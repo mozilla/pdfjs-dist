@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.291';
-PDFJS.build = 'e03ac80';
+PDFJS.version = '1.0.294';
+PDFJS.build = '11c1246';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3870,15 +3870,15 @@ var Dict = (function DictClosure() {
     getAsync: function Dict_getAsync(key1, key2, key3) {
       var value;
       var xref = this.xref;
-      if (typeof (value = this.map[key1]) !== undefined || key1 in this.map ||
-          typeof key2 === undefined) {
+      if (typeof (value = this.map[key1]) !== 'undefined' || key1 in this.map ||
+          typeof key2 === 'undefined') {
         if (xref) {
           return xref.fetchIfRefAsync(value);
         }
         return Promise.resolve(value);
       }
-      if (typeof (value = this.map[key2]) !== undefined || key2 in this.map ||
-          typeof key3 === undefined) {
+      if (typeof (value = this.map[key2]) !== 'undefined' || key2 in this.map ||
+          typeof key3 === 'undefined') {
         if (xref) {
           return xref.fetchIfRefAsync(value);
         }
