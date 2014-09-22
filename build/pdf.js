@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.226';
-PDFJS.build = '09b24d5';
+PDFJS.version = '1.0.229';
+PDFJS.build = '7079992';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3386,11 +3386,9 @@ var Annotation = (function AnnotationClosure() {
     },
 
     getOperatorList: function Annotation_getOperatorList(evaluator) {
-      var capability = createPromiseCapability();
 
       if (!this.appearance) {
-        capability.resolve(new OperatorList());
-        return capability.promise;
+        return Promise.resolve(new OperatorList());
       }
 
       var data = this.data;
@@ -3409,18 +3407,18 @@ var Annotation = (function AnnotationClosure() {
       var bbox = appearanceDict.get('BBox') || [0, 0, 1, 1];
       var matrix = appearanceDict.get('Matrix') || [1, 0, 0, 1, 0 ,0];
       var transform = getTransformMatrix(data.rect, bbox, matrix);
+      var self = this;
 
-      resourcesPromise.then(function(resources) {
-        var opList = new OperatorList();
-        opList.addOp(OPS.beginAnnotation, [data.rect, transform, matrix]);
-        evaluator.getOperatorList(this.appearance, resources, opList);
-        opList.addOp(OPS.endAnnotation, []);
-        capability.resolve(opList);
-
-        this.appearance.reset();
-      }.bind(this), capability.reject);
-
-      return capability.promise;
+      return resourcesPromise.then(function(resources) {
+          var opList = new OperatorList();
+          opList.addOp(OPS.beginAnnotation, [data.rect, transform, matrix]);
+          return evaluator.getOperatorList(self.appearance, resources, opList).
+            then(function () {
+              opList.addOp(OPS.endAnnotation, []);
+              self.appearance.reset();
+              return opList;
+            });
+        });
     }
   };
 
@@ -3679,8 +3677,10 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
       }
 
       var stream = new Stream(stringToBytes(data.defaultAppearance));
-      evaluator.getOperatorList(stream, this.fieldResources, opList);
-      return Promise.resolve(opList);
+      return evaluator.getOperatorList(stream, this.fieldResources, opList).
+        then(function () {
+          return opList;
+        });
     }
   });
 

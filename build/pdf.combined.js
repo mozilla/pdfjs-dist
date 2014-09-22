@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.226';
-PDFJS.build = '09b24d5';
+PDFJS.version = '1.0.229';
+PDFJS.build = '7079992';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3386,11 +3386,9 @@ var Annotation = (function AnnotationClosure() {
     },
 
     getOperatorList: function Annotation_getOperatorList(evaluator) {
-      var capability = createPromiseCapability();
 
       if (!this.appearance) {
-        capability.resolve(new OperatorList());
-        return capability.promise;
+        return Promise.resolve(new OperatorList());
       }
 
       var data = this.data;
@@ -3409,18 +3407,18 @@ var Annotation = (function AnnotationClosure() {
       var bbox = appearanceDict.get('BBox') || [0, 0, 1, 1];
       var matrix = appearanceDict.get('Matrix') || [1, 0, 0, 1, 0 ,0];
       var transform = getTransformMatrix(data.rect, bbox, matrix);
+      var self = this;
 
-      resourcesPromise.then(function(resources) {
-        var opList = new OperatorList();
-        opList.addOp(OPS.beginAnnotation, [data.rect, transform, matrix]);
-        evaluator.getOperatorList(this.appearance, resources, opList);
-        opList.addOp(OPS.endAnnotation, []);
-        capability.resolve(opList);
-
-        this.appearance.reset();
-      }.bind(this), capability.reject);
-
-      return capability.promise;
+      return resourcesPromise.then(function(resources) {
+          var opList = new OperatorList();
+          opList.addOp(OPS.beginAnnotation, [data.rect, transform, matrix]);
+          return evaluator.getOperatorList(self.appearance, resources, opList).
+            then(function () {
+              opList.addOp(OPS.endAnnotation, []);
+              self.appearance.reset();
+              return opList;
+            });
+        });
     }
   };
 
@@ -3679,8 +3677,10 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
       }
 
       var stream = new Stream(stringToBytes(data.defaultAppearance));
-      evaluator.getOperatorList(stream, this.fieldResources, opList);
-      return Promise.resolve(opList);
+      return evaluator.getOperatorList(stream, this.fieldResources, opList).
+        then(function () {
+          return opList;
+        });
     }
   });
 
@@ -9632,13 +9632,6 @@ var Page = (function PageClosure() {
 
     getOperatorList: function Page_getOperatorList(handler, intent) {
       var self = this;
-      var capability = createPromiseCapability();
-
-      function reject(e) {
-        capability.reject(e);
-      }
-
-      var pageListCapability = createPromiseCapability();
 
       var pdfManager = this.pdfManager;
       var contentStreamPromise = pdfManager.ensure(this, 'getContentStream',
@@ -9660,9 +9653,8 @@ var Page = (function PageClosure() {
                                                   this.idCounters,
                                                   this.fontCache);
 
-      var dataPromises = Promise.all([contentStreamPromise, resourcesPromise],
-                                     reject);
-      dataPromises.then(function(data) {
+      var dataPromises = Promise.all([contentStreamPromise, resourcesPromise]);
+      var pageListPromise = dataPromises.then(function(data) {
         var contentStream = data[0];
         var opList = new OperatorList(intent, handler, self.pageIndex);
 
@@ -9671,31 +9663,30 @@ var Page = (function PageClosure() {
           pageIndex: self.pageIndex,
           intent: intent
         });
-        partialEvaluator.getOperatorList(contentStream, self.resources, opList);
-        pageListCapability.resolve(opList);
+        return partialEvaluator.getOperatorList(contentStream, self.resources,
+          opList).then(function () {
+            return opList;
+          });
       });
 
       var annotationsPromise = pdfManager.ensure(this, 'annotations');
-      Promise.all([pageListCapability.promise, annotationsPromise]).then(
+      return Promise.all([pageListPromise, annotationsPromise]).then(
           function(datas) {
         var pageOpList = datas[0];
         var annotations = datas[1];
 
         if (annotations.length === 0) {
           pageOpList.flush(true);
-          capability.resolve(pageOpList);
-          return;
+          return pageOpList;
         }
 
         var annotationsReadyPromise = Annotation.appendToOperatorList(
           annotations, pageOpList, pdfManager, partialEvaluator, intent);
-        annotationsReadyPromise.then(function () {
+        return annotationsReadyPromise.then(function () {
           pageOpList.flush(true);
-          capability.resolve(pageOpList);
-        }, reject);
-      }, reject);
-
-      return capability.promise;
+          return pageOpList;
+        });
+      });
     },
 
     extractTextContent: function Page_extractTextContent() {
@@ -10496,11 +10487,17 @@ var Catalog = (function CatalogClosure() {
     },
 
     cleanup: function Catalog_cleanup() {
-      this.fontCache.forEach(function (font) {
-        delete font.sent;
-        delete font.translated;
+      var promises = [];
+      this.fontCache.forEach(function (promise) {
+        promises.push(promise);
       });
-      this.fontCache.clear();
+      return Promise.all(promises).then(function (fonts) {
+        for (var i = 0, ii = fonts.length; i < ii; i++) {
+          delete fonts[i].sent;
+          delete fonts[i].translated;
+        }
+        this.fontCache.clear();
+      }.bind(this));
     },
 
     getPage: function Catalog_getPage(pageIndex) {
@@ -20096,6 +20093,28 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     this.fontCache = fontCache;
   }
 
+  // Trying to minimize Date.now() usage and check every 100 time
+  var TIME_SLOT_DURATION_MS = 20;
+  var CHECK_TIME_EVERY = 100;
+  function TimeSlotManager() {
+    this.reset();
+  }
+  TimeSlotManager.prototype = {
+    check: function TimeSlotManager_check() {
+      if (++this.checked < CHECK_TIME_EVERY) {
+        return false;
+      }
+      this.checked = 0;
+      return this.endTime <= Date.now();
+    },
+    reset: function TimeSlotManager_reset() {
+      this.endTime = Date.now() + TIME_SLOT_DURATION_MS;
+      this.checked = 0;
+    }
+  };
+
+  var deferred = Promise.resolve();
+
   var TILING_PATTERN = 1, SHADING_PATTERN = 2;
 
   PartialEvaluator.prototype = {
@@ -20179,13 +20198,15 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       operatorList.addOp(OPS.paintFormXObjectBegin, [matrix, bbox]);
 
-      this.getOperatorList(xobj, (xobj.dict.get('Resources') || resources),
-                           operatorList, initialState);
-      operatorList.addOp(OPS.paintFormXObjectEnd, []);
+      return this.getOperatorList(xobj,
+        (xobj.dict.get('Resources') || resources), operatorList, initialState).
+        then(function () {
+          operatorList.addOp(OPS.paintFormXObjectEnd, []);
 
-      if (group) {
-        operatorList.addOp(OPS.endGroup, [groupOptions]);
-      }
+          if (group) {
+            operatorList.addOp(OPS.endGroup, [groupOptions]);
+          }
+        });
     },
 
     buildPaintImageXObject:
@@ -20294,7 +20315,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         subtype: smask.get('S').name,
         backdrop: smask.get('BC')
       };
-      this.buildFormXObject(resources, smaskContent, smaskOptions,
+      return this.buildFormXObject(resources, smaskContent, smaskOptions,
                             operatorList, stateManager.state.clone());
     },
 
@@ -20303,15 +20324,18 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                                                    pattern, patternDict,
                                                    operatorList) {
       // Create an IR of the pattern code.
-      var tilingOpList = this.getOperatorList(pattern,
-        (patternDict.get('Resources') || resources));
-      // Add the dependencies to the parent operator list so they are resolved
-      // before sub operator list is executed synchronously.
-      operatorList.addDependencies(tilingOpList.dependencies);
-      operatorList.addOp(fn, getTilingPatternIR({
-                               fnArray: tilingOpList.fnArray,
-                               argsArray: tilingOpList.argsArray
-                             }, patternDict, args));
+      var tilingOpList = new OperatorList();
+      return this.getOperatorList(pattern,
+        (patternDict.get('Resources') || resources), tilingOpList).
+        then(function () {
+          // Add the dependencies to the parent operator list so they are
+          // resolved before sub operator list is executed synchronously.
+          operatorList.addDependencies(tilingOpList.dependencies);
+          operatorList.addOp(fn, getTilingPatternIR({
+            fnArray: tilingOpList.fnArray,
+            argsArray: tilingOpList.argsArray
+          }, patternDict, args));
+        });
     },
 
     handleSetFont:
@@ -20324,22 +20348,23 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         fontName = fontArgs[0].name;
       }
       var self = this;
-      var font = this.loadFont(fontName, fontRef, this.xref, resources,
-                               operatorList);
-      state.font = font;
-      var loadedName = font.loadedName;
-      if (!font.sent) {
-        var fontData = font.translated.exportData();
+      return this.loadFont(fontName, fontRef, this.xref, resources,
+                               operatorList).then(function (font) {
+          state.font = font;
+          var loadedName = font.loadedName;
+          if (!font.sent) {
+            var fontData = font.translated.exportData();
 
-        self.handler.send('commonobj', [
-          loadedName,
-          'Font',
-          fontData
-        ]);
-        font.sent = true;
-      }
+            self.handler.send('commonobj', [
+              loadedName,
+              'Font',
+              fontData
+            ]);
+            font.sent = true;
+          }
 
-      return loadedName;
+          return loadedName;
+        });
     },
 
     handleText: function PartialEvaluator_handleText(chars, state) {
@@ -20382,7 +20407,6 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                                                    operatorList, xref,
                                                    stateManager) {
 
-      var self = this;
       // TODO(mack): This should be rewritten so that this function returns
       // what should be added to the queue during each iteration
       function setGStateForKey(gStateObj, key, value) {
@@ -20401,11 +20425,14 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             gStateObj.push([key, value]);
             break;
           case 'Font':
-            var loadedName = self.handleSetFont(resources, null, value[0],
-                                                operatorList,
-                                                stateManager.state);
-            operatorList.addDependency(loadedName);
-            gStateObj.push([key, [loadedName, value[1]]]);
+            promise = promise.then(function () {
+              return self.handleSetFont(resources, null, value[0],
+                                        operatorList, stateManager.state).
+                then(function (loadedName) {
+                  operatorList.addDependency(loadedName);
+                  gStateObj.push([key, [loadedName, value[1]]]);
+                });
+            });
             break;
           case 'BM':
             gStateObj.push([key, value]);
@@ -20417,7 +20444,10 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             }
             var dict = xref.fetchIfRef(value);
             if (isDict(dict)) {
-              self.handleSMask(dict, resources, operatorList, stateManager);
+              promise = promise.then(function () {
+                return self.handleSMask(dict, resources, operatorList,
+                                        stateManager);
+              });
               gStateObj.push([key, true]);
             } else {
               warn('Unsupported SMask type');
@@ -20452,12 +20482,15 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       // This array holds the converted/processed state data.
       var gStateObj = [];
       var gStateMap = gState.map;
+      var self = this;
+      var promise = Promise.resolve();
       for (var key in gStateMap) {
         var value = gStateMap[key];
         setGStateForKey(gStateObj, key, value);
       }
-
-      operatorList.addOp(OPS.setGState, [gStateObj]);
+      return promise.then(function () {
+        operatorList.addOp(OPS.setGState, [gStateObj]);
+      });
     },
 
     loadFont: function PartialEvaluator_loadFont(fontName, font, xref,
@@ -20465,10 +20498,10 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                                                  parentOperatorList) {
 
       function errorFont() {
-        return {
+        return Promise.resolve({
           translated: new ErrorFont('Font ' + fontName + ' is not available'),
           loadedName: 'g_font_error'
-        };
+        });
       }
 
       var fontRef;
@@ -20492,6 +20525,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       if (!isDict(font)) {
         return errorFont();
       }
+
+      var fontCapability = createPromiseCapability();
 
       var preEvaluatedFont = this.preEvaluateFont(font, xref);
       var descriptor = preEvaluatedFont.descriptor;
@@ -20529,7 +20564,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       // fontName in font.loadedName below.
       var fontRefIsDict = isDict(fontRef);
       if (!fontRefIsDict) {
-        this.fontCache.put(fontRef, font);
+        this.fontCache.put(fontRef, fontCapability.promise);
       }
 
       // Keep track of each font we translated so the caller can
@@ -20548,27 +20583,38 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         font.translated = translated;
       }
 
+      var loadCharProcsPromise = Promise.resolve();
       if (font.translated.loadCharProcs) {
         var charProcs = font.get('CharProcs').getAll();
         var fontResources = (font.get('Resources') || resources);
         var charProcKeys = Object.keys(charProcs);
         var charProcOperatorList = {};
         for (var i = 0, n = charProcKeys.length; i < n; ++i) {
-          var key = charProcKeys[i];
-          var glyphStream = charProcs[key];
-          var operatorList = this.getOperatorList(glyphStream, fontResources);
-          charProcOperatorList[key] = operatorList.getIR();
-          if (!parentOperatorList) {
-            continue;
-          }
-          // Add the dependencies to the parent operator list so they are
-          // resolved before sub operator list is executed synchronously.
-          parentOperatorList.addDependencies(charProcOperatorList.dependencies);
+          loadCharProcsPromise = loadCharProcsPromise.then(function (key) {
+            var glyphStream = charProcs[key];
+            var operatorList = new OperatorList();
+            return this.getOperatorList(glyphStream, fontResources,
+                                        operatorList).
+              then(function () {
+                charProcOperatorList[key] = operatorList.getIR();
+
+                // Add the dependencies to the parent operator list so they are
+                // resolved before sub operator list is executed synchronously.
+                if (parentOperatorList) {
+                  parentOperatorList.addDependencies(operatorList.dependencies);
+                }
+              });
+          }.bind(this, charProcKeys[i]));
         }
-        font.translated.charProcOperatorList = charProcOperatorList;
+        loadCharProcsPromise = loadCharProcsPromise.then(function () {
+          font.translated.charProcOperatorList = charProcOperatorList;
+        });
       }
-      font.loaded = true;
-      return font;
+      return loadCharProcsPromise.then(function () {
+        font.loaded = true;
+        fontCapability.resolve(font);
+        return fontCapability.promise;
+      }, fontCapability.reject);
     },
 
     buildPath: function PartialEvaluator_buildPath(operatorList, fn, args) {
@@ -20592,182 +20638,196 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       var xref = this.xref;
       var imageCache = {};
 
-      operatorList = (operatorList || new OperatorList());
+      assert(operatorList);
 
       resources = (resources || Dict.empty);
       var xobjs = (resources.get('XObject') || Dict.empty);
       var patterns = (resources.get('Pattern') || Dict.empty);
       var stateManager = new StateManager(initialState || new EvalState());
       var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
+      var shading;
+      var timeSlotManager = new TimeSlotManager();
 
-      var operation, i, ii;
-      while ((operation = preprocessor.read())) {
-        var args = operation.args;
-        var fn = operation.fn;
-        var shading;
+      return new Promise(function next(resolve, reject) {
+        timeSlotManager.reset();
+        var stop, operation, i, ii;
+        while (!(stop = timeSlotManager.check()) &&
+               (operation = preprocessor.read())) {
+          var args = operation.args;
+          var fn = operation.fn;
 
-        switch (fn | 0) {
-          case OPS.setStrokeColorN:
-          case OPS.setFillColorN:
-            if (args[args.length - 1].code) {
+          switch (fn | 0) {
+            case OPS.setStrokeColorN:
+            case OPS.setFillColorN:
+              if (args[args.length - 1].code) {
+                break;
+              }
+              // compile tiling patterns
+              var patternName = args[args.length - 1];
+              // SCN/scn applies patterns along with normal colors
+              var pattern;
+              if (isName(patternName) &&
+                  (pattern = patterns.get(patternName.name))) {
+                var dict = (isStream(pattern) ? pattern.dict : pattern);
+                var typeNum = dict.get('PatternType');
+
+                if (typeNum == TILING_PATTERN) {
+                  return self.handleTilingType(fn, args, resources, pattern,
+                                               dict, operatorList).then(
+                    function() {
+                      next(resolve, reject);
+                    }, reject);
+                } else if (typeNum == SHADING_PATTERN) {
+                  shading = dict.get('Shading');
+                  var matrix = dict.get('Matrix');
+                  pattern = Pattern.parseShading(shading, matrix, xref,
+                    resources);
+                  args = pattern.getIR();
+                } else {
+                  error('Unknown PatternType ' + typeNum);
+                }
+              }
               break;
-            }
-            // compile tiling patterns
-            var patternName = args[args.length - 1];
-            // SCN/scn applies patterns along with normal colors
-            var pattern;
-            if (isName(patternName) &&
-                (pattern = patterns.get(patternName.name))) {
-              var dict = (isStream(pattern) ? pattern.dict : pattern);
-              var typeNum = dict.get('PatternType');
-
-              if (typeNum == TILING_PATTERN) {
-                self.handleTilingType(fn, args, resources, pattern, dict,
-                                      operatorList);
+            case OPS.paintXObject:
+              if (args[0].code) {
+                break;
+              }
+              // eagerly compile XForm objects
+              var name = args[0].name;
+              if (imageCache.key === name) {
+                operatorList.addOp(imageCache.fn, imageCache.args);
                 args = [];
                 continue;
-              } else if (typeNum == SHADING_PATTERN) {
-                shading = dict.get('Shading');
-                var matrix = dict.get('Matrix');
-                pattern = Pattern.parseShading(shading, matrix, xref,
-                                               resources);
-                args = pattern.getIR();
-              } else {
-                error('Unkown PatternType ' + typeNum);
               }
-            }
-            break;
-          case OPS.paintXObject:
-            if (args[0].code) {
+
+              var xobj = xobjs.get(name);
+              if (xobj) {
+                assert(isStream(xobj), 'XObject should be a stream');
+
+                var type = xobj.dict.get('Subtype');
+                assert(isName(type),
+                  'XObject should have a Name subtype');
+
+                if ('Form' == type.name) {
+                  stateManager.save();
+                  return self.buildFormXObject(resources, xobj, null,
+                                               operatorList,
+                                               stateManager.state.clone()).
+                    then(function () {
+                      stateManager.restore();
+                      next(resolve, reject);
+                    }, reject);
+                } else if ('Image' == type.name) {
+                  self.buildPaintImageXObject(resources, xobj, false,
+                    operatorList, name, imageCache);
+                  args = [];
+                  continue;
+                } else {
+                  error('Unhandled XObject subtype ' + type.name);
+                }
+              }
               break;
-            }
-            // eagerly compile XForm objects
-            var name = args[0].name;
-            if (imageCache.key === name) {
-              operatorList.addOp(imageCache.fn, imageCache.args);
+            case OPS.setFont:
+              var fontSize = args[1];
+              // eagerly collect all fonts
+              return self.handleSetFont(resources, args, null,
+                                        operatorList, stateManager.state).
+                then(function (loadedName) {
+                  operatorList.addDependency(loadedName);
+                  operatorList.addOp(OPS.setFont, [loadedName, fontSize]);
+                  next(resolve, reject);
+                }, reject);
+            case OPS.endInlineImage:
+              var cacheKey = args[0].cacheKey;
+              if (cacheKey && imageCache.key === cacheKey) {
+                operatorList.addOp(imageCache.fn, imageCache.args);
+                args = [];
+                continue;
+              }
+              self.buildPaintImageXObject(resources, args[0], true,
+                operatorList, cacheKey, imageCache);
               args = [];
               continue;
-            }
-
-            var xobj = xobjs.get(name);
-            if (xobj) {
-              assert(isStream(xobj), 'XObject should be a stream');
-
-              var type = xobj.dict.get('Subtype');
-              assert(isName(type),
-                'XObject should have a Name subtype');
-
-              if ('Form' == type.name) {
-                stateManager.save();
-                self.buildFormXObject(resources, xobj, null, operatorList,
-                                      stateManager.state.clone());
-                args = [];
-                stateManager.restore();
-                continue;
-              } else if ('Image' == type.name) {
-                self.buildPaintImageXObject(resources, xobj, false,
-                                            operatorList, name, imageCache);
-                args = [];
-                continue;
-              } else {
-                error('Unhandled XObject subtype ' + type.name);
-              }
-            }
-            break;
-          case OPS.setFont:
-            // eagerly collect all fonts
-            var loadedName = self.handleSetFont(resources, args, null,
-                                                operatorList,
-                                                stateManager.state);
-            operatorList.addDependency(loadedName);
-            args[0] = loadedName;
-            break;
-          case OPS.endInlineImage:
-            var cacheKey = args[0].cacheKey;
-            if (cacheKey && imageCache.key === cacheKey) {
-              operatorList.addOp(imageCache.fn, imageCache.args);
-              args = [];
-              continue;
-            }
-            self.buildPaintImageXObject(resources, args[0], true,
-                                        operatorList, cacheKey, imageCache);
-            args = [];
-            continue;
-          case OPS.showText:
-            args[0] = this.handleText(args[0], stateManager.state);
-            break;
-          case OPS.showSpacedText:
-            var arr = args[0];
-            var arrLength = arr.length;
-            for (i = 0; i < arrLength; ++i) {
-              if (isString(arr[i])) {
-                arr[i] = this.handleText(arr[i], stateManager.state);
-              }
-            }
-            break;
-          case OPS.nextLineShowText:
-            args[0] = this.handleText(args[0], stateManager.state);
-            break;
-          case OPS.nextLineSetSpacingShowText:
-            args[2] = this.handleText(args[2], stateManager.state);
-            break;
-          case OPS.setTextRenderingMode:
-            stateManager.state.textRenderingMode = args[0];
-            break;
-          // Parse the ColorSpace data to a raw format.
-          case OPS.setFillColorSpace:
-          case OPS.setStrokeColorSpace:
-            args = [ColorSpace.parseToIR(args[0], xref, resources)];
-            break;
-          case OPS.shadingFill:
-            var shadingRes = resources.get('Shading');
-            if (!shadingRes) {
-              error('No shading resource found');
-            }
-
-            shading = shadingRes.get(args[0].name);
-            if (!shading) {
-              error('No shading object found');
-            }
-
-            var shadingFill = Pattern.parseShading(shading, null, xref,
-                                                   resources);
-            var patternIR = shadingFill.getIR();
-            args = [patternIR];
-            fn = OPS.shadingFill;
-            break;
-          case OPS.setGState:
-            var dictName = args[0];
-            var extGState = resources.get('ExtGState');
-
-            if (!isDict(extGState) || !extGState.has(dictName.name)) {
+            case OPS.showText:
+              args[0] = self.handleText(args[0], stateManager.state);
               break;
-            }
+            case OPS.showSpacedText:
+              var arr = args[0];
+              var arrLength = arr.length;
+              for (i = 0; i < arrLength; ++i) {
+                if (isString(arr[i])) {
+                  arr[i] = self.handleText(arr[i], stateManager.state);
+                }
+              }
+              break;
+            case OPS.nextLineShowText:
+              args[0] = self.handleText(args[0], stateManager.state);
+              break;
+            case OPS.nextLineSetSpacingShowText:
+              args[2] = self.handleText(args[2], stateManager.state);
+              break;
+            case OPS.setTextRenderingMode:
+              stateManager.state.textRenderingMode = args[0];
+              break;
+            // Parse the ColorSpace data to a raw format.
+            case OPS.setFillColorSpace:
+            case OPS.setStrokeColorSpace:
+              args = [ColorSpace.parseToIR(args[0], xref, resources)];
+              break;
+            case OPS.shadingFill:
+              var shadingRes = resources.get('Shading');
+              if (!shadingRes) {
+                error('No shading resource found');
+              }
 
-            var gState = extGState.get(dictName.name);
-            self.setGState(resources, gState, operatorList, xref,
-                           stateManager);
-            args = [];
-            continue;
-          case OPS.moveTo:
-          case OPS.lineTo:
-          case OPS.curveTo:
-          case OPS.curveTo2:
-          case OPS.curveTo3:
-          case OPS.closePath:
-            self.buildPath(operatorList, fn, args);
-            continue;
+              shading = shadingRes.get(args[0].name);
+              if (!shading) {
+                error('No shading object found');
+              }
+
+              var shadingFill = Pattern.parseShading(shading, null, xref,
+                resources);
+              var patternIR = shadingFill.getIR();
+              args = [patternIR];
+              fn = OPS.shadingFill;
+              break;
+            case OPS.setGState:
+              var dictName = args[0];
+              var extGState = resources.get('ExtGState');
+
+              if (!isDict(extGState) || !extGState.has(dictName.name)) {
+                break;
+              }
+
+              var gState = extGState.get(dictName.name);
+              return self.setGState(resources, gState, operatorList, xref,
+                stateManager).then(function() {
+                  next(resolve, reject);
+                }, reject);
+            case OPS.moveTo:
+            case OPS.lineTo:
+            case OPS.curveTo:
+            case OPS.curveTo2:
+            case OPS.curveTo3:
+            case OPS.closePath:
+              self.buildPath(operatorList, fn, args);
+              continue;
+          }
+          operatorList.addOp(fn, args);
         }
-        operatorList.addOp(fn, args);
-      }
-
-      // Some PDFs don't close all restores inside object/form.
-      // Closing those for them.
-      for (i = 0, ii = preprocessor.savedStatesDepth; i < ii; i++) {
-        operatorList.addOp(OPS.restore, []);
-      }
-
-      return operatorList;
+        if (stop) {
+          deferred.then(function () {
+            next(resolve, reject);
+          });
+          return;
+        }
+        // Some PDFs don't close all restores inside object/form.
+        // Closing those for them.
+        for (i = 0, ii = preprocessor.savedStatesDepth; i < ii; i++) {
+          operatorList.addOp(OPS.restore, []);
+        }
+        resolve();
+      });
     },
 
     getTextContent: function PartialEvaluator_getTextContent(stream, resources,
@@ -20825,10 +20885,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       }
 
       function handleSetFont(fontName, fontRef) {
-        var font = textState.font = self.loadFont(fontName, fontRef, xref,
-                                                  resources, null).translated;
-        textState.fontMatrix = font.fontMatrix ? font.fontMatrix :
-                                 FONT_IDENTITY_MATRIX;
+        return self.loadFont(fontName, fontRef, xref, resources, null).
+          then(function (font) {
+            var fontTranslated = textState.font = font.translated;
+            textState.fontMatrix = fontTranslated.fontMatrix ?
+              fontTranslated.fontMatrix :
+              FONT_IDENTITY_MATRIX;
+          });
       }
 
       function buildTextGeometry(chars, textChunk) {
@@ -20923,171 +20986,192 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         return textChunk;
       }
 
-      while ((operation = preprocessor.read())) {
-        textState = stateManager.state;
-        var fn = operation.fn;
-        var args = operation.args;
-        switch (fn | 0) {
-          case OPS.setFont:
-            handleSetFont(args[0].name);
-            textState.fontSize = args[1];
-            break;
-          case OPS.setTextRise:
-            textState.textRise = args[0];
-            break;
-          case OPS.setHScale:
-            textState.textHScale = args[0] / 100;
-            break;
-          case OPS.setLeading:
-            textState.leading = args[0];
-            break;
-          case OPS.moveText:
-            textState.translateTextLineMatrix(args[0], args[1]);
-            textState.textMatrix = textState.textLineMatrix.slice();
-            break;
-          case OPS.setLeadingMoveText:
-            textState.leading = -args[1];
-            textState.translateTextLineMatrix(args[0], args[1]);
-            textState.textMatrix = textState.textLineMatrix.slice();
-            break;
-          case OPS.nextLine:
-            textState.carriageReturn();
-            break;
-          case OPS.setTextMatrix:
-            textState.setTextMatrix(args[0], args[1], args[2], args[3],
-                                    args[4], args[5]);
-            textState.setTextLineMatrix(args[0], args[1], args[2], args[3],
-                                        args[4], args[5]);
-            break;
-          case OPS.setCharSpacing:
-            textState.charSpacing = args[0];
-            break;
-          case OPS.setWordSpacing:
-            textState.wordSpacing = args[0];
-            break;
-          case OPS.beginText:
-            textState.textMatrix = IDENTITY_MATRIX.slice();
-            textState.textLineMatrix = IDENTITY_MATRIX.slice();
-            break;
-          case OPS.showSpacedText:
-            var items = args[0];
-            var textChunk = newTextChunk();
-            var offset;
-            for (var j = 0, jj = items.length; j < jj; j++) {
-              if (typeof items[j] === 'string') {
-                buildTextGeometry(items[j], textChunk);
-              } else {
-                var val = items[j] / 1000;
-                if (!textState.font.vertical) {
-                  offset = -val * textState.fontSize * textState.textHScale *
-                           textState.textMatrix[0];
-                  textState.translateTextMatrix(offset, 0);
-                  textChunk.width += offset;
+      var timeSlotManager = new TimeSlotManager();
+
+      return new Promise(function next(resolve, reject) {
+        timeSlotManager.reset();
+        var stop;
+        while (!(stop = timeSlotManager.check()) &&
+               (operation = preprocessor.read())) {
+          textState = stateManager.state;
+          var fn = operation.fn;
+          var args = operation.args;
+          switch (fn | 0) {
+            case OPS.setFont:
+              textState.fontSize = args[1];
+              return handleSetFont(args[0].name).then(function() {
+                next(resolve, reject);
+              }, reject);
+            case OPS.setTextRise:
+              textState.textRise = args[0];
+              break;
+            case OPS.setHScale:
+              textState.textHScale = args[0] / 100;
+              break;
+            case OPS.setLeading:
+              textState.leading = args[0];
+              break;
+            case OPS.moveText:
+              textState.translateTextLineMatrix(args[0], args[1]);
+              textState.textMatrix = textState.textLineMatrix.slice();
+              break;
+            case OPS.setLeadingMoveText:
+              textState.leading = -args[1];
+              textState.translateTextLineMatrix(args[0], args[1]);
+              textState.textMatrix = textState.textLineMatrix.slice();
+              break;
+            case OPS.nextLine:
+              textState.carriageReturn();
+              break;
+            case OPS.setTextMatrix:
+              textState.setTextMatrix(args[0], args[1], args[2], args[3],
+                args[4], args[5]);
+              textState.setTextLineMatrix(args[0], args[1], args[2], args[3],
+                args[4], args[5]);
+              break;
+            case OPS.setCharSpacing:
+              textState.charSpacing = args[0];
+              break;
+            case OPS.setWordSpacing:
+              textState.wordSpacing = args[0];
+              break;
+            case OPS.beginText:
+              textState.textMatrix = IDENTITY_MATRIX.slice();
+              textState.textLineMatrix = IDENTITY_MATRIX.slice();
+              break;
+            case OPS.showSpacedText:
+              var items = args[0];
+              var textChunk = newTextChunk();
+              var offset;
+              for (var j = 0, jj = items.length; j < jj; j++) {
+                if (typeof items[j] === 'string') {
+                  buildTextGeometry(items[j], textChunk);
                 } else {
-                  offset = -val * textState.fontSize * textState.textMatrix[3];
-                  textState.translateTextMatrix(0, offset);
-                  textChunk.height += offset;
-                }
-                if (items[j] < 0 && textState.font.spaceWidth > 0) {
-                  var fakeSpaces = -items[j] / textState.font.spaceWidth;
-                  if (fakeSpaces > MULTI_SPACE_FACTOR) {
-                    fakeSpaces = Math.round(fakeSpaces);
-                    while (fakeSpaces--) {
+                  var val = items[j] / 1000;
+                  if (!textState.font.vertical) {
+                    offset = -val * textState.fontSize * textState.textHScale *
+                      textState.textMatrix[0];
+                    textState.translateTextMatrix(offset, 0);
+                    textChunk.width += offset;
+                  } else {
+                    offset = -val * textState.fontSize *
+                      textState.textMatrix[3];
+                    textState.translateTextMatrix(0, offset);
+                    textChunk.height += offset;
+                  }
+                  if (items[j] < 0 && textState.font.spaceWidth > 0) {
+                    var fakeSpaces = -items[j] / textState.font.spaceWidth;
+                    if (fakeSpaces > MULTI_SPACE_FACTOR) {
+                      fakeSpaces = Math.round(fakeSpaces);
+                      while (fakeSpaces--) {
+                        textChunk.str += ' ';
+                      }
+                    } else if (fakeSpaces > SPACE_FACTOR) {
                       textChunk.str += ' ';
                     }
-                  } else if (fakeSpaces > SPACE_FACTOR) {
-                    textChunk.str += ' ';
                   }
                 }
               }
-            }
-            bidiTexts.push(runBidi(textChunk));
-            break;
-          case OPS.showText:
-            bidiTexts.push(runBidi(buildTextGeometry(args[0])));
-            break;
-          case OPS.nextLineShowText:
-            textState.carriageReturn();
-            bidiTexts.push(runBidi(buildTextGeometry(args[0])));
-            break;
-          case OPS.nextLineSetSpacingShowText:
-            textState.wordSpacing = args[0];
-            textState.charSpacing = args[1];
-            textState.carriageReturn();
-            bidiTexts.push(runBidi(buildTextGeometry(args[2])));
-            break;
-          case OPS.paintXObject:
-            if (args[0].code) {
+              bidiTexts.push(runBidi(textChunk));
               break;
-            }
+            case OPS.showText:
+              bidiTexts.push(runBidi(buildTextGeometry(args[0])));
+              break;
+            case OPS.nextLineShowText:
+              textState.carriageReturn();
+              bidiTexts.push(runBidi(buildTextGeometry(args[0])));
+              break;
+            case OPS.nextLineSetSpacingShowText:
+              textState.wordSpacing = args[0];
+              textState.charSpacing = args[1];
+              textState.carriageReturn();
+              bidiTexts.push(runBidi(buildTextGeometry(args[2])));
+              break;
+            case OPS.paintXObject:
+              if (args[0].code) {
+                break;
+              }
 
-            if (!xobjs) {
-              xobjs = (resources.get('XObject') || Dict.empty);
-            }
+              if (!xobjs) {
+                xobjs = (resources.get('XObject') || Dict.empty);
+              }
 
-            var name = args[0].name;
-            if (xobjsCache.key === name) {
-              if (xobjsCache.texts) {
-                Util.concatenateToArray(bidiTexts, xobjsCache.texts.items);
-                Util.extendObj(textContent.styles, xobjsCache.texts.styles);
+              var name = args[0].name;
+              if (xobjsCache.key === name) {
+                if (xobjsCache.texts) {
+                  Util.concatenateToArray(bidiTexts, xobjsCache.texts.items);
+                  Util.extendObj(textContent.styles, xobjsCache.texts.styles);
+                }
+                break;
+              }
+
+              var xobj = xobjs.get(name);
+              if (!xobj) {
+                break;
+              }
+              assert(isStream(xobj), 'XObject should be a stream');
+
+              var type = xobj.dict.get('Subtype');
+              assert(isName(type),
+                'XObject should have a Name subtype');
+
+              if ('Form' !== type.name) {
+                xobjsCache.key = name;
+                xobjsCache.texts = null;
+                break;
+              }
+
+              stateManager.save();
+              var matrix = xobj.dict.get('Matrix');
+              if (isArray(matrix) && matrix.length === 6) {
+                stateManager.transform(matrix);
+              }
+
+              return self.getTextContent(xobj,
+                xobj.dict.get('Resources') || resources, stateManager).
+                then(function (formTextContent) {
+                  Util.concatenateToArray(bidiTexts, formTextContent.items);
+                  Util.extendObj(textContent.styles, formTextContent.styles);
+                  stateManager.restore();
+
+                  xobjsCache.key = name;
+                  xobjsCache.texts = formTextContent;
+
+                  next(resolve, reject);
+                }, reject);
+            case OPS.setGState:
+              var dictName = args[0];
+              var extGState = resources.get('ExtGState');
+
+              if (!isDict(extGState) || !extGState.has(dictName.name)) {
+                break;
+              }
+
+              var gsStateMap = extGState.get(dictName.name);
+              var gsStateFont = null;
+              for (var key in gsStateMap) {
+                if (key === 'Font') {
+                  assert(!gsStateFont);
+                  gsStateFont = gsStateMap[key];
+                }
+              }
+              if (gsStateFont) {
+                textState.fontSize = gsStateFont[1];
+                return handleSetFont(gsStateFont[0]).then(function() {
+                  next(resolve, reject);
+                }, reject);
               }
               break;
-            }
-
-            var xobj = xobjs.get(name);
-            if (!xobj) {
-              break;
-            }
-            assert(isStream(xobj), 'XObject should be a stream');
-
-            var type = xobj.dict.get('Subtype');
-            assert(isName(type),
-              'XObject should have a Name subtype');
-
-            if ('Form' !== type.name) {
-              xobjsCache.key = name;
-              xobjsCache.texts = null;
-              break;
-            }
-
-            stateManager.save();
-            var matrix = xobj.dict.get('Matrix');
-            if (isArray(matrix) && matrix.length === 6) {
-              stateManager.transform(matrix);
-            }
-
-            var formTextContent = this.getTextContent(
-              xobj,
-              xobj.dict.get('Resources') || resources,
-              stateManager
-            );
-            Util.concatenateToArray(bidiTexts, formTextContent.items);
-            Util.extendObj(textContent.styles, formTextContent.styles);
-            stateManager.restore();
-
-            xobjsCache.key = name;
-            xobjsCache.texts = formTextContent;
-            break;
-          case OPS.setGState:
-            var dictName = args[0];
-            var extGState = resources.get('ExtGState');
-
-            if (!isDict(extGState) || !extGState.has(dictName.name)) {
-              break;
-            }
-
-            var gsState = extGState.get(dictName.name);
-
-            for (var i = 0; i < gsState.length; i++) {
-              if (gsState[i] === 'Font') {
-                handleSetFont(args[0].name);
-              }
-            }
-            break;
-        } // switch
-      } // while
-
-      return textContent;
+          } // switch
+        } // while
+        if (stop) {
+          deferred.then(function () {
+            next(resolve, reject);
+          });
+          return;
+        }
+        resolve(textContent);
+      });
     },
 
     extractDataStructures: function
@@ -42411,8 +42495,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
     });
 
     handler.on('Cleanup', function wphCleanup(data) {
-      pdfManager.cleanup();
-      return true;
+      return pdfManager.cleanup();
     });
 
     handler.on('Terminate', function wphTerminate(data) {
