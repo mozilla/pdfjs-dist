@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 /*jshint globalstrict: false */
+/* globals PDFJS */
 
 // Initializing PDFJS global object (if still undefined)
 if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.505';
-PDFJS.build = '0e0ba4f';
+PDFJS.version = '1.0.509';
+PDFJS.build = '7026543';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6349,7 +6350,7 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
     return element;
   }
 
-  function getHtmlElementForTextAnnotation(item, commonObjs) {
+  function getHtmlElementForTextAnnotation(item) {
     var rect = item.rect;
 
     // sanity check because of OOo-generated PDFs
@@ -6466,8 +6467,7 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
     return container;
   }
 
-  function getHtmlElementForLinkAnnotation(item, commonObjs) {
-
+  function getHtmlElementForLinkAnnotation(item) {
     var container = initContainer(item);
     container.className = 'annotLink';
 
@@ -6487,9 +6487,9 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
       case AnnotationType.WIDGET:
         return getHtmlElementForTextWidgetAnnotation(data, objs);
       case AnnotationType.TEXT:
-        return getHtmlElementForTextAnnotation(data, objs);
+        return getHtmlElementForTextAnnotation(data);
       case AnnotationType.LINK:
-        return getHtmlElementForLinkAnnotation(data, objs);
+        return getHtmlElementForLinkAnnotation(data);
       default:
         throw new Error('Unsupported annotationType: ' + data.annotationType);
     }

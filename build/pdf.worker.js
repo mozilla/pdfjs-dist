@@ -15,14 +15,15 @@
  * limitations under the License.
  */
 /*jshint globalstrict: false */
+/* globals PDFJS */
 
 // Initializing PDFJS global object (if still undefined)
 if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.505';
-PDFJS.build = '0e0ba4f';
+PDFJS.version = '1.0.509';
+PDFJS.build = '7026543';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
