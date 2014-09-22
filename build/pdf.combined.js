@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.139';
-PDFJS.build = 'ae92b6f';
+PDFJS.version = '1.0.141';
+PDFJS.build = '5fb42f6';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -9306,9 +9306,14 @@ var BasePdfManager = (function BasePdfManagerClosure() {
 
     updatePassword: function BasePdfManager_updatePassword(password) {
       this.pdfDocument.xref.password = this.password = password;
-      if (this.passwordChangedPromise) {
-        this.passwordChangedPromise.resolve();
+      if (this._passwordChangedCapability) {
+        this._passwordChangedCapability.resolve();
       }
+    },
+
+    passwordChanged: function BasePdfManager_passwordChanged() {
+      this._passwordChangedCapability = createPromiseCapability();
+      return this._passwordChangedCapability.promise;
     },
 
     terminate: function BasePdfManager_terminate() {
@@ -41945,7 +41950,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
     var pdfManager;
 
     function loadDocument(recoveryMode) {
-      var loadDocumentPromise = new LegacyPromise();
+      var loadDocumentCapability = createPromiseCapability();
 
       var parseSuccess = function parseSuccess() {
         var numPagesPromise = pdfManager.ensureDoc('numPages');
@@ -41968,13 +41973,13 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
             encrypted: !!results[5],
             javaScript: results[6]
           };
-          loadDocumentPromise.resolve(doc);
+          loadDocumentCapability.resolve(doc);
         },
         parseFailure);
       };
 
       var parseFailure = function parseFailure(e) {
-        loadDocumentPromise.reject(e);
+        loadDocumentCapability.reject(e);
       };
 
       pdfManager.ensureDoc('checkHeader', []).then(function() {
@@ -41984,30 +41989,30 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
         }, parseFailure);
       }, parseFailure);
 
-      return loadDocumentPromise;
+      return loadDocumentCapability.promise;
     }
 
     function getPdfManager(data) {
-      var pdfManagerPromise = new LegacyPromise();
+      var pdfManagerCapability = createPromiseCapability();
 
       var source = data.source;
       var disableRange = data.disableRange;
       if (source.data) {
         try {
           pdfManager = new LocalPdfManager(source.data, source.password);
-          pdfManagerPromise.resolve();
+          pdfManagerCapability.resolve();
         } catch (ex) {
-          pdfManagerPromise.reject(ex);
+          pdfManagerCapability.reject(ex);
         }
-        return pdfManagerPromise;
+        return pdfManagerCapability.promise;
       } else if (source.chunkedViewerLoading) {
         try {
           pdfManager = new NetworkPdfManager(source, handler);
-          pdfManagerPromise.resolve();
+          pdfManagerCapability.resolve();
         } catch (ex) {
-          pdfManagerPromise.reject(ex);
+          pdfManagerCapability.reject(ex);
         }
-        return pdfManagerPromise;
+        return pdfManagerCapability.promise;
       }
 
       var networkManager = new NetworkManager(source.url, {
@@ -42052,9 +42057,9 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
 
           try {
             pdfManager = new NetworkPdfManager(source, handler);
-            pdfManagerPromise.resolve(pdfManager);
+            pdfManagerCapability.resolve(pdfManager);
           } catch (ex) {
-            pdfManagerPromise.reject(ex);
+            pdfManagerCapability.reject(ex);
           }
         },
 
@@ -42062,9 +42067,9 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
           // the data is array, instantiating directly from it
           try {
             pdfManager = new LocalPdfManager(args.chunk, source.password);
-            pdfManagerPromise.resolve();
+            pdfManagerCapability.resolve();
           } catch (ex) {
-            pdfManagerPromise.reject(ex);
+            pdfManagerCapability.reject(ex);
           }
         },
 
@@ -42088,7 +42093,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
         }
       });
 
-      return pdfManagerPromise;
+      return pdfManagerCapability.promise;
     }
 
     handler.on('test', function wphSetupTest(data) {
@@ -42171,8 +42176,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
             if (ex instanceof PasswordException) {
               // after password exception prepare to receive a new password
               // to repeat loading
-              pdfManager.passwordChangedPromise = new LegacyPromise();
-              pdfManager.passwordChangedPromise.then(pdfManagerReady);
+              pdfManager.passwordChanged().then(pdfManagerReady);
             }
 
             onFailure(ex);
