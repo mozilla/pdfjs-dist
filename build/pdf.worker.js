@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.304';
-PDFJS.build = '806aa36';
+PDFJS.version = '1.0.306';
+PDFJS.build = '2da1942';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -34482,6 +34482,9 @@ var Parser = (function ParserClosure() {
         while (stream.pos < stream.end) {
           var scanBytes = stream.peekBytes(SCAN_BLOCK_SIZE);
           var scanLength = scanBytes.length - ENDSTREAM_SIGNATURE_LENGTH;
+          if (scanLength <= 0) {
+            break;
+          }
           found = false;
           for (i = 0, j = 0; i < scanLength; i++) {
             var b = scanBytes[i];
