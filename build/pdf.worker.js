@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.672';
-PDFJS.build = '90afb70';
+PDFJS.version = '1.0.674';
+PDFJS.build = 'cd5bd9f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -17833,12 +17833,16 @@ var Font = (function FontClosure() {
       // Horizontal metrics
       builder.addTable('hmtx', (function fontFieldsHmtx() {
           var charstrings = font.charstrings;
+          var cffWidths = font.cff ? font.cff.widths : null;
           var hmtx = '\x00\x00\x00\x00'; // Fake .notdef
           for (var i = 1, ii = numGlyphs; i < ii; i++) {
-            // TODO: For CFF fonts the width should technically match th x in
-            // the glyph, but it doesn't seem to matter.
-            var charstring = charstrings ? charstrings[i - 1] : {};
-            var width = 'width' in charstring ? charstring.width : 0;
+            var width = 0;
+            if (charstrings) {
+              var charstring = charstrings[i - 1];
+              width = 'width' in charstring ? charstring.width : 0;
+            } else if (cffWidths) {
+              width = Math.ceil(cffWidths[i] || 0);
+            }
             hmtx += string16(width) + string16(0);
           }
           return hmtx;
@@ -19240,10 +19244,10 @@ var CFFFont = (function CFFFontClosure() {
 var CFFParser = (function CFFParserClosure() {
   var CharstringValidationData = [
     null,
-    { id: 'hstem', min: 2, resetStack: true, stem: true },
+    { id: 'hstem', min: 2, stackClearing: true, stem: true },
     null,
-    { id: 'vstem', min: 2, resetStack: true, stem: true },
-    { id: 'vmoveto', min: 1, resetStack: true },
+    { id: 'vstem', min: 2, stackClearing: true, stem: true },
+    { id: 'vmoveto', min: 1, stackClearing: true },
     { id: 'rlineto', min: 2, resetStack: true },
     { id: 'hlineto', min: 1, resetStack: true },
     { id: 'vlineto', min: 1, resetStack: true },
@@ -19253,16 +19257,16 @@ var CFFParser = (function CFFParserClosure() {
     { id: 'return', min: 0, undefStack: true },
     null, // 12
     null,
-    null, // endchar
+    { id: 'endchar', min: 0, stackClearing: true },
     null,
     null,
     null,
-    { id: 'hstemhm', min: 2, resetStack: true, stem: true },
-    null, // hintmask
-    null, // cntrmask
-    { id: 'rmoveto', min: 2, resetStack: true },
-    { id: 'hmoveto', min: 1, resetStack: true },
-    { id: 'vstemhm', min: 2, resetStack: true, stem: true },
+    { id: 'hstemhm', min: 2, stackClearing: true, stem: true },
+    { id: 'hintmask', min: 0, stackClearing: true },
+    { id: 'cntrmask', min: 0, stackClearing: true },
+    { id: 'rmoveto', min: 2, stackClearing: true },
+    { id: 'hmoveto', min: 1, stackClearing: true },
+    { id: 'vstemhm', min: 2, stackClearing: true, stem: true },
     { id: 'rcurveline', min: 8, resetStack: true },
     { id: 'rlinecurve', min: 8, resetStack: true },
     { id: 'vvcurveto', min: 4, resetStack: true },
@@ -19368,6 +19372,7 @@ var CFFParser = (function CFFParserClosure() {
       var charStringsAndSeacs = this.parseCharStrings(charStringOffset);
       cff.charStrings = charStringsAndSeacs.charStrings;
       cff.seacs = charStringsAndSeacs.seacs;
+      cff.widths = charStringsAndSeacs.widths;
 
       var fontMatrix = topDict.getByName('FontMatrix');
       if (fontMatrix) {
@@ -19585,6 +19590,7 @@ var CFFParser = (function CFFParserClosure() {
     parseCharStrings: function CFFParser_parseCharStrings(charStringOffset) {
       var charStrings = this.parseIndex(charStringOffset).obj;
       var seacs = [];
+      var widths = [];
       var count = charStrings.count;
       for (var i = 0; i < count; i++) {
         var charstring = charStrings.get(i);
@@ -19596,6 +19602,7 @@ var CFFParser = (function CFFParserClosure() {
         var valid = true;
         var data = charstring;
         var length = data.length;
+        var firstStackClearing = true;
         for (var j = 0; j < length;) {
           var value = data[j++];
           var validationCommand = null;
@@ -19625,6 +19632,7 @@ var CFFParser = (function CFFParserClosure() {
                 valid = false;
               }
             }
+            validationCommand = CharstringValidationData[value];
           } else if (value >= 32 && value <= 246) {  // number
             stack[stackSize] = value - 139;
             stackSize++;
@@ -19642,7 +19650,8 @@ var CFFParser = (function CFFParserClosure() {
           } else if (value === 19 || value === 20) {
             hints += stackSize >> 1;
             j += (hints + 7) >> 3; // skipping right amount of hints flag data
-            stackSize = 0;
+            stackSize %= 2;
+            validationCommand = CharstringValidationData[value];
           } else {
             validationCommand = CharstringValidationData[value];
           }
@@ -19659,17 +19668,35 @@ var CFFParser = (function CFFParserClosure() {
                 break;
               }
             }
+            if (firstStackClearing && validationCommand.stackClearing) {
+              firstStackClearing = false;
+              // the optional character width can be found before the first
+              // stack-clearing command arguments
+              stackSize -= validationCommand.min;
+              if (stackSize >= 2 && validationCommand.stem) {
+                // there are even amount of arguments for stem commands
+                stackSize %= 2;
+              } else if (stackSize > 1) {
+                warn('Found too many parameters for stack-clearing command');
+              }
+              if (stackSize > 0 && stack[stackSize - 1] >= 0) {
+                widths[i] = stack[stackSize - 1];
+              }
+            }
             if ('stackDelta' in validationCommand) {
               if ('stackFn' in validationCommand) {
                 validationCommand.stackFn(stack, stackSize);
               }
               stackSize += validationCommand.stackDelta;
+            } else if (validationCommand.stackClearing) {
+              stackSize = 0;
             } else if (validationCommand.resetStack) {
               stackSize = 0;
               undefStack = false;
             } else if (validationCommand.undefStack) {
               stackSize = 0;
               undefStack = true;
+              firstStackClearing = false;
             }
           }
         }
@@ -19678,7 +19705,7 @@ var CFFParser = (function CFFParserClosure() {
           charStrings.set(i, new Uint8Array([14]));
         }
       }
-      return { charStrings: charStrings, seacs: seacs };
+      return { charStrings: charStrings, seacs: seacs, widths: widths };
     },
     emptyPrivateDictionary:
       function CFFParser_emptyPrivateDictionary(parentDict) {
