@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.353';
-PDFJS.build = '480e093';
+PDFJS.version = '1.0.355';
+PDFJS.build = '2efbdfe';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2480,6 +2480,14 @@ PDFJS.useOnlyCssZoom = (PDFJS.useOnlyCssZoom === undefined ?
  */
 PDFJS.verbosity = (PDFJS.verbosity === undefined ?
                    PDFJS.VERBOSITY_LEVELS.warnings : PDFJS.verbosity);
+
+/**
+ * The maximum supported canvas size in total pixels e.g. width * height. 
+ * The default value is 4096 * 4096. Use -1 for no limit.
+ * @var {number}
+ */
+PDFJS.maxCanvasPixels = (PDFJS.maxCanvasPixels === undefined ?
+                         16777216 : PDFJS.maxCanvasPixels);
 
 /**
  * Document initialization / loading parameters object.
