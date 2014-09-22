@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.765';
-PDFJS.build = 'fd4134c';
+PDFJS.version = '1.0.768';
+PDFJS.build = '0d72784';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1967,6 +1967,12 @@ var ChunkedStream = (function ChunkedStreamClosure() {
 
       this.pos = end;
       return bytes.subarray(pos, end);
+    },
+
+    peekByte: function ChunkedStream_peekByte() {
+      var peekedByte = this.getByte();
+      this.pos--;
+      return peekedByte;
     },
 
     peekBytes: function ChunkedStream_peekBytes(length) {
@@ -30094,6 +30100,22 @@ var Parser = (function ParserClosure() {
           return new LZWStream(stream, maybeLength, earlyChange);
         }
         if (name === 'DCTDecode' || name === 'DCT') {
+          // According to the specification: for inline images, the ID operator
+          // shall be followed by a single whitespace character (unless it uses
+          // ASCII85Decode or ASCIIHexDecode filters).
+          // In practice this only seems to be followed for inline JPEG images,
+          // and generally ignoring the first byte of the stream if it is a
+          // whitespace char can even *cause* issues (e.g. in the CCITTFaxDecode
+          // filters used in issue2984.pdf).
+          // Hence when the first byte of the stream of an inline JPEG image is
+          // a whitespace character, we thus simply skip over it.
+          if (isCmd(this.buf1, 'ID')) {
+            var firstByte = stream.peekByte();
+            if (firstByte === 0x0A /* LF */ || firstByte === 0x0D /* CR */ ||
+                firstByte === 0x20 /* SPACE */) {
+              stream.skip();
+            }
+          }
           xrefStreamStats[StreamType.DCT] = true;
           return new JpegStream(stream, maybeLength, stream.dict, this.xref);
         }
@@ -30200,7 +30222,7 @@ var Lexer = (function LexerClosure() {
       return (this.currentChar = this.stream.getByte());
     },
     peekChar: function Lexer_peekChar() {
-      return this.stream.peekBytes(1)[0];
+      return this.stream.peekByte();
     },
     getNumber: function Lexer_getNumber() {
       var ch = this.currentChar;
@@ -30857,6 +30879,11 @@ var Stream = (function StreamClosure() {
       this.pos = end;
       return bytes.subarray(pos, end);
     },
+    peekByte: function Stream_peekByte() {
+      var peekedByte = this.getByte();
+      this.pos--;
+      return peekedByte;
+    },
     peekBytes: function Stream_peekBytes(length) {
       var bytes = this.getBytes(length);
       this.pos -= bytes.length;
@@ -30985,6 +31012,11 @@ var DecodeStream = (function DecodeStreamClosure() {
 
       this.pos = end;
       return this.buffer.subarray(pos, end);
+    },
+    peekByte: function DecodeStream_peekByte() {
+      var peekedByte = this.getByte();
+      this.pos--;
+      return peekedByte;
     },
     peekBytes: function DecodeStream_peekBytes(length) {
       var bytes = this.getBytes(length);
@@ -31311,7 +31343,7 @@ var FlateStream = (function FlateStreamClosure() {
       var end = bufferLength + blockLen;
       this.bufferLength = end;
       if (blockLen === 0) {
-        if (str.peekBytes(1).length === 0) {
+        if (str.peekByte() === -1) {
           this.eof = true;
         }
       } else {
