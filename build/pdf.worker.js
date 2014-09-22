@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.306';
-PDFJS.build = '2da1942';
+PDFJS.version = '1.0.308';
+PDFJS.build = 'fc85cfd';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4931,9 +4931,10 @@ var XRef = (function XRefClosure() {
       } else {
         xrefEntry = this.fetchCompressed(xrefEntry, suppressEncryption);
       }
-
-      if (isDict(xrefEntry)) {
+      if (isDict(xrefEntry)){
         xrefEntry.objId = 'R' + ref.num + '.' + ref.gen;
+      } else if (isStream(xrefEntry)) {
+        xrefEntry.dict.objId = 'R' + ref.num + '.' + ref.gen;
       }
       return xrefEntry;
     },
@@ -15584,6 +15585,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           var xObject = xObjects[key];
           if (!isStream(xObject)) {
             continue;
+          }
+          if (xObject.dict.objId) {
+            if (processed[xObject.dict.objId]) {
+              // stream has objId and is processed already
+              continue;
+            }
+            processed[xObject.dict.objId] = true;
           }
           var xResources = xObject.dict.get('Resources');
           // Checking objId to detect an infinite loop.
