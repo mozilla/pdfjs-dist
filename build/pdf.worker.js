@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.463';
-PDFJS.build = 'c0d1701';
+PDFJS.version = '1.0.465';
+PDFJS.build = '584fef9';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -13773,6 +13773,7 @@ var LabCS = (function LabCSClosure() {
       return (inputLength * (3 + alpha01) / 3) | 0;
     },
     isPassthrough: ColorSpace.prototype.isPassthrough,
+    fillRgb: ColorSpace.prototype.fillRgb,
     isDefaultDecode: function LabCS_isDefaultDecode(decodeMap) {
       // XXX: Decoding is handled with the lab conversion because of the strange
       // ranges that are used.
