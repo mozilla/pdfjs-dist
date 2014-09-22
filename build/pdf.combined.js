@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.400';
-PDFJS.build = 'cf4bc42';
+PDFJS.version = '1.0.402';
+PDFJS.build = 'b557b87';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -22041,9 +22041,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       return new Promise(function next(resolve, reject) {
         timeSlotManager.reset();
-        var stop, operation, i, ii, cs;
+        var stop, operation = {}, i, ii, cs;
         while (!(stop = timeSlotManager.check()) &&
-               (operation = preprocessor.read())) {
+               preprocessor.read(operation)) {
           var args = operation.args;
           var fn = operation.fn;
 
@@ -22297,7 +22297,6 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
 
-      var operation;
       var textState;
 
       function newTextChunk() {
@@ -22435,9 +22434,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       return new Promise(function next(resolve, reject) {
         timeSlotManager.reset();
-        var stop;
+        var stop, operation = {};
         while (!(stop = timeSlotManager.check()) &&
-               (operation = preprocessor.read())) {
+               (preprocessor.read(operation))) {
           textState = stateManager.state;
           var fn = operation.fn;
           var args = operation.args;
@@ -23502,12 +23501,12 @@ var EvaluatorPreprocessor = (function EvaluatorPreprocessorClosure() {
       return this.stateManager.stateStack.length;
     },
 
-    read: function EvaluatorPreprocessor_read() {
+    read: function EvaluatorPreprocessor_read(operation) {
       var args = [];
       while (true) {
         var obj = this.parser.getObj();
         if (isEOF(obj)) {
-          return null; // no more commands
+          return false; // no more commands
         }
         if (!isCmd(obj)) {
           // argument
@@ -23558,7 +23557,9 @@ var EvaluatorPreprocessor = (function EvaluatorPreprocessorClosure() {
         // TODO figure out how to type-check vararg functions
         this.preprocessCommand(fn, args);
 
-        return { fn: fn, args: args };
+        operation.fn = fn;
+        operation.args = args;
+        return true;
       }
     },
 
