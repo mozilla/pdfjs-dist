@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.362';
-PDFJS.build = 'a45e103';
+PDFJS.version = '1.0.366';
+PDFJS.build = '834c69a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
