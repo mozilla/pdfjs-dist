@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.423';
-PDFJS.build = '6d86c92';
+PDFJS.version = '1.0.425';
+PDFJS.build = 'c28839b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -26897,7 +26897,7 @@ var Glyph = (function GlyphClosure() {
  */
 var Font = (function FontClosure() {
   function Font(name, file, properties) {
-    var charCode;
+    var charCode, glyphName;
 
     this.name = name;
     this.loadedName = properties.loadedName;
@@ -26998,13 +26998,20 @@ var Font = (function FontClosure() {
       } else if (isStandardFont) {
         this.toFontChar = [];
         for (charCode in properties.defaultEncoding) {
-          var glyphName = properties.differences[charCode] ||
-                          properties.defaultEncoding[charCode];
+          glyphName = (properties.differences[charCode] ||
+                       properties.defaultEncoding[charCode]);
           this.toFontChar[charCode] = GlyphsUnicode[glyphName];
         }
       } else {
+        var unicodeCharCode, notCidFont = (type.indexOf('CIDFontType') === -1);
         for (charCode in this.toUnicode) {
-          this.toFontChar[charCode] = this.toUnicode[charCode].charCodeAt(0);
+          unicodeCharCode = this.toUnicode[charCode].charCodeAt(0);
+          if (notCidFont) {
+            glyphName = (properties.differences[charCode] ||
+                         properties.defaultEncoding[charCode]);
+            unicodeCharCode = (GlyphsUnicode[glyphName] || unicodeCharCode);
+          }
+          this.toFontChar[charCode] = unicodeCharCode;
         }
       }
       this.loadedName = fontName.split('-')[0];
