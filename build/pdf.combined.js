@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.300';
-PDFJS.build = '9308b52';
+PDFJS.version = '1.0.302';
+PDFJS.build = '9308c7c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -43323,13 +43323,10 @@ var JpegImage = (function jpegImage() {
   }
 
   function buildComponentData(frame, component) {
-    var lines = [];
     var blocksPerLine = component.blocksPerLine;
     var blocksPerColumn = component.blocksPerColumn;
-    var samplesPerLine = blocksPerLine << 3;
     var computationBuffer = new Int32Array(64);
 
-    var i, j, ll = 0;
     for (var blockRow = 0; blockRow < blocksPerColumn; blockRow++) {
       for (var blockCol = 0; blockCol < blocksPerLine; blockCol++) {
         var offset = getBlockBufferOffset(component, blockRow, blockCol);
