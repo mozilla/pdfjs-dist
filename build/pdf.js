@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.492';
-PDFJS.build = '62e6265';
+PDFJS.version = '1.0.494';
+PDFJS.build = '1e21bac';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4518,11 +4518,16 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           continue;
         }
 
+        var operatorList = font.charProcOperatorList[glyph.operatorListId];
+        if (!operatorList) {
+          warn('Type3 character \"' + glyph.operatorListId +
+               '\" is not available');
+          continue;
+        }
         this.processingType3 = glyph;
         this.save();
         ctx.scale(fontSize, fontSize);
         ctx.transform.apply(ctx, fontMatrix);
-        var operatorList = font.charProcOperatorList[glyph.operatorListId];
         this.executeOperatorList(operatorList);
         this.restore();
 
