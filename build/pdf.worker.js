@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.700';
-PDFJS.build = 'b06dc8d';
+PDFJS.version = '1.0.702';
+PDFJS.build = '6ac995d';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -10677,10 +10677,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     setGState: function PartialEvaluator_setGState(resources, gState,
                                                    operatorList, xref,
                                                    stateManager) {
-
-      // TODO(mack): This should be rewritten so that this function returns
-      // what should be added to the queue during each iteration
-      function setGStateForKey(gStateObj, key, value) {
+      // This array holds the converted/processed state data.
+      var gStateObj = [];
+      var gStateMap = gState.map;
+      var self = this;
+      var promise = Promise.resolve();
+      for (var key in gStateMap) {
+        var value = gStateMap[key];
         switch (key) {
           case 'Type':
             break;
@@ -10748,16 +10751,6 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             info('Unknown graphic state operator ' + key);
             break;
         }
-      }
-
-      // This array holds the converted/processed state data.
-      var gStateObj = [];
-      var gStateMap = gState.map;
-      var self = this;
-      var promise = Promise.resolve();
-      for (var key in gStateMap) {
-        var value = gStateMap[key];
-        setGStateForKey(gStateObj, key, value);
       }
       return promise.then(function () {
         if (gStateObj.length >= 0) {
