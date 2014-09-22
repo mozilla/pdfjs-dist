@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.618';
-PDFJS.build = 'defb67c';
+PDFJS.version = '1.0.620';
+PDFJS.build = '8909bf1';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -15432,6 +15432,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
     buildPath: function PartialEvaluator_buildPath(operatorList, fn, args) {
       var lastIndex = operatorList.length - 1;
+      if (!args) {
+        args = [];
+      }
       if (lastIndex < 0 ||
           operatorList.fnArray[lastIndex] !== OPS.constructPath) {
         operatorList.addOp(OPS.constructPath, [[fn], args]);
@@ -16977,10 +16980,10 @@ var EvaluatorPreprocessor = (function EvaluatorPreprocessorClosure() {
 
           var fn = opSpec.id;
           var numArgs = opSpec.numArgs;
+          var argsLength = args !== null ? args.length : 0;
 
           if (!opSpec.variableArgs) {
             // Postscript commands can be nested, e.g. /F2 /GS2 gs 5.711 Tf
-            var argsLength = args !== null ? args.length : 0;
             if (argsLength !== numArgs) {
               var nonProcessedArgs = this.nonProcessedArgs;
               while (argsLength > numArgs) {
