@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.592';
-PDFJS.build = '46a9a35';
+PDFJS.version = '1.0.594';
+PDFJS.build = '223f34b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -17801,10 +17801,10 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
   function hexToStr(a, size) {
     // This code is hot. Special-case some common values to avoid creating an
     // object with subarray().
-    if (size == 1) {
+    if (size === 1) {
       return String.fromCharCode(a[0], a[1]);
     }
-    if (size == 3) {
+    if (size === 3) {
       return String.fromCharCode(a[0], a[1], a[2], a[3]);
     }
     return String.fromCharCode.apply(null, a.subarray(0, size + 1));
