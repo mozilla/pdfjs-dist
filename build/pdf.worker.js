@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.256';
-PDFJS.build = '2a51b73';
+PDFJS.version = '1.0.258';
+PDFJS.build = 'd65df7d';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4260,6 +4260,22 @@ var Catalog = (function CatalogClosure() {
           javaScript.push(stringToPDFString(js));
         }
       }
+
+      // Append OpenAction actions to javaScript array
+      var openactionDict = this.catDict.get('OpenAction');
+      if (isDict(openactionDict)) {
+        var objType = openactionDict.get('Type');
+        var actionType = openactionDict.get('S');
+        var action = openactionDict.get('N');
+        var isPrintAction = (isName(objType) && objType.name === 'Action' &&
+                            isName(actionType) && actionType.name === 'Named' &&
+                            isName(action) && action.name === 'Print');
+        
+        if (isPrintAction) {
+          javaScript.push('print(true);');
+        }
+      }
+
       return shadow(this, 'javaScript', javaScript);
     },
 
