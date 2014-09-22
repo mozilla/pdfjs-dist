@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.308';
-PDFJS.build = 'fc85cfd';
+PDFJS.version = '1.0.310';
+PDFJS.build = 'cff2c3a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -31197,12 +31197,12 @@ var PDFImage = (function PDFImageClosure() {
           }
           return imgData;
         }
-      }
-      if (this.image instanceof JpegStream) {
-        imgData.kind = ImageKind.RGB_24BPP;
-        imgData.data = this.getImageBytes(originalHeight * rowBytes,
-                                          drawWidth, drawHeight);
-        return imgData;
+        if (this.image instanceof JpegStream && !this.smask && !this.mask) {
+          imgData.kind = ImageKind.RGB_24BPP;
+          imgData.data = this.getImageBytes(originalHeight * rowBytes,
+                                            drawWidth, drawHeight, true);
+          return imgData;
+        }
       }
 
       imgArray = this.getImageBytes(originalHeight * rowBytes);
@@ -31290,10 +31290,12 @@ var PDFImage = (function PDFImageClosure() {
     },
 
     getImageBytes: function PDFImage_getImageBytes(length,
-                                                   drawWidth, drawHeight) {
+                                                   drawWidth, drawHeight,
+                                                   forceRGB) {
       this.image.reset();
-      this.image.drawWidth = drawWidth;
-      this.image.drawHeight = drawHeight;
+      this.image.drawWidth = drawWidth || this.width;
+      this.image.drawHeight = drawHeight || this.height;
+      this.image.forceRGB = !!forceRGB;
       return this.image.getBytes(length);
     }
   };
@@ -36181,7 +36183,7 @@ var JpegStream = (function JpegStreamClosure() {
 
       jpegImage.parse(this.bytes);
       var data = jpegImage.getData(this.drawWidth, this.drawHeight,
-                                   /* forceRGBoutput = */true);
+                                   this.forceRGB);
       this.buffer = data;
       this.bufferLength = data.length;
       this.eof = true;
@@ -39297,7 +39299,7 @@ var JpegImage = (function jpegImage() {
           } else {
             return this._convertYcckToCmyk(data);
           }
-        } else {
+        } else if (forceRGBoutput) {
           return this._convertCmykToRgb(data);
         }
       }
