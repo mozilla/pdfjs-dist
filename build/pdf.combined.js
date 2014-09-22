@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.395';
-PDFJS.build = 'c4ed02e';
+PDFJS.version = '1.0.398';
+PDFJS.build = '7a83291';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6425,6 +6425,7 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
     getHtmlElement: getHtmlElement
   };
 })();
+PDFJS.AnnotationUtils = AnnotationUtils;
 
 
 
@@ -16760,8 +16761,6 @@ var Annotation = (function AnnotationClosure() {
 
   return Annotation;
 })();
-PDFJS.Annotation = Annotation;
-
 
 var WidgetAnnotation = (function WidgetAnnotationClosure() {
 
