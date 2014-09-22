@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.624';
-PDFJS.build = '13f1a96';
+PDFJS.version = '1.0.627';
+PDFJS.build = '99b08ed';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -16739,7 +16739,9 @@ var OperatorList = (function OperatorListClosure() {
     },
 
     flush: function(lastChunk) {
-      new QueueOptimizer().optimize(this);
+      if (this.intent !== 'oplist') {
+        new QueueOptimizer().optimize(this);
+      }
       var transfers = getTransfers(this);
       this.messageHandler.send('RenderPageChunk', {
         operatorList: {
