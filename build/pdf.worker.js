@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.332';
-PDFJS.build = '12a35f2';
+PDFJS.version = '1.0.334';
+PDFJS.build = '75859b8';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -15953,6 +15953,11 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           return errorFont();
         }
       }
+      if (!fontRef) {
+        warn('fontRef not available');
+        return errorFont();
+      }
+
       if (this.fontCache.has(fontRef)) {
         return this.fontCache.get(fontRef);
       }
