@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.205';
-PDFJS.build = '179f423';
+PDFJS.version = '1.0.207';
+PDFJS.build = '048c6d9';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6595,7 +6595,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       }
     },
 
-    paintChar: function (character, x, y) {
+    paintChar: function CanvasGraphics_paintChar(character, x, y) {
       var ctx = this.ctx;
       var current = this.current;
       var font = current.font;
