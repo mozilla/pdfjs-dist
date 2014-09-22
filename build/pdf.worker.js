@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.229';
-PDFJS.build = '7079992';
+PDFJS.version = '1.0.233';
+PDFJS.build = 'd39af0a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -34087,7 +34087,7 @@ var Metrics = {
 var EOF = {};
 
 function isEOF(v) {
-  return (v == EOF);
+  return (v === EOF);
 }
 
 var Parser = (function ParserClosure() {
