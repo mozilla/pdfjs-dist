@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.310';
-PDFJS.build = 'cff2c3a';
+PDFJS.version = '1.0.312';
+PDFJS.build = '12bfd20';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -42650,9 +42650,17 @@ var MurmurHash3_64 = (function MurmurHash3_64Closure (seed) {
     this.h2 = seed ? seed & 0xffffffff : SEED;
   }
 
+  var alwaysUseUint32ArrayView = false;
+  // old webkits have issues with non-aligned arrays
+  try {
+    new Uint32Array(new Uint8Array(5).buffer, 0, 1);
+  } catch (e) {
+    alwaysUseUint32ArrayView = true;
+  }
+
   MurmurHash3_64.prototype = {
     update: function MurmurHash3_64_update(input) {
-      var useUint32ArrayView = false;
+      var useUint32ArrayView = alwaysUseUint32ArrayView;
       var i;
       if (typeof input == 'string') {
         var data = new Uint8Array(input.length * 2);
