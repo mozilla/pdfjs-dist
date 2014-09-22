@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.288';
-PDFJS.build = '2449142';
+PDFJS.version = '1.0.291';
+PDFJS.build = 'e03ac80';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -40652,9 +40652,27 @@ var JpegStream = (function JpegStreamClosure() {
     }
     try {
       var jpegImage = new JpegImage();
-      if (this.colorTransform != -1) {
-        jpegImage.colorTransform = this.colorTransform;
+
+      // checking if values needs to be transformed before conversion
+      if (this.dict && isArray(this.dict.get('Decode'))) {
+        var decodeArr = this.dict.get('Decode');
+        var bitsPerComponent = this.dict.get('BitsPerComponent') || 8;
+        var decodeArrLength = decodeArr.length;
+        var transform = new Int32Array(decodeArrLength);
+        var transformNeeded = false;
+        var maxValue = (1 << bitsPerComponent) - 1;
+        for (var i = 0; i < decodeArrLength; i += 2) {
+          transform[i] = ((decodeArr[i + 1] - decodeArr[i]) * 256) | 0;
+          transform[i + 1] = (decodeArr[i] * maxValue) | 0;
+          if (transform[i] !== 256 || transform[i + 1] !== 0) {
+            transformNeeded = true;
+          }
+        }
+        if (transformNeeded) {
+          jpegImage.decodeTransform = transform;
+        }
       }
+
       jpegImage.parse(this.bytes);
       var data = jpegImage.getData(this.drawWidth, this.drawHeight,
                                    /* forceRGBoutput = */true);
@@ -43573,7 +43591,7 @@ var JpegImage = (function jpegImage() {
       var scaleX = this.width / width, scaleY = this.height / height;
 
       var component, componentScaleX, componentScaleY, blocksPerScanline;
-      var x, y, i, j;
+      var x, y, i, j, k;
       var index;
       var offset = 0;
       var output;
@@ -43605,6 +43623,17 @@ var JpegImage = (function jpegImage() {
           }
         }
       }
+
+      // decodeTransform will contains pairs of multiplier (-256..256) and
+      // additive
+      var transform = this.decodeTransform;
+      if (transform) {
+        for (i = 0; i < dataLength;) {
+          for (j = 0, k = 0; j < numComponents; j++, i++, k += 2) {
+            data[i] = ((data[i] * transform[k]) >> 8) + transform[k + 1];
+          }
+        }
+      }
       return data;
     },
 
@@ -43614,8 +43643,6 @@ var JpegImage = (function jpegImage() {
         return true;
       } else if (this.numComponents == 3) {
         return true;
-      } else if (typeof this.colorTransform !== 'undefined') {
-        return !!this.colorTransform;
       } else {
         return false;
       }
