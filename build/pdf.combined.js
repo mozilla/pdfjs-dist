@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.448';
-PDFJS.build = 'b5e5de0';
+PDFJS.version = '1.0.450';
+PDFJS.build = '0237d50';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -41441,11 +41441,17 @@ var StringStream = (function StringStreamClosure() {
 
 // super class for the decoding streams
 var DecodeStream = (function DecodeStreamClosure() {
+  // Lots of DecodeStreams are created whose buffers are never used.  For these
+  // we share a single empty buffer. This is (a) space-efficient and (b) avoids
+  // having special cases that would be required if we used |null| for an empty
+  // buffer.
+  var emptyBuffer = new Uint8Array(0);
+
   function DecodeStream(maybeMinBufferLength) {
     this.pos = 0;
     this.bufferLength = 0;
     this.eof = false;
-    this.buffer = null;
+    this.buffer = emptyBuffer;
     this.minBufferLength = 512;
     if (maybeMinBufferLength) {
       // Compute the first power of two that is as big as maybeMinBufferLength.
@@ -41464,23 +41470,15 @@ var DecodeStream = (function DecodeStreamClosure() {
     },
     ensureBuffer: function DecodeStream_ensureBuffer(requested) {
       var buffer = this.buffer;
-      var current;
-      if (buffer) {
-        current = buffer.byteLength;
-        if (requested <= current) {
-          return buffer;
-        }
-      } else {
-        current = 0;
+      if (requested <= buffer.byteLength) {
+        return buffer;
       }
       var size = this.minBufferLength;
       while (size < requested) {
         size *= 2;
       }
       var buffer2 = new Uint8Array(size);
-      if (buffer) {
-        buffer2.set(buffer);
-      }
+      buffer2.set(buffer);
       return (this.buffer = buffer2);
     },
     getByte: function DecodeStream_getByte() {
@@ -41524,12 +41522,6 @@ var DecodeStream = (function DecodeStreamClosure() {
           this.readBlock();
         }
         end = this.bufferLength;
-
-        // checking if bufferLength is still 0 then
-        // the buffer has to be initialized
-        if (!end) {
-          this.buffer = new Uint8Array(0);
-        }
       }
 
       this.pos = end;
