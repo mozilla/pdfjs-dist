@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.135';
-PDFJS.build = 'a39f44f';
+PDFJS.version = '1.0.137';
+PDFJS.build = 'c68ba07';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3308,31 +3308,29 @@ var Annotation = (function AnnotationClosure() {
                 data.rect);                          // rectangle is nessessary
     },
 
-    loadResources: function(keys) {
-      var promise = new LegacyPromise();
-      this.appearance.dict.getAsync('Resources').then(function(resources) {
-        if (!resources) {
-          promise.resolve();
-          return;
-        }
-        var objectLoader = new ObjectLoader(resources.map,
-                                            keys,
-                                            resources.xref);
-        objectLoader.load().then(function() {
-          promise.resolve(resources);
-        });
+    loadResources: function Annotation_loadResources(keys) {
+      return new Promise(function (resolve, reject) {
+        this.appearance.dict.getAsync('Resources').then(function (resources) {
+          if (!resources) {
+            resolve();
+            return;
+          }
+          var objectLoader = new ObjectLoader(resources.map,
+                                              keys,
+                                              resources.xref);
+          objectLoader.load().then(function() {
+            resolve(resources);
+          }, reject);
+        }, reject);
       }.bind(this));
-
-      return promise;
     },
 
     getOperatorList: function Annotation_getOperatorList(evaluator) {
-
-      var promise = new LegacyPromise();
+      var capability = createPromiseCapability();
 
       if (!this.appearance) {
-        promise.resolve(new OperatorList());
-        return promise;
+        capability.resolve(new OperatorList());
+        return capability.promise;
       }
 
       var data = this.data;
@@ -3357,12 +3355,12 @@ var Annotation = (function AnnotationClosure() {
         opList.addOp(OPS.beginAnnotation, [data.rect, transform, matrix]);
         evaluator.getOperatorList(this.appearance, resources, opList);
         opList.addOp(OPS.endAnnotation, []);
-        promise.resolve(opList);
+        capability.resolve(opList);
 
         this.appearance.reset();
-      }.bind(this));
+      }.bind(this), capability.reject);
 
-      return promise;
+      return capability.promise;
     }
   };
 
@@ -3442,10 +3440,10 @@ var Annotation = (function AnnotationClosure() {
       annotations, opList, pdfManager, partialEvaluator, intent) {
 
     function reject(e) {
-      annotationsReadyPromise.reject(e);
+      annotationsReadyCapability.reject(e);
     }
 
-    var annotationsReadyPromise = new LegacyPromise();
+    var annotationsReadyCapability = createPromiseCapability();
 
     var annotationPromises = [];
     for (var i = 0, n = annotations.length; i < n; ++i) {
@@ -3462,10 +3460,10 @@ var Annotation = (function AnnotationClosure() {
         opList.addOpList(annotOpList);
       }
       opList.addOp(OPS.endAnnotations, []);
-      annotationsReadyPromise.resolve();
+      annotationsReadyCapability.resolve();
     }, reject);
 
-    return annotationsReadyPromise;
+    return annotationsReadyCapability.promise;
   };
 
   return Annotation;
@@ -3611,7 +3609,6 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
         return Annotation.prototype.getOperatorList.call(this, evaluator);
       }
 
-      var promise = new LegacyPromise();
       var opList = new OperatorList();
       var data = this.data;
 
@@ -3620,8 +3617,7 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
 
       var defaultAppearance = data.defaultAppearance;
       if (!defaultAppearance) {
-        promise.resolve(opList);
-        return promise;
+        return Promise.resolve(opList);
       }
 
       // Include any font resources found in the default appearance
@@ -3656,8 +3652,7 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
           data.rgb = [rgbValue, rgbValue, rgbValue];
         }
       }
-      promise.resolve(opList);
-      return promise;
+      return Promise.resolve(opList);
     }
   });
 
