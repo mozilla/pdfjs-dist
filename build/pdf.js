@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.635';
-PDFJS.build = '5e18614';
+PDFJS.version = '1.0.639';
+PDFJS.build = '29d116f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -463,15 +463,6 @@ function bytesToString(bytes) {
     strBuf.push(String.fromCharCode.apply(null, chunk));
   }
   return strBuf.join('');
-}
-
-function stringToArray(str) {
-  var length = str.length;
-  var array = new Uint16Array(length);
-  for (var i = 0; i < length; ++i) {
-    array[i] = str.charCodeAt(i);
-  }
-  return array;
 }
 
 function stringToBytes(str) {
