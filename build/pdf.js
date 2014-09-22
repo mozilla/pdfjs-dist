@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.334';
-PDFJS.build = '75859b8';
+PDFJS.version = '1.0.336';
+PDFJS.build = 'b37b338';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1724,7 +1724,7 @@ var Annotation = (function AnnotationClosure() {
                 data &&
                 (!data.annotationFlags ||
                  !(data.annotationFlags & 0x22)) &&  // Hidden or NoView
-                data.rect);                          // rectangle is nessessary
+                data.rect);                          // rectangle is necessary
     },
 
     isPrintable: function Annotation_isPrintable() {
@@ -1733,7 +1733,8 @@ var Annotation = (function AnnotationClosure() {
                 data &&
                 data.annotationFlags &&              // Default: not printable
                 data.annotationFlags & 0x4 &&        // Print
-                data.rect);                          // rectangle is nessessary
+                !(data.annotationFlags & 0x2) &&     // Hidden
+                data.rect);                          // rectangle is necessary
     },
 
     loadResources: function Annotation_loadResources(keys) {
@@ -1858,7 +1859,9 @@ var Annotation = (function AnnotationClosure() {
     if (annotation.isViewable() || annotation.isPrintable()) {
       return annotation;
     } else {
-      warn('unimplemented annotation type: ' + subtype);
+      if (SUPPORTED_TYPES.indexOf(subtype) === -1) {
+        warn('unimplemented annotation type: ' + subtype);
+      }
     }
   };
 
