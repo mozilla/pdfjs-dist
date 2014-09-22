@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.480';
-PDFJS.build = '2642583';
+PDFJS.version = '1.0.482';
+PDFJS.build = '2aea7d7';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -8087,7 +8087,13 @@ var Ref = (function RefClosure() {
 
   Ref.prototype = {
     toString: function Ref_toString() {
-      return 'R' + this.num + '.' + this.gen;
+      // This function is hot, so we make the string as compact as possible.
+      // |this.gen| is almost always zero, so we treat that case specially.
+      var str = this.num + 'R';
+      if (this.gen !== 0) {
+        str += this.gen;
+      }
+      return str;
     }
   };
 
