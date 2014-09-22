@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.127';
-PDFJS.build = '1591429';
+PDFJS.version = '1.0.129';
+PDFJS.build = '164e11f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5220,7 +5220,6 @@ var InternalRenderTask = (function InternalRenderTaskClosure() {
     cancel: function InternalRenderTask_cancel() {
       this.running = false;
       this.cancelled = true;
-      this.capability.reject(new Error('Rendering is cancelled'));
       this.callback('cancelled');
     },
 
