@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.589';
-PDFJS.build = 'df8d257';
+PDFJS.version = '1.0.592';
+PDFJS.build = '46a9a35';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -467,7 +467,7 @@ function bytesToString(bytes) {
 
 function stringToArray(str) {
   var length = str.length;
-  var array = [];
+  var array = new Uint16Array(length);
   for (var i = 0; i < length; ++i) {
     array[i] = str.charCodeAt(i);
   }

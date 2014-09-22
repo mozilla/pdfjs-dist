@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.589';
-PDFJS.build = 'df8d257';
+PDFJS.version = '1.0.592';
+PDFJS.build = '46a9a35';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -467,7 +467,7 @@ function bytesToString(bytes) {
 
 function stringToArray(str) {
   var length = str.length;
-  var array = [];
+  var array = new Uint16Array(length);
   for (var i = 0; i < length; ++i) {
     array[i] = str.charCodeAt(i);
   }
@@ -17799,6 +17799,14 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
   }
 
   function hexToStr(a, size) {
+    // This code is hot. Special-case some common values to avoid creating an
+    // object with subarray().
+    if (size == 1) {
+      return String.fromCharCode(a[0], a[1]);
+    }
+    if (size == 3) {
+      return String.fromCharCode(a[0], a[1], a[2], a[3]);
+    }
     return String.fromCharCode.apply(null, a.subarray(0, size + 1));
   }
 
@@ -20749,17 +20757,43 @@ var Font = (function FontClosure() {
     // length
     var length = data.length;
 
-    // Per spec tables must be 4-bytes align so add padding as needed
-    while (data.length & 3) {
-      data.push(0x00);
+    // Per spec tables must be 4-bytes align so add padding as needed.
+    var paddedLength = length;
+    while (paddedLength & 3) {
+      paddedLength++;
     }
+    var i;
+    var padding = paddedLength - length;
+    if (padding !== 0) {
+      // Padding is required. |data| can be an Array, Uint8Array, or
+      // Uint16Array. In the latter two cases we need to create slightly larger
+      // typed arrays and copy the old contents in. Fortunately that's not a
+      // common case.
+      var data2;
+      if (data instanceof Array) {
+        for (i = 0; i < padding; i++) {
+          data.push(0);
+        }
+      } else if (data instanceof Uint8Array) {
+        data2 = new Uint8Array(paddedLength);
+        data2.set(data);
+        data = data2;
+      } else if (data instanceof Uint16Array) {
+        data2 = new Uint16Array(paddedLength);
+        data2.set(data);
+        data = data2;
+      } else {
+        error('bad array kind in createTableEntry');
+      }
+    }
+
     while (file.virtualOffset & 3) {
       file.virtualOffset++;
     }
 
     // checksum
     var checksum = 0, n = data.length;
-    for (var i = 0; i < n; i += 4) {
+    for (i = 0; i < n; i += 4) {
       checksum = (checksum + int32(data[i], data[i + 1], data[i + 2],
                                    data[i + 3])) | 0;
     }
@@ -20768,6 +20802,8 @@ var Font = (function FontClosure() {
                       string32(offset) + string32(length));
     file.file += tableEntry;
     file.virtualOffset += data.length;
+
+    return data;
   }
 
   function isTrueTypeFile(file) {
@@ -22379,13 +22415,7 @@ var Font = (function FontClosure() {
       // rewrite the tables but tweak offsets
       for (i = 0; i < numTables; i++) {
         table = tables[tablesNames[i]];
-        var data = [];
-
-        tableData = table.data;
-        for (var j = 0, jj = tableData.length; j < jj; j++) {
-          data.push(tableData[j]);
-        }
-        createTableEntry(ttf, table.tag, data);
+        table.data = createTableEntry(ttf, table.tag, table.data);
       }
 
       // Add the table datas
@@ -22580,7 +22610,7 @@ var Font = (function FontClosure() {
 
       var field;
       for (field in fields) {
-        createTableEntry(otf, field, fields[field]);
+        fields[field] = createTableEntry(otf, field, fields[field]);
       }
       for (field in fields) {
         var table = fields[field];
