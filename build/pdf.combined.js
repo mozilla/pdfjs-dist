@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.324';
-PDFJS.build = 'd487d42';
+PDFJS.version = '1.0.326';
+PDFJS.build = '36c0c64';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4307,7 +4307,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
   function genericComposeSMask(maskCtx, layerCtx, width, height,
                                subtype, backdrop) {
-    var hasBackdrop = backdrop !== undefined;
+    var hasBackdrop = !!backdrop;
     var r0 = hasBackdrop ? backdrop[0] : 0;
     var g0 = hasBackdrop ? backdrop[1] : 0;
     var b0 = hasBackdrop ? backdrop[2] : 0;
