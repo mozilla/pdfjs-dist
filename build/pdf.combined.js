@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.686';
-PDFJS.build = 'fa8d385';
+PDFJS.version = '1.0.688';
+PDFJS.build = 'e53a28c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -16700,7 +16700,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
             break;
           // Only generate info log messages for the following since
-          // they are unlikey to have a big impact on the rendering.
+          // they are unlikely to have a big impact on the rendering.
           case 'OP':
           case 'op':
           case 'OPM':
@@ -16734,7 +16734,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         setGStateForKey(gStateObj, key, value);
       }
       return promise.then(function () {
-        operatorList.addOp(OPS.setGState, [gStateObj]);
+        if (gStateObj.length >= 0) {
+          operatorList.addOp(OPS.setGState, [gStateObj]);
+        }
       });
     },
 
