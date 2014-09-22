@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.377';
-PDFJS.build = '5a2e511';
+PDFJS.version = '1.0.379';
+PDFJS.build = '11302f0';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3951,7 +3951,14 @@ var CachedCanvases = (function CachedCanvasesClosure() {
       return canvasEntry;
     },
     clear: function () {
-      cache = {};
+      for (var id in cache) {
+        var canvasEntry = cache[id];
+        // Zeroing the width and height causes Firefox to release graphics
+        // resources immediately, which can greatly reduce memory consumption.
+        canvasEntry.canvas.width = 0;
+        canvasEntry.canvas.height = 0;
+        delete cache[id];
+      }
     }
   };
 })();
