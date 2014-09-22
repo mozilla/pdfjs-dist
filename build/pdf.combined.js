@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.521';
-PDFJS.build = 'bdf1c51';
+PDFJS.version = '1.0.524';
+PDFJS.build = 'ad2ea78';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -15814,10 +15814,10 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       var cmapObj = toUnicode;
       if (isName(cmapObj)) {
         return CMapFactory.create(cmapObj,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).map;
+          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).getMap();
       } else if (isStream(cmapObj)) {
         var cmap = CMapFactory.create(cmapObj,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).map;
+          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).getMap();
         // Convert UTF-16BE
         // NOTE: cmap can be a sparse array, so use forEach instead of for(;;)
         // to iterate over all keys.
@@ -17206,7 +17206,7 @@ var CMap = (function CMapClosure() {
     // where nBytePairs are ranges e.g. [low1, high1, low2, high2, ...]
     this.codespaceRanges = [[], [], [], []];
     this.numCodespaceRanges = 0;
-    this.map = [];
+    this._map = [];
     this.vertical = false;
     this.useCMap = null;
     this.builtInCMap = builtInCMap;
@@ -17220,7 +17220,7 @@ var CMap = (function CMapClosure() {
     mapRange: function(low, high, dstLow) {
       var lastByte = dstLow.length - 1;
       while (low <= high) {
-        this.map[low] = dstLow;
+        this._map[low] = dstLow;
         // Only the last byte has to be incremented.
         dstLow = dstLow.substr(0, lastByte) +
                  String.fromCharCode(dstLow.charCodeAt(lastByte) + 1);
@@ -17231,17 +17231,51 @@ var CMap = (function CMapClosure() {
     mapRangeToArray: function(low, high, array) {
       var i = 0, ii = array.length;
       while (low <= high && i < ii) {
-        this.map[low] = array[i++];
+        this._map[low] = array[i++];
         ++low;
       }
     },
 
     mapOne: function(src, dst) {
-      this.map[src] = dst;
+      this._map[src] = dst;
     },
 
     lookup: function(code) {
-      return this.map[code];
+      return this._map[code];
+    },
+
+    contains: function(code) {
+      return this._map[code] !== undefined;
+    },
+
+    forEach: function(callback) {
+      // Most maps have fewer than 65536 entries, and for those we use normal
+      // array iteration. But really sparse tables are possible -- e.g. with
+      // indices in the *billions*. For such tables we use for..in, which isn't
+      // ideal because it stringifies the indices for all present elements, but
+      // it does avoid iterating over every undefined entry.
+      var map = this._map;
+      var length = map.length;
+      var i;
+      if (length <= 0x10000) {
+        for (i = 0; i < length; i++) {
+          if (map[i] !== undefined) {
+            callback(i, map[i]);
+          }
+        }
+      } else {
+        for (i in this._map) {
+          callback(i, map[i]);
+        }
+      }
+    },
+
+    charCodeOf: function(value) {
+      return this._map.indexOf(value);
+    },
+
+    getMap: function() {
+      return this._map;
     },
 
     readCharCode: function(str, offset) {
@@ -17796,12 +17830,11 @@ var CMapFactory = (function CMapFactoryClosure() {
     }
     // Merge the map into the current one, making sure not to override
     // any previously defined entries.
-    for (var key in cMap.useCMap.map) {
-      if (key in cMap.map) {
-        continue;
+    cMap.useCMap.forEach(function(key, value) {
+      if (!cMap.contains(key)) {
+        cMap.mapOne(key, cMap.useCMap.lookup(key));
       }
-      cMap.map[key] = cMap.useCMap.map[key];
-    }
+    });
   }
 
   function parseBinaryCMap(name, builtInCMapParams) {
@@ -21737,10 +21770,7 @@ var Font = (function FontClosure() {
       if (properties.type === 'CIDFontType2') {
         var cidToGidMap = properties.cidToGidMap || [];
         var cidToGidMapLength = cidToGidMap.length;
-        var cMap = properties.cMap.map;
-        for (charCode in cMap) {
-          charCode |= 0;
-          var cid = cMap[charCode];
+        properties.cMap.forEach(function(charCode, cid) {
           assert(cid.length === 1, 'Max size of CID is 65,535');
           cid = cid.charCodeAt(0);
           var glyphId = -1;
@@ -21752,7 +21782,7 @@ var Font = (function FontClosure() {
           if (glyphId >= 0 && glyphId < numGlyphs) {
             charCodeToGlyphId[charCode] = glyphId;
           }
-        }
+        });
         if (dupFirstEntry) {
           charCodeToGlyphId[0] = numGlyphs - 1;
         }
@@ -21810,7 +21840,7 @@ var Font = (function FontClosure() {
             if (!found && properties.glyphNames) {
               // Try to map using the post table. There are currently no known
               // pdfs that this fixes.
-              glyphId = properties.glyphNames.indexOf(glyphName);
+              var glyphId = properties.glyphNames.indexOf(glyphName);
               if (glyphId > 0) {
                 charCodeToGlyphId[charCode] = glyphId;
               }
@@ -22211,18 +22241,17 @@ var Font = (function FontClosure() {
           { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null);
         var cMap = properties.cMap;
         toUnicode = [];
-        for (charcode in cMap.map) {
-          var cid = cMap.map[charcode];
+        cMap.forEach(function(charcode, cid) {
           assert(cid.length === 1, 'Max size of CID is 65,535');
           // e) Map the CID obtained in step (a) according to the CMap obtained
           // in step (d), producing a Unicode value.
-          var ucs2 = ucs2CMap.map[cid.charCodeAt(0)];
-          if (!ucs2) {
-            continue;
+          var ucs2 = ucs2CMap.lookup(cid.charCodeAt(0));
+          if (ucs2) {
+            toUnicode[charcode] =
+              String.fromCharCode((ucs2.charCodeAt(0) << 8) +
+                                  ucs2.charCodeAt(1));
           }
-          toUnicode[charcode] = String.fromCharCode((ucs2.charCodeAt(0) << 8) +
-                                                    ucs2.charCodeAt(1));
-        }
+        });
         map.toUnicode = toUnicode;
         return map;
       }
@@ -22257,7 +22286,7 @@ var Font = (function FontClosure() {
         // finding the charcode via unicodeToCID map
         var charcode = 0;
         if (this.composite) {
-          if (glyphUnicode in this.cMap.map) {
+          if (this.cMap.contains(glyphUnicode)) {
             charcode = this.cMap.lookup(glyphUnicode).charCodeAt(0);
           }
         }
@@ -22286,8 +22315,8 @@ var Font = (function FontClosure() {
       var fontCharCode, width, operatorListId;
 
       var widthCode = charcode;
-      if (this.cMap && charcode in this.cMap.map) {
-        widthCode = this.cMap.map[charcode].charCodeAt(0);
+      if (this.cMap && this.cMap.contains(charcode)) {
+        widthCode = this.cMap.lookup(charcode).charCodeAt(0);
       }
       width = this.widths[widthCode];
       width = isNum(width) ? width : this.defaultWidth;
@@ -23470,7 +23499,7 @@ var CFFFont = (function CFFFontClosure() {
           // to map CIDs to GIDs.
           for (glyphId = 0; glyphId < charsets.length; glyphId++) {
             var cidString = String.fromCharCode(charsets[glyphId]);
-            var charCode = properties.cMap.map.indexOf(cidString);
+            var charCode = properties.cMap.charCodeOf(cidString);
             charCodeToGlyphId[charCode] = glyphId;
           }
         } else {
