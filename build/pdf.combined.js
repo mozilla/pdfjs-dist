@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.606';
-PDFJS.build = 'c6c4583';
+PDFJS.version = '1.0.608';
+PDFJS.build = 'cbdaf85';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6795,15 +6795,8 @@ var ChunkedStream = (function ChunkedStreamClosure() {
       if (pos >= this.end) {
         return -1;
       }
-      var byte = this.bytes[pos];
-      if (byte === 0) {
-        // |byte| might be zero, because the corresponding chunk has not been
-        // loaded yet. In this case, this.ensureByte(pos) will throw an
-        // exception and nothing is returned.
-        this.ensureByte(pos);
-      }
-      this.pos++;
-      return byte;
+      this.ensureByte(pos);
+      return this.bytes[this.pos++];
     },
 
     getUint16: function ChunkedStream_getUint16() {
