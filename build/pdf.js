@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.237';
-PDFJS.build = 'd2da73b';
+PDFJS.version = '1.0.239';
+PDFJS.build = 'fb74b02';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1037,7 +1037,7 @@ PDFJS.createPromiseCapability = createPromiseCapability;
 
 /**
  * Polyfill for Promises:
- * The following promise implementation tries to generally implment the
+ * The following promise implementation tries to generally implement the
  * Promise/A+ spec. Some notable differences from other promise libaries are:
  * - There currently isn't a seperate deferred and promise object.
  * - Unhandled rejections eventually show an error if they aren't handled.
@@ -1081,6 +1081,11 @@ PDFJS.createPromiseCapability = createPromiseCapability;
         return new globalScope.Promise(function (resolve, reject) {
           reject(reason);
         });
+      };
+    }
+    if (typeof globalScope.Promise.prototype.catch !== 'function') {
+      globalScope.Promise.prototype.catch = function (onReject) {
+        return globalScope.Promise.prototype.then(undefined, onReject);
       };
     }
     return;
@@ -1205,7 +1210,11 @@ PDFJS.createPromiseCapability = createPromiseCapability;
   function Promise(resolver) {
     this._status = STATUS_PENDING;
     this._handlers = [];
-    resolver.call(this, this._resolve.bind(this), this._reject.bind(this));
+    try {
+      resolver.call(this, this._resolve.bind(this), this._reject.bind(this));
+    } catch (e) {
+      this._reject(e);
+    }
   }
   /**
    * Builds a promise that is resolved when all the passed in promises are
@@ -1332,6 +1341,10 @@ PDFJS.createPromiseCapability = createPromiseCapability;
       });
       HandlerManager.scheduleHandlers(this);
       return nextPromise;
+    },
+    
+    catch: function Promise_catch(onReject) {
+      return this.then(undefined, onReject);
     }
   };
 
