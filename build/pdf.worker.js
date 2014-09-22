@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.456';
-PDFJS.build = 'a7800c2';
+PDFJS.version = '1.0.459';
+PDFJS.build = '9c6316f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1937,8 +1937,15 @@ var ChunkedStream = (function ChunkedStreamClosure() {
       if (pos >= this.end) {
         return -1;
       }
-      this.ensureByte(pos);
-      return this.bytes[this.pos++];
+      var byte = this.bytes[pos];
+      if (byte === 0) {
+        // |byte| might be zero, because the corresponding chunk has not been
+        // loaded yet. In this case, this.ensureByte(pos) will throw an
+        // exception and nothing is returned.
+        this.ensureByte(pos);
+      }
+      this.pos++;
+      return byte;
     },
 
     getUint16: function ChunkedStream_getUint16() {
@@ -2803,14 +2810,10 @@ var PDFDocument = (function PDFDocumentClosure() {
   function find(stream, needle, limit, backwards) {
     var pos = stream.pos;
     var end = stream.end;
-    var strBuf = [];
     if (pos + limit > end) {
       limit = end - pos;
     }
-    for (var n = 0; n < limit; ++n) {
-      strBuf.push(String.fromCharCode(stream.getByte()));
-    }
-    var str = strBuf.join('');
+    var str = bytesToString(stream.getBytes(limit));
     stream.pos = pos;
     var index = backwards ? str.lastIndexOf(needle) : str.indexOf(needle);
     if (index == -1) {
@@ -37017,12 +37020,10 @@ var FlateStream = (function FlateStreamClosure() {
           this.eof = true;
         }
       } else {
-        for (var n = bufferLength; n < end; ++n) {
-          if ((b = str.getByte()) === -1) {
-            this.eof = true;
-            break;
-          }
-          buffer[n] = b;
+        var block = str.getBytes(blockLen);
+        buffer.set(block, bufferLength);
+        if (block.length < blockLen) {
+          this.eof = true;
         }
       }
       return;
