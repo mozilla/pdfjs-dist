@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.575';
-PDFJS.build = '2803c31';
+PDFJS.version = '1.0.577';
+PDFJS.build = '6865c28';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -12348,6 +12348,10 @@ var CMap = (function CMapClosure() {
     // where nBytePairs are ranges e.g. [low1, high1, low2, high2, ...]
     this.codespaceRanges = [[], [], [], []];
     this.numCodespaceRanges = 0;
+    // Map entries have one of two forms.
+    // - cid chars are 16-bit unsigned integers, stored as integers.
+    // - bf chars are variable-length byte sequences, stored as strings, with
+    //   one byte per character.
     this._map = [];
     this.vertical = false;
     this.useCMap = null;
@@ -12359,18 +12363,23 @@ var CMap = (function CMapClosure() {
       this.numCodespaceRanges++;
     },
 
-    mapRange: function(low, high, dstLow) {
-      var lastByte = dstLow.length - 1;
+    mapCidRange: function(low, high, dstLow) {
       while (low <= high) {
-        this._map[low] = dstLow;
-        // Only the last byte has to be incremented.
-        dstLow = dstLow.substr(0, lastByte) +
-                 String.fromCharCode(dstLow.charCodeAt(lastByte) + 1);
-        ++low;
+        this._map[low++] = dstLow++;
       }
     },
 
-    mapRangeToArray: function(low, high, array) {
+    mapBfRange: function(low, high, dstLow) {
+      var lastByte = dstLow.length - 1;
+      while (low <= high) {
+        this._map[low++] = dstLow;
+        // Only the last byte has to be incremented.
+        dstLow = dstLow.substr(0, lastByte) +
+                 String.fromCharCode(dstLow.charCodeAt(lastByte) + 1);
+      }
+    },
+
+    mapBfRangeToArray: function(low, high, array) {
       var i = 0, ii = array.length;
       while (low <= high && i < ii) {
         this._map[low] = array[i++];
@@ -12378,6 +12387,7 @@ var CMap = (function CMapClosure() {
       }
     },
 
+    // This is used for both bf and cid chars.
     mapOne: function(src, dst) {
       this._map[src] = dst;
     },
@@ -12451,7 +12461,7 @@ var IdentityCMap = (function IdentityCMapClosure() {
     CMap.call(this);
     this.vertical = vertical;
     this.addCodespaceRange(n, 0, 0xffff);
-    this.mapRange(0, 0xffff, '\u0000');
+    this.mapCidRange(0, 0xffff, 0);
   }
   Util.inherit(IdentityCMap, CMap, {});
 
@@ -12671,7 +12681,7 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
         case 2: // cidchar
           stream.readHex(char, dataSize);
           code = stream.readNumber();
-          cMap.mapOne(hexToInt(char, dataSize), String.fromCharCode(code));
+          cMap.mapOne(hexToInt(char, dataSize), code);
           for (i = 1; i < subitemsCount; i++) {
             incHex(char, dataSize);
             if (!sequence) {
@@ -12679,7 +12689,7 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
               addHex(char, tmp, dataSize);
             }
             code = stream.readSigned() + (code + 1);
-            cMap.mapOne(hexToInt(char, dataSize), String.fromCharCode(code));
+            cMap.mapOne(hexToInt(char, dataSize), code);
           }
           break;
         case 3: // cidrange
@@ -12687,8 +12697,8 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
           stream.readHexNumber(end, dataSize);
           addHex(end, start, dataSize);
           code = stream.readNumber();
-          cMap.mapRange(hexToInt(start, dataSize), hexToInt(end, dataSize),
-                        String.fromCharCode(code));
+          cMap.mapCidRange(hexToInt(start, dataSize), hexToInt(end, dataSize),
+                           code);
           for (i = 1; i < subitemsCount; i++) {
             incHex(end, dataSize);
             if (!sequence) {
@@ -12700,8 +12710,8 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
             stream.readHexNumber(end, dataSize);
             addHex(end, start, dataSize);
             code = stream.readNumber();
-            cMap.mapRange(hexToInt(start, dataSize), hexToInt(end, dataSize),
-                          String.fromCharCode(code));
+            cMap.mapCidRange(hexToInt(start, dataSize), hexToInt(end, dataSize),
+                             code);
           }
           break;
         case 4: // bfchar
@@ -12727,9 +12737,9 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
           stream.readHexNumber(end, ucs2DataSize);
           addHex(end, start, ucs2DataSize);
           stream.readHex(charCode, dataSize);
-          cMap.mapRange(hexToInt(start, ucs2DataSize),
-                        hexToInt(end, ucs2DataSize),
-                        hexToStr(charCode, dataSize));
+          cMap.mapBfRange(hexToInt(start, ucs2DataSize),
+                          hexToInt(end, ucs2DataSize),
+                          hexToStr(charCode, dataSize));
           for (i = 1; i < subitemsCount; i++) {
             incHex(end, ucs2DataSize);
             if (!sequence) {
@@ -12741,9 +12751,9 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
             stream.readHexNumber(end, ucs2DataSize);
             addHex(end, start, ucs2DataSize);
             stream.readHex(charCode, dataSize);
-            cMap.mapRange(hexToInt(start, ucs2DataSize),
-                          hexToInt(end, ucs2DataSize),
-                          hexToStr(charCode, dataSize));
+            cMap.mapBfRange(hexToInt(start, ucs2DataSize),
+                            hexToInt(end, ucs2DataSize),
+                            hexToStr(charCode, dataSize));
           }
           break;
         default:
@@ -12824,7 +12834,7 @@ var CMapFactory = (function CMapFactoryClosure() {
       obj = lexer.getObj();
       if (isInt(obj) || isString(obj)) {
         var dstLow = isInt(obj) ? String.fromCharCode(obj) : obj;
-        cMap.mapRange(low, high, dstLow);
+        cMap.mapBfRange(low, high, dstLow);
       } else if (isCmd(obj, '[')) {
         obj = lexer.getObj();
         var array = [];
@@ -12832,7 +12842,7 @@ var CMapFactory = (function CMapFactoryClosure() {
           array.push(obj);
           obj = lexer.getObj();
         }
-        cMap.mapRangeToArray(low, high, array);
+        cMap.mapBfRangeToArray(low, high, array);
       } else {
         break;
       }
@@ -12853,7 +12863,7 @@ var CMapFactory = (function CMapFactoryClosure() {
       var src = strToInt(obj);
       obj = lexer.getObj();
       expectInt(obj);
-      var dst = String.fromCharCode(obj);
+      var dst = obj;
       cMap.mapOne(src, dst);
     }
   }
@@ -12874,8 +12884,8 @@ var CMapFactory = (function CMapFactoryClosure() {
       var high = strToInt(obj);
       obj = lexer.getObj();
       expectInt(obj);
-      var dstLow = String.fromCharCode(obj);
-      cMap.mapRange(low, high, dstLow);
+      var dstLow = obj;
+      cMap.mapCidRange(low, high, dstLow);
     }
   }
 
@@ -16913,8 +16923,7 @@ var Font = (function FontClosure() {
         var cidToGidMap = properties.cidToGidMap || [];
         var cidToGidMapLength = cidToGidMap.length;
         properties.cMap.forEach(function(charCode, cid) {
-          assert(cid.length === 1, 'Max size of CID is 65,535');
-          cid = cid.charCodeAt(0);
+          assert(cid <= 0xffff, 'Max size of CID is 65,535');
           var glyphId = -1;
           if (cidToGidMapLength === 0) {
             glyphId = charCode;
@@ -17384,10 +17393,10 @@ var Font = (function FontClosure() {
         var cMap = properties.cMap;
         toUnicode = [];
         cMap.forEach(function(charcode, cid) {
-          assert(cid.length === 1, 'Max size of CID is 65,535');
+          assert(cid <= 0xffff, 'Max size of CID is 65,535');
           // e) Map the CID obtained in step (a) according to the CMap obtained
           // in step (d), producing a Unicode value.
-          var ucs2 = ucs2CMap.lookup(cid.charCodeAt(0));
+          var ucs2 = ucs2CMap.lookup(cid);
           if (ucs2) {
             toUnicode[charcode] =
               String.fromCharCode((ucs2.charCodeAt(0) << 8) +
@@ -17429,7 +17438,7 @@ var Font = (function FontClosure() {
         var charcode = 0;
         if (this.composite) {
           if (this.cMap.contains(glyphUnicode)) {
-            charcode = this.cMap.lookup(glyphUnicode).charCodeAt(0);
+            charcode = this.cMap.lookup(glyphUnicode);
           }
         }
         // ... via toUnicode map
@@ -17458,7 +17467,7 @@ var Font = (function FontClosure() {
 
       var widthCode = charcode;
       if (this.cMap && this.cMap.contains(charcode)) {
-        widthCode = this.cMap.lookup(charcode).charCodeAt(0);
+        widthCode = this.cMap.lookup(charcode);
       }
       width = this.widths[widthCode];
       width = isNum(width) ? width : this.defaultWidth;
@@ -18640,8 +18649,8 @@ var CFFFont = (function CFFFontClosure() {
           // If the font is actually a CID font then we should use the charset
           // to map CIDs to GIDs.
           for (glyphId = 0; glyphId < charsets.length; glyphId++) {
-            var cidString = String.fromCharCode(charsets[glyphId]);
-            var charCode = properties.cMap.charCodeOf(cidString);
+            var cid = charsets[glyphId];
+            var charCode = properties.cMap.charCodeOf(cid);
             charCodeToGlyphId[charCode] = glyphId;
           }
         } else {
