@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.165';
-PDFJS.build = '12d9022';
+PDFJS.version = '1.0.167';
+PDFJS.build = 'a26d28a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -182,7 +182,8 @@ var OPS = PDFJS.OPS = {
   paintInlineImageXObjectGroup: 87,
   paintImageXObjectRepeat: 88,
   paintImageMaskXObjectRepeat: 89,
-  paintSolidColorImageMask: 90
+  paintSolidColorImageMask: 90,
+  constructPath: 91
 };
 
 // A notice for devs. These are good for things that are helpful to devs, such
@@ -6210,26 +6211,49 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     },
 
     // Path
-    moveTo: function CanvasGraphics_moveTo(x, y) {
-      this.ctx.moveTo(x, y);
-      this.current.setCurrentPoint(x, y);
-    },
-    lineTo: function CanvasGraphics_lineTo(x, y) {
-      this.ctx.lineTo(x, y);
-      this.current.setCurrentPoint(x, y);
-    },
-    curveTo: function CanvasGraphics_curveTo(x1, y1, x2, y2, x3, y3) {
-      this.ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
-      this.current.setCurrentPoint(x3, y3);
-    },
-    curveTo2: function CanvasGraphics_curveTo2(x2, y2, x3, y3) {
+    constructPath: function CanvasGraphics_constructPath(ops, args) {
+      var ctx = this.ctx;
       var current = this.current;
-      this.ctx.bezierCurveTo(current.x, current.y, x2, y2, x3, y3);
-      current.setCurrentPoint(x3, y3);
-    },
-    curveTo3: function CanvasGraphics_curveTo3(x1, y1, x3, y3) {
-      this.curveTo(x1, y1, x3, y3, x3, y3);
-      this.current.setCurrentPoint(x3, y3);
+      var x = current.x, y = current.y;
+      for (var i = 0, j = 0, ii = ops.length; i < ii; i++) {
+        switch (ops[i] | 0) {
+          case OPS.moveTo:
+            x = args[j++];
+            y = args[j++];
+            ctx.moveTo(x, y);
+            break;
+          case OPS.lineTo:
+            x = args[j++];
+            y = args[j++];
+            ctx.lineTo(x, y);
+            break;
+          case OPS.curveTo:
+            ctx.bezierCurveTo(args[j], args[j + 1], args[j + 2], args[j + 3],
+                              args[j + 4], args[j + 5]);
+            x = args[j + 4];
+            y = args[j + 5];
+            j += 6;
+            break;
+          case OPS.curveTo2:
+            ctx.bezierCurveTo(x, y, args[j], args[j + 1],
+                              args[j + 2], args[j + 3]);
+            x = args[j + 2];
+            y = args[j + 3];
+            j += 4;
+            break;
+          case OPS.curveTo3:
+            ctx.bezierCurveTo(args[j], args[j + 1], args[j + 2], args[j + 3],
+                              args[j + 2], args[j + 3]);
+            x = args[j + 2];
+            y = args[j + 3];
+            j += 4;
+            break;
+          case OPS.closePath:
+            ctx.closePath();
+            break;
+        }
+      }
+      current.setCurrentPoint(x, y);
     },
     closePath: function CanvasGraphics_closePath() {
       this.ctx.closePath();
@@ -20485,6 +20509,18 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       return font;
     },
 
+    buildPath: function PartialEvaluator_buildPath(operatorList, fn, args) {
+      var lastIndex = operatorList.length - 1;
+      if (lastIndex < 0 ||
+          operatorList.fnArray[lastIndex] !== OPS.constructPath) {
+        operatorList.addOp(OPS.constructPath, [[fn], args]);
+      } else {
+        var opArgs = operatorList.argsArray[lastIndex];
+        opArgs[0].push(fn);
+        Array.prototype.push.apply(opArgs[1], args);
+      }
+    },
+
     getOperatorList: function PartialEvaluator_getOperatorList(stream,
                                                                resources,
                                                                operatorList,
@@ -20508,7 +20544,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         var fn = operation.fn;
         var shading;
 
-        switch (fn) {
+        switch (fn | 0) {
           case OPS.setStrokeColorN:
           case OPS.setFillColorN:
             if (args[args.length - 1].code) {
@@ -20650,6 +20686,14 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             self.setGState(resources, gState, operatorList, xref,
                            stateManager);
             args = [];
+            continue;
+          case OPS.moveTo:
+          case OPS.lineTo:
+          case OPS.curveTo:
+          case OPS.curveTo2:
+          case OPS.curveTo3:
+          case OPS.closePath:
+            self.buildPath(operatorList, fn, args);
             continue;
         }
         operatorList.addOp(fn, args);
@@ -20821,7 +20865,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         textState = stateManager.state;
         var fn = operation.fn;
         var args = operation.args;
-        switch (fn) {
+        switch (fn | 0) {
           case OPS.setFont:
             handleSetFont(args[0].name);
             textState.fontSize = args[1];

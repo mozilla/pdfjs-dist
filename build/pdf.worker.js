@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.165';
-PDFJS.build = '12d9022';
+PDFJS.version = '1.0.167';
+PDFJS.build = 'a26d28a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -182,7 +182,8 @@ var OPS = PDFJS.OPS = {
   paintInlineImageXObjectGroup: 87,
   paintImageXObjectRepeat: 88,
   paintImageMaskXObjectRepeat: 89,
-  paintSolidColorImageMask: 90
+  paintSolidColorImageMask: 90,
+  constructPath: 91
 };
 
 // A notice for devs. These are good for things that are helpful to devs, such
@@ -15875,6 +15876,18 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       return font;
     },
 
+    buildPath: function PartialEvaluator_buildPath(operatorList, fn, args) {
+      var lastIndex = operatorList.length - 1;
+      if (lastIndex < 0 ||
+          operatorList.fnArray[lastIndex] !== OPS.constructPath) {
+        operatorList.addOp(OPS.constructPath, [[fn], args]);
+      } else {
+        var opArgs = operatorList.argsArray[lastIndex];
+        opArgs[0].push(fn);
+        Array.prototype.push.apply(opArgs[1], args);
+      }
+    },
+
     getOperatorList: function PartialEvaluator_getOperatorList(stream,
                                                                resources,
                                                                operatorList,
@@ -15898,7 +15911,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         var fn = operation.fn;
         var shading;
 
-        switch (fn) {
+        switch (fn | 0) {
           case OPS.setStrokeColorN:
           case OPS.setFillColorN:
             if (args[args.length - 1].code) {
@@ -16040,6 +16053,14 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             self.setGState(resources, gState, operatorList, xref,
                            stateManager);
             args = [];
+            continue;
+          case OPS.moveTo:
+          case OPS.lineTo:
+          case OPS.curveTo:
+          case OPS.curveTo2:
+          case OPS.curveTo3:
+          case OPS.closePath:
+            self.buildPath(operatorList, fn, args);
             continue;
         }
         operatorList.addOp(fn, args);
@@ -16211,7 +16232,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         textState = stateManager.state;
         var fn = operation.fn;
         var args = operation.args;
-        switch (fn) {
+        switch (fn | 0) {
           case OPS.setFont:
             handleSetFont(args[0].name);
             textState.fontSize = args[1];
