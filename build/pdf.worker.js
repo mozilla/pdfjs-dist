@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.478';
-PDFJS.build = '4b43c99';
+PDFJS.version = '1.0.480';
+PDFJS.build = '2642583';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1348,7 +1348,7 @@ PDFJS.createPromiseCapability = createPromiseCapability;
 
     then: function Promise_then(onResolve, onReject) {
       var nextPromise = new Promise(function (resolve, reject) {
-        this.resolve = reject;
+        this.resolve = resolve;
         this.reject = reject;
       });
       this._handlers.push({
