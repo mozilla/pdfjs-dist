@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.302';
-PDFJS.build = '9308c7c';
+PDFJS.version = '1.0.304';
+PDFJS.build = '806aa36';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -40204,10 +40204,12 @@ var FlateStream = (function FlateStreamClosure() {
     var codeSize = this.codeSize;
     var codeBuf = this.codeBuf;
 
+    var b;
     while (codeSize < maxLen) {
-      var b;
       if ((b = str.getByte()) === -1) {
-        error('Bad encoding in flate stream');
+        // premature end of stream. code might however still be valid.
+        // codeSize < codeLen check below guards against incomplete codeVal.
+        break;
       }
       codeBuf |= (b << codeSize);
       codeSize += 8;
@@ -40215,7 +40217,7 @@ var FlateStream = (function FlateStreamClosure() {
     var code = codes[codeBuf & ((1 << maxLen) - 1)];
     var codeLen = code >> 16;
     var codeVal = code & 0xffff;
-    if (codeSize === 0 || codeSize < codeLen || codeLen === 0) {
+    if (codeLen < 1 || codeSize < codeLen) {
       error('Bad encoding in flate stream');
     }
     this.codeBuf = (codeBuf >> codeLen);
