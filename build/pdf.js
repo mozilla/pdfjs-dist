@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.167';
-PDFJS.build = 'a26d28a';
+PDFJS.version = '1.0.169';
+PDFJS.build = 'fd4fc89';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5144,6 +5144,10 @@ var InternalRenderTask = (function InternalRenderTaskClosure() {
     this.graphicsReady = false;
     this.cancelled = false;
     this.capability = createPromiseCapability();
+    // caching this-bound methods
+    this._continueBound = this._continue.bind(this);
+    this._scheduleNextBound = this._scheduleNext.bind(this);
+    this._nextBound = this._next.bind(this);
   }
 
   InternalRenderTask.prototype = {
@@ -5182,7 +5186,7 @@ var InternalRenderTask = (function InternalRenderTaskClosure() {
     operatorListChanged: function InternalRenderTask_operatorListChanged() {
       if (!this.graphicsReady) {
         if (!this.graphicsReadyCallback) {
-          this.graphicsReadyCallback = this._continue.bind(this);
+          this.graphicsReadyCallback = this._continueBound;
         }
         return;
       }
@@ -5203,10 +5207,14 @@ var InternalRenderTask = (function InternalRenderTaskClosure() {
         return;
       }
       if (this.params.continueCallback) {
-        this.params.continueCallback(this._next.bind(this));
+        this.params.continueCallback(this._scheduleNextBound);
       } else {
-        this._next();
+        this._scheduleNext();
       }
+    },
+
+    _scheduleNext: function InternalRenderTask__scheduleNext() {
+      window.requestAnimationFrame(this._nextBound);
     },
 
     _next: function InternalRenderTask__next() {
@@ -5215,7 +5223,7 @@ var InternalRenderTask = (function InternalRenderTaskClosure() {
       }
       this.operatorListIdx = this.gfx.executeOperatorList(this.operatorList,
                                         this.operatorListIdx,
-                                        this._continue.bind(this),
+                                        this._continueBound,
                                         this.stepper);
       if (this.operatorListIdx === this.operatorList.argsArray.length) {
         this.running = false;
@@ -6037,7 +6045,6 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var commonObjs = this.commonObjs;
       var objs = this.objs;
       var fnId;
-      var deferred = Promise.resolve();
 
       while (true) {
         if (stepper && i === stepper.nextBreakPoint) {
@@ -6075,11 +6082,10 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           return i;
         }
 
-        // If the execution took longer then a certain amount of time, schedule
-        // to continue exeution after a short delay.
-        // However, this is only possible if a 'continueCallback' is passed in.
+        // If the execution took longer then a certain amount of time and
+        // `continueCallback` is specified, interrupt the execution.
         if (continueCallback && Date.now() > endTime) {
-          deferred.then(continueCallback);
+          continueCallback();
           return i;
         }
 
