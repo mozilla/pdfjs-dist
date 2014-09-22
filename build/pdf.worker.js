@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.429';
-PDFJS.build = '10db93b';
+PDFJS.version = '1.0.431';
+PDFJS.build = '6d5a041';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -17413,6 +17413,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             case OPS.curveTo2:
             case OPS.curveTo3:
             case OPS.closePath:
+              self.buildPath(operatorList, fn, args);
+              continue;
+            case OPS.rectangle:
               self.buildPath(operatorList, fn, args);
               continue;
           }
