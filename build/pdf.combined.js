@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.137';
-PDFJS.build = 'c68ba07';
+PDFJS.version = '1.0.139';
+PDFJS.build = 'ae92b6f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -9568,32 +9568,28 @@ var Page = (function PageClosure() {
       return stream;
     },
 
-    loadResources: function(keys) {
+    loadResources: function Page_loadResources(keys) {
       if (!this.resourcesPromise) {
         // TODO: add async getInheritedPageProp and remove this.
         this.resourcesPromise = this.pdfManager.ensure(this, 'resources');
       }
-      var promise = new LegacyPromise();
-      this.resourcesPromise.then(function resourceSuccess() {
+      return this.resourcesPromise.then(function resourceSuccess() {
         var objectLoader = new ObjectLoader(this.resources.map,
                                             keys,
                                             this.xref);
-        objectLoader.load().then(function objectLoaderSuccess() {
-          promise.resolve();
-        });
+        return objectLoader.load();
       }.bind(this));
-      return promise;
     },
 
     getOperatorList: function Page_getOperatorList(handler, intent) {
       var self = this;
-      var promise = new LegacyPromise();
+      var capability = createPromiseCapability();
 
       function reject(e) {
-        promise.reject(e);
+        capability.reject(e);
       }
 
-      var pageListPromise = new LegacyPromise();
+      var pageListCapability = createPromiseCapability();
 
       var pdfManager = this.pdfManager;
       var contentStreamPromise = pdfManager.ensure(this, 'getContentStream',
@@ -9627,17 +9623,18 @@ var Page = (function PageClosure() {
           intent: intent
         });
         partialEvaluator.getOperatorList(contentStream, self.resources, opList);
-        pageListPromise.resolve(opList);
+        pageListCapability.resolve(opList);
       });
 
       var annotationsPromise = pdfManager.ensure(this, 'annotations');
-      Promise.all([pageListPromise, annotationsPromise]).then(function(datas) {
+      Promise.all([pageListCapability.promise, annotationsPromise]).then(
+          function(datas) {
         var pageOpList = datas[0];
         var annotations = datas[1];
 
         if (annotations.length === 0) {
           pageOpList.flush(true);
-          promise.resolve(pageOpList);
+          capability.resolve(pageOpList);
           return;
         }
 
@@ -9645,11 +9642,11 @@ var Page = (function PageClosure() {
           annotations, pageOpList, pdfManager, partialEvaluator, intent);
         annotationsReadyPromise.then(function () {
           pageOpList.flush(true);
-          promise.resolve(pageOpList);
+          capability.resolve(pageOpList);
         }, reject);
       }, reject);
 
-      return promise;
+      return capability.promise;
     },
 
     extractTextContent: function Page_extractTextContent() {
