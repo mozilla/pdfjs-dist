@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.268';
-PDFJS.build = '7e6cdc7';
+PDFJS.version = '1.0.270';
+PDFJS.build = '844bc64';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -16121,7 +16121,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                 assert(isName(type),
                   'XObject should have a Name subtype');
 
-                if ('Form' == type.name) {
+                if (type.name === 'Form') {
                   stateManager.save();
                   return self.buildFormXObject(resources, xobj, null,
                                                operatorList,
@@ -16130,10 +16130,15 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                       stateManager.restore();
                       next(resolve, reject);
                     }, reject);
-                } else if ('Image' == type.name) {
+                } else if (type.name === 'Image') {
                   self.buildPaintImageXObject(resources, xobj, false,
                     operatorList, name, imageCache);
                   args = [];
+                  continue;
+                } else if (type.name === 'PS') {
+                  // PostScript XObjects are unused when viewing documents.
+                  // See section 4.7.1 of Adobe's PDF reference.
+                  info('Ignored XObject subtype PS');
                   continue;
                 } else {
                   error('Unhandled XObject subtype ' + type.name);
