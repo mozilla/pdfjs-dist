@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.322';
-PDFJS.build = '001238f';
+PDFJS.version = '1.0.324';
+PDFJS.build = 'd487d42';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -21622,7 +21622,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           // Workaround for cases where e.g. fontNameStr = 'Arial' and
           // baseFontStr = 'Arial,Bold' (needed when no font file is embedded).
           if (fontNameStr && baseFontStr &&
-              baseFontStr.search(fontNameStr) === 0) {
+              baseFontStr.indexOf(fontNameStr) === 0) {
             fontName = baseFont;
           }
         }
