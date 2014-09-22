@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.143';
-PDFJS.build = '70da61f';
+PDFJS.version = '1.0.145';
+PDFJS.build = 'b3f24ca';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3043,14 +3043,14 @@ var PostScriptEvaluator = (function PostScriptEvaluatorClosure() {
             break;
           case 'neg':
             a = stack.pop();
-            stack.push(-b);
+            stack.push(-a);
             break;
           case 'not':
             a = stack.pop();
-            if (isBool(a) && isBool(b)) {
-              stack.push(a && b);
+            if (isBool(a)) {
+              stack.push(!a);
             } else {
-              stack.push(a & b);
+              stack.push(~a);
             }
             break;
           case 'or':
