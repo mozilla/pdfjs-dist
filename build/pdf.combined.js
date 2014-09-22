@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.221';
-PDFJS.build = 'b7d8296';
+PDFJS.version = '1.0.224';
+PDFJS.build = '5cd6483';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -8900,6 +8900,10 @@ var ChunkedStream = (function ChunkedStreamClosure() {
 
     get length() {
       return this.end - this.start;
+    },
+
+    get isEmpty() {
+      return this.length === 0;
     },
 
     getByte: function ChunkedStream_getByte() {
@@ -25332,7 +25336,13 @@ var Font = (function FontClosure() {
       this.defaultVMetrics = properties.defaultVMetrics;
     }
 
-    if (!file) {
+    if (!file || file.isEmpty) {
+      if (file) {
+        // Some bad PDF generators will include empty font files,
+        // attempting to recover by assuming that no file exists.
+        warn('Font file is empty in "' + name + '" (' + this.loadedName + ')');
+      }
+
       this.missingFile = true;
       // The file data is not specified. Trying to fix the font name
       // to be used with the canvas.font.
@@ -39647,6 +39657,9 @@ var Stream = (function StreamClosure() {
     get length() {
       return this.end - this.start;
     },
+    get isEmpty() {
+      return this.length === 0;
+    },
     getByte: function Stream_getByte() {
       if (this.pos >= this.end) {
         return -1;
@@ -39740,6 +39753,12 @@ var DecodeStream = (function DecodeStreamClosure() {
   }
 
   DecodeStream.prototype = {
+    get isEmpty() {
+      while (!this.eof && this.bufferLength === 0) {
+        this.readBlock();
+      }
+      return this.bufferLength === 0;
+    },
     ensureBuffer: function DecodeStream_ensureBuffer(requested) {
       var buffer = this.buffer;
       var current;
@@ -39825,7 +39844,7 @@ var DecodeStream = (function DecodeStreamClosure() {
       }
       return new Stream(this.buffer, start, length, dict);
     },
-    skip: function Stream_skip(n) {
+    skip: function DecodeStream_skip(n) {
       if (!n) {
         n = 1;
       }
