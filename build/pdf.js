@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.370';
-PDFJS.build = '13efe84';
+PDFJS.version = '1.0.374';
+PDFJS.build = '22cfcbc';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -72,6 +72,33 @@ var ImageKind = {
   GRAYSCALE_1BPP: 1,
   RGB_24BPP: 2,
   RGBA_32BPP: 3
+};
+
+var StreamType = {
+  UNKNOWN: 0,
+  FLATE: 1,
+  LZW: 2,
+  DCT: 3,
+  JPX: 4,
+  JBIG: 5,
+  A85: 6,
+  AHX: 7,
+  CCF: 8,
+  RL: 9
+};
+
+var FontType = {
+  UNKNOWN: 0,
+  TYPE1: 1,
+  TYPE1C: 2,
+  CIDFONTTYPE0: 3,
+  CIDFONTTYPE0C: 4,
+  TRUETYPE: 5,
+  CIDFONTTYPE2: 6,
+  TYPE3: 7,
+  OPENTYPE: 8,
+  TYPE0: 9,
+  MMTYPE1: 10
 };
 
 // The global PDFJS object exposes the API
@@ -2506,6 +2533,14 @@ PDFJS.maxCanvasPixels = (PDFJS.maxCanvasPixels === undefined ?
  */
 
 /**
+ * @typedef {Object} PDFDocumentStats
+ * @property {Array} streamTypes - Used stream types in the document (an item
+ *   is set to true if specific stream ID was used in the document).
+ * @property {Array} fontTypes - Used font type in the document (an item is set
+ *   to true if specific font ID was used in the document).
+ */
+
+/**
  * This is the main entry point for loading a PDF and interacting with it.
  * NOTE: If a URL is used to fetch the PDF data a standard XMLHttpRequest(XHR)
  * is used, which means it must follow the same origin rules that any XHR does
@@ -2671,6 +2706,13 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
      */
     getDownloadInfo: function PDFDocumentProxy_getDownloadInfo() {
       return this.transport.downloadInfoCapability.promise;
+    },
+    /**
+     * @returns {Promise} A promise this is resolved with current stats about
+     * document structures (see {@link PDFDocumentStats}).
+     */
+    getStats: function PDFDocumentProxy_getStats() {
+      return this.transport.getStats();
     },
     /**
      * Cleans up resources allocated by the document, e.g. created @font-face.
@@ -3385,6 +3427,10 @@ var WorkerTransport = (function WorkerTransportClosure() {
           metadata: (results[1] ? new PDFJS.Metadata(results[1]) : null)
         };
       });
+    },
+
+    getStats: function WorkerTransport_getStats() {
+      return this.messageHandler.sendWithPromise('GetStats', null);
     },
 
     startCleanup: function WorkerTransport_startCleanup() {

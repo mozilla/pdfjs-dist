@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.370';
-PDFJS.build = '13efe84';
+PDFJS.version = '1.0.374';
+PDFJS.build = '22cfcbc';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -72,6 +72,33 @@ var ImageKind = {
   GRAYSCALE_1BPP: 1,
   RGB_24BPP: 2,
   RGBA_32BPP: 3
+};
+
+var StreamType = {
+  UNKNOWN: 0,
+  FLATE: 1,
+  LZW: 2,
+  DCT: 3,
+  JPX: 4,
+  JBIG: 5,
+  A85: 6,
+  AHX: 7,
+  CCF: 8,
+  RL: 9
+};
+
+var FontType = {
+  UNKNOWN: 0,
+  TYPE1: 1,
+  TYPE1C: 2,
+  CIDFONTTYPE0: 3,
+  CIDFONTTYPE0C: 4,
+  TRUETYPE: 5,
+  CIDFONTTYPE2: 6,
+  TYPE3: 7,
+  OPENTYPE: 8,
+  TYPE0: 9,
+  MMTYPE1: 10
 };
 
 // The global PDFJS object exposes the API
@@ -2506,6 +2533,14 @@ PDFJS.maxCanvasPixels = (PDFJS.maxCanvasPixels === undefined ?
  */
 
 /**
+ * @typedef {Object} PDFDocumentStats
+ * @property {Array} streamTypes - Used stream types in the document (an item
+ *   is set to true if specific stream ID was used in the document).
+ * @property {Array} fontTypes - Used font type in the document (an item is set
+ *   to true if specific font ID was used in the document).
+ */
+
+/**
  * This is the main entry point for loading a PDF and interacting with it.
  * NOTE: If a URL is used to fetch the PDF data a standard XMLHttpRequest(XHR)
  * is used, which means it must follow the same origin rules that any XHR does
@@ -2671,6 +2706,13 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
      */
     getDownloadInfo: function PDFDocumentProxy_getDownloadInfo() {
       return this.transport.downloadInfoCapability.promise;
+    },
+    /**
+     * @returns {Promise} A promise this is resolved with current stats about
+     * document structures (see {@link PDFDocumentStats}).
+     */
+    getStats: function PDFDocumentProxy_getStats() {
+      return this.transport.getStats();
     },
     /**
      * Cleans up resources allocated by the document, e.g. created @font-face.
@@ -3337,6 +3379,10 @@ var WorkerTransport = (function WorkerTransportClosure() {
           metadata: (results[1] ? new PDFJS.Metadata(results[1]) : null)
         };
       });
+    },
+
+    getStats: function WorkerTransport_getStats() {
+      return this.messageHandler.sendWithPromise('GetStats', null);
     },
 
     startCleanup: function WorkerTransport_startCleanup() {
@@ -8973,6 +9019,10 @@ var XRef = (function XRefClosure() {
     // prepare the XRef cache
     this.cache = [];
     this.password = password;
+    this.stats = {
+      streamTypes: [],
+      fontTypes: []
+    };
   }
 
   XRef.prototype = {
@@ -9321,7 +9371,7 @@ var XRef = (function XRefClosure() {
       var dict;
       for (i = 0, ii = trailers.length; i < ii; ++i) {
         stream.pos = trailers[i];
-        var parser = new Parser(new Lexer(stream), true, null);
+        var parser = new Parser(new Lexer(stream), true, this);
         var obj = parser.getObj();
         if (!isCmd(obj, 'trailer')) {
           continue;
@@ -9353,7 +9403,7 @@ var XRef = (function XRefClosure() {
 
           stream.pos = startXRef + stream.start;
 
-          var parser = new Parser(new Lexer(stream), true, null);
+          var parser = new Parser(new Lexer(stream), true, this);
           var obj = parser.getObj();
           var dict;
 
@@ -21878,11 +21928,28 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       }
 
       translatedPromise.then(function (translatedFont) {
+        if (translatedFont.fontType !== undefined) {
+          var xrefFontStats = xref.stats.fontTypes;
+          xrefFontStats[translatedFont.fontType] = true;
+        }
+
         fontCapability.resolve(new TranslatedFont(font.loadedName,
           translatedFont, font));
       }, function (reason) {
         // TODO fontCapability.reject?
         UnsupportedManager.notify(UNSUPPORTED_FEATURES.font);
+
+        try {
+          // error, but it's still nice to have font type reported
+          var descriptor = preEvaluatedFont.descriptor;
+          var fontFile3 = descriptor && descriptor.get('FontFile3');
+          var subtype = fontFile3 && fontFile3.get('Subtype');
+          var fontType = getFontType(preEvaluatedFont.type,
+                                     subtype && subtype.name);
+          var xrefFontStats = xref.stats.fontTypes;
+          xrefFontStats[fontType] = true;
+        } catch (ex) { }
+
         fontCapability.resolve(new TranslatedFont(font.loadedName,
           new ErrorFont(reason instanceof Error ? reason.message : reason),
           font));
@@ -22874,6 +22941,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         dict: dict,
         baseDict: baseDict,
         composite: composite,
+        type: type.name,
         hash: hash ? hash.hexdigest() : ''
       };
     },
@@ -22884,16 +22952,16 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       var dict = preEvaluatedFont.dict;
       var composite = preEvaluatedFont.composite;
       var descriptor = preEvaluatedFont.descriptor;
-      var type = dict.get('Subtype');
+      var type = preEvaluatedFont.type;
       var maxCharIndex = (composite ? 0xFFFF : 0xFF);
       var properties;
 
       if (!descriptor) {
-        if (type.name === 'Type3') {
+        if (type === 'Type3') {
           // FontDescriptor is only required for Type3 fonts when the document
           // is a tagged pdf. Create a barbebones one to get by.
           descriptor = new Dict(null);
-          descriptor.set('FontName', Name.get(type.name));
+          descriptor.set('FontName', Name.get(type));
         } else {
           // Before PDF 1.5 if the font was one of the base 14 fonts, having a
           // FontDescriptor was not required.
@@ -22916,7 +22984,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                                              FontFlags.Nonsymbolic);
 
           properties = {
-            type: type.name,
+            type: type,
             name: baseFontName,
             widths: metrics.widths,
             defaultWidth: metrics.defaultWidth,
@@ -22949,7 +23017,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         baseFont = Name.get(baseFont);
       }
 
-      if (type.name !== 'Type3') {
+      if (type !== 'Type3') {
         var fontNameStr = fontName && fontName.name;
         var baseFontStr = baseFont && baseFont.name;
         if (fontNameStr !== baseFontStr) {
@@ -22981,7 +23049,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       }
 
       properties = {
-        type: type.name,
+        type: type,
         name: fontName.name,
         subtype: subtype,
         file: fontFile,
@@ -23016,7 +23084,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       this.extractDataStructures(dict, baseDict, xref, properties);
       this.extractWidths(dict, xref, descriptor, properties);
 
-      if (type.name === 'Type3') {
+      if (type === 'Type3') {
         properties.isType3Font = true;
       }
 
@@ -26741,6 +26809,28 @@ function adjustWidths(properties) {
   properties.defaultWidth *= scale;
 }
 
+function getFontType(type, subtype) {
+  switch (type) {
+    case 'Type1':
+      return subtype === 'Type1C' ? FontType.TYPE1C : FontType.TYPE1;
+    case 'CIDFontType0':
+      return subtype === 'CIDFontType0C' ? FontType.CIDFONTTYPE0C :
+        FontType.CIDFONTTYPE0;
+    case 'OpenType':
+      return FontType.OPENTYPE;
+    case 'TrueType':
+      return FontType.TRUETYPE;
+    case 'CIDFontType2':
+      return FontType.CIDFONTTYPE2;
+    case 'MMType1':
+      return FontType.MMTYPE1;
+    case 'Type0':
+      return FontType.TYPE0;
+    default:
+      return FontType.UNKNOWN;
+  }
+}
+
 var Glyph = (function GlyphClosure() {
   function Glyph(fontChar, unicode, accent, width, vmetric, operatorListId) {
     this.fontChar = fontChar;
@@ -26791,6 +26881,7 @@ var Font = (function FontClosure() {
     this.isMonospace = !!(properties.flags & FontFlags.FixedPitch);
 
     var type = properties.type;
+    var subtype = properties.subtype;
     this.type = type;
 
     this.fallbackName = (this.isMonospace ? 'monospace' :
@@ -26817,6 +26908,7 @@ var Font = (function FontClosure() {
         this.toFontChar[charCode] = (this.differences[charCode] ||
                                      properties.defaultEncoding[charCode]);
       }
+      this.fontType = FontType.TYPE3;
       return;
     }
 
@@ -26884,11 +26976,11 @@ var Font = (function FontClosure() {
       }
       this.loadedName = fontName.split('-')[0];
       this.loading = false;
+      this.fontType = getFontType(type, subtype);
       return;
     }
 
     // Some fonts might use wrong font types for Type1C or CIDFontType0C
-    var subtype = properties.subtype;
     if (subtype == 'Type1C' && (type != 'Type1' && type != 'MMType1')) {
       // Some TrueType fonts by mistake claim Type1C
       if (isTrueTypeFile(file)) {
@@ -26912,7 +27004,7 @@ var Font = (function FontClosure() {
       case 'CIDFontType0':
         this.mimetype = 'font/opentype';
 
-        var cff = (subtype == 'Type1C' || subtype == 'CIDFontType0C') ?
+        var cff = (subtype === 'Type1C' || subtype === 'CIDFontType0C') ?
           new CFFFont(file, properties) : new Type1Font(name, file, properties);
 
         adjustWidths(properties);
@@ -26929,6 +27021,9 @@ var Font = (function FontClosure() {
         // Repair the TrueType file. It is can be damaged in the point of
         // view of the sanitizer
         data = this.checkAndRepair(name, file, properties);
+        if (this.isOpenType) {
+          type = 'OpenType';
+        }
         break;
 
       default:
@@ -26937,6 +27032,7 @@ var Font = (function FontClosure() {
     }
 
     this.data = data;
+    this.fontType = getFontType(type, subtype);
 
     // Transfer some properties again that could change during font conversion
     this.fontMatrix = properties.fontMatrix;
@@ -28376,10 +28472,12 @@ var Font = (function FontClosure() {
         delete tables.fpgm;
         delete tables.prep;
         delete tables['cvt '];
+        this.isOpenType = true;
       } else {
         if (!tables.glyf || !tables.loca) {
           error('Required "glyf" or "loca" tables are not found');
         }
+        this.isOpenType = false;
       }
 
       if (!tables.maxp) {
@@ -40432,7 +40530,9 @@ var Parser = (function ParserClosure() {
       if (stream.dict.get('Length') === 0) {
         return new NullStream(stream);
       }
+      var xrefStreamStats = this.xref.stats.streamTypes;
       if (name == 'FlateDecode' || name == 'Fl') {
+        xrefStreamStats[StreamType.FLATE] = true;
         if (params) {
           return new PredictorStream(new FlateStream(stream, maybeLength),
                                      maybeLength, params);
@@ -40440,6 +40540,7 @@ var Parser = (function ParserClosure() {
         return new FlateStream(stream, maybeLength);
       }
       if (name == 'LZWDecode' || name == 'LZW') {
+        xrefStreamStats[StreamType.LZW] = true;
         var earlyChange = 1;
         if (params) {
           if (params.has('EarlyChange')) {
@@ -40452,24 +40553,31 @@ var Parser = (function ParserClosure() {
         return new LZWStream(stream, maybeLength, earlyChange);
       }
       if (name == 'DCTDecode' || name == 'DCT') {
+        xrefStreamStats[StreamType.DCT] = true;
         return new JpegStream(stream, maybeLength, stream.dict, this.xref);
       }
       if (name == 'JPXDecode' || name == 'JPX') {
+        xrefStreamStats[StreamType.JPX] = true;
         return new JpxStream(stream, maybeLength, stream.dict);
       }
       if (name == 'ASCII85Decode' || name == 'A85') {
+        xrefStreamStats[StreamType.A85] = true;
         return new Ascii85Stream(stream, maybeLength);
       }
       if (name == 'ASCIIHexDecode' || name == 'AHx') {
+        xrefStreamStats[StreamType.AHX] = true;
         return new AsciiHexStream(stream, maybeLength);
       }
       if (name == 'CCITTFaxDecode' || name == 'CCF') {
+        xrefStreamStats[StreamType.CCF] = true;
         return new CCITTFaxStream(stream, maybeLength, params);
       }
       if (name == 'RunLengthDecode' || name == 'RL') {
+        xrefStreamStats[StreamType.RL] = true;
         return new RunLengthStream(stream, maybeLength);
       }
       if (name == 'JBIG2Decode') {
+        xrefStreamStats[StreamType.JBIG] = true;
         return new Jbig2Stream(stream, maybeLength, stream.dict);
       }
       warn('filter "' + name + '" not supported yet');
@@ -43883,6 +43991,12 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
         return stream.bytes;
       });
     });
+
+    handler.on('GetStats',
+      function wphSetupGetStats(data) {
+        return pdfManager.pdfDocument.xref.stats;
+      }
+    );
 
     handler.on('UpdatePassword', function wphSetupUpdatePassword(data) {
       pdfManager.updatePassword(data);
