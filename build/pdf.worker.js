@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.286';
-PDFJS.build = '3acf570';
+PDFJS.version = '1.0.288';
+PDFJS.build = '2449142';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -21741,7 +21741,12 @@ var Font = (function FontClosure() {
 
         if (!potentialTable) {
           warn('Could not find a preferred cmap table.');
-          return [];
+          return {
+            platformId: -1,
+            encodingId: -1,
+            mappings: [],
+            hasShortCmap: false
+          };
         }
 
         font.pos = start + potentialTable.offset;
