@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.727';
-PDFJS.build = '2158fcc';
+PDFJS.version = '1.0.730';
+PDFJS.build = '40ebf71';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -11620,9 +11620,14 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         // The Symbolic attribute can be misused for regular fonts
         // Heuristic: we have to check if the font is a standard one also
         if (!!(properties.flags & FontFlags.Symbolic)) {
-          encoding = (!properties.file && /Symbol/i.test(properties.name) ?
-                      Encodings.SymbolSetEncoding :
-                      Encodings.MacRomanEncoding);
+          encoding = Encodings.MacRomanEncoding;
+          if (!properties.file) {
+            if (/Symbol/i.test(properties.name)) {
+              encoding = Encodings.SymbolSetEncoding;
+            } else if (/Dingbats/i.test(properties.name)) {
+              encoding = Encodings.ZapfDingbatsEncoding;
+            }
+          }
         }
         properties.defaultEncoding = encoding;
       }
@@ -14127,7 +14132,7 @@ var Encodings = {
     'parenrighttp', 'parenrightex', 'parenrightbt', 'bracketrighttp',
     'bracketrightex', 'bracketrightbt', 'bracerighttp', 'bracerightmid',
     'bracerightbt'],
-  zapfDingbatsEncoding: ['', '', '', '', '', '', '', '', '', '', '', '', '', '',
+  ZapfDingbatsEncoding: ['', '', '', '', '', '', '', '', '', '', '', '', '', '',
     '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
     'space', 'a1', 'a2', 'a202', 'a3', 'a4', 'a5', 'a119', 'a118', 'a117',
     'a11', 'a12', 'a13', 'a14', 'a15', 'a16', 'a105', 'a17', 'a18', 'a19',
@@ -14138,19 +14143,19 @@ var Encodings = {
     'a57', 'a58', 'a59', 'a60', 'a61', 'a62', 'a63', 'a64', 'a65', 'a66',
     'a67', 'a68', 'a69', 'a70', 'a71', 'a72', 'a73', 'a74', 'a203', 'a75',
     'a204', 'a76', 'a77', 'a78', 'a79', 'a81', 'a82', 'a83', 'a84', 'a97',
-    'a98', 'a99', 'a100', '', '', '', '', '', '', '', '', '', '', '', '', '',
-    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
-    '', '', 'a101', 'a102', 'a103', 'a104', 'a106', 'a107', 'a108', 'a112',
-    'a111', 'a110', 'a109', 'a120', 'a121', 'a122', 'a123', 'a124', 'a125',
-    'a126', 'a127', 'a128', 'a129', 'a130', 'a131', 'a132', 'a133', 'a134',
-    'a135', 'a136', 'a137', 'a138', 'a139', 'a140', 'a141', 'a142', 'a143',
-    'a144', 'a145', 'a146', 'a147', 'a148', 'a149', 'a150', 'a151', 'a152',
-    'a153', 'a154', 'a155', 'a156', 'a157', 'a158', 'a159', 'a160', 'a161',
-    'a163', 'a164', 'a196', 'a165', 'a192', 'a166', 'a167', 'a168', 'a169',
-    'a170', 'a171', 'a172', 'a173', 'a162', 'a174', 'a175', 'a176', 'a177',
-    'a178', 'a179', 'a193', 'a180', 'a199', 'a181', 'a200', 'a182', '', 'a201',
-    'a183', 'a184', 'a197', 'a185', 'a194', 'a198', 'a186', 'a195', 'a187',
-    'a188', 'a189', 'a190', 'a191']
+    'a98', 'a99', 'a100', '', 'a89', 'a90', 'a93', 'a94', 'a91', 'a92', 'a205',
+    'a85', 'a206', 'a86', 'a87', 'a88', 'a95', 'a96', '', '', '', '', '', '',
+    '', '', '', '', '', '', '', '', '', '', '', '', '', 'a101', 'a102', 'a103',
+    'a104', 'a106', 'a107', 'a108', 'a112', 'a111', 'a110', 'a109', 'a120',
+    'a121', 'a122', 'a123', 'a124', 'a125', 'a126', 'a127', 'a128', 'a129',
+    'a130', 'a131', 'a132', 'a133', 'a134', 'a135', 'a136', 'a137', 'a138',
+    'a139', 'a140', 'a141', 'a142', 'a143', 'a144', 'a145', 'a146', 'a147',
+    'a148', 'a149', 'a150', 'a151', 'a152', 'a153', 'a154', 'a155', 'a156',
+    'a157', 'a158', 'a159', 'a160', 'a161', 'a163', 'a164', 'a196', 'a165',
+    'a192', 'a166', 'a167', 'a168', 'a169', 'a170', 'a171', 'a172', 'a173',
+    'a162', 'a174', 'a175', 'a176', 'a177', 'a178', 'a179', 'a193', 'a180',
+    'a199', 'a181', 'a200', 'a182', '', 'a201', 'a183', 'a184', 'a197', 'a185',
+    'a194', 'a198', 'a186', 'a195', 'a187', 'a188', 'a189', 'a190', 'a191']
 };
 
 /**
@@ -16239,7 +16244,7 @@ var OpenTypeFileBuilder = (function OpenTypeFileBuilderClosure() {
  */
 var Font = (function FontClosure() {
   function Font(name, file, properties) {
-    var charCode, glyphName;
+    var charCode, glyphName, fontChar;
 
     this.name = name;
     this.loadedName = properties.loadedName;
@@ -16329,7 +16334,23 @@ var Font = (function FontClosure() {
       } else if (/Symbol/i.test(fontName)) {
         var symbols = Encodings.SymbolSetEncoding;
         for (charCode in symbols) {
-          var fontChar = GlyphsUnicode[symbols[charCode]];
+          fontChar = GlyphsUnicode[symbols[charCode]];
+          if (!fontChar) {
+            continue;
+          }
+          this.toFontChar[charCode] = fontChar;
+        }
+      } else if (/Dingbats/i.test(fontName)) {
+        var dingbats = Encodings.ZapfDingbatsEncoding;
+        for (charCode in dingbats) {
+          fontChar = DingbatsGlyphsUnicode[dingbats[charCode]];
+          if (!fontChar) {
+            continue;
+          }
+          this.toFontChar[charCode] = fontChar;
+        }
+        for (charCode in properties.differences) {
+          fontChar = DingbatsGlyphsUnicode[properties.differences[charCode]];
           if (!fontChar) {
             continue;
           }
@@ -25909,6 +25930,211 @@ var GlyphsUnicode = {
   '.notdef': 0x0000
 };
 
+var DingbatsGlyphsUnicode = {
+  space: 0x0020,
+  a1: 0x2701,
+  a2: 0x2702,
+  a202: 0x2703,
+  a3: 0x2704,
+  a4: 0x260E,
+  a5: 0x2706,
+  a119: 0x2707,
+  a118: 0x2708,
+  a117: 0x2709,
+  a11: 0x261B,
+  a12: 0x261E,
+  a13: 0x270C,
+  a14: 0x270D,
+  a15: 0x270E,
+  a16: 0x270F,
+  a105: 0x2710,
+  a17: 0x2711,
+  a18: 0x2712,
+  a19: 0x2713,
+  a20: 0x2714,
+  a21: 0x2715,
+  a22: 0x2716,
+  a23: 0x2717,
+  a24: 0x2718,
+  a25: 0x2719,
+  a26: 0x271A,
+  a27: 0x271B,
+  a28: 0x271C,
+  a6: 0x271D,
+  a7: 0x271E,
+  a8: 0x271F,
+  a9: 0x2720,
+  a10: 0x2721,
+  a29: 0x2722,
+  a30: 0x2723,
+  a31: 0x2724,
+  a32: 0x2725,
+  a33: 0x2726,
+  a34: 0x2727,
+  a35: 0x2605,
+  a36: 0x2729,
+  a37: 0x272A,
+  a38: 0x272B,
+  a39: 0x272C,
+  a40: 0x272D,
+  a41: 0x272E,
+  a42: 0x272F,
+  a43: 0x2730,
+  a44: 0x2731,
+  a45: 0x2732,
+  a46: 0x2733,
+  a47: 0x2734,
+  a48: 0x2735,
+  a49: 0x2736,
+  a50: 0x2737,
+  a51: 0x2738,
+  a52: 0x2739,
+  a53: 0x273A,
+  a54: 0x273B,
+  a55: 0x273C,
+  a56: 0x273D,
+  a57: 0x273E,
+  a58: 0x273F,
+  a59: 0x2740,
+  a60: 0x2741,
+  a61: 0x2742,
+  a62: 0x2743,
+  a63: 0x2744,
+  a64: 0x2745,
+  a65: 0x2746,
+  a66: 0x2747,
+  a67: 0x2748,
+  a68: 0x2749,
+  a69: 0x274A,
+  a70: 0x274B,
+  a71: 0x25CF,
+  a72: 0x274D,
+  a73: 0x25A0,
+  a74: 0x274F,
+  a203: 0x2750,
+  a75: 0x2751,
+  a204: 0x2752,
+  a76: 0x25B2,
+  a77: 0x25BC,
+  a78: 0x25C6,
+  a79: 0x2756,
+  a81: 0x25D7,
+  a82: 0x2758,
+  a83: 0x2759,
+  a84: 0x275A,
+  a97: 0x275B,
+  a98: 0x275C,
+  a99: 0x275D,
+  a100: 0x275E,
+  a101: 0x2761,
+  a102: 0x2762,
+  a103: 0x2763,
+  a104: 0x2764,
+  a106: 0x2765,
+  a107: 0x2766,
+  a108: 0x2767,
+  a112: 0x2663,
+  a111: 0x2666,
+  a110: 0x2665,
+  a109: 0x2660,
+  a120: 0x2460,
+  a121: 0x2461,
+  a122: 0x2462,
+  a123: 0x2463,
+  a124: 0x2464,
+  a125: 0x2465,
+  a126: 0x2466,
+  a127: 0x2467,
+  a128: 0x2468,
+  a129: 0x2469,
+  a130: 0x2776,
+  a131: 0x2777,
+  a132: 0x2778,
+  a133: 0x2779,
+  a134: 0x277A,
+  a135: 0x277B,
+  a136: 0x277C,
+  a137: 0x277D,
+  a138: 0x277E,
+  a139: 0x277F,
+  a140: 0x2780,
+  a141: 0x2781,
+  a142: 0x2782,
+  a143: 0x2783,
+  a144: 0x2784,
+  a145: 0x2785,
+  a146: 0x2786,
+  a147: 0x2787,
+  a148: 0x2788,
+  a149: 0x2789,
+  a150: 0x278A,
+  a151: 0x278B,
+  a152: 0x278C,
+  a153: 0x278D,
+  a154: 0x278E,
+  a155: 0x278F,
+  a156: 0x2790,
+  a157: 0x2791,
+  a158: 0x2792,
+  a159: 0x2793,
+  a160: 0x2794,
+  a161: 0x2192,
+  a163: 0x2194,
+  a164: 0x2195,
+  a196: 0x2798,
+  a165: 0x2799,
+  a192: 0x279A,
+  a166: 0x279B,
+  a167: 0x279C,
+  a168: 0x279D,
+  a169: 0x279E,
+  a170: 0x279F,
+  a171: 0x27A0,
+  a172: 0x27A1,
+  a173: 0x27A2,
+  a162: 0x27A3,
+  a174: 0x27A4,
+  a175: 0x27A5,
+  a176: 0x27A6,
+  a177: 0x27A7,
+  a178: 0x27A8,
+  a179: 0x27A9,
+  a193: 0x27AA,
+  a180: 0x27AB,
+  a199: 0x27AC,
+  a181: 0x27AD,
+  a200: 0x27AE,
+  a182: 0x27AF,
+  a201: 0x27B1,
+  a183: 0x27B2,
+  a184: 0x27B3,
+  a197: 0x27B4,
+  a185: 0x27B5,
+  a194: 0x27B6,
+  a198: 0x27B7,
+  a186: 0x27B8,
+  a195: 0x27B9,
+  a187: 0x27BA,
+  a188: 0x27BB,
+  a189: 0x27BC,
+  a190: 0x27BD,
+  a191: 0x27BE,
+  a89: 0x2768, // 0xF8D7
+  a90: 0x2769, // 0xF8D8
+  a93: 0x276A, // 0xF8D9
+  a94: 0x276B, // 0xF8DA
+  a91: 0x276C, // 0xF8DB
+  a92: 0x276D, // 0xF8DC
+  a205: 0x276E, // 0xF8DD
+  a85: 0x276F, // 0xF8DE
+  a206: 0x2770, // 0xF8DF
+  a86: 0x2771, // 0xF8E0
+  a87: 0x2772, // 0xF8E1
+  a88: 0x2773, // 0xF8E2
+  a95: 0x2774, // 0xF8E3
+  a96: 0x2775, // 0xF8E4
+  '.notdef': 0x0000
+};
 
 
 var PDFImage = (function PDFImageClosure() {
