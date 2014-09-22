@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.653';
-PDFJS.build = '41a5bce';
+PDFJS.version = '1.0.655';
+PDFJS.build = 'c369150';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -17733,7 +17733,7 @@ var CMap = (function CMapClosure() {
       return this._map;
     },
 
-    readCharCode: function(str, offset) {
+    readCharCode: function(str, offset, out) {
       var c = 0;
       var codespaceRanges = this.codespaceRanges;
       var codespaceRangesLen = this.codespaceRanges.length;
@@ -17747,12 +17747,14 @@ var CMap = (function CMapClosure() {
           var low = codespaceRange[k++];
           var high = codespaceRange[k++];
           if (c >= low && c <= high) {
-            return [c, n + 1];
+            out.charcode = c;
+            out.length = n + 1;
+            return;
           }
         }
       }
-
-      return [0, 1];
+      out.charcode = 0;
+      out.length = 1;
     }
   };
   return CMap;
@@ -22958,10 +22960,11 @@ var Font = (function FontClosure() {
       if (this.cMap) {
         // composite fonts have multi-byte strings convert the string from
         // single-byte to multi-byte
+        var c = {};
         while (i < chars.length) {
-          var c = this.cMap.readCharCode(chars, i);
-          charcode = c[0];
-          var length = c[1];
+          this.cMap.readCharCode(chars, i, c);
+          charcode = c.charcode;
+          var length = c.length;
           i += length;
           glyph = this.charToGlyph(charcode);
           glyphs.push(glyph);
