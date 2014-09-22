@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.715';
-PDFJS.build = 'b4fb1e2';
+PDFJS.version = '1.0.717';
+PDFJS.build = '4834f1c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -23192,16 +23192,12 @@ var Font = (function FontClosure() {
         var numMissing = numOfSidebearings -
           ((metrics.length - numOfMetrics * 4) >> 1);
 
-        var i, ii;
         if (numMissing > 0) {
-          font.pos = (font.start ? font.start : 0) + metrics.offset;
-          var entries = '';
-          for (i = 0, ii = metrics.length; i < ii; i++) {
-            entries += String.fromCharCode(font.getByte());
-          }
-          for (i = 0; i < numMissing; i++) {
-            entries += '\x00\x00';
-          }
+          // For each missing glyph, we set both the width and lsb to 0 (zero).
+          // Since we need to add two properties for each glyph, this explains
+          // the use of |numMissing * 2| when initializing the typed array.
+          var entries = new Uint8Array(metrics.length + numMissing * 2);
+          entries.set(metrics.data);
           metrics.data = entries;
         }
       }
