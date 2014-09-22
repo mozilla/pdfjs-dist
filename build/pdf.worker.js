@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.730';
-PDFJS.build = '40ebf71';
+PDFJS.version = '1.0.732';
+PDFJS.build = '467b324';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -30094,6 +30094,7 @@ var Parser = (function ParserClosure() {
         }
         if (name === 'CCITTFaxDecode' || name === 'CCF') {
           xrefStreamStats[StreamType.CCF] = true;
+          params = this.fetchIfRef(params);
           return new CCITTFaxStream(stream, maybeLength, params);
         }
         if (name === 'RunLengthDecode' || name === 'RL') {
