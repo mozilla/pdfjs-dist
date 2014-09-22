@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.374';
-PDFJS.build = '22cfcbc';
+PDFJS.version = '1.0.377';
+PDFJS.build = '5a2e511';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -731,12 +731,11 @@ var Util = PDFJS.Util = (function UtilClosure() {
     return num < 0 ? -1 : 1;
   };
 
-  // TODO(mack): Rename appendToArray
-  Util.concatenateToArray = function concatenateToArray(arr1, arr2) {
+  Util.appendToArray = function Util_appendToArray(arr1, arr2) {
     Array.prototype.push.apply(arr1, arr2);
   };
 
-  Util.prependToArray = function concatenateToArray(arr1, arr2) {
+  Util.prependToArray = function Util_prependToArray(arr1, arr2) {
     Array.prototype.unshift.apply(arr1, arr2);
   };
 
@@ -17976,7 +17975,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               var name = args[0].name;
               if (xobjsCache.key === name) {
                 if (xobjsCache.texts) {
-                  Util.concatenateToArray(bidiTexts, xobjsCache.texts.items);
+                  Util.appendToArray(bidiTexts, xobjsCache.texts.items);
                   Util.extendObj(textContent.styles, xobjsCache.texts.styles);
                 }
                 break;
@@ -18007,7 +18006,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               return self.getTextContent(xobj,
                 xobj.dict.get('Resources') || resources, stateManager).
                 then(function (formTextContent) {
-                  Util.concatenateToArray(bidiTexts, formTextContent.items);
+                  Util.appendToArray(bidiTexts, formTextContent.items);
                   Util.extendObj(textContent.styles, formTextContent.styles);
                   stateManager.restore();
 
@@ -36982,7 +36981,7 @@ var StreamsSequenceStream = (function StreamsSequenceStreamClosure() {
     for (var i = 0, ii = this.streams.length; i < ii; i++) {
       var stream = this.streams[i];
       if (stream.getBaseStreams) {
-        Util.concatenateToArray(baseStreams, stream.getBaseStreams());
+        Util.appendToArray(baseStreams, stream.getBaseStreams());
       }
     }
     return baseStreams;
