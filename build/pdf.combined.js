@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.383';
-PDFJS.build = 'ea16723';
+PDFJS.version = '1.0.385';
+PDFJS.build = '0f0f068';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3074,6 +3074,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
                            pdfDataRangeTransport, progressCallback) {
     this.pdfDataRangeTransport = pdfDataRangeTransport;
 
+    this.workerInitializedCapability = workerInitializedCapability;
     this.workerReadyCapability = workerReadyCapability;
     this.progressCallback = progressCallback;
     this.commonObjs = new PDFObjects();
@@ -3090,11 +3091,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
     // as it arrives on the worker. Chrome added this with version 15.
     // Either workers are disabled, not supported or have thrown an exception.
     // Thus, we fallback to a faked worker.
-    globalScope.PDFJS.disableWorker = true;
-    this.loadFakeWorkerFiles().then(function() {
-      this.setupFakeWorker();
-      workerInitializedCapability.resolve();
-    }.bind(this));
+    this.setupFakeWorker();
   }
   WorkerTransport.prototype = {
     destroy: function WorkerTransport_destroy() {
@@ -3109,7 +3106,9 @@ var WorkerTransport = (function WorkerTransportClosure() {
       });
     },
 
-    loadFakeWorkerFiles: function WorkerTransport_loadFakeWorkerFiles() {
+    setupFakeWorker: function WorkerTransport_setupFakeWorker() {
+      globalScope.PDFJS.disableWorker = true;
+
       if (!PDFJS.fakeWorkerFilesLoadedCapability) {
         PDFJS.fakeWorkerFilesLoadedCapability = createPromiseCapability();
         // In the developer build load worker_loader which in turn loads all the
@@ -3117,25 +3116,25 @@ var WorkerTransport = (function WorkerTransportClosure() {
         // pdf.worker.js file is needed.
         PDFJS.fakeWorkerFilesLoadedCapability.resolve();
       }
-      return PDFJS.fakeWorkerFilesLoadedCapability.promise;
-    },
+      PDFJS.fakeWorkerFilesLoadedCapability.promise.then(function () {
+        warn('Setting up fake worker.');
+        // If we don't use a worker, just post/sendMessage to the main thread.
+        var fakeWorker = {
+          postMessage: function WorkerTransport_postMessage(obj) {
+            fakeWorker.onmessage({data: obj});
+          },
+          terminate: function WorkerTransport_terminate() {}
+        };
 
-    setupFakeWorker: function WorkerTransport_setupFakeWorker() {
-      warn('Setting up fake worker.');
-      // If we don't use a worker, just post/sendMessage to the main thread.
-      var fakeWorker = {
-        postMessage: function WorkerTransport_postMessage(obj) {
-          fakeWorker.onmessage({data: obj});
-        },
-        terminate: function WorkerTransport_terminate() {}
-      };
+        var messageHandler = new MessageHandler('main', fakeWorker);
+        this.setupMessageHandler(messageHandler);
 
-      var messageHandler = new MessageHandler('main', fakeWorker);
-      this.setupMessageHandler(messageHandler);
+        // If the main thread is our worker, setup the handling for the messages
+        // the main thread sends to it self.
+        PDFJS.WorkerMessageHandler.setup(messageHandler);
 
-      // If the main thread is our worker, setup the handling for the messages
-      // the main thread sends to it self.
-      PDFJS.WorkerMessageHandler.setup(messageHandler);
+        this.workerInitializedCapability.resolve();
+      }.bind(this));
     },
 
     setupMessageHandler:
