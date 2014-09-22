@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.680';
-PDFJS.build = '992e761';
+PDFJS.version = '1.0.682';
+PDFJS.build = '9b3c96d';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -13014,7 +13014,7 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
       request.overrideMimeType('text/plain; charset=x-user-defined');
     }
     request.send(null);
-    if (request.status === 0 && /^https?:/i.test(url)) {
+    if (nonBinaryRequest ? !request.responseText : !request.response) {
       error('Unable to get binary cMap at: ' + url);
     }
     if (nonBinaryRequest) {
@@ -13554,7 +13554,7 @@ var CMapFactory = (function CMapFactoryClosure() {
     var url = builtInCMapParams.url + name;
     request.open('GET', url, false);
     request.send(null);
-    if (request.status === 0 && /^https?:/i.test(url)) {
+    if (!request.responseText) {
       error('Unable to get cMap at: ' + url);
     }
     var cMap = new CMap(true);
