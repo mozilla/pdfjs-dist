@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.133';
-PDFJS.build = 'f8b3444';
+PDFJS.version = '1.0.135';
+PDFJS.build = 'a39f44f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -9328,8 +9328,8 @@ var LocalPdfManager = (function LocalPdfManagerClosure() {
   function LocalPdfManager(data, password) {
     var stream = new Stream(data);
     this.pdfDocument = new PDFDocument(this, stream, password);
-    this.loadedStream = new LegacyPromise();
-    this.loadedStream.resolve(stream);
+    this._loadedStreamCapability = createPromiseCapability();
+    this._loadedStreamCapability.resolve(stream);
   }
 
   LocalPdfManager.prototype = Object.create(BasePdfManager.prototype);
@@ -9337,28 +9337,25 @@ var LocalPdfManager = (function LocalPdfManagerClosure() {
 
   LocalPdfManager.prototype.ensure =
       function LocalPdfManager_ensure(obj, prop, args) {
-    var promise = new LegacyPromise();
-    try {
-      var value = obj[prop];
-      var result;
-      if (typeof(value) === 'function') {
-        result = value.apply(obj, args);
-      } else {
-        result = value;
+    return new Promise(function (resolve, reject) {
+      try {
+        var value = obj[prop];
+        var result;
+        if (typeof value === 'function') {
+          result = value.apply(obj, args);
+        } else {
+          result = value;
+        }
+        resolve(result);
+      } catch (e) {
+        reject(e);
       }
-      promise.resolve(result);
-    } catch (e) {
-      console.log(e.stack);
-      promise.reject(e);
-    }
-    return promise;
+    });
   };
 
   LocalPdfManager.prototype.requestRange =
       function LocalPdfManager_requestRange(begin, end) {
-    var promise = new LegacyPromise();
-    promise.resolve();
-    return promise;
+    return Promise.resolve();
   };
 
   LocalPdfManager.prototype.requestLoadedStream =
@@ -9367,7 +9364,7 @@ var LocalPdfManager = (function LocalPdfManagerClosure() {
 
   LocalPdfManager.prototype.onLoadedStream =
       function LocalPdfManager_getLoadedStream() {
-    return this.loadedStream;
+    return this._loadedStreamCapability.promise;
   };
 
   LocalPdfManager.prototype.terminate =
@@ -9403,42 +9400,39 @@ var NetworkPdfManager = (function NetworkPdfManagerClosure() {
 
   NetworkPdfManager.prototype.ensure =
       function NetworkPdfManager_ensure(obj, prop, args) {
-    var promise = new LegacyPromise();
-    this.ensureHelper(promise, obj, prop, args);
-    return promise;
-  };
+    var pdfManager = this;
 
-  NetworkPdfManager.prototype.ensureHelper =
-      function NetworkPdfManager_ensureHelper(promise, obj, prop, args) {
-    try {
-      var result;
-      var value = obj[prop];
-      if (typeof(value) === 'function') {
-        result = value.apply(obj, args);
-      } else {
-        result = value;
-      }
-      promise.resolve(result);
-    } catch(e) {
-      if (!(e instanceof MissingDataException)) {
-        console.log(e.stack);
-        promise.reject(e);
-        return;
+    return new Promise(function (resolve, reject) {
+      function ensureHelper() {
+        try {
+          var result;
+          var value = obj[prop];
+          if (typeof value === 'function') {
+            result = value.apply(obj, args);
+          } else {
+            result = value;
+          }
+          resolve(result);
+        } catch(e) {
+          if (!(e instanceof MissingDataException)) {
+            reject(e);
+            return;
+          }
+          pdfManager.streamManager.requestRange(e.begin, e.end, ensureHelper);
+        }
       }
 
-      this.streamManager.requestRange(e.begin, e.end, function() {
-        this.ensureHelper(promise, obj, prop, args);
-      }.bind(this));
-    }
+      ensureHelper();
+    });
   };
 
   NetworkPdfManager.prototype.requestRange =
       function NetworkPdfManager_requestRange(begin, end) {
-    var promise = new LegacyPromise();
-    this.streamManager.requestRange(begin, end, function() {
-      promise.resolve();
-    });
-    return promise;
+    return new Promise(function (resolve) {
+      this.streamManager.requestRange(begin, end, function() {
+        resolve();
+      });
+    }.bind(this));
   };
 
   NetworkPdfManager.prototype.requestLoadedStream =
