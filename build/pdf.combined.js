@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.199';
-PDFJS.build = '149d3d8';
+PDFJS.version = '1.0.203';
+PDFJS.build = 'df40ac9';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -10406,7 +10406,7 @@ var Catalog = (function CatalogClosure() {
       var xref = this.xref;
       var dests = {}, nameTreeRef, nameDictionaryRef;
       var obj = this.catDict.get('Names');
-      if (obj) {
+      if (obj && obj.has('Dests')) {
         nameTreeRef = obj.getRaw('Dests');
       } else if (this.catDict.has('Dests')) {
         nameDictionaryRef = this.catDict.get('Dests');
