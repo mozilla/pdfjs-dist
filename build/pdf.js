@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.141';
-PDFJS.build = '5fb42f6';
+PDFJS.version = '1.0.143';
+PDFJS.build = '70da61f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -958,24 +958,6 @@ function isPDFFunction(v) {
   }
   return fnDict.has('FunctionType');
 }
-
-/**
- * Legacy support for PDFJS Promise implementation.
- * TODO remove eventually
- * @ignore
- */
-var LegacyPromise = PDFJS.LegacyPromise = (function LegacyPromiseClosure() {
-  return function LegacyPromise() {
-    var resolve, reject;
-    var promise = new Promise(function (resolve_, reject_) {
-      resolve = resolve_;
-      reject = reject_;
-    });
-    promise.resolve = resolve;
-    promise.reject = reject;
-    return promise;
-  };
-})();
 
 /**
  * Promise Capability object.
