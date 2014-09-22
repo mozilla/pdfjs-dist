@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.155';
-PDFJS.build = '68e57f2';
+PDFJS.version = '1.0.159';
+PDFJS.build = '6ea118b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4186,10 +4186,7 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
      * JavaScript strings in the name tree.
      */
     getJavaScript: function PDFDocumentProxy_getJavaScript() {
-      return new Promise(function (resolve) {
-        var js = this.pdfInfo.javaScript;
-        resolve(js);
-      }.bind(this));
+      return this.transport.getJavaScript();
     },
     /**
      * @return {Promise} A promise that is resolved with an {Array} that is a
@@ -4207,10 +4204,7 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
      * ].
      */
     getOutline: function PDFDocumentProxy_getOutline() {
-      return new Promise(function (resolve) {
-        var outline = this.pdfInfo.outline;
-        resolve(outline);
-      }.bind(this));
+      return this.transport.getOutline();
     },
     /**
      * @return {Promise} A promise that is resolved with an {Object} that has
@@ -4219,14 +4213,7 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
      * {Metadata} object with information from the metadata section of the PDF.
      */
     getMetadata: function PDFDocumentProxy_getMetadata() {
-      return new Promise(function (resolve) {
-        var info = this.pdfInfo.info;
-        var metadata = this.pdfInfo.metadata;
-        resolve({
-          info: info,
-          metadata: (metadata ? new PDFJS.Metadata(metadata) : null)
-        });
-      }.bind(this));
+      return this.transport.getMetadata();
     },
     /**
      * @return {Promise} A promise that is resolved with a TypedArray that has
@@ -4917,6 +4904,39 @@ var WorkerTransport = (function WorkerTransportClosure() {
         this.messageHandler.send('GetAttachments', null,
           function transportAttachments(attachments) {
             resolve(attachments);
+          }
+        );
+      }.bind(this));
+    },
+
+    getJavaScript: function WorkerTransport_getJavaScript() {
+      return new Promise(function (resolve) {
+        this.messageHandler.send('GetJavaScript', null,
+          function transportJavaScript(js) {
+            resolve(js);
+          }
+        );
+      }.bind(this));
+    },
+
+    getOutline: function WorkerTransport_getOutline() {
+      return new Promise(function (resolve) {
+        this.messageHandler.send('GetOutline', null,
+          function transportOutline(outline) {
+            resolve(outline);
+          }
+        );
+      }.bind(this));
+    },
+
+    getMetadata: function WorkerTransport_getMetadata() {
+      return new Promise(function (resolve) {
+        this.messageHandler.send('GetMetadata', null,
+          function transportMetadata(results) {
+            resolve({
+              info: results[0],
+              metadata: (results[1] ? new PDFJS.Metadata(results[1]) : null)
+            });
           }
         );
       }.bind(this));
@@ -41938,23 +41958,13 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
       var parseSuccess = function parseSuccess() {
         var numPagesPromise = pdfManager.ensureDoc('numPages');
         var fingerprintPromise = pdfManager.ensureDoc('fingerprint');
-        var outlinePromise = pdfManager.ensureCatalog('documentOutline');
-        var infoPromise = pdfManager.ensureDoc('documentInfo');
-        var metadataPromise = pdfManager.ensureCatalog('metadata');
         var encryptedPromise = pdfManager.ensureXRef('encrypt');
-        var javaScriptPromise = pdfManager.ensureCatalog('javaScript');
-        Promise.all([numPagesPromise, fingerprintPromise, outlinePromise,
-                     infoPromise, metadataPromise, encryptedPromise,
-                     javaScriptPromise]).then(function onDocReady(results) {
-
+        Promise.all([numPagesPromise, fingerprintPromise,
+                     encryptedPromise]).then(function onDocReady(results) {
           var doc = {
             numPages: results[0],
             fingerprint: results[1],
-            outline: results[2],
-            info: results[3],
-            metadata: results[4],
-            encrypted: !!results[5],
-            javaScript: results[6]
+            encrypted: !!results[2],
           };
           loadDocumentCapability.resolve(doc);
         },
@@ -42215,6 +42225,32 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
       function wphSetupGetAttachments(data, deferred) {
         pdfManager.ensureCatalog('attachments').then(function(attachments) {
           deferred.resolve(attachments);
+        }, deferred.reject);
+      }
+    );
+
+    handler.on('GetJavaScript',
+      function wphSetupGetJavaScript(data, deferred) {
+        pdfManager.ensureCatalog('javaScript').then(function (js) {
+          deferred.resolve(js);
+        }, deferred.reject);
+      }
+    );
+
+    handler.on('GetOutline',
+      function wphSetupGetOutline(data, deferred) {
+        pdfManager.ensureCatalog('documentOutline').then(function (outline) {
+          deferred.resolve(outline);
+        }, deferred.reject);
+      }
+    );
+
+    handler.on('GetMetadata',
+      function wphSetupGetMetadata(data, deferred) {
+        Promise.all([pdfManager.ensureDoc('documentInfo'),
+                     pdfManager.ensureCatalog('metadata')]).then(
+            function (results) {
+          deferred.resolve(results);
         }, deferred.reject);
       }
     );
