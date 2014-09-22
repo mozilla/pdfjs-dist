@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.719';
-PDFJS.build = '4fcd502';
+PDFJS.version = '1.0.721';
+PDFJS.build = '61eac43';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1759,6 +1759,11 @@ PDFJS.maxCanvasPixels = (PDFJS.maxCanvasPixels === undefined ?
  * password if wrong or no password was provided. The callback receives two
  * parameters: function that needs to be called with new password and reason
  * (see {PasswordResponses}).
+ *
+ * @param {function} progressCallback is optional. It is used to be able to
+ * monitor the loading progress of the PDF file (necessary to implement e.g.
+ * a loading bar). The callback receives an {Object} with the properties:
+ * {number} loaded and {number} total.
  *
  * @return {Promise} A promise that is resolved with {@link PDFDocumentProxy}
  *   object.
