@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.197';
-PDFJS.build = '44cd0f4';
+PDFJS.version = '1.0.199';
+PDFJS.build = '149d3d8';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4278,9 +4278,7 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
      * the raw data from the PDF.
      */
     getData: function PDFDocumentProxy_getData() {
-      var capability = createPromiseCapability();
-      this.transport.getData(capability);
-      return capability.promise;
+      return this.transport.getData();
     },
     /**
      * @return {Promise} A promise that is resolved when the document's data
@@ -4897,10 +4895,8 @@ var WorkerTransport = (function WorkerTransportClosure() {
       });
     },
 
-    getData: function WorkerTransport_getData(capability) {
-      this.messageHandler.send('GetData', null, function(data) {
-        capability.resolve(data);
-      });
+    getData: function WorkerTransport_getData() {
+      return this.messageHandler.sendWithPromise('GetData', null);
     },
 
     getPage: function WorkerTransport_getPage(pageNumber, capability) {
