@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.501';
-PDFJS.build = '6038ee7';
+PDFJS.version = '1.0.503';
+PDFJS.build = '2264748';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -36632,8 +36632,8 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
     }
 
     // Get types and fill arrays
-    chars.length = 0;
-    types.length = 0;
+    chars.length = strLength;
+    types.length = strLength;
     var numBidi = 0;
 
     var i, ii;
