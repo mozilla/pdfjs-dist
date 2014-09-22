@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.710';
-PDFJS.build = '0dbac15';
+PDFJS.version = '1.0.712';
+PDFJS.build = '6969ed4';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -32457,10 +32457,11 @@ var PDFImage = (function PDFImageClosure() {
         var kind;
         if (this.colorSpace.name === 'DeviceGray' && bpc === 1) {
           kind = ImageKind.GRAYSCALE_1BPP;
-        } else if (this.colorSpace.name === 'DeviceRGB' && bpc === 8) {
+        } else if (this.colorSpace.name === 'DeviceRGB' && bpc === 8 &&
+                   !this.needsDecode) {
           kind = ImageKind.RGB_24BPP;
         }
-        if (kind && !this.smask && !this.mask && !this.needsDecode &&
+        if (kind && !this.smask && !this.mask &&
             drawWidth === originalWidth && drawHeight === originalHeight) {
           imgData.kind = kind;
 
@@ -32476,6 +32477,14 @@ var PDFImage = (function PDFImageClosure() {
             var newArray = new Uint8Array(imgArray.length);
             newArray.set(imgArray);
             imgData.data = newArray;
+          }
+          if (this.needsDecode) {
+            // Invert the buffer (which must be grayscale if we reached here).
+            assert(kind === ImageKind.GRAYSCALE_1BPP);
+            var buffer = imgData.data;
+            for (var i = 0, ii = buffer.length; i < ii; i++) {
+              buffer[i] ^= 0xff;
+            }
           }
           return imgData;
         }
