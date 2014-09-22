@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.674';
-PDFJS.build = 'cd5bd9f';
+PDFJS.version = '1.0.676';
+PDFJS.build = '9d87cbc';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -11202,7 +11202,7 @@ var PDFFunction = (function PDFFunctionClosure() {
       }
       length *= outputSize;
 
-      var array = [];
+      var array = new Array(length);
       var codeSize = 0;
       var codeBuf = 0;
       // 32 is a valid bps so shifting won't work
@@ -11217,7 +11217,7 @@ var PDFFunction = (function PDFFunctionClosure() {
           codeSize += 8;
         }
         codeSize -= bps;
-        array.push((codeBuf >> codeSize) * sampleMul);
+        array[i] = (codeBuf >> codeSize) * sampleMul;
         codeBuf &= (1 << codeSize) - 1;
       }
       return array;
