@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.659';
-PDFJS.build = '7fb6c87';
+PDFJS.version = '1.0.661';
+PDFJS.build = '84584f9';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2507,7 +2507,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
       messageHandler.on('PageError', function transportError(data) {
         var page = this.pageCache[data.pageNum - 1];
         var intentState = page.intentStates[data.intent];
-        if (intentState.displayReadyCapability.promise) {
+        if (intentState.displayReadyCapability) {
           intentState.displayReadyCapability.reject(data.error);
         } else {
           error(data.error);
@@ -6001,6 +6001,9 @@ var FontLoader = {
       return true;
     }
     // TODO other browsers
+    if (userAgent === 'node') {
+      return true;
+    }
     return false;
   })(),
 
