@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.622';
-PDFJS.build = '86d06d6';
+PDFJS.version = '1.0.624';
+PDFJS.build = '13f1a96';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -8204,8 +8204,18 @@ var AES128Cipher = (function AES128CipherClosure() {
     if (finalize) {
       // undo a padding that is described in RFC 2898
       var lastBlock = result[result.length - 1];
-      outputLength -= lastBlock[15];
-      result[result.length - 1] = lastBlock.subarray(0, 16 - lastBlock[15]);
+      var psLen = lastBlock[15];
+      if (psLen <= 16) {
+        for (i = 15, ii = 16 - psLen; i >= ii; --i) {
+          if (lastBlock[i] !== psLen) {
+            // Invalid padding, assume that the block has no padding.
+            psLen = 0;
+            break;
+          }
+        }
+        outputLength -= psLen;
+        result[result.length - 1] = lastBlock.subarray(0, 16 - psLen);
+      }
     }
     var output = new Uint8Array(outputLength);
     for (i = 0, j = 0, ii = result.length; i < ii; ++i, j += 16) {
@@ -8620,7 +8630,7 @@ var AES256Cipher = (function AES256CipherClosure() {
       if (bufferLength < 16) {
         continue;
       }
-      // buffer is full, encrypting
+      // buffer is full, decrypting
       var plain = decrypt256(buffer, this.key);
       // xor-ing the IV vector to get plain text
       for (j = 0; j < 16; ++j) {
@@ -8643,8 +8653,18 @@ var AES256Cipher = (function AES256CipherClosure() {
     if (finalize) {
       // undo a padding that is described in RFC 2898
       var lastBlock = result[result.length - 1];
-      outputLength -= lastBlock[15];
-      result[result.length - 1] = lastBlock.subarray(0, 16 - lastBlock[15]);
+      var psLen = lastBlock[15];
+      if (psLen <= 16) {
+        for (i = 15, ii = 16 - psLen; i >= ii; --i) {
+          if (lastBlock[i] !== psLen) {
+            // Invalid padding, assume that the block has no padding.
+            psLen = 0;
+            break;
+          }
+        }
+        outputLength -= psLen;
+        result[result.length - 1] = lastBlock.subarray(0, 16 - psLen);
+      }
     }
     var output = new Uint8Array(outputLength);
     for (i = 0, j = 0, ii = result.length; i < ii; ++i, j += 16) {
