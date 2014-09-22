@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.759';
-PDFJS.build = '8206894';
+PDFJS.version = '1.0.761';
+PDFJS.build = 'c84a569';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -31817,7 +31817,8 @@ var Jbig2Stream = (function Jbig2StreamClosure() {
 
     var jbig2Image = new Jbig2Image();
 
-    var chunks = [], decodeParams = this.dict.get('DecodeParms');
+    var chunks = [], xref = this.dict.xref;
+    var decodeParams = xref.fetchIfRef(this.dict.get('DecodeParms'));
 
     // According to the PDF specification, DecodeParms can be either
     // a dictionary, or an array whose elements are dictionaries.
@@ -31826,7 +31827,7 @@ var Jbig2Stream = (function Jbig2StreamClosure() {
         warn('JBIG2 - \'DecodeParms\' array with multiple elements ' +
              'not supported.');
       }
-      decodeParams = decodeParams[0];
+      decodeParams = xref.fetchIfRef(decodeParams[0]);
     }
     if (decodeParams && decodeParams.has('JBIG2Globals')) {
       var globalsStream = decodeParams.get('JBIG2Globals');
