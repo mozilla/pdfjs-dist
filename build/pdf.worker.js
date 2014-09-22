@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.233';
-PDFJS.build = 'd39af0a';
+PDFJS.version = '1.0.235';
+PDFJS.build = 'fe27a76';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5900,7 +5900,6 @@ var Catalog = (function CatalogClosure() {
       });
       return Promise.all(promises).then(function (fonts) {
         for (var i = 0, ii = fonts.length; i < ii; i++) {
-          delete fonts[i].sent;
           delete fonts[i].translated;
         }
         this.fontCache.clear();
@@ -15754,28 +15753,26 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         fontArgs = fontArgs.slice();
         fontName = fontArgs[0].name;
       }
+
       var self = this;
-      return this.loadFont(fontName, fontRef, this.xref, resources,
-                               operatorList).then(function (font) {
-          state.font = font;
-          var loadedName = font.loadedName;
-          if (!font.sent) {
-            var fontData = font.translated.exportData();
-
-            self.handler.send('commonobj', [
-              loadedName,
-              'Font',
-              fontData
-            ]);
-            font.sent = true;
-          }
-
-          return loadedName;
+      return this.loadFont(fontName, fontRef, this.xref, resources).then(
+          function (translated) {
+        if (!translated.font.isType3Font) {
+          return translated;
+        }
+        return translated.loadType3Data(self, resources, operatorList).then(
+            function () {
+          return translated;
         });
+      }).then(function (translated) {
+        state.font = translated.font;
+        translated.send(self.handler);
+        return translated.loadedName;
+      });
     },
 
     handleText: function PartialEvaluator_handleText(chars, state) {
-      var font = state.font.translated;
+      var font = state.font;
       var glyphs = font.charsToGlyphs(chars);
       var isAddToPathSet = !!(state.textRenderingMode &
                               TextRenderingMode.ADD_TO_PATH_FLAG);
@@ -15901,16 +15898,12 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     },
 
     loadFont: function PartialEvaluator_loadFont(fontName, font, xref,
-                                                 resources,
-                                                 parentOperatorList) {
+                                                 resources) {
 
       function errorFont() {
-        return Promise.resolve({
-          translated: new ErrorFont('Font ' + fontName + ' is not available'),
-          loadedName: 'g_font_error'
-        });
+        return Promise.resolve(new TranslatedFont('g_font_error',
+          new ErrorFont('Font ' + fontName + ' is not available'), font));
       }
-
       var fontRef;
       if (font) { // Loading by ref.
         assert(isRef(font));
@@ -15933,6 +15926,12 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         return errorFont();
       }
 
+      // We are holding font.translated references just for fontRef that are not
+      // dictionaries (Dict). See explanation below.
+      if (font.translated) {
+        return font.translated;
+      }
+
       var fontCapability = createPromiseCapability();
 
       var preEvaluatedFont = this.preEvaluateFont(font, xref);
@@ -15949,8 +15948,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           var aliasFontRef = fontAliases[hash].aliasRef;
           if (aliasFontRef && this.fontCache.has(aliasFontRef)) {
             this.fontCache.putAlias(fontRef, aliasFontRef);
-            var cachedFont = this.fontCache.get(fontRef);
-            return cachedFont;
+            return this.fontCache.get(fontRef);
           }
         }
 
@@ -15979,49 +15977,28 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       font.loadedName = 'g_font_' + (fontRefIsDict ?
         fontName.replace(/\W/g, '') : fontID);
 
-      if (!font.translated) {
-        var translated;
-        try {
-          translated = this.translateFont(preEvaluatedFont, xref);
-        } catch (e) {
-          UnsupportedManager.notify(UNSUPPORTED_FEATURES.font);
-          translated = new ErrorFont(e instanceof Error ? e.message : e);
-        }
-        font.translated = translated;
+      font.translated = fontCapability.promise;
+
+      // TODO move promises into translate font
+      var translatedPromise;
+      try {
+        translatedPromise = Promise.resolve(
+          this.translateFont(preEvaluatedFont, xref));
+      } catch (e) {
+        translatedPromise = Promise.reject(e);
       }
 
-      var loadCharProcsPromise = Promise.resolve();
-      if (font.translated.loadCharProcs) {
-        var charProcs = font.get('CharProcs').getAll();
-        var fontResources = (font.get('Resources') || resources);
-        var charProcKeys = Object.keys(charProcs);
-        var charProcOperatorList = {};
-        for (var i = 0, n = charProcKeys.length; i < n; ++i) {
-          loadCharProcsPromise = loadCharProcsPromise.then(function (key) {
-            var glyphStream = charProcs[key];
-            var operatorList = new OperatorList();
-            return this.getOperatorList(glyphStream, fontResources,
-                                        operatorList).
-              then(function () {
-                charProcOperatorList[key] = operatorList.getIR();
-
-                // Add the dependencies to the parent operator list so they are
-                // resolved before sub operator list is executed synchronously.
-                if (parentOperatorList) {
-                  parentOperatorList.addDependencies(operatorList.dependencies);
-                }
-              });
-          }.bind(this, charProcKeys[i]));
-        }
-        loadCharProcsPromise = loadCharProcsPromise.then(function () {
-          font.translated.charProcOperatorList = charProcOperatorList;
-        });
-      }
-      return loadCharProcsPromise.then(function () {
-        font.loaded = true;
-        fontCapability.resolve(font);
-        return fontCapability.promise;
-      }, fontCapability.reject);
+      translatedPromise.then(function (translatedFont) {
+        fontCapability.resolve(new TranslatedFont(font.loadedName,
+          translatedFont, font));
+      }, function (reason) {
+        // TODO fontCapability.reject?
+        UnsupportedManager.notify(UNSUPPORTED_FEATURES.font);
+        fontCapability.resolve(new TranslatedFont(font.loadedName,
+          new ErrorFont(reason instanceof Error ? reason.message : reason),
+          font));
+      });
+      return fontCapability.promise;
     },
 
     buildPath: function PartialEvaluator_buildPath(operatorList, fn, args) {
@@ -16292,11 +16269,10 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       }
 
       function handleSetFont(fontName, fontRef) {
-        return self.loadFont(fontName, fontRef, xref, resources, null).
-          then(function (font) {
-            var fontTranslated = textState.font = font.translated;
-            textState.fontMatrix = fontTranslated.fontMatrix ?
-              fontTranslated.fontMatrix :
+        return self.loadFont(fontName, fontRef, xref, resources).
+          then(function (translated) {
+            textState.font = translated.font;
+            textState.fontMatrix = translated.font.fontMatrix ||
               FONT_IDENTITY_MATRIX;
           });
       }
@@ -17071,7 +17047,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       this.extractWidths(dict, xref, descriptor, properties);
 
       if (type.name === 'Type3') {
-        properties.coded = true;
+        properties.isType3Font = true;
       }
 
       return new Font(fontName.name, fontFile, properties);
@@ -17079,6 +17055,64 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
   };
 
   return PartialEvaluator;
+})();
+
+var TranslatedFont = (function TranslatedFontClosure() {
+  function TranslatedFont(loadedName, font, dict) {
+    this.loadedName = loadedName;
+    this.font = font;
+    this.dict = dict;
+    this.type3Loaded = null;
+    this.sent = false;
+  }
+  TranslatedFont.prototype = {
+    send: function (handler) {
+      if (this.sent) {
+        return;
+      }
+      var fontData = this.font.exportData();
+      handler.send('commonobj', [
+        this.loadedName,
+        'Font',
+        fontData
+      ]);
+      this.sent = true;
+    },
+    loadType3Data: function (evaluator, resources, parentOperatorList) {
+      assert(this.font.isType3Font);
+
+      if (this.type3Loaded) {
+        return this.type3Loaded;
+      }
+
+      var translatedFont = this.font;
+      var loadCharProcsPromise = Promise.resolve();
+      var charProcs = this.dict.get('CharProcs').getAll();
+      var fontResources = this.dict.get('Resources') || resources;
+      var charProcKeys = Object.keys(charProcs);
+      var charProcOperatorList = {};
+      for (var i = 0, n = charProcKeys.length; i < n; ++i) {
+        loadCharProcsPromise = loadCharProcsPromise.then(function (key) {
+          var glyphStream = charProcs[key];
+          var operatorList = new OperatorList();
+          return evaluator.getOperatorList(glyphStream, fontResources,
+            operatorList).
+            then(function () {
+              charProcOperatorList[key] = operatorList.getIR();
+
+              // Add the dependencies to the parent operator list so they are
+              // resolved before sub operator list is executed synchronously.
+              parentOperatorList.addDependencies(operatorList.dependencies);
+            });
+        }.bind(this, charProcKeys[i]));
+      }
+      this.type3Loaded = loadCharProcsPromise.then(function () {
+        translatedFont.charProcOperatorList = charProcOperatorList;
+      });
+      return this.type3Loaded;
+    }
+  };
+  return TranslatedFont;
 })();
 
 var OperatorList = (function OperatorListClosure() {
@@ -20741,23 +20775,23 @@ function adjustWidths(properties) {
 }
 
 var Glyph = (function GlyphClosure() {
-  function Glyph(fontChar, unicode, accent, width, vmetric, operatorList) {
+  function Glyph(fontChar, unicode, accent, width, vmetric, operatorListId) {
     this.fontChar = fontChar;
     this.unicode = unicode;
     this.accent = accent;
     this.width = width;
     this.vmetric = vmetric;
-    this.operatorList = operatorList;
+    this.operatorListId = operatorListId;
   }
 
   Glyph.prototype.matchesForCache =
-      function(fontChar, unicode, accent, width, vmetric, operatorList) {
+      function(fontChar, unicode, accent, width, vmetric, operatorListId) {
     return this.fontChar === fontChar &&
            this.unicode === unicode &&
            this.accent === accent &&
            this.width === width &&
            this.vmetric === vmetric &&
-           this.operatorList === operatorList;
+           this.operatorListId === operatorListId;
   };
 
   return Glyph;
@@ -20777,8 +20811,7 @@ var Font = (function FontClosure() {
 
     this.name = name;
     this.loadedName = properties.loadedName;
-    this.coded = properties.coded;
-    this.loadCharProcs = properties.coded;
+    this.isType3Font = properties.isType3Font;
     this.sizes = [];
 
     this.glyphCache = {};
@@ -22999,7 +23032,7 @@ var Font = (function FontClosure() {
     },
 
     charToGlyph: function Font_charToGlyph(charcode) {
-      var fontCharCode, width, operatorList;
+      var fontCharCode, width, operatorListId;
 
       var widthCode = charcode;
       if (this.cMap && charcode in this.cMap.map) {
@@ -23021,9 +23054,9 @@ var Font = (function FontClosure() {
         fontCharCode = mapSpecialUnicodeValues(fontCharCode);
       }
 
-      if (this.type === 'Type3') {
+      if (this.isType3Font) {
         // Font char code in this case is actually a glyph name.
-        operatorList = this.charProcOperatorList[fontCharCode];
+        operatorListId = fontCharCode;
       }
 
       var accent = null;
@@ -23041,9 +23074,9 @@ var Font = (function FontClosure() {
       var glyph = this.glyphCache[charcode];
       if (!glyph ||
           !glyph.matchesForCache(fontChar, unicode, accent, width, vmetric,
-                                 operatorList)) {
+                                 operatorListId)) {
         glyph = new Glyph(fontChar, unicode, accent, width, vmetric,
-                          operatorList);
+                          operatorListId);
         this.glyphCache[charcode] = glyph;
       }
       return glyph;
@@ -23108,6 +23141,8 @@ var Font = (function FontClosure() {
 var ErrorFont = (function ErrorFontClosure() {
   function ErrorFont(error) {
     this.error = error;
+    this.loadedName = 'g_font_error';
+    this.loading = false;
   }
 
   ErrorFont.prototype = {
