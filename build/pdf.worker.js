@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.544';
-PDFJS.build = 'df0b821';
+PDFJS.version = '1.0.551';
+PDFJS.build = '00eea3d';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2821,7 +2821,7 @@ var PDFDocument = (function PDFDocumentClosure() {
     var str = strBuf.join('');
     stream.pos = pos;
     var index = backwards ? str.lastIndexOf(needle) : str.indexOf(needle);
-    if (index == -1) {
+    if (index === -1) {
       return false; /* not found */
     }
     stream.pos += index;
@@ -5043,7 +5043,7 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
         var j, jj;
         for (j = 0, jj = kids.length; j < jj; j++) {
           var kidRef = kids[j];
-          if (kidRef.num == ref.num && kidRef.gen == ref.gen) {
+          if (kidRef.num === ref.num && kidRef.gen === ref.gen) {
             break;
           }
         }
@@ -6004,7 +6004,7 @@ var ColorSpace = (function ColorSpaceClosure() {
       var count = originalWidth * originalHeight;
       var rgbBuf = null;
       var numComponentColors = 1 << bpc;
-      var needsResizing = originalHeight != height || originalWidth != width;
+      var needsResizing = originalHeight !== height || originalWidth !== width;
       var i, ii;
 
       if (this.isPassthrough(bpc)) {
@@ -6197,11 +6197,11 @@ var ColorSpace = (function ColorSpaceClosure() {
           var stream = xref.fetchIfRef(cs[1]);
           var dict = stream.dict;
           numComps = dict.get('N');
-          if (numComps == 1) {
+          if (numComps === 1) {
             return 'DeviceGrayCS';
-          } else if (numComps == 3) {
+          } else if (numComps === 3) {
             return 'DeviceRgbCS';
-          } else if (numComps == 4) {
+          } else if (numComps === 4) {
             return 'DeviceCmykCS';
           }
           break;
@@ -6262,7 +6262,7 @@ var ColorSpace = (function ColorSpaceClosure() {
       return true;
     }
     for (var i = 0, ii = decode.length; i < ii; i += 2) {
-      if (decode[i] !== 0 || decode[i + 1] != 1) {
+      if (decode[i] !== 0 || decode[i + 1] !== 1) {
         return false;
       }
     }
@@ -6527,7 +6527,7 @@ var DeviceRgbCS = (function DeviceRgbCSClosure() {
       return (inputLength * (3 + alpha01) / 3) | 0;
     },
     isPassthrough: function DeviceRgbCS_isPassthrough(bits) {
-      return bits == 8;
+      return bits === 8;
     },
     fillRgb: ColorSpace.prototype.fillRgb,
     isDefaultDecode: function DeviceRgbCS_isDefaultDecode(decodeMap) {
@@ -11083,7 +11083,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           firstWidth = glyphWidth;
           continue;
         }
-        if (firstWidth != glyphWidth) {
+        if (firstWidth !== glyphWidth) {
           isMonospace = false;
           break;
         }
@@ -32547,7 +32547,7 @@ var ArithmeticDecoder = (function ArithmeticDecoderClosure() {
     byteIn: function ArithmeticDecoder_byteIn() {
       var data = this.data;
       var bp = this.bp;
-      if (data[bp] == 0xFF) {
+      if (data[bp] === 0xFF) {
         var b1 = data[bp + 1];
         if (b1 > 0x8F) {
           this.clow += 0xFF00;
@@ -36622,7 +36622,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
 
   function findUnequal(arr, start, value) {
     for (var j = start, jj = arr.length; j < jj; ++j) {
-      if (arr[j] != value) {
+      if (arr[j] !== value) {
         return j;
       }
     }
@@ -36682,7 +36682,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
       } else if (0x0700 <= charCode && charCode <= 0x08AC) {
         charType = 'AL';
       }
-      if (charType == 'R' || charType == 'AL' || charType == 'AN') {
+      if (charType === 'R' || charType === 'AL' || charType === 'AN') {
         numBidi++;
       }
       types[i] = charType;
@@ -36697,7 +36697,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
       return createBidiText(str, isLTR);
     }
 
-    if (startLevel == -1) {
+    if (startLevel === -1) {
       if ((strLength / numBidi) < 0.3) {
         isLTR = true;
         startLevel = 0;
@@ -36726,7 +36726,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
      */
     var lastType = sor;
     for (i = 0; i < strLength; ++i) {
-      if (types[i] == 'NSM') {
+      if (types[i] === 'NSM') {
         types[i] = lastType;
       } else {
         lastType = types[i];
@@ -36742,9 +36742,9 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
     var t;
     for (i = 0; i < strLength; ++i) {
       t = types[i];
-      if (t == 'EN') {
-        types[i] = (lastType == 'AL') ? 'AN' : 'EN';
-      } else if (t == 'R' || t == 'L' || t == 'AL') {
+      if (t === 'EN') {
+        types[i] = (lastType === 'AL') ? 'AN' : 'EN';
+      } else if (t === 'R' || t === 'L' || t === 'AL') {
         lastType = t;
       }
     }
@@ -36754,7 +36754,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
      */
     for (i = 0; i < strLength; ++i) {
       t = types[i];
-      if (t == 'AL') {
+      if (t === 'AL') {
         types[i] = 'R';
       }
     }
@@ -36765,11 +36765,12 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
      type changes to that type:
      */
     for (i = 1; i < strLength - 1; ++i) {
-      if (types[i] == 'ES' && types[i - 1] == 'EN' && types[i + 1] == 'EN') {
+      if (types[i] === 'ES' && types[i - 1] === 'EN' && types[i + 1] === 'EN') {
         types[i] = 'EN';
       }
-      if (types[i] == 'CS' && (types[i - 1] == 'EN' || types[i - 1] == 'AN') &&
-          types[i + 1] == types[i - 1]) {
+      if (types[i] === 'CS' &&
+          (types[i - 1] === 'EN' || types[i - 1] === 'AN') &&
+          types[i + 1] === types[i - 1]) {
         types[i] = types[i - 1];
       }
     }
@@ -36779,18 +36780,18 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
      to all European numbers:
      */
     for (i = 0; i < strLength; ++i) {
-      if (types[i] == 'EN') {
+      if (types[i] === 'EN') {
         // do before
         var j;
         for (j = i - 1; j >= 0; --j) {
-          if (types[j] != 'ET') {
+          if (types[j] !== 'ET') {
             break;
           }
           types[j] = 'EN';
         }
         // do after
         for (j = i + 1; j < strLength; --j) {
-          if (types[j] != 'ET') {
+          if (types[j] !== 'ET') {
             break;
           }
           types[j] = 'EN';
@@ -36803,7 +36804,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
      */
     for (i = 0; i < strLength; ++i) {
       t = types[i];
-      if (t == 'WS' || t == 'ES' || t == 'ET' || t == 'CS') {
+      if (t === 'WS' || t === 'ES' || t === 'ET' || t === 'CS') {
         types[i] = 'ON';
       }
     }
@@ -36816,9 +36817,9 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
     lastType = sor;
     for (i = 0; i < strLength; ++i) {
       t = types[i];
-      if (t == 'EN') {
-        types[i] = ((lastType == 'L') ? 'L' : 'EN');
-      } else if (t == 'R' || t == 'L') {
+      if (t === 'EN') {
+        types[i] = ((lastType === 'L') ? 'L' : 'EN');
+      } else if (t === 'R' || t === 'L') {
         lastType = t;
       }
     }
@@ -36830,7 +36831,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
      end-of-level-run (eor) are used at level run boundaries.
      */
     for (i = 0; i < strLength; ++i) {
-      if (types[i] == 'ON') {
+      if (types[i] === 'ON') {
         var end = findUnequal(types, i + 1, 'ON');
         var before = sor;
         if (i > 0) {
@@ -36841,13 +36842,13 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
         if (end + 1 < strLength) {
           after = types[end + 1];
         }
-        if (before != 'L') {
+        if (before !== 'L') {
           before = 'R';
         }
-        if (after != 'L') {
+        if (after !== 'L') {
           after = 'R';
         }
-        if (before == after) {
+        if (before === after) {
           setValues(types, i, end, before);
         }
         i = end - 1; // reset to end (-1 so next iteration is ok)
@@ -36858,7 +36859,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
      N2. Any remaining neutrals take the embedding direction.
      */
     for (i = 0; i < strLength; ++i) {
-      if (types[i] == 'ON') {
+      if (types[i] === 'ON') {
         types[i] = e;
       }
     }
@@ -36873,13 +36874,13 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
     for (i = 0; i < strLength; ++i) {
       t = types[i];
       if (isEven(levels[i])) {
-        if (t == 'R') {
+        if (t === 'R') {
           levels[i] += 1;
-        } else if (t == 'AN' || t == 'EN') {
+        } else if (t === 'AN' || t === 'EN') {
           levels[i] += 2;
         }
       } else { // isOdd
-        if (t == 'L' || t == 'AN' || t == 'EN') {
+        if (t === 'L' || t === 'AN' || t === 'EN') {
           levels[i] += 1;
         }
       }
@@ -36958,7 +36959,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
     var result = '';
     for (i = 0, ii = chars.length; i < ii; ++i) {
       var ch = chars[i];
-      if (ch != '<' && ch != '>') {
+      if (ch !== '<' && ch !== '>') {
         result += ch;
       }
     }
