@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.427';
-PDFJS.build = 'bb7e7d3';
+PDFJS.version = '1.0.429';
+PDFJS.build = '10db93b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -24187,6 +24187,12 @@ var Font = (function FontClosure() {
             // Gxx glyph
             if (glyphName.length === 3 &&
                 glyphName[0] === 'G' &&
+                (code = parseInt(glyphName.substr(1), 16))) {
+              toUnicode[charcode] = String.fromCharCode(code);
+            }
+            // g00xx glyph
+            if (glyphName.length === 5 &&
+                glyphName[0] === 'g' &&
                 (code = parseInt(glyphName.substr(1), 16))) {
               toUnicode[charcode] = String.fromCharCode(code);
             }
