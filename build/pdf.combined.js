@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.553';
-PDFJS.build = '2cd49b5';
+PDFJS.version = '1.0.558';
+PDFJS.build = 'c86836a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -30072,7 +30072,7 @@ var PDFImage = (function PDFImageClosure() {
 
     var computedLength = ((width + 7) >> 3) * height;
     var actualLength = imgArray.byteLength;
-    var haveFullData = computedLength == actualLength;
+    var haveFullData = computedLength === actualLength;
     var data, i;
 
     if (imageIsFromDecodeStream && (!inverseDecode || haveFullData)) {
@@ -30230,7 +30230,7 @@ var PDFImage = (function PDFImageClosure() {
         sh = smask.height;
         alphaBuf = new Uint8Array(sw * sh);
         smask.fillGrayBuffer(alphaBuf);
-        if (sw != width || sh != height) {
+        if (sw !== width || sh !== height) {
           alphaBuf = PDFImage.resize(alphaBuf, smask.bpc, 1, sw, sh, width,
                                      height);
         }
@@ -30247,7 +30247,7 @@ var PDFImage = (function PDFImageClosure() {
             alphaBuf[i] = 255 - alphaBuf[i];
           }
 
-          if (sw != width || sh != height) {
+          if (sw !== width || sh !== height) {
             alphaBuf = PDFImage.resize(alphaBuf, mask.bpc, 1, sw, sh, width,
                                        height);
           }
@@ -30416,7 +30416,7 @@ var PDFImage = (function PDFImageClosure() {
 
     fillGrayBuffer: function PDFImage_fillGrayBuffer(buffer) {
       var numComps = this.numComps;
-      if (numComps != 1) {
+      if (numComps !== 1) {
         error('Reading gray scale from a color image: ' + numComps);
       }
 
@@ -37575,7 +37575,7 @@ var JpegImage = (function jpegImage() {
         return (bitsData >> bitsCount) & 1;
       }
       bitsData = data[offset++];
-      if (bitsData == 0xFF) {
+      if (bitsData === 0xFF) {
         var nextByte = data[offset++];
         if (nextByte) {
           throw 'unexpected marker: ' +
@@ -37721,7 +37721,7 @@ var JpegImage = (function jpegImage() {
           } else {
             r--;
             if (r === 0) {
-              successiveACState = successiveACState == 2 ? 3 : 0;
+              successiveACState = successiveACState === 2 ? 3 : 0;
             }
           }
           break;
@@ -37781,7 +37781,7 @@ var JpegImage = (function jpegImage() {
 
     var mcu = 0, marker;
     var mcuExpected;
-    if (componentsLength == 1) {
+    if (componentsLength === 1) {
       mcuExpected = components[0].blocksPerLine * components[0].blocksPerColumn;
     } else {
       mcuExpected = mcusPerLine * frame.mcusPerColumn;
@@ -37798,7 +37798,7 @@ var JpegImage = (function jpegImage() {
       }
       eobrun = 0;
 
-      if (componentsLength == 1) {
+      if (componentsLength === 1) {
         component = components[0];
         for (n = 0; n < resetInterval; n++) {
           decodeBlock(component, decodeFn, mcu);
@@ -38087,12 +38087,12 @@ var JpegImage = (function jpegImage() {
       var quantizationTables = [];
       var huffmanTablesAC = [], huffmanTablesDC = [];
       var fileMarker = readUint16();
-      if (fileMarker != 0xFFD8) { // SOI (Start of Image)
+      if (fileMarker !== 0xFFD8) { // SOI (Start of Image)
         throw 'SOI not found';
       }
 
       fileMarker = readUint16();
-      while (fileMarker != 0xFFD9) { // EOI (End of image)
+      while (fileMarker !== 0xFFD9) { // EOI (End of image)
         var i, j, l;
         switch(fileMarker) {
           case 0xFFE0: // APP0 (Application Specific)
@@ -38258,7 +38258,7 @@ var JpegImage = (function jpegImage() {
             offset += processed;
             break;
           default:
-            if (data[offset - 3] == 0xFF &&
+            if (data[offset - 3] === 0xFF &&
                 data[offset - 2] >= 0xC0 && data[offset - 2] <= 0xFE) {
               // could be incorrect encoding -- last 0xFF byte of the previous
               // block was eaten by the encoder
@@ -38342,7 +38342,7 @@ var JpegImage = (function jpegImage() {
       if (this.adobe && this.adobe.transformCode) {
         // The adobe transform marker overrides any previous setting
         return true;
-      } else if (this.numComponents == 3) {
+      } else if (this.numComponents === 3) {
         return true;
       } else {
         return false;
@@ -38573,7 +38573,7 @@ var JpxImage = (function JpxImageClosure() {
         newByte = stream.getByte();
         var code = (oldByte << 8) | newByte;
         // Image and tile size (SIZ)
-        if (code == 0xFF51) {
+        if (code === 0xFF51) {
           stream.skip(4);
           var Xsiz = stream.getInt32() >>> 0; // Byte 4
           var Ysiz = stream.getInt32() >>> 0; // Byte 8
@@ -38664,13 +38664,13 @@ var JpxImage = (function JpxImageClosure() {
                 default:
                   throw new Error('JPX Error: Invalid SQcd value ' + sqcd);
               }
-              qcd.noQuantization = (spqcdSize == 8);
+              qcd.noQuantization = (spqcdSize === 8);
               qcd.scalarExpounded = scalarExpounded;
               qcd.guardBits = sqcd >> 5;
               spqcds = [];
               while (j < length + position) {
                 var spqcd = {};
-                if (spqcdSize == 8) {
+                if (spqcdSize === 8) {
                   spqcd.epsilon = data[j++] >> 3;
                   spqcd.mu = 0;
                 } else {
@@ -38716,13 +38716,13 @@ var JpxImage = (function JpxImageClosure() {
                 default:
                   throw new Error('JPX Error: Invalid SQcd value ' + sqcd);
               }
-              qcc.noQuantization = (spqcdSize == 8);
+              qcc.noQuantization = (spqcdSize === 8);
               qcc.scalarExpounded = scalarExpounded;
               qcc.guardBits = sqcd >> 5;
               spqcds = [];
               while (j < (length + position)) {
                 spqcd = {};
-                if (spqcdSize == 8) {
+                if (spqcdSize === 8) {
                   spqcd.epsilon = data[j++] >> 3;
                   spqcd.mu = 0;
                 } else {
@@ -39035,7 +39035,7 @@ var JpxImage = (function JpxImageClosure() {
       var codeblocks = subband.codeblocks;
       for (var j = 0, jj = codeblocks.length; j < jj; j++) {
         var codeblock = codeblocks[j];
-        if (codeblock.precinctNumber != precinctNumber) {
+        if (codeblock.precinctNumber !== precinctNumber) {
           continue;
         }
         precinctCodeblocks.push(codeblock);
@@ -39237,7 +39237,7 @@ var JpxImage = (function JpxImageClosure() {
           buffer = (buffer << 8) | b;
           bufferSize += 8;
         }
-        if (b == 0xFF) {
+        if (b === 0xFF) {
           skipNextBit = true;
         }
       }
@@ -39744,7 +39744,7 @@ var JpxImage = (function JpxImageClosure() {
           level.index = index;
           var value = level.items[index];
 
-          if (value == 0xFF) {
+          if (value === 0xFF) {
             break;
           }
 
@@ -39822,8 +39822,8 @@ var JpxImage = (function JpxImageClosure() {
       this.width = width;
       this.height = height;
 
-      this.contextLabelTable = (subband == 'HH' ? HHContextLabel :
-        (subband == 'HL' ? HLContextLabel : LLAndLHContextsLabel));
+      this.contextLabelTable = (subband === 'HH' ? HHContextLabel :
+        (subband === 'HL' ? HLContextLabel : LLAndLHContextsLabel));
 
       var coefficientCount = width * height;
 
@@ -40061,8 +40061,8 @@ var JpxImage = (function JpxImageClosure() {
           var checkAllEmpty = i0 + 3 < height;
           for (var j = 0; j < width; j++) {
             var index0 = indexBase + j;
-            // using the property: labels[neighborsSignificance[index]] == 0
-            // when neighborsSignificance[index] == 0
+            // using the property: labels[neighborsSignificance[index]] === 0
+            // when neighborsSignificance[index] === 0
             var allEmpty = (checkAllEmpty &&
               processingFlags[index0] === 0 &&
               processingFlags[index0 + oneRowDown] === 0 &&
@@ -40131,7 +40131,7 @@ var JpxImage = (function JpxImageClosure() {
                      (decoder.readBit(contexts, UNIFORM_CONTEXT) << 2) |
                      (decoder.readBit(contexts, UNIFORM_CONTEXT) << 1) |
                       decoder.readBit(contexts, UNIFORM_CONTEXT);
-        if (symbol != 0xA) {
+        if (symbol !== 0xA) {
           throw new Error('JPX Error: Invalid segmentation symbol');
         }
       }
@@ -40850,7 +40850,7 @@ var Jbig2Image = (function Jbig2ImageClosure() {
       firstS += deltaFirstS;
       var currentS = firstS;
       do {
-        var currentT = (stripSize == 1 ? 0 :
+        var currentT = (stripSize === 1 ? 0 :
                         decodeInteger(contextCache, 'IAIT', decoder)); // 6.4.9
         var t = stripSize * stripT + currentT;
         var symbolId = decodeIAID(contextCache, decoder, symbolCodeLength);
@@ -40955,7 +40955,7 @@ var Jbig2Image = (function Jbig2ImageClosure() {
     var referredToCount = (referredFlags >> 5) & 7;
     var retainBits = [referredFlags & 31];
     var position = start + 6;
-    if (referredFlags == 7) {
+    if (referredFlags === 7) {
       referredToCount = readUint32(data, position - 1) & 0x1FFFFFFF;
       position += 3;
       var bytes = (referredToCount + 7) >> 3;
@@ -40963,7 +40963,7 @@ var Jbig2Image = (function Jbig2ImageClosure() {
       while (--bytes > 0) {
         retainBits.push(data[position++]);
       }
-    } else if (referredFlags == 5 || referredFlags == 6) {
+    } else if (referredFlags === 5 || referredFlags === 6) {
       error('JBIG2 error: invalid referred-to flags');
     }
 
@@ -40973,8 +40973,8 @@ var Jbig2Image = (function Jbig2ImageClosure() {
     var referredTo = [];
     var i, ii;
     for (i = 0; i < referredToCount; i++) {
-      var number = (referredToSegmentNumberSize == 1 ? data[position] :
-        (referredToSegmentNumberSize == 2 ? readUint16(data, position) :
+      var number = (referredToSegmentNumberSize === 1 ? data[position] :
+        (referredToSegmentNumberSize === 2 ? readUint16(data, position) :
         readUint32(data, position)));
       referredTo.push(number);
       position += referredToSegmentNumberSize;
@@ -40989,7 +40989,7 @@ var Jbig2Image = (function Jbig2ImageClosure() {
     segmentHeader.length = readUint32(data, position);
     position += 4;
 
-    if (segmentHeader.length == 0xFFFFFFFF) {
+    if (segmentHeader.length === 0xFFFFFFFF) {
       // 7.2.7 Segment data length, unknown segment length
       if (segmentType === 38) { // ImmediateGenericRegion
         var genericRegionInfo = readRegionSegmentInformation(data, position);
@@ -41012,12 +41012,12 @@ var Jbig2Image = (function Jbig2ImageClosure() {
           while (j < searchPatternLength && searchPattern[j] === data[i + j]) {
             j++;
           }
-          if (j == searchPatternLength) {
+          if (j === searchPatternLength) {
             segmentHeader.length = i + searchPatternLength;
             break;
           }
         }
-        if (segmentHeader.length == 0xFFFFFFFF) {
+        if (segmentHeader.length === 0xFFFFFFFF) {
           error('JBIG2 error: segment end was not found');
         }
       } else {
@@ -41044,7 +41044,7 @@ var Jbig2Image = (function Jbig2ImageClosure() {
         segment.end = position;
       }
       segments.push(segment);
-      if (segmentHeader.type == 51) {
+      if (segmentHeader.type === 51) {
         break; // end of file is found
       }
     }
@@ -41199,7 +41199,7 @@ var Jbig2Image = (function Jbig2ImageClosure() {
           resolutionX: readUint32(data, position + 8),
           resolutionY: readUint32(data, position + 12)
         };
-        if (pageInfo.height == 0xFFFFFFFF) {
+        if (pageInfo.height === 0xFFFFFFFF) {
           delete pageInfo.height;
         }
         var pageSegmentFlags = data[position + 16];
@@ -41239,10 +41239,10 @@ var Jbig2Image = (function Jbig2ImageClosure() {
 
   function parseJbig2(data, start, end) {
     var position = start;
-    if (data[position] != 0x97 || data[position + 1] != 0x4A ||
-        data[position + 2] != 0x42 || data[position + 3] != 0x32 ||
-        data[position + 4] != 0x0D || data[position + 5] != 0x0A ||
-        data[position + 6] != 0x1A || data[position + 7] != 0x0A) {
+    if (data[position] !== 0x97 || data[position + 1] !== 0x4A ||
+        data[position + 2] !== 0x42 || data[position + 3] !== 0x32 ||
+        data[position + 4] !== 0x0D || data[position + 5] !== 0x0A ||
+        data[position + 6] !== 0x1A || data[position + 7] !== 0x0A) {
       error('JBIG2 error: invalid header');
     }
     var header = {};
