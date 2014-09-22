@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.145';
-PDFJS.build = 'b3f24ca';
+PDFJS.version = '1.0.152';
+PDFJS.build = '7ac1d6c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2208,25 +2208,15 @@ var CalGrayCS = (function CalGrayCSClosure() {
     var A = src[srcOffset] * scale;
     var AG = Math.pow(A, cs.G);
 
-    // Computes intermediate variables M, L, N as per spec.
+    // Computes L as per spec. ( = cs.YW * AG )
     // Except if other than default BlackPoint values are used.
-    var M = cs.XW * AG;
     var L = cs.YW * AG;
-    var N = cs.ZW * AG;
-
-    // Decode XYZ, as per spec.
-    var X = M;
-    var Y = L;
-    var Z = N;
-
     // http://www.poynton.com/notes/colour_and_gamma/ColorFAQ.html, Ch 4.
-    // This yields values in range [0, 100].
-    var Lstar = Math.max(116 * Math.pow(Y, 1 / 3) - 16, 0);
-
     // Convert values to rgb range [0, 255].
-    dest[destOffset] = Lstar * 255 / 100;
-    dest[destOffset + 1] = Lstar * 255 / 100;
-    dest[destOffset + 2] = Lstar * 255 / 100;
+    var val = Math.max(295.8 * Math.pow(L, 0.333333333333333333) - 40.8, 0) | 0;
+    dest[destOffset] = val;
+    dest[destOffset + 1] = val;
+    dest[destOffset + 2] = val;
   }
 
   CalGrayCS.prototype = {
@@ -5824,24 +5814,33 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     } else if (imgData.kind === ImageKind.RGBA_32BPP) {
       // RGBA, 32-bits per pixel.
 
-      for (i = 0; i < totalChunks; i++) {
-        thisChunkHeight =
-          (i < fullChunks) ? fullChunkHeight : partialChunkHeight;
-        elemsInThisChunk = imgData.width * thisChunkHeight * 4;
-
+      j = 0;
+      elemsInThisChunk = width * fullChunkHeight * 4;
+      for (i = 0; i < fullChunks; i++) {
         dest.set(src.subarray(srcPos, srcPos + elemsInThisChunk));
         srcPos += elemsInThisChunk;
 
-        ctx.putImageData(chunkImgData, 0, i * fullChunkHeight);
+        ctx.putImageData(chunkImgData, 0, j);
+        j += fullChunkHeight;
       }
+      if (i < totalChunks) {
+        elemsInThisChunk = width * partialChunkHeight * 4;
+        dest.set(src.subarray(srcPos, srcPos + elemsInThisChunk));
+        ctx.putImageData(chunkImgData, 0, j);
+      }
+
     } else if (imgData.kind === ImageKind.RGB_24BPP) {
       // RGB, 24-bits per pixel.
+      thisChunkHeight = fullChunkHeight;
+      elemsInThisChunk = width * thisChunkHeight;
       for (i = 0; i < totalChunks; i++) {
-        thisChunkHeight =
-          (i < fullChunks) ? fullChunkHeight : partialChunkHeight;
-        elemsInThisChunk = imgData.width * thisChunkHeight * 3;
+        if (i >= fullChunks) {
+          thisChunkHeight =partialChunkHeight;
+          elemsInThisChunk = width * thisChunkHeight;
+        }
+
         destPos = 0;
-        for (j = 0; j < elemsInThisChunk; j += 3) {
+        for (j = elemsInThisChunk; j--;) {
           dest[destPos++] = src[srcPos++];
           dest[destPos++] = src[srcPos++];
           dest[destPos++] = src[srcPos++];

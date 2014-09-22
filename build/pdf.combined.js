@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.145';
-PDFJS.build = 'b3f24ca';
+PDFJS.version = '1.0.152';
+PDFJS.build = '7ac1d6c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2208,25 +2208,15 @@ var CalGrayCS = (function CalGrayCSClosure() {
     var A = src[srcOffset] * scale;
     var AG = Math.pow(A, cs.G);
 
-    // Computes intermediate variables M, L, N as per spec.
+    // Computes L as per spec. ( = cs.YW * AG )
     // Except if other than default BlackPoint values are used.
-    var M = cs.XW * AG;
     var L = cs.YW * AG;
-    var N = cs.ZW * AG;
-
-    // Decode XYZ, as per spec.
-    var X = M;
-    var Y = L;
-    var Z = N;
-
     // http://www.poynton.com/notes/colour_and_gamma/ColorFAQ.html, Ch 4.
-    // This yields values in range [0, 100].
-    var Lstar = Math.max(116 * Math.pow(Y, 1 / 3) - 16, 0);
-
     // Convert values to rgb range [0, 255].
-    dest[destOffset] = Lstar * 255 / 100;
-    dest[destOffset + 1] = Lstar * 255 / 100;
-    dest[destOffset + 2] = Lstar * 255 / 100;
+    var val = Math.max(295.8 * Math.pow(L, 0.333333333333333333) - 40.8, 0) | 0;
+    dest[destOffset] = val;
+    dest[destOffset + 1] = val;
+    dest[destOffset + 2] = val;
   }
 
   CalGrayCS.prototype = {
@@ -5776,24 +5766,33 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     } else if (imgData.kind === ImageKind.RGBA_32BPP) {
       // RGBA, 32-bits per pixel.
 
-      for (i = 0; i < totalChunks; i++) {
-        thisChunkHeight =
-          (i < fullChunks) ? fullChunkHeight : partialChunkHeight;
-        elemsInThisChunk = imgData.width * thisChunkHeight * 4;
-
+      j = 0;
+      elemsInThisChunk = width * fullChunkHeight * 4;
+      for (i = 0; i < fullChunks; i++) {
         dest.set(src.subarray(srcPos, srcPos + elemsInThisChunk));
         srcPos += elemsInThisChunk;
 
-        ctx.putImageData(chunkImgData, 0, i * fullChunkHeight);
+        ctx.putImageData(chunkImgData, 0, j);
+        j += fullChunkHeight;
       }
+      if (i < totalChunks) {
+        elemsInThisChunk = width * partialChunkHeight * 4;
+        dest.set(src.subarray(srcPos, srcPos + elemsInThisChunk));
+        ctx.putImageData(chunkImgData, 0, j);
+      }
+
     } else if (imgData.kind === ImageKind.RGB_24BPP) {
       // RGB, 24-bits per pixel.
+      thisChunkHeight = fullChunkHeight;
+      elemsInThisChunk = width * thisChunkHeight;
       for (i = 0; i < totalChunks; i++) {
-        thisChunkHeight =
-          (i < fullChunks) ? fullChunkHeight : partialChunkHeight;
-        elemsInThisChunk = imgData.width * thisChunkHeight * 3;
+        if (i >= fullChunks) {
+          thisChunkHeight =partialChunkHeight;
+          elemsInThisChunk = width * thisChunkHeight;
+        }
+
         destPos = 0;
-        for (j = 0; j < elemsInThisChunk; j += 3) {
+        for (j = elemsInThisChunk; j--;) {
           dest[destPos++] = src[srcPos++];
           dest[destPos++] = src[srcPos++];
           dest[destPos++] = src[srcPos++];
@@ -35361,27 +35360,29 @@ var PDFImage = (function PDFImageClosure() {
       if (!matte) {
         return;
       }
-
-      function clamp(value) {
-        return (value < 0 ? 0 : (value > 255 ? 255 : value)) | 0;
-      }
-
       var matteRgb = this.colorSpace.getRgb(matte, 0);
+      var matteR = matteRgb[0];
+      var matteG = matteRgb[1];
+      var matteB = matteRgb[2];
       var length = width * height * 4;
+      var r, g, b;
       for (var i = 0; i < length; i += 4) {
         var alpha = buffer[i + 3];
         if (alpha === 0) {
           // according formula we have to get Infinity in all components
-          // making it white (tipical paper color) should be okay
+          // making it white (typical paper color) should be okay
           buffer[i] = 255;
           buffer[i + 1] = 255;
           buffer[i + 2] = 255;
           continue;
         }
         var k = 255 / alpha;
-        buffer[i] = clamp((buffer[i] - matteRgb[0]) * k + matteRgb[0]);
-        buffer[i + 1] = clamp((buffer[i + 1] - matteRgb[1]) * k + matteRgb[1]);
-        buffer[i + 2] = clamp((buffer[i + 2] - matteRgb[2]) * k + matteRgb[2]);
+        r = (buffer[i] - matteR) * k + matteR;
+        g = (buffer[i + 1] - matteG) * k + matteG;
+        b = (buffer[i + 2] - matteB) * k + matteB;
+        buffer[i] = r <= 0 ? 0 : r >= 255 ? 255 : r | 0;
+        buffer[i + 1] = g <= 0 ? 0 : g >= 255 ? 255 : g | 0;
+        buffer[i + 2] = b <= 0 ? 0 : b >= 255 ? 255 : b | 0;
       }
     },
 
@@ -43314,60 +43315,35 @@ var JpegImage = (function jpegImage() {
     _getLinearizedBlockData: function getLinearizedBlockData(width, height) {
       var scaleX = this.width / width, scaleY = this.height / height;
 
-      var component, componentScaleX, componentScaleY;
-      var x, y, i;
+      var component, componentScaleX, componentScaleY, blocksPerScanline;
+      var x, y, i, j;
+      var index;
       var offset = 0;
-      var Y, Cb, Cr, K, C, M, Ye, R, G, B;
-      var colorTransform;
+      var output;
       var numComponents = this.components.length;
       var dataLength = width * height * numComponents;
       var data = new Uint8Array(dataLength);
-      var componentLine;
+      var xScaleBlockOffset = new Uint32Array(width);
+      var mask3LSB = 0xfffffff8; // used to clear the 3 LSBs
 
-      // lineData is reused for all components. Assume first component is
-      // the biggest
-      var lineData = new Uint8Array((this.components[0].blocksPerLine << 3) *
-                                    this.components[0].blocksPerColumn * 8);
-
-      // First construct image data ...
       for (i = 0; i < numComponents; i++) {
         component = this.components[i];
-        var blocksPerLine = component.blocksPerLine;
-        var blocksPerColumn = component.blocksPerColumn;
-        var samplesPerLine = blocksPerLine << 3;
-
-        var j, k, ll = 0;
-        var sample;
-        var lineOffset = 0;
-        for (var blockRow = 0; blockRow < blocksPerColumn; blockRow++) {
-          var scanLine = blockRow << 3;
-          for (var blockCol = 0; blockCol < blocksPerLine; blockCol++) {
-            var bufferOffset = getBlockBufferOffset(component,
-                                                    blockRow, blockCol);
-            offset = 0;
-            sample = blockCol << 3;
-            for (j = 0; j < 8; j++) {
-              lineOffset = (scanLine + j) * samplesPerLine;
-              for (k = 0; k < 8; k++) {
-                lineData[lineOffset + sample + k] =
-                  component.output[bufferOffset + offset++];
-              }
-            }
-          }
-        }
-
         componentScaleX = component.scaleX * scaleX;
         componentScaleY = component.scaleY * scaleY;
         offset = i;
-
-        var cx, cy;
-        var index;
+        output = component.output;
+        blocksPerScanline = (component.blocksPerLine + 1) << 3;
+        // precalculate the xScaleBlockOffset
+        for (x = 0; x < width; x++) {
+          j = 0 | (x * componentScaleX);
+          xScaleBlockOffset[x] = ((j & mask3LSB) << 3) | (j & 7);
+        }
+        // linearize the blocks of the component
         for (y = 0; y < height; y++) {
+          j = 0 | (y * componentScaleY);
+          index = blocksPerScanline * (j & mask3LSB) | ((j & 7) << 3);
           for (x = 0; x < width; x++) {
-            cy = 0 | (y * componentScaleY);
-            cx = 0 | (x * componentScaleX);
-            index = cy * samplesPerLine + cx;
-            data[offset] = lineData[index];
+            data[offset] = output[index + xScaleBlockOffset[x]];
             offset += numComponents;
           }
         }
@@ -43472,50 +43448,51 @@ var JpegImage = (function jpegImage() {
     _convertCmykToRgb: function convertCmykToRgb(data) {
       var c, m, y, k;
       var offset = 0;
-      for (var i = 0; i < data.length; i += this.numComponents) {
-        c = data[i   ] * 0.00392156862745098;
-        m = data[i + 1] * 0.00392156862745098;
-        y = data[i + 2] * 0.00392156862745098;
-        k = data[i + 3] * 0.00392156862745098;
+      var length = data.length;
+      var min = -255 * 255 * 255;
+      var scale = 1 / 255 / 255;
+      for (var i = 0; i < length;) {
+        c = data[i++];
+        m = data[i++];
+        y = data[i++];
+        k = data[i++];
 
         var r =
           c * (-4.387332384609988 * c + 54.48615194189176 * m +
-               18.82290502165302 * y + 212.25662451639585 * k +
-               -285.2331026137004) +
-          m * (1.7149763477362134 * m - 5.6096736904047315 * y +
-               -17.873870861415444 * k - 5.497006427196366) +
+               18.82290502165302 * y + 212.25662451639585 * k -
+               72734.4411664936) +
+          m * (1.7149763477362134 * m - 5.6096736904047315 * y -
+               17.873870861415444 * k - 1401.7366389350734) +
           y * (-2.5217340131683033 * y - 21.248923337353073 * k +
-               17.5119270841813) +
-          k * (-21.86122147463605 * k - 189.48180835922747) + 255;
+               4465.541406466231) -
+          k * (21.86122147463605 * k + 48317.86113160301);
         var g =
           c * (8.841041422036149 * c + 60.118027045597366 * m +
-               6.871425592049007 * y + 31.159100130055922 * k +
-               -79.2970844816548) +
+               6.871425592049007 * y + 31.159100130055922 * k -
+               20220.756542821975) +
           m * (-15.310361306967817 * m + 17.575251261109482 * y +
-               131.35250912493976 * k - 190.9453302588951) +
-          y * (4.444339102852739 * y + 9.8632861493405 * k - 24.8674158255588) +
-          k * (-20.737325471181034 * k - 187.80453709719578) + 255;
+               131.35250912493976 * k - 48691.05921601825) +
+          y * (4.444339102852739 * y + 9.8632861493405 * k -
+               6341.191035517494) -
+          k * (20.737325471181034 * k + 47890.15695978492);
         var b =
           c * (0.8842522430003296 * c + 8.078677503112928 * m +
-               30.89978309703729 * y - 0.23883238689178934 * k +
-               -14.183576799673286) +
+               30.89978309703729 * y - 0.23883238689178934 * k -
+               3616.812083916688) +
           m * (10.49593273432072 * m + 63.02378494754052 * y +
-               50.606957656360734 * k - 112.23884253719248) +
-          y * (0.03296041114873217 * y + 115.60384449646641 * k +
-               -193.58209356861505) +
-          k * (-22.33816807309886 * k - 180.12613974708367) + 255;
+               50.606957656360734 * k - 28620.90484698408) +
+          y * (0.03296041114873217 * y + 115.60384449646641 * k -
+               49363.43385999684) -
+          k * (22.33816807309886 * k + 45932.16563550634);
 
-        data[offset++] = clamp0to255(r);
-        data[offset++] = clamp0to255(g);
-        data[offset++] = clamp0to255(b);
+        data[offset++] = r >= 0 ? 255 : r <= min ? 0 : 255 + r * scale | 0;
+        data[offset++] = g >= 0 ? 255 : g <= min ? 0 : 255 + g * scale | 0;
+        data[offset++] = b >= 0 ? 255 : b <= min ? 0 : 255 + b * scale | 0;
       }
       return data;
     },
 
     getData: function getData(width, height, forceRGBoutput) {
-      var i;
-      var Y, Cb, Cr, K, C, M, Ye, R, G, B;
-      var colorTransform;
       if (this.numComponents > 4) {
         throw 'Unsupported color mode';
       }
@@ -44600,7 +44577,7 @@ var JpxImage = (function JpxImageClosure() {
       };
 
       // Section G.2.2 Inverse multi component transform
-      var shift, offset, max, min;
+      var shift, offset, max, min, maxK;
       var pos = 0, j, jj, y0, y1, y2, r, g, b, k, val;
       if (tile.codingStyleDefaultParameters.multipleComponentTransform) {
         var fourComponents = componentsCount === 4;
@@ -44614,45 +44591,44 @@ var JpxImage = (function JpxImageClosure() {
         // compute shift and offset only once.
         shift = components[0].precision - 8;
         offset = (128 << shift) + 0.5;
-        max = (127.5 * (1 << shift));
-        min = -max;
+        max = 255 * (1 << shift);
+        maxK = max * 0.5;
+        min = -maxK;
 
         var component0 = tile.components[0];
+        var alpha01 = componentsCount - 3;
+        jj = y0items.length;
         if (!component0.codingStyleParameters.reversibleTransformation) {
           // inverse irreversible multiple component transform
-          for (j = 0, jj = y0items.length; j < jj; ++j) {
-            y0 = y0items[j];
+          for (j = 0; j < jj; j++, pos += alpha01) {
+            y0 = y0items[j] + offset;
             y1 = y1items[j];
             y2 = y2items[j];
             r = y0 + 1.402 * y2;
             g = y0 - 0.34413 * y1 - 0.71414 * y2;
             b = y0 + 1.772 * y1;
-            out[pos++] = r <= min ? 0 : r >= max ? 255 : (r + offset) >> shift;
-            out[pos++] = g <= min ? 0 : g >= max ? 255 : (g + offset) >> shift;
-            out[pos++] = b <= min ? 0 : b >= max ? 255 : (b + offset) >> shift;
-            if (fourComponents) {
-              k = y3items[j];
-              out[pos++] =
-                k <= min ? 0 : k >= max ? 255 : (k + offset) >> shift;
-            }
+            out[pos++] = r <= 0 ? 0 : r >= max ? 255 : r >> shift;
+            out[pos++] = g <= 0 ? 0 : g >= max ? 255 : g >> shift;
+            out[pos++] = b <= 0 ? 0 : b >= max ? 255 : b >> shift;
           }
         } else {
           // inverse reversible multiple component transform
-          for (j = 0, jj = y0items.length; j < jj; ++j) {
-            y0 = y0items[j];
+          for (j = 0; j < jj; j++, pos += alpha01) {
+            y0 = y0items[j] + offset;
             y1 = y1items[j];
             y2 = y2items[j];
             g = y0 - ((y2 + y1) >> 2);
             r = g + y2;
             b = g + y1;
-            out[pos++] = r <= min ? 0 : r >= max ? 255 : (r + offset) >> shift;
-            out[pos++] = g <= min ? 0 : g >= max ? 255 : (g + offset) >> shift;
-            out[pos++] = b <= min ? 0 : b >= max ? 255 : (b + offset) >> shift;
-            if (fourComponents) {
-              k = y3items[j];
-              out[pos++] =
-                k <= min ? 0 : k >= max ? 255 : (k + offset) >> shift;
-            }
+            out[pos++] = r <= 0 ? 0 : r >= max ? 255 : r >> shift;
+            out[pos++] = g <= 0 ? 0 : g >= max ? 255 : g >> shift;
+            out[pos++] = b <= 0 ? 0 : b >= max ? 255 : b >> shift;
+          }
+        }
+        if (fourComponents) {
+          for (j = 0, pos = 3; j < jj; j++, pos += 4) {
+            k = y3items[j];
+            out[pos] = k <= min ? 0 : k >= maxK ? 255 : (k + offset) >> shift;
           }
         }
       } else { // no multi-component transform
