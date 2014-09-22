@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.122';
-PDFJS.build = 'aab48a2';
+PDFJS.version = '1.0.125';
+PDFJS.build = '4224bae';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4427,7 +4427,8 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
     this.requestsByChunk = {};
     this.callbacksByRequest = {};
 
-    this.loadedStream = new LegacyPromise();
+    this._loadedStreamCapability = createPromiseCapability();
+
     if (args.initialData) {
       this.setInitialData(args.initialData);
     }
@@ -4438,7 +4439,7 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
     setInitialData: function ChunkedStreamManager_setInitialData(data) {
       this.stream.onReceiveInitialData(data);
       if (this.stream.allChunksLoaded()) {
-        this.loadedStream.resolve(this.stream);
+        this._loadedStreamCapability.resolve(this.stream);
       } else if (this.msgHandler) {
         this.msgHandler.send('DocProgress', {
           loaded: data.length,
@@ -4448,7 +4449,7 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
     },
 
     onLoadedStream: function ChunkedStreamManager_getLoadedStream() {
-      return this.loadedStream;
+      return this._loadedStreamCapability.promise;
     },
 
     // Get all the chunks that are not yet loaded and groups them into
@@ -4456,7 +4457,7 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
     requestAllChunks: function ChunkedStreamManager_requestAllChunks() {
       var missingChunks = this.stream.getMissingChunks();
       this.requestChunks(missingChunks);
-      return this.loadedStream;
+      return this._loadedStreamCapability.promise;
     },
 
     requestChunks: function ChunkedStreamManager_requestChunks(chunks,
@@ -4592,7 +4593,7 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
 
       this.stream.onReceiveData(begin, chunk);
       if (this.stream.allChunksLoaded()) {
-        this.loadedStream.resolve(this.stream);
+        this._loadedStreamCapability.resolve(this.stream);
       }
 
       var loadedRequests = [];
@@ -4650,6 +4651,10 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
         loaded: this.stream.numChunksLoaded * this.chunkSize,
         total: this.length
       });
+    },
+
+    onError: function ChunkedStreamManager_onError(err) {
+      this._loadedStreamCapability.reject(err);
     },
 
     getBeginChunk: function ChunkedStreamManager_getBeginChunk(begin) {
