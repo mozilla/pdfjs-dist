@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.465';
-PDFJS.build = '584fef9';
+PDFJS.version = '1.0.467';
+PDFJS.build = '53320ce';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -22652,7 +22652,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       // 9.10.2
       var toUnicode = (dict.get('ToUnicode') || baseDict.get('ToUnicode'));
       if (toUnicode) {
-        properties.toUnicode = this.readToUnicode(toUnicode, xref, properties);
+        properties.toUnicode = this.readToUnicode(toUnicode);
       }
       if (properties.composite) {
         // CIDSystemInfo helps to match CID to glyphs
@@ -22736,9 +22736,11 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     readToUnicode: function PartialEvaluator_readToUnicode(toUnicode) {
       var cmapObj = toUnicode;
       if (isName(cmapObj)) {
-        return CMapFactory.create(cmapObj).map;
+        return CMapFactory.create(cmapObj,
+          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).map;
       } else if (isStream(cmapObj)) {
-        var cmap = CMapFactory.create(cmapObj).map;
+        var cmap = CMapFactory.create(cmapObj,
+          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).map;
         // Convert UTF-16BE
         // NOTE: cmap can be a sparse array, so use forEach instead of for(;;)
         // to iterate over all keys.
@@ -24740,7 +24742,7 @@ var CMapFactory = (function CMapFactoryClosure() {
     if (BUILT_IN_CMAPS.indexOf(name) === -1) {
       error('Unknown cMap name: ' + name);
     }
-    assert (builtInCMapParams, 'buildin cmap parameters are not provided');
+    assert(builtInCMapParams, 'built-in cMap parameters are not provided');
 
     if (builtInCMapParams.packed) {
       return parseBinaryCMap(name, builtInCMapParams);
