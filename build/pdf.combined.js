@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.454';
-PDFJS.build = 'e97efaa';
+PDFJS.version = '1.0.456';
+PDFJS.build = 'a7800c2';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5497,6 +5497,14 @@ var WebGLUtils = (function WebGLUtilsClosure() {
   }
 
   function cleanup() {
+    if (smaskCache && smaskCache.canvas) {
+      smaskCache.canvas.width = 0;
+      smaskCache.canvas.height = 0;
+    }
+    if (figuresCache && figuresCache.canvas) {
+      figuresCache.canvas.width = 0;
+      figuresCache.canvas.height = 0;
+    }
     smaskCache = null;
     figuresCache = null;
   }
