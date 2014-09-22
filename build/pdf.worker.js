@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.298';
-PDFJS.build = '75e1158';
+PDFJS.version = '1.0.300';
+PDFJS.build = '9308b52';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -38432,6 +38432,9 @@ var JpegImage = (function jpegImage() {
     }
 
     function receiveAndExtend(length) {
+      if (length === 1) {
+        return readBit() === 1 ? 1 : -1;
+      }
       var n = receive(length);
       if (n >= 1 << (length - 1)) {
         return n;
