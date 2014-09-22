@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.393';
-PDFJS.build = '2282c98';
+PDFJS.version = '1.0.395';
+PDFJS.build = 'c4ed02e';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1583,6 +1583,10 @@ function loadJpegStream(id, imageUrl, objs) {
   var img = new Image();
   img.onload = (function loadJpegStream_onloadClosure() {
     objs.resolve(id, img);
+  });
+  img.onerror = (function loadJpegStream_onerrorClosure() {
+    objs.resolve(id, null);
+    warn('Error during JPEG image loading');
   });
   img.src = imageUrl;
 }
