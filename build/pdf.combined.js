@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.704';
-PDFJS.build = '4ef7058';
+PDFJS.version = '1.0.706';
+PDFJS.build = 'f543e86';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4449,7 +4449,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       ctx.transform.apply(ctx, current.textMatrix);
       ctx.translate(current.x, current.y);
 
-      ctx.scale(textHScale, 1);
+      ctx.scale(textHScale, fontDirection);
 
       for (i = 0; i < glyphsLength; ++i) {
         glyph = glyphs[i];
@@ -4479,7 +4479,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
         this.restore();
 
         var transformed = Util.applyTransform([glyph.width, 0], fontMatrix);
-        width = ((transformed[0] * fontSize + charSpacing) * fontDirection);
+        width = transformed[0] * fontSize + charSpacing;
 
         ctx.translate(width, 0);
         current.x += width * textHScale;
