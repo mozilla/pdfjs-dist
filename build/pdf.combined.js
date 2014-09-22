@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.469';
-PDFJS.build = '780f86b';
+PDFJS.version = '1.0.471';
+PDFJS.build = 'faa9020';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -7664,10 +7664,14 @@ var PDFDocument = (function PDFDocumentClosure() {
   function find(stream, needle, limit, backwards) {
     var pos = stream.pos;
     var end = stream.end;
+    var strBuf = [];
     if (pos + limit > end) {
       limit = end - pos;
     }
-    var str = bytesToString(stream.getBytes(limit));
+    for (var n = 0; n < limit; ++n) {
+      strBuf.push(String.fromCharCode(stream.getByte()));
+    }
+    var str = strBuf.join('');
     stream.pos = pos;
     var index = backwards ? str.lastIndexOf(needle) : str.indexOf(needle);
     if (index == -1) {
@@ -41877,10 +41881,12 @@ var FlateStream = (function FlateStreamClosure() {
           this.eof = true;
         }
       } else {
-        var block = str.getBytes(blockLen);
-        buffer.set(block, bufferLength);
-        if (block.length < blockLen) {
-          this.eof = true;
+        for (var n = bufferLength; n < end; ++n) {
+          if ((b = str.getByte()) === -1) {
+            this.eof = true;
+            break;
+          }
+          buffer[n] = b;
         }
       }
       return;
