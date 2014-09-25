@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.830';
-PDFJS.build = '4189c78';
+PDFJS.version = '1.0.833';
+PDFJS.build = '9c56c6f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1675,6 +1675,14 @@ PDFJS.disableRange = (PDFJS.disableRange === undefined ?
                       false : PDFJS.disableRange);
 
 /**
+ * Disable streaming of PDF file data. By default PDF.js attempts to load PDF
+ * in chunks. This default behavior can be disabled.
+ * @var {boolean}
+ */
+PDFJS.disableStream = (PDFJS.disableStream === undefined ?
+                       false : PDFJS.disableStream);
+
+/**
  * Disable pre-fetching of PDF file data. When range requests are enabled PDF.js
  * will automatically keep fetching more data even if it isn't needed to display
  * the current page. This default behavior can be disabled.
@@ -2385,6 +2393,12 @@ var WorkerTransport = (function WorkerTransportClosure() {
           });
         });
 
+        pdfDataRangeTransport.addProgressiveReadListener(function(chunk) {
+          messageHandler.send('OnDataRange', {
+            chunk: chunk
+          });
+        });
+
         messageHandler.on('RequestDataRange',
           function transportDataRange(data) {
             pdfDataRangeTransport.requestDataRange(data.begin, data.end);
@@ -2443,6 +2457,12 @@ var WorkerTransport = (function WorkerTransportClosure() {
 
       messageHandler.on('DataLoaded', function transportPage(data) {
         this.downloadInfoCapability.resolve(data);
+      }, this);
+
+      messageHandler.on('PDFManagerReady', function transportPage(data) {
+        if (this.pdfDataRangeTransport) {
+          this.pdfDataRangeTransport.transportReady();
+        }
       }, this);
 
       messageHandler.on('StartRenderPage', function transportRender(data) {
@@ -7680,11 +7700,11 @@ var NetworkManager = (function NetworkManagerClosure() {
       return data;
     }
     var length = data.length;
-    var buffer = new Uint8Array(length);
+    var array = new Uint8Array(length);
     for (var i = 0; i < length; i++) {
-      buffer[i] = data.charCodeAt(i) & 0xFF;
+      array[i] = data.charCodeAt(i) & 0xFF;
     }
-    return buffer;
+    return array.buffer;
   }
 
   NetworkManager.prototype = {
@@ -7699,11 +7719,11 @@ var NetworkManager = (function NetworkManagerClosure() {
       return this.request(args);
     },
 
-    requestFull: function NetworkManager_requestRange(listeners) {
+    requestFull: function NetworkManager_requestFull(listeners) {
       return this.request(listeners);
     },
 
-    request: function NetworkManager_requestRange(args) {
+    request: function NetworkManager_request(args) {
       var xhr = this.getXhr();
       var xhrId = this.currXhrId++;
       var pendingRequest = this.pendingRequests[xhrId] = {
@@ -7727,25 +7747,52 @@ var NetworkManager = (function NetworkManagerClosure() {
         pendingRequest.expectedStatus = 200;
       }
 
-      xhr.responseType = 'arraybuffer';
-
-      if (args.onProgress) {
-        xhr.onprogress = args.onProgress;
+      if (args.onProgressiveData) {
+        xhr.responseType = 'moz-chunked-arraybuffer';
+        if (xhr.responseType === 'moz-chunked-arraybuffer') {
+          pendingRequest.onProgressiveData = args.onProgressiveData;
+          pendingRequest.mozChunked = true;
+        } else {
+          xhr.responseType = 'arraybuffer';
+        }
+      } else {
+        xhr.responseType = 'arraybuffer';
       }
+
       if (args.onError) {
         xhr.onerror = function(evt) {
           args.onError(xhr.status);
         };
       }
       xhr.onreadystatechange = this.onStateChange.bind(this, xhrId);
+      xhr.onprogress = this.onProgress.bind(this, xhrId);
 
       pendingRequest.onHeadersReceived = args.onHeadersReceived;
       pendingRequest.onDone = args.onDone;
       pendingRequest.onError = args.onError;
+      pendingRequest.onProgress = args.onProgress;
 
       xhr.send(null);
 
       return xhrId;
+    },
+
+    onProgress: function NetworkManager_onProgress(xhrId, evt) {
+      var pendingRequest = this.pendingRequests[xhrId];
+      if (!pendingRequest) {
+        // Maybe abortRequest was called...
+        return;
+      }
+
+      if (pendingRequest.mozChunked) {
+        var chunk = getArrayBuffer(pendingRequest.xhr);
+        pendingRequest.onProgressiveData(chunk);
+      }
+
+      var onProgress = pendingRequest.onProgress;
+      if (onProgress) {
+        onProgress(evt);
+      }
     },
 
     onStateChange: function NetworkManager_onStateChange(xhrId, evt) {
@@ -7808,6 +7855,8 @@ var NetworkManager = (function NetworkManagerClosure() {
           begin: begin,
           chunk: chunk
         });
+      } else if (pendingRequest.onProgressiveData) {
+        pendingRequest.onDone(null);
       } else {
         pendingRequest.onDone({
           begin: 0,
@@ -7825,6 +7874,10 @@ var NetworkManager = (function NetworkManagerClosure() {
 
     getRequestXhr: function NetworkManager_getXhr(xhrId) {
       return this.pendingRequests[xhrId].xhr;
+    },
+
+    isStreamingRequest: function NetworkManager_isStreamingRequest(xhrId) {
+      return !!(this.pendingRequests[xhrId].onProgressiveData);
     },
 
     isPendingRequest: function NetworkManager_isPendingRequest(xhrId) {
@@ -7864,7 +7917,7 @@ var ChunkedStream = (function ChunkedStreamClosure() {
     this.numChunksLoaded = 0;
     this.numChunks = Math.ceil(length / chunkSize);
     this.manager = manager;
-    this.initialDataLength = 0;
+    this.progressiveDataLength = 0;
     this.lastSuccessfulEnsureByteChunk = -1;  // a single-entry cache
   }
 
@@ -7875,7 +7928,7 @@ var ChunkedStream = (function ChunkedStreamClosure() {
     getMissingChunks: function ChunkedStream_getMissingChunks() {
       var chunks = [];
       for (var chunk = 0, n = this.numChunks; chunk < n; ++chunk) {
-        if (!(chunk in this.loadedChunks)) {
+        if (!this.loadedChunks[chunk]) {
           chunks.push(chunk);
         }
       }
@@ -7907,21 +7960,29 @@ var ChunkedStream = (function ChunkedStreamClosure() {
       var curChunk;
 
       for (curChunk = beginChunk; curChunk < endChunk; ++curChunk) {
-        if (!(curChunk in this.loadedChunks)) {
+        if (!this.loadedChunks[curChunk]) {
           this.loadedChunks[curChunk] = true;
           ++this.numChunksLoaded;
         }
       }
     },
 
-    onReceiveInitialData: function ChunkedStream_onReceiveInitialData(data) {
-      this.bytes.set(data);
-      this.initialDataLength = data.length;
-      var endChunk = (this.end === data.length ?
-        this.numChunks : Math.floor(data.length / this.chunkSize));
-      for (var i = 0; i < endChunk; i++) {
-        this.loadedChunks[i] = true;
-        ++this.numChunksLoaded;
+    onReceiveProgressiveData:
+        function ChunkedStream_onReceiveProgressiveData(data) {
+      var position = this.progressiveDataLength;
+      var beginChunk = Math.floor(position / this.chunkSize);
+
+      this.bytes.set(new Uint8Array(data), position);
+      position += data.byteLength;
+      this.progressiveDataLength = position;
+      var endChunk = position >= this.end ? this.numChunks :
+                     Math.floor(position / this.chunkSize);
+      var curChunk;
+      for (curChunk = beginChunk; curChunk < endChunk; ++curChunk) {
+        if (!this.loadedChunks[curChunk]) {
+          this.loadedChunks[curChunk] = true;
+          ++this.numChunksLoaded;
+        }
       }
     },
 
@@ -7931,7 +7992,7 @@ var ChunkedStream = (function ChunkedStreamClosure() {
         return;
       }
 
-      if (!(chunk in this.loadedChunks)) {
+      if (!this.loadedChunks[chunk]) {
         throw new MissingDataException(pos, pos + 1);
       }
       this.lastSuccessfulEnsureByteChunk = chunk;
@@ -7942,7 +8003,7 @@ var ChunkedStream = (function ChunkedStreamClosure() {
         return;
       }
 
-      if (end <= this.initialDataLength) {
+      if (end <= this.progressiveDataLength) {
         return;
       }
 
@@ -7950,7 +8011,7 @@ var ChunkedStream = (function ChunkedStreamClosure() {
       var beginChunk = Math.floor(begin / chunkSize);
       var endChunk = Math.floor((end - 1) / chunkSize) + 1;
       for (var chunk = beginChunk; chunk < endChunk; ++chunk) {
-        if (!(chunk in this.loadedChunks)) {
+        if (!this.loadedChunks[chunk]) {
           throw new MissingDataException(begin, end);
         }
       }
@@ -7959,13 +8020,13 @@ var ChunkedStream = (function ChunkedStreamClosure() {
     nextEmptyChunk: function ChunkedStream_nextEmptyChunk(beginChunk) {
       var chunk, n;
       for (chunk = beginChunk, n = this.numChunks; chunk < n; ++chunk) {
-        if (!(chunk in this.loadedChunks)) {
+        if (!this.loadedChunks[chunk]) {
           return chunk;
         }
       }
       // Wrap around to beginning
       for (chunk = 0; chunk < beginChunk; ++chunk) {
-        if (!(chunk in this.loadedChunks)) {
+        if (!this.loadedChunks[chunk]) {
           return chunk;
         }
       }
@@ -7973,7 +8034,7 @@ var ChunkedStream = (function ChunkedStreamClosure() {
     },
 
     hasChunk: function ChunkedStream_hasChunk(chunk) {
-      return chunk in this.loadedChunks;
+      return !!this.loadedChunks[chunk];
     },
 
     get length() {
@@ -8072,7 +8133,7 @@ var ChunkedStream = (function ChunkedStreamClosure() {
         var endChunk = Math.floor((this.end - 1) / chunkSize) + 1;
         var missingChunks = [];
         for (var chunk = beginChunk; chunk < endChunk; ++chunk) {
-          if (!(chunk in this.loadedChunks)) {
+          if (!this.loadedChunks[chunk]) {
             missingChunks.push(chunk);
           }
         }
@@ -8130,28 +8191,16 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
     this.chunksNeededByRequest = {};
     this.requestsByChunk = {};
     this.callbacksByRequest = {};
+    this.progressiveDataLength = 0;
 
     this._loadedStreamCapability = createPromiseCapability();
 
     if (args.initialData) {
-      this.setInitialData(args.initialData);
+      this.onReceiveData({chunk: args.initialData});
     }
   }
 
   ChunkedStreamManager.prototype = {
-
-    setInitialData: function ChunkedStreamManager_setInitialData(data) {
-      this.stream.onReceiveInitialData(data);
-      if (this.stream.allChunksLoaded()) {
-        this._loadedStreamCapability.resolve(this.stream);
-      } else if (this.msgHandler) {
-        this.msgHandler.send('DocProgress', {
-          loaded: data.length,
-          total: this.length
-        });
-      }
-    },
-
     onLoadedStream: function ChunkedStreamManager_getLoadedStream() {
       return this._loadedStreamCapability.promise;
     },
@@ -8289,13 +8338,21 @@ var ChunkedStreamManager = (function ChunkedStreamManagerClosure() {
 
     onReceiveData: function ChunkedStreamManager_onReceiveData(args) {
       var chunk = args.chunk;
-      var begin = args.begin;
+      var isProgressive = args.begin === undefined;
+      var begin = isProgressive ? this.progressiveDataLength : args.begin;
       var end = begin + chunk.byteLength;
 
-      var beginChunk = this.getBeginChunk(begin);
-      var endChunk = this.getEndChunk(end);
+      var beginChunk = Math.floor(begin / this.chunkSize);
+      var endChunk = end < this.length ? Math.floor(end / this.chunkSize) :
+                                         Math.ceil(end / this.chunkSize);
 
-      this.stream.onReceiveData(begin, chunk);
+      if (isProgressive) {
+        this.stream.onReceiveProgressiveData(chunk);
+        this.progressiveDataLength = end;
+      } else {
+        this.stream.onReceiveData(begin, chunk);
+      }
+
       if (this.stream.allChunksLoaded()) {
         this._loadedStreamCapability.resolve(this.stream);
       }
@@ -8429,6 +8486,10 @@ var BasePdfManager = (function BasePdfManagerClosure() {
     },
 
     requestLoadedStream: function BasePdfManager_requestLoadedStream() {
+      return new NotImplementedException();
+    },
+
+    sendProgressiveData: function BasePdfManager_sendProgressiveData(chunk) {
       return new NotImplementedException();
     },
 
@@ -8566,6 +8627,11 @@ var NetworkPdfManager = (function NetworkPdfManagerClosure() {
   NetworkPdfManager.prototype.requestLoadedStream =
       function NetworkPdfManager_requestLoadedStream() {
     this.streamManager.requestAllChunks();
+  };
+
+  NetworkPdfManager.prototype.sendProgressiveData =
+      function NetworkPdfManager_sendProgressiveData(chunk) {
+    this.streamManager.onReceiveData({ chunk: chunk });
   };
 
   NetworkPdfManager.prototype.onLoadedStream =
@@ -39398,6 +39464,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
         httpHeaders: source.httpHeaders,
         withCredentials: source.withCredentials
       });
+      var cachedChunks = [];
       var fullRequestXhrId = networkManager.requestFull({
         onHeadersReceived: function onHeadersReceived() {
           if (disableRange) {
@@ -39428,11 +39495,18 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
             return;
           }
 
-          // NOTE: by cancelling the full request, and then issuing range
-          // requests, there will be an issue for sites where you can only
-          // request the pdf once. However, if this is the case, then the
-          // server should not be returning that it can support range requests.
-          networkManager.abortRequest(fullRequestXhrId);
+          if (networkManager.isStreamingRequest(fullRequestXhrId)) {
+            // We can continue fetching when progressive loading is enabled,
+            // and we don't need the autoFetch feature.
+            source.disableAutoFetch = true;
+          } else {
+            // NOTE: by cancelling the full request, and then issuing range
+            // requests, there will be an issue for sites where you can only
+            // request the pdf once. However, if this is the case, then the
+            // server should not be returning that it can support range
+            // requests.
+            networkManager.abortRequest(fullRequestXhrId);
+          }
 
           try {
             pdfManager = new NetworkPdfManager(source, handler);
@@ -39442,10 +39516,44 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
           }
         },
 
+        onProgressiveData: PDFJS.disableStream ? null :
+            function onProgressiveData(chunk) {
+          if (!pdfManager) {
+            cachedChunks.push(chunk);
+            return;
+          }
+          pdfManager.sendProgressiveData(chunk);
+        },
+
         onDone: function onDone(args) {
+          if (pdfManager) {
+            return; // already processed
+          }
+
+          var pdfFile;
+          if (args === null) {
+            // TODO add some streaming manager, e.g. for unknown length files.
+            // The data was returned in the onProgressiveData, combining...
+            var pdfFileLength = 0, pos = 0;
+            cachedChunks.forEach(function (chunk) {
+              pdfFileLength += chunk.byteLength;
+            });
+            if (source.length && pdfFileLength !== source.length) {
+              warn('reported HTTP length is different from actual');
+            }
+            var pdfFileArray = new Uint8Array(pdfFileLength);
+            cachedChunks.forEach(function (chunk) {
+              pdfFileArray.set(new Uint8Array(chunk), pos);
+              pos += chunk.byteLength;
+            });
+            pdfFile = pdfFileArray.buffer;
+          } else {
+            pdfFile = args.chunk;
+          }
+
           // the data is array, instantiating directly from it
           try {
-            pdfManager = new LocalPdfManager(args.chunk, source.password);
+            pdfManager = new LocalPdfManager(pdfFile, source.password);
             pdfManagerCapability.resolve();
           } catch (ex) {
             pdfManagerCapability.reject(ex);
@@ -39540,6 +39648,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
       PDFJS.cMapPacked = data.cMapPacked === true;
 
       getPdfManager(data).then(function () {
+        handler.send('PDFManagerReady', null);
         pdfManager.onLoadedStream().then(function(stream) {
           handler.send('DataLoaded', { length: stream.bytes.byteLength });
         });
