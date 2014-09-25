@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.828';
-PDFJS.build = '76b3e5d';
+PDFJS.version = '1.0.830';
+PDFJS.build = '4189c78';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -22483,6 +22483,9 @@ var Font = (function FontClosure() {
 
     var data;
     switch (type) {
+      case 'MMType1':
+        info('MMType1 font (' + name + '), falling back to Type1.');
+        /* falls through */
       case 'Type1':
       case 'CIDFontType0':
         this.mimetype = 'font/opentype';
