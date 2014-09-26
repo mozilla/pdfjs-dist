@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.835';
-PDFJS.build = '8539cd6';
+PDFJS.version = '1.0.837';
+PDFJS.build = '744c8e8';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -22484,6 +22484,13 @@ var Font = (function FontClosure() {
         var symbols = Encodings.SymbolSetEncoding;
         for (charCode in symbols) {
           fontChar = GlyphsUnicode[symbols[charCode]];
+          if (!fontChar) {
+            continue;
+          }
+          this.toFontChar[charCode] = fontChar;
+        }
+        for (charCode in properties.differences) {
+          fontChar = GlyphsUnicode[properties.differences[charCode]];
           if (!fontChar) {
             continue;
           }
