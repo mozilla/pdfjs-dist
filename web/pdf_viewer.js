@@ -367,7 +367,6 @@ var Cache = function cacheCache(size) {
 };
 
 
-
 var PresentationModeState = {
   UNKNOWN: 0,
   NORMAL: 1,
