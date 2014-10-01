@@ -2074,8 +2074,9 @@ var PDFViewer = (function pdfViewer() {
                                                             this.scroll.down);
       if (pageView) {
         this.renderingQueue.renderView(pageView);
-        return;
+        return true;
       }
+      return false;
     },
 
     getPageTextContent: function (pageIndex) {
