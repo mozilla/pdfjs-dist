@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.876';
-PDFJS.build = '2b8ff7b';
+PDFJS.version = '1.0.878';
+PDFJS.build = 'dc30dba';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2653,6 +2653,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
 
     fetchDocument: function WorkerTransport_fetchDocument(source) {
       source.disableAutoFetch = PDFJS.disableAutoFetch;
+      source.disableStream = PDFJS.disableStream;
       source.chunkedViewerLoading = !!this.pdfDataRangeTransport;
       this.messageHandler.send('GetDocRequest', {
         source: source,
