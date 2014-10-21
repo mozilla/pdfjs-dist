@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.911';
-PDFJS.build = '92d3d7f';
+PDFJS.version = '1.0.913';
+PDFJS.build = '419ba54';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -11314,7 +11314,7 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
       var name = namedItem.get('T');
       if (name) {
         fieldName.unshift(stringToPDFString(name));
-      } else {
+      } else if (parent && ref) {
         // The field name is absent, that means more than one field
         // with the same name may exist. Replacing the empty name
         // with the '`' plus index in the parent's 'Kids' array.
