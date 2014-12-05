@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.962';
-PDFJS.build = 'dc5961d';
+PDFJS.version = '1.0.964';
+PDFJS.build = '37fe1d1';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -9769,19 +9769,27 @@ var Pattern = (function PatternClosure() {
     var dict = isStream(shading) ? shading.dict : shading;
     var type = dict.get('ShadingType');
 
-    switch (type) {
-      case PatternType.AXIAL:
-      case PatternType.RADIAL:
-        // Both radial and axial shadings are handled by RadialAxial shading.
-        return new Shadings.RadialAxial(dict, matrix, xref, res);
-      case PatternType.FREE_FORM_MESH:
-      case PatternType.LATTICE_FORM_MESH:
-      case PatternType.COONS_PATCH_MESH:
-      case PatternType.TENSOR_PATCH_MESH:
-        return new Shadings.Mesh(shading, matrix, xref, res);
-      default:
-        UnsupportedManager.notify(UNSUPPORTED_FEATURES.shadingPattern);
-        return new Shadings.Dummy();
+    try {
+      switch (type) {
+        case PatternType.AXIAL:
+        case PatternType.RADIAL:
+          // Both radial and axial shadings are handled by RadialAxial shading.
+          return new Shadings.RadialAxial(dict, matrix, xref, res);
+        case PatternType.FREE_FORM_MESH:
+        case PatternType.LATTICE_FORM_MESH:
+        case PatternType.COONS_PATCH_MESH:
+        case PatternType.TENSOR_PATCH_MESH:
+          return new Shadings.Mesh(shading, matrix, xref, res);
+        default:
+          throw new Error('Unknown PatternType: ' + type);
+      }
+    } catch (ex) {
+      if (ex instanceof MissingDataException) {
+        throw ex;
+      }
+      UnsupportedManager.notify(UNSUPPORTED_FEATURES.shadingPattern);
+      warn(ex);
+      return new Shadings.Dummy();
     }
   };
   return Pattern;
