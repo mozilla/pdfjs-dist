@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.964';
-PDFJS.build = '37fe1d1';
+PDFJS.version = '1.0.966';
+PDFJS.build = '8a6cc44';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -10749,7 +10749,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           var imgData = imageObj.createImageData(/* forceRGBA = */ false);
           self.handler.send('obj', [objId, self.pageIndex, 'Image', imgData],
             [imgData.data.buffer]);
-        }).then(null, function (reason) {
+        }).then(undefined, function (reason) {
           warn('Unable to decode image: ' + reason);
           self.handler.send('obj', [objId, self.pageIndex, 'Image', null]);
         });
