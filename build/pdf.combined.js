@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.966';
-PDFJS.build = '8a6cc44';
+PDFJS.version = '1.0.968';
+PDFJS.build = 'cddb870';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3680,9 +3680,9 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
   function composeSMaskLuminosity(maskData, layerData) {
     var length = maskData.length;
     for (var i = 3; i < length; i += 4) {
-      var y = ((maskData[i - 3] * 77) +     // * 0.3 / 255 * 0x10000
-               (maskData[i - 2] * 152) +    // * 0.59 ....
-               (maskData[i - 1] * 28)) | 0; // * 0.11 ....
+      var y = (maskData[i - 3] * 77) +  // * 0.3 / 255 * 0x10000
+              (maskData[i - 2] * 152) + // * 0.59 ....
+              (maskData[i - 1] * 28);   // * 0.11 ....
       layerData[i] = (layerData[i] * y) >> 16;
     }
   }
