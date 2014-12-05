@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.968';
-PDFJS.build = 'cddb870';
+PDFJS.version = '1.0.970';
+PDFJS.build = 'a3df129';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -3746,7 +3746,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     }
 
     // processing image in chunks to save memory
-    var PIXELS_TO_PROCESS = 65536;
+    var PIXELS_TO_PROCESS = 1048576;
     var chunkSize = Math.min(height, Math.ceil(PIXELS_TO_PROCESS / width));
     for (var row = 0; row < height; row += chunkSize) {
       var chunkHeight = Math.min(chunkSize, height - row);
