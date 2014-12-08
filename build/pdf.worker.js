@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.972';
-PDFJS.build = 'c28f7d2';
+PDFJS.version = '1.0.974';
+PDFJS.build = '7f24b1d';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1687,7 +1687,10 @@ var NetworkManager = (function NetworkManagerClosure() {
       }
 
       if (args.onProgressiveData) {
-        xhr.responseType = 'moz-chunked-arraybuffer';
+        // Some legacy browsers might throw an exception.
+        try {
+          xhr.responseType = 'moz-chunked-arraybuffer';
+        } catch(e) {}
         if (xhr.responseType === 'moz-chunked-arraybuffer') {
           pendingRequest.onProgressiveData = args.onProgressiveData;
           pendingRequest.mozChunked = true;
