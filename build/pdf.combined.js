@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.974';
-PDFJS.build = '7f24b1d';
+PDFJS.version = '1.0.976';
+PDFJS.build = '3547462';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -601,10 +601,10 @@ var Util = PDFJS.Util = (function UtilClosure() {
 
   // makeCssRgb() can be called thousands of times. Using |rgbBuf| avoids
   // creating many intermediate strings.
-  Util.makeCssRgb = function Util_makeCssRgb(rgb) {
-    rgbBuf[1] = rgb[0];
-    rgbBuf[3] = rgb[1];
-    rgbBuf[5] = rgb[2];
+  Util.makeCssRgb = function Util_makeCssRgb(r, g, b) {
+    rgbBuf[1] = r;
+    rgbBuf[3] = g;
+    rgbBuf[5] = b;
     return rgbBuf.join('');
   };
 
@@ -4594,12 +4594,12 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       this.current.fillColor = this.getColorN_Pattern(arguments);
     },
     setStrokeRGBColor: function CanvasGraphics_setStrokeRGBColor(r, g, b) {
-      var color = Util.makeCssRgb(arguments);
+      var color = Util.makeCssRgb(r, g, b);
       this.ctx.strokeStyle = color;
       this.current.strokeColor = color;
     },
     setFillRGBColor: function CanvasGraphics_setFillRGBColor(r, g, b) {
-      var color = Util.makeCssRgb(arguments);
+      var color = Util.makeCssRgb(r, g, b);
       this.ctx.fillStyle = color;
       this.current.fillColor = color;
     },
@@ -5974,7 +5974,7 @@ var TilingPattern = (function TilingPatternClosure() {
             context.strokeStyle = ctx.strokeStyle;
             break;
           case PaintType.UNCOLORED:
-            var cssColor = Util.makeCssRgb(color);
+            var cssColor = Util.makeCssRgb(color[0], color[1], color[2]);
             context.fillStyle = cssColor;
             context.strokeStyle = cssColor;
             break;
@@ -6377,11 +6377,9 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
     container.style.backgroundColor = item.color;
 
     var color = item.color;
-    var rgb = [];
-    for (var i = 0; i < 3; ++i) {
-      rgb[i] = Math.round(color[i] * 255);
-    }
-    item.colorCssRgb = Util.makeCssRgb(rgb);
+    item.colorCssRgb = Util.makeCssRgb(Math.round(color[0] * 255),
+                                       Math.round(color[1] * 255),
+                                       Math.round(color[2] * 255));
 
     var highlight = document.createElement('div');
     highlight.className = 'annotationHighlight';
@@ -6451,13 +6449,15 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
     var i, ii;
     if (item.hasBgColor) {
       var color = item.color;
-      var rgb = [];
-      for (i = 0; i < 3; ++i) {
-        // Enlighten the color (70%)
-        var c = Math.round(color[i] * 255);
-        rgb[i] = Math.round((255 - c) * 0.7) + c;
-      }
-      content.style.backgroundColor = Util.makeCssRgb(rgb);
+
+      // Enlighten the color (70%)
+      var BACKGROUND_ENLIGHT = 0.7;
+      var r = BACKGROUND_ENLIGHT * (1.0 - color[0]) + color[0];
+      var g = BACKGROUND_ENLIGHT * (1.0 - color[1]) + color[1];
+      var b = BACKGROUND_ENLIGHT * (1.0 - color[2]) + color[2];
+      content.style.backgroundColor = Util.makeCssRgb((r * 255) | 0,
+                                                      (g * 255) | 0,
+                                                      (b * 255) | 0);
     }
 
     var title = document.createElement('h1');
@@ -7369,11 +7369,11 @@ var SVGGraphics = (function SVGGraphicsClosure() {
       this.current.miterLimit = limit;
     },
     setStrokeRGBColor: function SVGGraphics_setStrokeRGBColor(r, g, b) {
-      var color = Util.makeCssRgb(arguments);
+      var color = Util.makeCssRgb(r, g, b);
       this.current.strokeColor = color;
     },
     setFillRGBColor: function SVGGraphics_setFillRGBColor(r, g, b) {
-      var color = Util.makeCssRgb(arguments);
+      var color = Util.makeCssRgb(r, g, b);
       this.current.fillColor = color;
       this.current.tspan = document.createElementNS(NS, 'svg:tspan');
       this.current.xcoords = [];
@@ -16004,14 +16004,14 @@ Shadings.RadialAxial = (function RadialAxialClosure() {
       ratio[0] = i;
       fn(ratio, 0, color, 0);
       rgbColor = cs.getRgb(color, 0);
-      var cssColor = Util.makeCssRgb(rgbColor);
+      var cssColor = Util.makeCssRgb(rgbColor[0], rgbColor[1], rgbColor[2]);
       colorStops.push([(i - t0) / diff, cssColor]);
     }
 
     var background = 'transparent';
     if (dict.has('Background')) {
       rgbColor = cs.getRgb(dict.get('Background'), 0);
-      background = Util.makeCssRgb(rgbColor);
+      background = Util.makeCssRgb(rgbColor[0], rgbColor[1], rgbColor[2]);
     }
 
     if (!extendStart) {
