@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.980';
-PDFJS.build = 'bc27774';
+PDFJS.version = '1.0.982';
+PDFJS.build = 'f5df30f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -16797,7 +16797,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     buildPaintImageXObject:
         function PartialEvaluator_buildPaintImageXObject(resources, image,
                                                          inline, operatorList,
-                                                         cacheKey, cache) {
+                                                         cacheKey, imageCache) {
       var self = this;
       var dict = image.dict;
       var w = dict.get('Width', 'W');
@@ -16835,9 +16835,10 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         args = [imgData];
         operatorList.addOp(OPS.paintImageMaskXObject, args);
         if (cacheKey) {
-          cache.key = cacheKey;
-          cache.fn = OPS.paintImageMaskXObject;
-          cache.args = args;
+          imageCache[cacheKey] = {
+            fn: OPS.paintImageMaskXObject,
+            args: args
+          };
         }
         return;
       }
@@ -16886,9 +16887,10 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       operatorList.addOp(OPS.paintImageXObject, args);
       if (cacheKey) {
-        cache.key = cacheKey;
-        cache.fn = OPS.paintImageXObject;
-        cache.args = args;
+        imageCache[cacheKey] = {
+          fn: OPS.paintImageXObject,
+          args: args
+        };
       }
     },
 
@@ -17282,8 +17284,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               }
               // eagerly compile XForm objects
               var name = args[0].name;
-              if (imageCache.key === name) {
-                operatorList.addOp(imageCache.fn, imageCache.args);
+              if (imageCache[name] !== undefined) {
+                operatorList.addOp(imageCache[name].fn, imageCache[name].args);
                 args = null;
                 continue;
               }
@@ -17332,10 +17334,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                 }, reject);
             case OPS.endInlineImage:
               var cacheKey = args[0].cacheKey;
-              if (cacheKey && imageCache.key === cacheKey) {
-                operatorList.addOp(imageCache.fn, imageCache.args);
-                args = null;
-                continue;
+              if (cacheKey) {
+                var cacheEntry = imageCache[cacheKey];
+                if (cacheEntry !== undefined) {
+                  operatorList.addOp(cacheEntry.fn, cacheEntry.args);
+                  args = null;
+                  continue;
+                }
               }
               self.buildPaintImageXObject(resources, args[0], true,
                 operatorList, cacheKey, imageCache);
@@ -36088,16 +36093,14 @@ function isEOF(v) {
   return (v === EOF);
 }
 
+var MAX_LENGTH_TO_CACHE = 1000;
+
 var Parser = (function ParserClosure() {
   function Parser(lexer, allowStreams, xref) {
     this.lexer = lexer;
     this.allowStreams = allowStreams;
     this.xref = xref;
-    this.imageCache = {
-      length: 0,
-      adler32: 0,
-      stream: null
-    };
+    this.imageCache = {};
     this.refill();
   }
 
@@ -36245,34 +36248,29 @@ var Parser = (function ParserClosure() {
       var length = (stream.pos - 4) - startPos;
       var imageStream = stream.makeSubStream(startPos, length, dict);
 
-      // trying to cache repeat images, first we are trying to "warm up" caching
-      // using length, then comparing adler32
-      var MAX_LENGTH_TO_CACHE = 1000;
-      var cacheImage = false, adler32;
-      if (length < MAX_LENGTH_TO_CACHE && this.imageCache.length === length) {
+      // cache all images below the MAX_LENGTH_TO_CACHE threshold by their
+      // adler32 checksum.
+      var adler32;
+      if (length < MAX_LENGTH_TO_CACHE) {
         var imageBytes = imageStream.getBytes();
         imageStream.reset();
 
         var a = 1;
         var b = 0;
         for (i = 0, ii = imageBytes.length; i < ii; ++i) {
-          a = (a + (imageBytes[i] & 0xff)) % 65521;
-          b = (b + a) % 65521;
+          // no modulo required in the loop if imageBytes.length < 5552
+          a += imageBytes[i] & 0xff;
+          b += a;
         }
-        adler32 = (b << 16) | a;
+        adler32 = ((b % 65521) << 16) | (a % 65521);
 
-        if (this.imageCache.stream && this.imageCache.adler32 === adler32) {
+        if (this.imageCache.adler32 === adler32) {
           this.buf2 = Cmd.get('EI');
           this.shift();
 
-          this.imageCache.stream.reset();
-          return this.imageCache.stream;
+          this.imageCache[adler32].reset();
+          return this.imageCache[adler32];
         }
-        cacheImage = true;
-      }
-      if (!cacheImage && !this.imageCache.stream) {
-        this.imageCache.length = length;
-        this.imageCache.stream = null;
       }
 
       if (cipherTransform) {
@@ -36281,10 +36279,9 @@ var Parser = (function ParserClosure() {
 
       imageStream = this.filter(imageStream, dict, length);
       imageStream.dict = dict;
-      if (cacheImage) {
+      if (adler32 !== undefined) {
         imageStream.cacheKey = 'inline_' + length + '_' + adler32;
-        this.imageCache.adler32 = adler32;
-        this.imageCache.stream = imageStream;
+        this.imageCache[adler32] = imageStream;
       }
 
       this.buf2 = Cmd.get('EI');
