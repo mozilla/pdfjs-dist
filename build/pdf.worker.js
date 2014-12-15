@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.982';
-PDFJS.build = 'f5df30f';
+PDFJS.version = '1.0.984';
+PDFJS.build = 'ee1b125';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2848,6 +2848,10 @@ var Page = (function PageClosure() {
  * `PDFDocument` objects on the main thread created.
  */
 var PDFDocument = (function PDFDocumentClosure() {
+  var FINGERPRINT_FIRST_BYTES = 1024;
+
+  var EMPTY_FINGERPRINT = '\x00\x00\x00\x00\x00\x00\x00' +
+    '\x00\x00\x00\x00\x00\x00\x00\x00\x00';
   function PDFDocument(pdfManager, arg, password) {
     if (isStream(arg)) {
       init.call(this, pdfManager, arg, password);
@@ -3061,14 +3065,21 @@ var PDFDocument = (function PDFDocumentClosure() {
     get fingerprint() {
       var xref = this.xref, hash, fileID = '';
 
-      if (xref.trailer.has('ID')) {
+      if (xref.trailer.has('ID') &&
+          xref.trailer.get('ID')[0] !== EMPTY_FINGERPRINT) {
         hash = stringToBytes(xref.trailer.get('ID')[0]);
       } else {
-        hash = calculateMD5(this.stream.bytes.subarray(0, 100), 0, 100);
+        if (this.stream.ensureRange) {
+          this.stream.ensureRange(0,
+            Math.min(FINGERPRINT_FIRST_BYTES, this.stream.end));
+        }
+        hash = calculateMD5(this.stream.bytes.subarray(0,
+          FINGERPRINT_FIRST_BYTES), 0, FINGERPRINT_FIRST_BYTES);
       }
 
       for (var i = 0, n = hash.length; i < n; i++) {
-        fileID += hash[i].toString(16);
+        var hex = hash[i].toString(16);
+        fileID += hex.length === 1 ? '0' + hex : hex;
       }
 
       return shadow(this, 'fingerprint', fileID);
