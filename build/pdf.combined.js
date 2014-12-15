@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.978';
-PDFJS.build = '20bf84a';
+PDFJS.version = '1.0.980';
+PDFJS.build = 'bc27774';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -36432,22 +36432,6 @@ var Parser = (function ParserClosure() {
           return new LZWStream(stream, maybeLength, earlyChange);
         }
         if (name === 'DCTDecode' || name === 'DCT') {
-          // According to the specification: for inline images, the ID operator
-          // shall be followed by a single whitespace character (unless it uses
-          // ASCII85Decode or ASCIIHexDecode filters).
-          // In practice this only seems to be followed for inline JPEG images,
-          // and generally ignoring the first byte of the stream if it is a
-          // whitespace char can even *cause* issues (e.g. in the CCITTFaxDecode
-          // filters used in issue2984.pdf).
-          // Hence when the first byte of the stream of an inline JPEG image is
-          // a whitespace character, we thus simply skip over it.
-          if (isCmd(this.buf1, 'ID')) {
-            var firstByte = stream.peekByte();
-            if (firstByte === 0x0A /* LF */ || firstByte === 0x0D /* CR */ ||
-                firstByte === 0x20 /* SPACE */) {
-              stream.skip();
-            }
-          }
           xrefStreamStats[StreamType.DCT] = true;
           return new JpegStream(stream, maybeLength, stream.dict, this.xref);
         }
@@ -37995,8 +37979,15 @@ var PredictorStream = (function PredictorStreamClosure() {
  */
 var JpegStream = (function JpegStreamClosure() {
   function JpegStream(stream, maybeLength, dict, xref) {
-    // TODO: per poppler, some images may have 'junk' before that
-    // need to be removed
+    // Some images may contain 'junk' before the SOI (start-of-image) marker.
+    // Note: this seems to mainly affect inline images.
+    var ch;
+    while ((ch = stream.getByte()) !== -1) {
+      if (ch === 0xFF) { // Find the first byte of the SOI marker (0xFFD8).
+        stream.skip(-1); // Reset the stream position to the SOI.
+        break;
+      }
+    }
     this.stream = stream;
     this.maybeLength = maybeLength;
     this.dict = dict;
