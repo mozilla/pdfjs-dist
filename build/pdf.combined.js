@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.993';
-PDFJS.build = '01cf219';
+PDFJS.version = '1.0.995';
+PDFJS.build = 'ee70aad';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -41540,12 +41540,6 @@ var JpxImage = (function JpxImageClosure() {
                 cod.precinctsSizes = precinctsSizes;
               }
               var unsupported = [];
-              if (cod.sopMarkerUsed) {
-                unsupported.push('sopMarkerUsed');
-              }
-              if (cod.ephMarkerUsed) {
-                unsupported.push('ephMarkerUsed');
-              }
               if (cod.selectiveArithmeticCodingBypass) {
                 unsupported.push('selectiveArithmeticCodingBypass');
               }
@@ -42032,6 +42026,21 @@ var JpxImage = (function JpxImageClosure() {
       bufferSize -= count;
       return (buffer >>> bufferSize) & ((1 << count) - 1);
     }
+    function skipMarkerIfEqual(value) {
+      if (data[offset + position - 1] === 0xFF &&
+          data[offset + position] === value) {
+        skipBytes(1);
+        return true;
+      } else if (data[offset + position] === 0xFF &&
+                 data[offset + position + 1] === value) {
+        skipBytes(2);
+        return true;
+      }
+      return false;
+    }
+    function skipBytes(count) {
+      position += count;
+    }
     function alignToByte() {
       bufferSize = 0;
       if (skipNextBit) {
@@ -42059,9 +42068,15 @@ var JpxImage = (function JpxImageClosure() {
     }
     var tileIndex = context.currentTile.index;
     var tile = context.tiles[tileIndex];
+    var sopMarkerUsed = context.COD.sopMarkerUsed;
+    var ephMarkerUsed = context.COD.ephMarkerUsed;
     var packetsIterator = tile.packetsIterator;
     while (position < dataLength) {
       alignToByte();
+      if (sopMarkerUsed && skipMarkerIfEqual(0x91)) {
+        // Skip also marker segment length and packet sequence ID
+        skipBytes(4);
+      }
       if (!readBits(1)) {
         continue;
       }
@@ -42144,6 +42159,9 @@ var JpxImage = (function JpxImageClosure() {
         });
       }
       alignToByte();
+      if (ephMarkerUsed) {
+        skipMarkerIfEqual(0x92);
+      }
       while (queue.length > 0) {
         var packetItem = queue.shift();
         codeblock = packetItem.codeblock;
