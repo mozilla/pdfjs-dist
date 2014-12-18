@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1008';
-PDFJS.build = '0c3a8ba';
+PDFJS.version = '1.0.1011';
+PDFJS.build = '31ae5f2';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -16761,6 +16761,7 @@ var Font = (function FontClosure() {
            fontCharCode <= 0x1f || // Control chars
            fontCharCode === 0x7F || // Control char
            fontCharCode === 0xAD || // Soft hyphen
+           fontCharCode === 0xA0 || // Non breaking space
            (fontCharCode >= 0x80 && fontCharCode <= 0x9F) || // Control chars
            // Prevent drawing characters in the specials unicode block.
            (fontCharCode >= 0xFFF0 && fontCharCode <= 0xFFFF) ||
@@ -18779,6 +18780,8 @@ function type1FontGlyphMapping(properties, builtInEncoding, glyphNames) {
       glyphId = glyphNames.indexOf(baseEncoding[charCode]);
       if (glyphId >= 0) {
         charCodeToGlyphId[charCode] = glyphId;
+      } else {
+        charCodeToGlyphId[charCode] = 0; // notdef
       }
     }
   } else if (!!(properties.flags & FontFlags.Symbolic)) {
@@ -18795,6 +18798,8 @@ function type1FontGlyphMapping(properties, builtInEncoding, glyphNames) {
       glyphId = glyphNames.indexOf(baseEncoding[charCode]);
       if (glyphId >= 0) {
         charCodeToGlyphId[charCode] = glyphId;
+      } else {
+        charCodeToGlyphId[charCode] = 0; // notdef
       }
     }
   }
@@ -18807,6 +18812,8 @@ function type1FontGlyphMapping(properties, builtInEncoding, glyphNames) {
       glyphId = glyphNames.indexOf(glyphName);
       if (glyphId >= 0) {
         charCodeToGlyphId[charCode] = glyphId;
+      } else {
+        charCodeToGlyphId[charCode] = 0; // notdef
       }
     }
   }
