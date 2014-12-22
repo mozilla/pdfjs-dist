@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1021';
-PDFJS.build = '9664787';
+PDFJS.version = '1.0.1023';
+PDFJS.build = '72bb48b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -42448,10 +42448,10 @@ var JpxImage = (function JpxImageClosure() {
         // Skip also marker segment length and packet sequence ID
         skipBytes(4);
       }
+      var packet = packetsIterator.nextPacket();
       if (!readBits(1)) {
         continue;
       }
-      var packet = packetsIterator.nextPacket();
       var layerNumber = packet.layerNumber;
       var queue = [], codeblock;
       for (var i = 0, ii = packet.codeblocks.length; i < ii; i++) {
