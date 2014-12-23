@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1023';
-PDFJS.build = '72bb48b';
+PDFJS.version = '1.0.1025';
+PDFJS.build = '406b57f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6351,7 +6351,6 @@ var FontFaceObject = (function FontFaceObjectClosure() {
 })();
 
 
-var HIGHLIGHT_OFFSET = 4; // px
 var ANNOT_MIN_SIZE = 10; // px
 
 var AnnotationUtils = (function AnnotationUtilsClosure() {
@@ -6399,16 +6398,6 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
     }
     cstyle.width = width + 'px';
     cstyle.height = height + 'px';
-
-    var highlight = document.createElement('div');
-    highlight.className = 'annotationHighlight';
-    highlight.style.left = highlight.style.top = -HIGHLIGHT_OFFSET + 'px';
-    highlight.style.right = highlight.style.bottom = -HIGHLIGHT_OFFSET + 'px';
-    highlight.setAttribute('hidden', true);
-
-    item.highlightElement = highlight;
-    container.appendChild(item.highlightElement);
-
     return container;
   }
 
