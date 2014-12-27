@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1027';
-PDFJS.build = 'bcfdd5b';
+PDFJS.version = '1.0.1029';
+PDFJS.build = '50fe7c8';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5394,11 +5394,7 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
     return url;
   }
 
-  Util.inherit(LinkAnnotation, InteractiveAnnotation, {
-    hasOperatorList: function LinkAnnotation_hasOperatorList() {
-      return false;
-    }
-  });
+  Util.inherit(LinkAnnotation, InteractiveAnnotation, { });
 
   return LinkAnnotation;
 })();
