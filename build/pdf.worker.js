@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1031';
-PDFJS.build = 'f1689cf';
+PDFJS.version = '1.0.1033';
+PDFJS.build = '6e66e30';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -33154,7 +33154,7 @@ var CCITTFaxStream = (function CCITTFaxStreamClosure() {
 
       if (!this.eoblock && this.row === this.rows - 1) {
         this.eof = true;
-      } else if (this.eoline || !this.byteAlign) {
+      } else {
         code1 = this.lookBits(12);
         if (this.eoline) {
           while (code1 !== EOF && code1 !== 1) {
