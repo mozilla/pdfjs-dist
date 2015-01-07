@@ -929,10 +929,9 @@ var PDFPageView = (function PDFPageViewClosure() {
         if (self.onAfterDraw) {
           self.onAfterDraw();
         }
-
         var event = document.createEvent('CustomEvent');
-        event.initCustomEvent('pagerender', true, true, {
-          pageNumber: pdfPage.pageNumber
+        event.initCustomEvent('pagerendered', true, true, {
+          pageNumber: self.id
         });
         div.dispatchEvent(event);
 
@@ -1826,11 +1825,6 @@ var PDFViewer = (function pdfViewer() {
             isOnePageRenderedResolved = true;
             resolveOnePageRendered();
           }
-          var event = document.createEvent('CustomEvent');
-          event.initCustomEvent('pagerendered', true, true, {
-            pageNumber: pageView.id
-          });
-          self.container.dispatchEvent(event);
         };
       };
 
