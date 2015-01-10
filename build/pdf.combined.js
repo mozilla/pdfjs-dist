@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1067';
-PDFJS.build = '8d0c442';
+PDFJS.version = '1.0.1069';
+PDFJS.build = '35e6680';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -341,6 +341,7 @@ function isValidUrl(url, allowRelative) {
     case 'https':
     case 'ftp':
     case 'mailto':
+    case 'tel':
       return true;
     default:
       return false;
