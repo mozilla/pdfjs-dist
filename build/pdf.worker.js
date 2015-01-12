@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1069';
-PDFJS.build = '35e6680';
+PDFJS.version = '1.0.1072';
+PDFJS.build = '36dd6c1';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2003,6 +2003,9 @@ var ChunkedStream = (function ChunkedStreamClosure() {
     getUint16: function ChunkedStream_getUint16() {
       var b0 = this.getByte();
       var b1 = this.getByte();
+      if (b0 === -1 || b1 === -1) {
+        return -1;
+      }
       return (b0 << 8) + b1;
     },
 
@@ -30150,6 +30153,102 @@ var Parser = (function ParserClosure() {
       return ((stream.pos - 4) - startPos);
     },
     /**
+     * Find the EOI (end-of-image) marker 0xFFD9 of the stream.
+     * @returns {number} The inline stream length.
+     */
+    findDCTDecodeInlineStreamEnd:
+        function Parser_findDCTDecodeInlineStreamEnd(stream) {
+      var startPos = stream.pos, foundEOI = false, b, markerLength, length;
+      while ((b = stream.getByte()) !== -1) {
+        if (b !== 0xFF) { // Not a valid marker.
+          continue;
+        }
+        switch (stream.getByte()) {
+          case 0x00: // Byte stuffing.
+            // 0xFF00 appears to be a very common byte sequence in JPEG images.
+            break;
+
+          case 0xFF: // Fill byte.
+            // Avoid skipping a valid marker, resetting the stream position.
+            stream.skip(-1);
+            break;
+
+          case 0xD9: // EOI
+            foundEOI = true;
+            break;
+
+          case 0xC0: // SOF0
+          case 0xC1: // SOF1
+          case 0xC2: // SOF2
+          case 0xC3: // SOF3
+
+          case 0xC5: // SOF5
+          case 0xC6: // SOF6
+          case 0xC7: // SOF7
+
+          case 0xC9: // SOF9
+          case 0xCA: // SOF10
+          case 0xCB: // SOF11
+
+          case 0xCD: // SOF13
+          case 0xCE: // SOF14
+          case 0xCF: // SOF15
+
+          case 0xC4: // DHT
+          case 0xCC: // DAC
+
+          case 0xDA: // SOS
+          case 0xDB: // DQT
+          case 0xDC: // DNL
+          case 0xDD: // DRI
+          case 0xDE: // DHP
+          case 0xDF: // EXP
+
+          case 0xE0: // APP0
+          case 0xE1: // APP1
+          case 0xE2: // APP2
+          case 0xE3: // APP3
+          case 0xE4: // APP4
+          case 0xE5: // APP5
+          case 0xE6: // APP6
+          case 0xE7: // APP7
+          case 0xE8: // APP8
+          case 0xE9: // APP9
+          case 0xEA: // APP10
+          case 0xEB: // APP11
+          case 0xEC: // APP12
+          case 0xED: // APP13
+          case 0xEE: // APP14
+          case 0xEF: // APP15
+
+          case 0xFE: // COM
+            // The marker should be followed by the length of the segment.
+            markerLength = stream.getUint16();
+            if (markerLength > 2) {
+              // |markerLength| contains the byte length of the marker segment,
+              // including its own length (2 bytes) and excluding the marker.
+              stream.skip(markerLength - 2); // Jump to the next marker.
+            } else {
+              // The marker length is invalid, resetting the stream position.
+              stream.skip(-2);
+            }
+            break;
+        }
+        if (foundEOI) {
+          break;
+        }
+      }
+      length = stream.pos - startPos;
+      if (b === -1) {
+        warn('Inline DCTDecode image stream: ' +
+             'EOI marker not found, searching for /EI/ instead.');
+        stream.skip(-length); // Reset the stream position.
+        return this.findDefaultInlineStreamEnd(stream);
+      }
+      this.inlineStreamSkipEI(stream);
+      return length;
+    },
+    /**
      * Find the EOD (end-of-data) marker '~>' (i.e. TILDE + GT) of the stream.
      * @returns {number} The inline stream length.
      */
@@ -30240,7 +30339,9 @@ var Parser = (function ParserClosure() {
 
       // Parse image stream.
       var startPos = stream.pos, length, i, ii;
-      if (filterName === 'ASCII85Decide' || filterName === 'A85') {
+      if (filterName === 'DCTDecode' || filterName === 'DCT') {
+        length = this.findDCTDecodeInlineStreamEnd(stream);
+      } else if (filterName === 'ASCII85Decide' || filterName === 'A85') {
         length = this.findASCII85DecodeInlineStreamEnd(stream);
       } else if (filterName === 'ASCIIHexDecode' || filterName === 'AHx') {
         length = this.findASCIIHexDecodeInlineStreamEnd(stream);
@@ -31167,6 +31268,9 @@ var Stream = (function StreamClosure() {
     getUint16: function Stream_getUint16() {
       var b0 = this.getByte();
       var b1 = this.getByte();
+      if (b0 === -1 || b1 === -1) {
+        return -1;
+      }
       return (b0 << 8) + b1;
     },
     getInt32: function Stream_getInt32() {
@@ -31294,6 +31398,9 @@ var DecodeStream = (function DecodeStreamClosure() {
     getUint16: function DecodeStream_getUint16() {
       var b0 = this.getByte();
       var b1 = this.getByte();
+      if (b0 === -1 || b1 === -1) {
+        return -1;
+      }
       return (b0 << 8) + b1;
     },
     getInt32: function DecodeStream_getInt32() {
