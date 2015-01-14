@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1080';
-PDFJS.build = 'f6ad15d';
+PDFJS.version = '1.0.1082';
+PDFJS.build = '5251db9';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1690,6 +1690,9 @@ PDFJS.disableStream = (PDFJS.disableStream === undefined ?
  * Disable pre-fetching of PDF file data. When range requests are enabled PDF.js
  * will automatically keep fetching more data even if it isn't needed to display
  * the current page. This default behavior can be disabled.
+ *
+ * NOTE: It is also necessary to disable streaming, see above,
+ *       in order for disabling of pre-fetching to work correctly.
  * @var {boolean}
  */
 PDFJS.disableAutoFetch = (PDFJS.disableAutoFetch === undefined ?
