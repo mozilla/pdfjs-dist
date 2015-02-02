@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1132';
-PDFJS.build = '294c4a8';
+PDFJS.version = '1.0.1135';
+PDFJS.build = 'ccf05c7';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -356,6 +356,7 @@ function shadow(obj, prop, value) {
                                      writable: false });
   return value;
 }
+PDFJS.shadow = shadow;
 
 var PasswordResponses = PDFJS.PasswordResponses = {
   NEED_PASSWORD: 1,
