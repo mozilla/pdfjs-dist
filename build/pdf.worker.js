@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1135';
-PDFJS.build = 'ccf05c7';
+PDFJS.version = '1.0.1137';
+PDFJS.build = 'fb82000';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -17266,7 +17266,11 @@ var Font = (function FontClosure() {
           var offset = font.getInt32() >>> 0;
           var useTable = false;
 
-          if (platformId === 1 && encodingId === 0) {
+          if (platformId === 0 && encodingId === 0) {
+            useTable = true;
+            // Continue the loop since there still may be a higher priority
+            // table.
+          } else if (platformId === 1 && encodingId === 0) {
             useTable = true;
             // Continue the loop since there still may be a higher priority
             // table.
@@ -18238,6 +18242,12 @@ var Font = (function FontClosure() {
                 charCodeToGlyphId[charCode] = glyphId;
               }
             }
+          }
+        } else if (cmapPlatformId === 0 && cmapEncodingId === 0) {
+          // Default Unicode semantics, use the charcodes as is.
+          for (i = 0; i < cmapMappingsLength; ++i) {
+            charCodeToGlyphId[cmapMappings[i].charCode] =
+              cmapMappings[i].glyphId;
           }
         } else {
           // For (3, 0) cmap tables:
