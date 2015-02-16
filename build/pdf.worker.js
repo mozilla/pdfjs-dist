@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1143';
-PDFJS.build = '8614c17';
+PDFJS.version = '1.0.1145';
+PDFJS.build = '76a24d8';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -33300,6 +33300,10 @@ var CCITTFaxStream = (function CCITTFaxStreamClosure() {
 
       var gotEOL = false;
 
+      if (this.byteAlign) {
+        this.inputBits &= ~7;
+      }
+
       if (!this.eoblock && this.row === this.rows - 1) {
         this.eof = true;
       } else {
@@ -33321,10 +33325,6 @@ var CCITTFaxStream = (function CCITTFaxStreamClosure() {
         } else if (code1 === EOF) {
           this.eof = true;
         }
-      }
-
-      if (this.byteAlign && !gotEOL) {
-        this.inputBits &= ~7;
       }
 
       if (!this.eof && this.encoding > 0) {
