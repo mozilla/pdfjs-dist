@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1145';
-PDFJS.build = '76a24d8';
+PDFJS.version = '1.0.1147';
+PDFJS.build = '6bb0a48';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -23600,9 +23600,11 @@ var Font = (function FontClosure() {
             useTable = true;
             // Continue the loop since there still may be a higher priority
             // table.
-          } else if (!isSymbolicFont && platformId === 3 && encodingId === 1) {
+          } else if (platformId === 3 && encodingId === 1) {
             useTable = true;
-            canBreak = true;
+            if (!isSymbolicFont) {
+              canBreak = true;
+            }
           } else if (isSymbolicFont && platformId === 3 && encodingId === 0) {
             useTable = true;
             canBreak = true;
