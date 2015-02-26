@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1152';
-PDFJS.build = 'ec7bab6';
+PDFJS.version = '1.0.1154';
+PDFJS.build = '23916b2';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6779,10 +6779,10 @@ var ColorSpace = (function ColorSpaceClosure() {
         case 'CMYK':
           return 'DeviceCmykCS';
         case 'CalGray':
-          params = cs[1].getAll();
+          params = xref.fetchIfRef(cs[1]).getAll();
           return ['CalGrayCS', params];
         case 'CalRGB':
-          params = cs[1].getAll();
+          params = xref.fetchIfRef(cs[1]).getAll();
           return ['CalRGBCS', params];
         case 'ICCBased':
           var stream = xref.fetchIfRef(cs[1]);
