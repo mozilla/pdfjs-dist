@@ -206,16 +206,16 @@ function getVisibleElements(scrollEl, views, sortByVisibility) {
   var currentWidth, viewWidth;
   for (var i = 0, ii = views.length; i < ii; ++i) {
     view = views[i];
-    currentHeight = view.el.offsetTop + view.el.clientTop;
-    viewHeight = view.el.clientHeight;
+    currentHeight = view.div.offsetTop + view.div.clientTop;
+    viewHeight = view.div.clientHeight;
     if ((currentHeight + viewHeight) < top) {
       continue;
     }
     if (currentHeight > bottom) {
       break;
     }
-    currentWidth = view.el.offsetLeft + view.el.clientLeft;
-    viewWidth = view.el.clientWidth;
+    currentWidth = view.div.offsetLeft + view.div.clientLeft;
+    viewWidth = view.div.clientWidth;
     if ((currentWidth + viewWidth) < left || currentWidth > right) {
       continue;
     }
@@ -596,7 +596,6 @@ var PDFPageView = (function PDFPageViewClosure() {
     div.className = 'page';
     div.style.width = Math.floor(this.viewport.width) + 'px';
     div.style.height = Math.floor(this.viewport.height) + 'px';
-    this.el = div; // TODO replace 'el' property usage
     this.div = div;
 
     container.appendChild(div);
