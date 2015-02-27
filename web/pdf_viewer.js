@@ -1883,6 +1883,10 @@ var PDFViewer = (function pdfViewer() {
         if (this.defaultRenderingQueue) {
           this.update();
         }
+
+        if (this.findController) {
+          this.findController.resolveFirstPage();
+        }
       }.bind(this));
     },
 
