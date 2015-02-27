@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1165';
-PDFJS.build = 'ce12259';
+PDFJS.version = '1.0.1167';
+PDFJS.build = '4c2640d';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1751,6 +1751,15 @@ PDFJS.verbosity = (PDFJS.verbosity === undefined ?
  */
 PDFJS.maxCanvasPixels = (PDFJS.maxCanvasPixels === undefined ?
                          16777216 : PDFJS.maxCanvasPixels);
+
+/**
+ * Opens external links in a new window if enabled. The default behavior opens
+ * external links in the PDF.js window.
+ * @var {boolean}
+ */
+PDFJS.openExternalLinksInNewWindow = (
+  PDFJS.openExternalLinksInNewWindow === undefined ?
+    false : PDFJS.openExternalLinksInNewWindow);
 
 /**
  * Document initialization / loading parameters object.
@@ -6744,6 +6753,9 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
 
     var link = document.createElement('a');
     link.href = link.title = item.url || '';
+    if (item.url && PDFJS.openExternalLinksInNewWindow) {
+      link.target = '_blank';
+    }
 
     container.appendChild(link);
 
