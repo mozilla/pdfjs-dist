@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1167';
-PDFJS.build = '4c2640d';
+PDFJS.version = '1.0.1169';
+PDFJS.build = '00ee6bd';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1745,7 +1745,7 @@ PDFJS.verbosity = (PDFJS.verbosity === undefined ?
                    PDFJS.VERBOSITY_LEVELS.warnings : PDFJS.verbosity);
 
 /**
- * The maximum supported canvas size in total pixels e.g. width * height. 
+ * The maximum supported canvas size in total pixels e.g. width * height.
  * The default value is 4096 * 4096. Use -1 for no limit.
  * @var {number}
  */
@@ -2200,7 +2200,7 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
  *                      rendering call the function that is the first argument
  *                      to the callback.
  */
- 
+
 /**
  * PDF page operator list.
  *
@@ -5439,7 +5439,6 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 })();
 
 
-
 var WebGLUtils = (function WebGLUtilsClosure() {
   function loadShader(gl, code, shaderType) {
     var shader = gl.createShader(shaderType);
@@ -7058,7 +7057,7 @@ var SVGExtraState = (function SVGExtraStateClosure() {
     this.lineJoin = '';
     this.lineCap = '';
     this.miterLimit = 0;
-    
+
     this.dashArray = [];
     this.dashPhase = 0;
 
@@ -7285,7 +7284,7 @@ var SVGGraphics = (function SVGGraphicsClosure() {
       }
       return opListToTree(opList);
     },
-    
+
     executeOpTree: function SVGGraphics_executeOpTree(opTree) {
       var opTreeLen = opTree.length;
       for(var x = 0; x < opTreeLen; x++) {
