@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1173';
-PDFJS.build = '43e6de7';
+PDFJS.version = '1.0.1175';
+PDFJS.build = 'fa0f09b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1001,10 +1001,6 @@ function isNum(v) {
 
 function isString(v) {
   return typeof v === 'string';
-}
-
-function isNull(v) {
-  return v === null;
 }
 
 function isName(v) {
