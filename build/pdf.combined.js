@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1177';
-PDFJS.build = '673cdbd';
+PDFJS.version = '1.0.1179';
+PDFJS.build = '5eedfff';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -17750,7 +17750,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         styles: Object.create(null)
       };
       var bidiTexts = textContent.items;
-      var SPACE_FACTOR = 0.35;
+      var SPACE_FACTOR = 0.3;
       var MULTI_SPACE_FACTOR = 1.5;
 
       var self = this;
