@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1205';
-PDFJS.build = '1fb1a99';
+PDFJS.version = '1.0.1207';
+PDFJS.build = '72cfa36';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1632,7 +1632,7 @@ PDFJS.cMapUrl = (PDFJS.cMapUrl === undefined ? null : PDFJS.cMapUrl);
  */
 PDFJS.cMapPacked = PDFJS.cMapPacked === undefined ? false : PDFJS.cMapPacked;
 
-/*
+/**
  * By default fonts are converted to OpenType fonts and loaded via font face
  * rules. If disabled, the font will be rendered using a built in font renderer
  * that constructs the glyphs with primitive path commands.
@@ -1721,6 +1721,14 @@ PDFJS.disableCreateObjectURL = (PDFJS.disableCreateObjectURL === undefined ?
  */
 PDFJS.disableWebGL = (PDFJS.disableWebGL === undefined ?
                       true : PDFJS.disableWebGL);
+
+/**
+ * Disables fullscreen support, and by extension Presentation Mode,
+ * in browsers which support the fullscreen API.
+ * @var {boolean}
+ */
+PDFJS.disableFullscreen = (PDFJS.disableFullscreen === undefined ?
+                           false : PDFJS.disableFullscreen);
 
 /**
  * Enables CSS only zooming.
