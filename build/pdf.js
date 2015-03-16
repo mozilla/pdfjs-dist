@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1207';
-PDFJS.build = '72cfa36';
+PDFJS.version = '1.0.1209';
+PDFJS.build = 'f7b3852';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -7326,6 +7326,9 @@ var SVGGraphics = (function SVGGraphicsClosure() {
             break;
           case OPS.setWordSpacing:
             this.setWordSpacing(args[0]);
+            break;
+          case OPS.setHScale:
+            this.setHScale(args[0]);
             break;
           case OPS.setTextMatrix:
             this.setTextMatrix(args[0], args[1], args[2],
