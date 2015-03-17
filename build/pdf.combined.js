@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.0.1209';
-PDFJS.build = 'f7b3852';
+PDFJS.version = '1.0.1211';
+PDFJS.build = '4e95362';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6306,7 +6306,8 @@ var FontLoader = {
 
   nativeFontFaces: [],
 
-  isFontLoadingAPISupported: !isWorker && !!document.fonts,
+  isFontLoadingAPISupported: (!isWorker && typeof document !== 'undefined' &&
+                              !!document.fonts),
 
   addNativeFontFace: function fontLoader_addNativeFontFace(nativeFontFace) {
     this.nativeFontFaces.push(nativeFontFace);
