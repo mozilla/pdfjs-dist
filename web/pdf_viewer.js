@@ -1664,6 +1664,8 @@ DefaultAnnotationsLayerFactory.prototype = {
  * @property {IPDFLinkService} linkService - The navigation/linking service.
  * @property {PDFRenderingQueue} renderingQueue - (optional) The rendering
  *   queue object.
+ * @property {boolean} removePageBorders - (optional) Removes the border shadow
+ *   around the pages. The default is false.
  */
 
 /**
@@ -1700,6 +1702,7 @@ var PDFViewer = (function pdfViewer() {
     this.container = options.container;
     this.viewer = options.viewer || options.container.firstElementChild;
     this.linkService = options.linkService || new SimpleLinkService(this);
+    this.removePageBorders = options.removePageBorders || false;
 
     this.defaultRenderingQueue = !options.renderingQueue;
     if (this.defaultRenderingQueue) {
@@ -1714,6 +1717,10 @@ var PDFViewer = (function pdfViewer() {
     this.updateInProgress = false;
     this.presentationModeState = PresentationModeState.UNKNOWN;
     this._resetView();
+
+    if (this.removePageBorders) {
+      this.viewer.classList.add('removePageBorders');
+    }
   }
 
   PDFViewer.prototype = /** @lends PDFViewer.prototype */{
@@ -2017,8 +2024,10 @@ var PDFViewer = (function pdfViewer() {
         }
         var inPresentationMode =
           this.presentationModeState === PresentationModeState.FULLSCREEN;
-        var hPadding = inPresentationMode ? 0 : SCROLLBAR_PADDING;
-        var vPadding = inPresentationMode ? 0 : VERTICAL_PADDING;
+        var hPadding = (inPresentationMode || this.removePageBorders) ?
+          0 : SCROLLBAR_PADDING;
+        var vPadding = (inPresentationMode || this.removePageBorders) ?
+          0 : VERTICAL_PADDING;
         var pageWidthScale = (this.container.clientWidth - hPadding) /
                              currentPage.width * currentPage.scale;
         var pageHeightScale = (this.container.clientHeight - vPadding) /
@@ -2121,9 +2130,12 @@ var PDFViewer = (function pdfViewer() {
           width = dest[4] - x;
           height = dest[5] - y;
           var viewerContainer = this.container;
-          widthScale = (viewerContainer.clientWidth - SCROLLBAR_PADDING) /
+          var hPadding = this.removePageBorders ? 0 : SCROLLBAR_PADDING;
+          var vPadding = this.removePageBorders ? 0 : VERTICAL_PADDING;
+
+          widthScale = (viewerContainer.clientWidth - hPadding) /
             width / CSS_UNITS;
-          heightScale = (viewerContainer.clientHeight - SCROLLBAR_PADDING) /
+          heightScale = (viewerContainer.clientHeight - vPadding) /
             height / CSS_UNITS;
           scale = Math.min(Math.abs(widthScale), Math.abs(heightScale));
           break;
