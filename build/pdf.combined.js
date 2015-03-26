@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.22';
-PDFJS.build = '185067e';
+PDFJS.version = '1.1.24';
+PDFJS.build = 'f6a8110';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -23131,6 +23131,7 @@ var Font = (function FontClosure() {
            fontCharCode === 0x7F || // Control char
            fontCharCode === 0xAD || // Soft hyphen
            fontCharCode === 0xA0 || // Non breaking space
+           fontCharCode === 0x0E33 || // Thai character SARA AM 
            fontCharCode === 0x25CC || // Dotted circle (combining mark)
            (fontCharCode >= 0x80 && fontCharCode <= 0x9F) || // Control chars
            // Prevent drawing characters in the specials unicode block.
