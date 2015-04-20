@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.71';
-PDFJS.build = 'c47d60f';
+PDFJS.version = '1.1.73';
+PDFJS.build = '846eb96';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -10016,6 +10016,7 @@ var Catalog = (function CatalogClosure() {
       var nodesToVisit = [this.catDict.getRaw('Pages')];
       var currentPageIndex = 0;
       var xref = this.xref;
+      var checkAllKids = false;
 
       function next() {
         while (nodesToVisit.length) {
@@ -10023,7 +10024,7 @@ var Catalog = (function CatalogClosure() {
 
           if (isRef(currentNode)) {
             xref.fetchAsync(currentNode).then(function (obj) {
-              if ((isDict(obj, 'Page') || (isDict(obj) && !obj.has('Kids')))) {
+              if (isDict(obj, 'Page') || (isDict(obj) && !obj.has('Kids'))) {
                 if (pageIndex === currentPageIndex) {
                   capability.resolve([obj, currentNode]);
                 } else {
@@ -10038,12 +10039,17 @@ var Catalog = (function CatalogClosure() {
             return;
           }
 
-          // must be a child page dictionary
+          // Must be a child page dictionary.
           assert(
             isDict(currentNode),
             'page dictionary kid reference points to wrong type of object'
           );
           var count = currentNode.get('Count');
+          // If the current node doesn't have any children, avoid getting stuck
+          // in an empty node further down in the tree (see issue5644.pdf).
+          if (count === 0) {
+            checkAllKids = true;
+          }
           // Skip nodes where the page can't be.
           if (currentPageIndex + count <= pageIndex) {
             currentPageIndex += count;
@@ -10052,7 +10058,7 @@ var Catalog = (function CatalogClosure() {
 
           var kids = currentNode.get('Kids');
           assert(isArray(kids), 'page dictionary kids object is not an array');
-          if (count === kids.length) {
+          if (!checkAllKids && count === kids.length) {
             // Nodes that don't have the page have been skipped and this is the
             // bottom of the tree which means the page requested must be a
             // descendant of this pages node. Ideally we would just resolve the
