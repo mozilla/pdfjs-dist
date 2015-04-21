@@ -1995,11 +1995,8 @@ var PDFViewer = (function pdfViewer() {
 
       if (!noScroll) {
         var page = this._currentPageNumber, dest;
-        var inPresentationMode =
-          this.presentationModeState === PresentationModeState.CHANGING ||
-          this.presentationModeState === PresentationModeState.FULLSCREEN;
-        if (this.location && !inPresentationMode &&
-            !IGNORE_CURRENT_POSITION_ON_ZOOM) {
+        if (this.location && !IGNORE_CURRENT_POSITION_ON_ZOOM &&
+            !(this.isInPresentationMode || this.isChangingPresentationMode)) {
           page = this.location.pageNumber;
           dest = [null, { name: 'XYZ' }, this.location.left,
             this.location.top, null];
@@ -2023,11 +2020,9 @@ var PDFViewer = (function pdfViewer() {
         if (!currentPage) {
           return;
         }
-        var inPresentationMode =
-          this.presentationModeState === PresentationModeState.FULLSCREEN;
-        var hPadding = (inPresentationMode || this.removePageBorders) ?
+        var hPadding = (this.isInPresentationMode || this.removePageBorders) ?
           0 : SCROLLBAR_PADDING;
-        var vPadding = (inPresentationMode || this.removePageBorders) ?
+        var vPadding = (this.isInPresentationMode || this.removePageBorders) ?
           0 : VERTICAL_PADDING;
         var pageWidthScale = (this.container.clientWidth - hPadding) /
                              currentPage.width * currentPage.scale;
@@ -2073,8 +2068,7 @@ var PDFViewer = (function pdfViewer() {
                                                               dest) {
       var pageView = this.pages[pageNumber - 1];
 
-      if (this.presentationModeState ===
-        PresentationModeState.FULLSCREEN) {
+      if (this.isInPresentationMode) {
         if (this.linkService.page !== pageView.id) {
           // Avoid breaking getVisiblePages in presentation mode.
           this.linkService.page = pageView.id;
@@ -2228,7 +2222,7 @@ var PDFViewer = (function pdfViewer() {
         currentId = visiblePages[0].id;
       }
 
-      if (this.presentationModeState !== PresentationModeState.FULLSCREEN) {
+      if (!this.isInPresentationMode) {
         this.currentPageNumber = currentId;
       }
 
@@ -2253,13 +2247,21 @@ var PDFViewer = (function pdfViewer() {
       this.container.blur();
     },
 
+    get isInPresentationMode() {
+      return this.presentationModeState === PresentationModeState.FULLSCREEN;
+    },
+
+    get isChangingPresentationMode() {
+      return this.PresentationModeState === PresentationModeState.CHANGING;
+    },
+
     get isHorizontalScrollbarEnabled() {
-      return (this.presentationModeState === PresentationModeState.FULLSCREEN ?
+      return (this.isInPresentationMode ?
         false : (this.container.scrollWidth > this.container.clientWidth));
     },
 
     _getVisiblePages: function () {
-      if (this.presentationModeState !== PresentationModeState.FULLSCREEN) {
+      if (!this.isInPresentationMode) {
         return getVisibleElements(this.container, this.pages, true);
       } else {
         // The algorithm in getVisibleElements doesn't work in all browsers and
@@ -2330,13 +2332,11 @@ var PDFViewer = (function pdfViewer() {
      * @returns {TextLayerBuilder}
      */
     createTextLayerBuilder: function (textLayerDiv, pageIndex, viewport) {
-      var isViewerInPresentationMode =
-        this.presentationModeState === PresentationModeState.FULLSCREEN;
       return new TextLayerBuilder({
         textLayerDiv: textLayerDiv,
         pageIndex: pageIndex,
         viewport: viewport,
-        findController: isViewerInPresentationMode ? null : this.findController
+        findController: this.isInPresentationMode ? null : this.findController
       });
     },
 
