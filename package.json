@@ -1,6 +1,6 @@
 {
   "name": "pdfjs-dist",
-  "version": "1.1.103",
+  "version": "1.1.105",
   "description": "Generic build of Mozilla's PDF.js library.",
   "keywords": [
     "Mozilla",
