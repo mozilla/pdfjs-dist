@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.114';
-PDFJS.build = '3fd44fd';
+PDFJS.version = '1.1.116';
+PDFJS.build = '6d2d854';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -11809,8 +11809,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               var data = diffEncoding[j];
               if (isNum(data)) {
                 index = data;
-              } else {
+              } else if (isName(data)) {
                 differences[index++] = data.name;
+              } else if (isRef(data)) {
+                diffEncoding[j--] = xref.fetch(data);
+                continue;
+              } else {
+                error('Invalid entry in \'Differences\' array: ' + data);
               }
             }
           }
