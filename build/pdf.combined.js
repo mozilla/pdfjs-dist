@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.126';
-PDFJS.build = 'b34366d';
+PDFJS.version = '1.1.128';
+PDFJS.build = 'd484ebd';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -10485,12 +10485,13 @@ var XRef = (function XRefClosure() {
           trailers.push(position);
           position += skipUntil(buffer, position, startxrefBytes);
         } else if ((m = /^(\d+)\s+(\d+)\s+obj\b/.exec(token))) {
-          this.entries[m[1]] = {
-            offset: position,
-            gen: m[2] | 0,
-            uncompressed: true
-          };
-
+          if (typeof this.entries[m[1]] === 'undefined') {
+            this.entries[m[1]] = {
+              offset: position,
+              gen: m[2] | 0,
+              uncompressed: true
+            };
+          }
           var contentLength = skipUntil(buffer, position, endobjBytes) + 7;
           var content = buffer.subarray(position, position + contentLength);
 
