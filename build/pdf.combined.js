@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.124';
-PDFJS.build = 'd87c1ec';
+PDFJS.version = '1.1.126';
+PDFJS.build = 'b34366d';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -17834,6 +17834,17 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           var tsm = [textState.fontSize * textState.textHScale, 0,
                      0, textState.fontSize,
                      0, textState.textRise];
+
+          if (font.isType3Font &&
+              textState.fontMatrix !== FONT_IDENTITY_MATRIX &&
+              textState.fontSize === 1) {
+            var glyphHeight = font.bbox[3] - font.bbox[1];
+            if (glyphHeight > 0) {
+              glyphHeight = glyphHeight * textState.fontMatrix[3];
+              tsm[3] *= glyphHeight;
+            }
+          }
+
           var trm = textChunk.transform = Util.transform(textState.ctm,
                                     Util.transform(textState.textMatrix, tsm));
           if (!font.vertical) {
@@ -18517,6 +18528,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           // is a tagged pdf. Create a barbebones one to get by.
           descriptor = new Dict(null);
           descriptor.set('FontName', Name.get(type));
+          descriptor.set('FontBBox', dict.get('FontBBox'));
         } else {
           // Before PDF 1.5 if the font was one of the base 14 fonts, having a
           // FontDescriptor was not required.
@@ -22936,6 +22948,7 @@ var Font = (function FontClosure() {
     this.ascent = properties.ascent / PDF_GLYPH_SPACE_UNITS;
     this.descent = properties.descent / PDF_GLYPH_SPACE_UNITS;
     this.fontMatrix = properties.fontMatrix;
+    this.bbox = properties.bbox;
 
     this.toUnicode = properties.toUnicode = this.buildToUnicode(properties);
 
