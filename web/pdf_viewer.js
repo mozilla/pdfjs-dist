@@ -1949,7 +1949,7 @@ var PDFViewer = (function pdfViewer() {
       this._currentScale = UNKNOWN_SCALE;
       this._currentScaleValue = null;
       this._buffer = new PDFPageViewBuffer(DEFAULT_CACHE_SIZE);
-      this.location = null;
+      this._location = null;
       this._pagesRotation = 0;
       this._pagesRequests = [];
 
@@ -1997,11 +1997,11 @@ var PDFViewer = (function pdfViewer() {
 
       if (!noScroll) {
         var page = this._currentPageNumber, dest;
-        if (this.location && !IGNORE_CURRENT_POSITION_ON_ZOOM &&
+        if (this._location && !IGNORE_CURRENT_POSITION_ON_ZOOM &&
             !(this.isInPresentationMode || this.isChangingPresentationMode)) {
-          page = this.location.pageNumber;
-          dest = [null, { name: 'XYZ' }, this.location.left,
-            this.location.top, null];
+          page = this._location.pageNumber;
+          dest = [null, { name: 'XYZ' }, this._location.left,
+                  this._location.top, null];
         }
         this.scrollPageIntoView(page, dest);
       }
@@ -2180,7 +2180,7 @@ var PDFViewer = (function pdfViewer() {
       var intTop = Math.round(topLeft[1]);
       pdfOpenParams += ',' + intLeft + ',' + intTop;
 
-      this.location = {
+      this._location = {
         pageNumber: pageNumber,
         scale: normalizedScaleValue,
         top: intTop,
@@ -2234,6 +2234,7 @@ var PDFViewer = (function pdfViewer() {
 
       var event = document.createEvent('UIEvents');
       event.initUIEvent('updateviewarea', true, true, window, 0);
+      event.location = this._location;
       this.container.dispatchEvent(event);
     },
 
