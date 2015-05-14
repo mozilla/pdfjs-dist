@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.128';
-PDFJS.build = 'd484ebd';
+PDFJS.version = '1.1.130';
+PDFJS.build = '67816bd';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -11714,7 +11714,15 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
         if (!isValidUrl(url, false)) {
           url = '';
         }
-        data.url = url;
+        // According to ISO 32000-1:2008, section 12.6.4.7, 
+        // URI should to be encoded in 7-bit ASCII.
+        // Some bad PDFs may have URIs in UTF-8 encoding, see Bugzilla 1122280.
+        try {
+          data.url = stringToUTF8String(url);
+        } catch (e) {
+          // Fall back to a simple copy.
+          data.url = url;
+        }
       } else if (linkType === 'GoTo') {
         data.dest = action.get('D');
       } else if (linkType === 'GoToR') {
