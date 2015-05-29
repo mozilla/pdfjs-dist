@@ -468,12 +468,14 @@ var PDFLinkService = (function () {
     get page() {
       return this.pdfViewer.currentPageNumber;
     },
+
     /**
      * @param {number} value
      */
     set page(value) {
       this.pdfViewer.currentPageNumber = value;
     },
+
     /**
      * @param dest - The PDF destination object.
      */
@@ -492,12 +494,14 @@ var PDFLinkService = (function () {
           }
           self.pdfViewer.scrollPageIntoView(pageNumber, dest);
 
-          // Update the browsing history.
-          self.pdfHistory.push({
-            dest: dest,
-            hash: destString,
-            page: pageNumber
-          });
+          if (self.pdfHistory) {
+            // Update the browsing history.
+            self.pdfHistory.push({
+              dest: dest,
+              hash: destString,
+              page: pageNumber
+            });
+          }
         } else {
           self.pdfDocument.getPageIndex(destRef).then(function (pageIndex) {
             var pageNum = pageIndex + 1;
@@ -576,7 +580,9 @@ var PDFLinkService = (function () {
         var params = parseQueryString(hash);
         // borrowing syntax from "Parameters for Opening PDF Files"
         if ('nameddest' in params) {
-          this.pdfHistory.updateNextHashParam(params.nameddest);
+          if (this.pdfHistory) {
+            this.pdfHistory.updateNextHashParam(params.nameddest);
+          }
           this.navigateTo(params.nameddest);
           return;
         }
@@ -606,7 +612,7 @@ var PDFLinkService = (function () {
                       zoomArgs.length > 1 ? (zoomArgs[1] | 0) : null];
             } else if (zoomArg === 'FitR') {
               if (zoomArgs.length !== 5) {
-                console.error('pdfViewSetHash: ' +
+                console.error('PDFLinkService_setHash: ' +
                               'Not enough parameters for \'FitR\'.');
               } else {
                 dest = [null, { name: zoomArg },
@@ -614,7 +620,7 @@ var PDFLinkService = (function () {
                         (zoomArgs[3] | 0), (zoomArgs[4] | 0)];
               }
             } else {
-              console.error('pdfViewSetHash: \'' + zoomArg +
+              console.error('PDFLinkService_setHash: \'' + zoomArg +
                             '\' is not a valid zoom value.');
             }
           }
@@ -636,7 +642,9 @@ var PDFLinkService = (function () {
       } else if (/^\d+$/.test(hash)) { // page number
         this.page = hash;
       } else { // named destination
-        this.pdfHistory.updateNextHashParam(unescape(hash));
+        if (this.pdfHistory) {
+          this.pdfHistory.updateNextHashParam(unescape(hash));
+        }
         this.navigateTo(unescape(hash));
       }
     },
@@ -648,11 +656,15 @@ var PDFLinkService = (function () {
       // See PDF reference, table 8.45 - Named action
       switch (action) {
         case 'GoBack':
-          this.pdfHistory.back();
+          if (this.pdfHistory) {
+            this.pdfHistory.back();
+          }
           break;
 
         case 'GoForward':
-          this.pdfHistory.forward();
+          if (this.pdfHistory) {
+            this.pdfHistory.forward();
+          }
           break;
 
         case 'NextPage':
