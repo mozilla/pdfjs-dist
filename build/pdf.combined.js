@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.177';
-PDFJS.build = 'd3fa65e';
+PDFJS.version = '1.1.179';
+PDFJS.build = '5c3c516';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -8964,17 +8964,33 @@ var Page = (function PageClosure() {
       return this.pageDict.get(key);
     },
 
-    getInheritedPageProp: function Page_inheritPageProp(key) {
-      var dict = this.pageDict;
-      var value = dict.get(key);
-      while (value === undefined) {
-        dict = dict.get('Parent');
-        if (!dict) {
+    getInheritedPageProp: function Page_getInheritedPageProp(key) {
+      var dict = this.pageDict, valueArray = null, loopCount = 0;
+      var MAX_LOOP_COUNT = 100;
+      // Always walk up the entire parent chain, to be able to find
+      // e.g. \Resources placed on multiple levels of the tree.
+      while (dict) {
+        var value = dict.get(key);
+        if (value) {
+          if (!valueArray) {
+            valueArray = [];
+          }
+          valueArray.push(value);
+        }
+        if (++loopCount > MAX_LOOP_COUNT) {
+          warn('Page_getInheritedPageProp: maximum loop count exceeded.');
           break;
         }
-        value = dict.get(key);
+        dict = dict.get('Parent');
       }
-      return value;
+      if (!valueArray) {
+        return Dict.empty;
+      }
+      if (valueArray.length === 1 || !isDict(valueArray[0]) ||
+          loopCount > MAX_LOOP_COUNT) {
+        return valueArray[0];
+      }
+      return Dict.merge(this.xref, valueArray);
     },
 
     get content() {
@@ -8982,14 +8998,10 @@ var Page = (function PageClosure() {
     },
 
     get resources() {
-      var value = this.getInheritedPageProp('Resources');
       // For robustness: The spec states that a \Resources entry has to be
-      // present, but can be empty. Some document omit it still. In this case
-      // return an empty dictionary:
-      if (value === undefined) {
-        value = Dict.empty;
-      }
-      return shadow(this, 'resources', value);
+      // present, but can be empty. Some document omit it still, in this case
+      // we return an empty dictionary.
+      return shadow(this, 'resources', this.getInheritedPageProp('Resources'));
     },
 
     get mediaBox() {
@@ -9646,6 +9658,24 @@ var Dict = (function DictClosure() {
   };
 
   Dict.empty = new Dict(null);
+
+  Dict.merge = function Dict_merge(xref, dictArray) {
+    var mergedDict = new Dict(xref);
+
+    for (var i = 0, ii = dictArray.length; i < ii; i++) {
+      var dict = dictArray[i];
+      if (!isDict(dict)) {
+        continue;
+      }
+      for (var keyName in dict.map) {
+        if (mergedDict.map[keyName]) {
+          continue;
+        }
+        mergedDict.map[keyName] = dict.map[keyName];
+      }
+    }
+    return mergedDict;
+  };
 
   return Dict;
 })();
