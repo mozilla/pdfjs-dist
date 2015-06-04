@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.183';
-PDFJS.build = '6203dcd';
+PDFJS.version = '1.1.185';
+PDFJS.build = 'd95b4e4';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -13160,7 +13160,7 @@ var ColorSpace = (function ColorSpaceClosure() {
           error('unrecognized colorspace ' + mode);
       }
     } else if (isArray(cs)) {
-      mode = cs[0].name;
+      mode = xref.fetchIfRef(cs[0]).name;
       this.mode = mode;
       var numComps, params;
 
@@ -13193,7 +13193,7 @@ var ColorSpace = (function ColorSpaceClosure() {
           }
           break;
         case 'Pattern':
-          var basePatternCS = cs[1];
+          var basePatternCS = xref.fetchIfRef(cs[1]) || null;
           if (basePatternCS) {
             basePatternCS = ColorSpace.parseToIR(basePatternCS, xref, res);
           }
