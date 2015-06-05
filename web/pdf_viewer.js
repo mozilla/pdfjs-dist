@@ -2838,6 +2838,10 @@ var PDFHistory = (function () {
       });
     },
 
+    clearHistoryState: function pdfHistory_clearHistoryState() {
+      this._pushOrReplaceState(null, true);
+    },
+
     _isStateObjectDefined: function pdfHistory_isStateObjectDefined(state) {
       return (state && state.uid >= 0 &&
       state.fingerprint && this.fingerprint === state.fingerprint &&
