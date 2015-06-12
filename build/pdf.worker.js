@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.203';
-PDFJS.build = '0259448';
+PDFJS.version = '1.1.205';
+PDFJS.build = 'bf20334';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -18448,11 +18448,12 @@ var Font = (function FontClosure() {
               }
             }
             if (!found && properties.glyphNames) {
-              // Try to map using the post table. There are currently no known
-              // pdfs that this fixes.
+              // Try to map using the post table.
               var glyphId = properties.glyphNames.indexOf(glyphName);
               if (glyphId > 0 && hasGlyph(glyphId, -1, -1)) {
                 charCodeToGlyphId[charCode] = glyphId;
+              } else {
+                charCodeToGlyphId[charCode] = 0; // notdef
               }
             }
           }
