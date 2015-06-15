@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.207';
-PDFJS.build = 'c8fd9c8';
+PDFJS.version = '1.1.209';
+PDFJS.build = 'd7e6490';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5798,7 +5798,10 @@ var PDFFunction = (function PDFFunctionClosure() {
         var rmin = encode[2 * i];
         var rmax = encode[2 * i + 1];
 
-        tmpBuf[0] = rmin + (v - dmin) * (rmax - rmin) / (dmax - dmin);
+        // Prevent the value from becoming NaN as a result
+        // of division by zero (fixes issue6113.pdf).
+        tmpBuf[0] = dmin === dmax ? rmin :
+                    rmin + (v - dmin) * (rmax - rmin) / (dmax - dmin);
 
         // call the appropriate function
         fns[i](tmpBuf, 0, dest, destOffset);
