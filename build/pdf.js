@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.213';
-PDFJS.build = 'e926757';
+PDFJS.version = '1.1.215';
+PDFJS.build = 'c9a7498';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4780,6 +4780,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       if (isTextInvisible || fontSize === 0) {
         return;
       }
+      this.cachedGetSinglePixelWidth = null;
 
       ctx.save();
       ctx.transform.apply(ctx, current.textMatrix);
