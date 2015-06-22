@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.218';
-PDFJS.build = '99415a7';
+PDFJS.version = '1.1.220';
+PDFJS.build = 'd504cde';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6854,7 +6854,7 @@ var ColorSpace = (function ColorSpaceClosure() {
           }
           break;
         case 'Pattern':
-          var basePatternCS = xref.fetchIfRef(cs[1]) || null;
+          var basePatternCS = cs[1] || null;
           if (basePatternCS) {
             basePatternCS = ColorSpace.parseToIR(basePatternCS, xref, res);
           }
@@ -6862,7 +6862,7 @@ var ColorSpace = (function ColorSpaceClosure() {
         case 'Indexed':
         case 'I':
           var baseIndexedCS = ColorSpace.parseToIR(cs[1], xref, res);
-          var hiVal = cs[2] + 1;
+          var hiVal = xref.fetchIfRef(cs[2]) + 1;
           var lookup = xref.fetchIfRef(cs[3]);
           if (isStream(lookup)) {
             lookup = lookup.getBytes();
@@ -6870,7 +6870,7 @@ var ColorSpace = (function ColorSpaceClosure() {
           return ['IndexedCS', baseIndexedCS, hiVal, lookup];
         case 'Separation':
         case 'DeviceN':
-          var name = cs[1];
+          var name = xref.fetchIfRef(cs[1]);
           numComps = 1;
           if (isName(name)) {
             numComps = 1;
