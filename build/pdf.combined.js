@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.230';
-PDFJS.build = '1da0b3a';
+PDFJS.version = '1.1.233';
+PDFJS.build = '0a744fb';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -534,7 +534,7 @@ Object.defineProperty(PDFJS, 'isLittleEndian', {
   }
 });
 
-  // Lazy test if the userAgant support CanvasTypedArrays
+  // Lazy test if the userAgent support CanvasTypedArrays
 function hasCanvasTypedArrays() {
   var canvas = document.createElement('canvas');
   canvas.width = canvas.height = 1;
