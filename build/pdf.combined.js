@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.233';
-PDFJS.build = '0a744fb';
+PDFJS.version = '1.1.238';
+PDFJS.build = '98339f6';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -79,6 +79,14 @@ var AnnotationType = {
   WIDGET: 1,
   TEXT: 2,
   LINK: 3
+};
+
+var AnnotationBorderStyleType = {
+  SOLID: 1,
+  DASHED: 2,
+  BEVELED: 3,
+  INSET: 4,
+  UNDERLINE: 5
 };
 
 var StreamType = {
@@ -6593,19 +6601,64 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
     var width = item.rect[2] - item.rect[0];
     var height = item.rect[3] - item.rect[1];
 
-    var bWidth = item.borderWidth || 0;
-    if (bWidth) {
-      width = width - 2 * bWidth;
-      height = height - 2 * bWidth;
-      cstyle.borderWidth = bWidth + 'px';
-      var color = item.color;
-      if (drawBorder && color) {
-        cstyle.borderStyle = 'solid';
-        cstyle.borderColor = Util.makeCssRgb(Math.round(color[0] * 255),
-                                             Math.round(color[1] * 255),
-                                             Math.round(color[2] * 255));
+    // Border
+    if (item.borderStyle.width > 0) {
+      // Border width
+      container.style.borderWidth = item.borderStyle.width + 'px';
+      if (item.borderStyle.style !== AnnotationBorderStyleType.UNDERLINE) {
+        // Underline styles only have a bottom border, so we do not need
+        // to adjust for all borders. This yields a similar result as
+        // Adobe Acrobat/Reader.
+        width = width - 2 * item.borderStyle.width;
+        height = height - 2 * item.borderStyle.width;
+      }
+
+      // Horizontal and vertical border radius
+      var horizontalRadius = item.borderStyle.horizontalCornerRadius;
+      var verticalRadius = item.borderStyle.verticalCornerRadius;
+      if (horizontalRadius > 0 || verticalRadius > 0) {
+        var radius = horizontalRadius + 'px / ' + verticalRadius + 'px';
+        CustomStyle.setProp('borderRadius', container, radius);
+      }
+
+      // Border style
+      switch (item.borderStyle.style) {
+        case AnnotationBorderStyleType.SOLID:
+          container.style.borderStyle = 'solid';
+          break;
+
+        case AnnotationBorderStyleType.DASHED:
+          container.style.borderStyle = 'dashed';
+          break;
+
+        case AnnotationBorderStyleType.BEVELED:
+          warn('Unimplemented border style: beveled');
+          break;
+
+        case AnnotationBorderStyleType.INSET:
+          warn('Unimplemented border style: inset');
+          break;
+
+        case AnnotationBorderStyleType.UNDERLINE:
+          container.style.borderBottomStyle = 'solid';
+          break;
+
+        default:
+          break;
+      }
+
+      // Border color
+      if (item.color) {
+        container.style.borderColor =
+          Util.makeCssRgb(Math.round(item.color[0] * 255),
+                          Math.round(item.color[1] * 255),
+                          Math.round(item.color[2] * 255));
+      } else {
+        // Default color is black, but that's not obvious from the spec.
+        container.style.borderColor = 'rgb(0,0,0)';
       }
     }
+
     cstyle.width = width + 'px';
     cstyle.height = height + 'px';
     return container;
@@ -11356,45 +11409,8 @@ var Annotation = (function AnnotationClosure() {
       }
     }
 
-    // Some types of annotations have border style dict which has more
-    // info than the border array
-    if (dict.has('BS')) {
-      var borderStyle = dict.get('BS');
-      data.borderWidth = borderStyle.has('W') ? borderStyle.get('W') : 1;
-    } else {
-      var borderArray = dict.get('Border') || [0, 0, 1];
-      data.borderWidth = borderArray[2] || 0;
-
-      // TODO: implement proper support for annotations with line dash patterns.
-      var dashArray = borderArray[3];
-      if (data.borderWidth > 0 && dashArray) {
-        if (!isArray(dashArray)) {
-          // Ignore the border if dashArray is not actually an array,
-          // this is consistent with the behaviour in Adobe Reader.
-          data.borderWidth = 0;
-        } else {
-          var dashArrayLength = dashArray.length;
-          if (dashArrayLength > 0) {
-            // According to the PDF specification: the elements in a dashArray
-            // shall be numbers that are nonnegative and not all equal to zero.
-            var isInvalid = false;
-            var numPositive = 0;
-            for (var i = 0; i < dashArrayLength; i++) {
-              var validNumber = (+dashArray[i] >= 0);
-              if (!validNumber) {
-                isInvalid = true;
-                break;
-              } else if (dashArray[i] > 0) {
-                numPositive++;
-              }
-            }
-            if (isInvalid || numPositive === 0) {
-              data.borderWidth = 0;
-            }
-          }
-        }
-      }
-    }
+    this.borderStyle = data.borderStyle = new AnnotationBorderStyle();
+    this.setBorderStyle(dict);
 
     this.appearance = getDefaultAppearance(dict);
     data.hasAppearance = !!this.appearance;
@@ -11402,6 +11418,41 @@ var Annotation = (function AnnotationClosure() {
   }
 
   Annotation.prototype = {
+    /**
+     * Set the border style (as AnnotationBorderStyle object).
+     *
+     * @public
+     * @memberof Annotation
+     * @param {Dict} borderStyle - The border style dictionary
+     */
+    setBorderStyle: function Annotation_setBorderStyle(borderStyle) {
+      if (!isDict(borderStyle)) {
+        return;
+      }
+      if (borderStyle.has('BS')) {
+        var dict = borderStyle.get('BS');
+        var dictType;
+
+        if (!dict.has('Type') || (isName(dictType = dict.get('Type')) &&
+                                  dictType.name === 'Border')) {
+          this.borderStyle.setWidth(dict.get('W'));
+          this.borderStyle.setStyle(dict.get('S'));
+          this.borderStyle.setDashArray(dict.get('D'));
+        }
+      } else if (borderStyle.has('Border')) {
+        var array = borderStyle.get('Border');
+        if (isArray(array) && array.length >= 3) {
+          this.borderStyle.setHorizontalCornerRadius(array[0]);
+          this.borderStyle.setVerticalCornerRadius(array[1]);
+          this.borderStyle.setWidth(array[2]);
+          this.borderStyle.setStyle('S');
+
+          if (array.length === 4) { // Dash array available
+            this.borderStyle.setDashArray(array[3]);
+          }
+        }
+      }
+    },
 
     getData: function Annotation_getData() {
       return this.data;
@@ -11586,6 +11637,144 @@ var Annotation = (function AnnotationClosure() {
   };
 
   return Annotation;
+})();
+
+/**
+ * Contains all data regarding an annotation's border style.
+ *
+ * @class
+ */
+var AnnotationBorderStyle = (function AnnotationBorderStyleClosure() {
+  /**
+   * @constructor
+   * @private
+   */
+  function AnnotationBorderStyle() {
+    this.width = 1;
+    this.style = AnnotationBorderStyleType.SOLID;
+    this.dashArray = [3];
+    this.horizontalCornerRadius = 0;
+    this.verticalCornerRadius = 0;
+  }
+
+  AnnotationBorderStyle.prototype = {
+    /**
+     * Set the width.
+     *
+     * @public
+     * @memberof AnnotationBorderStyle
+     * @param {integer} width - The width
+     */
+    setWidth: function AnnotationBorderStyle_setWidth(width) {
+      if (width === (width | 0)) {
+        this.width = width;
+      }
+    },
+
+    /**
+     * Set the style.
+     *
+     * @public
+     * @memberof AnnotationBorderStyle
+     * @param {Object} style - The style object
+     * @see {@link shared/util.js}
+     */
+    setStyle: function AnnotationBorderStyle_setStyle(style) {
+      if (!style) {
+        return;
+      }
+      switch (style.name) {
+        case 'S':
+          this.style = AnnotationBorderStyleType.SOLID;
+          break;
+
+        case 'D':
+          this.style = AnnotationBorderStyleType.DASHED;
+          break;
+
+        case 'B':
+          this.style = AnnotationBorderStyleType.BEVELED;
+          break;
+
+        case 'I':
+          this.style = AnnotationBorderStyleType.INSET;
+          break;
+
+        case 'U':
+          this.style = AnnotationBorderStyleType.UNDERLINE;
+          break;
+
+        default:
+          break;
+      }
+    },
+
+    /**
+     * Set the dash array.
+     *
+     * @public
+     * @memberof AnnotationBorderStyle
+     * @param {Array} dashArray - The dash array with at least one element
+     */
+    setDashArray: function AnnotationBorderStyle_setDashArray(dashArray) {
+      // We validate the dash array, but we do not use it because CSS does not
+      // allow us to change spacing of dashes. For more information, visit
+      // http://www.w3.org/TR/css3-background/#the-border-style.
+      if (isArray(dashArray) && dashArray.length > 0) {
+        // According to the PDF specification: the elements in a dashArray
+        // shall be numbers that are nonnegative and not all equal to zero.
+        var isValid = true;
+        var allZeros = true;
+        for (var i = 0, len = dashArray.length; i < len; i++) {
+          var element = dashArray[i];
+          var validNumber = (+element >= 0);
+          if (!validNumber) {
+            isValid = false;
+            break;
+          } else if (element > 0) {
+            allZeros = false;
+          }
+        }
+        if (isValid && !allZeros) {
+          this.dashArray = dashArray;
+        } else {
+          this.width = 0; // Adobe behavior when the array is invalid.
+        }
+      } else if (dashArray) {
+        this.width = 0; // Adobe behavior when the array is invalid.
+      }
+    },
+
+    /**
+     * Set the horizontal corner radius (from a Border dictionary).
+     *
+     * @public
+     * @memberof AnnotationBorderStyle
+     * @param {integer} radius - The horizontal corner radius
+     */
+    setHorizontalCornerRadius:
+        function AnnotationBorderStyle_setHorizontalCornerRadius(radius) {
+      if (radius === (radius | 0)) {
+        this.horizontalCornerRadius = radius;
+      }
+    },
+
+    /**
+     * Set the vertical corner radius (from a Border dictionary).
+     *
+     * @public
+     * @memberof AnnotationBorderStyle
+     * @param {integer} radius - The vertical corner radius
+     */
+    setVerticalCornerRadius:
+        function AnnotationBorderStyle_setVerticalCornerRadius(radius) {
+      if (radius === (radius | 0)) {
+        this.verticalCornerRadius = radius;
+      }
+    }
+  };
+
+  return AnnotationBorderStyle;
 })();
 
 var WidgetAnnotation = (function WidgetAnnotationClosure() {
