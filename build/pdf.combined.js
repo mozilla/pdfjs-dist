@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.240';
-PDFJS.build = '9bb2908';
+PDFJS.version = '1.1.242';
+PDFJS.build = 'd8e2014';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -24912,13 +24912,17 @@ var Font = (function FontClosure() {
 
       var charCodeToGlyphId = [], charCode;
       var toUnicode = properties.toUnicode, widths = properties.widths;
-      var isIdentityUnicode = toUnicode instanceof IdentityToUnicodeMap;
+      var skipToUnicode = (toUnicode instanceof IdentityToUnicodeMap ||
+                           toUnicode.length === 0x10000);
 
+      // Helper function to try to skip mapping of empty glyphs.
+      // Note: In some cases, just relying on the glyph data doesn't work,
+      //       hence we also use a few heuristics to fix various PDF files.
       function hasGlyph(glyphId, charCode, widthCode) {
         if (!missingGlyphs[glyphId]) {
           return true;
         }
-        if (!isIdentityUnicode && charCode >= 0 && toUnicode.has(charCode)) {
+        if (!skipToUnicode && charCode >= 0 && toUnicode.has(charCode)) {
           return true;
         }
         if (widths && widthCode >= 0 && isNum(widths[widthCode])) {
