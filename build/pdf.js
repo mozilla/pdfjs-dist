@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.260';
-PDFJS.build = 'e5b7258';
+PDFJS.version = '1.1.262';
+PDFJS.build = '8e59528';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6375,6 +6375,13 @@ var FontLoader = {
     var rules = [];
     var fontsToLoad = [];
     var fontLoadPromises = [];
+    var getNativeFontPromise = function(nativeFontFace) {
+      // Return a promise that is always fulfilled, even when the font fails to
+      // load.
+      return nativeFontFace.loaded.catch(function(e) {
+        warn('Failed to load font "' + nativeFontFace.family + '": ' + e);
+      });
+    };
     for (var i = 0, ii = fonts.length; i < ii; i++) {
       var font = fonts[i];
 
@@ -6388,7 +6395,7 @@ var FontLoader = {
       if (this.isFontLoadingAPISupported) {
         var nativeFontFace = font.createNativeFontFace();
         if (nativeFontFace) {
-          fontLoadPromises.push(nativeFontFace.loaded);
+          fontLoadPromises.push(getNativeFontPromise(nativeFontFace));
         }
       } else {
         var rule = font.bindDOM();
@@ -6401,7 +6408,7 @@ var FontLoader = {
 
     var request = FontLoader.queueLoadingCallback(callback);
     if (this.isFontLoadingAPISupported) {
-      Promise.all(fontsToLoad).then(function() {
+      Promise.all(fontLoadPromises).then(function() {
         request.complete();
       });
     } else if (rules.length > 0 && !this.isSyncFontLoadingSupported) {
