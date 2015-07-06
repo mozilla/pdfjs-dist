@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.254';
-PDFJS.build = '56e3a66';
+PDFJS.version = '1.1.256';
+PDFJS.build = '9e08737';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -11891,21 +11891,9 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
   return TextWidgetAnnotation;
 })();
 
-var InteractiveAnnotation = (function InteractiveAnnotationClosure() {
-  function InteractiveAnnotation(params) {
-    Annotation.call(this, params);
-
-    this.data.hasHtml = true;
-  }
-
-  Util.inherit(InteractiveAnnotation, Annotation, { });
-
-  return InteractiveAnnotation;
-})();
-
 var TextAnnotation = (function TextAnnotationClosure() {
   function TextAnnotation(params) {
-    InteractiveAnnotation.call(this, params);
+    Annotation.call(this, params);
 
     var dict = params.dict;
     var data = this.data;
@@ -11915,6 +11903,7 @@ var TextAnnotation = (function TextAnnotationClosure() {
     data.annotationType = AnnotationType.TEXT;
     data.content = stringToPDFString(content || '');
     data.title = stringToPDFString(title || '');
+    data.hasHtml = true;
 
     if (data.hasAppearance) {
       data.name = 'NoIcon';
@@ -11929,18 +11918,19 @@ var TextAnnotation = (function TextAnnotationClosure() {
     }
   }
 
-  Util.inherit(TextAnnotation, InteractiveAnnotation, { });
+  Util.inherit(TextAnnotation, Annotation, { });
 
   return TextAnnotation;
 })();
 
 var LinkAnnotation = (function LinkAnnotationClosure() {
   function LinkAnnotation(params) {
-    InteractiveAnnotation.call(this, params);
+    Annotation.call(this, params);
 
     var dict = params.dict;
     var data = this.data;
     data.annotationType = AnnotationType.LINK;
+    data.hasHtml = true;
 
     var action = dict.get('A');
     if (action && isDict(action)) {
@@ -12004,7 +11994,7 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
     return url;
   }
 
-  Util.inherit(LinkAnnotation, InteractiveAnnotation, { });
+  Util.inherit(LinkAnnotation, Annotation, { });
 
   return LinkAnnotation;
 })();
