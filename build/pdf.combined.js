@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.258';
-PDFJS.build = '5aaf18d';
+PDFJS.version = '1.1.260';
+PDFJS.build = 'e5b7258';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -11465,6 +11465,13 @@ var Annotation = (function AnnotationClosure() {
             this.borderStyle.setDashArray(array[3]);
           }
         }
+      } else {
+        // There are no border entries in the dictionary. According to the
+        // specification, we should draw a solid border of width 1 in that
+        // case, but Adobe Reader did not implement that part of the
+        // specification and instead draws no border at all, so we do the same.
+        // See also https://github.com/mozilla/pdf.js/issues/6179.
+        this.borderStyle.setWidth(0);
       }
     },
 
