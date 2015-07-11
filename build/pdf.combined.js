@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.278';
-PDFJS.build = 'd091263';
+PDFJS.version = '1.1.280';
+PDFJS.build = '7d4303b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -10602,7 +10602,7 @@ var XRef = (function XRefClosure() {
         } else if ((m = /^(\d+)\s+(\d+)\s+obj\b/.exec(token))) {
           if (typeof this.entries[m[1]] === 'undefined') {
             this.entries[m[1]] = {
-              offset: position,
+              offset: position - stream.start,
               gen: m[2] | 0,
               uncompressed: true
             };
@@ -10615,8 +10615,8 @@ var XRef = (function XRefClosure() {
           var xrefTagOffset = skipUntil(content, 0, xrefBytes);
           if (xrefTagOffset < contentLength &&
               content[xrefTagOffset + 5] < 64) {
-            xrefStms.push(position);
-            this.xrefstms[position] = 1; // don't read it recursively
+            xrefStms.push(position - stream.start);
+            this.xrefstms[position - stream.start] = 1; // Avoid recursion
           }
 
           position += contentLength;
