@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.284';
-PDFJS.build = '535b7c2';
+PDFJS.version = '1.1.286';
+PDFJS.build = 'dde3e4a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -30464,6 +30464,16 @@ var Parser = (function ParserClosure() {
         this.buf2 = this.lexer.getObj();
       }
     },
+    tryShift: function Parser_tryShift() {
+      try {
+        this.shift();
+        return true;
+      } catch (e) {
+        // Upon failure, the caller should reset this.lexer.pos to a known good
+        // state and call this.shift() twice to reset the buffers.
+        return false;
+      }
+    },
     getObj: function Parser_getObj(cipherTransform) {
       var buf1 = this.buf1;
       this.shift();
@@ -30837,9 +30847,10 @@ var Parser = (function ParserClosure() {
       stream.pos = pos + length;
       lexer.nextChar();
 
-      this.shift(); // '>>'
-      this.shift(); // 'stream'
-      if (!isCmd(this.buf1, 'endstream')) {
+      // Shift '>>' and check whether the new object marks the end of the stream
+      if (this.tryShift() && isCmd(this.buf2, 'endstream')) {
+        this.shift(); // 'stream'
+      } else {
         // bad stream length, scanning for endstream
         stream.pos = pos;
         var SCAN_BLOCK_SIZE = 2048;
