@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.299';
-PDFJS.build = '2817f00';
+PDFJS.version = '1.1.301';
+PDFJS.build = 'cf6d40f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6657,12 +6657,12 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
       // Border color
       if (item.color) {
         container.style.borderColor =
-          Util.makeCssRgb(Math.round(item.color[0] * 255),
-                          Math.round(item.color[1] * 255),
-                          Math.round(item.color[2] * 255));
+          Util.makeCssRgb(item.color[0] | 0,
+                          item.color[1] | 0,
+                          item.color[2] | 0);
       } else {
-        // Default color is black, but that's not obvious from the spec.
-        container.style.borderColor = 'rgb(0,0,0)';
+        // Transparent (invisible) border, so do not draw it at all.
+        container.style.borderWidth = 0;
       }
     }
 
@@ -6729,17 +6729,15 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
     content.setAttribute('hidden', true);
 
     var i, ii;
-    if (item.hasBgColor) {
+    if (item.hasBgColor && item.color) {
       var color = item.color;
 
       // Enlighten the color (70%)
       var BACKGROUND_ENLIGHT = 0.7;
-      var r = BACKGROUND_ENLIGHT * (1.0 - color[0]) + color[0];
-      var g = BACKGROUND_ENLIGHT * (1.0 - color[1]) + color[1];
-      var b = BACKGROUND_ENLIGHT * (1.0 - color[2]) + color[2];
-      content.style.backgroundColor = Util.makeCssRgb((r * 255) | 0,
-                                                      (g * 255) | 0,
-                                                      (b * 255) | 0);
+      var r = BACKGROUND_ENLIGHT * (255 - color[0]) + color[0];
+      var g = BACKGROUND_ENLIGHT * (255 - color[1]) + color[1];
+      var b = BACKGROUND_ENLIGHT * (255 - color[2]) + color[2];
+      content.style.backgroundColor = Util.makeCssRgb(r | 0, g | 0, b | 0);
     }
 
     var title = document.createElement('h1');
@@ -11387,28 +11385,8 @@ var Annotation = (function AnnotationClosure() {
     data.rect = Util.normalizeRect(rect);
     data.annotationFlags = dict.get('F');
 
-    var color = dict.get('C');
-    if (!color) {
-      // The PDF spec does not mention how a missing color array is interpreted.
-      // Adobe Reader seems to default to black in this case.
-      data.color = [0, 0, 0];
-    } else if (isArray(color)) {
-      switch (color.length) {
-        case 0:
-          // Empty array denotes transparent border.
-          data.color = null;
-          break;
-        case 1:
-          // TODO: implement DeviceGray
-          break;
-        case 3:
-          data.color = color;
-          break;
-        case 4:
-          // TODO: implement DeviceCMYK
-          break;
-      }
-    }
+    this.setColor(dict.get('C'));
+    data.color = this.color;
 
     this.borderStyle = data.borderStyle = new AnnotationBorderStyle();
     this.setBorderStyle(dict);
@@ -11419,6 +11397,48 @@ var Annotation = (function AnnotationClosure() {
   }
 
   Annotation.prototype = {
+    /**
+     * Set the color and take care of color space conversion.
+     *
+     * @public
+     * @memberof Annotation
+     * @param {Array} color - The color array containing either 0
+     *                        (transparent), 1 (grayscale), 3 (RGB) or
+     *                        4 (CMYK) elements
+     */
+    setColor: function Annotation_setColor(color) {
+      var rgbColor = new Uint8Array(3); // Black in RGB color space (default)
+      if (!isArray(color)) {
+        this.color = rgbColor;
+        return;
+      }
+
+      switch (color.length) {
+        case 0: // Transparent, which we indicate with a null value
+          this.color = null;
+          break;
+
+        case 1: // Convert grayscale to RGB
+          ColorSpace.singletons.gray.getRgbItem(color, 0, rgbColor, 0);
+          this.color = rgbColor;
+          break;
+
+        case 3: // Convert RGB percentages to RGB
+          ColorSpace.singletons.rgb.getRgbItem(color, 0, rgbColor, 0);
+          this.color = rgbColor;
+          break;
+
+        case 4: // Convert CMYK to RGB
+          ColorSpace.singletons.cmyk.getRgbItem(color, 0, rgbColor, 0);
+          this.color = rgbColor;
+          break;
+
+        default:
+          this.color = rgbColor;
+          break;
+      }
+    },
+
     /**
      * Set the border style (as AnnotationBorderStyle object).
      *
