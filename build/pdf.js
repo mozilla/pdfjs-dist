@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.309';
-PDFJS.build = '4b6e272';
+PDFJS.version = '1.1.311';
+PDFJS.build = '7065c1b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6646,7 +6646,7 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
     style.fontFamily = fontFamily + fallbackName;
   }
 
-  function initContainer(item, drawBorder) {
+  function initContainer(item) {
     var container = document.createElement('section');
     var cstyle = container.style;
     var width = item.rect[2] - item.rect[0];
@@ -6750,7 +6750,7 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
       rect[2] = rect[0] + (rect[3] - rect[1]); // make it square
     }
 
-    var container = initContainer(item, false);
+    var container = initContainer(item);
     container.className = 'annotText';
 
     var image  = document.createElement('img');
@@ -6857,7 +6857,7 @@ var AnnotationUtils = (function AnnotationUtilsClosure() {
   }
 
   function getHtmlElementForLinkAnnotation(item) {
-    var container = initContainer(item, true);
+    var container = initContainer(item);
     container.className = 'annotLink';
 
     var link = document.createElement('a');
