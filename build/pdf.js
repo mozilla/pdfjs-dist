@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.320';
-PDFJS.build = 'a58393f';
+PDFJS.version = '1.1.322';
+PDFJS.build = 'd3e90cf';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2262,13 +2262,10 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
      * annotation objects.
      */
     getAnnotations: function PDFPageProxy_getAnnotations() {
-      if (this.annotationsPromise) {
-        return this.annotationsPromise;
+      if (!this.annotationsPromise) {
+        this.annotationsPromise = this.transport.getAnnotations(this.pageIndex);
       }
-
-      var promise = this.transport.getAnnotations(this.pageIndex);
-      this.annotationsPromise = promise;
-      return promise;
+      return this.annotationsPromise;
     },
     /**
      * Begins the process of rendering a page to the desired context.
