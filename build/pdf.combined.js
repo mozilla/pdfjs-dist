@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.335';
-PDFJS.build = '94d9a27';
+PDFJS.version = '1.1.337';
+PDFJS.build = '61f9052';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -13446,7 +13446,7 @@ var ColorSpace = (function ColorSpaceClosure() {
    * @param {Number} n Number of components the color space has.
    */
   ColorSpace.isDefaultDecode = function ColorSpace_isDefaultDecode(decode, n) {
-    if (!decode) {
+    if (!isArray(decode)) {
       return true;
     }
 
@@ -38991,7 +38991,8 @@ var JpegStream = (function JpegStreamClosure() {
   JpegStream.prototype.isNativelySupported =
       function JpegStream_isNativelySupported(xref, res) {
     var cs = ColorSpace.parse(this.dict.get('ColorSpace', 'CS'), xref, res);
-    return cs.name === 'DeviceGray' || cs.name === 'DeviceRGB';
+    return (cs.name === 'DeviceGray' || cs.name === 'DeviceRGB') &&
+           cs.isDefaultDecode(this.dict.get('Decode', 'D'));
   };
   /**
    * Checks if the image can be decoded by the browser.
@@ -38999,8 +39000,8 @@ var JpegStream = (function JpegStreamClosure() {
   JpegStream.prototype.isNativelyDecodable =
       function JpegStream_isNativelyDecodable(xref, res) {
     var cs = ColorSpace.parse(this.dict.get('ColorSpace', 'CS'), xref, res);
-    var numComps = cs.numComps;
-    return numComps === 1 || numComps === 3;
+    return (cs.numComps === 1 || cs.numComps === 3) &&
+           cs.isDefaultDecode(this.dict.get('Decode', 'D'));
   };
 
   return JpegStream;
