@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.341';
-PDFJS.build = 'd08895d';
+PDFJS.version = '1.1.343';
+PDFJS.build = 'e876dd8';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2820,10 +2820,12 @@ var Page = (function PageClosure() {
     get annotations() {
       var annotations = [];
       var annotationRefs = this.getInheritedPageProp('Annots') || [];
+      var annotationFactory = new AnnotationFactory();
       for (var i = 0, n = annotationRefs.length; i < n; ++i) {
         var annotationRef = annotationRefs[i];
-        var annotation = Annotation.fromRef(this.xref, annotationRef);
-        if (annotation) {
+        var annotation = annotationFactory.create(this.xref, annotationRef);
+        if (annotation &&
+            (annotation.isViewable() || annotation.isPrintable())) {
           annotations.push(annotation);
         }
       }
@@ -4902,7 +4904,54 @@ var ExpertSubsetCharset = [
 
 
 var DEFAULT_ICON_SIZE = 22; // px
-var SUPPORTED_TYPES = ['Link', 'Text', 'Widget'];
+
+/**
+ * @constructor
+ */
+function AnnotationFactory() {}
+AnnotationFactory.prototype = {
+  /**
+   * @param {XRef} xref
+   * @param {Object} ref
+   * @returns {Annotation}
+   */
+  create: function AnnotationFactory_create(xref, ref) {
+    var dict = xref.fetchIfRef(ref);
+    if (!isDict(dict)) {
+      return;
+    }
+
+    // Determine the annotation's subtype.
+    var subtype = dict.get('Subtype');
+    subtype = isName(subtype) ? subtype.name : '';
+
+    // Return the right annotation object based on the subtype and field type.
+    var parameters = {
+      dict: dict,
+      ref: ref
+    };
+
+    switch (subtype) {
+      case 'Link':
+        return new LinkAnnotation(parameters);
+
+      case 'Text':
+        return new TextAnnotation(parameters);
+
+      case 'Widget':
+        var fieldType = Util.getInheritableProperty(dict, 'FT');
+        if (isName(fieldType) && fieldType.name === 'Tx') {
+          return new TextWidgetAnnotation(parameters);
+        }
+        return new WidgetAnnotation(parameters);
+
+      default:
+        warn('Unimplemented annotation type "' + subtype + '", ' +
+             'falling back to base annotation');
+        return new Annotation(parameters);
+    }
+  }
+};
 
 var Annotation = (function AnnotationClosure() {
   // 12.5.5: Algorithm: Appearance streams
@@ -5073,13 +5122,9 @@ var Annotation = (function AnnotationClosure() {
 
     isInvisible: function Annotation_isInvisible() {
       var data = this.data;
-      if (data && SUPPORTED_TYPES.indexOf(data.subtype) !== -1) {
-        return false;
-      } else {
-        return !!(data &&
-                  data.annotationFlags &&            // Default: not invisible
-                  data.annotationFlags & 0x1);       // Invisible
-      }
+      return !!(data &&
+                data.annotationFlags &&            // Default: not invisible
+                data.annotationFlags & 0x1);       // Invisible
     },
 
     isViewable: function Annotation_isViewable() {
@@ -5152,70 +5197,6 @@ var Annotation = (function AnnotationClosure() {
               return opList;
             });
         });
-    }
-  };
-
-  Annotation.getConstructor =
-      function Annotation_getConstructor(subtype, fieldType) {
-
-    if (!subtype) {
-      return;
-    }
-
-    // TODO(mack): Implement FreeText annotations
-    if (subtype === 'Link') {
-      return LinkAnnotation;
-    } else if (subtype === 'Text') {
-      return TextAnnotation;
-    } else if (subtype === 'Widget') {
-      if (!fieldType) {
-        return;
-      }
-
-      if (fieldType === 'Tx') {
-        return TextWidgetAnnotation;
-      } else {
-        return WidgetAnnotation;
-      }
-    } else {
-      return Annotation;
-    }
-  };
-
-  Annotation.fromRef = function Annotation_fromRef(xref, ref) {
-
-    var dict = xref.fetchIfRef(ref);
-    if (!isDict(dict)) {
-      return;
-    }
-
-    var subtype = dict.get('Subtype');
-    subtype = isName(subtype) ? subtype.name : '';
-    if (!subtype) {
-      return;
-    }
-
-    var fieldType = Util.getInheritableProperty(dict, 'FT');
-    fieldType = isName(fieldType) ? fieldType.name : '';
-
-    var Constructor = Annotation.getConstructor(subtype, fieldType);
-    if (!Constructor) {
-      return;
-    }
-
-    var params = {
-      dict: dict,
-      ref: ref,
-    };
-
-    var annotation = new Constructor(params);
-
-    if (annotation.isViewable() || annotation.isPrintable()) {
-      return annotation;
-    } else {
-      if (SUPPORTED_TYPES.indexOf(subtype) === -1) {
-        warn('unimplemented annotation type: ' + subtype);
-      }
     }
   };
 
