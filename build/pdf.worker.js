@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.347';
-PDFJS.build = '28130b9';
+PDFJS.version = '1.1.350';
+PDFJS.build = '72ecbec';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -10171,7 +10171,7 @@ Shadings.Mesh = (function MeshClosure() {
 
     var numComps = context.numComps;
     this.tmpCompsBuf = new Float32Array(numComps);
-    var csNumComps = context.colorSpace;
+    var csNumComps = context.colorSpace.numComps;
     this.tmpCsCompsBuf = context.colorFn ? new Float32Array(csNumComps) :
                                            this.tmpCompsBuf;
   }
@@ -10291,13 +10291,10 @@ Shadings.Mesh = (function MeshClosure() {
 
       reader.align();
     }
-
-    var psPacked = new Int32Array(ps);
-
     mesh.figures.push({
       type: 'triangles',
-      coords: psPacked,
-      colors: psPacked
+      coords: new Int32Array(ps),
+      colors: new Int32Array(ps),
     });
   }
 
@@ -10312,13 +10309,10 @@ Shadings.Mesh = (function MeshClosure() {
       coords.push(coord);
       colors.push(color);
     }
-
-    var psPacked = new Int32Array(ps);
-
     mesh.figures.push({
       type: 'lattice',
-      coords: psPacked,
-      colors: psPacked,
+      coords: new Int32Array(ps),
+      colors: new Int32Array(ps),
       verticesPerRow: verticesPerRow
     });
   }
