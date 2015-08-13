@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.377';
-PDFJS.build = '00b798d';
+PDFJS.version = '1.1.379';
+PDFJS.build = '8bc8eb1';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5773,7 +5773,7 @@ var WebGLUtils = (function WebGLUtilsClosure() {
           for (var j = 0, jj = ps.length; j < jj; j++) {
             coords[pIndex] = coordsMap[ps[j]];
             coords[pIndex + 1] = coordsMap[ps[j] + 1];
-            colors[cIndex] = colorsMap[cs[i]];
+            colors[cIndex] = colorsMap[cs[j]];
             colors[cIndex + 1] = colorsMap[cs[j] + 1];
             colors[cIndex + 2] = colorsMap[cs[j] + 2];
             pIndex += 2;
