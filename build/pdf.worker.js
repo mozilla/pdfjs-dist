@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.379';
-PDFJS.build = '8bc8eb1';
+PDFJS.version = '1.1.381';
+PDFJS.build = '88bf193';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1634,18 +1634,15 @@ var NetworkManager = (function NetworkManagerClosure() {
   }
 
   var supportsMozChunked = (function supportsMozChunkedClosure() {
-    var x = new XMLHttpRequest();
     try {
+      var x = new XMLHttpRequest();
       // Firefox 37- required .open() to be called before setting responseType.
       // https://bugzilla.mozilla.org/show_bug.cgi?id=707484
-      x.open('GET', 'https://example.com');
-    } catch (e) {
       // Even though the URL is not visited, .open() could fail if the URL is
       // blocked, e.g. via the connect-src CSP directive or the NoScript addon.
       // When this error occurs, this feature detection method will mistakenly
       // report that moz-chunked-arraybuffer is not supported in Firefox 37-.
-    }
-    try {
+      x.open('GET', 'https://example.com');
       x.responseType = 'moz-chunked-arraybuffer';
       return x.responseType === 'moz-chunked-arraybuffer';
     } catch (e) {
