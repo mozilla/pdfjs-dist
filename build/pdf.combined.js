@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.390';
-PDFJS.build = 'f9c2783';
+PDFJS.version = '1.1.392';
+PDFJS.build = 'c56dc9a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1750,6 +1750,14 @@ PDFJS.maxCanvasPixels = (PDFJS.maxCanvasPixels === undefined ?
 PDFJS.openExternalLinksInNewWindow = (
   PDFJS.openExternalLinksInNewWindow === undefined ?
     false : PDFJS.openExternalLinksInNewWindow);
+
+/**
+  * Determines if we can eval strings as JS. Primarily used to improve
+  * performance for font rendering.
+  * @var {boolean}
+  */
+PDFJS.isEvalSupported = (PDFJS.isEvalSupported === undefined ?
+                         true : PDFJS.isEvalSupported);
 
 /**
  * Document initialization / loading parameters object.
@@ -6267,6 +6275,18 @@ var FontLoader = {
     ));
   },
 
+  get isEvalSupported() {
+    var evalSupport = false;
+    if (PDFJS.isEvalSupported) {
+      try {
+        /* jshint evil: true */
+        new Function('');
+        evalSupport = true;
+      } catch (e) {}
+    }
+    return shadow(this, 'isEvalSupported', evalSupport);
+  },
+
   loadTestFontId: 0,
 
   loadingContext: {
@@ -6543,9 +6563,40 @@ var FontFaceObject = (function FontFaceObjectClosure() {
 
     getPathGenerator: function FontLoader_getPathGenerator(objs, character) {
       if (!(character in this.compiledGlyphs)) {
-        var js = objs.get(this.loadedName + '_path_' + character);
-        /*jshint -W054 */
-        this.compiledGlyphs[character] = new Function('c', 'size', js);
+        var cmds = objs.get(this.loadedName + '_path_' + character);
+        var current, i, len;
+
+        // If we can, compile cmds into JS for MAXIMUM SPEED
+        if (FontLoader.isEvalSupported) {
+          var args, js = '';
+          for (i = 0, len = cmds.length; i < len; i++) {
+            current = cmds[i];
+
+            if (current.args !== undefined) {
+              args = current.args.join(',');
+            } else {
+              args = '';
+            }
+
+            js += 'c.' + current.cmd + '(' + args + ');\n';
+          }
+          /* jshint -W054 */
+          this.compiledGlyphs[character] = new Function('c', 'size', js);
+        } else {
+          // But fall back on using Function.prototype.apply() if we're
+          // blocked from using eval() for whatever reason (like CSP policies)
+          this.compiledGlyphs[character] = function(c, size) {
+            for (i = 0, len = cmds.length; i < len; i++) {
+              current = cmds[i];
+
+              if (current.cmd === 'scale') {
+                current.args = [size, -size];
+              }
+
+              c[current.cmd].apply(c, current.args);
+            }
+          };
+        }
       }
       return this.compiledGlyphs[character];
     }
@@ -28219,16 +28270,15 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
     return 0;
   }
 
-  function compileGlyf(code, js, font) {
+  function compileGlyf(code, cmds, font) {
     function moveTo(x, y) {
-      js.push('c.moveTo(' + x + ',' + y + ');');
+      cmds.push({cmd: 'moveTo', args: [x, y]});
     }
     function lineTo(x, y) {
-      js.push('c.lineTo(' + x + ',' + y + ');');
+      cmds.push({cmd: 'lineTo', args: [x, y]});
     }
     function quadraticCurveTo(xa, ya, x, y) {
-      js.push('c.quadraticCurveTo(' + xa + ',' + ya + ',' +
-                                   x + ',' + y + ');');
+      cmds.push({cmd: 'quadraticCurveTo', args: [xa, ya, x, y]});
     }
 
     var i = 0;
@@ -28274,11 +28324,11 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
         }
         var subglyph = font.glyphs[glyphIndex];
         if (subglyph) {
-          js.push('c.save();');
-          js.push('c.transform(' + scaleX + ',' + scale01 + ',' +
-                  scale10 + ',' + scaleY + ',' + x + ',' + y + ');');
-          compileGlyf(subglyph, js, font);
-          js.push('c.restore();');
+          cmds.push({cmd: 'save'});
+          cmds.push({cmd: 'transform',
+                     args: [scaleX, scale01, scale10, scaleY, x, y]});
+          compileGlyf(subglyph, cmds, font);
+          cmds.push({cmd: 'restore'});
         }
       } while ((flags & 0x20));
     } else {
@@ -28374,20 +28424,19 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
     }
   }
 
-  function compileCharString(code, js, font) {
+  function compileCharString(code, cmds, font) {
     var stack = [];
     var x = 0, y = 0;
     var stems = 0;
 
     function moveTo(x, y) {
-      js.push('c.moveTo(' + x + ',' + y + ');');
+      cmds.push({cmd: 'moveTo', args: [x, y]});
     }
     function lineTo(x, y) {
-      js.push('c.lineTo(' + x + ',' + y + ');');
+      cmds.push({cmd: 'lineTo', args: [x, y]});
     }
     function bezierCurveTo(x1, y1, x2, y2, x, y) {
-      js.push('c.bezierCurveTo(' + x1 + ',' + y1 + ',' + x2 + ',' + y2 + ',' +
-                                   x + ',' + y + ');');
+      cmds.push({cmd: 'bezierCurveTo', args: [x1, y1, x2, y2, x, y]});
     }
 
     function parse(code) {
@@ -28516,16 +28565,16 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
               var bchar = stack.pop();
               y = stack.pop();
               x = stack.pop();
-              js.push('c.save();');
-              js.push('c.translate('+ x + ',' + y + ');');
+              cmds.push({cmd: 'save'});
+              cmds.push({cmd: 'translate', args: [x, y]});
               var gid = lookupCmap(font.cmap, String.fromCharCode(
                 font.glyphNameMap[Encodings.StandardEncoding[achar]]));
-              compileCharString(font.glyphs[gid], js, font);
-              js.push('c.restore();');
+              compileCharString(font.glyphs[gid], cmds, font);
+              cmds.push({cmd: 'restore'});
 
               gid = lookupCmap(font.cmap, String.fromCharCode(
                 font.glyphNameMap[Encodings.StandardEncoding[bchar]]));
-              compileCharString(font.glyphs[gid], js, font);
+              compileCharString(font.glyphs[gid], cmds, font);
             }
             return;
           case 18: // hstemhm
@@ -28694,16 +28743,16 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
         return noop;
       }
 
-      var js = [];
-      js.push('c.save();');
-      js.push('c.transform(' + this.fontMatrix.join(',') + ');');
-      js.push('c.scale(size, -size);');
+      var cmds = [];
+      cmds.push({cmd: 'save'});
+      cmds.push({cmd: 'transform', args: this.fontMatrix.slice()});
+      cmds.push({cmd: 'scale', args: ['size', '-size']});
 
-      this.compileGlyphImpl(code, js);
+      this.compileGlyphImpl(code, cmds);
 
-      js.push('c.restore();');
+      cmds.push({cmd: 'restore'});
 
-      return js.join('\n');
+      return cmds;
     },
 
     compileGlyphImpl: function () {
@@ -28727,8 +28776,8 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
   }
 
   Util.inherit(TrueTypeCompiled, CompiledFont, {
-    compileGlyphImpl: function (code, js) {
-      compileGlyf(code, js, this);
+    compileGlyphImpl: function (code, cmds) {
+      compileGlyf(code, cmds, this);
     }
   });
 
@@ -28749,8 +28798,8 @@ var FontRendererFactory = (function FontRendererFactoryClosure() {
   }
 
   Util.inherit(Type2Compiled, CompiledFont, {
-    compileGlyphImpl: function (code, js) {
-      compileCharString(code, js, this);
+    compileGlyphImpl: function (code, cmds) {
+      compileCharString(code, cmds, this);
     }
   });
 
