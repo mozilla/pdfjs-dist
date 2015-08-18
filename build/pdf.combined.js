@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.387';
-PDFJS.build = '421289c';
+PDFJS.version = '1.1.390';
+PDFJS.build = 'f9c2783';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -33754,7 +33754,10 @@ var PDFImage = (function PDFImageClosure() {
           }
           return imgData;
         }
-        if (this.image instanceof JpegStream && !this.smask && !this.mask) {
+        if (this.image instanceof JpegStream && !this.smask && !this.mask &&
+            (this.colorSpace.name === 'DeviceGray' ||
+             this.colorSpace.name === 'DeviceRGB' ||
+             this.colorSpace.name === 'DeviceCMYK')) {
           imgData.kind = ImageKind.RGB_24BPP;
           imgData.data = this.getImageBytes(originalHeight * rowBytes,
                                             drawWidth, drawHeight, true);
