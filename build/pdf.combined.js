@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.392';
-PDFJS.build = 'c56dc9a';
+PDFJS.version = '1.1.394';
+PDFJS.build = 'ede5235';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1508,6 +1508,10 @@ function MessageHandler(name, comObj) {
             data: result
           });
         }, function (reason) {
+          if (reason instanceof Error) {
+            // Serialize error to avoid "DataCloneError"
+            reason = reason + '';
+          }
           comObj.postMessage({
             isReply: true,
             callbackId: data.callbackId,
