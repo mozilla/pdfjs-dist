@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.395';
-PDFJS.build = '78dbf56';
+PDFJS.version = '1.1.397';
+PDFJS.build = 'b11bc72';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1872,6 +1872,8 @@ PDFJS.getDocument = function getDocument(src,
         params[key] = stringToBytes(pdfBytes);
       } else if (typeof pdfBytes === 'object' && pdfBytes !== null &&
                  !isNaN(pdfBytes.length)) {
+        params[key] = new Uint8Array(pdfBytes);
+      } else if (isArrayBuffer(pdfBytes)) {
         params[key] = new Uint8Array(pdfBytes);
       } else {
         error('Invalid PDF binary data: either typed array, string or ' +
