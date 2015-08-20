@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.397';
-PDFJS.build = 'b11bc72';
+PDFJS.version = '1.1.399';
+PDFJS.build = '23cb01c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -37363,7 +37363,7 @@ var Parser = (function ParserClosure() {
       return stream;
     },
     makeFilter: function Parser_makeFilter(stream, name, maybeLength, params) {
-      if (stream.dict.get('Length') === 0) {
+      if (stream.dict.get('Length') === 0 && !maybeLength) {
         return new NullStream(stream);
       }
       try {
