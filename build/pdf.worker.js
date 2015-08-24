@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.399';
-PDFJS.build = '23cb01c';
+PDFJS.version = '1.1.401';
+PDFJS.build = '5dcd409';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4093,9 +4093,12 @@ var XRef = (function XRefClosure() {
     indexObjects: function XRef_indexObjects() {
       // Simple scan through the PDF content to find objects,
       // trailers and XRef streams.
+      var TAB = 0x9, LF = 0xA, CR = 0xD, SPACE = 0x20;
+      var PERCENT = 0x25, LT = 0x3C;
+
       function readToken(data, offset) {
         var token = '', ch = data[offset];
-        while (ch !== 13 && ch !== 10) {
+        while (ch !== LF && ch !== CR && ch !== LT) {
           if (++offset >= data.length) {
             break;
           }
@@ -4127,6 +4130,9 @@ var XRef = (function XRefClosure() {
       var endobjBytes = new Uint8Array([101, 110, 100, 111, 98, 106]);
       var xrefBytes = new Uint8Array([47, 88, 82, 101, 102]);
 
+      // Clear out any existing entries, since they may be bogus.
+      this.entries.length = 0;
+
       var stream = this.stream;
       stream.pos = 0;
       var buffer = stream.getBytes();
@@ -4134,23 +4140,24 @@ var XRef = (function XRefClosure() {
       var trailers = [], xrefStms = [];
       while (position < length) {
         var ch = buffer[position];
-        if (ch === 32 || ch === 9 || ch === 13 || ch === 10) {
+        if (ch === TAB || ch === LF || ch === CR || ch === SPACE) {
           ++position;
           continue;
         }
-        if (ch === 37) { // %-comment
+        if (ch === PERCENT) { // %-comment
           do {
             ++position;
             if (position >= length) {
               break;
             }
             ch = buffer[position];
-          } while (ch !== 13 && ch !== 10);
+          } while (ch !== LF && ch !== CR);
           continue;
         }
         var token = readToken(buffer, position);
         var m;
-        if (token === 'xref') {
+        if (token.indexOf('xref') === 0 &&
+            (token.length === 4 || /\s/.test(token[4]))) {
           position += skipUntil(buffer, position, trailerBytes);
           trailers.push(position);
           position += skipUntil(buffer, position, startxrefBytes);
