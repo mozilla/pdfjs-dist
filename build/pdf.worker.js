@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.407';
-PDFJS.build = '63ed681';
+PDFJS.version = '1.1.409';
+PDFJS.build = '582573b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -30454,6 +30454,9 @@ var Parser = (function ParserClosure() {
         this.shift();
         return true;
       } catch (e) {
+        if (e instanceof MissingDataException) {
+          throw e;
+        }
         // Upon failure, the caller should reset this.lexer.pos to a known good
         // state and call this.shift() twice to reset the buffers.
         return false;
