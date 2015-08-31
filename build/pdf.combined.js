@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.431';
-PDFJS.build = '8a27b8d';
+PDFJS.version = '1.1.433';
+PDFJS.build = '0020f33';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -45880,14 +45880,13 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
     // don't mirror as characters are already mirrored in the pdf
 
     // Finally, return string
-    var result = '';
     for (i = 0, ii = chars.length; i < ii; ++i) {
       var ch = chars[i];
-      if (ch !== '<' && ch !== '>') {
-        result += ch;
+      if (ch === '<' || ch === '>') {
+        chars[i] = '';
       }
     }
-    return createBidiText(result, isLTR);
+    return createBidiText(chars.join(''), isLTR);
   }
 
   return bidi;
