@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.438';
-PDFJS.build = '2a0e078';
+PDFJS.version = '1.1.440';
+PDFJS.build = '238e16f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -24221,7 +24221,13 @@ var Font = (function FontClosure() {
             });
           }
         } else {
-          error('cmap table has unsupported format: ' + format);
+          warn('cmap table has unsupported format: ' + format);
+          return {
+            platformId: -1,
+            encodingId: -1,
+            mappings: [],
+            hasShortCmap: false
+          };
         }
 
         // removing duplicate entries
