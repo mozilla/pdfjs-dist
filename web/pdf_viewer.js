@@ -87,6 +87,12 @@ var CustomStyle = (function CustomStyleClosure() {
   return CustomStyle;
 })();
 
+var NullCharactersRegExp = /\x00/g;
+
+function removeNullCharacters(str) {
+  return str.replace(NullCharactersRegExp, '');
+}
+
 function getFileName(url) {
   var anchor = url.indexOf('#');
   var query = url.indexOf('?');
