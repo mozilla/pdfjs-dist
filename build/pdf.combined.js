@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.467';
-PDFJS.build = 'e68a5c0';
+PDFJS.version = '1.1.469';
+PDFJS.build = 'f06aa6a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4611,6 +4611,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var textHScale = current.textHScale * fontDirection;
       var glyphsLength = glyphs.length;
       var vertical = font.vertical;
+      var spacingDir = vertical ? 1 : -1;
       var defaultVMetrics = font.defaultVMetrics;
       var widthAdvanceScale = fontSize * current.fontMatrix[0];
 
@@ -4657,7 +4658,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           x += fontDirection * wordSpacing;
           continue;
         } else if (isNum(glyph)) {
-          x += -glyph * fontSize * 0.001;
+          x += spacingDir * glyph * fontSize / 1000;
           continue;
         }
 
@@ -4727,6 +4728,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var font = current.font;
       var fontSize = current.fontSize;
       var fontDirection = current.fontDirection;
+      var spacingDir = font.vertical ? 1 : -1;
       var charSpacing = current.charSpacing;
       var wordSpacing = current.wordSpacing;
       var textHScale = current.textHScale * fontDirection;
@@ -4734,7 +4736,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var glyphsLength = glyphs.length;
       var isTextInvisible =
         current.textRenderingMode === TextRenderingMode.INVISIBLE;
-      var i, glyph, width;
+      var i, glyph, width, spacingLength;
 
       if (isTextInvisible || fontSize === 0) {
         return;
@@ -4755,7 +4757,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           current.x += wordSpacing * textHScale;
           continue;
         } else if (isNum(glyph)) {
-          var spacingLength = -glyph * 0.001 * fontSize;
+          spacingLength = spacingDir * glyph * fontSize / 1000;
           this.ctx.translate(spacingLength, 0);
           current.x += spacingLength * textHScale;
           continue;
@@ -17918,11 +17920,12 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               var arr = args[0];
               var combinedGlyphs = [];
               var arrLength = arr.length;
+              var state = stateManager.state;
               for (i = 0; i < arrLength; ++i) {
                 var arrItem = arr[i];
                 if (isString(arrItem)) {
                   Array.prototype.push.apply(combinedGlyphs,
-                    self.handleText(arrItem, stateManager.state));
+                    self.handleText(arrItem, state));
                 } else if (isNum(arrItem)) {
                   combinedGlyphs.push(arrItem);
                 }
@@ -18318,17 +18321,26 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                 if (typeof items[j] === 'string') {
                   buildTextGeometry(items[j], textChunk);
                 } else {
-                  var val = items[j] / 1000;
-                  if (!textState.font.vertical) {
-                    offset = -val * textState.fontSize * textState.textHScale *
-                      textState.textMatrix[0];
-                    textState.translateTextMatrix(offset, 0);
-                    textChunk.width += offset;
-                  } else {
-                    offset = -val * textState.fontSize *
-                      textState.textMatrix[3];
+                  // PDF Specification 5.3.2 states:
+                  // The number is expressed in thousandths of a unit of text
+                  // space.
+                  // This amount is subtracted from the current horizontal or
+                  // vertical coordinate, depending on the writing mode.
+                  // In the default coordinate system, a positive adjustment
+                  // has the effect of moving the next glyph painted either to
+                  // the left or down by the given amount.
+                  var val = items[j] * textState.fontSize / 1000;
+                  if (textState.font.vertical) {
+                    offset = val * textState.textMatrix[3];
                     textState.translateTextMatrix(0, offset);
+                    // Value needs to be added to height to paint down.
                     textChunk.height += offset;
+                  } else {
+                    offset = val * textState.textHScale *
+                                   textState.textMatrix[0];
+                    textState.translateTextMatrix(offset, 0);
+                    // Value needs to be subtracted from width to paint left.
+                    textChunk.width -= offset;
                   }
                   if (items[j] < 0 && textState.font.spaceWidth > 0) {
                     var fakeSpaces = -items[j] / textState.font.spaceWidth;

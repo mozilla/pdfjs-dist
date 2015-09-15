@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.467';
-PDFJS.build = 'e68a5c0';
+PDFJS.version = '1.1.469';
+PDFJS.build = 'f06aa6a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4655,6 +4655,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var textHScale = current.textHScale * fontDirection;
       var glyphsLength = glyphs.length;
       var vertical = font.vertical;
+      var spacingDir = vertical ? 1 : -1;
       var defaultVMetrics = font.defaultVMetrics;
       var widthAdvanceScale = fontSize * current.fontMatrix[0];
 
@@ -4701,7 +4702,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           x += fontDirection * wordSpacing;
           continue;
         } else if (isNum(glyph)) {
-          x += -glyph * fontSize * 0.001;
+          x += spacingDir * glyph * fontSize / 1000;
           continue;
         }
 
@@ -4771,6 +4772,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var font = current.font;
       var fontSize = current.fontSize;
       var fontDirection = current.fontDirection;
+      var spacingDir = font.vertical ? 1 : -1;
       var charSpacing = current.charSpacing;
       var wordSpacing = current.wordSpacing;
       var textHScale = current.textHScale * fontDirection;
@@ -4778,7 +4780,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var glyphsLength = glyphs.length;
       var isTextInvisible =
         current.textRenderingMode === TextRenderingMode.INVISIBLE;
-      var i, glyph, width;
+      var i, glyph, width, spacingLength;
 
       if (isTextInvisible || fontSize === 0) {
         return;
@@ -4799,7 +4801,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           current.x += wordSpacing * textHScale;
           continue;
         } else if (isNum(glyph)) {
-          var spacingLength = -glyph * 0.001 * fontSize;
+          spacingLength = spacingDir * glyph * fontSize / 1000;
           this.ctx.translate(spacingLength, 0);
           current.x += spacingLength * textHScale;
           continue;
