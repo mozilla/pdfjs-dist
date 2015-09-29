@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.485';
-PDFJS.build = 'e28ad20';
+PDFJS.version = '1.1.488';
+PDFJS.build = 'a6761a5';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -9675,6 +9675,22 @@ var Dict = (function DictClosure() {
       return Promise.resolve(value);
     },
 
+    // Same as get(), but dereferences all elements if the result is an Array.
+    getArray: function Dict_getArray(key1, key2, key3) {
+      var value = this.get(key1, key2, key3);
+      if (!isArray(value)) {
+        return value;
+      }
+      value = value.slice(); // Ensure that we don't modify the Dict data.
+      for (var i = 0, ii = value.length; i < ii; i++) {
+        if (!isRef(value[i])) {
+          continue;
+        }
+        value[i] = this.xref.fetch(value[i]);
+      }
+      return value;
+    },
+
     // no dereferencing
     getRaw: function Dict_getRaw(key) {
       return this.map[key];
@@ -17317,8 +17333,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                                                                  xobj, smask,
                                                                  operatorList,
                                                                  initialState) {
-      var matrix = xobj.dict.get('Matrix');
-      var bbox = xobj.dict.get('BBox');
+      var matrix = xobj.dict.getArray('Matrix');
+      var bbox = xobj.dict.getArray('BBox');
       var group = xobj.dict.get('Group');
       if (group) {
         var groupOptions = {
