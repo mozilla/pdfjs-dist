@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.488';
-PDFJS.build = 'a6761a5';
+PDFJS.version = '1.1.490';
+PDFJS.build = '1bdfc47';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -30769,7 +30769,7 @@ var Parser = (function ParserClosure() {
       var stream = lexer.stream;
 
       // Parse dictionary.
-      var dict = new Dict(null);
+      var dict = new Dict(this.xref);
       while (!isCmd(this.buf1, 'ID') && !isEOF(this.buf1)) {
         if (!isName(this.buf1)) {
           error('Dictionary key must be a name object');
@@ -30783,7 +30783,7 @@ var Parser = (function ParserClosure() {
       }
 
       // Extract the name of the first (i.e. the current) image filter.
-      var filter = this.fetchIfRef(dict.get('Filter', 'F')), filterName;
+      var filter = dict.get('Filter', 'F'), filterName;
       if (isName(filter)) {
         filterName = filter.name;
       } else if (isArray(filter) && isName(filter[0])) {
@@ -30844,10 +30844,6 @@ var Parser = (function ParserClosure() {
 
       return imageStream;
     },
-    fetchIfRef: function Parser_fetchIfRef(obj) {
-      // not relying on the xref.fetchIfRef -- xref might not be set
-      return (isRef(obj) ? this.xref.fetch(obj) : obj);
-    },
     makeStream: function Parser_makeStream(dict, cipherTransform) {
       var lexer = this.lexer;
       var stream = lexer.stream;
@@ -30857,7 +30853,7 @@ var Parser = (function ParserClosure() {
       var pos = stream.pos - 1;
 
       // get length
-      var length = this.fetchIfRef(dict.get('Length'));
+      var length = dict.get('Length');
       if (!isInt(length)) {
         info('Bad ' + length + ' attribute in stream');
         length = 0;
@@ -30927,8 +30923,8 @@ var Parser = (function ParserClosure() {
       return stream;
     },
     filter: function Parser_filter(stream, dict, length) {
-      var filter = this.fetchIfRef(dict.get('Filter', 'F'));
-      var params = this.fetchIfRef(dict.get('DecodeParms', 'DP'));
+      var filter = dict.get('Filter', 'F');
+      var params = dict.get('DecodeParms', 'DP');
       if (isName(filter)) {
         return this.makeFilter(stream, filter.name, length, params);
       }
@@ -30960,8 +30956,8 @@ var Parser = (function ParserClosure() {
         return new NullStream(stream);
       }
       try {
-        if (params) {
-          params = this.fetchIfRef(params);
+        if (params && this.xref) {
+          params = this.xref.fetchIfRef(params);
         }
         var xrefStreamStats = this.xref.stats.streamTypes;
         if (name === 'FlateDecode' || name === 'Fl') {
