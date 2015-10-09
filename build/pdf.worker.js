@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.513';
-PDFJS.build = '9332da3';
+PDFJS.version = '1.1.515';
+PDFJS.build = '3eaeacf';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -12131,7 +12131,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         if (cmap instanceof IdentityCMap) {
           return new IdentityToUnicodeMap(0, 0xFFFF);
         }
-        var map = [];
+        var map = new Array(cmap.length);
         // Convert UTF-16BE
         // NOTE: cmap can be a sparse array, so use forEach instead of for(;;)
         // to iterate over all keys.
@@ -13744,6 +13744,10 @@ var CMap = (function CMapClosure() {
       out.length = 1;
     },
 
+    get length() {
+      return this._map.length;
+    },
+
     get isIdentityCMap() {
       if (!(this.name === 'Identity-H' || this.name === 'Identity-V')) {
         return false;
@@ -13819,6 +13823,10 @@ var IdentityCMap = (function IdentityCMapClosure() {
     },
 
     readCharCode: CMap.prototype.readCharCode,
+
+    get length() {
+      return 0x10000;
+    },
 
     get isIdentityCMap() {
       error('should not access .isIdentityCMap');
