@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.529';
-PDFJS.build = 'd1d81de';
+PDFJS.version = '1.1.531';
+PDFJS.build = 'e4f0e6f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -9746,9 +9746,10 @@ var CipherTransformFactory = (function CipherTransformFactoryClosure() {
       if (pdfAlgorithm.checkUserPassword(password, userValidationSalt,
                                          userPassword)) {
         return pdfAlgorithm.getUserKey(password, userKeySalt, userEncryption);
-      } else if (pdfAlgorithm.checkOwnerPassword(password, ownerValidationSalt,
-                                                 uBytes,
-                                                 ownerPassword)) {
+      } else if (password.length && pdfAlgorithm.checkOwnerPassword(password,
+                                                   ownerValidationSalt,
+                                                   uBytes,
+                                                   ownerPassword)) {
         return pdfAlgorithm.getOwnerKey(password, ownerKeySalt, uBytes,
                                         ownerEncryption);
       }
