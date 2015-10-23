@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.2.28';
-PDFJS.build = '5111422';
+PDFJS.version = '1.2.30';
+PDFJS.build = '4afd51a';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2847,6 +2847,9 @@ var WorkerTransport = (function WorkerTransportClosure() {
       }, this);
 
       messageHandler.on('StartRenderPage', function transportRender(data) {
+        if (this.destroyed) {
+          return; // Ignore any pending requests if the worker was terminated.
+        }
         var page = this.pageCache[data.pageIndex];
 
         page.stats.timeEnd('Page Request');
@@ -2854,6 +2857,9 @@ var WorkerTransport = (function WorkerTransportClosure() {
       }, this);
 
       messageHandler.on('RenderPageChunk', function transportRender(data) {
+        if (this.destroyed) {
+          return; // Ignore any pending requests if the worker was terminated.
+        }
         var page = this.pageCache[data.pageIndex];
 
         page._renderPageChunk(data.operatorList, data.intent);
