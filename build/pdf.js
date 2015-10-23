@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.1.535';
-PDFJS.build = 'eff28ee';
+PDFJS.version = '1.1.544';
+PDFJS.build = 'eabbfd7';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5420,6 +5420,11 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     paintSolidColorImageMask:
       function CanvasGraphics_paintSolidColorImageMask() {
         this.ctx.fillRect(0, 0, 1, 1);
+    },
+
+    paintXObject: function CanvasGraphics_paintXObject() {
+      UnsupportedManager.notify(UNSUPPORTED_FEATURES.unknown);
+      warn('Unsupported \'paintXObject\' command.');
     },
 
     // Marked content
