@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.2.32';
-PDFJS.build = 'aae82ec';
+PDFJS.version = '1.2.34';
+PDFJS.build = '7a3963e';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -12726,6 +12726,7 @@ var OperatorList = (function OperatorListClosure() {
     this.fnArray = [];
     this.argsArray = [];
     this.dependencies = {};
+    this._totalLength = 0;
     this.pageIndex = pageIndex;
     this.intent = intent;
   }
@@ -12733,6 +12734,14 @@ var OperatorList = (function OperatorListClosure() {
   OperatorList.prototype = {
     get length() {
       return this.argsArray.length;
+    },
+
+    /**
+     * @returns {number} The total length of the entire operator list,
+     *                   since `this.length === 0` after flushing.
+     */
+    get totalLength() {
+      return (this._totalLength + this.length);
     },
 
     addOp: function(fn, args) {
@@ -12783,12 +12792,15 @@ var OperatorList = (function OperatorListClosure() {
         new QueueOptimizer().optimize(this);
       }
       var transfers = getTransfers(this);
+      var length = this.length;
+      this._totalLength += length;
+
       this.messageHandler.send('RenderPageChunk', {
         operatorList: {
           fnArray: this.fnArray,
           argsArray: this.argsArray,
           lastChunk: lastChunk,
-          length: this.length
+          length: length
         },
         pageIndex: this.pageIndex,
         intent: this.intent
@@ -34684,7 +34696,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
           finishWorkerTask(task);
 
           info('page=' + pageNum + ' - getOperatorList: time=' +
-               (Date.now() - start) + 'ms, len=' + operatorList.fnArray.length);
+               (Date.now() - start) + 'ms, len=' + operatorList.totalLength);
         }, function(e) {
           finishWorkerTask(task);
           if (task.terminated) {
