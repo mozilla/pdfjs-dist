@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.2.70';
-PDFJS.build = '9e66625';
+PDFJS.version = '1.2.73';
+PDFJS.build = '1e0bd07';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -39832,10 +39832,8 @@ if (!PDFJS.workerSrc && typeof document !== 'undefined') {
   // workerSrc is not set -- using last script url to define default location
   PDFJS.workerSrc = (function () {
     'use strict';
-    var scriptTagContainer = document.body ||
-                             document.getElementsByTagName('head')[0];
-    var pdfjsSrc = scriptTagContainer.lastChild.src;
-    return pdfjsSrc && pdfjsSrc.replace(/\.js$/i, '.worker.js');
+    var pdfJsSrc = document.currentScript.src;
+    return pdfJsSrc && pdfJsSrc.replace(/\.js$/i, '.worker.js');
   })();
 }
 
