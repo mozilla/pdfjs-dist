@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.2.83';
-PDFJS.build = '1280b7b';
+PDFJS.version = '1.2.85';
+PDFJS.build = '5b2015b';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -17837,6 +17837,15 @@ var Font = (function FontClosure() {
        * PDF spec
        */
       function readCmapTable(cmap, font, isSymbolicFont, hasEncoding) {
+        if (!cmap) {
+          warn('No cmap table available.');
+          return {
+            platformId: -1,
+            encodingId: -1,
+            mappings: [],
+            hasShortCmap: false
+          };
+        }
         var segment;
         var start = (font.start ? font.start : 0) + cmap.offset;
         font.pos = start;
