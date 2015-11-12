@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.2.101';
-PDFJS.build = '2a5a791';
+PDFJS.version = '1.2.103';
+PDFJS.build = '7381ff9';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4985,10 +4985,11 @@ var ExpertSubsetCharset = [
 var DEFAULT_ICON_SIZE = 22; // px
 
 /**
- * @constructor
+ * @class
+ * @alias AnnotationFactory
  */
 function AnnotationFactory() {}
-AnnotationFactory.prototype = {
+AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
   /**
    * @param {XRef} xref
    * @param {Object} ref

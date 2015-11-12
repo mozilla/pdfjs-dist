@@ -22,8 +22,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.2.101';
-PDFJS.build = '2a5a791';
+PDFJS.version = '1.2.103';
+PDFJS.build = '7381ff9';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1963,9 +1963,9 @@ PDFJS.getDocument = function getDocument(src,
 /**
  * PDF document loading operation.
  * @class
+ * @alias PDFDocumentLoadingTask
  */
 var PDFDocumentLoadingTask = (function PDFDocumentLoadingTaskClosure() {
-  /** @constructs PDFDocumentLoadingTask */
   function PDFDocumentLoadingTask() {
     this._capability = createPromiseCapability();
     this._transport = null;
@@ -2022,13 +2022,11 @@ var PDFDocumentLoadingTask = (function PDFDocumentLoadingTaskClosure() {
 /**
  * Abstract class to support range requests file loading.
  * @class
+ * @alias PDFJS.PDFDataRangeTransport
+ * @param {number} length
+ * @param {Uint8Array} initialData
  */
 var PDFDataRangeTransport = (function pdfDataRangeTransportClosure() {
-  /**
-   * @constructs PDFDataRangeTransport
-   * @param {number} length
-   * @param {Uint8Array} initialData
-   */
   function PDFDataRangeTransport(length, initialData) {
     this.length = length;
     this.initialData = initialData;
@@ -2102,6 +2100,7 @@ PDFJS.PDFDataRangeTransport = PDFDataRangeTransport;
  * Proxy to a PDFDocument in the worker thread. Also, contains commonly used
  * properties that can be read synchronously.
  * @class
+ * @alias PDFDocumentProxy
  */
 var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
   function PDFDocumentProxy(pdfInfo, transport, loadingTask) {
@@ -2296,6 +2295,7 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
 /**
  * Proxy to a PDFPage in the worker thread.
  * @class
+ * @alias PDFPageProxy
  */
 var PDFPageProxy = (function PDFPageProxyClosure() {
   function PDFPageProxy(pageIndex, pageInfo, transport) {
@@ -3197,6 +3197,7 @@ var PDFObjects = (function PDFObjectsClosure() {
 /**
  * Allows controlling of the rendering tasks.
  * @class
+ * @alias RenderTask
  */
 var RenderTask = (function RenderTaskClosure() {
   function RenderTask(internalRenderTask) {
@@ -11565,10 +11566,11 @@ var ExpertSubsetCharset = [
 var DEFAULT_ICON_SIZE = 22; // px
 
 /**
- * @constructor
+ * @class
+ * @alias AnnotationFactory
  */
 function AnnotationFactory() {}
-AnnotationFactory.prototype = {
+AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
   /**
    * @param {XRef} xref
    * @param {Object} ref
