@@ -1,5 +1,3 @@
-/* -*- Mode: Java; tab-width: 2; indent-tabs-mode: nil; c-basic-offset: 2 -*- */
-/* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
 /* Copyright 2012 Mozilla Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.2.121';
-PDFJS.build = '37f511c';
+PDFJS.version = '1.2.123';
+PDFJS.build = '99f9b52';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -35126,6 +35124,7 @@ var ArithmeticDecoder = (function ArithmeticDecoderClosure() {
 })();
 
 
+
 var JpegImage = (function jpegImage() {
   var dctZigZag = new Uint8Array([
      0,
@@ -39802,6 +39801,7 @@ var bidi = PDFJS.bidi = (function bidiClosure() {
 
   return bidi;
 })();
+
 
 
 var MurmurHash3_64 = (function MurmurHash3_64Closure (seed) {
