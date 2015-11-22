@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.14';
-PDFJS.build = 'df46b64';
+PDFJS.version = '1.3.16';
+PDFJS.build = '97cb7ff';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -58,6 +58,19 @@ var AnnotationType = {
   WIDGET: 1,
   TEXT: 2,
   LINK: 3
+};
+
+var AnnotationFlag = {
+  INVISIBLE: 0x01,
+  HIDDEN: 0x02,
+  PRINT: 0x04,
+  NOZOOM: 0x08,
+  NOROTATE: 0x10,
+  NOVIEW: 0x20,
+  READONLY: 0x40,
+  LOCKED: 0x80,
+  TOGGLENOVIEW: 0x100,
+  LOCKEDCONTENTS: 0x200
 };
 
 var AnnotationBorderStyleType = {

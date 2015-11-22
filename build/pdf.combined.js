@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.14';
-PDFJS.build = 'df46b64';
+PDFJS.version = '1.3.16';
+PDFJS.build = '97cb7ff';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -58,6 +58,19 @@ var AnnotationType = {
   WIDGET: 1,
   TEXT: 2,
   LINK: 3
+};
+
+var AnnotationFlag = {
+  INVISIBLE: 0x01,
+  HIDDEN: 0x02,
+  PRINT: 0x04,
+  NOZOOM: 0x08,
+  NOROTATE: 0x10,
+  NOVIEW: 0x20,
+  READONLY: 0x40,
+  LOCKED: 0x80,
+  TOGGLENOVIEW: 0x100,
+  LOCKEDCONTENTS: 0x200
 };
 
 var AnnotationBorderStyleType = {
@@ -9759,8 +9772,7 @@ var Page = (function PageClosure() {
       for (var i = 0, n = annotationRefs.length; i < n; ++i) {
         var annotationRef = annotationRefs[i];
         var annotation = annotationFactory.create(this.xref, annotationRef);
-        if (annotation &&
-            (annotation.isViewable() || annotation.isPrintable())) {
+        if (annotation && (annotation.viewable || annotation.printable)) {
           annotations.push(annotation);
         }
       }
@@ -11969,7 +11981,8 @@ var Annotation = (function AnnotationClosure() {
     var data = this.data = {};
 
     data.subtype = dict.get('Subtype').name;
-    data.annotationFlags = dict.get('F');
+
+    this.setFlags(dict.get('F'));
 
     this.setRectangle(dict.get('Rect'));
     data.rect = this.rectangle;
@@ -11986,6 +11999,64 @@ var Annotation = (function AnnotationClosure() {
   }
 
   Annotation.prototype = {
+    /**
+     * @return {boolean}
+     */
+    get viewable() {
+      if (this.flags) {
+        return !this.hasFlag(AnnotationFlag.INVISIBLE) &&
+               !this.hasFlag(AnnotationFlag.HIDDEN) &&
+               !this.hasFlag(AnnotationFlag.NOVIEW);
+      }
+      return true;
+    },
+
+    /**
+     * @return {boolean}
+     */
+    get printable() {
+      if (this.flags) {
+        return this.hasFlag(AnnotationFlag.PRINT) &&
+               !this.hasFlag(AnnotationFlag.INVISIBLE) &&
+               !this.hasFlag(AnnotationFlag.HIDDEN);
+      }
+      return false;
+    },
+
+    /**
+     * Set the flags.
+     *
+     * @public
+     * @memberof Annotation
+     * @param {number} flags - Unsigned 32-bit integer specifying annotation
+     *                         characteristics
+     * @see {@link shared/util.js}
+     */
+    setFlags: function Annotation_setFlags(flags) {
+      if (isInt(flags)) {
+        this.flags = flags;
+      } else {
+        this.flags = 0;
+      }
+    },
+
+    /**
+     * Check if a provided flag is set.
+     *
+     * @public
+     * @memberof Annotation
+     * @param {number} flag - Hexadecimal representation for an annotation
+     *                        characteristic
+     * @return {boolean}
+     * @see {@link shared/util.js}
+     */
+    hasFlag: function Annotation_hasFlag(flag) {
+      if (this.flags) {
+        return (this.flags & flag) > 0;
+      }
+      return false;
+    },
+
     /**
      * Set the rectangle.
      *
@@ -12085,32 +12156,6 @@ var Annotation = (function AnnotationClosure() {
       }
     },
 
-    isInvisible: function Annotation_isInvisible() {
-      var data = this.data;
-      return !!(data &&
-                data.annotationFlags &&            // Default: not invisible
-                data.annotationFlags & 0x1);       // Invisible
-    },
-
-    isViewable: function Annotation_isViewable() {
-      var data = this.data;
-      return !!(!this.isInvisible() &&
-                data &&
-                (!data.annotationFlags ||
-                 !(data.annotationFlags & 0x22)) &&  // Hidden or NoView
-                data.rect);                          // rectangle is necessary
-    },
-
-    isPrintable: function Annotation_isPrintable() {
-      var data = this.data;
-      return !!(!this.isInvisible() &&
-                data &&
-                data.annotationFlags &&              // Default: not printable
-                data.annotationFlags & 0x4 &&        // Print
-                !(data.annotationFlags & 0x2) &&     // Hidden
-                data.rect);                          // rectangle is necessary
-    },
-
     loadResources: function Annotation_loadResources(keys) {
       return new Promise(function (resolve, reject) {
         this.appearance.dict.getAsync('Resources').then(function (resources) {
@@ -12177,8 +12222,8 @@ var Annotation = (function AnnotationClosure() {
 
     var annotationPromises = [];
     for (var i = 0, n = annotations.length; i < n; ++i) {
-      if (intent === 'display' && annotations[i].isViewable() ||
-          intent === 'print' && annotations[i].isPrintable()) {
+      if (intent === 'display' && annotations[i].viewable ||
+          intent === 'print' && annotations[i].printable) {
         annotationPromises.push(
           annotations[i].getOperatorList(partialEvaluator, task));
       }
@@ -12354,6 +12399,12 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
     data.fieldFlags = Util.getInheritableProperty(dict, 'Ff') || 0;
     this.fieldResources = Util.getInheritableProperty(dict, 'DR') || Dict.empty;
 
+    // Hide unsupported Widget signatures.
+    if (data.fieldType === 'Sig') {
+      warn('unimplemented annotation type: Widget signature');
+      this.setFlags(AnnotationFlag.HIDDEN);
+    }
+
     // Building the full field name by collecting the field and
     // its ancestors 'T' data and joining them using '.'.
     var fieldName = [];
@@ -12387,17 +12438,7 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
     data.fullName = fieldName.join('.');
   }
 
-  var parent = Annotation.prototype;
-  Util.inherit(WidgetAnnotation, Annotation, {
-    isViewable: function WidgetAnnotation_isViewable() {
-      if (this.data.fieldType === 'Sig') {
-        warn('unimplemented annotation type: Widget signature');
-        return false;
-      }
-
-      return parent.isViewable.call(this);
-    }
-  });
+  Util.inherit(WidgetAnnotation, Annotation, {});
 
   return WidgetAnnotation;
 })();
