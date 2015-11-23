@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.22';
-PDFJS.build = 'aa75c4f';
+PDFJS.version = '1.3.24';
+PDFJS.build = 'dcd2812';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -11983,6 +11983,7 @@ var Annotation = (function AnnotationClosure() {
     data.subtype = dict.get('Subtype').name;
 
     this.setFlags(dict.get('F'));
+    data.annotationFlags = this.flags;
 
     this.setRectangle(dict.get('Rect'));
     data.rect = this.rectangle;
@@ -12537,7 +12538,7 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
         if (!isValidUrl(url, false)) {
           url = '';
         }
-        // According to ISO 32000-1:2008, section 12.6.4.7, 
+        // According to ISO 32000-1:2008, section 12.6.4.7,
         // URI should to be encoded in 7-bit ASCII.
         // Some bad PDFs may have URIs in UTF-8 encoding, see Bugzilla 1122280.
         try {
