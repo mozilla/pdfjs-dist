@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.24';
-PDFJS.build = 'dcd2812';
+PDFJS.version = '1.3.26';
+PDFJS.build = '4b243cd';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2278,6 +2278,16 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
  */
 
 /**
+ * Page annotation parameters.
+ *
+ * @typedef {Object} GetAnnotationsParameters
+ * @param {string} intent - Determines the annotations that will be fetched,
+ *                 can be either 'display' (viewable annotations) or 'print'
+ *                 (printable annotations).
+ *                 If the parameter is omitted, all annotations are fetched.
+ */
+
+/**
  * Page render parameters.
  *
  * @typedef {Object} RenderParameters
@@ -2365,12 +2375,17 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
       return new PDFJS.PageViewport(this.view, scale, rotate, 0, 0);
     },
     /**
+     * @param {GetAnnotationsParameters} params - Annotation parameters.
      * @return {Promise} A promise that is resolved with an {Array} of the
      * annotation objects.
      */
-    getAnnotations: function PDFPageProxy_getAnnotations() {
-      if (!this.annotationsPromise) {
-        this.annotationsPromise = this.transport.getAnnotations(this.pageIndex);
+    getAnnotations: function PDFPageProxy_getAnnotations(params) {
+      var intent = (params && params.intent) || null;
+
+      if (!this.annotationsPromise || this.annotationsIntent !== intent) {
+        this.annotationsPromise = this.transport.getAnnotations(this.pageIndex,
+                                                                intent);
+        this.annotationsIntent = intent;
       }
       return this.annotationsPromise;
     },
@@ -3044,9 +3059,11 @@ var WorkerTransport = (function WorkerTransportClosure() {
       return this.messageHandler.sendWithPromise('GetPageIndex', { ref: ref });
     },
 
-    getAnnotations: function WorkerTransport_getAnnotations(pageIndex) {
-      return this.messageHandler.sendWithPromise('GetAnnotations',
-        { pageIndex: pageIndex });
+    getAnnotations: function WorkerTransport_getAnnotations(pageIndex, intent) {
+      return this.messageHandler.sendWithPromise('GetAnnotations', {
+        pageIndex: pageIndex,
+        intent: intent,
+      });
     },
 
     getDestinations: function WorkerTransport_getDestinations() {
@@ -3054,7 +3071,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
     },
 
     getDestination: function WorkerTransport_getDestination(id) {
-      return this.messageHandler.sendWithPromise('GetDestination', { id: id } );
+      return this.messageHandler.sendWithPromise('GetDestination', { id: id });
     },
 
     getAttachments: function WorkerTransport_getAttachments() {
@@ -9756,10 +9773,16 @@ var Page = (function PageClosure() {
       });
     },
 
-    getAnnotationsData: function Page_getAnnotationsData() {
+    getAnnotationsData: function Page_getAnnotationsData(intent) {
       var annotations = this.annotations;
       var annotationsData = [];
       for (var i = 0, n = annotations.length; i < n; ++i) {
+        if (intent) {
+          if (!(intent === 'display' && annotations[i].viewable) &&
+              !(intent === 'print' && annotations[i].printable)) {
+            continue;
+          }
+        }
         annotationsData.push(annotations[i].data);
       }
       return annotationsData;
@@ -9772,7 +9795,7 @@ var Page = (function PageClosure() {
       for (var i = 0, n = annotationRefs.length; i < n; ++i) {
         var annotationRef = annotationRefs[i];
         var annotation = annotationFactory.create(this.xref, annotationRef);
-        if (annotation && (annotation.viewable || annotation.printable)) {
+        if (annotation) {
           annotations.push(annotation);
         }
       }
@@ -41685,7 +41708,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
 
     handler.on('GetDestination',
       function wphSetupGetDestination(data) {
-        return pdfManager.ensureCatalog('getDestination', [ data.id ]);
+        return pdfManager.ensureCatalog('getDestination', [data.id]);
       }
     );
 
@@ -41733,7 +41756,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
 
     handler.on('GetAnnotations', function wphSetupGetAnnotations(data) {
       return pdfManager.getPage(data.pageIndex).then(function(page) {
-        return pdfManager.ensure(page, 'getAnnotationsData', []);
+        return pdfManager.ensure(page, 'getAnnotationsData', [data.intent]);
       });
     });
 

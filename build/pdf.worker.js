@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.24';
-PDFJS.build = 'dcd2812';
+PDFJS.version = '1.3.26';
+PDFJS.build = '4b243cd';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2869,10 +2869,16 @@ var Page = (function PageClosure() {
       });
     },
 
-    getAnnotationsData: function Page_getAnnotationsData() {
+    getAnnotationsData: function Page_getAnnotationsData(intent) {
       var annotations = this.annotations;
       var annotationsData = [];
       for (var i = 0, n = annotations.length; i < n; ++i) {
+        if (intent) {
+          if (!(intent === 'display' && annotations[i].viewable) &&
+              !(intent === 'print' && annotations[i].printable)) {
+            continue;
+          }
+        }
         annotationsData.push(annotations[i].data);
       }
       return annotationsData;
@@ -2885,7 +2891,7 @@ var Page = (function PageClosure() {
       for (var i = 0, n = annotationRefs.length; i < n; ++i) {
         var annotationRef = annotationRefs[i];
         var annotation = annotationFactory.create(this.xref, annotationRef);
-        if (annotation && (annotation.viewable || annotation.printable)) {
+        if (annotation) {
           annotations.push(annotation);
         }
       }
@@ -34798,7 +34804,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
 
     handler.on('GetDestination',
       function wphSetupGetDestination(data) {
-        return pdfManager.ensureCatalog('getDestination', [ data.id ]);
+        return pdfManager.ensureCatalog('getDestination', [data.id]);
       }
     );
 
@@ -34846,7 +34852,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
 
     handler.on('GetAnnotations', function wphSetupGetAnnotations(data) {
       return pdfManager.getPage(data.pageIndex).then(function(page) {
-        return pdfManager.ensure(page, 'getAnnotationsData', []);
+        return pdfManager.ensure(page, 'getAnnotationsData', [data.intent]);
       });
     });
 
