@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.28';
-PDFJS.build = 'c280fb5';
+PDFJS.version = '1.3.32';
+PDFJS.build = 'c2dfe9e';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1520,26 +1520,20 @@ PDFJS.createObjectURL = (function createObjectURLClosure() {
   };
 })();
 
-function MessageHandler(name, comObj) {
-  this.name = name;
+function MessageHandler(sourceName, targetName, comObj) {
+  this.sourceName = sourceName;
+  this.targetName = targetName;
   this.comObj = comObj;
   this.callbackIndex = 1;
   this.postMessageTransfers = true;
   var callbacksCapabilities = this.callbacksCapabilities = {};
   var ah = this.actionHandler = {};
 
-  ah['console_log'] = [function ahConsoleLog(data) {
-    console.log.apply(console, data);
-  }];
-  ah['console_error'] = [function ahConsoleError(data) {
-    console.error.apply(console, data);
-  }];
-  ah['_unsupported_feature'] = [function ah_unsupportedFeature(data) {
-    UnsupportedManager.notify(data);
-  }];
-
-  comObj.onmessage = function messageHandlerComObjOnMessage(event) {
+  this._onComObjOnMessage = function messageHandlerComObjOnMessage(event) {
     var data = event.data;
+    if (data.targetName !== this.sourceName) {
+      return;
+    }
     if (data.isReply) {
       var callbackId = data.callbackId;
       if (data.callbackId in callbacksCapabilities) {
@@ -1556,10 +1550,14 @@ function MessageHandler(name, comObj) {
     } else if (data.action in ah) {
       var action = ah[data.action];
       if (data.callbackId) {
+        var sourceName = this.sourceName;
+        var targetName = data.sourceName;
         Promise.resolve().then(function () {
           return action[0].call(action[1], data.data);
         }).then(function (result) {
           comObj.postMessage({
+            sourceName: sourceName,
+            targetName: targetName,
             isReply: true,
             callbackId: data.callbackId,
             data: result
@@ -1570,6 +1568,8 @@ function MessageHandler(name, comObj) {
             reason = reason + '';
           }
           comObj.postMessage({
+            sourceName: sourceName,
+            targetName: targetName,
             isReply: true,
             callbackId: data.callbackId,
             error: reason
@@ -1581,7 +1581,8 @@ function MessageHandler(name, comObj) {
     } else {
       error('Unknown action from worker: ' + data.action);
     }
-  };
+  }.bind(this);
+  comObj.addEventListener('message', this._onComObjOnMessage);
 }
 
 MessageHandler.prototype = {
@@ -1600,6 +1601,8 @@ MessageHandler.prototype = {
    */
   send: function messageHandlerSend(actionName, data, transfers) {
     var message = {
+      sourceName: this.sourceName,
+      targetName: this.targetName,
       action: actionName,
       data: data
     };
@@ -1617,6 +1620,8 @@ MessageHandler.prototype = {
     function messageHandlerSendWithPromise(actionName, data, transfers) {
     var callbackId = this.callbackIndex++;
     var message = {
+      sourceName: this.sourceName,
+      targetName: this.targetName,
       action: actionName,
       data: data,
       callbackId: callbackId
@@ -1642,6 +1647,10 @@ MessageHandler.prototype = {
     } else {
       this.comObj.postMessage(message);
     }
+  },
+
+  destroy: function () {
+    this.comObj.removeEventListener('message', this._onComObjOnMessage);
   }
 };
 
@@ -1862,6 +1871,8 @@ PDFJS.isEvalSupported = (PDFJS.isEvalSupported === undefined ?
  * @property {number}     rangeChunkSize - Optional parameter to specify
  *   maximum number of bytes fetched per range request. The default value is
  *   2^16 = 65536.
+ * @property {PDFWorker}  worker - The worker that will be used for the loading
+ *   and parsing of the PDF data.
  */
 
 /**
@@ -1924,7 +1935,6 @@ PDFJS.getDocument = function getDocument(src,
   task.onPassword = passwordCallback || null;
   task.onProgress = progressCallback || null;
 
-  var workerInitializedCapability, transport;
   var source;
   if (typeof src === 'string') {
     source = { url: src };
@@ -1945,12 +1955,18 @@ PDFJS.getDocument = function getDocument(src,
   }
 
   var params = {};
+  var rangeTransport = null;
+  var worker = null;
   for (var key in source) {
     if (key === 'url' && typeof window !== 'undefined') {
       // The full path is required in the 'url' field.
       params[key] = combineUrl(window.location.href, source[key]);
       continue;
     } else if (key === 'range') {
+      rangeTransport = source[key];
+      continue;
+    } else if (key === 'worker') {
+      worker = source[key];
       continue;
     } else if (key === 'data' && !(source[key] instanceof Uint8Array)) {
       // Converting string or array-like data to Uint8Array.
@@ -1971,17 +1987,71 @@ PDFJS.getDocument = function getDocument(src,
     params[key] = source[key];
   }
 
-  params.rangeChunkSize = source.rangeChunkSize || DEFAULT_RANGE_CHUNK_SIZE;
+  params.rangeChunkSize = params.rangeChunkSize || DEFAULT_RANGE_CHUNK_SIZE;
 
-  workerInitializedCapability = createPromiseCapability();
-  transport = new WorkerTransport(workerInitializedCapability, source.range);
-  workerInitializedCapability.promise.then(function transportInitialized() {
-    transport.fetchDocument(task, params);
-  });
-  task._transport = transport;
+  if (!worker) {
+    // Worker was not provided -- creating and owning our own.
+    worker = new PDFWorker();
+    task._worker = worker;
+  }
+  var docId = task.docId;
+  worker.promise.then(function () {
+    if (task.destroyed) {
+      throw new Error('Loading aborted');
+    }
+    return _fetchDocument(worker, params, rangeTransport, docId).then(
+        function (workerId) {
+      if (task.destroyed) {
+        throw new Error('Loading aborted');
+      }
+      var messageHandler = new MessageHandler(docId, workerId, worker.port);
+      var transport = new WorkerTransport(messageHandler, task, rangeTransport);
+      task._transport = transport;
+    });
+  }, task._capability.reject);
 
   return task;
 };
+
+/**
+ * Starts fetching of specified PDF document/data.
+ * @param {PDFWorker} worker
+ * @param {Object} source
+ * @param {PDFDataRangeTransport} pdfDataRangeTransport
+ * @param {string} docId Unique document id, used as MessageHandler id.
+ * @returns {Promise} The promise, which is resolved when worker id of
+ *                    MessageHandler is known.
+ * @private
+ */
+function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
+  if (worker.destroyed) {
+    return Promise.reject(new Error('Worker was destroyed'));
+  }
+
+  source.disableAutoFetch = PDFJS.disableAutoFetch;
+  source.disableStream = PDFJS.disableStream;
+  source.chunkedViewerLoading = !!pdfDataRangeTransport;
+  if (pdfDataRangeTransport) {
+    source.length = pdfDataRangeTransport.length;
+    source.initialData = pdfDataRangeTransport.initialData;
+  }
+  return worker.messageHandler.sendWithPromise('GetDocRequest', {
+    docId: docId,
+    source: source,
+    disableRange: PDFJS.disableRange,
+    maxImageSize: PDFJS.maxImageSize,
+    cMapUrl: PDFJS.cMapUrl,
+    cMapPacked: PDFJS.cMapPacked,
+    disableFontFace: PDFJS.disableFontFace,
+    disableCreateObjectURL: PDFJS.disableCreateObjectURL,
+    verbosity: PDFJS.verbosity
+  }).then(function (workerId) {
+    if (worker.destroyed) {
+      throw new Error('Worker was destroyed');
+    }
+    return workerId;
+  });
+}
 
 /**
  * PDF document loading operation.
@@ -1989,9 +2059,25 @@ PDFJS.getDocument = function getDocument(src,
  * @alias PDFDocumentLoadingTask
  */
 var PDFDocumentLoadingTask = (function PDFDocumentLoadingTaskClosure() {
+  var nextDocumentId = 0;
+
+  /** @constructs PDFDocumentLoadingTask */
   function PDFDocumentLoadingTask() {
     this._capability = createPromiseCapability();
     this._transport = null;
+    this._worker = null;
+
+    /**
+     * Unique document loading task id -- used in MessageHandlers.
+     * @type {string}
+     */
+    this.docId = 'd' + (nextDocumentId++);
+
+    /**
+     * Shows if loading task is destroyed.
+     * @type {boolean}
+     */
+    this.destroyed = false;
 
     /**
      * Callback to request a password if wrong or no password was provided.
@@ -2023,7 +2109,17 @@ var PDFDocumentLoadingTask = (function PDFDocumentLoadingTaskClosure() {
      *                   is completed.
      */
     destroy: function () {
-      return this._transport.destroy();
+      this.destroyed = true;
+
+      var transportDestroyed = !this._transport ? Promise.resolve() :
+        this._transport.destroy();
+      return transportDestroyed.then(function () {
+        this._transport = null;
+        if (this._worker) {
+          this._worker.destroy();
+          this._worker = null;
+        }
+      }.bind(this));
     },
 
     /**
@@ -2252,7 +2348,7 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
      * Destroys current document instance and terminates worker.
      */
     destroy: function PDFDocumentProxy_destroy() {
-      return this.transport.destroy();
+      return this.loadingTask.destroy();
     }
   };
   return PDFDocumentProxy;
@@ -2649,16 +2745,139 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
 })();
 
 /**
+ * PDF.js web worker abstraction, it controls instantiation of PDF documents and
+ * WorkerTransport for them.  If creation of a web worker is not possible,
+ * a "fake" worker will be used instead.
+ * @class
+ */
+var PDFWorker = (function PDFWorkerClosure() {
+  var nextFakeWorkerId = 0;
+
+  // Loads worker code into main thread.
+  function setupFakeWorkerGlobal() {
+    if (!PDFJS.fakeWorkerFilesLoadedCapability) {
+      PDFJS.fakeWorkerFilesLoadedCapability = createPromiseCapability();
+      // In the developer build load worker_loader which in turn loads all the
+      // other files and resolves the promise. In production only the
+      // pdf.worker.js file is needed.
+      PDFJS.fakeWorkerFilesLoadedCapability.resolve();
+    }
+    return PDFJS.fakeWorkerFilesLoadedCapability.promise;
+  }
+
+  function PDFWorker(name) {
+    this.name = name;
+    this.destroyed = false;
+
+    this._readyCapability = createPromiseCapability();
+    this._port = null;
+    this._webWorker = null;
+    this._messageHandler = null;
+    this._initialize();
+  }
+
+  PDFWorker.prototype =  /** @lends PDFWorker.prototype */ {
+    get promise() {
+      return this._readyCapability.promise;
+    },
+
+    get port() {
+      return this._port;
+    },
+
+    get messageHandler() {
+      return this._messageHandler;
+    },
+
+    _initialize: function PDFWorker_initialize() {
+      // If worker support isn't disabled explicit and the browser has worker
+      // support, create a new web worker and test if it/the browser fullfills
+      // all requirements to run parts of pdf.js in a web worker.
+      // Right now, the requirement is, that an Uint8Array is still an
+      // Uint8Array as it arrives on the worker. (Chrome added this with v.15.)
+      // Either workers are disabled, not supported or have thrown an exception.
+      // Thus, we fallback to a faked worker.
+      this._setupFakeWorker();
+    },
+
+    _setupFakeWorker: function PDFWorker_setupFakeWorker() {
+      warn('Setting up fake worker.');
+      globalScope.PDFJS.disableWorker = true;
+
+      setupFakeWorkerGlobal().then(function () {
+        if (this.destroyed) {
+          this._readyCapability.reject(new Error('Worker was destroyed'));
+          return;
+        }
+
+        // If we don't use a worker, just post/sendMessage to the main thread.
+        var port = {
+          _listeners: [],
+          postMessage: function (obj) {
+            var e = {data: obj};
+            this._listeners.forEach(function (listener) {
+              listener.call(this, e);
+            }, this);
+          },
+          addEventListener: function (name, listener) {
+            this._listeners.push(listener);
+          },
+          removeEventListener: function (name, listener) {
+            var i = this._listeners.indexOf(listener);
+            this._listeners.splice(i, 1);
+          },
+          terminate: function () {}
+        };
+        this._port = port;
+
+        // All fake workers use the same port, making id unique.
+        var id = 'fake' + (nextFakeWorkerId++);
+
+        // If the main thread is our worker, setup the handling for the
+        // messages -- the main thread sends to it self.
+        var workerHandler = new MessageHandler(id + '_worker', id, port);
+        PDFJS.WorkerMessageHandler.setup(workerHandler, port);
+
+        var messageHandler = new MessageHandler(id, id + '_worker', port);
+        this._messageHandler = messageHandler;
+        this._readyCapability.resolve();
+      }.bind(this));
+    },
+
+    /**
+     * Destroys the worker instance.
+     */
+    destroy: function PDFWorker_destroy() {
+      this.destroyed = true;
+      if (this._webWorker) {
+        // We need to terminate only web worker created resource.
+        this._webWorker.terminate();
+        this._webWorker = null;
+      }
+      this._port = null;
+      if (this._messageHandler) {
+        this._messageHandler.destroy();
+        this._messageHandler = null;
+      }
+    }
+  };
+
+  return PDFWorker;
+})();
+PDFJS.PDFWorker = PDFWorker;
+
+/**
  * For internal use only.
  * @ignore
  */
 var WorkerTransport = (function WorkerTransportClosure() {
-  function WorkerTransport(workerInitializedCapability, pdfDataRangeTransport) {
+  function WorkerTransport(messageHandler, loadingTask, pdfDataRangeTransport) {
+    this.messageHandler = messageHandler;
+    this.loadingTask = loadingTask;
     this.pdfDataRangeTransport = pdfDataRangeTransport;
-    this.workerInitializedCapability = workerInitializedCapability;
     this.commonObjs = new PDFObjects();
+    this.fontLoader = new FontLoader(loadingTask.docId);
 
-    this.loadingTask = null;
     this.destroyed = false;
     this.destroyCapability = null;
 
@@ -2666,14 +2885,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
     this.pagePromises = [];
     this.downloadInfoCapability = createPromiseCapability();
 
-    // If worker support isn't disabled explicit and the browser has worker
-    // support, create a new web worker and test if it/the browser fullfills
-    // all requirements to run parts of pdf.js in a web worker.
-    // Right now, the requirement is, that an Uint8Array is still an Uint8Array
-    // as it arrives on the worker. Chrome added this with version 15.
-    // Either workers are disabled, not supported or have thrown an exception.
-    // Thus, we fallback to a faked worker.
-    this.setupFakeWorker();
+    this.setupMessageHandler();
   }
   WorkerTransport.prototype = {
     destroy: function WorkerTransport_destroy() {
@@ -2699,54 +2911,23 @@ var WorkerTransport = (function WorkerTransportClosure() {
       var terminated = this.messageHandler.sendWithPromise('Terminate', null);
       waitOn.push(terminated);
       Promise.all(waitOn).then(function () {
-        FontLoader.clear();
-        if (self.worker) {
-          self.worker.terminate();
-        }
+        self.fontLoader.clear();
         if (self.pdfDataRangeTransport) {
           self.pdfDataRangeTransport.abort();
           self.pdfDataRangeTransport = null;
         }
-        self.messageHandler = null;
+        if (self.messageHandler) {
+          self.messageHandler.destroy();
+          self.messageHandler = null;
+        }
         self.destroyCapability.resolve();
       }, this.destroyCapability.reject);
       return this.destroyCapability.promise;
     },
 
-    setupFakeWorker: function WorkerTransport_setupFakeWorker() {
-      globalScope.PDFJS.disableWorker = true;
-
-      if (!PDFJS.fakeWorkerFilesLoadedCapability) {
-        PDFJS.fakeWorkerFilesLoadedCapability = createPromiseCapability();
-        // In the developer build load worker_loader which in turn loads all the
-        // other files and resolves the promise. In production only the
-        // pdf.worker.js file is needed.
-        PDFJS.fakeWorkerFilesLoadedCapability.resolve();
-      }
-      PDFJS.fakeWorkerFilesLoadedCapability.promise.then(function () {
-        warn('Setting up fake worker.');
-        // If we don't use a worker, just post/sendMessage to the main thread.
-        var fakeWorker = {
-          postMessage: function WorkerTransport_postMessage(obj) {
-            fakeWorker.onmessage({data: obj});
-          },
-          terminate: function WorkerTransport_terminate() {}
-        };
-
-        var messageHandler = new MessageHandler('main', fakeWorker);
-        this.setupMessageHandler(messageHandler);
-
-        // If the main thread is our worker, setup the handling for the messages
-        // the main thread sends to it self.
-        PDFJS.WorkerMessageHandler.setup(messageHandler);
-
-        this.workerInitializedCapability.resolve();
-      }.bind(this));
-    },
-
     setupMessageHandler:
-      function WorkerTransport_setupMessageHandler(messageHandler) {
-      this.messageHandler = messageHandler;
+      function WorkerTransport_setupMessageHandler() {
+      var messageHandler = this.messageHandler;
 
       function updatePassword(password) {
         messageHandler.send('UpdatePassword', password);
@@ -2886,7 +3067,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
               font = new FontFaceObject(exportedData);
             }
 
-            FontLoader.bind(
+            this.fontLoader.bind(
               [font],
               function fontReady(fontObjs) {
                 this.commonObjs.resolve(id, font);
@@ -3011,34 +3192,6 @@ var WorkerTransport = (function WorkerTransportClosure() {
       }, this);
     },
 
-    fetchDocument: function WorkerTransport_fetchDocument(loadingTask, source) {
-      if (this.destroyed) {
-        loadingTask._capability.reject(new Error('Loading aborted'));
-        this.destroyCapability.resolve();
-        return;
-      }
-
-      this.loadingTask = loadingTask;
-
-      source.disableAutoFetch = PDFJS.disableAutoFetch;
-      source.disableStream = PDFJS.disableStream;
-      source.chunkedViewerLoading = !!this.pdfDataRangeTransport;
-      if (this.pdfDataRangeTransport) {
-        source.length = this.pdfDataRangeTransport.length;
-        source.initialData = this.pdfDataRangeTransport.initialData;
-      }
-      this.messageHandler.send('GetDocRequest', {
-        source: source,
-        disableRange: PDFJS.disableRange,
-        maxImageSize: PDFJS.maxImageSize,
-        cMapUrl: PDFJS.cMapUrl,
-        cMapPacked: PDFJS.cMapPacked,
-        disableFontFace: PDFJS.disableFontFace,
-        disableCreateObjectURL: PDFJS.disableCreateObjectURL,
-        verbosity: PDFJS.verbosity
-      });
-    },
-
     getData: function WorkerTransport_getData() {
       return this.messageHandler.sendWithPromise('GetData', null);
     },
@@ -3122,7 +3275,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
           }
         }
         this.commonObjs.clear();
-        FontLoader.clear();
+        this.fontLoader.clear();
       }.bind(this));
     }
   };
@@ -6471,12 +6624,22 @@ var TilingPattern = (function TilingPatternClosure() {
 
 PDFJS.disableFontFace = false;
 
-var FontLoader = {
+function FontLoader(docId) {
+  this.docId = docId;
+  this.styleElement = null;
+  this.nativeFontFaces = [];
+  this.loadTestFontId = 0;
+  this.loadingContext = {
+    requests: [],
+    nextRequestId: 0
+  };
+}
+FontLoader.prototype = {
   insertRule: function fontLoaderInsertRule(rule) {
-    var styleElement = document.getElementById('PDFJS_FONT_STYLE_TAG');
+    var styleElement = this.styleElement;
     if (!styleElement) {
-      styleElement = document.createElement('style');
-      styleElement.id = 'PDFJS_FONT_STYLE_TAG';
+      styleElement = this.styleElement = document.createElement('style');
+      styleElement.id = 'PDFJS_FONT_STYLE_TAG_' + this.docId;
       document.documentElement.getElementsByTagName('head')[0].appendChild(
         styleElement);
     }
@@ -6486,7 +6649,7 @@ var FontLoader = {
   },
 
   clear: function fontLoaderClear() {
-    var styleElement = document.getElementById('PDFJS_FONT_STYLE_TAG');
+    var styleElement = this.styleElement;
     if (styleElement) {
       styleElement.parentNode.removeChild(styleElement);
     }
@@ -6524,49 +6687,6 @@ var FontLoader = {
     ));
   },
 
-  get isEvalSupported() {
-    var evalSupport = false;
-    if (PDFJS.isEvalSupported) {
-      try {
-        /* jshint evil: true */
-        new Function('');
-        evalSupport = true;
-      } catch (e) {}
-    }
-    return shadow(this, 'isEvalSupported', evalSupport);
-  },
-
-  loadTestFontId: 0,
-
-  loadingContext: {
-    requests: [],
-    nextRequestId: 0
-  },
-
-  isSyncFontLoadingSupported: (function detectSyncFontLoadingSupport() {
-    if (isWorker) {
-      return false;
-    }
-
-    // User agent string sniffing is bad, but there is no reliable way to tell
-    // if font is fully loaded and ready to be used with canvas.
-    var userAgent = window.navigator.userAgent;
-    var m = /Mozilla\/5.0.*?rv:(\d+).*? Gecko/.exec(userAgent);
-    if (m && m[1] >= 14) {
-      return true;
-    }
-    // TODO other browsers
-    if (userAgent === 'node') {
-      return true;
-    }
-    return false;
-  })(),
-
-  nativeFontFaces: [],
-
-  isFontLoadingAPISupported: (!isWorker && typeof document !== 'undefined' &&
-                              !!document.fonts),
-
   addNativeFontFace: function fontLoader_addNativeFontFace(nativeFontFace) {
     this.nativeFontFaces.push(nativeFontFace);
     document.fonts.add(nativeFontFace);
@@ -6595,27 +6715,29 @@ var FontLoader = {
       }
       font.attached = true;
 
-      if (this.isFontLoadingAPISupported) {
+      if (FontLoader.isFontLoadingAPISupported) {
         var nativeFontFace = font.createNativeFontFace();
         if (nativeFontFace) {
+          this.addNativeFontFace(nativeFontFace);
           fontLoadPromises.push(getNativeFontPromise(nativeFontFace));
         }
       } else {
-        var rule = font.bindDOM();
+        var rule = font.createFontFaceRule();
         if (rule) {
+          this.insertRule(rule);
           rules.push(rule);
           fontsToLoad.push(font);
         }
       }
     }
 
-    var request = FontLoader.queueLoadingCallback(callback);
-    if (this.isFontLoadingAPISupported) {
+    var request = this.queueLoadingCallback(callback);
+    if (FontLoader.isFontLoadingAPISupported) {
       Promise.all(fontLoadPromises).then(function() {
         request.complete();
       });
-    } else if (rules.length > 0 && !this.isSyncFontLoadingSupported) {
-      FontLoader.prepareFontLoadEvent(rules, fontsToLoad, request);
+    } else if (rules.length > 0 && !FontLoader.isSyncFontLoadingSupported) {
+      this.prepareFontLoadEvent(rules, fontsToLoad, request);
     } else {
       request.complete();
     }
@@ -6633,7 +6755,7 @@ var FontLoader = {
       }
     }
 
-    var context = FontLoader.loadingContext;
+    var context = this.loadingContext;
     var requestId = 'pdfjs-font-loading-' + (context.nextRequestId++);
     var request = {
       id: requestId,
@@ -6720,7 +6842,7 @@ var FontLoader = {
       var url = 'url(data:font/opentype;base64,' + btoa(data) + ');';
       var rule = '@font-face { font-family:"' + loadTestFontId + '";src:' +
                  url + '}';
-      FontLoader.insertRule(rule);
+      this.insertRule(rule);
 
       var names = [];
       for (i = 0, ii = fonts.length; i < ii; i++) {
@@ -6748,19 +6870,52 @@ var FontLoader = {
       /** Hack end */
   }
 };
+FontLoader.isFontLoadingAPISupported = (!isWorker &&
+  typeof document !== 'undefined' && !!document.fonts);
+Object.defineProperty(FontLoader, 'isSyncFontLoadingSupported', {
+  get: function () {
+    var supported = false;
+
+    // User agent string sniffing is bad, but there is no reliable way to tell
+    // if font is fully loaded and ready to be used with canvas.
+    var userAgent = window.navigator.userAgent;
+    var m = /Mozilla\/5.0.*?rv:(\d+).*? Gecko/.exec(userAgent);
+    if (m && m[1] >= 14) {
+      supported = true;
+    }
+    // TODO other browsers
+    if (userAgent === 'node') {
+      supported = true;
+    }
+    return shadow(FontLoader, 'isSyncFontLoadingSupported', supported);
+  },
+  enumerable: true,
+  configurable: true
+});
 
 var FontFaceObject = (function FontFaceObjectClosure() {
-  function FontFaceObject(name, file, properties) {
+  function FontFaceObject(translatedData) {
     this.compiledGlyphs = {};
-    if (arguments.length === 1) {
-      // importing translated data
-      var data = arguments[0];
-      for (var i in data) {
-        this[i] = data[i];
-      }
-      return;
+    // importing translated data
+    for (var i in translatedData) {
+      this[i] = translatedData[i];
     }
   }
+  Object.defineProperty(FontFaceObject, 'isEvalSupported', {
+    get: function () {
+      var evalSupport = false;
+      if (PDFJS.isEvalSupported) {
+        try {
+          /* jshint evil: true */
+          new Function('');
+          evalSupport = true;
+        } catch (e) {}
+      }
+      return shadow(this, 'isEvalSupported', evalSupport);
+    },
+    enumerable: true,
+    configurable: true
+  });
   FontFaceObject.prototype = {
     createNativeFontFace: function FontFaceObject_createNativeFontFace() {
       if (!this.data) {
@@ -6774,8 +6929,6 @@ var FontFaceObject = (function FontFaceObjectClosure() {
 
       var nativeFontFace = new FontFace(this.loadedName, this.data, {});
 
-      FontLoader.addNativeFontFace(nativeFontFace);
-
       if (PDFJS.pdfBug && 'FontInspector' in globalScope &&
           globalScope['FontInspector'].enabled) {
         globalScope['FontInspector'].fontAdded(this);
@@ -6783,7 +6936,7 @@ var FontFaceObject = (function FontFaceObjectClosure() {
       return nativeFontFace;
     },
 
-    bindDOM: function FontFaceObject_bindDOM() {
+    createFontFaceRule: function FontFaceObject_createFontFaceRule() {
       if (!this.data) {
         return null;
       }
@@ -6800,7 +6953,6 @@ var FontFaceObject = (function FontFaceObjectClosure() {
       var url = ('url(data:' + this.mimetype + ';base64,' +
                  window.btoa(data) + ');');
       var rule = '@font-face { font-family:"' + fontName + '";src:' + url + '}';
-      FontLoader.insertRule(rule);
 
       if (PDFJS.pdfBug && 'FontInspector' in globalScope &&
           globalScope['FontInspector'].enabled) {
@@ -6810,13 +6962,14 @@ var FontFaceObject = (function FontFaceObjectClosure() {
       return rule;
     },
 
-    getPathGenerator: function FontLoader_getPathGenerator(objs, character) {
+    getPathGenerator:
+        function FontFaceObject_getPathGenerator(objs, character) {
       if (!(character in this.compiledGlyphs)) {
         var cmds = objs.get(this.loadedName + '_path_' + character);
         var current, i, len;
 
         // If we can, compile cmds into JS for MAXIMUM SPEED
-        if (FontLoader.isEvalSupported) {
+        if (FontFaceObject.isEvalSupported) {
           var args, js = '';
           for (i = 0, len = cmds.length; i < len; i++) {
             current = cmds[i];
@@ -9361,6 +9514,10 @@ var BasePdfManager = (function BasePdfManagerClosure() {
   }
 
   BasePdfManager.prototype = {
+    get docId() {
+      return this._docId;
+    },
+
     onLoadedStream: function BasePdfManager_onLoadedStream() {
       throw new NotImplementedException();
     },
@@ -9422,7 +9579,8 @@ var BasePdfManager = (function BasePdfManagerClosure() {
 })();
 
 var LocalPdfManager = (function LocalPdfManagerClosure() {
-  function LocalPdfManager(data, password) {
+  function LocalPdfManager(docId, data, password) {
+    this._docId = docId;
     var stream = new Stream(data);
     this.pdfDocument = new PDFDocument(this, stream, password);
     this._loadedStreamCapability = createPromiseCapability();
@@ -9473,8 +9631,8 @@ var LocalPdfManager = (function LocalPdfManagerClosure() {
 })();
 
 var NetworkPdfManager = (function NetworkPdfManagerClosure() {
-  function NetworkPdfManager(args, msgHandler) {
-
+  function NetworkPdfManager(docId, args, msgHandler) {
+    this._docId = docId;
     this.msgHandler = msgHandler;
 
     var params = {
@@ -18305,7 +18463,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       // Keep track of each font we translated so the caller can
       // load them asynchronously before calling display on a page.
-      font.loadedName = 'g_font_' + (fontRefIsDict ?
+      font.loadedName = 'g_' + this.pdfManager.docId + '_f' + (fontRefIsDict ?
         fontName.replace(/\W/g, '') : fontID);
 
       font.translated = fontCapability.promise;
@@ -41372,11 +41530,50 @@ var WorkerTask = (function WorkerTaskClosure() {
 })();
 
 var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
-  setup: function wphSetup(handler) {
+  setup: function wphSetup(handler, port) {
+    handler.on('test', function wphSetupTest(data) {
+      // check if Uint8Array can be sent to worker
+      if (!(data instanceof Uint8Array)) {
+        handler.send('test', 'main', false);
+        return;
+      }
+      // making sure postMessage transfers are working
+      var supportTransfers = data[0] === 255;
+      handler.postMessageTransfers = supportTransfers;
+      // check if the response property is supported by xhr
+      var xhr = new XMLHttpRequest();
+      var responseExists = 'response' in xhr;
+      // check if the property is actually implemented
+      try {
+        var dummy = xhr.responseType;
+      } catch (e) {
+        responseExists = false;
+      }
+      if (!responseExists) {
+        handler.send('test', false);
+        return;
+      }
+      handler.send('test', {
+        supportTypedArray: true,
+        supportTransfers: supportTransfers
+      });
+    });
+
+    handler.on('GetDocRequest', function wphSetupDoc(data) {
+      return WorkerMessageHandler.createDocumentHandler(data, port);
+    });
+  },
+  createDocumentHandler: function wphCreateDocumentHandler(data, port) {
+    // This context is actually holds references on pdfManager and handler,
+    // until the latter is destroyed.
     var pdfManager;
     var terminated = false;
     var cancelXHRs = null;
     var WorkerTasks = [];
+
+    var docId = data.docId;
+    var workerHandlerName = data.docId + '_worker';
+    var handler = new MessageHandler(workerHandlerName, docId, port);
 
     function ensureNotTerminated() {
       if (terminated) {
@@ -41435,7 +41632,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
       var disableRange = data.disableRange;
       if (source.data) {
         try {
-          pdfManager = new LocalPdfManager(source.data, source.password);
+          pdfManager = new LocalPdfManager(docId, source.data, source.password);
           pdfManagerCapability.resolve(pdfManager);
         } catch (ex) {
           pdfManagerCapability.reject(ex);
@@ -41443,7 +41640,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
         return pdfManagerCapability.promise;
       } else if (source.chunkedViewerLoading) {
         try {
-          pdfManager = new NetworkPdfManager(source, handler);
+          pdfManager = new NetworkPdfManager(docId, source, handler);
           pdfManagerCapability.resolve(pdfManager);
         } catch (ex) {
           pdfManagerCapability.reject(ex);
@@ -41500,7 +41697,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
           }
 
           try {
-            pdfManager = new NetworkPdfManager(source, handler);
+            pdfManager = new NetworkPdfManager(docId, source, handler);
             pdfManagerCapability.resolve(pdfManager);
           } catch (ex) {
             pdfManagerCapability.reject(ex);
@@ -41545,7 +41742,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
 
           // the data is array, instantiating directly from it
           try {
-            pdfManager = new LocalPdfManager(pdfFile, source.password);
+            pdfManager = new LocalPdfManager(docId, pdfFile, source.password);
             pdfManagerCapability.resolve(pdfManager);
           } catch (ex) {
             pdfManagerCapability.reject(ex);
@@ -41583,35 +41780,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
       return pdfManagerCapability.promise;
     }
 
-    handler.on('test', function wphSetupTest(data) {
-      // check if Uint8Array can be sent to worker
-      if (!(data instanceof Uint8Array)) {
-        handler.send('test', false);
-        return;
-      }
-      // making sure postMessage transfers are working
-      var supportTransfers = data[0] === 255;
-      handler.postMessageTransfers = supportTransfers;
-      // check if the response property is supported by xhr
-      var xhr = new XMLHttpRequest();
-      var responseExists = 'response' in xhr;
-      // check if the property is actually implemented
-      try {
-        var dummy = xhr.responseType;
-      } catch (e) {
-        responseExists = false;
-      }
-      if (!responseExists) {
-        handler.send('test', false);
-        return;
-      }
-      handler.send('test', {
-        supportTypedArray: true,
-        supportTransfers: supportTransfers
-      });
-    });
-
-    handler.on('GetDocRequest', function wphSetupDoc(data) {
+    var setupDoc = function(data) {
       var onSuccess = function(doc) {
         ensureNotTerminated();
         handler.send('GetDoc', { pdfInfo: doc });
@@ -41687,7 +41856,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
           });
         }, onFailure);
       }, onFailure);
-    });
+    };
 
     handler.on('GetPage', function wphSetupGetPage(data) {
       return pdfManager.getPage(data.pageIndex).then(function(page) {
@@ -41867,8 +42036,16 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
         task.terminate();
       });
 
-      return Promise.all(waitOn).then(function () {});
+      return Promise.all(waitOn).then(function () {
+        // Notice that even if we destroying handler, resolved response promise
+        // must be sent back.
+        handler.destroy();
+        handler = null;
+      });
     });
+
+    setupDoc(data);
+    return workerHandlerName;
   }
 };
 
@@ -41878,6 +42055,7 @@ var workerConsole = {
   log: function log() {
     var args = Array.prototype.slice.call(arguments);
     globalScope.postMessage({
+      targetName: 'main',
       action: 'console_log',
       data: args
     });
@@ -41886,6 +42064,7 @@ var workerConsole = {
   error: function error() {
     var args = Array.prototype.slice.call(arguments);
     globalScope.postMessage({
+      targetName: 'main',
       action: 'console_error',
       data: args
     });
@@ -41915,13 +42094,14 @@ if (typeof window === 'undefined') {
   // Listen for unsupported features so we can pass them on to the main thread.
   PDFJS.UnsupportedManager.listen(function (msg) {
     globalScope.postMessage({
+      targetName: 'main',
       action: '_unsupported_feature',
       data: msg
     });
   });
 
-  var handler = new MessageHandler('worker_processor', this);
-  WorkerMessageHandler.setup(handler);
+  var handler = new MessageHandler('worker', 'main', this);
+  WorkerMessageHandler.setup(handler, this);
 }
 
 
