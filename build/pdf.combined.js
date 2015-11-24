@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.26';
-PDFJS.build = '4b243cd';
+PDFJS.version = '1.3.28';
+PDFJS.build = 'c280fb5';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -372,6 +372,15 @@ var LinkTargetStringMap = [
 ];
 
 function isExternalLinkTargetSet() {
+  if (PDFJS.openExternalLinksInNewWindow) {
+    deprecated('PDFJS.openExternalLinksInNewWindow, please use ' +
+               '"PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK" instead.');
+    if (PDFJS.externalLinkTarget === LinkTarget.NONE) {
+      PDFJS.externalLinkTarget = LinkTarget.BLANK;
+    }
+    // Reset the deprecated parameter, to suppress further warnings.
+    PDFJS.openExternalLinksInNewWindow = false;
+  }
   switch (PDFJS.externalLinkTarget) {
     case LinkTarget.NONE:
       return false;
@@ -1801,6 +1810,9 @@ PDFJS.maxCanvasPixels = (PDFJS.maxCanvasPixels === undefined ?
 /**
  * (Deprecated) Opens external links in a new window if enabled.
  * The default behavior opens external links in the PDF.js window.
+ *
+ * NOTE: This property has been deprecated, please use
+ *       `PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK` instead.
  * @var {boolean}
  */
 PDFJS.openExternalLinksInNewWindow = (

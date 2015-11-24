@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.26';
-PDFJS.build = '4b243cd';
+PDFJS.version = '1.3.28';
+PDFJS.build = 'c280fb5';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -373,8 +373,8 @@ var LinkTargetStringMap = [
 
 function isExternalLinkTargetSet() {
   if (PDFJS.openExternalLinksInNewWindow) {
-    warn('PDFJS.openExternalLinksInNewWindow is deprecated, ' +
-         'use PDFJS.externalLinkTarget instead.');
+    deprecated('PDFJS.openExternalLinksInNewWindow, please use ' +
+               '"PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK" instead.');
     if (PDFJS.externalLinkTarget === LinkTarget.NONE) {
       PDFJS.externalLinkTarget = LinkTarget.BLANK;
     }
