@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.36';
-PDFJS.build = '5fcd779';
+PDFJS.version = '1.3.38';
+PDFJS.build = '83dbdc1';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2005,6 +2005,7 @@ PDFJS.getDocument = function getDocument(src,
         throw new Error('Loading aborted');
       }
       var messageHandler = new MessageHandler(docId, workerId, worker.port);
+      messageHandler.send('Ready', null);
       var transport = new WorkerTransport(messageHandler, task, rangeTransport);
       task._transport = transport;
     });
