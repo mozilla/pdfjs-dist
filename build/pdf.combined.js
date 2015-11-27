@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.38';
-PDFJS.build = '83dbdc1';
+PDFJS.version = '1.3.40';
+PDFJS.build = 'a8279f7';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -18271,6 +18271,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         return translated.loadType3Data(self, resources, operatorList, task).
           then(function () {
           return translated;
+        }, function (reason) {
+          return new TranslatedFont('g_font_error',
+            new ErrorFont('Type3 font load error: ' + reason), translated.font);
         });
       }).then(function (translated) {
         state.font = translated.font;
