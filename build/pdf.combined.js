@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.44';
-PDFJS.build = '361fa83';
+PDFJS.version = '1.3.46';
+PDFJS.build = '4a82f2f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -38635,17 +38635,32 @@ var Lexer = (function LexerClosure() {
       return strBuf.join('');
     },
     getName: function Lexer_getName() {
-      var ch;
+      var ch, previousCh;
       var strBuf = this.strBuf;
       strBuf.length = 0;
       while ((ch = this.nextChar()) >= 0 && !specialChars[ch]) {
         if (ch === 0x23) { // '#'
           ch = this.nextChar();
+          if (specialChars[ch]) {
+            warn('Lexer_getName: ' +
+                 'NUMBER SIGN (#) should be followed by a hexadecimal number.');
+            strBuf.push('#');
+            break;
+          }
           var x = toHexDigit(ch);
           if (x !== -1) {
-            var x2 = toHexDigit(this.nextChar());
+            previousCh = ch;
+            ch = this.nextChar();
+            var x2 = toHexDigit(ch);
             if (x2 === -1) {
-              error('Illegal digit in hex char in name: ' + x2);
+              warn('Lexer_getName: Illegal digit (' +
+                   String.fromCharCode(ch) +') in hexadecimal number.');
+              strBuf.push('#', String.fromCharCode(previousCh));
+              if (specialChars[ch]) {
+                break;
+              }
+              strBuf.push(String.fromCharCode(ch));
+              continue;
             }
             strBuf.push(String.fromCharCode((x << 4) | x2));
           } else {
