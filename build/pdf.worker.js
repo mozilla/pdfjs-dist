@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.48';
-PDFJS.build = '5f56a20';
+PDFJS.version = '1.3.50';
+PDFJS.build = '376788f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -248,7 +248,6 @@ function error(msg) {
     console.log('Error: ' + msg);
     console.log(backtrace());
   }
-  UnsupportedManager.notify(UNSUPPORTED_FEATURES.unknown);
   throw new Error(msg);
 }
 
@@ -274,22 +273,6 @@ var UNSUPPORTED_FEATURES = PDFJS.UNSUPPORTED_FEATURES = {
   shadingPattern: 'shadingPattern',
   font: 'font'
 };
-
-var UnsupportedManager = PDFJS.UnsupportedManager =
-  (function UnsupportedManagerClosure() {
-  var listeners = [];
-  return {
-    listen: function (cb) {
-      listeners.push(cb);
-    },
-    notify: function (featureId) {
-      warn('Unsupported feature "' + featureId + '"');
-      for (var i = 0, ii = listeners.length; i < ii; i++) {
-        listeners[i](featureId);
-      }
-    }
-  };
-})();
 
 // Combines two URLs. The baseUrl shall be absolute URL. If the url is an
 // absolute URL, it will be returned as is.
@@ -10109,7 +10092,7 @@ var Pattern = (function PatternClosure() {
   };
 
   Pattern.parseShading = function Pattern_parseShading(shading, matrix, xref,
-                                                       res) {
+                                                       res, handler) {
 
     var dict = isStream(shading) ? shading.dict : shading;
     var type = dict.get('ShadingType');
@@ -10132,7 +10115,8 @@ var Pattern = (function PatternClosure() {
       if (ex instanceof MissingDataException) {
         throw ex;
       }
-      UnsupportedManager.notify(UNSUPPORTED_FEATURES.shadingPattern);
+      handler.send('UnsupportedFeature',
+                   {featureId: UNSUPPORTED_FEATURES.shadingPattern});
       warn(ex);
       return new Shadings.Dummy();
     }
@@ -11170,6 +11154,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           then(function () {
           return translated;
         }, function (reason) {
+          // Error in the font data -- sending unsupported feature notification.
+          self.handler.send('UnsupportedFeature',
+                            {featureId: UNSUPPORTED_FEATURES.font});
           return new TranslatedFont('g_font_error',
             new ErrorFont('Type3 font load error: ' + reason), translated.font);
         });
@@ -11394,6 +11381,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         translatedPromise = Promise.reject(e);
       }
 
+      var self = this;
       translatedPromise.then(function (translatedFont) {
         if (translatedFont.fontType !== undefined) {
           var xrefFontStats = xref.stats.fontTypes;
@@ -11404,7 +11392,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           translatedFont, font));
       }, function (reason) {
         // TODO fontCapability.reject?
-        UnsupportedManager.notify(UNSUPPORTED_FEATURES.font);
+        // Error in the font data -- sending unsupported feature notification.
+        self.handler.send('UnsupportedFeature',
+                          {featureId: UNSUPPORTED_FEATURES.font});
 
         try {
           // error, but it's still nice to have font type reported
@@ -11457,7 +11447,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         } else if (typeNum === SHADING_PATTERN) {
           var shading = dict.get('Shading');
           var matrix = dict.get('Matrix');
-          pattern = Pattern.parseShading(shading, matrix, xref, resources);
+          pattern = Pattern.parseShading(shading, matrix, xref, resources,
+                                         this.handler);
           operatorList.addOp(fn, pattern.getIR());
           return Promise.resolve();
         } else {
@@ -11694,7 +11685,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               }
 
               var shadingFill = Pattern.parseShading(shading, null, xref,
-                resources);
+                resources, self.handler);
               var patternIR = shadingFill.getIR();
               args = [patternIR];
               fn = OPS.shadingFill;
@@ -34908,6 +34899,11 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
             return; // ignoring errors from the terminated thread
           }
 
+          // For compatibility with older behavior, generating unknown
+          // unsupported feature notification on errors.
+          handler.send('UnsupportedFeature',
+                       {featureId: UNSUPPORTED_FEATURES.unknown});
+
           var minimumStackMessage =
             'worker.js: while trying to getPage() and getOperatorList()';
 
@@ -35041,15 +35037,6 @@ if (typeof window === 'undefined') {
   if (!('console' in globalScope)) {
     globalScope.console = workerConsole;
   }
-
-  // Listen for unsupported features so we can pass them on to the main thread.
-  PDFJS.UnsupportedManager.listen(function (msg) {
-    globalScope.postMessage({
-      targetName: 'main',
-      action: '_unsupported_feature',
-      data: msg
-    });
-  });
 
   var handler = new MessageHandler('worker', 'main', this);
   WorkerMessageHandler.setup(handler, this);
