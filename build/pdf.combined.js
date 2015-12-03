@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.54';
-PDFJS.build = 'e180d01';
+PDFJS.version = '1.3.56';
+PDFJS.build = 'e2aca38';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4633,6 +4633,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
       composeSMask(this.ctx, this.current.activeSMask, groupCtx);
       this.ctx.restore();
+      copyCtxState(groupCtx, this.ctx);
     },
     save: function CanvasGraphics_save() {
       this.ctx.save();
