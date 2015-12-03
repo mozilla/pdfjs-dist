@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.52';
-PDFJS.build = 'e93512f';
+PDFJS.version = '1.3.54';
+PDFJS.build = 'e180d01';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -17462,11 +17462,15 @@ var Font = (function FontClosure() {
     };
   }
 
-  function getRanges(glyphs) {
+  function getRanges(glyphs, numGlyphs) {
     // Array.sort() sorts by characters, not numerically, so convert to an
     // array of characters.
     var codes = [];
     for (var charCode in glyphs) {
+      // Remove an invalid glyph ID mappings to make OTS happy.
+      if (glyphs[charCode] >= numGlyphs) {
+        continue;
+      }
       codes.push({ fontCharCode: charCode | 0, glyphId: glyphs[charCode] });
     }
     codes.sort(function fontGetRangesSort(a, b) {
@@ -17495,8 +17499,8 @@ var Font = (function FontClosure() {
     return ranges;
   }
 
-  function createCmapTable(glyphs) {
-    var ranges = getRanges(glyphs);
+  function createCmapTable(glyphs, numGlyphs) {
+    var ranges = getRanges(glyphs, numGlyphs);
     var numTables = ranges[ranges.length - 1][1] > 0xFFFF ? 2 : 1;
     var cmap = '\x00\x00' + // version
                string16(numTables) +  // numTables
@@ -18999,7 +19003,7 @@ var Font = (function FontClosure() {
       this.toFontChar = newMapping.toFontChar;
       tables.cmap = {
         tag: 'cmap',
-        data: createCmapTable(newMapping.charCodeToGlyphId)
+        data: createCmapTable(newMapping.charCodeToGlyphId, numGlyphs)
       };
 
       if (!tables['OS/2'] || !validateOS2Table(tables['OS/2'])) {
@@ -19137,7 +19141,8 @@ var Font = (function FontClosure() {
       builder.addTable('OS/2', createOS2Table(properties,
                                               newMapping.charCodeToGlyphId));
       // Character to glyphs mapping
-      builder.addTable('cmap', createCmapTable(newMapping.charCodeToGlyphId));
+      builder.addTable('cmap', createCmapTable(newMapping.charCodeToGlyphId,
+                       numGlyphs));
       // Font header
       builder.addTable('head',
             '\x00\x01\x00\x00' + // Version number
