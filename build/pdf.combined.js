@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.56';
-PDFJS.build = 'e2aca38';
+PDFJS.version = '1.3.58';
+PDFJS.build = '171f59c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -24032,7 +24032,7 @@ var IdentityToUnicodeMap = (function IdentityToUnicodeMapClosure() {
     },
 
     charCodeOf: function (v) {
-      error('should not call .charCodeOf');
+      return (isInt(v) && v >= this.firstChar && v <= this.lastChar) ? v : -1;
     }
   };
 
@@ -26476,7 +26476,7 @@ var Font = (function FontClosure() {
           }
         }
         // ... via toUnicode map
-        if (!charcode && 'toUnicode' in this) {
+        if (!charcode && this.toUnicode) {
           charcode = this.toUnicode.charCodeOf(glyphUnicode);
         }
         // setting it to unicode if negative or undefined
