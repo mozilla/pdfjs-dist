@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.60';
-PDFJS.build = '5beb9a2';
+PDFJS.version = '1.3.62';
+PDFJS.build = '084bb86';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4292,27 +4292,29 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     }
   }
 
-  function composeSMaskAlpha(maskData, layerData) {
+  function composeSMaskAlpha(maskData, layerData, transferMap) {
     var length = maskData.length;
     var scale = 1 / 255;
     for (var i = 3; i < length; i += 4) {
-      var alpha = maskData[i];
+      var alpha = transferMap ? transferMap[maskData[i]] : maskData[i];
       layerData[i] = (layerData[i] * alpha * scale) | 0;
     }
   }
 
-  function composeSMaskLuminosity(maskData, layerData) {
+  function composeSMaskLuminosity(maskData, layerData, transferMap) {
     var length = maskData.length;
     for (var i = 3; i < length; i += 4) {
       var y = (maskData[i - 3] * 77) +  // * 0.3 / 255 * 0x10000
               (maskData[i - 2] * 152) + // * 0.59 ....
               (maskData[i - 1] * 28);   // * 0.11 ....
-      layerData[i] = (layerData[i] * y) >> 16;
+      layerData[i] = transferMap ?
+        (layerData[i] * transferMap[y >> 8]) >> 8 :
+        (layerData[i] * y) >> 16;
     }
   }
 
   function genericComposeSMask(maskCtx, layerCtx, width, height,
-                               subtype, backdrop) {
+                               subtype, backdrop, transferMap) {
     var hasBackdrop = !!backdrop;
     var r0 = hasBackdrop ? backdrop[0] : 0;
     var g0 = hasBackdrop ? backdrop[1] : 0;
@@ -4336,7 +4338,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       if (hasBackdrop) {
         composeSMaskBackdrop(maskData.data, r0, g0, b0);
       }
-      composeFn(maskData.data, layerData.data);
+      composeFn(maskData.data, layerData.data, transferMap);
 
       maskCtx.putImageData(layerData, 0, row);
     }
@@ -4350,7 +4352,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
                      smask.offsetX, smask.offsetY);
 
     var backdrop = smask.backdrop || null;
-    if (WebGLUtils.isEnabled) {
+    if (!smask.transferMap && WebGLUtils.isEnabled) {
       var composed = WebGLUtils.composeSMask(layerCtx.canvas, mask,
         {subtype: smask.subtype, backdrop: backdrop});
       ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -4358,7 +4360,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       return;
     }
     genericComposeSMask(maskCtx, layerCtx, mask.width, mask.height,
-                        smask.subtype, backdrop);
+                        smask.subtype, backdrop, smask.transferMap);
     ctx.drawImage(mask, 0, 0);
   }
 
@@ -5409,7 +5411,8 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           scaleX: scaleX,
           scaleY: scaleY,
           subtype: group.smask.subtype,
-          backdrop: group.smask.backdrop
+          backdrop: group.smask.backdrop,
+          transferMap: group.smask.transferMap || null
         });
       } else {
         // Setup the current ctx so when the group is popped we draw it at the
@@ -18219,6 +18222,22 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         subtype: smask.get('S').name,
         backdrop: smask.get('BC')
       };
+
+      // The SMask might have a alpha/luminosity value transfer function --
+      // we will build a map of integer values in range 0..255 to be fast.
+      var transferObj = smask.get('TR');
+      if (isPDFFunction(transferObj)) {
+        var transferFn = PDFFunction.parse(this.xref, transferObj);
+        var transferMap = new Uint8Array(256);
+        var tmp = new Float32Array(1);
+        for (var i = 0; i < 255; i++) {
+          tmp[0] = i / 255;
+          transferFn(tmp, 0, tmp, 0);
+          transferMap[i] = (tmp[0] * 255) | 0;
+        }
+        smaskOptions.transferMap = transferMap;
+      }
+
       return this.buildFormXObject(resources, smaskContent, smaskOptions,
                             operatorList, task, stateManager.state.clone());
     },
