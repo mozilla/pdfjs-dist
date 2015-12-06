@@ -8,6 +8,7 @@
     "pdf.js"
   ],
   "homepage": "http://mozilla.github.io/pdf.js/",
+  "main": "dist/pdf.combined.js",
   "bugs": "https://github.com/mozilla/pdf.js/issues",
   "license": "Apache-2.0",
   "repository": {
