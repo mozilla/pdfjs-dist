@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.62';
-PDFJS.build = '084bb86';
+PDFJS.version = '1.3.64';
+PDFJS.build = 'a966022';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -23928,6 +23928,9 @@ function reverseIfRtl(chars) {
 }
 
 function adjustWidths(properties) {
+  if (!properties.fontMatrix) {
+    return;
+  }
   if (properties.fontMatrix[0] === FONT_IDENTITY_MATRIX[0]) {
     return;
   }
@@ -24442,6 +24445,8 @@ var Font = (function FontClosure() {
         // view of the sanitizer
         data = this.checkAndRepair(name, file, properties);
         if (this.isOpenType) {
+          adjustWidths(properties);
+
           type = 'OpenType';
         }
         break;
@@ -25873,6 +25878,8 @@ var Font = (function FontClosure() {
           // no major tables: throwing everything at CFFFont
           cffFile = new Stream(tables['CFF '].data);
           cff = new CFFFont(cffFile, properties);
+
+          adjustWidths(properties);
 
           return this.convert(name, cff, properties);
         }
