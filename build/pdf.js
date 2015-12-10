@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.66';
-PDFJS.build = '7b144c0';
+PDFJS.version = '1.3.68';
+PDFJS.build = '91b27aa';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5165,16 +5165,22 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           scaledY = 0;
         }
 
-        if (font.remeasure && width > 0 && this.isFontSubpixelAAEnabled) {
-          // some standard fonts may not have the exact width, trying to
-          // rescale per character
+        if (font.remeasure && width > 0) {
+          // Some standard fonts may not have the exact width: rescale per
+          // character if measured width is greater than expected glyph width
+          // and subpixel-aa is enabled, otherwise just center the glyph.
           var measuredWidth = ctx.measureText(character).width * 1000 /
             fontSize * fontSizeScale;
-          var characterScaleX = width / measuredWidth;
-          restoreNeeded = true;
-          ctx.save();
-          ctx.scale(characterScaleX, 1);
-          scaledX /= characterScaleX;
+          if (width < measuredWidth && this.isFontSubpixelAAEnabled) {
+            var characterScaleX = width / measuredWidth;
+            restoreNeeded = true;
+            ctx.save();
+            ctx.scale(characterScaleX, 1);
+            scaledX /= characterScaleX;
+          } else if (width !== measuredWidth) {
+            scaledX += (width - measuredWidth) / 2000 *
+              fontSize / fontSizeScale;
+          }
         }
 
         if (simpleFillText && !accent) {
