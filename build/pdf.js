@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.74';
-PDFJS.build = '4485c79';
+PDFJS.version = '1.3.76';
+PDFJS.build = 'f7ec866';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6724,8 +6724,6 @@ var TilingPattern = (function TilingPatternClosure() {
   return TilingPattern;
 })();
 
-
-PDFJS.disableFontFace = false;
 
 function FontLoader(docId) {
   this.docId = docId;
