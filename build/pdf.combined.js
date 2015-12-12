@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.72';
-PDFJS.build = '4d6f3c8';
+PDFJS.version = '1.3.74';
+PDFJS.build = '4485c79';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6696,6 +6696,7 @@ FontLoader.prototype = {
     var styleElement = this.styleElement;
     if (styleElement) {
       styleElement.parentNode.removeChild(styleElement);
+      styleElement = this.styleElement = null;
     }
     this.nativeFontFaces.forEach(function(nativeFontFace) {
       document.fonts.delete(nativeFontFace);
