@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.76';
-PDFJS.build = 'f7ec866';
+PDFJS.version = '1.3.78';
+PDFJS.build = 'f93a220';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -4772,6 +4772,9 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
 
       if (isPatternFill) {
         ctx.save();
+        if (this.baseTransform) {
+          ctx.setTransform.apply(ctx, this.baseTransform);
+        }
         ctx.fillStyle = fillColor.getPattern(ctx, this);
         needRestore = true;
       }
