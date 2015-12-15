@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.78';
-PDFJS.build = 'f93a220';
+PDFJS.version = '1.3.80';
+PDFJS.build = 'a6ba210';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -55,9 +55,32 @@ var ImageKind = {
 };
 
 var AnnotationType = {
-  WIDGET: 1,
-  TEXT: 2,
-  LINK: 3
+  TEXT: 1,
+  LINK: 2,
+  FREETEXT: 3,
+  LINE: 4,
+  SQUARE: 5,
+  CIRCLE: 6,
+  POLYGON: 7,
+  POLYLINE: 8,
+  HIGHLIGHT: 9,
+  UNDERLINE: 10,
+  SQUIGGLY: 11,
+  STRIKEOUT: 12,
+  STAMP: 13,
+  CARET: 14,
+  INK: 15,
+  POPUP: 16,
+  FILEATTACHMENT: 17,
+  SOUND: 18,
+  MOVIE: 19,
+  WIDGET: 20,
+  SCREEN: 21,
+  PRINTERMARK: 22,
+  TRAPNET: 23,
+  WATERMARK: 24,
+  THREED: 25,
+  REDACT: 26
 };
 
 var AnnotationFlag = {
@@ -5481,6 +5504,7 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
     var dict = params.dict;
     var data = this.data;
 
+    data.annotationType = AnnotationType.WIDGET;
     data.fieldValue = stringToPDFString(
       Util.getInheritableProperty(dict, 'V') || '');
     data.alternativeText = stringToPDFString(dict.get('TU') || '');
@@ -5539,7 +5563,6 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
     WidgetAnnotation.call(this, params);
 
     this.data.textAlignment = Util.getInheritableProperty(params.dict, 'Q');
-    this.data.annotationType = AnnotationType.WIDGET;
     this.data.hasHtml = !this.data.hasAppearance && !!this.data.fieldValue;
   }
 
