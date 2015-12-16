@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.96';
-PDFJS.build = '0a21c8c';
+PDFJS.version = '1.3.98';
+PDFJS.build = 'f01911f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -30,11 +30,7 @@ PDFJS.build = '0a21c8c';
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/shared/global', ['exports'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports);
-  } else {
+  {
     factory((root.pdfjsSharedGlobal = {}));
   }
 }(this, function (exports) {
@@ -61,11 +57,7 @@ PDFJS.build = '0a21c8c';
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/shared/util', ['exports', 'pdfjs/shared/global'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('./global.js'));
-  } else {
+  {
     factory((root.pdfjsSharedUtil = {}), root.pdfjsSharedGlobal);
   }
 }(this, function (exports, sharedGlobal) {
@@ -1735,12 +1727,7 @@ exports.warn = warn;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/dom_utils', ['exports', 'pdfjs/shared/global'],
-      factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/global.js'));
-  } else {
+  {
     factory((root.pdfjsDisplayDOMUtils = {}), root.pdfjsSharedGlobal);
   }
 }(this, function (exports, sharedGlobal) {
@@ -1808,12 +1795,7 @@ exports.CustomStyle = CustomStyle;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/annotation_layer', ['exports', 'pdfjs/shared/util',
-      'pdfjs/display/dom_utils'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./dom_utils.js'));
-  } else {
+  {
     factory((root.pdfjsDisplayAnnotationLayer = {}), root.pdfjsSharedUtil,
       root.pdfjsDisplayDOMUtils);
   }
@@ -2166,13 +2148,7 @@ exports.AnnotationLayer = AnnotationLayer;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/font_loader', ['exports', 'pdfjs/shared/util',
-      'pdfjs/shared/global'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'),
-      require('../shared/global.js'));
-  } else {
+  {
     factory((root.pdfjsDisplayFontLoader = {}), root.pdfjsSharedUtil,
       root.pdfjsSharedGlobal);
   }
@@ -2577,11 +2553,7 @@ exports.FontLoader = FontLoader;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/metadata', ['exports', 'pdfjs/shared/util'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'));
-  } else {
+  {
     factory((root.pdfjsDisplayMetadata = {}), root.pdfjsSharedUtil);
   }
 }(this, function (exports, sharedUtil) {
@@ -2673,12 +2645,7 @@ exports.Metadata = Metadata;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/text_layer', ['exports', 'pdfjs/shared/util'],
-      factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'));
-  } else {
+  {
     factory((root.pdfjsDisplayTextLayer = {}), root.pdfjsSharedUtil);
   }
 }(this, function (exports, sharedUtil) {
@@ -2908,11 +2875,7 @@ exports.renderTextLayer = renderTextLayer;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/webgl', ['exports', 'pdfjs/shared/util'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'));
-  } else {
+  {
     factory((root.pdfjsDisplayWebGL = {}), root.pdfjsSharedUtil);
   }
 }(this, function (exports, sharedUtil) {
@@ -3341,12 +3304,7 @@ exports.WebGLUtils = WebGLUtils;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/pattern_helper', ['exports', 'pdfjs/shared/util',
-      'pdfjs/display/webgl'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./webgl.js'));
-  } else {
+  {
     factory((root.pdfjsDisplayPatternHelper = {}), root.pdfjsSharedUtil,
       root.pdfjsDisplayWebGL);
   }
@@ -3769,13 +3727,7 @@ exports.TilingPattern = TilingPattern;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/canvas', ['exports', 'pdfjs/shared/util',
-      'pdfjs/display/pattern_helper', 'pdfjs/display/webgl'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'),
-      require('./pattern_helper.js'), require('./webgl.js'));
-  } else {
+  {
     factory((root.pdfjsDisplayCanvas = {}), root.pdfjsSharedUtil,
       root.pdfjsDisplayPatternHelper, root.pdfjsDisplayWebGL);
   }
@@ -5974,14 +5926,7 @@ exports.createScratchCanvas = createScratchCanvas;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/api', ['exports', 'pdfjs/shared/util',
-      'pdfjs/display/font_loader', 'pdfjs/display/canvas',
-      'pdfjs/shared/global', 'require'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./font_loader.js'),
-      require('./canvas.js'), require('../shared/global.js'));
-  } else {
+  {
     factory((root.pdfjsDisplayAPI = {}), root.pdfjsSharedUtil,
       root.pdfjsDisplayFontLoader, root.pdfjsDisplayCanvas,
       root.pdfjsSharedGlobal);
@@ -8028,11 +7973,7 @@ exports.PDFPageProxy = PDFPageProxy;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/display/svg', ['exports', 'pdfjs/shared/util'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'));
-  } else {
+  {
     factory((root.pdfjsDisplaySVG = {}), root.pdfjsSharedUtil);
   }
 }(this, function (exports, sharedUtil) {

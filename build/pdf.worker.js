@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.96';
-PDFJS.build = '0a21c8c';
+PDFJS.version = '1.3.98';
+PDFJS.build = 'f01911f';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -30,11 +30,7 @@ PDFJS.build = '0a21c8c';
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/shared/global', ['exports'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports);
-  } else {
+  {
     factory((root.pdfjsSharedGlobal = {}));
   }
 }(this, function (exports) {
@@ -61,11 +57,7 @@ PDFJS.build = '0a21c8c';
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/shared/util', ['exports', 'pdfjs/shared/global'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('./global.js'));
-  } else {
+  {
     factory((root.pdfjsSharedUtil = {}), root.pdfjsSharedGlobal);
   }
 }(this, function (exports, sharedGlobal) {
@@ -1985,11 +1977,7 @@ var NetworkManager = (function NetworkManagerClosure() {
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/arithmetic_decoder', ['exports'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports);
-  } else {
+  {
     factory((root.pdfjsCoreArithmeticDecoder = {}));
   }
 }(this, function (exports) {
@@ -2166,11 +2154,7 @@ exports.ArithmeticDecoder = ArithmeticDecoder;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/charsets', ['exports'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports);
-  } else {
+  {
     factory((root.pdfjsCoreCharsets = {}));
   }
 }(this, function (exports) {
@@ -2282,11 +2266,7 @@ exports.ExpertSubsetCharset = ExpertSubsetCharset;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/glyphlist', ['exports'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports);
-  } else {
+  {
     factory((root.pdfjsCoreGlyphList = {}));
   }
 }(this, function (exports) {
@@ -6711,11 +6691,7 @@ exports.DingbatsGlyphsUnicode = DingbatsGlyphsUnicode;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/jpg', ['exports'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports);
-  } else {
+  {
     factory((root.pdfjsCoreJpg = {}));
   }
 }(this, function (exports) {
@@ -7743,11 +7719,7 @@ exports.JpegImage = JpegImage;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/metrics', ['exports'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports);
-  } else {
+  {
     factory((root.pdfjsCoreMetrics = {}));
   }
 }(this, function (exports) {
@@ -10699,11 +10671,7 @@ exports.Metrics = Metrics;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/bidi', ['exports', 'pdfjs/shared/global'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/global.js'));
-  } else {
+  {
     factory((root.pdfjsCoreBidi = {}), root.pdfjsSharedGlobal);
   }
 }(this, function (exports, sharedGlobal) {
@@ -11121,12 +11089,7 @@ exports.bidi = bidi;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/chunked_stream', ['exports', 'pdfjs/shared/util'],
-      factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'));
-  } else {
+  {
     factory((root.pdfjsCoreChunkedStream = {}), root.pdfjsSharedUtil);
   }
 }(this, function (exports, sharedUtil) {
@@ -11672,13 +11635,7 @@ exports.ChunkedStreamManager = ChunkedStreamManager;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/jbig2', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/arithmetic_decoder'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'),
-      require('./arithmetic_decoder.js'));
-  } else {
+  {
     factory((root.pdfjsCoreJbig2 = {}), root.pdfjsSharedUtil,
       root.pdfjsCoreArithmeticDecoder);
   }
@@ -12765,13 +12722,7 @@ exports.Jbig2Image = Jbig2Image;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/jpx', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/arithmetic_decoder'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'),
-      require('./arithmetic_decoder.js'));
-  } else {
+  {
     factory((root.pdfjsCoreJpx = {}), root.pdfjsSharedUtil,
       root.pdfjsCoreArithmeticDecoder);
   }
@@ -14985,11 +14936,7 @@ exports.JpxImage = JpxImage;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/murmurhash3', ['exports', 'pdfjs/shared/util'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'));
-  } else {
+  {
     factory((root.pdfjsCoreMurmurHash3 = {}), root.pdfjsSharedUtil);
   }
 }(this, function (exports, sharedUtil) {
@@ -15141,11 +15088,7 @@ exports.MurmurHash3_64 = MurmurHash3_64;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/primitives', ['exports', 'pdfjs/shared/util'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'));
-  } else {
+  {
     factory((root.pdfjsCorePrimitives = {}), root.pdfjsSharedUtil);
   }
 }(this, function (exports, sharedUtil) {
@@ -15503,14 +15446,7 @@ exports.isStream = isStream;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/stream', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/jbig2', 'pdfjs/core/jpg',
-      'pdfjs/core/jpx'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./jbig2.js'), require('./jpg.js'), require('./jpx.js'));
-  } else {
+  {
     factory((root.pdfjsCoreStream = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreJbig2, root.pdfjsCoreJpg,
       root.pdfjsCoreJpx);
@@ -18019,13 +17955,7 @@ exports.LZWStream = LZWStream;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/crypto', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/stream'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./stream.js'));
-  } else {
+  {
     factory((root.pdfjsCoreCrypto = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreStream);
   }
@@ -20088,13 +20018,7 @@ exports.calculateSHA512 = calculateSHA512;
 }));
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/font_renderer', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/stream', 'pdfjs/core/glyphlist'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./stream.js'),
-      require('./glyphlist.js'));
-  } else {
+  {
     factory((root.pdfjsCoreFontRenderer = {}), root.pdfjsSharedUtil,
       root.pdfjsCoreStream, root.pdfjsCoreGlyphList);
   }
@@ -20814,13 +20738,7 @@ exports.FontRendererFactory = FontRendererFactory;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/parser', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/stream'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./stream.js'));
-  } else {
+  {
     factory((root.pdfjsCoreParser = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreStream);
   }
@@ -21922,14 +21840,7 @@ coreStream._setCoreParser(exports);
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/cmap', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/stream', 'pdfjs/core/parser'],
-      factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./stream.js'), require('./parser.js'));
-  } else {
+  {
     factory((root.pdfjsCoreCMap = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreStream, root.pdfjsCoreParser);
   }
@@ -22931,15 +22842,7 @@ exports.IdentityCMap = IdentityCMap;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/obj', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/crypto', 'pdfjs/core/parser',
-      'pdfjs/core/chunked_stream'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./crypto.js'), require('./parser.js'),
-      require('./chunked_stream.js'));
-  } else {
+  {
     factory((root.pdfjsCoreObj = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreCrypto, root.pdfjsCoreParser,
       root.pdfjsCoreChunkedStream);
@@ -24404,12 +24307,7 @@ exports.XRef = XRef;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/ps_parser', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/parser'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./parser.js'));
-  } else {
+  {
     factory((root.pdfjsCorePsParser = {}), root.pdfjsSharedUtil,
       root.pdfjsCoreParser);
   }
@@ -24628,17 +24526,7 @@ exports.PostScriptParser = PostScriptParser;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/fonts', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/stream', 'pdfjs/core/parser',
-      'pdfjs/core/cmap', 'pdfjs/core/glyphlist', 'pdfjs/core/charsets',
-      'pdfjs/core/font_renderer'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./stream.js'), require('./parser.js'), require('./cmap.js'),
-      require('./glyphlist.js'), require('./charsets.js'),
-      require('./font_renderer.js'));
-  } else {
+  {
     factory((root.pdfjsCoreFonts = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreStream, root.pdfjsCoreParser,
       root.pdfjsCoreCMap, root.pdfjsCoreGlyphList, root.pdfjsCoreCharsets,
@@ -32055,13 +31943,7 @@ coreFontRenderer._setCoreFonts(exports);
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/function', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/ps_parser'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./ps_parser.js'));
-  } else {
+  {
     factory((root.pdfjsCoreFunction = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCorePsParser);
   }
@@ -33199,14 +33081,7 @@ exports.PostScriptCompiler = PostScriptCompiler;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/colorspace', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/function', 'pdfjs/core/stream'],
-      factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./function.js'), require('./stream.js'));
-  } else {
+  {
     factory((root.pdfjsCoreColorSpace = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreFunction, root.pdfjsCoreStream);
   }
@@ -34479,15 +34354,7 @@ coreStream._setCoreColorSpace(exports);
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/image', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/colorspace', 'pdfjs/core/stream',
-      'pdfjs/core/jpx'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./colorspace.js'), require('./stream.js'),
-      require('./jpx.js'));
-  } else {
+  {
     factory((root.pdfjsCoreImage = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreColorSpace, root.pdfjsCoreStream,
       root.pdfjsCoreJpx);
@@ -35173,14 +35040,7 @@ coreColorSpace._setCoreImage(exports);
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/pattern', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/function',
-      'pdfjs/core/colorspace'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./function.js'), require('./colorspace.js'));
-  } else {
+  {
     factory((root.pdfjsCorePattern = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreFunction,
       root.pdfjsCoreColorSpace);
@@ -35994,19 +35854,7 @@ exports.getTilingPatternIR = getTilingPatternIR;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/evaluator', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/stream', 'pdfjs/core/parser',
-      'pdfjs/core/image', 'pdfjs/core/colorspace', 'pdfjs/core/murmurhash3',
-      'pdfjs/core/fonts', 'pdfjs/core/function', 'pdfjs/core/pattern',
-      'pdfjs/core/cmap', 'pdfjs/core/metrics', 'pdfjs/core/bidi'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./stream.js'), require('./parser.js'), require('./image.js'),
-      require('./colorspace.js'), require('./murmurhash3.js'),
-      require('./fonts.js'), require('./function.js'), require('./pattern.js'),
-      require('./cmap.js'), require('./metrics.js'), require('./bidi.js'));
-  } else {
+  {
     factory((root.pdfjsCoreEvaluator = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreStream, root.pdfjsCoreParser,
       root.pdfjsCoreImage, root.pdfjsCoreColorSpace, root.pdfjsCoreMurmurHash3,
@@ -38939,15 +38787,7 @@ exports.PartialEvaluator = PartialEvaluator;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/annotation', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/stream', 'pdfjs/core/colorspace',
-      'pdfjs/core/obj', 'pdfjs/core/evaluator'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./stream.js'), require('./colorspace.js'), require('./obj.js'),
-      require('./evaluator.js'));
-  } else {
+  {
     factory((root.pdfjsCoreAnnotation = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreStream, root.pdfjsCoreColorSpace,
       root.pdfjsCoreObj, root.pdfjsCoreEvaluator);
@@ -39677,17 +39517,7 @@ exports.AnnotationFactory = AnnotationFactory;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/document', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/stream', 'pdfjs/core/obj',
-      'pdfjs/core/parser', 'pdfjs/core/crypto', 'pdfjs/core/evaluator',
-      'pdfjs/core/annotation'], factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./stream.js'), require('./obj.js'), require('./parser.js'),
-      require('./crypto.js'), require('./evaluator.js'),
-      require('./annotation.js'));
-  } else {
+  {
     factory((root.pdfjsCoreDocument = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreStream,
       root.pdfjsCoreObj, root.pdfjsCoreParser, root.pdfjsCoreCrypto,
@@ -40270,14 +40100,7 @@ exports.PDFDocument = PDFDocument;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/pdf_manager', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/stream', 'pdfjs/core/chunked_stream', 'pdfjs/core/document'],
-      factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./stream.js'),
-      require('./chunked_stream.js'), require('./document.js'));
-  } else {
+  {
     factory((root.pdfjsCorePdfManager = {}), root.pdfjsSharedUtil,
       root.pdfjsCoreStream, root.pdfjsCoreChunkedStream,
       root.pdfjsCoreDocument);
@@ -40490,14 +40313,7 @@ exports.NetworkPdfManager = NetworkPdfManager;
 
 
 (function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define('pdfjs/core/worker', ['exports', 'pdfjs/shared/util',
-      'pdfjs/core/primitives', 'pdfjs/core/pdf_manager', 'pdfjs/shared/global'],
-      factory);
-  } else if (typeof exports !== 'undefined') {
-    factory(exports, require('../shared/util.js'), require('./primitives.js'),
-      require('./pdf_manager.js'), require('../shared/global.js'));
-  } else {
+  {
     factory((root.pdfjsCoreWorker = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCorePdfManager,
       root.pdfjsSharedGlobal);
