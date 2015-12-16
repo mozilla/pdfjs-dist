@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.94';
-PDFJS.build = 'f1c64b6';
+PDFJS.version = '1.3.96';
+PDFJS.build = '0a21c8c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -672,6 +672,8 @@ var Uint32ArrayView = (function Uint32ArrayViewClosure() {
 
   return Uint32ArrayView;
 })();
+
+exports.Uint32ArrayView = Uint32ArrayView;
 
 var IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 
@@ -1697,7 +1699,6 @@ exports.PasswordResponses = PasswordResponses;
 exports.StatTimer = StatTimer;
 exports.StreamType = StreamType;
 exports.TextRenderingMode = TextRenderingMode;
-exports.Uint32ArrayView = Uint32ArrayView;
 exports.UnexpectedResponseException = UnexpectedResponseException;
 exports.UnknownErrorException = UnknownErrorException;
 exports.Util = Util;
