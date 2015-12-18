@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.106';
-PDFJS.build = '49437c8';
+PDFJS.version = '1.3.108';
+PDFJS.build = '65de3d6';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5905,11 +5905,11 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       return this.cachedGetSinglePixelWidth;
     },
     getCanvasPosition: function CanvasGraphics_getCanvasPosition(x, y) {
-        var transform = this.ctx.mozCurrentTransform;
-        return [
-          transform[0] * x + transform[2] * y + transform[4],
-          transform[1] * x + transform[3] * y + transform[5]
-        ];
+      var transform = this.ctx.mozCurrentTransform;
+      return [
+        transform[0] * x + transform[2] * y + transform[4],
+        transform[1] * x + transform[3] * y + transform[5]
+      ];
     }
   };
 
