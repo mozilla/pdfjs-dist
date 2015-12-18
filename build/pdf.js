@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.108';
-PDFJS.build = '65de3d6';
+PDFJS.version = '1.3.110';
+PDFJS.build = '42beb0c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -2082,6 +2082,11 @@ var AnnotationLayer = (function AnnotationLayerClosure() {
 
     if (item.url && isExternalLinkTargetSet()) {
       link.target = LinkTargetStringMap[PDFJS.externalLinkTarget];
+    }
+
+    // Strip referrer
+    if (item.url) {
+      link.rel = PDFJS.externalLinkRel;
     }
 
     if (!item.url) {
@@ -6132,6 +6137,14 @@ PDFJS.openExternalLinksInNewWindow = (
  */
 PDFJS.externalLinkTarget = (PDFJS.externalLinkTarget === undefined ?
                             PDFJS.LinkTarget.NONE : PDFJS.externalLinkTarget);
+
+/**
+ * Specifies the |rel| attribute for external links. Defaults to stripping
+ * the referrer.
+ * @var {string}
+ */
+PDFJS.externalLinkRel = (PDFJS.externalLinkRel === undefined ?
+                         'noreferrer' : PDFJS.externalLinkRel);
 
 /**
   * Determines if we can eval strings as JS. Primarily used to improve
