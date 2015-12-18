@@ -20,8 +20,8 @@ if (typeof PDFJS === 'undefined') {
   (typeof window !== 'undefined' ? window : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.110';
-PDFJS.build = '42beb0c';
+PDFJS.version = '1.3.112';
+PDFJS.build = 'e45e7d0';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1804,7 +1804,7 @@ exports.CustomStyle = CustomStyle;
 var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
 var AnnotationType = sharedUtil.AnnotationType;
 var Util = sharedUtil.Util;
-var isExternalLinkTargetSet = sharedUtil.Util;
+var isExternalLinkTargetSet = sharedUtil.isExternalLinkTargetSet;
 var LinkTargetStringMap = sharedUtil.LinkTargetStringMap;
 var warn = sharedUtil.warn;
 var CustomStyle = displayDOMUtils.CustomStyle;
