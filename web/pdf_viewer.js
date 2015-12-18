@@ -14,8 +14,8 @@
  */
 /*jshint globalstrict: false */
 /* globals PDFJS, PDFViewer, PDFPageView, TextLayerBuilder, PDFLinkService,
-           DefaultTextLayerFactory, AnnotationsLayerBuilder, PDFHistory,
-           DefaultAnnotationsLayerFactory, getFileName, ProgressBar */
+           DefaultTextLayerFactory, AnnotationLayerBuilder, PDFHistory,
+           DefaultAnnotationLayerFactory, getFileName, ProgressBar */
 
 // Initializing PDFJS global object (if still undefined)
 if (typeof PDFJS === 'undefined') {
@@ -896,7 +896,7 @@ var TEXT_LAYER_RENDER_DELAY = 200; // ms
  * @property {PageViewport} defaultViewport - The page viewport.
  * @property {PDFRenderingQueue} renderingQueue - The rendering queue object.
  * @property {IPDFTextLayerFactory} textLayerFactory
- * @property {IPDFAnnotationsLayerFactory} annotationsLayerFactory
+ * @property {IPDFAnnotationLayerFactory} annotationLayerFactory
  */
 
 /**
@@ -917,7 +917,7 @@ var PDFPageView = (function PDFPageViewClosure() {
     var defaultViewport = options.defaultViewport;
     var renderingQueue = options.renderingQueue;
     var textLayerFactory = options.textLayerFactory;
-    var annotationsLayerFactory = options.annotationsLayerFactory;
+    var annotationLayerFactory = options.annotationLayerFactory;
 
     this.id = id;
     this.renderingId = 'page' + id;
@@ -930,7 +930,7 @@ var PDFPageView = (function PDFPageViewClosure() {
 
     this.renderingQueue = renderingQueue;
     this.textLayerFactory = textLayerFactory;
-    this.annotationsLayerFactory = annotationsLayerFactory;
+    this.annotationLayerFactory = annotationLayerFactory;
 
     this.renderingState = RenderingStates.INITIAL;
     this.resume = null;
@@ -1358,10 +1358,10 @@ var PDFPageView = (function PDFPageViewClosure() {
         }
       );
 
-      if (this.annotationsLayerFactory) {
+      if (this.annotationLayerFactory) {
         if (!this.annotationLayer) {
-          this.annotationLayer = this.annotationsLayerFactory.
-            createAnnotationsLayerBuilder(div, this.pdfPage);
+          this.annotationLayer = this.annotationLayerFactory.
+            createAnnotationLayerBuilder(div, this.pdfPage);
         }
         this.annotationLayer.render(this.viewport, 'display');
       }
@@ -1766,7 +1766,7 @@ DefaultTextLayerFactory.prototype = {
 
 
 /**
- * @typedef {Object} AnnotationsLayerBuilderOptions
+ * @typedef {Object} AnnotationLayerBuilderOptions
  * @property {HTMLDivElement} pageDiv
  * @property {PDFPage} pdfPage
  * @property {IPDFLinkService} linkService
@@ -1775,12 +1775,12 @@ DefaultTextLayerFactory.prototype = {
 /**
  * @class
  */
-var AnnotationsLayerBuilder = (function AnnotationsLayerBuilderClosure() {
+var AnnotationLayerBuilder = (function AnnotationLayerBuilderClosure() {
   /**
-   * @param {AnnotationsLayerBuilderOptions} options
-   * @constructs AnnotationsLayerBuilder
+   * @param {AnnotationLayerBuilderOptions} options
+   * @constructs AnnotationLayerBuilder
    */
-  function AnnotationsLayerBuilder(options) {
+  function AnnotationLayerBuilder(options) {
     this.pageDiv = options.pageDiv;
     this.pdfPage = options.pdfPage;
     this.linkService = options.linkService;
@@ -1788,14 +1788,14 @@ var AnnotationsLayerBuilder = (function AnnotationsLayerBuilderClosure() {
     this.div = null;
   }
 
-  AnnotationsLayerBuilder.prototype =
-      /** @lends AnnotationsLayerBuilder.prototype */ {
+  AnnotationLayerBuilder.prototype =
+      /** @lends AnnotationLayerBuilder.prototype */ {
 
     /**
      * @param {PageViewport} viewport
      * @param {string} intent (default value is 'display')
      */
-    render: function AnnotationsLayerBuilder_render(viewport, intent) {
+    render: function AnnotationLayerBuilder_render(viewport, intent) {
       var self = this;
       var parameters = {
         intent: (intent === undefined ? 'display' : intent),
@@ -1828,7 +1828,7 @@ var AnnotationsLayerBuilder = (function AnnotationsLayerBuilderClosure() {
       });
     },
 
-    hide: function AnnotationsLayerBuilder_hide() {
+    hide: function AnnotationLayerBuilder_hide() {
       if (!this.div) {
         return;
       }
@@ -1836,22 +1836,22 @@ var AnnotationsLayerBuilder = (function AnnotationsLayerBuilderClosure() {
     }
   };
 
-  return AnnotationsLayerBuilder;
+  return AnnotationLayerBuilder;
 })();
 
 /**
  * @constructor
- * @implements IPDFAnnotationsLayerFactory
+ * @implements IPDFAnnotationLayerFactory
  */
-function DefaultAnnotationsLayerFactory() {}
-DefaultAnnotationsLayerFactory.prototype = {
+function DefaultAnnotationLayerFactory() {}
+DefaultAnnotationLayerFactory.prototype = {
   /**
    * @param {HTMLDivElement} pageDiv
    * @param {PDFPage} pdfPage
-   * @returns {AnnotationsLayerBuilder}
+   * @returns {AnnotationLayerBuilder}
    */
-  createAnnotationsLayerBuilder: function (pageDiv, pdfPage) {
-    return new AnnotationsLayerBuilder({
+  createAnnotationLayerBuilder: function (pageDiv, pdfPage) {
+    return new AnnotationLayerBuilder({
       pageDiv: pageDiv,
       pdfPage: pdfPage,
       linkService: new SimpleLinkService(),
@@ -2119,7 +2119,7 @@ var PDFViewer = (function pdfViewer() {
             defaultViewport: viewport.clone(),
             renderingQueue: this.renderingQueue,
             textLayerFactory: textLayerFactory,
-            annotationsLayerFactory: this
+            annotationLayerFactory: this
           });
           bindOnAfterAndBeforeDraw(pageView);
           this._pages.push(pageView);
@@ -2576,10 +2576,10 @@ var PDFViewer = (function pdfViewer() {
     /**
      * @param {HTMLDivElement} pageDiv
      * @param {PDFPage} pdfPage
-     * @returns {AnnotationsLayerBuilder}
+     * @returns {AnnotationLayerBuilder}
      */
-    createAnnotationsLayerBuilder: function (pageDiv, pdfPage) {
-      return new AnnotationsLayerBuilder({
+    createAnnotationLayerBuilder: function (pageDiv, pdfPage) {
+      return new AnnotationLayerBuilder({
         pageDiv: pageDiv,
         pdfPage: pdfPage,
         linkService: this.linkService
@@ -3041,8 +3041,8 @@ var PDFHistory = (function () {
   PDFJS.PDFLinkService = PDFLinkService;
   PDFJS.TextLayerBuilder = TextLayerBuilder;
   PDFJS.DefaultTextLayerFactory = DefaultTextLayerFactory;
-  PDFJS.AnnotationsLayerBuilder = AnnotationsLayerBuilder;
-  PDFJS.DefaultAnnotationsLayerFactory = DefaultAnnotationsLayerFactory;
+  PDFJS.AnnotationLayerBuilder = AnnotationLayerBuilder;
+  PDFJS.DefaultAnnotationLayerFactory = DefaultAnnotationLayerFactory;
   PDFJS.PDFHistory = PDFHistory;
 
   PDFJS.getFileName = getFileName;
