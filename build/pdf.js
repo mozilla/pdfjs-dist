@@ -12,16 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*jshint globalstrict: false */
-/* globals PDFJS */
+/* jshint globalstrict: false */
+/* globals PDFJS, global */
 
 // Initializing PDFJS global object (if still undefined)
 if (typeof PDFJS === 'undefined') {
-  (typeof window !== 'undefined' ? window : this).PDFJS = {};
+  (typeof window !== 'undefined' ? window :
+   typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.120';
-PDFJS.build = 'eb557d2';
+PDFJS.version = '1.3.122';
+PDFJS.build = '05b9d37';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -6156,6 +6157,29 @@ var globalScope = sharedGlobal.globalScope;
 
 var DEFAULT_RANGE_CHUNK_SIZE = 65536; // 2^16 = 65536
 
+
+var useRequireEnsure = false;
+if (typeof module !== 'undefined' && module.require) {
+  // node.js - disable worker and set require.ensure.
+  PDFJS.disableWorker = true;
+  if (typeof require.ensure === 'undefined') {
+    require.ensure = require('node-ensure');
+  }
+  useRequireEnsure = true;
+}
+if (typeof __webpack_require__ !== 'undefined') {
+  // Webpack - get/bundle pdf.worker.js as additional file.
+  PDFJS.workerSrc = require('entry?name=[hash]-worker.js!./pdf.worker.js');
+  useRequireEnsure = true;
+}
+var fakeWorkerFilesLoader = useRequireEnsure && function (callback) {
+  require.ensure([], function () {
+    require('./pdf.worker.js');
+    callback();
+  });
+};
+
+
 /**
  * The maximum allowed image size in total pixels e.g. width * height. Images
  * above this value will not be drawn. Use -1 for no limit.
@@ -7274,7 +7298,10 @@ var PDFWorker = (function PDFWorkerClosure() {
       // In the developer build load worker_loader which in turn loads all the
       // other files and resolves the promise. In production only the
       // pdf.worker.js file is needed.
-      Util.loadScript(PDFJS.workerSrc, function() {
+      var loader = fakeWorkerFilesLoader || function (callback) {
+        Util.loadScript(PDFJS.workerSrc, callback);
+      };
+      loader(function () {
         PDFJS.fakeWorkerFilesLoadedCapability.resolve();
       });
     }
@@ -7374,8 +7401,10 @@ var PDFWorker = (function PDFWorkerClosure() {
     },
 
     _setupFakeWorker: function PDFWorker_setupFakeWorker() {
-      warn('Setting up fake worker.');
-      globalScope.PDFJS.disableWorker = true;
+      if (!globalScope.PDFJS.disableWorker) {
+        warn('Setting up fake worker.');
+        globalScope.PDFJS.disableWorker = true;
+      }
 
       setupFakeWorkerGlobal().then(function () {
         if (this.destroyed) {

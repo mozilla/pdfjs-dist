@@ -12,16 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*jshint globalstrict: false */
-/* globals PDFJS */
+/* jshint globalstrict: false */
+/* globals PDFJS, global */
 
 // Initializing PDFJS global object (if still undefined)
 if (typeof PDFJS === 'undefined') {
-  (typeof window !== 'undefined' ? window : this).PDFJS = {};
+  (typeof window !== 'undefined' ? window :
+   typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.120';
-PDFJS.build = 'eb557d2';
+PDFJS.version = '1.3.122';
+PDFJS.build = '05b9d37';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -40929,7 +40930,8 @@ var workerConsole = {
 
 
 // Worker thread?
-if (typeof window === 'undefined' && typeof require === 'undefined') {
+if (typeof window === 'undefined' &&
+    !(typeof module !== 'undefined' && module.require)) {
   if (!('console' in globalScope)) {
     globalScope.console = workerConsole;
   }
