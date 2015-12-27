@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
    typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.125';
-PDFJS.build = '17780da';
+PDFJS.version = '1.3.127';
+PDFJS.build = 'ad4354c';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1883,7 +1883,9 @@ var AnnotationElement = (function AnnotationElementClosure() {
 
       container.setAttribute('data-annotation-id', data.id);
 
-      data.rect = Util.normalizeRect([
+      // Do *not* modify `data.rect`, since that will corrupt the annotation
+      // position on subsequent calls to `_createContainer` (see issue 6804).
+      var rect = Util.normalizeRect([
         data.rect[0],
         page.view[3] - data.rect[1] + page.view[1],
         data.rect[2],
@@ -1893,7 +1895,7 @@ var AnnotationElement = (function AnnotationElementClosure() {
       CustomStyle.setProp('transform', container,
                           'matrix(' + viewport.transform.join(',') + ')');
       CustomStyle.setProp('transformOrigin', container,
-                          -data.rect[0] + 'px ' + -data.rect[1] + 'px');
+                          -rect[0] + 'px ' + -rect[1] + 'px');
 
       if (data.borderStyle.width > 0) {
         container.style.borderWidth = data.borderStyle.width + 'px';
@@ -1948,8 +1950,8 @@ var AnnotationElement = (function AnnotationElementClosure() {
         }
       }
 
-      container.style.left = data.rect[0] + 'px';
-      container.style.top = data.rect[1] + 'px';
+      container.style.left = rect[0] + 'px';
+      container.style.top = rect[1] + 'px';
 
       container.style.width = width + 'px';
       container.style.height = height + 'px';
@@ -2235,7 +2237,7 @@ var PopupAnnotationElement = (function PopupAnnotationElementClosure() {
 
 /**
  * @class
- * @alias PopupElement 
+ * @alias PopupElement
  */
 var PopupElement = (function PopupElementClosure() {
   var BACKGROUND_ENLIGHT = 0.7;
