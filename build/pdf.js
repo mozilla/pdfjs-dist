@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
    typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.133';
-PDFJS.build = '8558948';
+PDFJS.version = '1.3.135';
+PDFJS.build = 'b32cdf5';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -1846,6 +1846,9 @@ AnnotationElementFactory.prototype =
       case AnnotationType.POPUP:
         return new PopupAnnotationElement(parameters);
 
+      case AnnotationType.UNDERLINE:
+        return new UnderlineAnnotationElement(parameters);
+
       default:
         throw new Error('Unimplemented annotation type "' + subtype + '"');
     }
@@ -2372,6 +2375,33 @@ var PopupElement = (function PopupElementClosure() {
   };
 
   return PopupElement;
+})();
+
+/**
+ * @class
+ * @alias UnderlineAnnotationElement
+ */
+var UnderlineAnnotationElement = (
+    function UnderlineAnnotationElementClosure() {
+  function UnderlineAnnotationElement(parameters) {
+    AnnotationElement.call(this, parameters);
+  }
+
+  Util.inherit(UnderlineAnnotationElement, AnnotationElement, {
+    /**
+     * Render the underline annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof UnderlineAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function UnderlineAnnotationElement_render() {
+      this.container.className = 'underlineAnnotation';
+      return this.container;
+    }
+  });
+
+  return UnderlineAnnotationElement;
 })();
 
 /**

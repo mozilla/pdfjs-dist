@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
    typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.133';
-PDFJS.build = '8558948';
+PDFJS.version = '1.3.135';
+PDFJS.build = 'b32cdf5';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -38853,6 +38853,9 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
       case 'Popup':
         return new PopupAnnotation(parameters);
 
+      case 'Underline':
+        return new UnderlineAnnotation(parameters);
+
       default:
         warn('Unimplemented annotation type "' + subtype + '", ' +
              'falling back to base annotation');
@@ -39541,6 +39544,22 @@ var PopupAnnotation = (function PopupAnnotationClosure() {
   Util.inherit(PopupAnnotation, Annotation, {});
 
   return PopupAnnotation;
+})();
+
+var UnderlineAnnotation = (function UnderlineAnnotationClosure() {
+  function UnderlineAnnotation(parameters) {
+    Annotation.call(this, parameters);
+
+    this.data.annotationType = AnnotationType.UNDERLINE;
+    this.data.hasHtml = true;
+
+    // PDF viewers completely ignore any border styles.
+    this.data.borderStyle.setWidth(0);
+  }
+
+  Util.inherit(UnderlineAnnotation, Annotation, {});
+
+  return UnderlineAnnotation;
 })();
 
 exports.Annotation = Annotation;

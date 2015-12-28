@@ -138,6 +138,10 @@
   padding-top: 0.2em;
 }
 
+.annotationLayer .underlineAnnotation {
+  cursor: pointer;
+}
+
 .pdfViewer .canvasWrapper {
   overflow: hidden;
 }
