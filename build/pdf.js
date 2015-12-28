@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
    typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.129';
-PDFJS.build = 'f17d672';
+PDFJS.version = '1.3.131';
+PDFJS.build = 'edf8ccc';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -5834,6 +5834,10 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     beginAnnotations: function CanvasGraphics_beginAnnotations() {
       this.save();
       this.current = new CanvasExtraState();
+
+      if (this.baseTransform) {
+        this.ctx.setTransform.apply(this.ctx, this.baseTransform);
+      }
     },
 
     endAnnotations: function CanvasGraphics_endAnnotations() {
