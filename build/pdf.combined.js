@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
    typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.142';
-PDFJS.build = 'e8db825';
+PDFJS.version = '1.3.144';
+PDFJS.build = 'd956177';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -15569,6 +15569,9 @@ AnnotationElementFactory.prototype =
       case AnnotationType.UNDERLINE:
         return new UnderlineAnnotationElement(parameters);
 
+      case AnnotationType.STRIKEOUT:
+        return new StrikeOutAnnotationElement(parameters);
+
       default:
         throw new Error('Unimplemented annotation type "' + subtype + '"');
     }
@@ -16122,6 +16125,33 @@ var UnderlineAnnotationElement = (
   });
 
   return UnderlineAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias StrikeOutAnnotationElement
+ */
+var StrikeOutAnnotationElement = (
+    function StrikeOutAnnotationElementClosure() {
+  function StrikeOutAnnotationElement(parameters) {
+    AnnotationElement.call(this, parameters);
+  }
+
+  Util.inherit(StrikeOutAnnotationElement, AnnotationElement, {
+    /**
+     * Render the strikeout annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof StrikeOutAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function StrikeOutAnnotationElement_render() {
+      this.container.className = 'strikeoutAnnotation';
+      return this.container;
+    }
+  });
+
+  return StrikeOutAnnotationElement;
 })();
 
 /**
@@ -46608,6 +46638,9 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
       case 'Underline':
         return new UnderlineAnnotation(parameters);
 
+      case 'StrikeOut':
+        return new StrikeOutAnnotation(parameters);
+
       default:
         warn('Unimplemented annotation type "' + subtype + '", ' +
              'falling back to base annotation');
@@ -47312,6 +47345,22 @@ var UnderlineAnnotation = (function UnderlineAnnotationClosure() {
   Util.inherit(UnderlineAnnotation, Annotation, {});
 
   return UnderlineAnnotation;
+})();
+
+var StrikeOutAnnotation = (function StrikeOutAnnotationClosure() {
+  function StrikeOutAnnotation(parameters) {
+    Annotation.call(this, parameters);
+
+    this.data.annotationType = AnnotationType.STRIKEOUT;
+    this.data.hasHtml = true;
+
+    // PDF viewers completely ignore any border styles.
+    this.data.borderStyle.setWidth(0);
+  }
+
+  Util.inherit(StrikeOutAnnotation, Annotation, {});
+
+  return StrikeOutAnnotation;
 })();
 
 exports.Annotation = Annotation;

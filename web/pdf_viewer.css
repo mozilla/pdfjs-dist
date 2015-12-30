@@ -142,6 +142,10 @@
   cursor: pointer;
 }
 
+.annotationLayer .strikeoutAnnotation {
+  cursor: pointer;
+}
+
 .pdfViewer .canvasWrapper {
   overflow: hidden;
 }
