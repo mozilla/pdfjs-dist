@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
    typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.144';
-PDFJS.build = 'd956177';
+PDFJS.version = '1.3.146';
+PDFJS.build = '8ed3692';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -15569,6 +15569,9 @@ AnnotationElementFactory.prototype =
       case AnnotationType.UNDERLINE:
         return new UnderlineAnnotationElement(parameters);
 
+      case AnnotationType.SQUIGGLY:
+        return new SquigglyAnnotationElement(parameters);
+
       case AnnotationType.STRIKEOUT:
         return new StrikeOutAnnotationElement(parameters);
 
@@ -16125,6 +16128,32 @@ var UnderlineAnnotationElement = (
   });
 
   return UnderlineAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias SquigglyAnnotationElement
+ */
+var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
+  function SquigglyAnnotationElement(parameters) {
+    AnnotationElement.call(this, parameters);
+  }
+
+  Util.inherit(SquigglyAnnotationElement, AnnotationElement, {
+    /**
+     * Render the squiggly annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof SquigglyAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function SquigglyAnnotationElement_render() {
+      this.container.className = 'squigglyAnnotation';
+      return this.container;
+    }
+  });
+
+  return SquigglyAnnotationElement;
 })();
 
 /**
@@ -46638,6 +46667,9 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
       case 'Underline':
         return new UnderlineAnnotation(parameters);
 
+      case 'Squiggly':
+        return new SquigglyAnnotation(parameters);
+
       case 'StrikeOut':
         return new StrikeOutAnnotation(parameters);
 
@@ -47345,6 +47377,22 @@ var UnderlineAnnotation = (function UnderlineAnnotationClosure() {
   Util.inherit(UnderlineAnnotation, Annotation, {});
 
   return UnderlineAnnotation;
+})();
+
+var SquigglyAnnotation = (function SquigglyAnnotationClosure() {
+  function SquigglyAnnotation(parameters) {
+    Annotation.call(this, parameters);
+
+    this.data.annotationType = AnnotationType.SQUIGGLY;
+    this.data.hasHtml = true;
+
+    // PDF viewers completely ignore any border styles.
+    this.data.borderStyle.setWidth(0);
+  }
+
+  Util.inherit(SquigglyAnnotation, Annotation, {});
+
+  return SquigglyAnnotation;
 })();
 
 var StrikeOutAnnotation = (function StrikeOutAnnotationClosure() {
