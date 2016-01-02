@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
    typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.146';
-PDFJS.build = '8ed3692';
+PDFJS.version = '1.3.148';
+PDFJS.build = '4e9ea35';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -38882,6 +38882,9 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
       case 'Popup':
         return new PopupAnnotation(parameters);
 
+      case 'Highlight':
+        return new HighlightAnnotation(parameters);
+
       case 'Underline':
         return new UnderlineAnnotation(parameters);
 
@@ -39579,6 +39582,22 @@ var PopupAnnotation = (function PopupAnnotationClosure() {
   Util.inherit(PopupAnnotation, Annotation, {});
 
   return PopupAnnotation;
+})();
+
+var HighlightAnnotation = (function HighlightAnnotationClosure() {
+  function HighlightAnnotation(parameters) {
+    Annotation.call(this, parameters);
+
+    this.data.annotationType = AnnotationType.HIGHLIGHT;
+    this.data.hasHtml = true;
+
+    // PDF viewers completely ignore any border styles.
+    this.data.borderStyle.setWidth(0);
+  }
+
+  Util.inherit(HighlightAnnotation, Annotation, {});
+
+  return HighlightAnnotation;
 })();
 
 var UnderlineAnnotation = (function UnderlineAnnotationClosure() {

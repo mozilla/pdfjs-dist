@@ -21,8 +21,8 @@ if (typeof PDFJS === 'undefined') {
    typeof global !== 'undefined' ? global : this).PDFJS = {};
 }
 
-PDFJS.version = '1.3.146';
-PDFJS.build = '8ed3692';
+PDFJS.version = '1.3.148';
+PDFJS.build = '4e9ea35';
 
 (function pdfjsWrapper() {
   // Use strict in our context only - users might not want it
@@ -15566,6 +15566,9 @@ AnnotationElementFactory.prototype =
       case AnnotationType.POPUP:
         return new PopupAnnotationElement(parameters);
 
+      case AnnotationType.HIGHLIGHT:
+        return new HighlightAnnotationElement(parameters);
+
       case AnnotationType.UNDERLINE:
         return new UnderlineAnnotationElement(parameters);
 
@@ -16101,6 +16104,33 @@ var PopupElement = (function PopupElementClosure() {
   };
 
   return PopupElement;
+})();
+
+/**
+ * @class
+ * @alias HighlightAnnotationElement
+ */
+var HighlightAnnotationElement = (
+    function HighlightAnnotationElementClosure() {
+  function HighlightAnnotationElement(parameters) {
+    AnnotationElement.call(this, parameters);
+  }
+
+  Util.inherit(HighlightAnnotationElement, AnnotationElement, {
+    /**
+     * Render the highlight annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof HighlightAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function HighlightAnnotationElement_render() {
+      this.container.className = 'highlightAnnotation';
+      return this.container;
+    }
+  });
+
+  return HighlightAnnotationElement;
 })();
 
 /**
@@ -46664,6 +46694,9 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
       case 'Popup':
         return new PopupAnnotation(parameters);
 
+      case 'Highlight':
+        return new HighlightAnnotation(parameters);
+
       case 'Underline':
         return new UnderlineAnnotation(parameters);
 
@@ -47361,6 +47394,22 @@ var PopupAnnotation = (function PopupAnnotationClosure() {
   Util.inherit(PopupAnnotation, Annotation, {});
 
   return PopupAnnotation;
+})();
+
+var HighlightAnnotation = (function HighlightAnnotationClosure() {
+  function HighlightAnnotation(parameters) {
+    Annotation.call(this, parameters);
+
+    this.data.annotationType = AnnotationType.HIGHLIGHT;
+    this.data.hasHtml = true;
+
+    // PDF viewers completely ignore any border styles.
+    this.data.borderStyle.setWidth(0);
+  }
+
+  Util.inherit(HighlightAnnotation, Annotation, {});
+
+  return HighlightAnnotation;
 })();
 
 var UnderlineAnnotation = (function UnderlineAnnotationClosure() {
