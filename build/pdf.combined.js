@@ -13,20 +13,31 @@
  * limitations under the License.
  */
 /* jshint globalstrict: false */
-/* globals PDFJS, global */
+/* umdutils ignore */
 
-// Initializing PDFJS global object (if still undefined)
-if (typeof PDFJS === 'undefined') {
-  (typeof window !== 'undefined' ? window :
-   typeof global !== 'undefined' ? global : this).PDFJS = {};
-}
-
-PDFJS.version = '1.3.158';
-PDFJS.build = '944d1e6';
-
-(function pdfjsWrapper() {
+(function (root, factory) {
+  'use strict';
+  if (typeof define === 'function' && define.amd) {
+define('pdfjs-dist/build/pdf.combined', ['exports'], factory);
+  } else if (typeof exports !== 'undefined') {
+    factory(exports);
+  } else {
+factory((root.pdfjsDistBuildPdfCombined = {}));
+  }
+}(this, function (exports) {
   // Use strict in our context only - users might not want it
   'use strict';
+
+var pdfjsVersion = '1.3.161';
+var pdfjsBuild = '4a215f0';
+
+  var pdfjsFilePath =
+    typeof document !== 'undefined' && document.currentScript ?
+      document.currentScript.src : null;
+
+  var pdfjsLibs = {};
+
+  (function pdfjsWrapper() {
 
 
 
@@ -8994,6 +9005,13 @@ var NetworkManager = (function NetworkManagerClosure() {
   // In development, it will be declared here
   if (!globalScope.PDFJS) {
     globalScope.PDFJS = {};
+  }
+
+  if (typeof pdfjsVersion !== 'undefined') {
+    globalScope.PDFJS.version = pdfjsVersion;
+  }
+  if (typeof pdfjsVersion !== 'undefined') {
+    globalScope.PDFJS.build = pdfjsBuild;
   }
 
   globalScope.PDFJS.pdfBug = false;
@@ -30378,10 +30396,10 @@ exports.PostScriptParser = PostScriptParser;
   {
     factory((root.pdfjsDisplayAPI = {}), root.pdfjsSharedUtil,
       root.pdfjsDisplayFontLoader, root.pdfjsDisplayCanvas,
-      root.pdfjsSharedGlobal);
+      root.pdfjsDisplayMetadata, root.pdfjsSharedGlobal);
   }
 }(this, function (exports, sharedUtil, displayFontLoader, displayCanvas,
-                  sharedGlobal, amdRequire) {
+                  displayMetadata, sharedGlobal, amdRequire) {
 
 var InvalidPDFException = sharedUtil.InvalidPDFException;
 var MessageHandler = sharedUtil.MessageHandler;
@@ -30405,6 +30423,7 @@ var FontFaceObject = displayFontLoader.FontFaceObject;
 var FontLoader = displayFontLoader.FontLoader;
 var CanvasGraphics = displayCanvas.CanvasGraphics;
 var createScratchCanvas = displayCanvas.createScratchCanvas;
+var Metadata = displayMetadata.Metadata;
 var PDFJS = sharedGlobal.PDFJS;
 var globalScope = sharedGlobal.globalScope;
 
@@ -31522,6 +31541,16 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
 var PDFWorker = (function PDFWorkerClosure() {
   var nextFakeWorkerId = 0;
 
+  function getWorkerSrc() {
+    if (PDFJS.workerSrc) {
+      return PDFJS.workerSrc;
+    }
+    if (pdfjsFilePath) {
+      return pdfjsFilePath.replace(/\.js$/i, '.worker.js');
+    }
+    error('No PDFJS.workerSrc specified');
+  }
+
   // Loads worker code into main thread.
   function setupFakeWorkerGlobal() {
     if (!PDFJS.fakeWorkerFilesLoadedCapability) {
@@ -32040,7 +32069,7 @@ var WorkerTransport = (function WorkerTransportClosure() {
         then(function transportMetadata(results) {
         return {
           info: results[0],
-          metadata: (results[1] ? new PDFJS.Metadata(results[1]) : null)
+          metadata: (results[1] ? new Metadata(results[1]) : null)
         };
       });
     },
@@ -49025,15 +49054,22 @@ exports.WorkerMessageHandler = WorkerMessageHandler;
 }));
 
 
-}).call((typeof window === 'undefined') ? this : window);
+  }).call(pdfjsLibs);
 
-if (!PDFJS.workerSrc && typeof document !== 'undefined') {
-  // workerSrc is not set -- using last script url to define default location
-  PDFJS.workerSrc = (function () {
-    'use strict';
-    var pdfJsSrc = document.currentScript.src;
-    return pdfJsSrc && pdfJsSrc.replace(/\.js$/i, '.worker.js');
-  })();
-}
+  exports.PDFJS = pdfjsLibs.pdfjsSharedGlobal.PDFJS;
+
+  exports.getDocument = pdfjsLibs.pdfjsDisplayAPI.getDocument;
+  exports.PDFDataRangeTransport =
+    pdfjsLibs.pdfjsDisplayAPI.PDFDataRangeTransport;
+  exports.renderTextLayer = pdfjsLibs.pdfjsDisplayTextLayer.renderTextLayer;
+  exports.AnnotationLayer =
+    pdfjsLibs.pdfjsDisplayAnnotationLayer.AnnotationLayer;
+  exports.CustomStyle = pdfjsLibs.pdfjsDisplayDOMUtils.CustomStyle;
+  exports.PasswordResponses = pdfjsLibs.pdfjsSharedUtil.PasswordResponses;
+  exports.InvalidPDFException = pdfjsLibs.pdfjsSharedUtil.InvalidPDFException;
+  exports.MissingPDFException = pdfjsLibs.pdfjsSharedUtil.MissingPDFException;
+  exports.UnexpectedResponseException =
+    pdfjsLibs.pdfjsSharedUtil.UnexpectedResponseException;
+}));
 
 
