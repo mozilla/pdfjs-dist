@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.3.161';
-var pdfjsBuild = '4a215f0';
+var pdfjsVersion = '1.3.163';
+var pdfjsBuild = '30b8f41';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -6767,6 +6767,12 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       ctx.save();
       ctx.transform.apply(ctx, current.textMatrix);
       ctx.translate(current.x, current.y + current.textRise);
+
+      if (current.patternFill) {
+        // TODO: Some shading patterns are not applied correctly to text,
+        //       e.g. issues 3988 and 5432, and ShowText-ShadingPattern.pdf.
+        ctx.fillStyle = current.fillColor.getPattern(ctx, this);
+      }
 
       if (fontDirection > 0) {
         ctx.scale(textHScale, -1);
