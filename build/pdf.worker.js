@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.3.185';
-var pdfjsBuild = '794e1a3';
+var pdfjsVersion = '1.3.187';
+var pdfjsBuild = 'f6a8dfb';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -11042,7 +11042,7 @@ function loadJpegStream(id, imageUrl, objs) {
   img.src = imageUrl;
 }
 
-   Polyfill from https://github.com/Polymer/URL
+  // Polyfill from https://github.com/Polymer/URL
 /* Any copyright is dedicated to the Public Domain.
  * http://creativecommons.org/publicdomain/zero/1.0/ */
 (function checkURLConstructor(scope) {
