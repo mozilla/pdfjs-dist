@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.3.222';
-var pdfjsBuild = 'd9e21a3';
+var pdfjsVersion = '1.3.224';
+var pdfjsBuild = '1eea0db';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -9806,6 +9806,26 @@ function isValidUrl(url, allowRelative) {
 }
 PDFJS.isValidUrl = isValidUrl;
 
+/**
+ * Adds various attributes (href, title, target, rel) to hyperlinks.
+ * @param {HTMLLinkElement} link - The link element.
+ * @param {Object} params - An object with the properties:
+ * @param {string} params.url - An absolute URL.
+ */
+function addLinkAttributes(link, params) {
+  var url = params && params.url;
+  link.href = link.title = (url ? removeNullCharacters(url) : '');
+
+  if (url) {
+    if (isExternalLinkTargetSet()) {
+      link.target = LinkTargetStringMap[PDFJS.externalLinkTarget];
+    }
+    // Strip referrer from the URL.
+    link.rel = PDFJS.externalLinkRel;
+  }
+}
+PDFJS.addLinkAttributes = addLinkAttributes;
+
 function shadow(obj, prop, value) {
   Object.defineProperty(obj, prop, { value: value,
                                      enumerable: true,
@@ -11768,6 +11788,7 @@ exports.isInt = isInt;
 exports.isNum = isNum;
 exports.isString = isString;
 exports.isValidUrl = isValidUrl;
+exports.addLinkAttributes = addLinkAttributes;
 exports.loadJpegStream = loadJpegStream;
 exports.log2 = log2;
 exports.readInt8 = readInt8;
@@ -16149,9 +16170,7 @@ exports.isStream = isStream;
 var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
 var AnnotationType = sharedUtil.AnnotationType;
 var Util = sharedUtil.Util;
-var isExternalLinkTargetSet = sharedUtil.isExternalLinkTargetSet;
-var LinkTargetStringMap = sharedUtil.LinkTargetStringMap;
-var removeNullCharacters = sharedUtil.removeNullCharacters;
+var addLinkAttributes = sharedUtil.addLinkAttributes;
 var warn = sharedUtil.warn;
 var CustomStyle = displayDOMUtils.CustomStyle;
 
@@ -16351,17 +16370,7 @@ var LinkAnnotationElement = (function LinkAnnotationElementClosure() {
       this.container.className = 'linkAnnotation';
 
       var link = document.createElement('a');
-      link.href = link.title = (this.data.url ?
-                                removeNullCharacters(this.data.url) : '');
-
-      if (this.data.url && isExternalLinkTargetSet()) {
-        link.target = LinkTargetStringMap[PDFJS.externalLinkTarget];
-      }
-
-      // Strip referrer from the URL.
-      if (this.data.url) {
-        link.rel = PDFJS.externalLinkRel;
-      }
+      addLinkAttributes(link, { url: this.data.url });
 
       if (!this.data.url) {
         if (this.data.action) {
@@ -29333,6 +29342,7 @@ var shadow = sharedUtil.shadow;
 var stringToPDFString = sharedUtil.stringToPDFString;
 var stringToUTF8String = sharedUtil.stringToUTF8String;
 var warn = sharedUtil.warn;
+var isValidUrl = sharedUtil.isValidUrl;
 var Ref = corePrimitives.Ref;
 var RefSet = corePrimitives.RefSet;
 var RefSetCache = corePrimitives.RefSetCache;
@@ -29432,9 +29442,17 @@ var Catalog = (function CatalogClosure() {
             if (!outlineDict.has('Title')) {
               error('Invalid outline item');
             }
-            var dest = outlineDict.get('A');
-            if (dest) {
-              dest = dest.get('D');
+            var actionDict = outlineDict.get('A'), dest = null, url = null;
+            if (actionDict) {
+              var destEntry = actionDict.get('D');
+              if (destEntry) {
+                dest = destEntry;
+              } else {
+                var uriEntry = actionDict.get('URI');
+                if (isString(uriEntry) && isValidUrl(uriEntry, false)) {
+                  url = uriEntry;
+                }
+              }
             } else if (outlineDict.has('Dest')) {
               dest = outlineDict.getRaw('Dest');
               if (isName(dest)) {
@@ -29444,6 +29462,7 @@ var Catalog = (function CatalogClosure() {
             var title = outlineDict.get('Title');
             var outlineItem = {
               dest: dest,
+              url: url,
               title: stringToPDFString(title),
               color: outlineDict.get('C') || [0, 0, 0],
               count: outlineDict.get('Count'),
@@ -31676,6 +31695,7 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
      *   italic: boolean,
      *   color: rgb array,
      *   dest: dest obj,
+     *   url: string,
      *   items: array of more items like this
      *  },
      *  ...
