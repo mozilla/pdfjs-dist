@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.3.228';
-var pdfjsBuild = '0aa373c';
+var pdfjsVersion = '1.3.231';
+var pdfjsBuild = '58329f7';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -923,6 +923,42 @@ var Util = PDFJS.Util = (function UtilClosure() {
 
   Util.sign = function Util_sign(num) {
     return num < 0 ? -1 : 1;
+  };
+
+  var ROMAN_NUMBER_MAP = [
+    '', 'C', 'CC', 'CCC', 'CD', 'D', 'DC', 'DCC', 'DCCC', 'CM',
+    '', 'X', 'XX', 'XXX', 'XL', 'L', 'LX', 'LXX', 'LXXX', 'XC',
+    '', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'
+  ];
+  /**
+   * Converts positive integers to (upper case) Roman numerals.
+   * @param {integer} number - The number that should be converted.
+   * @param {boolean} lowerCase - Indicates if the result should be converted
+   *   to lower case letters. The default is false.
+   * @return {string} The resulting Roman number.
+   */
+  Util.toRoman = function Util_toRoman(number, lowerCase) {
+    assert(isInt(number) && number > 0,
+           'The number should be a positive integer.');
+    var pos, romanBuf = [];
+    // Thousands
+    while (number >= 1000) {
+      number -= 1000;
+      romanBuf.push('M');
+    }
+    // Hundreds
+    pos = (number / 100) | 0;
+    number %= 100;
+    romanBuf.push(ROMAN_NUMBER_MAP[pos]);
+    // Tens
+    pos = (number / 10) | 0;
+    number %= 10;
+    romanBuf.push(ROMAN_NUMBER_MAP[10 + pos]);
+    // Ones
+    romanBuf.push(ROMAN_NUMBER_MAP[20 + number]);
+
+    var romanStr = romanBuf.join('');
+    return (lowerCase ? romanStr.toLowerCase() : romanStr);
   };
 
   Util.appendToArray = function Util_appendToArray(arr1, arr2) {
@@ -8871,6 +8907,16 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
       return this.transport.getDestination(id);
     },
     /**
+     * @return {Promise} A promise that is resolved with: an Array containing
+     *   the pageLabels that correspond to the pageIndexes; or null, when no
+     *   pageLabels are present in the PDF file.
+     *   NOTE: If the pageLabels are all identical to standard page numbering,
+     *         i.e. [1, 2, 3, ...], the promise is resolved with an empty Array.
+     */
+    getPageLabels: function PDFDocumentProxy_getPageLabels() {
+      return this.transport.getPageLabels();
+    },
+    /**
      * @return {Promise} A promise that is resolved with a lookup table for
      * mapping named attachments to their content.
      */
@@ -9952,6 +9998,10 @@ var WorkerTransport = (function WorkerTransportClosure() {
 
     getDestination: function WorkerTransport_getDestination(id) {
       return this.messageHandler.sendWithPromise('GetDestination', { id: id });
+    },
+
+    getPageLabels: function WorkerTransport_getPageLabels() {
+      return this.messageHandler.sendWithPromise('GetPageLabels', null);
     },
 
     getAttachments: function WorkerTransport_getAttachments() {
