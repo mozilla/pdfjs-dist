@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.14';
-var pdfjsBuild = '051a074';
+var pdfjsVersion = '1.4.16';
+var pdfjsBuild = '0558ffc';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -25508,23 +25508,22 @@ var Parser = (function ParserClosure() {
             break;
           }
           found = false;
-          for (i = 0, j = 0; i < scanLength; i++) {
-            var b = scanBytes[i];
-            if (b !== ENDSTREAM_SIGNATURE[j]) {
-              i -= j;
-              j = 0;
-            } else {
+          i = 0;
+          while (i < scanLength) {
+            j = 0;
+            while (j < ENDSTREAM_SIGNATURE_LENGTH &&
+                   scanBytes[i + j] === ENDSTREAM_SIGNATURE[j]) {
               j++;
-              if (j >= ENDSTREAM_SIGNATURE_LENGTH) {
-                i++;
-                found = true;
-                break;
-              }
             }
+            if (j >= ENDSTREAM_SIGNATURE_LENGTH) {
+              found = true;
+              break;
+            }
+            i++;
           }
           if (found) {
-            skipped += i - ENDSTREAM_SIGNATURE_LENGTH;
-            stream.pos += i - ENDSTREAM_SIGNATURE_LENGTH;
+            skipped += i;
+            stream.pos += i;
             break;
           }
           skipped += scanLength;
