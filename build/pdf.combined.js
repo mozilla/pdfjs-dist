@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.21';
-var pdfjsBuild = 'e44dada';
+var pdfjsVersion = '1.4.23';
+var pdfjsBuild = '252b9d5';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -9781,6 +9781,21 @@ function combineUrl(baseUrl, url) {
   return new URL(url, baseUrl).href;
 }
 
+// Checks if URLs have the same origin. For non-HTTP based URLs, returns false.
+function isSameOrigin(baseUrl, otherUrl) {
+  try {
+    var base = new URL(baseUrl);
+    if (!base.origin || base.origin === 'null') {
+      return false; // non-HTTP url
+    }
+  } catch (e) {
+    return false;
+  }
+
+  var other = new URL(otherUrl, base);
+  return base.origin === other.origin;
+}
+
 // Validates if URL is safe and allowed, e.g. to avoid XSS.
 function isValidUrl(url, allowRelative) {
   if (!url) {
@@ -11825,6 +11840,7 @@ exports.isExternalLinkTargetSet = isExternalLinkTargetSet;
 exports.isInt = isInt;
 exports.isNum = isNum;
 exports.isString = isString;
+exports.isSameOrigin = isSameOrigin;
 exports.isValidUrl = isValidUrl;
 exports.addLinkAttributes = addLinkAttributes;
 exports.loadJpegStream = loadJpegStream;
@@ -31178,6 +31194,7 @@ var error = sharedUtil.error;
 var deprecated = sharedUtil.deprecated;
 var info = sharedUtil.info;
 var isArrayBuffer = sharedUtil.isArrayBuffer;
+var isSameOrigin = sharedUtil.isSameOrigin;
 var loadJpegStream = sharedUtil.loadJpegStream;
 var stringToBytes = sharedUtil.stringToBytes;
 var warn = sharedUtil.warn;
@@ -32332,6 +32349,14 @@ var PDFWorker = (function PDFWorkerClosure() {
       PDFJS.fakeWorkerFilesLoadedCapability.resolve();
     }
     return PDFJS.fakeWorkerFilesLoadedCapability.promise;
+  }
+
+  function createCDNWrapper(url) {
+    // We will rely on blob URL's property to specify origin.
+    // We want this function to fail in case if createObjectURL or Blob do not
+    // exist or fail for some reason -- our Worker creation will fail anyway.
+    var wrapper = 'importScripts(\'' + url + '\');';
+    return URL.createObjectURL(new Blob([wrapper]));
   }
 
   function PDFWorker(name) {
