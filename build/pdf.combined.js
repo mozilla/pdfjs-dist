@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.18';
-var pdfjsBuild = '1f2910b';
+var pdfjsVersion = '1.4.20';
+var pdfjsBuild = 'b15f335';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -29675,14 +29675,7 @@ var Catalog = (function CatalogClosure() {
         currentLabel = '';
         currentIndex++;
       }
-
-      // Ignore PageLabels if they correspond to standard page numbering.
-      for (i = 0, ii = this.numPages; i < ii; i++) {
-        if (pageLabels[i] !== (i + 1).toString()) {
-          break;
-        }
-      }
-      return (i === ii ? [] : pageLabels);
+      return pageLabels;
     },
 
     get attachments() {
@@ -31821,11 +31814,9 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
       return this.transport.getDestination(id);
     },
     /**
-     * @return {Promise} A promise that is resolved with: an Array containing
-     *   the pageLabels that correspond to the pageIndexes; or null, when no
-     *   pageLabels are present in the PDF file.
-     *   NOTE: If the pageLabels are all identical to standard page numbering,
-     *         i.e. [1, 2, 3, ...], the promise is resolved with an empty Array.
+     * @return {Promise} A promise that is resolved with:
+     *   an Array containing the pageLabels that correspond to the pageIndexes,
+     *   or `null` when no pageLabels are present in the PDF file.
      */
     getPageLabels: function PDFDocumentProxy_getPageLabels() {
       return this.transport.getPageLabels();
