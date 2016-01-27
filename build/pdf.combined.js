@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.16';
-var pdfjsBuild = '0558ffc';
+var pdfjsVersion = '1.4.18';
+var pdfjsBuild = '1f2910b';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -11174,13 +11174,15 @@ function loadJpegStream(id, imageUrl, objs) {
 
   // feature detect for URL constructor
   var hasWorkingUrl = false;
-  if (typeof URL === 'function' && ('origin' in URL.prototype)) {
-    try {
+  try {
+    if (typeof URL === 'function' &&
+        typeof URL.prototype === 'object' &&
+        ('origin' in URL.prototype)) {
       var u = new URL('b', 'http://a');
       u.pathname = 'c%20d';
       hasWorkingUrl = u.href === 'http://a/c%20d';
-    } catch(e) {}
-  }
+    }
+  } catch(e) { }
 
   if (hasWorkingUrl)
     return;
