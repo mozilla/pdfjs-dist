@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.31';
-var pdfjsBuild = '825a222';
+var pdfjsVersion = '1.4.33';
+var pdfjsBuild = '365bc99';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -36087,10 +36087,10 @@ var PDFImage = (function PDFImageClosure() {
 
           imgArray = this.getImageBytes(originalHeight * rowBytes);
           // If imgArray came from a DecodeStream, we're safe to transfer it
-          // (and thus neuter it) because it will constitute the entire
-          // DecodeStream's data.  But if it came from a Stream, we need to
-          // copy it because it'll only be a portion of the Stream's data, and
-          // the rest will be read later on.
+          // (and thus detach its underlying buffer) because it will constitute
+          // the entire DecodeStream's data.  But if it came from a Stream, we
+          // need to copy it because it'll only be a portion of the Stream's
+          // data, and the rest will be read later on.
           if (this.image instanceof DecodeStream) {
             imgData.data = imgArray;
           } else {
