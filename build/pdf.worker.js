@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.37';
-var pdfjsBuild = 'a4b9024';
+var pdfjsVersion = '1.4.39';
+var pdfjsBuild = '974433a';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -37365,7 +37365,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         var transferFn = PDFFunction.parse(this.xref, transferObj);
         var transferMap = new Uint8Array(256);
         var tmp = new Float32Array(1);
-        for (var i = 0; i < 255; i++) {
+        for (var i = 0; i < 256; i++) {
           tmp[0] = i / 255;
           transferFn(tmp, 0, tmp, 0);
           transferMap[i] = (tmp[0] * 255) | 0;
