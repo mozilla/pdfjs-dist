@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.48';
-var pdfjsBuild = '02b161d';
+var pdfjsVersion = '1.4.51';
+var pdfjsBuild = '03f12a1';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -45328,11 +45328,12 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                                                    xref, stateManager) {
       // This array holds the converted/processed state data.
       var gStateObj = [];
-      var gStateMap = gState.map;
+      var gStateKeys = gState.getKeys();
       var self = this;
       var promise = Promise.resolve();
-      for (var key in gStateMap) {
-        var value = gStateMap[key];
+      for (var i = 0, ii = gStateKeys.length; i < ii; i++) {
+        var key = gStateKeys[i];
+        var value = gState.get(key);
         switch (key) {
           case 'Type':
             break;
@@ -45365,12 +45366,11 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               gStateObj.push([key, false]);
               break;
             }
-            var dict = xref.fetchIfRef(value);
-            if (isDict(dict)) {
-              promise = promise.then(function () {
+            if (isDict(value)) {
+              promise = promise.then(function (dict) {
                 return self.handleSMask(dict, resources, operatorList,
                                         task, stateManager);
-              });
+              }.bind(this, value));
               gStateObj.push([key, true]);
             } else {
               warn('Unsupported SMask type');
@@ -45402,7 +45402,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         }
       }
       return promise.then(function () {
-        if (gStateObj.length >= 0) {
+        if (gStateObj.length > 0) {
           operatorList.addOp(OPS.setGState, [gStateObj]);
         }
       });
