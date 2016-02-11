@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.57';
-var pdfjsBuild = '72c05af';
+var pdfjsVersion = '1.4.59';
+var pdfjsBuild = '6133a99';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -39109,13 +39109,13 @@ var TranslatedFont = (function TranslatedFontClosure() {
 
       var translatedFont = this.font;
       var loadCharProcsPromise = Promise.resolve();
-      var charProcs = this.dict.get('CharProcs').getAll();
+      var charProcs = this.dict.get('CharProcs');
       var fontResources = this.dict.get('Resources') || resources;
-      var charProcKeys = Object.keys(charProcs);
+      var charProcKeys = charProcs.getKeys();
       var charProcOperatorList = Object.create(null);
       for (var i = 0, n = charProcKeys.length; i < n; ++i) {
         loadCharProcsPromise = loadCharProcsPromise.then(function (key) {
-          var glyphStream = charProcs[key];
+          var glyphStream = charProcs.get(key);
           var operatorList = new OperatorList();
           return evaluator.getOperatorList(glyphStream, task, fontResources,
                                            operatorList).then(function () {
