@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.59';
-var pdfjsBuild = '6133a99';
+var pdfjsVersion = '1.4.61';
+var pdfjsBuild = '1f49e7b';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -42311,15 +42311,15 @@ var ColorSpace = (function ColorSpaceClosure() {
       case 'DeviceCmykCS':
         return this.singletons.cmyk;
       case 'CalGrayCS':
-        whitePoint = IR[1].WhitePoint;
-        blackPoint = IR[1].BlackPoint;
-        gamma = IR[1].Gamma;
+        whitePoint = IR[1];
+        blackPoint = IR[2];
+        gamma = IR[3];
         return new CalGrayCS(whitePoint, blackPoint, gamma);
       case 'CalRGBCS':
-        whitePoint = IR[1].WhitePoint;
-        blackPoint = IR[1].BlackPoint;
-        gamma = IR[1].Gamma;
-        var matrix = IR[1].Matrix;
+        whitePoint = IR[1];
+        blackPoint = IR[2];
+        gamma = IR[3];
+        var matrix = IR[4];
         return new CalRGBCS(whitePoint, blackPoint, gamma, matrix);
       case 'PatternCS':
         var basePatternCS = IR[1];
@@ -42338,11 +42338,11 @@ var ColorSpace = (function ColorSpaceClosure() {
         var tintFnIR = IR[3];
 
         return new AlternateCS(numComps, ColorSpace.fromIR(alt),
-                                PDFFunction.fromIR(tintFnIR));
+                               PDFFunction.fromIR(tintFnIR));
       case 'LabCS':
-        whitePoint = IR[1].WhitePoint;
-        blackPoint = IR[1].BlackPoint;
-        var range = IR[1].Range;
+        whitePoint = IR[1];
+        blackPoint = IR[2];
+        var range = IR[3];
         return new LabCS(whitePoint, blackPoint, range);
       default:
         error('Unknown name ' + name);
@@ -42386,7 +42386,7 @@ var ColorSpace = (function ColorSpaceClosure() {
     } else if (isArray(cs)) {
       mode = xref.fetchIfRef(cs[0]).name;
       this.mode = mode;
-      var numComps, params, alt;
+      var numComps, params, alt, whitePoint, blackPoint, gamma;
 
       switch (mode) {
         case 'DeviceGray':
@@ -42399,11 +42399,18 @@ var ColorSpace = (function ColorSpaceClosure() {
         case 'CMYK':
           return 'DeviceCmykCS';
         case 'CalGray':
-          params = xref.fetchIfRef(cs[1]).getAll();
-          return ['CalGrayCS', params];
+          params = xref.fetchIfRef(cs[1]);
+          whitePoint = params.get('WhitePoint');
+          blackPoint = params.get('BlackPoint');
+          gamma = params.get('Gamma');
+          return ['CalGrayCS', whitePoint, blackPoint, gamma];
         case 'CalRGB':
-          params = xref.fetchIfRef(cs[1]).getAll();
-          return ['CalRGBCS', params];
+          params = xref.fetchIfRef(cs[1]);
+          whitePoint = params.get('WhitePoint');
+          blackPoint = params.get('BlackPoint');
+          gamma = params.get('Gamma');
+          var matrix = params.get('Matrix');
+          return ['CalRGBCS', whitePoint, blackPoint, gamma, matrix];
         case 'ICCBased':
           var stream = xref.fetchIfRef(cs[1]);
           var dict = stream.dict;
@@ -42455,8 +42462,11 @@ var ColorSpace = (function ColorSpaceClosure() {
           var tintFnIR = PDFFunction.getIR(xref, xref.fetchIfRef(cs[3]));
           return ['AlternateCS', numComps, alt, tintFnIR];
         case 'Lab':
-          params = xref.fetchIfRef(cs[1]).getAll();
-          return ['LabCS', params];
+          params = xref.fetchIfRef(cs[1]);
+          whitePoint = params.get('WhitePoint');
+          blackPoint = params.get('BlackPoint');
+          var range = params.get('Range');
+          return ['LabCS', whitePoint, blackPoint, range];
         default:
           error('unimplemented color space object "' + mode + '"');
       }
