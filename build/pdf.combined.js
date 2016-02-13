@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.66';
-var pdfjsBuild = 'cd9d134';
+var pdfjsVersion = '1.4.68';
+var pdfjsBuild = 'addc4a3';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -18523,7 +18523,7 @@ AnnotationElementFactory.prototype =
         return new StrikeOutAnnotationElement(parameters);
 
       default:
-        throw new Error('Unimplemented annotation type "' + subtype + '"');
+        return new AnnotationElement(parameters);
     }
   }
 };
@@ -18533,14 +18533,17 @@ AnnotationElementFactory.prototype =
  * @alias AnnotationElement
  */
 var AnnotationElement = (function AnnotationElementClosure() {
-  function AnnotationElement(parameters) {
+  function AnnotationElement(parameters, isRenderable) {
+    this.isRenderable = isRenderable || false;
     this.data = parameters.data;
     this.layer = parameters.layer;
     this.page = parameters.page;
     this.viewport = parameters.viewport;
     this.linkService = parameters.linkService;
 
-    this.container = this._createContainer();
+    if (isRenderable) {
+      this.container = this._createContainer();
+    }
   }
 
   AnnotationElement.prototype = /** @lends AnnotationElement.prototype */ {
@@ -18655,7 +18658,7 @@ var AnnotationElement = (function AnnotationElementClosure() {
  */
 var LinkAnnotationElement = (function LinkAnnotationElementClosure() {
   function LinkAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters);
+    AnnotationElement.call(this, parameters, true);
   }
 
   Util.inherit(LinkAnnotationElement, AnnotationElement, {
@@ -18737,7 +18740,9 @@ var LinkAnnotationElement = (function LinkAnnotationElementClosure() {
  */
 var TextAnnotationElement = (function TextAnnotationElementClosure() {
   function TextAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters);
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
+    AnnotationElement.call(this, parameters, isRenderable);
   }
 
   Util.inherit(TextAnnotationElement, AnnotationElement, {
@@ -18791,7 +18796,9 @@ var TextAnnotationElement = (function TextAnnotationElementClosure() {
  */
 var WidgetAnnotationElement = (function WidgetAnnotationElementClosure() {
   function WidgetAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters);
+    var isRenderable = !parameters.data.hasAppearance &&
+                       !!parameters.data.fieldValue;
+    AnnotationElement.call(this, parameters, isRenderable);
   }
 
   Util.inherit(WidgetAnnotationElement, AnnotationElement, {
@@ -18858,7 +18865,8 @@ var WidgetAnnotationElement = (function WidgetAnnotationElementClosure() {
  */
 var PopupAnnotationElement = (function PopupAnnotationElementClosure() {
   function PopupAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters);
+    var isRenderable = !!(parameters.data.title || parameters.data.contents);
+    AnnotationElement.call(this, parameters, isRenderable);
   }
 
   Util.inherit(PopupAnnotationElement, AnnotationElement, {
@@ -19048,7 +19056,7 @@ var PopupElement = (function PopupElementClosure() {
 var HighlightAnnotationElement = (
     function HighlightAnnotationElementClosure() {
   function HighlightAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters);
+    AnnotationElement.call(this, parameters, true);
   }
 
   Util.inherit(HighlightAnnotationElement, AnnotationElement, {
@@ -19075,7 +19083,7 @@ var HighlightAnnotationElement = (
 var UnderlineAnnotationElement = (
     function UnderlineAnnotationElementClosure() {
   function UnderlineAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters);
+    AnnotationElement.call(this, parameters, true);
   }
 
   Util.inherit(UnderlineAnnotationElement, AnnotationElement, {
@@ -19101,7 +19109,7 @@ var UnderlineAnnotationElement = (
  */
 var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
   function SquigglyAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters);
+    AnnotationElement.call(this, parameters, true);
   }
 
   Util.inherit(SquigglyAnnotationElement, AnnotationElement, {
@@ -19128,7 +19136,7 @@ var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
 var StrikeOutAnnotationElement = (
     function StrikeOutAnnotationElementClosure() {
   function StrikeOutAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters);
+    AnnotationElement.call(this, parameters, true);
   }
 
   Util.inherit(StrikeOutAnnotationElement, AnnotationElement, {
@@ -19175,7 +19183,7 @@ var AnnotationLayer = (function AnnotationLayerClosure() {
 
       for (var i = 0, ii = parameters.annotations.length; i < ii; i++) {
         var data = parameters.annotations[i];
-        if (!data || !data.hasHtml) {
+        if (!data) {
           continue;
         }
 
@@ -19187,7 +19195,9 @@ var AnnotationLayer = (function AnnotationLayerClosure() {
           linkService: parameters.linkService
         };
         var element = annotationElementFactory.create(properties);
-        parameters.div.appendChild(element.render());
+        if (element.isRenderable) {
+          parameters.div.appendChild(element.render());
+        }
       }
     },
 
@@ -48456,7 +48466,6 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
     WidgetAnnotation.call(this, params);
 
     this.data.textAlignment = Util.getInheritableProperty(params.dict, 'Q');
-    this.data.hasHtml = !this.data.hasAppearance && !!this.data.fieldValue;
   }
 
   Util.inherit(TextWidgetAnnotation, WidgetAnnotation, {
@@ -48494,7 +48503,6 @@ var TextAnnotation = (function TextAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.TEXT;
-    this.data.hasHtml = true;
 
     var dict = parameters.dict;
     if (this.data.hasAppearance) {
@@ -48516,7 +48524,6 @@ var TextAnnotation = (function TextAnnotationClosure() {
       // must create its own popup.
       this.data.title = stringToPDFString(dict.get('T') || '');
       this.data.contents = stringToPDFString(dict.get('Contents') || '');
-      this.data.hasHtml = (this.data.title || this.data.contents);
     }
   }
 
@@ -48532,7 +48539,6 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
     var dict = params.dict;
     var data = this.data;
     data.annotationType = AnnotationType.LINK;
-    data.hasHtml = true;
 
     var action = dict.get('A');
     if (action && isDict(action)) {
@@ -48625,8 +48631,6 @@ var PopupAnnotation = (function PopupAnnotationClosure() {
       this.setColor(parentItem.get('C'));
       this.data.color = this.color;
     }
-
-    this.data.hasHtml = (this.data.title || this.data.contents);
   }
 
   Util.inherit(PopupAnnotation, Annotation, {});
@@ -48639,7 +48643,6 @@ var HighlightAnnotation = (function HighlightAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.HIGHLIGHT;
-    this.data.hasHtml = true;
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -48655,7 +48658,6 @@ var UnderlineAnnotation = (function UnderlineAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.UNDERLINE;
-    this.data.hasHtml = true;
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -48671,7 +48673,6 @@ var SquigglyAnnotation = (function SquigglyAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.SQUIGGLY;
-    this.data.hasHtml = true;
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -48687,7 +48688,6 @@ var StrikeOutAnnotation = (function StrikeOutAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.STRIKEOUT;
-    this.data.hasHtml = true;
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
