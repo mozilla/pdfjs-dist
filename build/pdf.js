@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.76';
-var pdfjsBuild = '45fea88';
+var pdfjsVersion = '1.4.79';
+var pdfjsBuild = '9eedfc1';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -8978,7 +8978,7 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
      *   title: string,
      *   bold: boolean,
      *   italic: boolean,
-     *   color: rgb array,
+     *   color: rgb Uint8Array,
      *   dest: dest obj,
      *   url: string,
      *   items: array of more items like this
