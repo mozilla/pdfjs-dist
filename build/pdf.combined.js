@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.85';
-var pdfjsBuild = 'ebe6fb2';
+var pdfjsVersion = '1.4.87';
+var pdfjsBuild = 'c53581f';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -48485,12 +48485,8 @@ var TextAnnotation = (function TextAnnotationClosure() {
     }
 
     this.data.hasPopup = dict.has('Popup');
-    if (!this.data.hasPopup) {
-      // There is no associated Popup annotation, so the Text annotation
-      // must create its own popup.
-      this.data.title = stringToPDFString(dict.get('T') || '');
-      this.data.contents = stringToPDFString(dict.get('Contents') || '');
-    }
+    this.data.title = stringToPDFString(dict.get('T') || '');
+    this.data.contents = stringToPDFString(dict.get('Contents') || '');
   }
 
   Util.inherit(TextAnnotation, Annotation, {});
