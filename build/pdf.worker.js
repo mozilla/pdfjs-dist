@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.83';
-var pdfjsBuild = '0629fd0';
+var pdfjsVersion = '1.4.85';
+var pdfjsBuild = 'ebe6fb2';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -40744,6 +40744,7 @@ var HighlightAnnotation = (function HighlightAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.HIGHLIGHT;
+    this.data.hasPopup = parameters.dict.has('Popup');
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -40759,6 +40760,7 @@ var UnderlineAnnotation = (function UnderlineAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.UNDERLINE;
+    this.data.hasPopup = parameters.dict.has('Popup');
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -40774,6 +40776,7 @@ var SquigglyAnnotation = (function SquigglyAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.SQUIGGLY;
+    this.data.hasPopup = parameters.dict.has('Popup');
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -40789,6 +40792,7 @@ var StrikeOutAnnotation = (function StrikeOutAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.STRIKEOUT;
+    this.data.hasPopup = parameters.dict.has('Popup');
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);

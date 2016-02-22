@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.83';
-var pdfjsBuild = '0629fd0';
+var pdfjsVersion = '1.4.85';
+var pdfjsBuild = 'ebe6fb2';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -3103,7 +3103,8 @@ var PopupElement = (function PopupElementClosure() {
 var HighlightAnnotationElement = (
     function HighlightAnnotationElementClosure() {
   function HighlightAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters, true);
+    var isRenderable = parameters.data.hasPopup;
+    AnnotationElement.call(this, parameters, isRenderable);
   }
 
   Util.inherit(HighlightAnnotationElement, AnnotationElement, {
@@ -3130,7 +3131,8 @@ var HighlightAnnotationElement = (
 var UnderlineAnnotationElement = (
     function UnderlineAnnotationElementClosure() {
   function UnderlineAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters, true);
+    var isRenderable = parameters.data.hasPopup;
+    AnnotationElement.call(this, parameters, isRenderable);
   }
 
   Util.inherit(UnderlineAnnotationElement, AnnotationElement, {
@@ -3156,7 +3158,8 @@ var UnderlineAnnotationElement = (
  */
 var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
   function SquigglyAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters, true);
+    var isRenderable = parameters.data.hasPopup;
+    AnnotationElement.call(this, parameters, isRenderable);
   }
 
   Util.inherit(SquigglyAnnotationElement, AnnotationElement, {
@@ -3183,7 +3186,8 @@ var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
 var StrikeOutAnnotationElement = (
     function StrikeOutAnnotationElementClosure() {
   function StrikeOutAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters, true);
+    var isRenderable = parameters.data.hasPopup;
+    AnnotationElement.call(this, parameters, isRenderable);
   }
 
   Util.inherit(StrikeOutAnnotationElement, AnnotationElement, {
