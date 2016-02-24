@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.87';
-var pdfjsBuild = 'c53581f';
+var pdfjsVersion = '1.4.91';
+var pdfjsBuild = '41efb92';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -2624,6 +2624,17 @@ var UNSUPPORTED_FEATURES = PDFJS.UNSUPPORTED_FEATURES = {
   font: 'font'
 };
 
+// Gets the file name from a given URL.
+function getFilenameFromUrl(url) {
+  var anchor = url.indexOf('#');
+  var query = url.indexOf('?');
+  var end = Math.min(
+    anchor > 0 ? anchor : url.length,
+    query > 0 ? query : url.length);
+  return url.substring(url.lastIndexOf('/', end) + 1, end);
+}
+PDFJS.getFilenameFromUrl = getFilenameFromUrl;
+
 // Combines two URLs. The baseUrl shall be absolute URL. If the url is an
 // absolute URL, it will be returned as is.
 function combineUrl(baseUrl, url) {
@@ -4695,6 +4706,7 @@ exports.combineUrl = combineUrl;
 exports.createPromiseCapability = createPromiseCapability;
 exports.deprecated = deprecated;
 exports.error = error;
+exports.getFilenameFromUrl = getFilenameFromUrl;
 exports.getLookupTableFactory = getLookupTableFactory;
 exports.info = info;
 exports.isArray = isArray;
@@ -36187,6 +36199,7 @@ var ObjectLoader = (function() {
 exports.Catalog = Catalog;
 exports.ObjectLoader = ObjectLoader;
 exports.XRef = XRef;
+exports.FileSpec = FileSpec;
 }));
 
 
@@ -39997,6 +40010,7 @@ var isName = corePrimitives.isName;
 var Stream = coreStream.Stream;
 var ColorSpace = coreColorSpace.ColorSpace;
 var ObjectLoader = coreObj.ObjectLoader;
+var FileSpec = coreObj.FileSpec;
 var OperatorList = coreEvaluator.OperatorList;
 
 /**
@@ -40022,6 +40036,7 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
 
     // Return the right annotation object based on the subtype and field type.
     var parameters = {
+      xref: xref,
       dict: dict,
       ref: ref
     };
@@ -40054,6 +40069,9 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
 
       case 'StrikeOut':
         return new StrikeOutAnnotation(parameters);
+
+      case 'FileAttachment':
+        return new FileAttachmentAnnotation(parameters);
 
       default:
         warn('Unimplemented annotation type "' + subtype + '", ' +
@@ -40797,6 +40815,31 @@ var StrikeOutAnnotation = (function StrikeOutAnnotationClosure() {
   Util.inherit(StrikeOutAnnotation, Annotation, {});
 
   return StrikeOutAnnotation;
+})();
+
+var FileAttachmentAnnotation = (function FileAttachmentAnnotationClosure() {
+  function FileAttachmentAnnotation(parameters) {
+    Annotation.call(this, parameters);
+
+    var dict = parameters.dict;
+    var file = new FileSpec(dict.get('FS'), parameters.xref);
+
+    this.data.annotationType = AnnotationType.FILEATTACHMENT;
+    this.data.file = file.serializable;
+
+    if (!dict.has('C')) {
+      // Fall back to the default background color.
+      this.data.color = null;
+    }
+
+    this.data.hasPopup = dict.has('Popup');
+    this.data.title = stringToPDFString(dict.get('T') || '');
+    this.data.contents = stringToPDFString(dict.get('Contents') || '');
+  }
+
+  Util.inherit(FileAttachmentAnnotation, Annotation, {});
+
+  return FileAttachmentAnnotation;
 })();
 
 exports.Annotation = Annotation;

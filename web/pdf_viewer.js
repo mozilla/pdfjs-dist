@@ -15,7 +15,7 @@
 /*jshint globalstrict: false */
 /* globals PDFJS, PDFViewer, PDFPageView, TextLayerBuilder, PDFLinkService,
            DefaultTextLayerFactory, AnnotationLayerBuilder, PDFHistory,
-           DefaultAnnotationLayerFactory, getFileName, ProgressBar */
+           DefaultAnnotationLayerFactory, DownloadManager, ProgressBar */
 
 // Initializing PDFJS global object (if still undefined)
 if (typeof PDFJS === 'undefined') {
@@ -33,15 +33,6 @@ var UNKNOWN_SCALE = 0;
 var MAX_AUTO_SCALE = 1.25;
 var SCROLLBAR_PADDING = 40;
 var VERTICAL_PADDING = 5;
-
-function getFileName(url) {
-  var anchor = url.indexOf('#');
-  var query = url.indexOf('?');
-  var end = Math.min(
-    anchor > 0 ? anchor : url.length,
-    query > 0 ? query : url.length);
-  return url.substring(url.lastIndexOf('/', end) + 1, end);
-}
 
 /**
  * Returns scale factor for the canvas. It makes sense for the HiDPI displays.
@@ -1765,6 +1756,7 @@ DefaultTextLayerFactory.prototype = {
  * @property {HTMLDivElement} pageDiv
  * @property {PDFPage} pdfPage
  * @property {IPDFLinkService} linkService
+ * @property {DownloadManager} downloadManager
  */
 
 /**
@@ -1779,6 +1771,7 @@ var AnnotationLayerBuilder = (function AnnotationLayerBuilderClosure() {
     this.pageDiv = options.pageDiv;
     this.pdfPage = options.pdfPage;
     this.linkService = options.linkService;
+    this.downloadManager = options.downloadManager;
 
     this.div = null;
   }
@@ -1803,7 +1796,8 @@ var AnnotationLayerBuilder = (function AnnotationLayerBuilderClosure() {
           div: self.div,
           annotations: annotations,
           page: self.pdfPage,
-          linkService: self.linkService
+          linkService: self.linkService,
+          downloadManager: self.downloadManager
         };
 
         if (self.div) {
@@ -1867,6 +1861,8 @@ DefaultAnnotationLayerFactory.prototype = {
  * @property {HTMLDivElement} container - The container for the viewer element.
  * @property {HTMLDivElement} viewer - (optional) The viewer element.
  * @property {IPDFLinkService} linkService - The navigation/linking service.
+ * @property {DownloadManager} downloadManager - (optional) The download
+ *   manager component.
  * @property {PDFRenderingQueue} renderingQueue - (optional) The rendering
  *   queue object.
  * @property {boolean} removePageBorders - (optional) Removes the border shadow
@@ -1919,6 +1915,7 @@ var PDFViewer = (function pdfViewer() {
     this.container = options.container;
     this.viewer = options.viewer || options.container.firstElementChild;
     this.linkService = options.linkService || new SimpleLinkService();
+    this.downloadManager = options.downloadManager || null;
     this.removePageBorders = options.removePageBorders || false;
 
     this.defaultRenderingQueue = !options.renderingQueue;
@@ -2584,7 +2581,8 @@ var PDFViewer = (function pdfViewer() {
       return new AnnotationLayerBuilder({
         pageDiv: pageDiv,
         pdfPage: pdfPage,
-        linkService: this.linkService
+        linkService: this.linkService,
+        downloadManager: this.downloadManager
       });
     },
 
@@ -3038,6 +3036,90 @@ var PDFHistory = (function () {
 })();
 
 
+var DownloadManager = (function DownloadManagerClosure() {
+
+  function download(blobUrl, filename) {
+    var a = document.createElement('a');
+    if (a.click) {
+      // Use a.click() if available. Otherwise, Chrome might show
+      // "Unsafe JavaScript attempt to initiate a navigation change
+      //  for frame with URL" and not open the PDF at all.
+      // Supported by (not mentioned = untested):
+      // - Firefox 6 - 19 (4- does not support a.click, 5 ignores a.click)
+      // - Chrome 19 - 26 (18- does not support a.click)
+      // - Opera 9 - 12.15
+      // - Internet Explorer 6 - 10
+      // - Safari 6 (5.1- does not support a.click)
+      a.href = blobUrl;
+      a.target = '_parent';
+      // Use a.download if available. This increases the likelihood that
+      // the file is downloaded instead of opened by another PDF plugin.
+      if ('download' in a) {
+        a.download = filename;
+      }
+      // <a> must be in the document for IE and recent Firefox versions.
+      // (otherwise .click() is ignored)
+      (document.body || document.documentElement).appendChild(a);
+      a.click();
+      a.parentNode.removeChild(a);
+    } else {
+      if (window.top === window &&
+          blobUrl.split('#')[0] === window.location.href.split('#')[0]) {
+        // If _parent == self, then opening an identical URL with different
+        // location hash will only cause a navigation, not a download.
+        var padCharacter = blobUrl.indexOf('?') === -1 ? '?' : '&';
+        blobUrl = blobUrl.replace(/#|$/, padCharacter + '$&');
+      }
+      window.open(blobUrl, '_parent');
+    }
+  }
+
+  function DownloadManager() {}
+
+  DownloadManager.prototype = {
+    downloadUrl: function DownloadManager_downloadUrl(url, filename) {
+      if (!PDFJS.isValidUrl(url, true)) {
+        return; // restricted/invalid URL
+      }
+
+      download(url + '#pdfjs.action=download', filename);
+    },
+
+    downloadData: function DownloadManager_downloadData(data, filename,
+                                                        contentType) {
+      if (navigator.msSaveBlob) { // IE10 and above
+        return navigator.msSaveBlob(new Blob([data], { type: contentType }),
+                                    filename);
+      }
+
+      var blobUrl = PDFJS.createObjectURL(data, contentType);
+      download(blobUrl, filename);
+    },
+
+    download: function DownloadManager_download(blob, url, filename) {
+      if (!URL) {
+        // URL.createObjectURL is not supported
+        this.downloadUrl(url, filename);
+        return;
+      }
+
+      if (navigator.msSaveBlob) {
+        // IE10 / IE11
+        if (!navigator.msSaveBlob(blob, filename)) {
+          this.downloadUrl(url, filename);
+        }
+        return;
+      }
+
+      var blobUrl = URL.createObjectURL(blob);
+      download(blobUrl, filename);
+    }
+  };
+
+  return DownloadManager;
+})();
+
+
   PDFJS.PDFViewer = PDFViewer;
   PDFJS.PDFPageView = PDFPageView;
   PDFJS.PDFLinkService = PDFLinkService;
@@ -3047,7 +3129,7 @@ var PDFHistory = (function () {
   PDFJS.DefaultAnnotationLayerFactory = DefaultAnnotationLayerFactory;
   PDFJS.PDFHistory = PDFHistory;
 
-  PDFJS.getFileName = getFileName;
+  PDFJS.DownloadManager = DownloadManager;
   PDFJS.ProgressBar = ProgressBar;
 }).call((typeof window === 'undefined') ? this : window);
 
