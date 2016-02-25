@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.91';
-var pdfjsBuild = '41efb92';
+var pdfjsVersion = '1.4.93';
+var pdfjsBuild = '05917b6';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -18598,6 +18598,43 @@ var AnnotationElement = (function AnnotationElementClosure() {
     },
 
     /**
+     * Create a popup for the annotation's HTML element. This is used for
+     * annotations that do not have a Popup entry in the dictionary, but
+     * are of a type that works with popups (such as Highlight annotations).
+     *
+     * @private
+     * @param {HTMLSectionElement} container
+     * @param {HTMLDivElement|HTMLImageElement|null} trigger
+     * @param {Object} data
+     * @memberof AnnotationElement
+     */
+    _createPopup:
+        function AnnotationElement_createPopup(container, trigger, data) {
+      // If no trigger element is specified, create it.
+      if (!trigger) {
+        trigger = document.createElement('div');
+        trigger.style.height = container.style.height;
+        trigger.style.width = container.style.width;
+        container.appendChild(trigger);
+      }
+
+      var popupElement = new PopupElement({
+        container: container,
+        trigger: trigger,
+        color: data.color,
+        title: data.title,
+        contents: data.contents,
+        hideWrapper: true
+      });
+      var popup = popupElement.render();
+
+      // Position the popup next to the annotation's container.
+      popup.style.left = container.style.width;
+
+      container.appendChild(popup);
+    },
+
+    /**
      * Render the annotation's HTML element in the empty container.
      *
      * @public
@@ -18725,20 +18762,7 @@ var TextAnnotationElement = (function TextAnnotationElementClosure() {
       image.dataset.l10nArgs = JSON.stringify({type: this.data.name});
 
       if (!this.data.hasPopup) {
-        var popupElement = new PopupElement({
-          container: this.container,
-          trigger: image,
-          color: this.data.color,
-          title: this.data.title,
-          contents: this.data.contents,
-          hideWrapper: true
-        });
-        var popup = popupElement.render();
-
-        // Position the popup next to the Text annotation's container.
-        popup.style.left = image.style.width;
-
-        this.container.appendChild(popup);
+        this._createPopup(this.container, image, this.data);
       }
 
       this.container.appendChild(image);
@@ -19015,7 +19039,8 @@ var PopupElement = (function PopupElementClosure() {
 var HighlightAnnotationElement = (
     function HighlightAnnotationElementClosure() {
   function HighlightAnnotationElement(parameters) {
-    var isRenderable = parameters.data.hasPopup;
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
     AnnotationElement.call(this, parameters, isRenderable);
   }
 
@@ -19029,6 +19054,11 @@ var HighlightAnnotationElement = (
      */
     render: function HighlightAnnotationElement_render() {
       this.container.className = 'highlightAnnotation';
+
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, null, this.data);
+      }
+
       return this.container;
     }
   });
@@ -19043,7 +19073,8 @@ var HighlightAnnotationElement = (
 var UnderlineAnnotationElement = (
     function UnderlineAnnotationElementClosure() {
   function UnderlineAnnotationElement(parameters) {
-    var isRenderable = parameters.data.hasPopup;
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
     AnnotationElement.call(this, parameters, isRenderable);
   }
 
@@ -19057,6 +19088,11 @@ var UnderlineAnnotationElement = (
      */
     render: function UnderlineAnnotationElement_render() {
       this.container.className = 'underlineAnnotation';
+
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, null, this.data);
+      }
+
       return this.container;
     }
   });
@@ -19070,7 +19106,8 @@ var UnderlineAnnotationElement = (
  */
 var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
   function SquigglyAnnotationElement(parameters) {
-    var isRenderable = parameters.data.hasPopup;
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
     AnnotationElement.call(this, parameters, isRenderable);
   }
 
@@ -19084,6 +19121,11 @@ var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
      */
     render: function SquigglyAnnotationElement_render() {
       this.container.className = 'squigglyAnnotation';
+
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, null, this.data);
+      }
+
       return this.container;
     }
   });
@@ -19098,7 +19140,8 @@ var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
 var StrikeOutAnnotationElement = (
     function StrikeOutAnnotationElementClosure() {
   function StrikeOutAnnotationElement(parameters) {
-    var isRenderable = parameters.data.hasPopup;
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
     AnnotationElement.call(this, parameters, isRenderable);
   }
 
@@ -19112,6 +19155,11 @@ var StrikeOutAnnotationElement = (
      */
     render: function StrikeOutAnnotationElement_render() {
       this.container.className = 'strikeoutAnnotation';
+
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, null, this.data);
+      }
+
       return this.container;
     }
   });
@@ -19150,21 +19198,7 @@ var FileAttachmentAnnotationElement = (
       trigger.addEventListener('dblclick', this._download.bind(this));
 
       if (!this.data.hasPopup && (this.data.title || this.data.contents)) {
-        var popupElement = new PopupElement({
-          container: this.container,
-          trigger: trigger,
-          color: this.data.color,
-          title: this.data.title,
-          contents: this.data.contents,
-          hideWrapper: true
-        });
-        var popup = popupElement.render();
-
-        // Position the popup next to the FileAttachment annotation's
-        // container.
-        popup.style.left = this.container.style.width;
-
-        this.container.appendChild(popup);
+        this._createPopup(this.container, trigger, this.data);
       }
 
       this.container.appendChild(trigger);
@@ -48248,6 +48282,24 @@ var Annotation = (function AnnotationClosure() {
       }
     },
 
+    /**
+     * Prepare the annotation for working with a popup in the display layer.
+     *
+     * @private
+     * @memberof Annotation
+     * @param {Dict} dict - The annotation's data dictionary
+     */
+    _preparePopup: function Annotation_preparePopup(dict) {
+      if (!dict.has('C')) {
+        // Fall back to the default background color.
+        this.data.color = null;
+      }
+
+      this.data.hasPopup = dict.has('Popup');
+      this.data.title = stringToPDFString(dict.get('T') || '');
+      this.data.contents = stringToPDFString(dict.get('Contents') || '');
+    },
+
     loadResources: function Annotation_loadResources(keys) {
       return new Promise(function (resolve, reject) {
         this.appearance.dict.getAsync('Resources').then(function (resources) {
@@ -48565,23 +48617,15 @@ var TextAnnotation = (function TextAnnotationClosure() {
 
     this.data.annotationType = AnnotationType.TEXT;
 
-    var dict = parameters.dict;
     if (this.data.hasAppearance) {
       this.data.name = 'NoIcon';
     } else {
       this.data.rect[1] = this.data.rect[3] - DEFAULT_ICON_SIZE;
       this.data.rect[2] = this.data.rect[0] + DEFAULT_ICON_SIZE;
-      this.data.name = dict.has('Name') ? dict.get('Name').name : 'Note';
+      this.data.name = parameters.dict.has('Name') ?
+                       parameters.dict.get('Name').name : 'Note';
     }
-
-    if (!dict.has('C')) {
-      // Fall back to the default background color.
-      this.data.color = null;
-    }
-
-    this.data.hasPopup = dict.has('Popup');
-    this.data.title = stringToPDFString(dict.get('T') || '');
-    this.data.contents = stringToPDFString(dict.get('Contents') || '');
+    this._preparePopup(parameters.dict);
   }
 
   Util.inherit(TextAnnotation, Annotation, {});
@@ -48700,7 +48744,7 @@ var HighlightAnnotation = (function HighlightAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.HIGHLIGHT;
-    this.data.hasPopup = parameters.dict.has('Popup');
+    this._preparePopup(parameters.dict);
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -48716,7 +48760,7 @@ var UnderlineAnnotation = (function UnderlineAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.UNDERLINE;
-    this.data.hasPopup = parameters.dict.has('Popup');
+    this._preparePopup(parameters.dict);
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -48732,7 +48776,7 @@ var SquigglyAnnotation = (function SquigglyAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.SQUIGGLY;
-    this.data.hasPopup = parameters.dict.has('Popup');
+    this._preparePopup(parameters.dict);
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -48748,7 +48792,7 @@ var StrikeOutAnnotation = (function StrikeOutAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.STRIKEOUT;
-    this.data.hasPopup = parameters.dict.has('Popup');
+    this._preparePopup(parameters.dict);
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -48763,20 +48807,11 @@ var FileAttachmentAnnotation = (function FileAttachmentAnnotationClosure() {
   function FileAttachmentAnnotation(parameters) {
     Annotation.call(this, parameters);
 
-    var dict = parameters.dict;
-    var file = new FileSpec(dict.get('FS'), parameters.xref);
+    var file = new FileSpec(parameters.dict.get('FS'), parameters.xref);
 
     this.data.annotationType = AnnotationType.FILEATTACHMENT;
     this.data.file = file.serializable;
-
-    if (!dict.has('C')) {
-      // Fall back to the default background color.
-      this.data.color = null;
-    }
-
-    this.data.hasPopup = dict.has('Popup');
-    this.data.title = stringToPDFString(dict.get('T') || '');
-    this.data.contents = stringToPDFString(dict.get('Contents') || '');
+    this._preparePopup(parameters.dict);
   }
 
   Util.inherit(FileAttachmentAnnotation, Annotation, {});

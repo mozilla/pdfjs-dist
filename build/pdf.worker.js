@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.91';
-var pdfjsBuild = '41efb92';
+var pdfjsVersion = '1.4.93';
+var pdfjsBuild = '05917b6';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -40306,6 +40306,24 @@ var Annotation = (function AnnotationClosure() {
       }
     },
 
+    /**
+     * Prepare the annotation for working with a popup in the display layer.
+     *
+     * @private
+     * @memberof Annotation
+     * @param {Dict} dict - The annotation's data dictionary
+     */
+    _preparePopup: function Annotation_preparePopup(dict) {
+      if (!dict.has('C')) {
+        // Fall back to the default background color.
+        this.data.color = null;
+      }
+
+      this.data.hasPopup = dict.has('Popup');
+      this.data.title = stringToPDFString(dict.get('T') || '');
+      this.data.contents = stringToPDFString(dict.get('Contents') || '');
+    },
+
     loadResources: function Annotation_loadResources(keys) {
       return new Promise(function (resolve, reject) {
         this.appearance.dict.getAsync('Resources').then(function (resources) {
@@ -40623,23 +40641,15 @@ var TextAnnotation = (function TextAnnotationClosure() {
 
     this.data.annotationType = AnnotationType.TEXT;
 
-    var dict = parameters.dict;
     if (this.data.hasAppearance) {
       this.data.name = 'NoIcon';
     } else {
       this.data.rect[1] = this.data.rect[3] - DEFAULT_ICON_SIZE;
       this.data.rect[2] = this.data.rect[0] + DEFAULT_ICON_SIZE;
-      this.data.name = dict.has('Name') ? dict.get('Name').name : 'Note';
+      this.data.name = parameters.dict.has('Name') ?
+                       parameters.dict.get('Name').name : 'Note';
     }
-
-    if (!dict.has('C')) {
-      // Fall back to the default background color.
-      this.data.color = null;
-    }
-
-    this.data.hasPopup = dict.has('Popup');
-    this.data.title = stringToPDFString(dict.get('T') || '');
-    this.data.contents = stringToPDFString(dict.get('Contents') || '');
+    this._preparePopup(parameters.dict);
   }
 
   Util.inherit(TextAnnotation, Annotation, {});
@@ -40758,7 +40768,7 @@ var HighlightAnnotation = (function HighlightAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.HIGHLIGHT;
-    this.data.hasPopup = parameters.dict.has('Popup');
+    this._preparePopup(parameters.dict);
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -40774,7 +40784,7 @@ var UnderlineAnnotation = (function UnderlineAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.UNDERLINE;
-    this.data.hasPopup = parameters.dict.has('Popup');
+    this._preparePopup(parameters.dict);
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -40790,7 +40800,7 @@ var SquigglyAnnotation = (function SquigglyAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.SQUIGGLY;
-    this.data.hasPopup = parameters.dict.has('Popup');
+    this._preparePopup(parameters.dict);
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -40806,7 +40816,7 @@ var StrikeOutAnnotation = (function StrikeOutAnnotationClosure() {
     Annotation.call(this, parameters);
 
     this.data.annotationType = AnnotationType.STRIKEOUT;
-    this.data.hasPopup = parameters.dict.has('Popup');
+    this._preparePopup(parameters.dict);
 
     // PDF viewers completely ignore any border styles.
     this.data.borderStyle.setWidth(0);
@@ -40821,20 +40831,11 @@ var FileAttachmentAnnotation = (function FileAttachmentAnnotationClosure() {
   function FileAttachmentAnnotation(parameters) {
     Annotation.call(this, parameters);
 
-    var dict = parameters.dict;
-    var file = new FileSpec(dict.get('FS'), parameters.xref);
+    var file = new FileSpec(parameters.dict.get('FS'), parameters.xref);
 
     this.data.annotationType = AnnotationType.FILEATTACHMENT;
     this.data.file = file.serializable;
-
-    if (!dict.has('C')) {
-      // Fall back to the default background color.
-      this.data.color = null;
-    }
-
-    this.data.hasPopup = dict.has('Popup');
-    this.data.title = stringToPDFString(dict.get('T') || '');
-    this.data.contents = stringToPDFString(dict.get('Contents') || '');
+    this._preparePopup(parameters.dict);
   }
 
   Util.inherit(FileAttachmentAnnotation, Annotation, {});
