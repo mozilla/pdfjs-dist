@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.109';
-var pdfjsBuild = '22341c0';
+var pdfjsVersion = '1.4.111';
+var pdfjsBuild = '6b1de4a';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -35570,6 +35570,9 @@ var Font = (function FontClosure() {
         }
         for (i = 0, ii = records.length; i < ii; i++) {
           var record = records[i];
+          if (record.length <= 0) {
+            continue; // Nothing to process, ignoring.
+          }
           var pos = start + stringsStart + record.offset;
           if (pos + record.length > end) {
             continue; // outside of name table, ignoring
