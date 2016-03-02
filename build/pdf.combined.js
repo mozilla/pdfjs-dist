@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.111';
-var pdfjsBuild = '6b1de4a';
+var pdfjsVersion = '1.4.113';
+var pdfjsBuild = 'a6acf74';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -29773,15 +29773,19 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
           }
         }
 
-        if (simpleFillText && !accent) {
-          // common case
-          ctx.fillText(character, scaledX, scaledY);
-        } else {
-          this.paintChar(character, scaledX, scaledY);
-          if (accent) {
-            scaledAccentX = scaledX + accent.offset.x / fontSizeScale;
-            scaledAccentY = scaledY - accent.offset.y / fontSizeScale;
-            this.paintChar(accent.fontChar, scaledAccentX, scaledAccentY);
+        // Only attempt to draw the glyph if it is actually in the embedded font
+        // file or if there isn't a font file so the fallback font is shown.
+        if (glyph.isInFont || font.missingFile) {
+          if (simpleFillText && !accent) {
+            // common case
+            ctx.fillText(character, scaledX, scaledY);
+          } else {
+            this.paintChar(character, scaledX, scaledY);
+            if (accent) {
+              scaledAccentX = scaledX + accent.offset.x / fontSizeScale;
+              scaledAccentY = scaledY - accent.offset.y / fontSizeScale;
+              this.paintChar(accent.fontChar, scaledAccentX, scaledAccentY);
+            }
           }
         }
 
@@ -33929,7 +33933,7 @@ function getFontType(type, subtype) {
 
 var Glyph = (function GlyphClosure() {
   function Glyph(fontChar, unicode, accent, width, vmetric, operatorListId,
-                 isSpace) {
+                 isSpace, isInFont) {
     this.fontChar = fontChar;
     this.unicode = unicode;
     this.accent = accent;
@@ -33937,17 +33941,20 @@ var Glyph = (function GlyphClosure() {
     this.vmetric = vmetric;
     this.operatorListId = operatorListId;
     this.isSpace = isSpace;
+    this.isInFont = isInFont;
   }
 
   Glyph.prototype.matchesForCache = function(fontChar, unicode, accent, width,
-                                             vmetric, operatorListId, isSpace) {
+                                             vmetric, operatorListId, isSpace,
+                                             isInFont) {
     return this.fontChar === fontChar &&
            this.unicode === unicode &&
            this.accent === accent &&
            this.width === width &&
            this.vmetric === vmetric &&
            this.operatorListId === operatorListId &&
-           this.isSpace === isSpace;
+           this.isSpace === isSpace &&
+           this.isInFont === isInFont;
   };
 
   return Glyph;
@@ -34206,6 +34213,7 @@ var Font = (function FontClosure() {
     this.loadedName = properties.loadedName;
     this.isType3Font = properties.isType3Font;
     this.sizes = [];
+    this.missingFile = false;
 
     this.glyphCache = Object.create(null);
 
@@ -36548,6 +36556,7 @@ var Font = (function FontClosure() {
         unicode = String.fromCharCode(unicode);
       }
 
+      var isInFont = charcode in this.toFontChar;
       // First try the toFontChar map, if it's not there then try falling
       // back to the char code.
       fontCharCode = this.toFontChar[charcode] || charcode;
@@ -36562,6 +36571,7 @@ var Font = (function FontClosure() {
 
       var accent = null;
       if (this.seacMap && this.seacMap[charcode]) {
+        isInFont = true;
         var seac = this.seacMap[charcode];
         fontCharCode = seac.baseFontCharCode;
         accent = {
@@ -36575,9 +36585,9 @@ var Font = (function FontClosure() {
       var glyph = this.glyphCache[charcode];
       if (!glyph ||
           !glyph.matchesForCache(fontChar, unicode, accent, width, vmetric,
-                                 operatorListId, isSpace)) {
+                                 operatorListId, isSpace, isInFont)) {
         glyph = new Glyph(fontChar, unicode, accent, width, vmetric,
-                          operatorListId, isSpace);
+                          operatorListId, isSpace, isInFont);
         this.glyphCache[charcode] = glyph;
       }
       return glyph;
