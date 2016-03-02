@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.113';
-var pdfjsBuild = 'a6acf74';
+var pdfjsVersion = '1.4.115';
+var pdfjsBuild = '8402c79';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -28048,7 +28048,7 @@ var Font = (function FontClosure() {
           assert(cid <= 0xffff, 'Max size of CID is 65,535');
           var glyphId = -1;
           if (isCidToGidMapEmpty) {
-            glyphId = charCode;
+            glyphId = cid;
           } else if (cidToGidMap[cid] !== undefined) {
             glyphId = cidToGidMap[cid];
           }
