@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.137';
-var pdfjsBuild = '122d473';
+var pdfjsVersion = '1.4.139';
+var pdfjsBuild = '56f5c3a';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -32185,7 +32185,8 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
     cMapPacked: PDFJS.cMapPacked,
     disableFontFace: PDFJS.disableFontFace,
     disableCreateObjectURL: PDFJS.disableCreateObjectURL,
-    verbosity: PDFJS.verbosity
+    verbosity: PDFJS.verbosity,
+    postMessageTransfers: PDFJS.postMessageTransfers,
   }).then(function (workerId) {
     if (worker.destroyed) {
       throw new Error('Worker was destroyed');
@@ -49846,6 +49847,10 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
     var docId = docParams.docId;
     var workerHandlerName = docParams.docId + '_worker';
     var handler = new MessageHandler(workerHandlerName, docId, port);
+
+    // Ensure that postMessage transfers are correctly enabled/disabled,
+    // to prevent "DataCloneError" in older versions of IE (see issue 6957).
+    handler.postMessageTransfers = docParams.postMessageTransfers;
 
     function ensureNotTerminated() {
       if (terminated) {
