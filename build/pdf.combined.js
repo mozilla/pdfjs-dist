@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.141';
-var pdfjsBuild = '7ad8f3a';
+var pdfjsVersion = '1.4.143';
+var pdfjsBuild = '21ed8ff';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -30942,31 +30942,22 @@ var IdentityCMap = (function IdentityCMapClosure() {
 
 var BinaryCMapReader = (function BinaryCMapReaderClosure() {
   function fetchBinaryData(url) {
-    var nonBinaryRequest = PDFJS.disableWorker;
-    var request = new XMLHttpRequest();
-    request.open('GET', url, false);
-    if (!nonBinaryRequest) {
-      try {
-        request.responseType = 'arraybuffer';
-        nonBinaryRequest = request.responseType !== 'arraybuffer';
-      } catch (e) {
-        nonBinaryRequest = true;
-      }
-    }
-    if (nonBinaryRequest && request.overrideMimeType) {
-      request.overrideMimeType('text/plain; charset=x-user-defined');
-    }
-    request.send(null);
-    if (nonBinaryRequest ? !request.responseText : !request.response) {
-      error('Unable to get binary cMap at: ' + url);
-    }
-    if (nonBinaryRequest) {
-      var data = Array.prototype.map.call(request.responseText, function (ch) {
-        return ch.charCodeAt(0) & 255;
-      });
-      return new Uint8Array(data);
-    }
-    return new Uint8Array(request.response);
+    return new Promise(function (resolve, reject) {
+      var request = new XMLHttpRequest();
+      request.open('GET', url, true);
+      request.responseType = 'arraybuffer';
+      request.onreadystatechange = function () {
+        if (request.readyState === XMLHttpRequest.DONE) {
+          if (!request.response || request.status !== 200 &&
+              request.status !== 0) {
+            reject(new Error('Unable to get binary cMap at: ' + url));
+          } else {
+            resolve(new Uint8Array(request.response));
+          }
+        }
+      };
+      request.send(null);
+    });
   }
 
   function hexToInt(a, size) {
@@ -31089,163 +31080,163 @@ var BinaryCMapReader = (function BinaryCMapReaderClosure() {
   };
 
   function processBinaryCMap(url, cMap, extend) {
-    var data = fetchBinaryData(url);
-    var stream = new BinaryCMapStream(data);
+    return fetchBinaryData(url).then(function (data) {
+      var stream = new BinaryCMapStream(data);
+      var header = stream.readByte();
+      cMap.vertical = !!(header & 1);
 
-    var header = stream.readByte();
-    cMap.vertical = !!(header & 1);
+      var useCMap = null;
+      var start = new Uint8Array(MAX_NUM_SIZE);
+      var end = new Uint8Array(MAX_NUM_SIZE);
+      var char = new Uint8Array(MAX_NUM_SIZE);
+      var charCode = new Uint8Array(MAX_NUM_SIZE);
+      var tmp = new Uint8Array(MAX_NUM_SIZE);
+      var code;
 
-    var useCMap = null;
-    var start = new Uint8Array(MAX_NUM_SIZE);
-    var end = new Uint8Array(MAX_NUM_SIZE);
-    var char = new Uint8Array(MAX_NUM_SIZE);
-    var charCode = new Uint8Array(MAX_NUM_SIZE);
-    var tmp = new Uint8Array(MAX_NUM_SIZE);
-    var code;
-
-    var b;
-    while ((b = stream.readByte()) >= 0) {
-      var type = b >> 5;
-      if (type === 7) { // metadata, e.g. comment or usecmap
-        switch (b & 0x1F) {
-          case 0:
-            stream.readString(); // skipping comment
-            break;
-          case 1:
-            useCMap = stream.readString();
-            break;
+      var b;
+      while ((b = stream.readByte()) >= 0) {
+        var type = b >> 5;
+        if (type === 7) { // metadata, e.g. comment or usecmap
+          switch (b & 0x1F) {
+            case 0:
+              stream.readString(); // skipping comment
+              break;
+            case 1:
+              useCMap = stream.readString();
+              break;
+          }
+          continue;
         }
-        continue;
-      }
-      var sequence = !!(b & 0x10);
-      var dataSize = b & 15;
+        var sequence = !!(b & 0x10);
+        var dataSize = b & 15;
 
-      assert(dataSize + 1 <= MAX_NUM_SIZE);
+        assert(dataSize + 1 <= MAX_NUM_SIZE);
 
-      var ucs2DataSize = 1;
-      var subitemsCount = stream.readNumber();
-      var i;
-      switch (type) {
-        case 0: // codespacerange
-          stream.readHex(start, dataSize);
-          stream.readHexNumber(end, dataSize);
-          addHex(end, start, dataSize);
-          cMap.addCodespaceRange(dataSize + 1, hexToInt(start, dataSize),
-                                 hexToInt(end, dataSize));
-          for (i = 1; i < subitemsCount; i++) {
-            incHex(end, dataSize);
-            stream.readHexNumber(start, dataSize);
-            addHex(start, end, dataSize);
+        var ucs2DataSize = 1;
+        var subitemsCount = stream.readNumber();
+        var i;
+        switch (type) {
+          case 0: // codespacerange
+            stream.readHex(start, dataSize);
             stream.readHexNumber(end, dataSize);
             addHex(end, start, dataSize);
             cMap.addCodespaceRange(dataSize + 1, hexToInt(start, dataSize),
                                    hexToInt(end, dataSize));
-          }
-          break;
-        case 1: // notdefrange
-          stream.readHex(start, dataSize);
-          stream.readHexNumber(end, dataSize);
-          addHex(end, start, dataSize);
-          code = stream.readNumber();
-          // undefined range, skipping
-          for (i = 1; i < subitemsCount; i++) {
-            incHex(end, dataSize);
-            stream.readHexNumber(start, dataSize);
-            addHex(start, end, dataSize);
+            for (i = 1; i < subitemsCount; i++) {
+              incHex(end, dataSize);
+              stream.readHexNumber(start, dataSize);
+              addHex(start, end, dataSize);
+              stream.readHexNumber(end, dataSize);
+              addHex(end, start, dataSize);
+              cMap.addCodespaceRange(dataSize + 1, hexToInt(start, dataSize),
+                                     hexToInt(end, dataSize));
+            }
+            break;
+          case 1: // notdefrange
+            stream.readHex(start, dataSize);
             stream.readHexNumber(end, dataSize);
             addHex(end, start, dataSize);
             code = stream.readNumber();
-            // nop
-          }
-          break;
-        case 2: // cidchar
-          stream.readHex(char, dataSize);
-          code = stream.readNumber();
-          cMap.mapOne(hexToInt(char, dataSize), code);
-          for (i = 1; i < subitemsCount; i++) {
-            incHex(char, dataSize);
-            if (!sequence) {
-              stream.readHexNumber(tmp, dataSize);
-              addHex(char, tmp, dataSize);
-            }
-            code = stream.readSigned() + (code + 1);
-            cMap.mapOne(hexToInt(char, dataSize), code);
-          }
-          break;
-        case 3: // cidrange
-          stream.readHex(start, dataSize);
-          stream.readHexNumber(end, dataSize);
-          addHex(end, start, dataSize);
-          code = stream.readNumber();
-          cMap.mapCidRange(hexToInt(start, dataSize), hexToInt(end, dataSize),
-                           code);
-          for (i = 1; i < subitemsCount; i++) {
-            incHex(end, dataSize);
-            if (!sequence) {
+            // undefined range, skipping
+            for (i = 1; i < subitemsCount; i++) {
+              incHex(end, dataSize);
               stream.readHexNumber(start, dataSize);
               addHex(start, end, dataSize);
-            } else {
-              start.set(end);
+              stream.readHexNumber(end, dataSize);
+              addHex(end, start, dataSize);
+              code = stream.readNumber();
+              // nop
             }
+            break;
+          case 2: // cidchar
+            stream.readHex(char, dataSize);
+            code = stream.readNumber();
+            cMap.mapOne(hexToInt(char, dataSize), code);
+            for (i = 1; i < subitemsCount; i++) {
+              incHex(char, dataSize);
+              if (!sequence) {
+                stream.readHexNumber(tmp, dataSize);
+                addHex(char, tmp, dataSize);
+              }
+              code = stream.readSigned() + (code + 1);
+              cMap.mapOne(hexToInt(char, dataSize), code);
+            }
+            break;
+          case 3: // cidrange
+            stream.readHex(start, dataSize);
             stream.readHexNumber(end, dataSize);
             addHex(end, start, dataSize);
             code = stream.readNumber();
             cMap.mapCidRange(hexToInt(start, dataSize), hexToInt(end, dataSize),
                              code);
-          }
-          break;
-        case 4: // bfchar
-          stream.readHex(char, ucs2DataSize);
-          stream.readHex(charCode, dataSize);
-          cMap.mapOne(hexToInt(char, ucs2DataSize),
-                      hexToStr(charCode, dataSize));
-          for (i = 1; i < subitemsCount; i++) {
-            incHex(char, ucs2DataSize);
-            if (!sequence) {
-              stream.readHexNumber(tmp, ucs2DataSize);
-              addHex(char, tmp, ucs2DataSize);
+            for (i = 1; i < subitemsCount; i++) {
+              incHex(end, dataSize);
+              if (!sequence) {
+                stream.readHexNumber(start, dataSize);
+                addHex(start, end, dataSize);
+              } else {
+                start.set(end);
+              }
+              stream.readHexNumber(end, dataSize);
+              addHex(end, start, dataSize);
+              code = stream.readNumber();
+              cMap.mapCidRange(hexToInt(start, dataSize),
+                               hexToInt(end, dataSize), code);
             }
-            incHex(charCode, dataSize);
-            stream.readHexSigned(tmp, dataSize);
-            addHex(charCode, tmp, dataSize);
+            break;
+          case 4: // bfchar
+            stream.readHex(char, ucs2DataSize);
+            stream.readHex(charCode, dataSize);
             cMap.mapOne(hexToInt(char, ucs2DataSize),
                         hexToStr(charCode, dataSize));
-          }
-          break;
-        case 5: // bfrange
-          stream.readHex(start, ucs2DataSize);
-          stream.readHexNumber(end, ucs2DataSize);
-          addHex(end, start, ucs2DataSize);
-          stream.readHex(charCode, dataSize);
-          cMap.mapBfRange(hexToInt(start, ucs2DataSize),
-                          hexToInt(end, ucs2DataSize),
+            for (i = 1; i < subitemsCount; i++) {
+              incHex(char, ucs2DataSize);
+              if (!sequence) {
+                stream.readHexNumber(tmp, ucs2DataSize);
+                addHex(char, tmp, ucs2DataSize);
+              }
+              incHex(charCode, dataSize);
+              stream.readHexSigned(tmp, dataSize);
+              addHex(charCode, tmp, dataSize);
+              cMap.mapOne(hexToInt(char, ucs2DataSize),
                           hexToStr(charCode, dataSize));
-          for (i = 1; i < subitemsCount; i++) {
-            incHex(end, ucs2DataSize);
-            if (!sequence) {
-              stream.readHexNumber(start, ucs2DataSize);
-              addHex(start, end, ucs2DataSize);
-            } else {
-              start.set(end);
             }
+            break;
+          case 5: // bfrange
+            stream.readHex(start, ucs2DataSize);
             stream.readHexNumber(end, ucs2DataSize);
             addHex(end, start, ucs2DataSize);
             stream.readHex(charCode, dataSize);
             cMap.mapBfRange(hexToInt(start, ucs2DataSize),
                             hexToInt(end, ucs2DataSize),
                             hexToStr(charCode, dataSize));
-          }
-          break;
-        default:
-          error('Unknown type: ' + type);
-          break;
+            for (i = 1; i < subitemsCount; i++) {
+              incHex(end, ucs2DataSize);
+              if (!sequence) {
+                stream.readHexNumber(start, ucs2DataSize);
+                addHex(start, end, ucs2DataSize);
+              } else {
+                start.set(end);
+              }
+              stream.readHexNumber(end, ucs2DataSize);
+              addHex(end, start, ucs2DataSize);
+              stream.readHex(charCode, dataSize);
+              cMap.mapBfRange(hexToInt(start, ucs2DataSize),
+                              hexToInt(end, ucs2DataSize),
+                              hexToStr(charCode, dataSize));
+            }
+            break;
+          default:
+            error('Unknown type: ' + type);
+            break;
+        }
       }
-    }
 
-    if (useCMap) {
-      extend(useCMap);
-    }
-    return cMap;
+      if (useCMap) {
+        return extend(useCMap);
+      }
+      return cMap;
+    });
   }
 
   function BinaryCMapReader() {}
@@ -31454,47 +31445,53 @@ var CMapFactory = (function CMapFactoryClosure() {
       useCMap = embededUseCMap;
     }
     if (useCMap) {
-      extendCMap(cMap, builtInCMapParams, useCMap);
+      return extendCMap(cMap, builtInCMapParams, useCMap);
+    } else {
+      return Promise.resolve(cMap);
     }
   }
 
   function extendCMap(cMap, builtInCMapParams, useCMap) {
-    cMap.useCMap = createBuiltInCMap(useCMap, builtInCMapParams);
-    // If there aren't any code space ranges defined clone all the parent ones
-    // into this cMap.
-    if (cMap.numCodespaceRanges === 0) {
-      var useCodespaceRanges = cMap.useCMap.codespaceRanges;
-      for (var i = 0; i < useCodespaceRanges.length; i++) {
-        cMap.codespaceRanges[i] = useCodespaceRanges[i].slice();
+    return createBuiltInCMap(useCMap, builtInCMapParams).then(
+        function(newCMap) {
+      cMap.useCMap = newCMap;
+      // If there aren't any code space ranges defined clone all the parent ones
+      // into this cMap.
+      if (cMap.numCodespaceRanges === 0) {
+        var useCodespaceRanges = cMap.useCMap.codespaceRanges;
+        for (var i = 0; i < useCodespaceRanges.length; i++) {
+          cMap.codespaceRanges[i] = useCodespaceRanges[i].slice();
+        }
+        cMap.numCodespaceRanges = cMap.useCMap.numCodespaceRanges;
       }
-      cMap.numCodespaceRanges = cMap.useCMap.numCodespaceRanges;
-    }
-    // Merge the map into the current one, making sure not to override
-    // any previously defined entries.
-    cMap.useCMap.forEach(function(key, value) {
-      if (!cMap.contains(key)) {
-        cMap.mapOne(key, cMap.useCMap.lookup(key));
-      }
+      // Merge the map into the current one, making sure not to override
+      // any previously defined entries.
+      cMap.useCMap.forEach(function(key, value) {
+        if (!cMap.contains(key)) {
+          cMap.mapOne(key, cMap.useCMap.lookup(key));
+        }
+      });
+
+      return cMap;
     });
   }
 
   function parseBinaryCMap(name, builtInCMapParams) {
     var url = builtInCMapParams.url + name + '.bcmap';
     var cMap = new CMap(true);
-    new BinaryCMapReader().read(url, cMap, function (useCMap) {
-      extendCMap(cMap, builtInCMapParams, useCMap);
+    return new BinaryCMapReader().read(url, cMap, function (useCMap) {
+      return extendCMap(cMap, builtInCMapParams, useCMap);
     });
-    return cMap;
   }
 
   function createBuiltInCMap(name, builtInCMapParams) {
     if (name === 'Identity-H') {
-      return new IdentityCMap(false, 2);
+      return Promise.resolve(new IdentityCMap(false, 2));
     } else if (name === 'Identity-V') {
-      return new IdentityCMap(true, 2);
+      return Promise.resolve(new IdentityCMap(true, 2));
     }
     if (BUILT_IN_CMAPS.indexOf(name) === -1) {
-      error('Unknown cMap name: ' + name);
+      return Promise.reject(new Error('Unknown cMap name: ' + name));
     }
     assert(builtInCMapParams, 'built-in cMap parameters are not provided');
 
@@ -31502,17 +31499,28 @@ var CMapFactory = (function CMapFactoryClosure() {
       return parseBinaryCMap(name, builtInCMapParams);
     }
 
-    var request = new XMLHttpRequest();
-    var url = builtInCMapParams.url + name;
-    request.open('GET', url, false);
-    request.send(null);
-    if (!request.responseText) {
-      error('Unable to get cMap at: ' + url);
-    }
-    var cMap = new CMap(true);
-    var lexer = new Lexer(new StringStream(request.responseText));
-    parseCMap(cMap, lexer, builtInCMapParams, null);
-    return cMap;
+    return new Promise(function (resolve, reject) {
+      var url = builtInCMapParams.url + name;
+      var request = new XMLHttpRequest();
+      request.onreadystatechange = function () {
+        if (request.readyState === XMLHttpRequest.DONE) {
+          if (request.status === 200 || request.status === 0) {
+            var cMap = new CMap(true);
+            var lexer = new Lexer(new StringStream(request.responseText));
+            parseCMap(cMap, lexer, builtInCMapParams, null).then(
+                function (parsedCMap) {
+              resolve(parsedCMap);
+            }).catch(function (e) {
+              reject(new Error({ message: 'Invalid CMap data', error: e }));
+            });
+          } else {
+            reject(new Error('Unable to get cMap at: ' + url));
+          }
+        }
+      };
+      request.open('GET', url, true);
+      request.send(null);
+    });
   }
 
   return {
@@ -31522,17 +31530,15 @@ var CMapFactory = (function CMapFactoryClosure() {
       } else if (isStream(encoding)) {
         var cMap = new CMap();
         var lexer = new Lexer(encoding);
-        try {
-          parseCMap(cMap, lexer, builtInCMapParams, useCMap);
-        } catch (e) {
-          warn('Invalid CMap data. ' + e);
-        }
-        if (cMap.isIdentityCMap) {
-          return createBuiltInCMap(cMap.name, builtInCMapParams);
-        }
-        return cMap;
+        return parseCMap(cMap, lexer, builtInCMapParams, useCMap).then(
+            function (parsedCMap) {
+          if (parsedCMap.isIdentityCMap) {
+            return createBuiltInCMap(parsedCMap.name, builtInCMapParams);
+          }
+          return parsedCMap;
+        });
       }
-      error('Encoding required.');
+      return Promise.reject(new Error('Encoding required.'));
     }
   };
 })();
@@ -34278,7 +34284,7 @@ var Font = (function FontClosure() {
     this.fontMatrix = properties.fontMatrix;
     this.bbox = properties.bbox;
 
-    this.toUnicode = properties.toUnicode = this.buildToUnicode(properties);
+    this.toUnicode = properties.toUnicode;
 
     this.toFontChar = [];
 
@@ -36440,138 +36446,6 @@ var Font = (function FontClosure() {
       builder.addTable('post', createPostTable(properties));
 
       return builder.toArray();
-    },
-
-    /**
-     * Builds a char code to unicode map based on section 9.10 of the spec.
-     * @param {Object} properties Font properties object.
-     * @return {Object} A ToUnicodeMap object.
-     */
-    buildToUnicode: function Font_buildToUnicode(properties) {
-      // Section 9.10.2 Mapping Character Codes to Unicode Values
-      if (properties.toUnicode && properties.toUnicode.length !== 0) {
-        return properties.toUnicode;
-      }
-      // According to the spec if the font is a simple font we should only map
-      // to unicode if the base encoding is MacRoman, MacExpert, or WinAnsi or
-      // the differences array only contains adobe standard or symbol set names,
-      // in pratice it seems better to always try to create a toUnicode
-      // map based of the default encoding.
-      var toUnicode, charcode;
-      if (!properties.composite /* is simple font */) {
-        toUnicode = [];
-        var encoding = properties.defaultEncoding.slice();
-        var baseEncodingName = properties.baseEncodingName;
-        // Merge in the differences array.
-        var differences = properties.differences;
-        for (charcode in differences) {
-          encoding[charcode] = differences[charcode];
-        }
-        var glyphsUnicodeMap = getGlyphsUnicode();
-        for (charcode in encoding) {
-          // a) Map the character code to a character name.
-          var glyphName = encoding[charcode];
-          // b) Look up the character name in the Adobe Glyph List (see the
-          //    Bibliography) to obtain the corresponding Unicode value.
-          if (glyphName === '') {
-            continue;
-          } else if (glyphsUnicodeMap[glyphName] === undefined) {
-            // (undocumented) c) Few heuristics to recognize unknown glyphs
-            // NOTE: Adobe Reader does not do this step, but OSX Preview does
-            var code = 0;
-            switch (glyphName[0]) {
-              case 'G': // Gxx glyph
-                if (glyphName.length === 3) {
-                  code = parseInt(glyphName.substr(1), 16);
-                }
-                break;
-              case 'g': // g00xx glyph
-                if (glyphName.length === 5) {
-                  code = parseInt(glyphName.substr(1), 16);
-                }
-                break;
-              case 'C': // Cddd glyph
-              case 'c': // cddd glyph
-                if (glyphName.length >= 3) {
-                  code = +glyphName.substr(1);
-                }
-                break;
-              default:
-                // 'uniXXXX'/'uXXXX{XX}' glyphs
-                var unicode = getUnicodeForGlyph(glyphName, glyphsUnicodeMap);
-                if (unicode !== -1) {
-                  code = unicode;
-                }
-            }
-            if (code) {
-              // If |baseEncodingName| is one the predefined encodings,
-              // and |code| equals |charcode|, using the glyph defined in the
-              // baseEncoding seems to yield a better |toUnicode| mapping
-              // (fixes issue 5070).
-              if (baseEncodingName && code === +charcode) {
-                var baseEncoding = getEncoding(baseEncodingName);
-                if (baseEncoding && (glyphName = baseEncoding[charcode])) {
-                  toUnicode[charcode] =
-                    String.fromCharCode(glyphsUnicodeMap[glyphName]);
-                  continue;
-                }
-              }
-              toUnicode[charcode] = String.fromCharCode(code);
-            }
-            continue;
-          }
-          toUnicode[charcode] =
-            String.fromCharCode(glyphsUnicodeMap[glyphName]);
-        }
-        return new ToUnicodeMap(toUnicode);
-      }
-      // If the font is a composite font that uses one of the predefined CMaps
-      // listed in Table 118 (except Identity–H and Identity–V) or whose
-      // descendant CIDFont uses the Adobe-GB1, Adobe-CNS1, Adobe-Japan1, or
-      // Adobe-Korea1 character collection:
-      if (properties.composite && (
-           (properties.cMap.builtInCMap &&
-            !(properties.cMap instanceof IdentityCMap)) ||
-           (properties.cidSystemInfo.registry === 'Adobe' &&
-             (properties.cidSystemInfo.ordering === 'GB1' ||
-              properties.cidSystemInfo.ordering === 'CNS1' ||
-              properties.cidSystemInfo.ordering === 'Japan1' ||
-              properties.cidSystemInfo.ordering === 'Korea1')))) {
-        // Then:
-        // a) Map the character code to a character identifier (CID) according
-        // to the font’s CMap.
-        // b) Obtain the registry and ordering of the character collection used
-        // by the font’s CMap (for example, Adobe and Japan1) from its
-        // CIDSystemInfo dictionary.
-        var registry = properties.cidSystemInfo.registry;
-        var ordering = properties.cidSystemInfo.ordering;
-        // c) Construct a second CMap name by concatenating the registry and
-        // ordering obtained in step (b) in the format registry–ordering–UCS2
-        // (for example, Adobe–Japan1–UCS2).
-        var ucs2CMapName = new Name(registry + '-' + ordering + '-UCS2');
-        // d) Obtain the CMap with the name constructed in step (c) (available
-        // from the ASN Web site; see the Bibliography).
-        var ucs2CMap = CMapFactory.create(ucs2CMapName,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null);
-        var cMap = properties.cMap;
-        toUnicode = [];
-        cMap.forEach(function(charcode, cid) {
-          assert(cid <= 0xffff, 'Max size of CID is 65,535');
-          // e) Map the CID obtained in step (a) according to the CMap obtained
-          // in step (d), producing a Unicode value.
-          var ucs2 = ucs2CMap.lookup(cid);
-          if (ucs2) {
-            toUnicode[charcode] =
-              String.fromCharCode((ucs2.charCodeAt(0) << 8) +
-                                  ucs2.charCodeAt(1));
-          }
-        });
-        return new ToUnicodeMap(toUnicode);
-      }
-
-      // The viewer's choice, just use an identity map.
-      return new IdentityToUnicodeMap(properties.firstChar,
-                                      properties.lastChar);
     },
 
     get spaceWidth() {
@@ -44901,12 +44775,13 @@ exports.getTilingPatternIR = getTilingPatternIR;
       root.pdfjsCoreFonts, root.pdfjsCoreFunction, root.pdfjsCorePattern,
       root.pdfjsCoreCMap, root.pdfjsCoreMetrics, root.pdfjsCoreBidi,
       root.pdfjsCoreEncodings, root.pdfjsCoreStandardFonts,
-      root.pdfjsCoreUnicode);
+      root.pdfjsCoreUnicode, root.pdfjsCoreGlyphList);
   }
 }(this, function (exports, sharedUtil, corePrimitives, coreStream, coreParser,
                   coreImage, coreColorSpace, coreMurmurHash3, coreFonts,
                   coreFunction, corePattern, coreCMap, coreMetrics, coreBidi,
-                  coreEncodings, coreStandardFonts, coreUnicode) {
+                  coreEncodings, coreStandardFonts, coreUnicode,
+                  coreGlyphList) {
 
 var FONT_IDENTITY_MATRIX = sharedUtil.FONT_IDENTITY_MATRIX;
 var IDENTITY_MATRIX = sharedUtil.IDENTITY_MATRIX;
@@ -44964,6 +44839,8 @@ var getSerifFonts = coreStandardFonts.getSerifFonts;
 var getSymbolsFonts = coreStandardFonts.getSymbolsFonts;
 var getNormalizedUnicodes = coreUnicode.getNormalizedUnicodes;
 var reverseIfRtl = coreUnicode.reverseIfRtl;
+var getUnicodeForGlyph = coreUnicode.getUnicodeForGlyph;
+var getGlyphsUnicode = coreGlyphList.getGlyphsUnicode;
 
 var PartialEvaluator = (function PartialEvaluatorClosure() {
   function PartialEvaluator(pdfManager, xref, handler, pageIndex,
@@ -45512,8 +45389,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       // TODO move promises into translate font
       var translatedPromise;
       try {
-        translatedPromise = Promise.resolve(
-          this.translateFont(preEvaluatedFont, xref));
+        translatedPromise = this.translateFont(preEvaluatedFont, xref);
       } catch (e) {
         translatedPromise = Promise.reject(e);
       }
@@ -46411,9 +46287,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                                             xref, properties) {
       // 9.10.2
       var toUnicode = (dict.get('ToUnicode') || baseDict.get('ToUnicode'));
-      if (toUnicode) {
-        properties.toUnicode = this.readToUnicode(toUnicode);
-      }
+      var toUnicodePromise = toUnicode ?
+            this.readToUnicode(toUnicode) : Promise.resolve(undefined);
+
       if (properties.composite) {
         // CIDSystemInfo helps to match CID to glyphs
         var cidSystemInfo = dict.get('CIDSystemInfo');
@@ -46498,44 +46374,189 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       properties.differences = differences;
       properties.baseEncodingName = baseEncodingName;
       properties.dict = dict;
+      return toUnicodePromise.then(function(toUnicode) {
+        properties.toUnicode = toUnicode;
+        return this.buildToUnicode(properties);
+      }.bind(this)).then(function (toUnicode) {
+        properties.toUnicode = toUnicode;
+        return properties;
+      });
+    },
+
+    /**
+     * Builds a char code to unicode map based on section 9.10 of the spec.
+     * @param {Object} properties Font properties object.
+     * @return {Promise} A Promise resolving to ToUnicodeMap object.
+     */
+    buildToUnicode: function partialEvaluator_buildToUnicode(properties) {
+      // Section 9.10.2 Mapping Character Codes to Unicode Values
+      if (properties.toUnicode && properties.toUnicode.length !== 0) {
+        return Promise.resolve(properties.toUnicode);
+      }
+      // According to the spec if the font is a simple font we should only map
+      // to unicode if the base encoding is MacRoman, MacExpert, or WinAnsi or
+      // the differences array only contains adobe standard or symbol set names,
+      // in pratice it seems better to always try to create a toUnicode
+      // map based of the default encoding.
+      var toUnicode, charcode;
+      if (!properties.composite /* is simple font */) {
+        toUnicode = [];
+        var encoding = properties.defaultEncoding.slice();
+        var baseEncodingName = properties.baseEncodingName;
+        // Merge in the differences array.
+        var differences = properties.differences;
+        for (charcode in differences) {
+          encoding[charcode] = differences[charcode];
+        }
+        var glyphsUnicodeMap = getGlyphsUnicode();
+        for (charcode in encoding) {
+          // a) Map the character code to a character name.
+          var glyphName = encoding[charcode];
+          // b) Look up the character name in the Adobe Glyph List (see the
+          //    Bibliography) to obtain the corresponding Unicode value.
+          if (glyphName === '') {
+            continue;
+          } else if (glyphsUnicodeMap[glyphName] === undefined) {
+            // (undocumented) c) Few heuristics to recognize unknown glyphs
+            // NOTE: Adobe Reader does not do this step, but OSX Preview does
+            var code = 0;
+            switch (glyphName[0]) {
+              case 'G': // Gxx glyph
+                if (glyphName.length === 3) {
+                  code = parseInt(glyphName.substr(1), 16);
+                }
+                break;
+              case 'g': // g00xx glyph
+                if (glyphName.length === 5) {
+                  code = parseInt(glyphName.substr(1), 16);
+                }
+                break;
+              case 'C': // Cddd glyph
+              case 'c': // cddd glyph
+                if (glyphName.length >= 3) {
+                  code = +glyphName.substr(1);
+                }
+                break;
+              default:
+                // 'uniXXXX'/'uXXXX{XX}' glyphs
+                var unicode = getUnicodeForGlyph(glyphName, glyphsUnicodeMap);
+                if (unicode !== -1) {
+                  code = unicode;
+                }
+            }
+            if (code) {
+              // If |baseEncodingName| is one the predefined encodings,
+              // and |code| equals |charcode|, using the glyph defined in the
+              // baseEncoding seems to yield a better |toUnicode| mapping
+              // (fixes issue 5070).
+              if (baseEncodingName && code === +charcode) {
+                var baseEncoding = getEncoding(baseEncodingName);
+                if (baseEncoding && (glyphName = baseEncoding[charcode])) {
+                  toUnicode[charcode] =
+                    String.fromCharCode(glyphsUnicodeMap[glyphName]);
+                  continue;
+                }
+              }
+              toUnicode[charcode] = String.fromCharCode(code);
+            }
+            continue;
+          }
+          toUnicode[charcode] =
+            String.fromCharCode(glyphsUnicodeMap[glyphName]);
+        }
+        return Promise.resolve(new ToUnicodeMap(toUnicode));
+      }
+      // If the font is a composite font that uses one of the predefined CMaps
+      // listed in Table 118 (except Identity–H and Identity–V) or whose
+      // descendant CIDFont uses the Adobe-GB1, Adobe-CNS1, Adobe-Japan1, or
+      // Adobe-Korea1 character collection:
+      if (properties.composite && (
+           (properties.cMap.builtInCMap &&
+            !(properties.cMap instanceof IdentityCMap)) ||
+           (properties.cidSystemInfo.registry === 'Adobe' &&
+             (properties.cidSystemInfo.ordering === 'GB1' ||
+              properties.cidSystemInfo.ordering === 'CNS1' ||
+              properties.cidSystemInfo.ordering === 'Japan1' ||
+              properties.cidSystemInfo.ordering === 'Korea1')))) {
+        // Then:
+        // a) Map the character code to a character identifier (CID) according
+        // to the font’s CMap.
+        // b) Obtain the registry and ordering of the character collection used
+        // by the font’s CMap (for example, Adobe and Japan1) from its
+        // CIDSystemInfo dictionary.
+        var registry = properties.cidSystemInfo.registry;
+        var ordering = properties.cidSystemInfo.ordering;
+        // c) Construct a second CMap name by concatenating the registry and
+        // ordering obtained in step (b) in the format registry–ordering–UCS2
+        // (for example, Adobe–Japan1–UCS2).
+        var ucs2CMapName = new Name(registry + '-' + ordering + '-UCS2');
+        // d) Obtain the CMap with the name constructed in step (c) (available
+        // from the ASN Web site; see the Bibliography).
+        return CMapFactory.create(ucs2CMapName,
+          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).then(
+            function (ucs2CMap) {
+          var cMap = properties.cMap;
+          toUnicode = [];
+          cMap.forEach(function(charcode, cid) {
+            assert(cid <= 0xffff, 'Max size of CID is 65,535');
+            // e) Map the CID obtained in step (a) according to the CMap
+            // obtained in step (d), producing a Unicode value.
+            var ucs2 = ucs2CMap.lookup(cid);
+            if (ucs2) {
+              toUnicode[charcode] =
+                String.fromCharCode((ucs2.charCodeAt(0) << 8) +
+                                    ucs2.charCodeAt(1));
+            }
+          });
+          return new ToUnicodeMap(toUnicode);
+        });
+      }
+
+      // The viewer's choice, just use an identity map.
+      return Promise.resolve(new IdentityToUnicodeMap(properties.firstChar,
+                                                      properties.lastChar));
     },
 
     readToUnicode: function PartialEvaluator_readToUnicode(toUnicode) {
-      var cmap, cmapObj = toUnicode;
+      var cmapObj = toUnicode;
       if (isName(cmapObj)) {
-        cmap = CMapFactory.create(cmapObj,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null);
-        if (cmap instanceof IdentityCMap) {
-          return new IdentityToUnicodeMap(0, 0xFFFF);
-        }
-        return new ToUnicodeMap(cmap.getMap());
-      } else if (isStream(cmapObj)) {
-        cmap = CMapFactory.create(cmapObj,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null);
-        if (cmap instanceof IdentityCMap) {
-          return new IdentityToUnicodeMap(0, 0xFFFF);
-        }
-        var map = new Array(cmap.length);
-        // Convert UTF-16BE
-        // NOTE: cmap can be a sparse array, so use forEach instead of for(;;)
-        // to iterate over all keys.
-        cmap.forEach(function(charCode, token) {
-          var str = [];
-          for (var k = 0; k < token.length; k += 2) {
-            var w1 = (token.charCodeAt(k) << 8) | token.charCodeAt(k + 1);
-            if ((w1 & 0xF800) !== 0xD800) { // w1 < 0xD800 || w1 > 0xDFFF
-              str.push(w1);
-              continue;
-            }
-            k += 2;
-            var w2 = (token.charCodeAt(k) << 8) | token.charCodeAt(k + 1);
-            str.push(((w1 & 0x3ff) << 10) + (w2 & 0x3ff) + 0x10000);
+        return CMapFactory.create(cmapObj,
+          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).then(
+            function (cmap) {
+          if (cmap instanceof IdentityCMap) {
+            return new IdentityToUnicodeMap(0, 0xFFFF);
           }
-          map[charCode] = String.fromCharCode.apply(String, str);
+          return new ToUnicodeMap(cmap.getMap());
         });
-        return new ToUnicodeMap(map);
+      } else if (isStream(cmapObj)) {
+        return CMapFactory.create(cmapObj,
+          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).then(
+            function (cmap) {
+          if (cmap instanceof IdentityCMap) {
+            return new IdentityToUnicodeMap(0, 0xFFFF);
+          }
+          var map = new Array(cmap.length);
+          // Convert UTF-16BE
+          // NOTE: cmap can be a sparse array, so use forEach instead of for(;;)
+          // to iterate over all keys.
+          cmap.forEach(function(charCode, token) {
+            var str = [];
+            for (var k = 0; k < token.length; k += 2) {
+              var w1 = (token.charCodeAt(k) << 8) | token.charCodeAt(k + 1);
+              if ((w1 & 0xF800) !== 0xD800) { // w1 < 0xD800 || w1 > 0xDFFF
+                str.push(w1);
+                continue;
+              }
+              k += 2;
+              var w2 = (token.charCodeAt(k) << 8) | token.charCodeAt(k + 1);
+              str.push(((w1 & 0x3ff) << 10) + (w2 & 0x3ff) + 0x10000);
+            }
+            map[charCode] = String.fromCharCode.apply(String, str);
+          });
+          return new ToUnicodeMap(map);
+        });
       }
-      return null;
+      return Promise.resolve(null);
     },
 
     readCidToGidMap: function PartialEvaluator_readCidToGidMap(cidToGidStream) {
@@ -46839,10 +46860,12 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             firstChar: 0,
             lastChar: maxCharIndex
           };
-          this.extractDataStructures(dict, dict, xref, properties);
-          properties.widths = this.buildCharCodeToWidth(metrics.widths,
-                                                        properties);
-          return new Font(baseFontName, null, properties);
+          return this.extractDataStructures(dict, dict, xref, properties).then(
+              function (properties) {
+            properties.widths = this.buildCharCodeToWidth(metrics.widths,
+                                                          properties);
+            return new Font(baseFontName, null, properties);
+          }.bind(this));
         }
       }
 
@@ -46919,23 +46942,33 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         coded: false
       };
 
+      var cMapPromise;
       if (composite) {
         var cidEncoding = baseDict.get('Encoding');
         if (isName(cidEncoding)) {
           properties.cidEncoding = cidEncoding.name;
         }
-        properties.cMap = CMapFactory.create(cidEncoding,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null);
-        properties.vertical = properties.cMap.vertical;
+        cMapPromise = CMapFactory.create(cidEncoding,
+          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).then(
+            function (cMap) {
+          properties.cMap = cMap;
+          properties.vertical = properties.cMap.vertical;
+        });
+      } else {
+        cMapPromise = Promise.resolve(undefined);
       }
-      this.extractDataStructures(dict, baseDict, xref, properties);
-      this.extractWidths(dict, xref, descriptor, properties);
 
-      if (type === 'Type3') {
-        properties.isType3Font = true;
-      }
+      return cMapPromise.then(function () {
+        return this.extractDataStructures(dict, baseDict, xref, properties);
+      }.bind(this)).then(function (properties) {
+        this.extractWidths(dict, xref, descriptor, properties);
 
-      return new Font(fontName.name, fontFile, properties);
+        if (type === 'Type3') {
+          properties.isType3Font = true;
+        }
+
+        return new Font(fontName.name, fontFile, properties);
+      }.bind(this));
     }
   };
 
