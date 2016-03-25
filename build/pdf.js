@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.157';
-var pdfjsBuild = 'c22c85f';
+var pdfjsVersion = '1.4.162';
+var pdfjsBuild = 'df7afcf';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -43,114 +43,13 @@ var pdfjsBuild = 'c22c85f';
 
 (function (root, factory) {
   {
-    factory((root.pdfjsSharedGlobal = {}));
+    factory((root.pdfjsSharedUtil = {}));
   }
 }(this, function (exports) {
 
-  var globalScope = (typeof window !== 'undefined') ? window :
-                    (typeof global !== 'undefined') ? global :
-                    (typeof self !== 'undefined') ? self : this;
-
-  var isWorker = (typeof window === 'undefined');
-
-  // The global PDFJS object exposes the API
-  // In production, it will be declared outside a global wrapper
-  // In development, it will be declared here
-  if (!globalScope.PDFJS) {
-    globalScope.PDFJS = {};
-  }
-
-  if (typeof pdfjsVersion !== 'undefined') {
-    globalScope.PDFJS.version = pdfjsVersion;
-  }
-  if (typeof pdfjsVersion !== 'undefined') {
-    globalScope.PDFJS.build = pdfjsBuild;
-  }
-
-  globalScope.PDFJS.pdfBug = false;
-
-  exports.globalScope = globalScope;
-  exports.isWorker = isWorker;
-  exports.PDFJS = globalScope.PDFJS;
-}));
-
-
-(function (root, factory) {
-  {
-    factory((root.pdfjsDisplayDOMUtils = {}), root.pdfjsSharedGlobal);
-  }
-}(this, function (exports, sharedGlobal) {
-
-var PDFJS = sharedGlobal.PDFJS;
-
-/**
- * Optimised CSS custom property getter/setter.
- * @class
- */
-var CustomStyle = (function CustomStyleClosure() {
-
-  // As noted on: http://www.zachstronaut.com/posts/2009/02/17/
-  //              animate-css-transforms-firefox-webkit.html
-  // in some versions of IE9 it is critical that ms appear in this list
-  // before Moz
-  var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
-  var _cache = Object.create(null);
-
-  function CustomStyle() {}
-
-  CustomStyle.getProp = function get(propName, element) {
-    // check cache only when no element is given
-    if (arguments.length === 1 && typeof _cache[propName] === 'string') {
-      return _cache[propName];
-    }
-
-    element = element || document.documentElement;
-    var style = element.style, prefixed, uPropName;
-
-    // test standard property first
-    if (typeof style[propName] === 'string') {
-      return (_cache[propName] = propName);
-    }
-
-    // capitalize
-    uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
-
-    // test vendor specific properties
-    for (var i = 0, l = prefixes.length; i < l; i++) {
-      prefixed = prefixes[i] + uPropName;
-      if (typeof style[prefixed] === 'string') {
-        return (_cache[propName] = prefixed);
-      }
-    }
-
-    //if all fails then set to undefined
-    return (_cache[propName] = 'undefined');
-  };
-
-  CustomStyle.setProp = function set(propName, element, str) {
-    var prop = this.getProp(propName);
-    if (prop !== 'undefined') {
-      element.style[prop] = str;
-    }
-  };
-
-  return CustomStyle;
-})();
-
-PDFJS.CustomStyle = CustomStyle;
-
-exports.CustomStyle = CustomStyle;
-}));
-
-
-(function (root, factory) {
-  {
-    factory((root.pdfjsSharedUtil = {}), root.pdfjsSharedGlobal);
-  }
-}(this, function (exports, sharedGlobal) {
-
-var PDFJS = sharedGlobal.PDFJS;
-var globalScope = sharedGlobal.globalScope;
+var globalScope = (typeof window !== 'undefined') ? window :
+                  (typeof global !== 'undefined') ? global :
+                  (typeof self !== 'undefined') ? self : this;
 
 var FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
 
@@ -250,14 +149,14 @@ var FontType = {
   MMTYPE1: 10
 };
 
-PDFJS.VERBOSITY_LEVELS = {
+var VERBOSITY_LEVELS = {
   errors: 0,
   warnings: 1,
   infos: 5
 };
 
 // All the possible operations for an operator list.
-var OPS = PDFJS.OPS = {
+var OPS = {
   // Intentionally start from 1 so it is easy to spot bad operators that will be
   // 0's.
   dependency: 1,
@@ -353,18 +252,28 @@ var OPS = PDFJS.OPS = {
   constructPath: 91
 };
 
+var verbosity = VERBOSITY_LEVELS.warnings;
+
+function setVerbosityLevel(level) {
+  verbosity = level;
+}
+
+function getVerbosityLevel() {
+  return verbosity;
+}
+
 // A notice for devs. These are good for things that are helpful to devs, such
 // as warning that Workers were disabled, which is important to devs but not
 // end users.
 function info(msg) {
-  if (PDFJS.verbosity >= PDFJS.VERBOSITY_LEVELS.infos) {
+  if (verbosity >= VERBOSITY_LEVELS.infos) {
     console.log('Info: ' + msg);
   }
 }
 
 // Non-fatal warnings.
 function warn(msg) {
-  if (PDFJS.verbosity >= PDFJS.VERBOSITY_LEVELS.warnings) {
+  if (verbosity >= VERBOSITY_LEVELS.warnings) {
     console.log('Warning: ' + msg);
   }
 }
@@ -377,7 +286,7 @@ function deprecated(details) {
 // Fatal errors that should trigger the fallback UI and halt execution by
 // throwing an exception.
 function error(msg) {
-  if (PDFJS.verbosity >= PDFJS.VERBOSITY_LEVELS.errors) {
+  if (verbosity >= VERBOSITY_LEVELS.errors) {
     console.log('Error: ' + msg);
     console.log(backtrace());
   }
@@ -398,7 +307,7 @@ function assert(cond, msg) {
   }
 }
 
-var UNSUPPORTED_FEATURES = PDFJS.UNSUPPORTED_FEATURES = {
+var UNSUPPORTED_FEATURES = {
   unknown: 'unknown',
   forms: 'forms',
   javaScript: 'javaScript',
@@ -406,17 +315,6 @@ var UNSUPPORTED_FEATURES = PDFJS.UNSUPPORTED_FEATURES = {
   shadingPattern: 'shadingPattern',
   font: 'font'
 };
-
-// Gets the file name from a given URL.
-function getFilenameFromUrl(url) {
-  var anchor = url.indexOf('#');
-  var query = url.indexOf('?');
-  var end = Math.min(
-    anchor > 0 ? anchor : url.length,
-    query > 0 ? query : url.length);
-  return url.substring(url.lastIndexOf('/', end) + 1, end);
-}
-PDFJS.getFilenameFromUrl = getFilenameFromUrl;
 
 // Combines two URLs. The baseUrl shall be absolute URL. If the url is an
 // absolute URL, it will be returned as is.
@@ -465,27 +363,6 @@ function isValidUrl(url, allowRelative) {
       return false;
   }
 }
-PDFJS.isValidUrl = isValidUrl;
-
-/**
- * Adds various attributes (href, title, target, rel) to hyperlinks.
- * @param {HTMLLinkElement} link - The link element.
- * @param {Object} params - An object with the properties:
- * @param {string} params.url - An absolute URL.
- */
-function addLinkAttributes(link, params) {
-  var url = params && params.url;
-  link.href = link.title = (url ? removeNullCharacters(url) : '');
-
-  if (url) {
-    if (isExternalLinkTargetSet()) {
-      link.target = LinkTargetStringMap[PDFJS.externalLinkTarget];
-    }
-    // Strip referrer from the URL.
-    link.rel = PDFJS.externalLinkRel;
-  }
-}
-PDFJS.addLinkAttributes = addLinkAttributes;
 
 function shadow(obj, prop, value) {
   Object.defineProperty(obj, prop, { value: value,
@@ -494,7 +371,6 @@ function shadow(obj, prop, value) {
                                      writable: false });
   return value;
 }
-PDFJS.shadow = shadow;
 
 function getLookupTableFactory(initializer) {
   var lookup;
@@ -508,48 +384,7 @@ function getLookupTableFactory(initializer) {
   };
 }
 
-var LinkTarget = PDFJS.LinkTarget = {
-  NONE: 0, // Default value.
-  SELF: 1,
-  BLANK: 2,
-  PARENT: 3,
-  TOP: 4,
-};
-var LinkTargetStringMap = [
-  '',
-  '_self',
-  '_blank',
-  '_parent',
-  '_top'
-];
-
-function isExternalLinkTargetSet() {
-  if (PDFJS.openExternalLinksInNewWindow) {
-    deprecated('PDFJS.openExternalLinksInNewWindow, please use ' +
-               '"PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK" instead.');
-    if (PDFJS.externalLinkTarget === LinkTarget.NONE) {
-      PDFJS.externalLinkTarget = LinkTarget.BLANK;
-    }
-    // Reset the deprecated parameter, to suppress further warnings.
-    PDFJS.openExternalLinksInNewWindow = false;
-  }
-  switch (PDFJS.externalLinkTarget) {
-    case LinkTarget.NONE:
-      return false;
-    case LinkTarget.SELF:
-    case LinkTarget.BLANK:
-    case LinkTarget.PARENT:
-    case LinkTarget.TOP:
-      return true;
-  }
-  warn('PDFJS.externalLinkTarget is invalid: ' + PDFJS.externalLinkTarget);
-  // Reset the external link target, to suppress further warnings.
-  PDFJS.externalLinkTarget = LinkTarget.NONE;
-  return false;
-}
-PDFJS.isExternalLinkTargetSet = isExternalLinkTargetSet;
-
-var PasswordResponses = PDFJS.PasswordResponses = {
+var PasswordResponses = {
   NEED_PASSWORD: 1,
   INCORRECT_PASSWORD: 2
 };
@@ -566,7 +401,6 @@ var PasswordException = (function PasswordExceptionClosure() {
 
   return PasswordException;
 })();
-PDFJS.PasswordException = PasswordException;
 
 var UnknownErrorException = (function UnknownErrorExceptionClosure() {
   function UnknownErrorException(msg, details) {
@@ -580,7 +414,6 @@ var UnknownErrorException = (function UnknownErrorExceptionClosure() {
 
   return UnknownErrorException;
 })();
-PDFJS.UnknownErrorException = UnknownErrorException;
 
 var InvalidPDFException = (function InvalidPDFExceptionClosure() {
   function InvalidPDFException(msg) {
@@ -593,7 +426,6 @@ var InvalidPDFException = (function InvalidPDFExceptionClosure() {
 
   return InvalidPDFException;
 })();
-PDFJS.InvalidPDFException = InvalidPDFException;
 
 var MissingPDFException = (function MissingPDFExceptionClosure() {
   function MissingPDFException(msg) {
@@ -606,7 +438,6 @@ var MissingPDFException = (function MissingPDFExceptionClosure() {
 
   return MissingPDFException;
 })();
-PDFJS.MissingPDFException = MissingPDFException;
 
 var UnexpectedResponseException =
     (function UnexpectedResponseExceptionClosure() {
@@ -621,7 +452,6 @@ var UnexpectedResponseException =
 
   return UnexpectedResponseException;
 })();
-PDFJS.UnexpectedResponseException = UnexpectedResponseException;
 
 var NotImplementedException = (function NotImplementedExceptionClosure() {
   function NotImplementedException(msg) {
@@ -670,7 +500,6 @@ function removeNullCharacters(str) {
   }
   return str.replace(NullCharactersRegExp, '');
 }
-PDFJS.removeNullCharacters = removeNullCharacters;
 
 function bytesToString(bytes) {
   assert(bytes !== null && typeof bytes === 'object' &&
@@ -784,29 +613,6 @@ function isLittleEndian() {
   return (buffer16[0] === 1);
 }
 
-Object.defineProperty(PDFJS, 'isLittleEndian', {
-  configurable: true,
-  get: function PDFJS_isLittleEndian() {
-    return shadow(PDFJS, 'isLittleEndian', isLittleEndian());
-  }
-});
-
-  // Lazy test if the userAgent support CanvasTypedArrays
-function hasCanvasTypedArrays() {
-  var canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 1;
-  var ctx = canvas.getContext('2d');
-  var imageData = ctx.createImageData(1, 1);
-  return (typeof imageData.data.buffer !== 'undefined');
-}
-
-Object.defineProperty(PDFJS, 'hasCanvasTypedArrays', {
-  configurable: true,
-  get: function PDFJS_hasCanvasTypedArrays() {
-    return shadow(PDFJS, 'hasCanvasTypedArrays', hasCanvasTypedArrays());
-  }
-});
-
 var Uint32ArrayView = (function Uint32ArrayViewClosure() {
 
   function Uint32ArrayView(buffer, length) {
@@ -851,7 +657,7 @@ exports.Uint32ArrayView = Uint32ArrayView;
 
 var IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 
-var Util = PDFJS.Util = (function UtilClosure() {
+var Util = (function UtilClosure() {
   function Util() {}
 
   var rgbBuf = ['rgb(', 0, ',', 0, ',', 0, ')'];
@@ -1104,7 +910,7 @@ var Util = PDFJS.Util = (function UtilClosure() {
  * @class
  * @alias PDFJS.PageViewport
  */
-var PageViewport = PDFJS.PageViewport = (function PageViewportClosure() {
+var PageViewport = (function PageViewportClosure() {
   /**
    * @constructor
    * @private
@@ -1327,8 +1133,6 @@ function createPromiseCapability() {
   });
   return capability;
 }
-
-PDFJS.createPromiseCapability = createPromiseCapability;
 
 /**
  * Polyfill for Promises:
@@ -1706,7 +1510,7 @@ var StatTimer = (function StatTimerClosure() {
   return StatTimer;
 })();
 
-PDFJS.createBlob = function createBlob(data, contentType) {
+var createBlob = function createBlob(data, contentType) {
   if (typeof Blob !== 'undefined') {
     return new Blob([data], { type: contentType });
   }
@@ -1716,15 +1520,15 @@ PDFJS.createBlob = function createBlob(data, contentType) {
   return bb.getBlob(contentType);
 };
 
-PDFJS.createObjectURL = (function createObjectURLClosure() {
+var createObjectURL = (function createObjectURLClosure() {
   // Blob/createObjectURL is not available, falling back to data schema.
   var digits =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 
-  return function createObjectURL(data, contentType) {
-    if (!PDFJS.disableCreateObjectURL &&
+  return function createObjectURL(data, contentType, forceDataSchema) {
+    if (!forceDataSchema &&
         typeof URL !== 'undefined' && URL.createObjectURL) {
-      var blob = PDFJS.createBlob(data, contentType);
+      var blob = createBlob(data, contentType);
       return URL.createObjectURL(blob);
     }
 
@@ -2510,6 +2314,7 @@ function loadJpegStream(id, imageUrl, objs) {
 exports.FONT_IDENTITY_MATRIX = FONT_IDENTITY_MATRIX;
 exports.IDENTITY_MATRIX = IDENTITY_MATRIX;
 exports.OPS = OPS;
+exports.VERBOSITY_LEVELS = VERBOSITY_LEVELS;
 exports.UNSUPPORTED_FEATURES = UNSUPPORTED_FEATURES;
 exports.AnnotationBorderStyleType = AnnotationBorderStyleType;
 exports.AnnotationFlag = AnnotationFlag;
@@ -2517,12 +2322,11 @@ exports.AnnotationType = AnnotationType;
 exports.FontType = FontType;
 exports.ImageKind = ImageKind;
 exports.InvalidPDFException = InvalidPDFException;
-exports.LinkTarget = LinkTarget;
-exports.LinkTargetStringMap = LinkTargetStringMap;
 exports.MessageHandler = MessageHandler;
 exports.MissingDataException = MissingDataException;
 exports.MissingPDFException = MissingPDFException;
 exports.NotImplementedException = NotImplementedException;
+exports.PageViewport = PageViewport;
 exports.PasswordException = PasswordException;
 exports.PasswordResponses = PasswordResponses;
 exports.StatTimer = StatTimer;
@@ -2537,29 +2341,32 @@ exports.arraysToBytes = arraysToBytes;
 exports.assert = assert;
 exports.bytesToString = bytesToString;
 exports.combineUrl = combineUrl;
+exports.createBlob = createBlob;
 exports.createPromiseCapability = createPromiseCapability;
+exports.createObjectURL = createObjectURL;
 exports.deprecated = deprecated;
 exports.error = error;
-exports.getFilenameFromUrl = getFilenameFromUrl;
 exports.getLookupTableFactory = getLookupTableFactory;
+exports.getVerbosityLevel = getVerbosityLevel;
+exports.globalScope = globalScope;
 exports.info = info;
 exports.isArray = isArray;
 exports.isArrayBuffer = isArrayBuffer;
 exports.isBool = isBool;
 exports.isEmptyObj = isEmptyObj;
-exports.isExternalLinkTargetSet = isExternalLinkTargetSet;
 exports.isInt = isInt;
 exports.isNum = isNum;
 exports.isString = isString;
 exports.isSameOrigin = isSameOrigin;
 exports.isValidUrl = isValidUrl;
-exports.addLinkAttributes = addLinkAttributes;
+exports.isLittleEndian = isLittleEndian;
 exports.loadJpegStream = loadJpegStream;
 exports.log2 = log2;
 exports.readInt8 = readInt8;
 exports.readUint16 = readUint16;
 exports.readUint32 = readUint32;
 exports.removeNullCharacters = removeNullCharacters;
+exports.setVerbosityLevel = setVerbosityLevel;
 exports.shadow = shadow;
 exports.string32 = string32;
 exports.stringToBytes = stringToBytes;
@@ -2572,894 +2379,250 @@ exports.warn = warn;
 
 (function (root, factory) {
   {
-    factory((root.pdfjsDisplayAnnotationLayer = {}), root.pdfjsSharedUtil,
-      root.pdfjsDisplayDOMUtils);
+    factory((root.pdfjsDisplayGlobal = {}), root.pdfjsSharedUtil);
   }
-}(this, function (exports, sharedUtil, displayDOMUtils) {
+}(this, function (exports, sharedUtil) {
 
-var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
-var AnnotationType = sharedUtil.AnnotationType;
-var Util = sharedUtil.Util;
-var addLinkAttributes = sharedUtil.addLinkAttributes;
-var getFilenameFromUrl = sharedUtil.getFilenameFromUrl;
-var warn = sharedUtil.warn;
-var CustomStyle = displayDOMUtils.CustomStyle;
+  var globalScope = sharedUtil.globalScope;
 
-/**
- * @typedef {Object} AnnotationElementParameters
- * @property {Object} data
- * @property {HTMLDivElement} layer
- * @property {PDFPage} page
- * @property {PageViewport} viewport
- * @property {IPDFLinkService} linkService
- * @property {DownloadManager} downloadManager
- */
+  var isWorker = (typeof window === 'undefined');
 
-/**
- * @class
- * @alias AnnotationElementFactory
- */
-function AnnotationElementFactory() {}
-AnnotationElementFactory.prototype =
-    /** @lends AnnotationElementFactory.prototype */ {
-  /**
-   * @param {AnnotationElementParameters} parameters
-   * @returns {AnnotationElement}
-   */
-  create: function AnnotationElementFactory_create(parameters) {
-    var subtype = parameters.data.annotationType;
+  // The global PDFJS object exposes the API
+  // In production, it will be declared outside a global wrapper
+  // In development, it will be declared here
+  if (!globalScope.PDFJS) {
+    globalScope.PDFJS = {};
+  }
+  var PDFJS = globalScope.PDFJS;
 
-    switch (subtype) {
-      case AnnotationType.LINK:
-        return new LinkAnnotationElement(parameters);
+  if (typeof pdfjsVersion !== 'undefined') {
+    PDFJS.version = pdfjsVersion;
+  }
+  if (typeof pdfjsBuild !== 'undefined') {
+    PDFJS.build = pdfjsBuild;
+  }
 
-      case AnnotationType.TEXT:
-        return new TextAnnotationElement(parameters);
+  PDFJS.pdfBug = false;
 
-      case AnnotationType.WIDGET:
-        return new WidgetAnnotationElement(parameters);
+  if (PDFJS.verbosity !== undefined) {
+    sharedUtil.setVerbosityLevel(PDFJS.verbosity);
+  }
+  delete PDFJS.verbosity;
+  Object.defineProperty(PDFJS, 'verbosity', {
+    get: function () { return sharedUtil.getVerbosityLevel(); },
+    set: function (level) { sharedUtil.setVerbosityLevel(level); },
+    enumerable: true,
+    configurable: true
+  });
 
-      case AnnotationType.POPUP:
-        return new PopupAnnotationElement(parameters);
-
-      case AnnotationType.HIGHLIGHT:
-        return new HighlightAnnotationElement(parameters);
-
-      case AnnotationType.UNDERLINE:
-        return new UnderlineAnnotationElement(parameters);
-
-      case AnnotationType.SQUIGGLY:
-        return new SquigglyAnnotationElement(parameters);
-
-      case AnnotationType.STRIKEOUT:
-        return new StrikeOutAnnotationElement(parameters);
-
-      case AnnotationType.FILEATTACHMENT:
-        return new FileAttachmentAnnotationElement(parameters);
-
-      default:
-        return new AnnotationElement(parameters);
+  PDFJS.VERBOSITY_LEVELS = sharedUtil.VERBOSITY_LEVELS;
+  PDFJS.OPS = sharedUtil.OPS;
+  PDFJS.UNSUPPORTED_FEATURES = sharedUtil.UNSUPPORTED_FEATURES;
+  PDFJS.isValidUrl = sharedUtil.isValidUrl;
+  PDFJS.shadow = sharedUtil.shadow;
+  PDFJS.createBlob = sharedUtil.createBlob;
+  PDFJS.createObjectURL = function PDFJS_createObjectURL(data, contentType) {
+    return sharedUtil.createObjectURL(data, contentType,
+                                      PDFJS.disableCreateObjectURL);
+  };
+  Object.defineProperty(PDFJS, 'isLittleEndian', {
+    configurable: true,
+    get: function PDFJS_isLittleEndian() {
+      var value = sharedUtil.isLittleEndian();
+      return sharedUtil.shadow(PDFJS, 'isLittleEndian', value);
     }
+  });
+  PDFJS.removeNullCharacters = sharedUtil.removeNullCharacters;
+  PDFJS.PasswordResponses = sharedUtil.PasswordResponses;
+  PDFJS.PasswordException = sharedUtil.PasswordException;
+  PDFJS.UnknownErrorException = sharedUtil.UnknownErrorException;
+  PDFJS.InvalidPDFException = sharedUtil.InvalidPDFException;
+  PDFJS.MissingPDFException = sharedUtil.MissingPDFException;
+  PDFJS.UnexpectedResponseException = sharedUtil.UnexpectedResponseException;
+  PDFJS.Util = sharedUtil.Util;
+  PDFJS.PageViewport = sharedUtil.PageViewport;
+  PDFJS.createPromiseCapability = sharedUtil.createPromiseCapability;
+
+  exports.globalScope = globalScope;
+  exports.isWorker = isWorker;
+  exports.PDFJS = globalScope.PDFJS;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsDisplayDOMUtils = {}), root.pdfjsSharedUtil,
+      root.pdfjsDisplayGlobal);
   }
+}(this, function (exports, sharedUtil, displayGlobal) {
+
+var deprecated = sharedUtil.deprecated;
+var removeNullCharacters = sharedUtil.removeNullCharacters;
+var shadow = sharedUtil.shadow;
+var warn = sharedUtil.warn;
+var PDFJS = displayGlobal.PDFJS;
+
+/**
+ * Optimised CSS custom property getter/setter.
+ * @class
+ */
+var CustomStyle = (function CustomStyleClosure() {
+
+  // As noted on: http://www.zachstronaut.com/posts/2009/02/17/
+  //              animate-css-transforms-firefox-webkit.html
+  // in some versions of IE9 it is critical that ms appear in this list
+  // before Moz
+  var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
+  var _cache = Object.create(null);
+
+  function CustomStyle() {}
+
+  CustomStyle.getProp = function get(propName, element) {
+    // check cache only when no element is given
+    if (arguments.length === 1 && typeof _cache[propName] === 'string') {
+      return _cache[propName];
+    }
+
+    element = element || document.documentElement;
+    var style = element.style, prefixed, uPropName;
+
+    // test standard property first
+    if (typeof style[propName] === 'string') {
+      return (_cache[propName] = propName);
+    }
+
+    // capitalize
+    uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
+
+    // test vendor specific properties
+    for (var i = 0, l = prefixes.length; i < l; i++) {
+      prefixed = prefixes[i] + uPropName;
+      if (typeof style[prefixed] === 'string') {
+        return (_cache[propName] = prefixed);
+      }
+    }
+
+    //if all fails then set to undefined
+    return (_cache[propName] = 'undefined');
+  };
+
+  CustomStyle.setProp = function set(propName, element, str) {
+    var prop = this.getProp(propName);
+    if (prop !== 'undefined') {
+      element.style[prop] = str;
+    }
+  };
+
+  return CustomStyle;
+})();
+
+PDFJS.CustomStyle = CustomStyle;
+
+  // Lazy test if the userAgent support CanvasTypedArrays
+function hasCanvasTypedArrays() {
+  var canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 1;
+  var ctx = canvas.getContext('2d');
+  var imageData = ctx.createImageData(1, 1);
+  return (typeof imageData.data.buffer !== 'undefined');
+}
+
+Object.defineProperty(PDFJS, 'hasCanvasTypedArrays', {
+  configurable: true,
+  get: function PDFJS_hasCanvasTypedArrays() {
+    return shadow(PDFJS, 'hasCanvasTypedArrays', hasCanvasTypedArrays());
+  }
+});
+
+var LinkTarget = {
+  NONE: 0, // Default value.
+  SELF: 1,
+  BLANK: 2,
+  PARENT: 3,
+  TOP: 4,
 };
 
-/**
- * @class
- * @alias AnnotationElement
- */
-var AnnotationElement = (function AnnotationElementClosure() {
-  function AnnotationElement(parameters, isRenderable) {
-    this.isRenderable = isRenderable || false;
-    this.data = parameters.data;
-    this.layer = parameters.layer;
-    this.page = parameters.page;
-    this.viewport = parameters.viewport;
-    this.linkService = parameters.linkService;
-    this.downloadManager = parameters.downloadManager;
+PDFJS.LinkTarget = LinkTarget;
 
-    if (isRenderable) {
-      this.container = this._createContainer();
+var LinkTargetStringMap = [
+  '',
+  '_self',
+  '_blank',
+  '_parent',
+  '_top'
+];
+
+function isExternalLinkTargetSet() {
+  if (PDFJS.openExternalLinksInNewWindow) {
+    deprecated('PDFJS.openExternalLinksInNewWindow, please use ' +
+      '"PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK" instead.');
+    if (PDFJS.externalLinkTarget === LinkTarget.NONE) {
+      PDFJS.externalLinkTarget = LinkTarget.BLANK;
     }
+    // Reset the deprecated parameter, to suppress further warnings.
+    PDFJS.openExternalLinksInNewWindow = false;
   }
-
-  AnnotationElement.prototype = /** @lends AnnotationElement.prototype */ {
-    /**
-     * Create an empty container for the annotation's HTML element.
-     *
-     * @private
-     * @memberof AnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    _createContainer: function AnnotationElement_createContainer() {
-      var data = this.data, page = this.page, viewport = this.viewport;
-      var container = document.createElement('section');
-      var width = data.rect[2] - data.rect[0];
-      var height = data.rect[3] - data.rect[1];
-
-      container.setAttribute('data-annotation-id', data.id);
-
-      // Do *not* modify `data.rect`, since that will corrupt the annotation
-      // position on subsequent calls to `_createContainer` (see issue 6804).
-      var rect = Util.normalizeRect([
-        data.rect[0],
-        page.view[3] - data.rect[1] + page.view[1],
-        data.rect[2],
-        page.view[3] - data.rect[3] + page.view[1]
-      ]);
-
-      CustomStyle.setProp('transform', container,
-                          'matrix(' + viewport.transform.join(',') + ')');
-      CustomStyle.setProp('transformOrigin', container,
-                          -rect[0] + 'px ' + -rect[1] + 'px');
-
-      if (data.borderStyle.width > 0) {
-        container.style.borderWidth = data.borderStyle.width + 'px';
-        if (data.borderStyle.style !== AnnotationBorderStyleType.UNDERLINE) {
-          // Underline styles only have a bottom border, so we do not need
-          // to adjust for all borders. This yields a similar result as
-          // Adobe Acrobat/Reader.
-          width = width - 2 * data.borderStyle.width;
-          height = height - 2 * data.borderStyle.width;
-        }
-
-        var horizontalRadius = data.borderStyle.horizontalCornerRadius;
-        var verticalRadius = data.borderStyle.verticalCornerRadius;
-        if (horizontalRadius > 0 || verticalRadius > 0) {
-          var radius = horizontalRadius + 'px / ' + verticalRadius + 'px';
-          CustomStyle.setProp('borderRadius', container, radius);
-        }
-
-        switch (data.borderStyle.style) {
-          case AnnotationBorderStyleType.SOLID:
-            container.style.borderStyle = 'solid';
-            break;
-
-          case AnnotationBorderStyleType.DASHED:
-            container.style.borderStyle = 'dashed';
-            break;
-
-          case AnnotationBorderStyleType.BEVELED:
-            warn('Unimplemented border style: beveled');
-            break;
-
-          case AnnotationBorderStyleType.INSET:
-            warn('Unimplemented border style: inset');
-            break;
-
-          case AnnotationBorderStyleType.UNDERLINE:
-            container.style.borderBottomStyle = 'solid';
-            break;
-
-          default:
-            break;
-        }
-
-        if (data.color) {
-          container.style.borderColor =
-            Util.makeCssRgb(data.color[0] | 0,
-                            data.color[1] | 0,
-                            data.color[2] | 0);
-        } else {
-          // Transparent (invisible) border, so do not draw it at all.
-          container.style.borderWidth = 0;
-        }
-      }
-
-      container.style.left = rect[0] + 'px';
-      container.style.top = rect[1] + 'px';
-
-      container.style.width = width + 'px';
-      container.style.height = height + 'px';
-
-      return container;
-    },
-
-    /**
-     * Create a popup for the annotation's HTML element. This is used for
-     * annotations that do not have a Popup entry in the dictionary, but
-     * are of a type that works with popups (such as Highlight annotations).
-     *
-     * @private
-     * @param {HTMLSectionElement} container
-     * @param {HTMLDivElement|HTMLImageElement|null} trigger
-     * @param {Object} data
-     * @memberof AnnotationElement
-     */
-    _createPopup:
-        function AnnotationElement_createPopup(container, trigger, data) {
-      // If no trigger element is specified, create it.
-      if (!trigger) {
-        trigger = document.createElement('div');
-        trigger.style.height = container.style.height;
-        trigger.style.width = container.style.width;
-        container.appendChild(trigger);
-      }
-
-      var popupElement = new PopupElement({
-        container: container,
-        trigger: trigger,
-        color: data.color,
-        title: data.title,
-        contents: data.contents,
-        hideWrapper: true
-      });
-      var popup = popupElement.render();
-
-      // Position the popup next to the annotation's container.
-      popup.style.left = container.style.width;
-
-      container.appendChild(popup);
-    },
-
-    /**
-     * Render the annotation's HTML element in the empty container.
-     *
-     * @public
-     * @memberof AnnotationElement
-     */
-    render: function AnnotationElement_render() {
-      throw new Error('Abstract method AnnotationElement.render called');
-    }
-  };
-
-  return AnnotationElement;
-})();
-
-/**
- * @class
- * @alias LinkAnnotationElement
- */
-var LinkAnnotationElement = (function LinkAnnotationElementClosure() {
-  function LinkAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters, true);
+  switch (PDFJS.externalLinkTarget) {
+    case LinkTarget.NONE:
+      return false;
+    case LinkTarget.SELF:
+    case LinkTarget.BLANK:
+    case LinkTarget.PARENT:
+    case LinkTarget.TOP:
+      return true;
   }
-
-  Util.inherit(LinkAnnotationElement, AnnotationElement, {
-    /**
-     * Render the link annotation's HTML element in the empty container.
-     *
-     * @public
-     * @memberof LinkAnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function LinkAnnotationElement_render() {
-      this.container.className = 'linkAnnotation';
-
-      var link = document.createElement('a');
-      addLinkAttributes(link, { url: this.data.url });
-
-      if (!this.data.url) {
-        if (this.data.action) {
-          this._bindNamedAction(link, this.data.action);
-        } else {
-          this._bindLink(link, ('dest' in this.data) ? this.data.dest : null);
-        }
-      }
-
-      this.container.appendChild(link);
-      return this.container;
-    },
-
-    /**
-     * Bind internal links to the link element.
-     *
-     * @private
-     * @param {Object} link
-     * @param {Object} destination
-     * @memberof LinkAnnotationElement
-     */
-    _bindLink: function LinkAnnotationElement_bindLink(link, destination) {
-      var self = this;
-
-      link.href = this.linkService.getDestinationHash(destination);
-      link.onclick = function() {
-        if (destination) {
-          self.linkService.navigateTo(destination);
-        }
-        return false;
-      };
-      if (destination) {
-        link.className = 'internalLink';
-      }
-    },
-
-    /**
-     * Bind named actions to the link element.
-     *
-     * @private
-     * @param {Object} link
-     * @param {Object} action
-     * @memberof LinkAnnotationElement
-     */
-    _bindNamedAction:
-        function LinkAnnotationElement_bindNamedAction(link, action) {
-      var self = this;
-
-      link.href = this.linkService.getAnchorUrl('');
-      link.onclick = function() {
-        self.linkService.executeNamedAction(action);
-        return false;
-      };
-      link.className = 'internalLink';
-    }
-  });
-
-  return LinkAnnotationElement;
-})();
+  warn('PDFJS.externalLinkTarget is invalid: ' + PDFJS.externalLinkTarget);
+  // Reset the external link target, to suppress further warnings.
+  PDFJS.externalLinkTarget = LinkTarget.NONE;
+  return false;
+}
+PDFJS.isExternalLinkTargetSet = isExternalLinkTargetSet;
 
 /**
- * @class
- * @alias TextAnnotationElement
+ * Adds various attributes (href, title, target, rel) to hyperlinks.
+ * @param {HTMLLinkElement} link - The link element.
+ * @param {Object} params - An object with the properties:
+ * @param {string} params.url - An absolute URL.
  */
-var TextAnnotationElement = (function TextAnnotationElementClosure() {
-  function TextAnnotationElement(parameters) {
-    var isRenderable = !!(parameters.data.hasPopup ||
-                          parameters.data.title || parameters.data.contents);
-    AnnotationElement.call(this, parameters, isRenderable);
+function addLinkAttributes(link, params) {
+  var url = params && params.url;
+  link.href = link.title = (url ? removeNullCharacters(url) : '');
+
+  if (url) {
+    if (isExternalLinkTargetSet()) {
+      link.target = LinkTargetStringMap[PDFJS.externalLinkTarget];
+    }
+    // Strip referrer from the URL.
+    link.rel = PDFJS.externalLinkRel;
   }
-
-  Util.inherit(TextAnnotationElement, AnnotationElement, {
-    /**
-     * Render the text annotation's HTML element in the empty container.
-     *
-     * @public
-     * @memberof TextAnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function TextAnnotationElement_render() {
-      this.container.className = 'textAnnotation';
-
-      var image = document.createElement('img');
-      image.style.height = this.container.style.height;
-      image.style.width = this.container.style.width;
-      image.src = PDFJS.imageResourcesPath + 'annotation-' +
-        this.data.name.toLowerCase() + '.svg';
-      image.alt = '[{{type}} Annotation]';
-      image.dataset.l10nId = 'text_annotation_type';
-      image.dataset.l10nArgs = JSON.stringify({type: this.data.name});
-
-      if (!this.data.hasPopup) {
-        this._createPopup(this.container, image, this.data);
-      }
-
-      this.container.appendChild(image);
-      return this.container;
-    }
-  });
-
-  return TextAnnotationElement;
-})();
-
-/**
- * @class
- * @alias WidgetAnnotationElement
- */
-var WidgetAnnotationElement = (function WidgetAnnotationElementClosure() {
-  function WidgetAnnotationElement(parameters) {
-    var isRenderable = !parameters.data.hasAppearance &&
-                       !!parameters.data.fieldValue;
-    AnnotationElement.call(this, parameters, isRenderable);
-  }
-
-  Util.inherit(WidgetAnnotationElement, AnnotationElement, {
-    /**
-     * Render the widget annotation's HTML element in the empty container.
-     *
-     * @public
-     * @memberof WidgetAnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function WidgetAnnotationElement_render() {
-      var content = document.createElement('div');
-      content.textContent = this.data.fieldValue;
-      var textAlignment = this.data.textAlignment;
-      content.style.textAlign = ['left', 'center', 'right'][textAlignment];
-      content.style.verticalAlign = 'middle';
-      content.style.display = 'table-cell';
-
-      var font = (this.data.fontRefName ?
-        this.page.commonObjs.getData(this.data.fontRefName) : null);
-      this._setTextStyle(content, font);
-
-      this.container.appendChild(content);
-      return this.container;
-    },
-
-    /**
-     * Apply text styles to the text in the element.
-     *
-     * @private
-     * @param {HTMLDivElement} element
-     * @param {Object} font
-     * @memberof WidgetAnnotationElement
-     */
-    _setTextStyle:
-        function WidgetAnnotationElement_setTextStyle(element, font) {
-      // TODO: This duplicates some of the logic in CanvasGraphics.setFont().
-      var style = element.style;
-      style.fontSize = this.data.fontSize + 'px';
-      style.direction = (this.data.fontDirection < 0 ? 'rtl': 'ltr');
-
-      if (!font) {
-        return;
-      }
-
-      style.fontWeight = (font.black ?
-        (font.bold ? '900' : 'bold') :
-        (font.bold ? 'bold' : 'normal'));
-      style.fontStyle = (font.italic ? 'italic' : 'normal');
-
-      // Use a reasonable default font if the font doesn't specify a fallback.
-      var fontFamily = font.loadedName ? '"' + font.loadedName + '", ' : '';
-      var fallbackName = font.fallbackName || 'Helvetica, sans-serif';
-      style.fontFamily = fontFamily + fallbackName;
-    }
-  });
-
-  return WidgetAnnotationElement;
-})();
-
-/**
- * @class
- * @alias PopupAnnotationElement
- */
-var PopupAnnotationElement = (function PopupAnnotationElementClosure() {
-  function PopupAnnotationElement(parameters) {
-    var isRenderable = !!(parameters.data.title || parameters.data.contents);
-    AnnotationElement.call(this, parameters, isRenderable);
-  }
-
-  Util.inherit(PopupAnnotationElement, AnnotationElement, {
-    /**
-     * Render the popup annotation's HTML element in the empty container.
-     *
-     * @public
-     * @memberof PopupAnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function PopupAnnotationElement_render() {
-      this.container.className = 'popupAnnotation';
-
-      var selector = '[data-annotation-id="' + this.data.parentId + '"]';
-      var parentElement = this.layer.querySelector(selector);
-      if (!parentElement) {
-        return this.container;
-      }
-
-      var popup = new PopupElement({
-        container: this.container,
-        trigger: parentElement,
-        color: this.data.color,
-        title: this.data.title,
-        contents: this.data.contents
-      });
-
-      // Position the popup next to the parent annotation's container.
-      // PDF viewers ignore a popup annotation's rectangle.
-      var parentLeft = parseFloat(parentElement.style.left);
-      var parentWidth = parseFloat(parentElement.style.width);
-      CustomStyle.setProp('transformOrigin', this.container,
-                          -(parentLeft + parentWidth) + 'px -' +
-                          parentElement.style.top);
-      this.container.style.left = (parentLeft + parentWidth) + 'px';
-
-      this.container.appendChild(popup.render());
-      return this.container;
-    }
-  });
-
-  return PopupAnnotationElement;
-})();
-
-/**
- * @class
- * @alias PopupElement
- */
-var PopupElement = (function PopupElementClosure() {
-  var BACKGROUND_ENLIGHT = 0.7;
-
-  function PopupElement(parameters) {
-    this.container = parameters.container;
-    this.trigger = parameters.trigger;
-    this.color = parameters.color;
-    this.title = parameters.title;
-    this.contents = parameters.contents;
-    this.hideWrapper = parameters.hideWrapper || false;
-
-    this.pinned = false;
-  }
-
-  PopupElement.prototype = /** @lends PopupElement.prototype */ {
-    /**
-     * Render the popup's HTML element.
-     *
-     * @public
-     * @memberof PopupElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function PopupElement_render() {
-      var wrapper = document.createElement('div');
-      wrapper.className = 'popupWrapper';
-
-      // For Popup annotations we hide the entire section because it contains
-      // only the popup. However, for Text annotations without a separate Popup
-      // annotation, we cannot hide the entire container as the image would
-      // disappear too. In that special case, hiding the wrapper suffices.
-      this.hideElement = (this.hideWrapper ? wrapper : this.container);
-      this.hideElement.setAttribute('hidden', true);
-
-      var popup = document.createElement('div');
-      popup.className = 'popup';
-
-      var color = this.color;
-      if (color) {
-        // Enlighten the color.
-        var r = BACKGROUND_ENLIGHT * (255 - color[0]) + color[0];
-        var g = BACKGROUND_ENLIGHT * (255 - color[1]) + color[1];
-        var b = BACKGROUND_ENLIGHT * (255 - color[2]) + color[2];
-        popup.style.backgroundColor = Util.makeCssRgb(r | 0, g | 0, b | 0);
-      }
-
-      var contents = this._formatContents(this.contents);
-      var title = document.createElement('h1');
-      title.textContent = this.title;
-
-      // Attach the event listeners to the trigger element.
-      this.trigger.addEventListener('click', this._toggle.bind(this));
-      this.trigger.addEventListener('mouseover', this._show.bind(this, false));
-      this.trigger.addEventListener('mouseout', this._hide.bind(this, false));
-      popup.addEventListener('click', this._hide.bind(this, true));
-
-      popup.appendChild(title);
-      popup.appendChild(contents);
-      wrapper.appendChild(popup);
-      return wrapper;
-    },
-
-    /**
-     * Format the contents of the popup by adding newlines where necessary.
-     *
-     * @private
-     * @param {string} contents
-     * @memberof PopupElement
-     * @returns {HTMLParagraphElement}
-     */
-    _formatContents: function PopupElement_formatContents(contents) {
-      var p = document.createElement('p');
-      var lines = contents.split(/(?:\r\n?|\n)/);
-      for (var i = 0, ii = lines.length; i < ii; ++i) {
-        var line = lines[i];
-        p.appendChild(document.createTextNode(line));
-        if (i < (ii - 1)) {
-          p.appendChild(document.createElement('br'));
-        }
-      }
-      return p;
-    },
-
-    /**
-     * Toggle the visibility of the popup.
-     *
-     * @private
-     * @memberof PopupElement
-     */
-    _toggle: function PopupElement_toggle() {
-      if (this.pinned) {
-        this._hide(true);
-      } else {
-        this._show(true);
-      }
-    },
-
-    /**
-     * Show the popup.
-     *
-     * @private
-     * @param {boolean} pin
-     * @memberof PopupElement
-     */
-    _show: function PopupElement_show(pin) {
-      if (pin) {
-        this.pinned = true;
-      }
-      if (this.hideElement.hasAttribute('hidden')) {
-        this.hideElement.removeAttribute('hidden');
-        this.container.style.zIndex += 1;
-      }
-    },
-
-    /**
-     * Hide the popup.
-     *
-     * @private
-     * @param {boolean} unpin
-     * @memberof PopupElement
-     */
-    _hide: function PopupElement_hide(unpin) {
-      if (unpin) {
-        this.pinned = false;
-      }
-      if (!this.hideElement.hasAttribute('hidden') && !this.pinned) {
-        this.hideElement.setAttribute('hidden', true);
-        this.container.style.zIndex -= 1;
-      }
-    }
-  };
-
-  return PopupElement;
-})();
-
-/**
- * @class
- * @alias HighlightAnnotationElement
- */
-var HighlightAnnotationElement = (
-    function HighlightAnnotationElementClosure() {
-  function HighlightAnnotationElement(parameters) {
-    var isRenderable = !!(parameters.data.hasPopup ||
-                          parameters.data.title || parameters.data.contents);
-    AnnotationElement.call(this, parameters, isRenderable);
-  }
-
-  Util.inherit(HighlightAnnotationElement, AnnotationElement, {
-    /**
-     * Render the highlight annotation's HTML element in the empty container.
-     *
-     * @public
-     * @memberof HighlightAnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function HighlightAnnotationElement_render() {
-      this.container.className = 'highlightAnnotation';
-
-      if (!this.data.hasPopup) {
-        this._createPopup(this.container, null, this.data);
-      }
-
-      return this.container;
-    }
-  });
-
-  return HighlightAnnotationElement;
-})();
-
-/**
- * @class
- * @alias UnderlineAnnotationElement
- */
-var UnderlineAnnotationElement = (
-    function UnderlineAnnotationElementClosure() {
-  function UnderlineAnnotationElement(parameters) {
-    var isRenderable = !!(parameters.data.hasPopup ||
-                          parameters.data.title || parameters.data.contents);
-    AnnotationElement.call(this, parameters, isRenderable);
-  }
-
-  Util.inherit(UnderlineAnnotationElement, AnnotationElement, {
-    /**
-     * Render the underline annotation's HTML element in the empty container.
-     *
-     * @public
-     * @memberof UnderlineAnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function UnderlineAnnotationElement_render() {
-      this.container.className = 'underlineAnnotation';
-
-      if (!this.data.hasPopup) {
-        this._createPopup(this.container, null, this.data);
-      }
-
-      return this.container;
-    }
-  });
-
-  return UnderlineAnnotationElement;
-})();
-
-/**
- * @class
- * @alias SquigglyAnnotationElement
- */
-var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
-  function SquigglyAnnotationElement(parameters) {
-    var isRenderable = !!(parameters.data.hasPopup ||
-                          parameters.data.title || parameters.data.contents);
-    AnnotationElement.call(this, parameters, isRenderable);
-  }
-
-  Util.inherit(SquigglyAnnotationElement, AnnotationElement, {
-    /**
-     * Render the squiggly annotation's HTML element in the empty container.
-     *
-     * @public
-     * @memberof SquigglyAnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function SquigglyAnnotationElement_render() {
-      this.container.className = 'squigglyAnnotation';
-
-      if (!this.data.hasPopup) {
-        this._createPopup(this.container, null, this.data);
-      }
-
-      return this.container;
-    }
-  });
-
-  return SquigglyAnnotationElement;
-})();
-
-/**
- * @class
- * @alias StrikeOutAnnotationElement
- */
-var StrikeOutAnnotationElement = (
-    function StrikeOutAnnotationElementClosure() {
-  function StrikeOutAnnotationElement(parameters) {
-    var isRenderable = !!(parameters.data.hasPopup ||
-                          parameters.data.title || parameters.data.contents);
-    AnnotationElement.call(this, parameters, isRenderable);
-  }
-
-  Util.inherit(StrikeOutAnnotationElement, AnnotationElement, {
-    /**
-     * Render the strikeout annotation's HTML element in the empty container.
-     *
-     * @public
-     * @memberof StrikeOutAnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function StrikeOutAnnotationElement_render() {
-      this.container.className = 'strikeoutAnnotation';
-
-      if (!this.data.hasPopup) {
-        this._createPopup(this.container, null, this.data);
-      }
-
-      return this.container;
-    }
-  });
-
-  return StrikeOutAnnotationElement;
-})();
-
-/**
- * @class
- * @alias FileAttachmentAnnotationElement
- */
-var FileAttachmentAnnotationElement = (
-    function FileAttachmentAnnotationElementClosure() {
-  function FileAttachmentAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters, true);
-
-    this.filename = getFilenameFromUrl(parameters.data.file.filename);
-    this.content = parameters.data.file.content;
-  }
-
-  Util.inherit(FileAttachmentAnnotationElement, AnnotationElement, {
-    /**
-     * Render the file attachment annotation's HTML element in the empty
-     * container.
-     *
-     * @public
-     * @memberof FileAttachmentAnnotationElement
-     * @returns {HTMLSectionElement}
-     */
-    render: function FileAttachmentAnnotationElement_render() {
-      this.container.className = 'fileAttachmentAnnotation';
-
-      var trigger = document.createElement('div');
-      trigger.style.height = this.container.style.height;
-      trigger.style.width = this.container.style.width;
-      trigger.addEventListener('dblclick', this._download.bind(this));
-
-      if (!this.data.hasPopup && (this.data.title || this.data.contents)) {
-        this._createPopup(this.container, trigger, this.data);
-      }
-
-      this.container.appendChild(trigger);
-      return this.container;
-    },
-
-    /**
-     * Download the file attachment associated with this annotation.
-     *
-     * @private
-     * @memberof FileAttachmentAnnotationElement
-     */
-    _download: function FileAttachmentAnnotationElement_download() {
-      if (!this.downloadManager) {
-        warn('Download cannot be started due to unavailable download manager');
-        return;
-      }
-      this.downloadManager.downloadData(this.content, this.filename, '');
-    }
-  });
-
-  return FileAttachmentAnnotationElement;
-})();
-
-/**
- * @typedef {Object} AnnotationLayerParameters
- * @property {PageViewport} viewport
- * @property {HTMLDivElement} div
- * @property {Array} annotations
- * @property {PDFPage} page
- * @property {IPDFLinkService} linkService
- */
-
-/**
- * @class
- * @alias AnnotationLayer
- */
-var AnnotationLayer = (function AnnotationLayerClosure() {
-  return {
-    /**
-     * Render a new annotation layer with all annotation elements.
-     *
-     * @public
-     * @param {AnnotationLayerParameters} parameters
-     * @memberof AnnotationLayer
-     */
-    render: function AnnotationLayer_render(parameters) {
-      var annotationElementFactory = new AnnotationElementFactory();
-
-      for (var i = 0, ii = parameters.annotations.length; i < ii; i++) {
-        var data = parameters.annotations[i];
-        if (!data) {
-          continue;
-        }
-
-        var properties = {
-          data: data,
-          layer: parameters.div,
-          page: parameters.page,
-          viewport: parameters.viewport,
-          linkService: parameters.linkService,
-          downloadManager: parameters.downloadManager
-        };
-        var element = annotationElementFactory.create(properties);
-        if (element.isRenderable) {
-          parameters.div.appendChild(element.render());
-        }
-      }
-    },
-
-    /**
-     * Update the annotation elements on existing annotation layer.
-     *
-     * @public
-     * @param {AnnotationLayerParameters} parameters
-     * @memberof AnnotationLayer
-     */
-    update: function AnnotationLayer_update(parameters) {
-      for (var i = 0, ii = parameters.annotations.length; i < ii; i++) {
-        var data = parameters.annotations[i];
-        var element = parameters.div.querySelector(
-          '[data-annotation-id="' + data.id + '"]');
-        if (element) {
-          CustomStyle.setProp('transform', element,
-            'matrix(' + parameters.viewport.transform.join(',') + ')');
-        }
-      }
-      parameters.div.removeAttribute('hidden');
-    }
-  };
-})();
-
-PDFJS.AnnotationLayer = AnnotationLayer;
-
-exports.AnnotationLayer = AnnotationLayer;
+}
+PDFJS.addLinkAttributes = addLinkAttributes;
+
+// Gets the file name from a given URL.
+function getFilenameFromUrl(url) {
+  var anchor = url.indexOf('#');
+  var query = url.indexOf('?');
+  var end = Math.min(
+    anchor > 0 ? anchor : url.length,
+    query > 0 ? query : url.length);
+  return url.substring(url.lastIndexOf('/', end) + 1, end);
+}
+PDFJS.getFilenameFromUrl = getFilenameFromUrl;
+
+exports.CustomStyle = CustomStyle;
+exports.addLinkAttributes = addLinkAttributes;
+exports.isExternalLinkTargetSet = isExternalLinkTargetSet;
+exports.getFilenameFromUrl = getFilenameFromUrl;
+exports.LinkTarget = LinkTarget;
 }));
 
 
 (function (root, factory) {
   {
     factory((root.pdfjsDisplayFontLoader = {}), root.pdfjsSharedUtil,
-      root.pdfjsSharedGlobal);
+      root.pdfjsDisplayGlobal);
   }
-}(this, function (exports, sharedUtil, sharedGlobal) {
+}(this, function (exports, sharedUtil, displayGlobal) {
 
 var assert = sharedUtil.assert;
 var bytesToString = sharedUtil.bytesToString;
@@ -3467,9 +2630,9 @@ var string32 = sharedUtil.string32;
 var shadow = sharedUtil.shadow;
 var warn = sharedUtil.warn;
 
-var PDFJS = sharedGlobal.PDFJS;
-var globalScope = sharedGlobal.globalScope;
-var isWorker = sharedGlobal.isWorker;
+var PDFJS = displayGlobal.PDFJS;
+var globalScope = displayGlobal.globalScope;
+var isWorker = displayGlobal.isWorker;
 
 function FontLoader(docId) {
   this.docId = docId;
@@ -3861,11 +3024,13 @@ exports.FontLoader = FontLoader;
 
 (function (root, factory) {
   {
-    factory((root.pdfjsDisplayMetadata = {}), root.pdfjsSharedUtil);
+    factory((root.pdfjsDisplayMetadata = {}), root.pdfjsSharedUtil,
+      root.pdfjsDisplayGlobal);
   }
-}(this, function (exports, sharedUtil) {
+}(this, function (exports, sharedUtil, displayGlobal) {
 
 var error = sharedUtil.error;
+var PDFJS = displayGlobal.PDFJS;
 
 var Metadata = PDFJS.Metadata = (function MetadataClosure() {
   function fixMetadata(meta) {
@@ -3953,9 +3118,10 @@ exports.Metadata = Metadata;
 
 (function (root, factory) {
   {
-    factory((root.pdfjsDisplaySVG = {}), root.pdfjsSharedUtil);
+    factory((root.pdfjsDisplaySVG = {}), root.pdfjsSharedUtil,
+      root.pdfjsDisplayGlobal);
   }
-}(this, function (exports, sharedUtil) {
+}(this, function (exports, sharedUtil, displayGlobal) {
 
 var FONT_IDENTITY_MATRIX = sharedUtil.FONT_IDENTITY_MATRIX;
 var IDENTITY_MATRIX = sharedUtil.IDENTITY_MATRIX;
@@ -3965,6 +3131,7 @@ var Util = sharedUtil.Util;
 var isNum = sharedUtil.isNum;
 var isArray = sharedUtil.isArray;
 var warn = sharedUtil.warn;
+var PDFJS = displayGlobal.PDFJS;
 
 var SVG_DEFAULTS = {
   fontStyle: 'normal',
@@ -5144,245 +4311,13 @@ exports.SVGGraphics = SVGGraphics;
 
 (function (root, factory) {
   {
-    factory((root.pdfjsDisplayTextLayer = {}), root.pdfjsSharedUtil,
-      root.pdfjsDisplayDOMUtils, root.pdfjsSharedGlobal);
+    factory((root.pdfjsDisplayWebGL = {}), root.pdfjsSharedUtil,
+      root.pdfjsDisplayGlobal);
   }
-}(this, function (exports, sharedUtil, displayDOMUtils, sharedGlobal) {
-
-var Util = sharedUtil.Util;
-var createPromiseCapability = sharedUtil.createPromiseCapability;
-var CustomStyle = displayDOMUtils.CustomStyle;
-var PDFJS = sharedGlobal.PDFJS;
-
-/**
- * Text layer render parameters.
- *
- * @typedef {Object} TextLayerRenderParameters
- * @property {TextContent} textContent - Text content to render (the object is
- *   returned by the page's getTextContent() method).
- * @property {HTMLElement} container - HTML element that will contain text runs.
- * @property {PDFJS.PageViewport} viewport - The target viewport to properly
- *   layout the text runs.
- * @property {Array} textDivs - (optional) HTML elements that are correspond
- *   the text items of the textContent input. This is output and shall be
- *   initially be set to empty array.
- * @property {number} timeout - (optional) Delay in milliseconds before
- *   rendering of the text  runs occurs.
- */
-var renderTextLayer = (function renderTextLayerClosure() {
-  var MAX_TEXT_DIVS_TO_RENDER = 100000;
-
-  var NonWhitespaceRegexp = /\S/;
-
-  function isAllWhitespace(str) {
-    return !NonWhitespaceRegexp.test(str);
-  }
-
-  function appendText(textDivs, viewport, geom, styles) {
-    var style = styles[geom.fontName];
-    var textDiv = document.createElement('div');
-    textDivs.push(textDiv);
-    if (isAllWhitespace(geom.str)) {
-      textDiv.dataset.isWhitespace = true;
-      return;
-    }
-    var tx = Util.transform(viewport.transform, geom.transform);
-    var angle = Math.atan2(tx[1], tx[0]);
-    if (style.vertical) {
-      angle += Math.PI / 2;
-    }
-    var fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
-    var fontAscent = fontHeight;
-    if (style.ascent) {
-      fontAscent = style.ascent * fontAscent;
-    } else if (style.descent) {
-      fontAscent = (1 + style.descent) * fontAscent;
-    }
-
-    var left;
-    var top;
-    if (angle === 0) {
-      left = tx[4];
-      top = tx[5] - fontAscent;
-    } else {
-      left = tx[4] + (fontAscent * Math.sin(angle));
-      top = tx[5] - (fontAscent * Math.cos(angle));
-    }
-    textDiv.style.left = left + 'px';
-    textDiv.style.top = top + 'px';
-    textDiv.style.fontSize = fontHeight + 'px';
-    textDiv.style.fontFamily = style.fontFamily;
-
-    textDiv.textContent = geom.str;
-    // |fontName| is only used by the Font Inspector. This test will succeed
-    // when e.g. the Font Inspector is off but the Stepper is on, but it's
-    // not worth the effort to do a more accurate test.
-    if (PDFJS.pdfBug) {
-      textDiv.dataset.fontName = geom.fontName;
-    }
-    // Storing into dataset will convert number into string.
-    if (angle !== 0) {
-      textDiv.dataset.angle = angle * (180 / Math.PI);
-    }
-    // We don't bother scaling single-char text divs, because it has very
-    // little effect on text highlighting. This makes scrolling on docs with
-    // lots of such divs a lot faster.
-    if (geom.str.length > 1) {
-      if (style.vertical) {
-        textDiv.dataset.canvasWidth = geom.height * viewport.scale;
-      } else {
-        textDiv.dataset.canvasWidth = geom.width * viewport.scale;
-      }
-    }
-  }
-
-  function render(task) {
-    if (task._canceled) {
-      return;
-    }
-    var textLayerFrag = task._container;
-    var textDivs = task._textDivs;
-    var capability = task._capability;
-    var textDivsLength = textDivs.length;
-
-    // No point in rendering many divs as it would make the browser
-    // unusable even after the divs are rendered.
-    if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
-      capability.resolve();
-      return;
-    }
-
-    var canvas = document.createElement('canvas');
-    canvas.mozOpaque = true;
-    var ctx = canvas.getContext('2d', {alpha: false});
-
-    var lastFontSize;
-    var lastFontFamily;
-    for (var i = 0; i < textDivsLength; i++) {
-      var textDiv = textDivs[i];
-      if (textDiv.dataset.isWhitespace !== undefined) {
-        continue;
-      }
-
-      var fontSize = textDiv.style.fontSize;
-      var fontFamily = textDiv.style.fontFamily;
-
-      // Only build font string and set to context if different from last.
-      if (fontSize !== lastFontSize || fontFamily !== lastFontFamily) {
-        ctx.font = fontSize + ' ' + fontFamily;
-        lastFontSize = fontSize;
-        lastFontFamily = fontFamily;
-      }
-
-      var width = ctx.measureText(textDiv.textContent).width;
-      if (width > 0) {
-        textLayerFrag.appendChild(textDiv);
-        var transform;
-        if (textDiv.dataset.canvasWidth !== undefined) {
-          // Dataset values come of type string.
-          var textScale = textDiv.dataset.canvasWidth / width;
-          transform = 'scaleX(' + textScale + ')';
-        } else {
-          transform = '';
-        }
-        var rotation = textDiv.dataset.angle;
-        if (rotation) {
-          transform = 'rotate(' + rotation + 'deg) ' + transform;
-        }
-        if (transform) {
-          CustomStyle.setProp('transform' , textDiv, transform);
-        }
-      }
-    }
-    capability.resolve();
-  }
-
-  /**
-   * Text layer rendering task.
-   *
-   * @param {TextContent} textContent
-   * @param {HTMLElement} container
-   * @param {PDFJS.PageViewport} viewport
-   * @param {Array} textDivs
-   * @private
-   */
-  function TextLayerRenderTask(textContent, container, viewport, textDivs) {
-    this._textContent = textContent;
-    this._container = container;
-    this._viewport = viewport;
-    textDivs = textDivs || [];
-    this._textDivs = textDivs;
-    this._canceled = false;
-    this._capability = createPromiseCapability();
-    this._renderTimer = null;
-  }
-  TextLayerRenderTask.prototype = {
-    get promise() {
-      return this._capability.promise;
-    },
-
-    cancel: function TextLayer_cancel() {
-      this._canceled = true;
-      if (this._renderTimer !== null) {
-        clearTimeout(this._renderTimer);
-        this._renderTimer = null;
-      }
-      this._capability.reject('canceled');
-    },
-
-    _render: function TextLayer_render(timeout) {
-      var textItems = this._textContent.items;
-      var styles = this._textContent.styles;
-      var textDivs = this._textDivs;
-      var viewport = this._viewport;
-      for (var i = 0, len = textItems.length; i < len; i++) {
-        appendText(textDivs, viewport, textItems[i], styles);
-      }
-
-      if (!timeout) { // Render right away
-        render(this);
-      } else { // Schedule
-        var self = this;
-        this._renderTimer = setTimeout(function() {
-          render(self);
-          self._renderTimer = null;
-        }, timeout);
-      }
-    }
-  };
-
-
-  /**
-   * Starts rendering of the text layer.
-   *
-   * @param {TextLayerRenderParameters} renderParameters
-   * @returns {TextLayerRenderTask}
-   */
-  function renderTextLayer(renderParameters) {
-    var task = new TextLayerRenderTask(renderParameters.textContent,
-                                       renderParameters.container,
-                                       renderParameters.viewport,
-                                       renderParameters.textDivs);
-    task._render(renderParameters.timeout);
-    return task;
-  }
-
-  return renderTextLayer;
-})();
-
-PDFJS.renderTextLayer = renderTextLayer;
-
-exports.renderTextLayer = renderTextLayer;
-}));
-
-
-(function (root, factory) {
-  {
-    factory((root.pdfjsDisplayWebGL = {}), root.pdfjsSharedUtil);
-  }
-}(this, function (exports, sharedUtil) {
+}(this, function (exports, sharedUtil, displayGlobal) {
 
 var shadow = sharedUtil.shadow;
+var PDFJS = displayGlobal.PDFJS;
 
 var WebGLUtils = (function WebGLUtilsClosure() {
   function loadShader(gl, code, shaderType) {
@@ -5802,6 +4737,890 @@ var WebGLUtils = (function WebGLUtilsClosure() {
 })();
 
 exports.WebGLUtils = WebGLUtils;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsDisplayAnnotationLayer = {}), root.pdfjsSharedUtil,
+      root.pdfjsDisplayDOMUtils);
+  }
+}(this, function (exports, sharedUtil, displayDOMUtils) {
+
+var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
+var AnnotationType = sharedUtil.AnnotationType;
+var Util = sharedUtil.Util;
+var addLinkAttributes = displayDOMUtils.addLinkAttributes;
+var getFilenameFromUrl = displayDOMUtils.getFilenameFromUrl;
+var warn = sharedUtil.warn;
+var CustomStyle = displayDOMUtils.CustomStyle;
+
+/**
+ * @typedef {Object} AnnotationElementParameters
+ * @property {Object} data
+ * @property {HTMLDivElement} layer
+ * @property {PDFPage} page
+ * @property {PageViewport} viewport
+ * @property {IPDFLinkService} linkService
+ * @property {DownloadManager} downloadManager
+ */
+
+/**
+ * @class
+ * @alias AnnotationElementFactory
+ */
+function AnnotationElementFactory() {}
+AnnotationElementFactory.prototype =
+    /** @lends AnnotationElementFactory.prototype */ {
+  /**
+   * @param {AnnotationElementParameters} parameters
+   * @returns {AnnotationElement}
+   */
+  create: function AnnotationElementFactory_create(parameters) {
+    var subtype = parameters.data.annotationType;
+
+    switch (subtype) {
+      case AnnotationType.LINK:
+        return new LinkAnnotationElement(parameters);
+
+      case AnnotationType.TEXT:
+        return new TextAnnotationElement(parameters);
+
+      case AnnotationType.WIDGET:
+        return new WidgetAnnotationElement(parameters);
+
+      case AnnotationType.POPUP:
+        return new PopupAnnotationElement(parameters);
+
+      case AnnotationType.HIGHLIGHT:
+        return new HighlightAnnotationElement(parameters);
+
+      case AnnotationType.UNDERLINE:
+        return new UnderlineAnnotationElement(parameters);
+
+      case AnnotationType.SQUIGGLY:
+        return new SquigglyAnnotationElement(parameters);
+
+      case AnnotationType.STRIKEOUT:
+        return new StrikeOutAnnotationElement(parameters);
+
+      case AnnotationType.FILEATTACHMENT:
+        return new FileAttachmentAnnotationElement(parameters);
+
+      default:
+        return new AnnotationElement(parameters);
+    }
+  }
+};
+
+/**
+ * @class
+ * @alias AnnotationElement
+ */
+var AnnotationElement = (function AnnotationElementClosure() {
+  function AnnotationElement(parameters, isRenderable) {
+    this.isRenderable = isRenderable || false;
+    this.data = parameters.data;
+    this.layer = parameters.layer;
+    this.page = parameters.page;
+    this.viewport = parameters.viewport;
+    this.linkService = parameters.linkService;
+    this.downloadManager = parameters.downloadManager;
+
+    if (isRenderable) {
+      this.container = this._createContainer();
+    }
+  }
+
+  AnnotationElement.prototype = /** @lends AnnotationElement.prototype */ {
+    /**
+     * Create an empty container for the annotation's HTML element.
+     *
+     * @private
+     * @memberof AnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    _createContainer: function AnnotationElement_createContainer() {
+      var data = this.data, page = this.page, viewport = this.viewport;
+      var container = document.createElement('section');
+      var width = data.rect[2] - data.rect[0];
+      var height = data.rect[3] - data.rect[1];
+
+      container.setAttribute('data-annotation-id', data.id);
+
+      // Do *not* modify `data.rect`, since that will corrupt the annotation
+      // position on subsequent calls to `_createContainer` (see issue 6804).
+      var rect = Util.normalizeRect([
+        data.rect[0],
+        page.view[3] - data.rect[1] + page.view[1],
+        data.rect[2],
+        page.view[3] - data.rect[3] + page.view[1]
+      ]);
+
+      CustomStyle.setProp('transform', container,
+                          'matrix(' + viewport.transform.join(',') + ')');
+      CustomStyle.setProp('transformOrigin', container,
+                          -rect[0] + 'px ' + -rect[1] + 'px');
+
+      if (data.borderStyle.width > 0) {
+        container.style.borderWidth = data.borderStyle.width + 'px';
+        if (data.borderStyle.style !== AnnotationBorderStyleType.UNDERLINE) {
+          // Underline styles only have a bottom border, so we do not need
+          // to adjust for all borders. This yields a similar result as
+          // Adobe Acrobat/Reader.
+          width = width - 2 * data.borderStyle.width;
+          height = height - 2 * data.borderStyle.width;
+        }
+
+        var horizontalRadius = data.borderStyle.horizontalCornerRadius;
+        var verticalRadius = data.borderStyle.verticalCornerRadius;
+        if (horizontalRadius > 0 || verticalRadius > 0) {
+          var radius = horizontalRadius + 'px / ' + verticalRadius + 'px';
+          CustomStyle.setProp('borderRadius', container, radius);
+        }
+
+        switch (data.borderStyle.style) {
+          case AnnotationBorderStyleType.SOLID:
+            container.style.borderStyle = 'solid';
+            break;
+
+          case AnnotationBorderStyleType.DASHED:
+            container.style.borderStyle = 'dashed';
+            break;
+
+          case AnnotationBorderStyleType.BEVELED:
+            warn('Unimplemented border style: beveled');
+            break;
+
+          case AnnotationBorderStyleType.INSET:
+            warn('Unimplemented border style: inset');
+            break;
+
+          case AnnotationBorderStyleType.UNDERLINE:
+            container.style.borderBottomStyle = 'solid';
+            break;
+
+          default:
+            break;
+        }
+
+        if (data.color) {
+          container.style.borderColor =
+            Util.makeCssRgb(data.color[0] | 0,
+                            data.color[1] | 0,
+                            data.color[2] | 0);
+        } else {
+          // Transparent (invisible) border, so do not draw it at all.
+          container.style.borderWidth = 0;
+        }
+      }
+
+      container.style.left = rect[0] + 'px';
+      container.style.top = rect[1] + 'px';
+
+      container.style.width = width + 'px';
+      container.style.height = height + 'px';
+
+      return container;
+    },
+
+    /**
+     * Create a popup for the annotation's HTML element. This is used for
+     * annotations that do not have a Popup entry in the dictionary, but
+     * are of a type that works with popups (such as Highlight annotations).
+     *
+     * @private
+     * @param {HTMLSectionElement} container
+     * @param {HTMLDivElement|HTMLImageElement|null} trigger
+     * @param {Object} data
+     * @memberof AnnotationElement
+     */
+    _createPopup:
+        function AnnotationElement_createPopup(container, trigger, data) {
+      // If no trigger element is specified, create it.
+      if (!trigger) {
+        trigger = document.createElement('div');
+        trigger.style.height = container.style.height;
+        trigger.style.width = container.style.width;
+        container.appendChild(trigger);
+      }
+
+      var popupElement = new PopupElement({
+        container: container,
+        trigger: trigger,
+        color: data.color,
+        title: data.title,
+        contents: data.contents,
+        hideWrapper: true
+      });
+      var popup = popupElement.render();
+
+      // Position the popup next to the annotation's container.
+      popup.style.left = container.style.width;
+
+      container.appendChild(popup);
+    },
+
+    /**
+     * Render the annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof AnnotationElement
+     */
+    render: function AnnotationElement_render() {
+      throw new Error('Abstract method AnnotationElement.render called');
+    }
+  };
+
+  return AnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias LinkAnnotationElement
+ */
+var LinkAnnotationElement = (function LinkAnnotationElementClosure() {
+  function LinkAnnotationElement(parameters) {
+    AnnotationElement.call(this, parameters, true);
+  }
+
+  Util.inherit(LinkAnnotationElement, AnnotationElement, {
+    /**
+     * Render the link annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof LinkAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function LinkAnnotationElement_render() {
+      this.container.className = 'linkAnnotation';
+
+      var link = document.createElement('a');
+      addLinkAttributes(link, { url: this.data.url });
+
+      if (!this.data.url) {
+        if (this.data.action) {
+          this._bindNamedAction(link, this.data.action);
+        } else {
+          this._bindLink(link, ('dest' in this.data) ? this.data.dest : null);
+        }
+      }
+
+      this.container.appendChild(link);
+      return this.container;
+    },
+
+    /**
+     * Bind internal links to the link element.
+     *
+     * @private
+     * @param {Object} link
+     * @param {Object} destination
+     * @memberof LinkAnnotationElement
+     */
+    _bindLink: function LinkAnnotationElement_bindLink(link, destination) {
+      var self = this;
+
+      link.href = this.linkService.getDestinationHash(destination);
+      link.onclick = function() {
+        if (destination) {
+          self.linkService.navigateTo(destination);
+        }
+        return false;
+      };
+      if (destination) {
+        link.className = 'internalLink';
+      }
+    },
+
+    /**
+     * Bind named actions to the link element.
+     *
+     * @private
+     * @param {Object} link
+     * @param {Object} action
+     * @memberof LinkAnnotationElement
+     */
+    _bindNamedAction:
+        function LinkAnnotationElement_bindNamedAction(link, action) {
+      var self = this;
+
+      link.href = this.linkService.getAnchorUrl('');
+      link.onclick = function() {
+        self.linkService.executeNamedAction(action);
+        return false;
+      };
+      link.className = 'internalLink';
+    }
+  });
+
+  return LinkAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias TextAnnotationElement
+ */
+var TextAnnotationElement = (function TextAnnotationElementClosure() {
+  function TextAnnotationElement(parameters) {
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
+    AnnotationElement.call(this, parameters, isRenderable);
+  }
+
+  Util.inherit(TextAnnotationElement, AnnotationElement, {
+    /**
+     * Render the text annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof TextAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function TextAnnotationElement_render() {
+      this.container.className = 'textAnnotation';
+
+      var image = document.createElement('img');
+      image.style.height = this.container.style.height;
+      image.style.width = this.container.style.width;
+      image.src = PDFJS.imageResourcesPath + 'annotation-' +
+        this.data.name.toLowerCase() + '.svg';
+      image.alt = '[{{type}} Annotation]';
+      image.dataset.l10nId = 'text_annotation_type';
+      image.dataset.l10nArgs = JSON.stringify({type: this.data.name});
+
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, image, this.data);
+      }
+
+      this.container.appendChild(image);
+      return this.container;
+    }
+  });
+
+  return TextAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias WidgetAnnotationElement
+ */
+var WidgetAnnotationElement = (function WidgetAnnotationElementClosure() {
+  function WidgetAnnotationElement(parameters) {
+    var isRenderable = !parameters.data.hasAppearance &&
+                       !!parameters.data.fieldValue;
+    AnnotationElement.call(this, parameters, isRenderable);
+  }
+
+  Util.inherit(WidgetAnnotationElement, AnnotationElement, {
+    /**
+     * Render the widget annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof WidgetAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function WidgetAnnotationElement_render() {
+      var content = document.createElement('div');
+      content.textContent = this.data.fieldValue;
+      var textAlignment = this.data.textAlignment;
+      content.style.textAlign = ['left', 'center', 'right'][textAlignment];
+      content.style.verticalAlign = 'middle';
+      content.style.display = 'table-cell';
+
+      var font = (this.data.fontRefName ?
+        this.page.commonObjs.getData(this.data.fontRefName) : null);
+      this._setTextStyle(content, font);
+
+      this.container.appendChild(content);
+      return this.container;
+    },
+
+    /**
+     * Apply text styles to the text in the element.
+     *
+     * @private
+     * @param {HTMLDivElement} element
+     * @param {Object} font
+     * @memberof WidgetAnnotationElement
+     */
+    _setTextStyle:
+        function WidgetAnnotationElement_setTextStyle(element, font) {
+      // TODO: This duplicates some of the logic in CanvasGraphics.setFont().
+      var style = element.style;
+      style.fontSize = this.data.fontSize + 'px';
+      style.direction = (this.data.fontDirection < 0 ? 'rtl': 'ltr');
+
+      if (!font) {
+        return;
+      }
+
+      style.fontWeight = (font.black ?
+        (font.bold ? '900' : 'bold') :
+        (font.bold ? 'bold' : 'normal'));
+      style.fontStyle = (font.italic ? 'italic' : 'normal');
+
+      // Use a reasonable default font if the font doesn't specify a fallback.
+      var fontFamily = font.loadedName ? '"' + font.loadedName + '", ' : '';
+      var fallbackName = font.fallbackName || 'Helvetica, sans-serif';
+      style.fontFamily = fontFamily + fallbackName;
+    }
+  });
+
+  return WidgetAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias PopupAnnotationElement
+ */
+var PopupAnnotationElement = (function PopupAnnotationElementClosure() {
+  function PopupAnnotationElement(parameters) {
+    var isRenderable = !!(parameters.data.title || parameters.data.contents);
+    AnnotationElement.call(this, parameters, isRenderable);
+  }
+
+  Util.inherit(PopupAnnotationElement, AnnotationElement, {
+    /**
+     * Render the popup annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof PopupAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function PopupAnnotationElement_render() {
+      this.container.className = 'popupAnnotation';
+
+      var selector = '[data-annotation-id="' + this.data.parentId + '"]';
+      var parentElement = this.layer.querySelector(selector);
+      if (!parentElement) {
+        return this.container;
+      }
+
+      var popup = new PopupElement({
+        container: this.container,
+        trigger: parentElement,
+        color: this.data.color,
+        title: this.data.title,
+        contents: this.data.contents
+      });
+
+      // Position the popup next to the parent annotation's container.
+      // PDF viewers ignore a popup annotation's rectangle.
+      var parentLeft = parseFloat(parentElement.style.left);
+      var parentWidth = parseFloat(parentElement.style.width);
+      CustomStyle.setProp('transformOrigin', this.container,
+                          -(parentLeft + parentWidth) + 'px -' +
+                          parentElement.style.top);
+      this.container.style.left = (parentLeft + parentWidth) + 'px';
+
+      this.container.appendChild(popup.render());
+      return this.container;
+    }
+  });
+
+  return PopupAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias PopupElement
+ */
+var PopupElement = (function PopupElementClosure() {
+  var BACKGROUND_ENLIGHT = 0.7;
+
+  function PopupElement(parameters) {
+    this.container = parameters.container;
+    this.trigger = parameters.trigger;
+    this.color = parameters.color;
+    this.title = parameters.title;
+    this.contents = parameters.contents;
+    this.hideWrapper = parameters.hideWrapper || false;
+
+    this.pinned = false;
+  }
+
+  PopupElement.prototype = /** @lends PopupElement.prototype */ {
+    /**
+     * Render the popup's HTML element.
+     *
+     * @public
+     * @memberof PopupElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function PopupElement_render() {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'popupWrapper';
+
+      // For Popup annotations we hide the entire section because it contains
+      // only the popup. However, for Text annotations without a separate Popup
+      // annotation, we cannot hide the entire container as the image would
+      // disappear too. In that special case, hiding the wrapper suffices.
+      this.hideElement = (this.hideWrapper ? wrapper : this.container);
+      this.hideElement.setAttribute('hidden', true);
+
+      var popup = document.createElement('div');
+      popup.className = 'popup';
+
+      var color = this.color;
+      if (color) {
+        // Enlighten the color.
+        var r = BACKGROUND_ENLIGHT * (255 - color[0]) + color[0];
+        var g = BACKGROUND_ENLIGHT * (255 - color[1]) + color[1];
+        var b = BACKGROUND_ENLIGHT * (255 - color[2]) + color[2];
+        popup.style.backgroundColor = Util.makeCssRgb(r | 0, g | 0, b | 0);
+      }
+
+      var contents = this._formatContents(this.contents);
+      var title = document.createElement('h1');
+      title.textContent = this.title;
+
+      // Attach the event listeners to the trigger element.
+      this.trigger.addEventListener('click', this._toggle.bind(this));
+      this.trigger.addEventListener('mouseover', this._show.bind(this, false));
+      this.trigger.addEventListener('mouseout', this._hide.bind(this, false));
+      popup.addEventListener('click', this._hide.bind(this, true));
+
+      popup.appendChild(title);
+      popup.appendChild(contents);
+      wrapper.appendChild(popup);
+      return wrapper;
+    },
+
+    /**
+     * Format the contents of the popup by adding newlines where necessary.
+     *
+     * @private
+     * @param {string} contents
+     * @memberof PopupElement
+     * @returns {HTMLParagraphElement}
+     */
+    _formatContents: function PopupElement_formatContents(contents) {
+      var p = document.createElement('p');
+      var lines = contents.split(/(?:\r\n?|\n)/);
+      for (var i = 0, ii = lines.length; i < ii; ++i) {
+        var line = lines[i];
+        p.appendChild(document.createTextNode(line));
+        if (i < (ii - 1)) {
+          p.appendChild(document.createElement('br'));
+        }
+      }
+      return p;
+    },
+
+    /**
+     * Toggle the visibility of the popup.
+     *
+     * @private
+     * @memberof PopupElement
+     */
+    _toggle: function PopupElement_toggle() {
+      if (this.pinned) {
+        this._hide(true);
+      } else {
+        this._show(true);
+      }
+    },
+
+    /**
+     * Show the popup.
+     *
+     * @private
+     * @param {boolean} pin
+     * @memberof PopupElement
+     */
+    _show: function PopupElement_show(pin) {
+      if (pin) {
+        this.pinned = true;
+      }
+      if (this.hideElement.hasAttribute('hidden')) {
+        this.hideElement.removeAttribute('hidden');
+        this.container.style.zIndex += 1;
+      }
+    },
+
+    /**
+     * Hide the popup.
+     *
+     * @private
+     * @param {boolean} unpin
+     * @memberof PopupElement
+     */
+    _hide: function PopupElement_hide(unpin) {
+      if (unpin) {
+        this.pinned = false;
+      }
+      if (!this.hideElement.hasAttribute('hidden') && !this.pinned) {
+        this.hideElement.setAttribute('hidden', true);
+        this.container.style.zIndex -= 1;
+      }
+    }
+  };
+
+  return PopupElement;
+})();
+
+/**
+ * @class
+ * @alias HighlightAnnotationElement
+ */
+var HighlightAnnotationElement = (
+    function HighlightAnnotationElementClosure() {
+  function HighlightAnnotationElement(parameters) {
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
+    AnnotationElement.call(this, parameters, isRenderable);
+  }
+
+  Util.inherit(HighlightAnnotationElement, AnnotationElement, {
+    /**
+     * Render the highlight annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof HighlightAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function HighlightAnnotationElement_render() {
+      this.container.className = 'highlightAnnotation';
+
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, null, this.data);
+      }
+
+      return this.container;
+    }
+  });
+
+  return HighlightAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias UnderlineAnnotationElement
+ */
+var UnderlineAnnotationElement = (
+    function UnderlineAnnotationElementClosure() {
+  function UnderlineAnnotationElement(parameters) {
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
+    AnnotationElement.call(this, parameters, isRenderable);
+  }
+
+  Util.inherit(UnderlineAnnotationElement, AnnotationElement, {
+    /**
+     * Render the underline annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof UnderlineAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function UnderlineAnnotationElement_render() {
+      this.container.className = 'underlineAnnotation';
+
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, null, this.data);
+      }
+
+      return this.container;
+    }
+  });
+
+  return UnderlineAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias SquigglyAnnotationElement
+ */
+var SquigglyAnnotationElement = (function SquigglyAnnotationElementClosure() {
+  function SquigglyAnnotationElement(parameters) {
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
+    AnnotationElement.call(this, parameters, isRenderable);
+  }
+
+  Util.inherit(SquigglyAnnotationElement, AnnotationElement, {
+    /**
+     * Render the squiggly annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof SquigglyAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function SquigglyAnnotationElement_render() {
+      this.container.className = 'squigglyAnnotation';
+
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, null, this.data);
+      }
+
+      return this.container;
+    }
+  });
+
+  return SquigglyAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias StrikeOutAnnotationElement
+ */
+var StrikeOutAnnotationElement = (
+    function StrikeOutAnnotationElementClosure() {
+  function StrikeOutAnnotationElement(parameters) {
+    var isRenderable = !!(parameters.data.hasPopup ||
+                          parameters.data.title || parameters.data.contents);
+    AnnotationElement.call(this, parameters, isRenderable);
+  }
+
+  Util.inherit(StrikeOutAnnotationElement, AnnotationElement, {
+    /**
+     * Render the strikeout annotation's HTML element in the empty container.
+     *
+     * @public
+     * @memberof StrikeOutAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function StrikeOutAnnotationElement_render() {
+      this.container.className = 'strikeoutAnnotation';
+
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, null, this.data);
+      }
+
+      return this.container;
+    }
+  });
+
+  return StrikeOutAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias FileAttachmentAnnotationElement
+ */
+var FileAttachmentAnnotationElement = (
+    function FileAttachmentAnnotationElementClosure() {
+  function FileAttachmentAnnotationElement(parameters) {
+    AnnotationElement.call(this, parameters, true);
+
+    this.filename = getFilenameFromUrl(parameters.data.file.filename);
+    this.content = parameters.data.file.content;
+  }
+
+  Util.inherit(FileAttachmentAnnotationElement, AnnotationElement, {
+    /**
+     * Render the file attachment annotation's HTML element in the empty
+     * container.
+     *
+     * @public
+     * @memberof FileAttachmentAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function FileAttachmentAnnotationElement_render() {
+      this.container.className = 'fileAttachmentAnnotation';
+
+      var trigger = document.createElement('div');
+      trigger.style.height = this.container.style.height;
+      trigger.style.width = this.container.style.width;
+      trigger.addEventListener('dblclick', this._download.bind(this));
+
+      if (!this.data.hasPopup && (this.data.title || this.data.contents)) {
+        this._createPopup(this.container, trigger, this.data);
+      }
+
+      this.container.appendChild(trigger);
+      return this.container;
+    },
+
+    /**
+     * Download the file attachment associated with this annotation.
+     *
+     * @private
+     * @memberof FileAttachmentAnnotationElement
+     */
+    _download: function FileAttachmentAnnotationElement_download() {
+      if (!this.downloadManager) {
+        warn('Download cannot be started due to unavailable download manager');
+        return;
+      }
+      this.downloadManager.downloadData(this.content, this.filename, '');
+    }
+  });
+
+  return FileAttachmentAnnotationElement;
+})();
+
+/**
+ * @typedef {Object} AnnotationLayerParameters
+ * @property {PageViewport} viewport
+ * @property {HTMLDivElement} div
+ * @property {Array} annotations
+ * @property {PDFPage} page
+ * @property {IPDFLinkService} linkService
+ */
+
+/**
+ * @class
+ * @alias AnnotationLayer
+ */
+var AnnotationLayer = (function AnnotationLayerClosure() {
+  return {
+    /**
+     * Render a new annotation layer with all annotation elements.
+     *
+     * @public
+     * @param {AnnotationLayerParameters} parameters
+     * @memberof AnnotationLayer
+     */
+    render: function AnnotationLayer_render(parameters) {
+      var annotationElementFactory = new AnnotationElementFactory();
+
+      for (var i = 0, ii = parameters.annotations.length; i < ii; i++) {
+        var data = parameters.annotations[i];
+        if (!data) {
+          continue;
+        }
+
+        var properties = {
+          data: data,
+          layer: parameters.div,
+          page: parameters.page,
+          viewport: parameters.viewport,
+          linkService: parameters.linkService,
+          downloadManager: parameters.downloadManager
+        };
+        var element = annotationElementFactory.create(properties);
+        if (element.isRenderable) {
+          parameters.div.appendChild(element.render());
+        }
+      }
+    },
+
+    /**
+     * Update the annotation elements on existing annotation layer.
+     *
+     * @public
+     * @param {AnnotationLayerParameters} parameters
+     * @memberof AnnotationLayer
+     */
+    update: function AnnotationLayer_update(parameters) {
+      for (var i = 0, ii = parameters.annotations.length; i < ii; i++) {
+        var data = parameters.annotations[i];
+        var element = parameters.div.querySelector(
+          '[data-annotation-id="' + data.id + '"]');
+        if (element) {
+          CustomStyle.setProp('transform', element,
+            'matrix(' + parameters.viewport.transform.join(',') + ')');
+        }
+      }
+      parameters.div.removeAttribute('hidden');
+    }
+  };
+})();
+
+PDFJS.AnnotationLayer = AnnotationLayer;
+
+exports.AnnotationLayer = AnnotationLayer;
 }));
 
 
@@ -6230,10 +6049,246 @@ exports.TilingPattern = TilingPattern;
 
 (function (root, factory) {
   {
-    factory((root.pdfjsDisplayCanvas = {}), root.pdfjsSharedUtil,
-      root.pdfjsDisplayPatternHelper, root.pdfjsDisplayWebGL);
+    factory((root.pdfjsDisplayTextLayer = {}), root.pdfjsSharedUtil,
+      root.pdfjsDisplayDOMUtils, root.pdfjsDisplayGlobal);
   }
-}(this, function (exports, sharedUtil, displayPatternHelper, displayWebGL) {
+}(this, function (exports, sharedUtil, displayDOMUtils, displayGlobal) {
+
+var Util = sharedUtil.Util;
+var createPromiseCapability = sharedUtil.createPromiseCapability;
+var CustomStyle = displayDOMUtils.CustomStyle;
+var PDFJS = displayGlobal.PDFJS;
+
+/**
+ * Text layer render parameters.
+ *
+ * @typedef {Object} TextLayerRenderParameters
+ * @property {TextContent} textContent - Text content to render (the object is
+ *   returned by the page's getTextContent() method).
+ * @property {HTMLElement} container - HTML element that will contain text runs.
+ * @property {PDFJS.PageViewport} viewport - The target viewport to properly
+ *   layout the text runs.
+ * @property {Array} textDivs - (optional) HTML elements that are correspond
+ *   the text items of the textContent input. This is output and shall be
+ *   initially be set to empty array.
+ * @property {number} timeout - (optional) Delay in milliseconds before
+ *   rendering of the text  runs occurs.
+ */
+var renderTextLayer = (function renderTextLayerClosure() {
+  var MAX_TEXT_DIVS_TO_RENDER = 100000;
+
+  var NonWhitespaceRegexp = /\S/;
+
+  function isAllWhitespace(str) {
+    return !NonWhitespaceRegexp.test(str);
+  }
+
+  function appendText(textDivs, viewport, geom, styles) {
+    var style = styles[geom.fontName];
+    var textDiv = document.createElement('div');
+    textDivs.push(textDiv);
+    if (isAllWhitespace(geom.str)) {
+      textDiv.dataset.isWhitespace = true;
+      return;
+    }
+    var tx = Util.transform(viewport.transform, geom.transform);
+    var angle = Math.atan2(tx[1], tx[0]);
+    if (style.vertical) {
+      angle += Math.PI / 2;
+    }
+    var fontHeight = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
+    var fontAscent = fontHeight;
+    if (style.ascent) {
+      fontAscent = style.ascent * fontAscent;
+    } else if (style.descent) {
+      fontAscent = (1 + style.descent) * fontAscent;
+    }
+
+    var left;
+    var top;
+    if (angle === 0) {
+      left = tx[4];
+      top = tx[5] - fontAscent;
+    } else {
+      left = tx[4] + (fontAscent * Math.sin(angle));
+      top = tx[5] - (fontAscent * Math.cos(angle));
+    }
+    textDiv.style.left = left + 'px';
+    textDiv.style.top = top + 'px';
+    textDiv.style.fontSize = fontHeight + 'px';
+    textDiv.style.fontFamily = style.fontFamily;
+
+    textDiv.textContent = geom.str;
+    // |fontName| is only used by the Font Inspector. This test will succeed
+    // when e.g. the Font Inspector is off but the Stepper is on, but it's
+    // not worth the effort to do a more accurate test.
+    if (PDFJS.pdfBug) {
+      textDiv.dataset.fontName = geom.fontName;
+    }
+    // Storing into dataset will convert number into string.
+    if (angle !== 0) {
+      textDiv.dataset.angle = angle * (180 / Math.PI);
+    }
+    // We don't bother scaling single-char text divs, because it has very
+    // little effect on text highlighting. This makes scrolling on docs with
+    // lots of such divs a lot faster.
+    if (geom.str.length > 1) {
+      if (style.vertical) {
+        textDiv.dataset.canvasWidth = geom.height * viewport.scale;
+      } else {
+        textDiv.dataset.canvasWidth = geom.width * viewport.scale;
+      }
+    }
+  }
+
+  function render(task) {
+    if (task._canceled) {
+      return;
+    }
+    var textLayerFrag = task._container;
+    var textDivs = task._textDivs;
+    var capability = task._capability;
+    var textDivsLength = textDivs.length;
+
+    // No point in rendering many divs as it would make the browser
+    // unusable even after the divs are rendered.
+    if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
+      capability.resolve();
+      return;
+    }
+
+    var canvas = document.createElement('canvas');
+    canvas.mozOpaque = true;
+    var ctx = canvas.getContext('2d', {alpha: false});
+
+    var lastFontSize;
+    var lastFontFamily;
+    for (var i = 0; i < textDivsLength; i++) {
+      var textDiv = textDivs[i];
+      if (textDiv.dataset.isWhitespace !== undefined) {
+        continue;
+      }
+
+      var fontSize = textDiv.style.fontSize;
+      var fontFamily = textDiv.style.fontFamily;
+
+      // Only build font string and set to context if different from last.
+      if (fontSize !== lastFontSize || fontFamily !== lastFontFamily) {
+        ctx.font = fontSize + ' ' + fontFamily;
+        lastFontSize = fontSize;
+        lastFontFamily = fontFamily;
+      }
+
+      var width = ctx.measureText(textDiv.textContent).width;
+      if (width > 0) {
+        textLayerFrag.appendChild(textDiv);
+        var transform;
+        if (textDiv.dataset.canvasWidth !== undefined) {
+          // Dataset values come of type string.
+          var textScale = textDiv.dataset.canvasWidth / width;
+          transform = 'scaleX(' + textScale + ')';
+        } else {
+          transform = '';
+        }
+        var rotation = textDiv.dataset.angle;
+        if (rotation) {
+          transform = 'rotate(' + rotation + 'deg) ' + transform;
+        }
+        if (transform) {
+          CustomStyle.setProp('transform' , textDiv, transform);
+        }
+      }
+    }
+    capability.resolve();
+  }
+
+  /**
+   * Text layer rendering task.
+   *
+   * @param {TextContent} textContent
+   * @param {HTMLElement} container
+   * @param {PDFJS.PageViewport} viewport
+   * @param {Array} textDivs
+   * @private
+   */
+  function TextLayerRenderTask(textContent, container, viewport, textDivs) {
+    this._textContent = textContent;
+    this._container = container;
+    this._viewport = viewport;
+    textDivs = textDivs || [];
+    this._textDivs = textDivs;
+    this._canceled = false;
+    this._capability = createPromiseCapability();
+    this._renderTimer = null;
+  }
+  TextLayerRenderTask.prototype = {
+    get promise() {
+      return this._capability.promise;
+    },
+
+    cancel: function TextLayer_cancel() {
+      this._canceled = true;
+      if (this._renderTimer !== null) {
+        clearTimeout(this._renderTimer);
+        this._renderTimer = null;
+      }
+      this._capability.reject('canceled');
+    },
+
+    _render: function TextLayer_render(timeout) {
+      var textItems = this._textContent.items;
+      var styles = this._textContent.styles;
+      var textDivs = this._textDivs;
+      var viewport = this._viewport;
+      for (var i = 0, len = textItems.length; i < len; i++) {
+        appendText(textDivs, viewport, textItems[i], styles);
+      }
+
+      if (!timeout) { // Render right away
+        render(this);
+      } else { // Schedule
+        var self = this;
+        this._renderTimer = setTimeout(function() {
+          render(self);
+          self._renderTimer = null;
+        }, timeout);
+      }
+    }
+  };
+
+
+  /**
+   * Starts rendering of the text layer.
+   *
+   * @param {TextLayerRenderParameters} renderParameters
+   * @returns {TextLayerRenderTask}
+   */
+  function renderTextLayer(renderParameters) {
+    var task = new TextLayerRenderTask(renderParameters.textContent,
+                                       renderParameters.container,
+                                       renderParameters.viewport,
+                                       renderParameters.textDivs);
+    task._render(renderParameters.timeout);
+    return task;
+  }
+
+  return renderTextLayer;
+})();
+
+PDFJS.renderTextLayer = renderTextLayer;
+
+exports.renderTextLayer = renderTextLayer;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsDisplayCanvas = {}), root.pdfjsSharedUtil,
+      root.pdfjsDisplayDOMUtils, root.pdfjsDisplayPatternHelper,
+      root.pdfjsDisplayWebGL);
+  }
+}(this, function (exports, sharedUtil, displayDOMUtils, displayPatternHelper,
+                  displayWebGL) {
 
 var FONT_IDENTITY_MATRIX = sharedUtil.FONT_IDENTITY_MATRIX;
 var IDENTITY_MATRIX = sharedUtil.IDENTITY_MATRIX;
@@ -8448,10 +8503,11 @@ exports.createScratchCanvas = createScratchCanvas;
   {
     factory((root.pdfjsDisplayAPI = {}), root.pdfjsSharedUtil,
       root.pdfjsDisplayFontLoader, root.pdfjsDisplayCanvas,
-      root.pdfjsDisplayMetadata, root.pdfjsSharedGlobal);
+      root.pdfjsDisplayMetadata, root.pdfjsDisplayDOMUtils,
+      root.pdfjsDisplayGlobal);
   }
 }(this, function (exports, sharedUtil, displayFontLoader, displayCanvas,
-                  displayMetadata, sharedGlobal, amdRequire) {
+                  displayMetadata, displayDOMUtils, displayGlobal, amdRequire) {
 
 var InvalidPDFException = sharedUtil.InvalidPDFException;
 var MessageHandler = sharedUtil.MessageHandler;
@@ -8466,6 +8522,7 @@ var createPromiseCapability = sharedUtil.createPromiseCapability;
 var combineUrl = sharedUtil.combineUrl;
 var error = sharedUtil.error;
 var deprecated = sharedUtil.deprecated;
+var getVerbosityLevel = sharedUtil.getVerbosityLevel;
 var info = sharedUtil.info;
 var isArrayBuffer = sharedUtil.isArrayBuffer;
 var isSameOrigin = sharedUtil.isSameOrigin;
@@ -8477,8 +8534,8 @@ var FontLoader = displayFontLoader.FontLoader;
 var CanvasGraphics = displayCanvas.CanvasGraphics;
 var createScratchCanvas = displayCanvas.createScratchCanvas;
 var Metadata = displayMetadata.Metadata;
-var PDFJS = sharedGlobal.PDFJS;
-var globalScope = sharedGlobal.globalScope;
+var PDFJS = displayGlobal.PDFJS;
+var globalScope = displayGlobal.globalScope;
 
 var DEFAULT_RANGE_CHUNK_SIZE = 65536; // 2^16 = 65536
 
@@ -8502,12 +8559,12 @@ if (typeof requirejs !== 'undefined' && requirejs.toUrl) {
 }
 var fakeWorkerFilesLoader = useRequireEnsure ? (function (callback) {
   require.ensure([], function () {
-    require('./pdf.worker.js');
-    callback();
+    var worker = require('./pdf.worker.js');
+    callback(worker.WorkerMessageHandler);
   });
 }) : (typeof requirejs !== 'undefined') ? (function (callback) {
   requirejs(['pdfjs-dist/build/pdf.worker'], function (worker) {
-    callback();
+    callback(worker.WorkerMessageHandler);
   });
 }) : null;
 
@@ -8639,17 +8696,6 @@ PDFJS.disableFullscreen = (PDFJS.disableFullscreen === undefined ?
  */
 PDFJS.useOnlyCssZoom = (PDFJS.useOnlyCssZoom === undefined ?
                         false : PDFJS.useOnlyCssZoom);
-
-/**
- * Controls the logging level.
- * The constants from PDFJS.VERBOSITY_LEVELS should be used:
- * - errors
- * - warnings [default]
- * - infos
- * @var {number}
- */
-PDFJS.verbosity = (PDFJS.verbosity === undefined ?
-                   PDFJS.VERBOSITY_LEVELS.warnings : PDFJS.verbosity);
 
 /**
  * The maximum supported canvas size in total pixels e.g. width * height.
@@ -8896,7 +8942,6 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
     cMapPacked: PDFJS.cMapPacked,
     disableFontFace: PDFJS.disableFontFace,
     disableCreateObjectURL: PDFJS.disableCreateObjectURL,
-    verbosity: PDFJS.verbosity,
     postMessageTransfers: PDFJS.postMessageTransfers,
   }).then(function (workerId) {
     if (worker.destroyed) {
@@ -9653,21 +9698,24 @@ var PDFWorker = (function PDFWorkerClosure() {
     error('No PDFJS.workerSrc specified');
   }
 
+  var fakeWorkerFilesLoadedCapability;
+
   // Loads worker code into main thread.
   function setupFakeWorkerGlobal() {
-    if (!PDFJS.fakeWorkerFilesLoadedCapability) {
-      PDFJS.fakeWorkerFilesLoadedCapability = createPromiseCapability();
+    var WorkerMessageHandler;
+    if (!fakeWorkerFilesLoadedCapability) {
+      fakeWorkerFilesLoadedCapability = createPromiseCapability();
       // In the developer build load worker_loader which in turn loads all the
       // other files and resolves the promise. In production only the
       // pdf.worker.js file is needed.
       var loader = fakeWorkerFilesLoader || function (callback) {
-        Util.loadScript(getWorkerSrc(), callback);
+        Util.loadScript(getWorkerSrc(), function () {
+          callback(window.pdfjsDistBuildPdfWorker.WorkerMessageHandler);
+        });
       };
-      loader(function () {
-        PDFJS.fakeWorkerFilesLoadedCapability.resolve();
-      });
+      loader(fakeWorkerFilesLoadedCapability.resolve);
     }
-    return PDFJS.fakeWorkerFilesLoadedCapability.promise;
+    return fakeWorkerFilesLoadedCapability.promise;
   }
 
   function createCDNWrapper(url) {
@@ -9738,6 +9786,10 @@ var PDFWorker = (function PDFWorkerClosure() {
                 PDFJS.postMessageTransfers = false;
               }
               this._readyCapability.resolve();
+              // Send global PDFJS setting, e.g. verbosity level.
+              messageHandler.send('configure', {
+                verbosity: getVerbosityLevel()
+              });
             } else {
               this._setupFakeWorker();
               messageHandler.destroy();
@@ -9802,7 +9854,7 @@ var PDFWorker = (function PDFWorkerClosure() {
         globalScope.PDFJS.disableWorker = true;
       }
 
-      setupFakeWorkerGlobal().then(function () {
+      setupFakeWorkerGlobal().then(function (WorkerMessageHandler) {
         if (this.destroyed) {
           this._readyCapability.reject(new Error('Worker was destroyed'));
           return;
@@ -9834,7 +9886,7 @@ var PDFWorker = (function PDFWorkerClosure() {
         // If the main thread is our worker, setup the handling for the
         // messages -- the main thread sends to it self.
         var workerHandler = new MessageHandler(id + '_worker', id, port);
-        PDFJS.WorkerMessageHandler.setup(workerHandler, port);
+        WorkerMessageHandler.setup(workerHandler, port);
 
         var messageHandler = new MessageHandler(id, id + '_worker', port);
         this._messageHandler = messageHandler;
@@ -10606,8 +10658,7 @@ exports.PDFPageProxy = PDFPageProxy;
 
   }).call(pdfjsLibs);
 
-  exports.PDFJS = pdfjsLibs.pdfjsSharedGlobal.PDFJS;
-
+  exports.PDFJS = pdfjsLibs.pdfjsDisplayGlobal.PDFJS;
   exports.getDocument = pdfjsLibs.pdfjsDisplayAPI.getDocument;
   exports.PDFDataRangeTransport =
     pdfjsLibs.pdfjsDisplayAPI.PDFDataRangeTransport;

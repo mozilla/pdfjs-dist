@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.157';
-var pdfjsBuild = 'c22c85f';
+var pdfjsVersion = '1.4.162';
+var pdfjsBuild = 'df7afcf';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -215,6 +215,418 @@ var ArithmeticDecoder = (function ArithmeticDecoderClosure() {
 })();
 
 exports.ArithmeticDecoder = ArithmeticDecoder;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsCoreBidi = {}));
+  }
+}(this, function (exports) {
+
+  // Character types for symbols from 0000 to 00FF.
+  var baseTypes = [
+    'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'S', 'B', 'S', 'WS',
+    'B', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN',
+    'BN', 'BN', 'B', 'B', 'B', 'S', 'WS', 'ON', 'ON', 'ET', 'ET', 'ET', 'ON',
+    'ON', 'ON', 'ON', 'ON', 'ON', 'CS', 'ON', 'CS', 'ON', 'EN', 'EN', 'EN',
+    'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'ON', 'ON', 'ON', 'ON', 'ON',
+    'ON', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
+    'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'ON', 'ON',
+    'ON', 'ON', 'ON', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
+    'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
+    'L', 'ON', 'ON', 'ON', 'ON', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'B', 'BN',
+    'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN',
+    'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN',
+    'BN', 'CS', 'ON', 'ET', 'ET', 'ET', 'ET', 'ON', 'ON', 'ON', 'ON', 'L', 'ON',
+    'ON', 'ON', 'ON', 'ON', 'ET', 'ET', 'EN', 'EN', 'ON', 'L', 'ON', 'ON', 'ON',
+    'EN', 'L', 'ON', 'ON', 'ON', 'ON', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
+    'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
+    'L', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
+    'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
+    'L', 'L', 'L', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'
+  ];
+
+  // Character types for symbols from 0600 to 06FF
+  var arabicTypes = [
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'CS', 'AL', 'ON', 'ON', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM',
+    'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AN', 'AN', 'AN', 'AN', 'AN', 'AN', 'AN', 'AN', 'AN',
+    'AN', 'ET', 'AN', 'AN', 'AL', 'AL', 'AL', 'NSM', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM',
+    'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'ON', 'NSM',
+    'NSM', 'NSM', 'NSM', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
+    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL'
+  ];
+
+  function isOdd(i) {
+    return (i & 1) !== 0;
+  }
+
+  function isEven(i) {
+    return (i & 1) === 0;
+  }
+
+  function findUnequal(arr, start, value) {
+    for (var j = start, jj = arr.length; j < jj; ++j) {
+      if (arr[j] !== value) {
+        return j;
+      }
+    }
+    return j;
+  }
+
+  function setValues(arr, start, end, value) {
+    for (var j = start; j < end; ++j) {
+      arr[j] = value;
+    }
+  }
+
+  function reverseValues(arr, start, end) {
+    for (var i = start, j = end - 1; i < j; ++i, --j) {
+      var temp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = temp;
+    }
+  }
+
+  function createBidiText(str, isLTR, vertical) {
+    return {
+      str: str,
+      dir: (vertical ? 'ttb' : (isLTR ? 'ltr' : 'rtl'))
+    };
+  }
+
+  // These are used in bidi(), which is called frequently. We re-use them on
+  // each call to avoid unnecessary allocations.
+  var chars = [];
+  var types = [];
+
+  function bidi(str, startLevel, vertical) {
+    var isLTR = true;
+    var strLength = str.length;
+    if (strLength === 0 || vertical) {
+      return createBidiText(str, isLTR, vertical);
+    }
+
+    // Get types and fill arrays
+    chars.length = strLength;
+    types.length = strLength;
+    var numBidi = 0;
+
+    var i, ii;
+    for (i = 0; i < strLength; ++i) {
+      chars[i] = str.charAt(i);
+
+      var charCode = str.charCodeAt(i);
+      var charType = 'L';
+      if (charCode <= 0x00ff) {
+        charType = baseTypes[charCode];
+      } else if (0x0590 <= charCode && charCode <= 0x05f4) {
+        charType = 'R';
+      } else if (0x0600 <= charCode && charCode <= 0x06ff) {
+        charType = arabicTypes[charCode & 0xff];
+      } else if (0x0700 <= charCode && charCode <= 0x08AC) {
+        charType = 'AL';
+      }
+      if (charType === 'R' || charType === 'AL' || charType === 'AN') {
+        numBidi++;
+      }
+      types[i] = charType;
+    }
+
+    // Detect the bidi method
+    // - If there are no rtl characters then no bidi needed
+    // - If less than 30% chars are rtl then string is primarily ltr
+    // - If more than 30% chars are rtl then string is primarily rtl
+    if (numBidi === 0) {
+      isLTR = true;
+      return createBidiText(str, isLTR);
+    }
+
+    if (startLevel === -1) {
+      if ((strLength / numBidi) < 0.3) {
+        isLTR = true;
+        startLevel = 0;
+      } else {
+        isLTR = false;
+        startLevel = 1;
+      }
+    }
+
+    var levels = [];
+    for (i = 0; i < strLength; ++i) {
+      levels[i] = startLevel;
+    }
+
+    /*
+     X1-X10: skip most of this, since we are NOT doing the embeddings.
+     */
+    var e = (isOdd(startLevel) ? 'R' : 'L');
+    var sor = e;
+    var eor = sor;
+
+    /*
+     W1. Examine each non-spacing mark (NSM) in the level run, and change the
+     type of the NSM to the type of the previous character. If the NSM is at the
+     start of the level run, it will get the type of sor.
+     */
+    var lastType = sor;
+    for (i = 0; i < strLength; ++i) {
+      if (types[i] === 'NSM') {
+        types[i] = lastType;
+      } else {
+        lastType = types[i];
+      }
+    }
+
+    /*
+     W2. Search backwards from each instance of a European number until the
+     first strong type (R, L, AL, or sor) is found.  If an AL is found, change
+     the type of the European number to Arabic number.
+     */
+    lastType = sor;
+    var t;
+    for (i = 0; i < strLength; ++i) {
+      t = types[i];
+      if (t === 'EN') {
+        types[i] = (lastType === 'AL') ? 'AN' : 'EN';
+      } else if (t === 'R' || t === 'L' || t === 'AL') {
+        lastType = t;
+      }
+    }
+
+    /*
+     W3. Change all ALs to R.
+     */
+    for (i = 0; i < strLength; ++i) {
+      t = types[i];
+      if (t === 'AL') {
+        types[i] = 'R';
+      }
+    }
+
+    /*
+     W4. A single European separator between two European numbers changes to a
+     European number. A single common separator between two numbers of the same
+     type changes to that type:
+     */
+    for (i = 1; i < strLength - 1; ++i) {
+      if (types[i] === 'ES' && types[i - 1] === 'EN' && types[i + 1] === 'EN') {
+        types[i] = 'EN';
+      }
+      if (types[i] === 'CS' &&
+          (types[i - 1] === 'EN' || types[i - 1] === 'AN') &&
+          types[i + 1] === types[i - 1]) {
+        types[i] = types[i - 1];
+      }
+    }
+
+    /*
+     W5. A sequence of European terminators adjacent to European numbers changes
+     to all European numbers:
+     */
+    for (i = 0; i < strLength; ++i) {
+      if (types[i] === 'EN') {
+        // do before
+        var j;
+        for (j = i - 1; j >= 0; --j) {
+          if (types[j] !== 'ET') {
+            break;
+          }
+          types[j] = 'EN';
+        }
+        // do after
+        for (j = i + 1; j < strLength; --j) {
+          if (types[j] !== 'ET') {
+            break;
+          }
+          types[j] = 'EN';
+        }
+      }
+    }
+
+    /*
+     W6. Otherwise, separators and terminators change to Other Neutral:
+     */
+    for (i = 0; i < strLength; ++i) {
+      t = types[i];
+      if (t === 'WS' || t === 'ES' || t === 'ET' || t === 'CS') {
+        types[i] = 'ON';
+      }
+    }
+
+    /*
+     W7. Search backwards from each instance of a European number until the
+     first strong type (R, L, or sor) is found. If an L is found,  then change
+     the type of the European number to L.
+     */
+    lastType = sor;
+    for (i = 0; i < strLength; ++i) {
+      t = types[i];
+      if (t === 'EN') {
+        types[i] = ((lastType === 'L') ? 'L' : 'EN');
+      } else if (t === 'R' || t === 'L') {
+        lastType = t;
+      }
+    }
+
+    /*
+     N1. A sequence of neutrals takes the direction of the surrounding strong
+     text if the text on both sides has the same direction. European and Arabic
+     numbers are treated as though they were R. Start-of-level-run (sor) and
+     end-of-level-run (eor) are used at level run boundaries.
+     */
+    for (i = 0; i < strLength; ++i) {
+      if (types[i] === 'ON') {
+        var end = findUnequal(types, i + 1, 'ON');
+        var before = sor;
+        if (i > 0) {
+          before = types[i - 1];
+        }
+
+        var after = eor;
+        if (end + 1 < strLength) {
+          after = types[end + 1];
+        }
+        if (before !== 'L') {
+          before = 'R';
+        }
+        if (after !== 'L') {
+          after = 'R';
+        }
+        if (before === after) {
+          setValues(types, i, end, before);
+        }
+        i = end - 1; // reset to end (-1 so next iteration is ok)
+      }
+    }
+
+    /*
+     N2. Any remaining neutrals take the embedding direction.
+     */
+    for (i = 0; i < strLength; ++i) {
+      if (types[i] === 'ON') {
+        types[i] = e;
+      }
+    }
+
+    /*
+     I1. For all characters with an even (left-to-right) embedding direction,
+     those of type R go up one level and those of type AN or EN go up two
+     levels.
+     I2. For all characters with an odd (right-to-left) embedding direction,
+     those of type L, EN or AN go up one level.
+     */
+    for (i = 0; i < strLength; ++i) {
+      t = types[i];
+      if (isEven(levels[i])) {
+        if (t === 'R') {
+          levels[i] += 1;
+        } else if (t === 'AN' || t === 'EN') {
+          levels[i] += 2;
+        }
+      } else { // isOdd
+        if (t === 'L' || t === 'AN' || t === 'EN') {
+          levels[i] += 1;
+        }
+      }
+    }
+
+    /*
+     L1. On each line, reset the embedding level of the following characters to
+     the paragraph embedding level:
+
+     segment separators,
+     paragraph separators,
+     any sequence of whitespace characters preceding a segment separator or
+     paragraph separator, and any sequence of white space characters at the end
+     of the line.
+     */
+
+    // don't bother as text is only single line
+
+    /*
+     L2. From the highest level found in the text to the lowest odd level on
+     each line, reverse any contiguous sequence of characters that are at that
+     level or higher.
+     */
+
+    // find highest level & lowest odd level
+    var highestLevel = -1;
+    var lowestOddLevel = 99;
+    var level;
+    for (i = 0, ii = levels.length; i < ii; ++i) {
+      level = levels[i];
+      if (highestLevel < level) {
+        highestLevel = level;
+      }
+      if (lowestOddLevel > level && isOdd(level)) {
+        lowestOddLevel = level;
+      }
+    }
+
+    // now reverse between those limits
+    for (level = highestLevel; level >= lowestOddLevel; --level) {
+      // find segments to reverse
+      var start = -1;
+      for (i = 0, ii = levels.length; i < ii; ++i) {
+        if (levels[i] < level) {
+          if (start >= 0) {
+            reverseValues(chars, start, i);
+            start = -1;
+          }
+        } else if (start < 0) {
+          start = i;
+        }
+      }
+      if (start >= 0) {
+        reverseValues(chars, start, levels.length);
+      }
+    }
+
+    /*
+     L3. Combining marks applied to a right-to-left base character will at this
+     point precede their base character. If the rendering engine expects them to
+     follow the base characters in the final display process, then the ordering
+     of the marks and the base character must be reversed.
+     */
+
+    // don't bother for now
+
+    /*
+     L4. A character that possesses the mirrored property as specified by
+     Section 4.7, Mirrored, must be depicted by a mirrored glyph if the resolved
+     directionality of that character is R.
+     */
+
+    // don't mirror as characters are already mirrored in the pdf
+
+    // Finally, return string
+    for (i = 0, ii = chars.length; i < ii; ++i) {
+      var ch = chars[i];
+      if (ch === '<' || ch === '>') {
+        chars[i] = '';
+      }
+    }
+    return createBidiText(chars.join(''), isLTR);
+  }
+
+exports.bidi = bidi;
 }));
 
 
@@ -1652,464 +2064,13 @@ exports.JpegImage = JpegImage;
 
 (function (root, factory) {
   {
-    factory((root.pdfjsSharedGlobal = {}));
+    factory((root.pdfjsSharedUtil = {}));
   }
 }(this, function (exports) {
 
-  var globalScope = (typeof window !== 'undefined') ? window :
-                    (typeof global !== 'undefined') ? global :
-                    (typeof self !== 'undefined') ? self : this;
-
-  var isWorker = (typeof window === 'undefined');
-
-  // The global PDFJS object exposes the API
-  // In production, it will be declared outside a global wrapper
-  // In development, it will be declared here
-  if (!globalScope.PDFJS) {
-    globalScope.PDFJS = {};
-  }
-
-  if (typeof pdfjsVersion !== 'undefined') {
-    globalScope.PDFJS.version = pdfjsVersion;
-  }
-  if (typeof pdfjsVersion !== 'undefined') {
-    globalScope.PDFJS.build = pdfjsBuild;
-  }
-
-  globalScope.PDFJS.pdfBug = false;
-
-  exports.globalScope = globalScope;
-  exports.isWorker = isWorker;
-  exports.PDFJS = globalScope.PDFJS;
-}));
-
-
-(function (root, factory) {
-  {
-    factory((root.pdfjsCoreBidi = {}), root.pdfjsSharedGlobal);
-  }
-}(this, function (exports, sharedGlobal) {
-
-var PDFJS = sharedGlobal.PDFJS;
-
-var bidi = PDFJS.bidi = (function bidiClosure() {
-  // Character types for symbols from 0000 to 00FF.
-  var baseTypes = [
-    'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'S', 'B', 'S', 'WS',
-    'B', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN',
-    'BN', 'BN', 'B', 'B', 'B', 'S', 'WS', 'ON', 'ON', 'ET', 'ET', 'ET', 'ON',
-    'ON', 'ON', 'ON', 'ON', 'ON', 'CS', 'ON', 'CS', 'ON', 'EN', 'EN', 'EN',
-    'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'EN', 'ON', 'ON', 'ON', 'ON', 'ON',
-    'ON', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
-    'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'ON', 'ON',
-    'ON', 'ON', 'ON', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
-    'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
-    'L', 'ON', 'ON', 'ON', 'ON', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'B', 'BN',
-    'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN',
-    'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN', 'BN',
-    'BN', 'CS', 'ON', 'ET', 'ET', 'ET', 'ET', 'ON', 'ON', 'ON', 'ON', 'L', 'ON',
-    'ON', 'ON', 'ON', 'ON', 'ET', 'ET', 'EN', 'EN', 'ON', 'L', 'ON', 'ON', 'ON',
-    'EN', 'L', 'ON', 'ON', 'ON', 'ON', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
-    'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
-    'L', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
-    'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L',
-    'L', 'L', 'L', 'ON', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L'
-  ];
-
-  // Character types for symbols from 0600 to 06FF
-  var arabicTypes = [
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'CS', 'AL', 'ON', 'ON', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM',
-    'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AN', 'AN', 'AN', 'AN', 'AN', 'AN', 'AN', 'AN', 'AN',
-    'AN', 'ET', 'AN', 'AN', 'AL', 'AL', 'AL', 'NSM', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM',
-    'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'NSM', 'ON', 'NSM',
-    'NSM', 'NSM', 'NSM', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL',
-    'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL', 'AL'
-  ];
-
-  function isOdd(i) {
-    return (i & 1) !== 0;
-  }
-
-  function isEven(i) {
-    return (i & 1) === 0;
-  }
-
-  function findUnequal(arr, start, value) {
-    for (var j = start, jj = arr.length; j < jj; ++j) {
-      if (arr[j] !== value) {
-        return j;
-      }
-    }
-    return j;
-  }
-
-  function setValues(arr, start, end, value) {
-    for (var j = start; j < end; ++j) {
-      arr[j] = value;
-    }
-  }
-
-  function reverseValues(arr, start, end) {
-    for (var i = start, j = end - 1; i < j; ++i, --j) {
-      var temp = arr[i];
-      arr[i] = arr[j];
-      arr[j] = temp;
-    }
-  }
-
-  function createBidiText(str, isLTR, vertical) {
-    return {
-      str: str,
-      dir: (vertical ? 'ttb' : (isLTR ? 'ltr' : 'rtl'))
-    };
-  }
-
-  // These are used in bidi(), which is called frequently. We re-use them on
-  // each call to avoid unnecessary allocations.
-  var chars = [];
-  var types = [];
-
-  function bidi(str, startLevel, vertical) {
-    var isLTR = true;
-    var strLength = str.length;
-    if (strLength === 0 || vertical) {
-      return createBidiText(str, isLTR, vertical);
-    }
-
-    // Get types and fill arrays
-    chars.length = strLength;
-    types.length = strLength;
-    var numBidi = 0;
-
-    var i, ii;
-    for (i = 0; i < strLength; ++i) {
-      chars[i] = str.charAt(i);
-
-      var charCode = str.charCodeAt(i);
-      var charType = 'L';
-      if (charCode <= 0x00ff) {
-        charType = baseTypes[charCode];
-      } else if (0x0590 <= charCode && charCode <= 0x05f4) {
-        charType = 'R';
-      } else if (0x0600 <= charCode && charCode <= 0x06ff) {
-        charType = arabicTypes[charCode & 0xff];
-      } else if (0x0700 <= charCode && charCode <= 0x08AC) {
-        charType = 'AL';
-      }
-      if (charType === 'R' || charType === 'AL' || charType === 'AN') {
-        numBidi++;
-      }
-      types[i] = charType;
-    }
-
-    // Detect the bidi method
-    // - If there are no rtl characters then no bidi needed
-    // - If less than 30% chars are rtl then string is primarily ltr
-    // - If more than 30% chars are rtl then string is primarily rtl
-    if (numBidi === 0) {
-      isLTR = true;
-      return createBidiText(str, isLTR);
-    }
-
-    if (startLevel === -1) {
-      if ((strLength / numBidi) < 0.3) {
-        isLTR = true;
-        startLevel = 0;
-      } else {
-        isLTR = false;
-        startLevel = 1;
-      }
-    }
-
-    var levels = [];
-    for (i = 0; i < strLength; ++i) {
-      levels[i] = startLevel;
-    }
-
-    /*
-     X1-X10: skip most of this, since we are NOT doing the embeddings.
-     */
-    var e = (isOdd(startLevel) ? 'R' : 'L');
-    var sor = e;
-    var eor = sor;
-
-    /*
-     W1. Examine each non-spacing mark (NSM) in the level run, and change the
-     type of the NSM to the type of the previous character. If the NSM is at the
-     start of the level run, it will get the type of sor.
-     */
-    var lastType = sor;
-    for (i = 0; i < strLength; ++i) {
-      if (types[i] === 'NSM') {
-        types[i] = lastType;
-      } else {
-        lastType = types[i];
-      }
-    }
-
-    /*
-     W2. Search backwards from each instance of a European number until the
-     first strong type (R, L, AL, or sor) is found.  If an AL is found, change
-     the type of the European number to Arabic number.
-     */
-    lastType = sor;
-    var t;
-    for (i = 0; i < strLength; ++i) {
-      t = types[i];
-      if (t === 'EN') {
-        types[i] = (lastType === 'AL') ? 'AN' : 'EN';
-      } else if (t === 'R' || t === 'L' || t === 'AL') {
-        lastType = t;
-      }
-    }
-
-    /*
-     W3. Change all ALs to R.
-     */
-    for (i = 0; i < strLength; ++i) {
-      t = types[i];
-      if (t === 'AL') {
-        types[i] = 'R';
-      }
-    }
-
-    /*
-     W4. A single European separator between two European numbers changes to a
-     European number. A single common separator between two numbers of the same
-     type changes to that type:
-     */
-    for (i = 1; i < strLength - 1; ++i) {
-      if (types[i] === 'ES' && types[i - 1] === 'EN' && types[i + 1] === 'EN') {
-        types[i] = 'EN';
-      }
-      if (types[i] === 'CS' &&
-          (types[i - 1] === 'EN' || types[i - 1] === 'AN') &&
-          types[i + 1] === types[i - 1]) {
-        types[i] = types[i - 1];
-      }
-    }
-
-    /*
-     W5. A sequence of European terminators adjacent to European numbers changes
-     to all European numbers:
-     */
-    for (i = 0; i < strLength; ++i) {
-      if (types[i] === 'EN') {
-        // do before
-        var j;
-        for (j = i - 1; j >= 0; --j) {
-          if (types[j] !== 'ET') {
-            break;
-          }
-          types[j] = 'EN';
-        }
-        // do after
-        for (j = i + 1; j < strLength; --j) {
-          if (types[j] !== 'ET') {
-            break;
-          }
-          types[j] = 'EN';
-        }
-      }
-    }
-
-    /*
-     W6. Otherwise, separators and terminators change to Other Neutral:
-     */
-    for (i = 0; i < strLength; ++i) {
-      t = types[i];
-      if (t === 'WS' || t === 'ES' || t === 'ET' || t === 'CS') {
-        types[i] = 'ON';
-      }
-    }
-
-    /*
-     W7. Search backwards from each instance of a European number until the
-     first strong type (R, L, or sor) is found. If an L is found,  then change
-     the type of the European number to L.
-     */
-    lastType = sor;
-    for (i = 0; i < strLength; ++i) {
-      t = types[i];
-      if (t === 'EN') {
-        types[i] = ((lastType === 'L') ? 'L' : 'EN');
-      } else if (t === 'R' || t === 'L') {
-        lastType = t;
-      }
-    }
-
-    /*
-     N1. A sequence of neutrals takes the direction of the surrounding strong
-     text if the text on both sides has the same direction. European and Arabic
-     numbers are treated as though they were R. Start-of-level-run (sor) and
-     end-of-level-run (eor) are used at level run boundaries.
-     */
-    for (i = 0; i < strLength; ++i) {
-      if (types[i] === 'ON') {
-        var end = findUnequal(types, i + 1, 'ON');
-        var before = sor;
-        if (i > 0) {
-          before = types[i - 1];
-        }
-
-        var after = eor;
-        if (end + 1 < strLength) {
-          after = types[end + 1];
-        }
-        if (before !== 'L') {
-          before = 'R';
-        }
-        if (after !== 'L') {
-          after = 'R';
-        }
-        if (before === after) {
-          setValues(types, i, end, before);
-        }
-        i = end - 1; // reset to end (-1 so next iteration is ok)
-      }
-    }
-
-    /*
-     N2. Any remaining neutrals take the embedding direction.
-     */
-    for (i = 0; i < strLength; ++i) {
-      if (types[i] === 'ON') {
-        types[i] = e;
-      }
-    }
-
-    /*
-     I1. For all characters with an even (left-to-right) embedding direction,
-     those of type R go up one level and those of type AN or EN go up two
-     levels.
-     I2. For all characters with an odd (right-to-left) embedding direction,
-     those of type L, EN or AN go up one level.
-     */
-    for (i = 0; i < strLength; ++i) {
-      t = types[i];
-      if (isEven(levels[i])) {
-        if (t === 'R') {
-          levels[i] += 1;
-        } else if (t === 'AN' || t === 'EN') {
-          levels[i] += 2;
-        }
-      } else { // isOdd
-        if (t === 'L' || t === 'AN' || t === 'EN') {
-          levels[i] += 1;
-        }
-      }
-    }
-
-    /*
-     L1. On each line, reset the embedding level of the following characters to
-     the paragraph embedding level:
-
-     segment separators,
-     paragraph separators,
-     any sequence of whitespace characters preceding a segment separator or
-     paragraph separator, and any sequence of white space characters at the end
-     of the line.
-     */
-
-    // don't bother as text is only single line
-
-    /*
-     L2. From the highest level found in the text to the lowest odd level on
-     each line, reverse any contiguous sequence of characters that are at that
-     level or higher.
-     */
-
-    // find highest level & lowest odd level
-    var highestLevel = -1;
-    var lowestOddLevel = 99;
-    var level;
-    for (i = 0, ii = levels.length; i < ii; ++i) {
-      level = levels[i];
-      if (highestLevel < level) {
-        highestLevel = level;
-      }
-      if (lowestOddLevel > level && isOdd(level)) {
-        lowestOddLevel = level;
-      }
-    }
-
-    // now reverse between those limits
-    for (level = highestLevel; level >= lowestOddLevel; --level) {
-      // find segments to reverse
-      var start = -1;
-      for (i = 0, ii = levels.length; i < ii; ++i) {
-        if (levels[i] < level) {
-          if (start >= 0) {
-            reverseValues(chars, start, i);
-            start = -1;
-          }
-        } else if (start < 0) {
-          start = i;
-        }
-      }
-      if (start >= 0) {
-        reverseValues(chars, start, levels.length);
-      }
-    }
-
-    /*
-     L3. Combining marks applied to a right-to-left base character will at this
-     point precede their base character. If the rendering engine expects them to
-     follow the base characters in the final display process, then the ordering
-     of the marks and the base character must be reversed.
-     */
-
-    // don't bother for now
-
-    /*
-     L4. A character that possesses the mirrored property as specified by
-     Section 4.7, Mirrored, must be depicted by a mirrored glyph if the resolved
-     directionality of that character is R.
-     */
-
-    // don't mirror as characters are already mirrored in the pdf
-
-    // Finally, return string
-    for (i = 0, ii = chars.length; i < ii; ++i) {
-      var ch = chars[i];
-      if (ch === '<' || ch === '>') {
-        chars[i] = '';
-      }
-    }
-    return createBidiText(chars.join(''), isLTR);
-  }
-
-  return bidi;
-})();
-
-exports.bidi = bidi;
-}));
-
-
-(function (root, factory) {
-  {
-    factory((root.pdfjsSharedUtil = {}), root.pdfjsSharedGlobal);
-  }
-}(this, function (exports, sharedGlobal) {
-
-var PDFJS = sharedGlobal.PDFJS;
-var globalScope = sharedGlobal.globalScope;
+var globalScope = (typeof window !== 'undefined') ? window :
+                  (typeof global !== 'undefined') ? global :
+                  (typeof self !== 'undefined') ? self : this;
 
 var FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
 
@@ -2209,14 +2170,14 @@ var FontType = {
   MMTYPE1: 10
 };
 
-PDFJS.VERBOSITY_LEVELS = {
+var VERBOSITY_LEVELS = {
   errors: 0,
   warnings: 1,
   infos: 5
 };
 
 // All the possible operations for an operator list.
-var OPS = PDFJS.OPS = {
+var OPS = {
   // Intentionally start from 1 so it is easy to spot bad operators that will be
   // 0's.
   dependency: 1,
@@ -2312,18 +2273,28 @@ var OPS = PDFJS.OPS = {
   constructPath: 91
 };
 
+var verbosity = VERBOSITY_LEVELS.warnings;
+
+function setVerbosityLevel(level) {
+  verbosity = level;
+}
+
+function getVerbosityLevel() {
+  return verbosity;
+}
+
 // A notice for devs. These are good for things that are helpful to devs, such
 // as warning that Workers were disabled, which is important to devs but not
 // end users.
 function info(msg) {
-  if (PDFJS.verbosity >= PDFJS.VERBOSITY_LEVELS.infos) {
+  if (verbosity >= VERBOSITY_LEVELS.infos) {
     console.log('Info: ' + msg);
   }
 }
 
 // Non-fatal warnings.
 function warn(msg) {
-  if (PDFJS.verbosity >= PDFJS.VERBOSITY_LEVELS.warnings) {
+  if (verbosity >= VERBOSITY_LEVELS.warnings) {
     console.log('Warning: ' + msg);
   }
 }
@@ -2336,7 +2307,7 @@ function deprecated(details) {
 // Fatal errors that should trigger the fallback UI and halt execution by
 // throwing an exception.
 function error(msg) {
-  if (PDFJS.verbosity >= PDFJS.VERBOSITY_LEVELS.errors) {
+  if (verbosity >= VERBOSITY_LEVELS.errors) {
     console.log('Error: ' + msg);
     console.log(backtrace());
   }
@@ -2357,7 +2328,7 @@ function assert(cond, msg) {
   }
 }
 
-var UNSUPPORTED_FEATURES = PDFJS.UNSUPPORTED_FEATURES = {
+var UNSUPPORTED_FEATURES = {
   unknown: 'unknown',
   forms: 'forms',
   javaScript: 'javaScript',
@@ -2365,17 +2336,6 @@ var UNSUPPORTED_FEATURES = PDFJS.UNSUPPORTED_FEATURES = {
   shadingPattern: 'shadingPattern',
   font: 'font'
 };
-
-// Gets the file name from a given URL.
-function getFilenameFromUrl(url) {
-  var anchor = url.indexOf('#');
-  var query = url.indexOf('?');
-  var end = Math.min(
-    anchor > 0 ? anchor : url.length,
-    query > 0 ? query : url.length);
-  return url.substring(url.lastIndexOf('/', end) + 1, end);
-}
-PDFJS.getFilenameFromUrl = getFilenameFromUrl;
 
 // Combines two URLs. The baseUrl shall be absolute URL. If the url is an
 // absolute URL, it will be returned as is.
@@ -2424,27 +2384,6 @@ function isValidUrl(url, allowRelative) {
       return false;
   }
 }
-PDFJS.isValidUrl = isValidUrl;
-
-/**
- * Adds various attributes (href, title, target, rel) to hyperlinks.
- * @param {HTMLLinkElement} link - The link element.
- * @param {Object} params - An object with the properties:
- * @param {string} params.url - An absolute URL.
- */
-function addLinkAttributes(link, params) {
-  var url = params && params.url;
-  link.href = link.title = (url ? removeNullCharacters(url) : '');
-
-  if (url) {
-    if (isExternalLinkTargetSet()) {
-      link.target = LinkTargetStringMap[PDFJS.externalLinkTarget];
-    }
-    // Strip referrer from the URL.
-    link.rel = PDFJS.externalLinkRel;
-  }
-}
-PDFJS.addLinkAttributes = addLinkAttributes;
 
 function shadow(obj, prop, value) {
   Object.defineProperty(obj, prop, { value: value,
@@ -2453,7 +2392,6 @@ function shadow(obj, prop, value) {
                                      writable: false });
   return value;
 }
-PDFJS.shadow = shadow;
 
 function getLookupTableFactory(initializer) {
   var lookup;
@@ -2467,48 +2405,7 @@ function getLookupTableFactory(initializer) {
   };
 }
 
-var LinkTarget = PDFJS.LinkTarget = {
-  NONE: 0, // Default value.
-  SELF: 1,
-  BLANK: 2,
-  PARENT: 3,
-  TOP: 4,
-};
-var LinkTargetStringMap = [
-  '',
-  '_self',
-  '_blank',
-  '_parent',
-  '_top'
-];
-
-function isExternalLinkTargetSet() {
-  if (PDFJS.openExternalLinksInNewWindow) {
-    deprecated('PDFJS.openExternalLinksInNewWindow, please use ' +
-               '"PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK" instead.');
-    if (PDFJS.externalLinkTarget === LinkTarget.NONE) {
-      PDFJS.externalLinkTarget = LinkTarget.BLANK;
-    }
-    // Reset the deprecated parameter, to suppress further warnings.
-    PDFJS.openExternalLinksInNewWindow = false;
-  }
-  switch (PDFJS.externalLinkTarget) {
-    case LinkTarget.NONE:
-      return false;
-    case LinkTarget.SELF:
-    case LinkTarget.BLANK:
-    case LinkTarget.PARENT:
-    case LinkTarget.TOP:
-      return true;
-  }
-  warn('PDFJS.externalLinkTarget is invalid: ' + PDFJS.externalLinkTarget);
-  // Reset the external link target, to suppress further warnings.
-  PDFJS.externalLinkTarget = LinkTarget.NONE;
-  return false;
-}
-PDFJS.isExternalLinkTargetSet = isExternalLinkTargetSet;
-
-var PasswordResponses = PDFJS.PasswordResponses = {
+var PasswordResponses = {
   NEED_PASSWORD: 1,
   INCORRECT_PASSWORD: 2
 };
@@ -2525,7 +2422,6 @@ var PasswordException = (function PasswordExceptionClosure() {
 
   return PasswordException;
 })();
-PDFJS.PasswordException = PasswordException;
 
 var UnknownErrorException = (function UnknownErrorExceptionClosure() {
   function UnknownErrorException(msg, details) {
@@ -2539,7 +2435,6 @@ var UnknownErrorException = (function UnknownErrorExceptionClosure() {
 
   return UnknownErrorException;
 })();
-PDFJS.UnknownErrorException = UnknownErrorException;
 
 var InvalidPDFException = (function InvalidPDFExceptionClosure() {
   function InvalidPDFException(msg) {
@@ -2552,7 +2447,6 @@ var InvalidPDFException = (function InvalidPDFExceptionClosure() {
 
   return InvalidPDFException;
 })();
-PDFJS.InvalidPDFException = InvalidPDFException;
 
 var MissingPDFException = (function MissingPDFExceptionClosure() {
   function MissingPDFException(msg) {
@@ -2565,7 +2459,6 @@ var MissingPDFException = (function MissingPDFExceptionClosure() {
 
   return MissingPDFException;
 })();
-PDFJS.MissingPDFException = MissingPDFException;
 
 var UnexpectedResponseException =
     (function UnexpectedResponseExceptionClosure() {
@@ -2580,7 +2473,6 @@ var UnexpectedResponseException =
 
   return UnexpectedResponseException;
 })();
-PDFJS.UnexpectedResponseException = UnexpectedResponseException;
 
 var NotImplementedException = (function NotImplementedExceptionClosure() {
   function NotImplementedException(msg) {
@@ -2629,7 +2521,6 @@ function removeNullCharacters(str) {
   }
   return str.replace(NullCharactersRegExp, '');
 }
-PDFJS.removeNullCharacters = removeNullCharacters;
 
 function bytesToString(bytes) {
   assert(bytes !== null && typeof bytes === 'object' &&
@@ -2743,29 +2634,6 @@ function isLittleEndian() {
   return (buffer16[0] === 1);
 }
 
-Object.defineProperty(PDFJS, 'isLittleEndian', {
-  configurable: true,
-  get: function PDFJS_isLittleEndian() {
-    return shadow(PDFJS, 'isLittleEndian', isLittleEndian());
-  }
-});
-
-  // Lazy test if the userAgent support CanvasTypedArrays
-function hasCanvasTypedArrays() {
-  var canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 1;
-  var ctx = canvas.getContext('2d');
-  var imageData = ctx.createImageData(1, 1);
-  return (typeof imageData.data.buffer !== 'undefined');
-}
-
-Object.defineProperty(PDFJS, 'hasCanvasTypedArrays', {
-  configurable: true,
-  get: function PDFJS_hasCanvasTypedArrays() {
-    return shadow(PDFJS, 'hasCanvasTypedArrays', hasCanvasTypedArrays());
-  }
-});
-
 var Uint32ArrayView = (function Uint32ArrayViewClosure() {
 
   function Uint32ArrayView(buffer, length) {
@@ -2810,7 +2678,7 @@ exports.Uint32ArrayView = Uint32ArrayView;
 
 var IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 
-var Util = PDFJS.Util = (function UtilClosure() {
+var Util = (function UtilClosure() {
   function Util() {}
 
   var rgbBuf = ['rgb(', 0, ',', 0, ',', 0, ')'];
@@ -3063,7 +2931,7 @@ var Util = PDFJS.Util = (function UtilClosure() {
  * @class
  * @alias PDFJS.PageViewport
  */
-var PageViewport = PDFJS.PageViewport = (function PageViewportClosure() {
+var PageViewport = (function PageViewportClosure() {
   /**
    * @constructor
    * @private
@@ -3286,8 +3154,6 @@ function createPromiseCapability() {
   });
   return capability;
 }
-
-PDFJS.createPromiseCapability = createPromiseCapability;
 
 /**
  * Polyfill for Promises:
@@ -3665,7 +3531,7 @@ var StatTimer = (function StatTimerClosure() {
   return StatTimer;
 })();
 
-PDFJS.createBlob = function createBlob(data, contentType) {
+var createBlob = function createBlob(data, contentType) {
   if (typeof Blob !== 'undefined') {
     return new Blob([data], { type: contentType });
   }
@@ -3675,15 +3541,15 @@ PDFJS.createBlob = function createBlob(data, contentType) {
   return bb.getBlob(contentType);
 };
 
-PDFJS.createObjectURL = (function createObjectURLClosure() {
+var createObjectURL = (function createObjectURLClosure() {
   // Blob/createObjectURL is not available, falling back to data schema.
   var digits =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 
-  return function createObjectURL(data, contentType) {
-    if (!PDFJS.disableCreateObjectURL &&
+  return function createObjectURL(data, contentType, forceDataSchema) {
+    if (!forceDataSchema &&
         typeof URL !== 'undefined' && URL.createObjectURL) {
-      var blob = PDFJS.createBlob(data, contentType);
+      var blob = createBlob(data, contentType);
       return URL.createObjectURL(blob);
     }
 
@@ -4469,6 +4335,7 @@ function loadJpegStream(id, imageUrl, objs) {
 exports.FONT_IDENTITY_MATRIX = FONT_IDENTITY_MATRIX;
 exports.IDENTITY_MATRIX = IDENTITY_MATRIX;
 exports.OPS = OPS;
+exports.VERBOSITY_LEVELS = VERBOSITY_LEVELS;
 exports.UNSUPPORTED_FEATURES = UNSUPPORTED_FEATURES;
 exports.AnnotationBorderStyleType = AnnotationBorderStyleType;
 exports.AnnotationFlag = AnnotationFlag;
@@ -4476,12 +4343,11 @@ exports.AnnotationType = AnnotationType;
 exports.FontType = FontType;
 exports.ImageKind = ImageKind;
 exports.InvalidPDFException = InvalidPDFException;
-exports.LinkTarget = LinkTarget;
-exports.LinkTargetStringMap = LinkTargetStringMap;
 exports.MessageHandler = MessageHandler;
 exports.MissingDataException = MissingDataException;
 exports.MissingPDFException = MissingPDFException;
 exports.NotImplementedException = NotImplementedException;
+exports.PageViewport = PageViewport;
 exports.PasswordException = PasswordException;
 exports.PasswordResponses = PasswordResponses;
 exports.StatTimer = StatTimer;
@@ -4496,29 +4362,32 @@ exports.arraysToBytes = arraysToBytes;
 exports.assert = assert;
 exports.bytesToString = bytesToString;
 exports.combineUrl = combineUrl;
+exports.createBlob = createBlob;
 exports.createPromiseCapability = createPromiseCapability;
+exports.createObjectURL = createObjectURL;
 exports.deprecated = deprecated;
 exports.error = error;
-exports.getFilenameFromUrl = getFilenameFromUrl;
 exports.getLookupTableFactory = getLookupTableFactory;
+exports.getVerbosityLevel = getVerbosityLevel;
+exports.globalScope = globalScope;
 exports.info = info;
 exports.isArray = isArray;
 exports.isArrayBuffer = isArrayBuffer;
 exports.isBool = isBool;
 exports.isEmptyObj = isEmptyObj;
-exports.isExternalLinkTargetSet = isExternalLinkTargetSet;
 exports.isInt = isInt;
 exports.isNum = isNum;
 exports.isString = isString;
 exports.isSameOrigin = isSameOrigin;
 exports.isValidUrl = isValidUrl;
-exports.addLinkAttributes = addLinkAttributes;
+exports.isLittleEndian = isLittleEndian;
 exports.loadJpegStream = loadJpegStream;
 exports.log2 = log2;
 exports.readInt8 = readInt8;
 exports.readUint16 = readUint16;
 exports.readUint32 = readUint32;
 exports.removeNullCharacters = removeNullCharacters;
+exports.setVerbosityLevel = setVerbosityLevel;
 exports.shadow = shadow;
 exports.string32 = string32;
 exports.stringToBytes = stringToBytes;
@@ -18199,6 +18068,7 @@ var Util = sharedUtil.Util;
 var error = sharedUtil.error;
 var info = sharedUtil.info;
 var isArray = sharedUtil.isArray;
+var createObjectURL = sharedUtil.createObjectURL;
 var shadow = sharedUtil.shadow;
 var warn = sharedUtil.warn;
 var Dict = corePrimitives.Dict;
@@ -19122,8 +18992,8 @@ var JpegStream = (function JpegStreamClosure() {
     return this.buffer;
   };
 
-  JpegStream.prototype.getIR = function JpegStream_getIR() {
-    return PDFJS.createObjectURL(this.bytes, 'image/jpeg');
+  JpegStream.prototype.getIR = function JpegStream_getIR(forceDataSchema) {
+    return createObjectURL(this.bytes, 'image/jpeg', forceDataSchema);
   };
   /**
    * Checks if the image can be decoded and displayed by the browser without any
@@ -24603,7 +24473,6 @@ var assert = sharedUtil.assert;
 var error = sharedUtil.error;
 var isInt = sharedUtil.isInt;
 var isString = sharedUtil.isString;
-var warn = sharedUtil.warn;
 var isName = corePrimitives.isName;
 var isCmd = corePrimitives.isCmd;
 var isStream = corePrimitives.isStream;
@@ -25601,233 +25470,14 @@ exports.IdentityCMap = IdentityCMap;
 
 (function (root, factory) {
   {
-    factory((root.pdfjsCorePsParser = {}), root.pdfjsSharedUtil,
-      root.pdfjsCoreParser);
-  }
-}(this, function (exports, sharedUtil, coreParser) {
-
-var error = sharedUtil.error;
-var EOF = coreParser.EOF;
-var Lexer = coreParser.Lexer;
-
-var PostScriptParser = (function PostScriptParserClosure() {
-  function PostScriptParser(lexer) {
-    this.lexer = lexer;
-    this.operators = [];
-    this.token = null;
-    this.prev = null;
-  }
-  PostScriptParser.prototype = {
-    nextToken: function PostScriptParser_nextToken() {
-      this.prev = this.token;
-      this.token = this.lexer.getToken();
-    },
-    accept: function PostScriptParser_accept(type) {
-      if (this.token.type === type) {
-        this.nextToken();
-        return true;
-      }
-      return false;
-    },
-    expect: function PostScriptParser_expect(type) {
-      if (this.accept(type)) {
-        return true;
-      }
-      error('Unexpected symbol: found ' + this.token.type + ' expected ' +
-        type + '.');
-    },
-    parse: function PostScriptParser_parse() {
-      this.nextToken();
-      this.expect(PostScriptTokenTypes.LBRACE);
-      this.parseBlock();
-      this.expect(PostScriptTokenTypes.RBRACE);
-      return this.operators;
-    },
-    parseBlock: function PostScriptParser_parseBlock() {
-      while (true) {
-        if (this.accept(PostScriptTokenTypes.NUMBER)) {
-          this.operators.push(this.prev.value);
-        } else if (this.accept(PostScriptTokenTypes.OPERATOR)) {
-          this.operators.push(this.prev.value);
-        } else if (this.accept(PostScriptTokenTypes.LBRACE)) {
-          this.parseCondition();
-        } else {
-          return;
-        }
-      }
-    },
-    parseCondition: function PostScriptParser_parseCondition() {
-      // Add two place holders that will be updated later
-      var conditionLocation = this.operators.length;
-      this.operators.push(null, null);
-
-      this.parseBlock();
-      this.expect(PostScriptTokenTypes.RBRACE);
-      if (this.accept(PostScriptTokenTypes.IF)) {
-        // The true block is right after the 'if' so it just falls through on
-        // true else it jumps and skips the true block.
-        this.operators[conditionLocation] = this.operators.length;
-        this.operators[conditionLocation + 1] = 'jz';
-      } else if (this.accept(PostScriptTokenTypes.LBRACE)) {
-        var jumpLocation = this.operators.length;
-        this.operators.push(null, null);
-        var endOfTrue = this.operators.length;
-        this.parseBlock();
-        this.expect(PostScriptTokenTypes.RBRACE);
-        this.expect(PostScriptTokenTypes.IFELSE);
-        // The jump is added at the end of the true block to skip the false
-        // block.
-        this.operators[jumpLocation] = this.operators.length;
-        this.operators[jumpLocation + 1] = 'j';
-
-        this.operators[conditionLocation] = endOfTrue;
-        this.operators[conditionLocation + 1] = 'jz';
-      } else {
-        error('PS Function: error parsing conditional.');
-      }
-    }
-  };
-  return PostScriptParser;
-})();
-
-var PostScriptTokenTypes = {
-  LBRACE: 0,
-  RBRACE: 1,
-  NUMBER: 2,
-  OPERATOR: 3,
-  IF: 4,
-  IFELSE: 5
-};
-
-var PostScriptToken = (function PostScriptTokenClosure() {
-  function PostScriptToken(type, value) {
-    this.type = type;
-    this.value = value;
-  }
-
-  var opCache = Object.create(null);
-
-  PostScriptToken.getOperator = function PostScriptToken_getOperator(op) {
-    var opValue = opCache[op];
-    if (opValue) {
-      return opValue;
-    }
-    return opCache[op] = new PostScriptToken(PostScriptTokenTypes.OPERATOR, op);
-  };
-
-  PostScriptToken.LBRACE = new PostScriptToken(PostScriptTokenTypes.LBRACE,
-    '{');
-  PostScriptToken.RBRACE = new PostScriptToken(PostScriptTokenTypes.RBRACE,
-    '}');
-  PostScriptToken.IF = new PostScriptToken(PostScriptTokenTypes.IF, 'IF');
-  PostScriptToken.IFELSE = new PostScriptToken(PostScriptTokenTypes.IFELSE,
-    'IFELSE');
-  return PostScriptToken;
-})();
-
-var PostScriptLexer = (function PostScriptLexerClosure() {
-  function PostScriptLexer(stream) {
-    this.stream = stream;
-    this.nextChar();
-
-    this.strBuf = [];
-  }
-  PostScriptLexer.prototype = {
-    nextChar: function PostScriptLexer_nextChar() {
-      return (this.currentChar = this.stream.getByte());
-    },
-    getToken: function PostScriptLexer_getToken() {
-      var comment = false;
-      var ch = this.currentChar;
-
-      // skip comments
-      while (true) {
-        if (ch < 0) {
-          return EOF;
-        }
-
-        if (comment) {
-          if (ch === 0x0A || ch === 0x0D) {
-            comment = false;
-          }
-        } else if (ch === 0x25) { // '%'
-          comment = true;
-        } else if (!Lexer.isSpace(ch)) {
-          break;
-        }
-        ch = this.nextChar();
-      }
-      switch (ch | 0) {
-        case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: // '0'-'4'
-        case 0x35: case 0x36: case 0x37: case 0x38: case 0x39: // '5'-'9'
-        case 0x2B: case 0x2D: case 0x2E: // '+', '-', '.'
-          return new PostScriptToken(PostScriptTokenTypes.NUMBER,
-                                     this.getNumber());
-        case 0x7B: // '{'
-          this.nextChar();
-          return PostScriptToken.LBRACE;
-        case 0x7D: // '}'
-          this.nextChar();
-          return PostScriptToken.RBRACE;
-      }
-      // operator
-      var strBuf = this.strBuf;
-      strBuf.length = 0;
-      strBuf[0] = String.fromCharCode(ch);
-
-      while ((ch = this.nextChar()) >= 0 && // and 'A'-'Z', 'a'-'z'
-             ((ch >= 0x41 && ch <= 0x5A) || (ch >= 0x61 && ch <= 0x7A))) {
-        strBuf.push(String.fromCharCode(ch));
-      }
-      var str = strBuf.join('');
-      switch (str.toLowerCase()) {
-        case 'if':
-          return PostScriptToken.IF;
-        case 'ifelse':
-          return PostScriptToken.IFELSE;
-        default:
-          return PostScriptToken.getOperator(str);
-      }
-    },
-    getNumber: function PostScriptLexer_getNumber() {
-      var ch = this.currentChar;
-      var strBuf = this.strBuf;
-      strBuf.length = 0;
-      strBuf[0] = String.fromCharCode(ch);
-
-      while ((ch = this.nextChar()) >= 0) {
-        if ((ch >= 0x30 && ch <= 0x39) || // '0'-'9'
-            ch === 0x2D || ch === 0x2E) { // '-', '.'
-          strBuf.push(String.fromCharCode(ch));
-        } else {
-          break;
-        }
-      }
-      var value = parseFloat(strBuf.join(''));
-      if (isNaN(value)) {
-        error('Invalid floating point number: ' + value);
-      }
-      return value;
-    }
-  };
-  return PostScriptLexer;
-})();
-
-exports.PostScriptLexer = PostScriptLexer;
-exports.PostScriptParser = PostScriptParser;
-}));
-
-
-(function (root, factory) {
-  {
     factory((root.pdfjsCoreFonts = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCoreStream, root.pdfjsCoreParser,
-      root.pdfjsCoreCMap, root.pdfjsCoreGlyphList, root.pdfjsCoreCharsets,
+      root.pdfjsCoreGlyphList, root.pdfjsCoreCharsets,
       root.pdfjsCoreFontRenderer, root.pdfjsCoreEncodings,
       root.pdfjsCoreStandardFonts, root.pdfjsCoreUnicode);
   }
 }(this, function (exports, sharedUtil, corePrimitives, coreStream, coreParser,
-                  coreCMap, coreGlyphList, coreCharsets, coreFontRenderer,
+                  coreGlyphList, coreCharsets, coreFontRenderer,
                   coreEncodings, coreStandardFonts, coreUnicode) {
 
 var FONT_IDENTITY_MATRIX = sharedUtil.FONT_IDENTITY_MATRIX;
@@ -25845,11 +25495,8 @@ var shadow = sharedUtil.shadow;
 var stringToBytes = sharedUtil.stringToBytes;
 var string32 = sharedUtil.string32;
 var warn = sharedUtil.warn;
-var Name = corePrimitives.Name;
 var Stream = coreStream.Stream;
 var Lexer = coreParser.Lexer;
-var CMapFactory = coreCMap.CMapFactory;
-var IdentityCMap = coreCMap.IdentityCMap;
 var getGlyphsUnicode = coreGlyphList.getGlyphsUnicode;
 var getDingbatsGlyphsUnicode = coreGlyphList.getDingbatsGlyphsUnicode;
 var ISOAdobeCharset = coreCharsets.ISOAdobeCharset;
@@ -31274,6 +30921,225 @@ coreFontRenderer._setCoreFonts(exports);
 
 (function (root, factory) {
   {
+    factory((root.pdfjsCorePsParser = {}), root.pdfjsSharedUtil,
+      root.pdfjsCoreParser);
+  }
+}(this, function (exports, sharedUtil, coreParser) {
+
+var error = sharedUtil.error;
+var EOF = coreParser.EOF;
+var Lexer = coreParser.Lexer;
+
+var PostScriptParser = (function PostScriptParserClosure() {
+  function PostScriptParser(lexer) {
+    this.lexer = lexer;
+    this.operators = [];
+    this.token = null;
+    this.prev = null;
+  }
+  PostScriptParser.prototype = {
+    nextToken: function PostScriptParser_nextToken() {
+      this.prev = this.token;
+      this.token = this.lexer.getToken();
+    },
+    accept: function PostScriptParser_accept(type) {
+      if (this.token.type === type) {
+        this.nextToken();
+        return true;
+      }
+      return false;
+    },
+    expect: function PostScriptParser_expect(type) {
+      if (this.accept(type)) {
+        return true;
+      }
+      error('Unexpected symbol: found ' + this.token.type + ' expected ' +
+        type + '.');
+    },
+    parse: function PostScriptParser_parse() {
+      this.nextToken();
+      this.expect(PostScriptTokenTypes.LBRACE);
+      this.parseBlock();
+      this.expect(PostScriptTokenTypes.RBRACE);
+      return this.operators;
+    },
+    parseBlock: function PostScriptParser_parseBlock() {
+      while (true) {
+        if (this.accept(PostScriptTokenTypes.NUMBER)) {
+          this.operators.push(this.prev.value);
+        } else if (this.accept(PostScriptTokenTypes.OPERATOR)) {
+          this.operators.push(this.prev.value);
+        } else if (this.accept(PostScriptTokenTypes.LBRACE)) {
+          this.parseCondition();
+        } else {
+          return;
+        }
+      }
+    },
+    parseCondition: function PostScriptParser_parseCondition() {
+      // Add two place holders that will be updated later
+      var conditionLocation = this.operators.length;
+      this.operators.push(null, null);
+
+      this.parseBlock();
+      this.expect(PostScriptTokenTypes.RBRACE);
+      if (this.accept(PostScriptTokenTypes.IF)) {
+        // The true block is right after the 'if' so it just falls through on
+        // true else it jumps and skips the true block.
+        this.operators[conditionLocation] = this.operators.length;
+        this.operators[conditionLocation + 1] = 'jz';
+      } else if (this.accept(PostScriptTokenTypes.LBRACE)) {
+        var jumpLocation = this.operators.length;
+        this.operators.push(null, null);
+        var endOfTrue = this.operators.length;
+        this.parseBlock();
+        this.expect(PostScriptTokenTypes.RBRACE);
+        this.expect(PostScriptTokenTypes.IFELSE);
+        // The jump is added at the end of the true block to skip the false
+        // block.
+        this.operators[jumpLocation] = this.operators.length;
+        this.operators[jumpLocation + 1] = 'j';
+
+        this.operators[conditionLocation] = endOfTrue;
+        this.operators[conditionLocation + 1] = 'jz';
+      } else {
+        error('PS Function: error parsing conditional.');
+      }
+    }
+  };
+  return PostScriptParser;
+})();
+
+var PostScriptTokenTypes = {
+  LBRACE: 0,
+  RBRACE: 1,
+  NUMBER: 2,
+  OPERATOR: 3,
+  IF: 4,
+  IFELSE: 5
+};
+
+var PostScriptToken = (function PostScriptTokenClosure() {
+  function PostScriptToken(type, value) {
+    this.type = type;
+    this.value = value;
+  }
+
+  var opCache = Object.create(null);
+
+  PostScriptToken.getOperator = function PostScriptToken_getOperator(op) {
+    var opValue = opCache[op];
+    if (opValue) {
+      return opValue;
+    }
+    return opCache[op] = new PostScriptToken(PostScriptTokenTypes.OPERATOR, op);
+  };
+
+  PostScriptToken.LBRACE = new PostScriptToken(PostScriptTokenTypes.LBRACE,
+    '{');
+  PostScriptToken.RBRACE = new PostScriptToken(PostScriptTokenTypes.RBRACE,
+    '}');
+  PostScriptToken.IF = new PostScriptToken(PostScriptTokenTypes.IF, 'IF');
+  PostScriptToken.IFELSE = new PostScriptToken(PostScriptTokenTypes.IFELSE,
+    'IFELSE');
+  return PostScriptToken;
+})();
+
+var PostScriptLexer = (function PostScriptLexerClosure() {
+  function PostScriptLexer(stream) {
+    this.stream = stream;
+    this.nextChar();
+
+    this.strBuf = [];
+  }
+  PostScriptLexer.prototype = {
+    nextChar: function PostScriptLexer_nextChar() {
+      return (this.currentChar = this.stream.getByte());
+    },
+    getToken: function PostScriptLexer_getToken() {
+      var comment = false;
+      var ch = this.currentChar;
+
+      // skip comments
+      while (true) {
+        if (ch < 0) {
+          return EOF;
+        }
+
+        if (comment) {
+          if (ch === 0x0A || ch === 0x0D) {
+            comment = false;
+          }
+        } else if (ch === 0x25) { // '%'
+          comment = true;
+        } else if (!Lexer.isSpace(ch)) {
+          break;
+        }
+        ch = this.nextChar();
+      }
+      switch (ch | 0) {
+        case 0x30: case 0x31: case 0x32: case 0x33: case 0x34: // '0'-'4'
+        case 0x35: case 0x36: case 0x37: case 0x38: case 0x39: // '5'-'9'
+        case 0x2B: case 0x2D: case 0x2E: // '+', '-', '.'
+          return new PostScriptToken(PostScriptTokenTypes.NUMBER,
+                                     this.getNumber());
+        case 0x7B: // '{'
+          this.nextChar();
+          return PostScriptToken.LBRACE;
+        case 0x7D: // '}'
+          this.nextChar();
+          return PostScriptToken.RBRACE;
+      }
+      // operator
+      var strBuf = this.strBuf;
+      strBuf.length = 0;
+      strBuf[0] = String.fromCharCode(ch);
+
+      while ((ch = this.nextChar()) >= 0 && // and 'A'-'Z', 'a'-'z'
+             ((ch >= 0x41 && ch <= 0x5A) || (ch >= 0x61 && ch <= 0x7A))) {
+        strBuf.push(String.fromCharCode(ch));
+      }
+      var str = strBuf.join('');
+      switch (str.toLowerCase()) {
+        case 'if':
+          return PostScriptToken.IF;
+        case 'ifelse':
+          return PostScriptToken.IFELSE;
+        default:
+          return PostScriptToken.getOperator(str);
+      }
+    },
+    getNumber: function PostScriptLexer_getNumber() {
+      var ch = this.currentChar;
+      var strBuf = this.strBuf;
+      strBuf.length = 0;
+      strBuf[0] = String.fromCharCode(ch);
+
+      while ((ch = this.nextChar()) >= 0) {
+        if ((ch >= 0x30 && ch <= 0x39) || // '0'-'9'
+            ch === 0x2D || ch === 0x2E) { // '-', '.'
+          strBuf.push(String.fromCharCode(ch));
+        } else {
+          break;
+        }
+      }
+      var value = parseFloat(strBuf.join(''));
+      if (isNaN(value)) {
+        error('Invalid floating point number: ' + value);
+      }
+      return value;
+    }
+  };
+  return PostScriptLexer;
+})();
+
+exports.PostScriptLexer = PostScriptLexer;
+exports.PostScriptParser = PostScriptParser;
+}));
+
+
+(function (root, factory) {
+  {
     factory((root.pdfjsCoreFunction = {}), root.pdfjsSharedUtil,
       root.pdfjsCorePrimitives, root.pdfjsCorePsParser);
   }
@@ -33721,7 +33587,7 @@ var PDFImage = (function PDFImageClosure() {
    * Decode the image in the main thread if it supported. Resovles the promise
    * when the image data is ready.
    */
-  function handleImageData(handler, xref, res, image) {
+  function handleImageData(handler, xref, res, image, forceDataSchema) {
     if (image instanceof JpegStream && image.isNativelyDecodable(xref, res)) {
       // For natively supported jpegs send them to the main thread for decoding.
       var dict = image.dict;
@@ -33729,7 +33595,8 @@ var PDFImage = (function PDFImageClosure() {
       colorSpace = ColorSpace.parse(colorSpace, xref, res);
       var numComps = colorSpace.numComps;
       var decodePromise = handler.sendWithPromise('JpegDecode',
-                                                  [image.getIR(), numComps]);
+                                                  [image.getIR(forceDataSchema),
+                                                   numComps]);
       return decodePromise.then(function (message) {
         var data = message.data;
         return new Stream(data, 0, data.length, image.dict);
@@ -33854,8 +33721,10 @@ var PDFImage = (function PDFImageClosure() {
    * with a PDFImage when the image is ready to be used.
    */
   PDFImage.buildImage = function PDFImage_buildImage(handler, xref,
-                                                     res, image, inline) {
-    var imagePromise = handleImageData(handler, xref, res, image);
+                                                     res, image, inline,
+                                                     forceDataSchema) {
+    var imagePromise = handleImageData(handler, xref, res, image,
+                                       forceDataSchema);
     var smaskPromise;
     var maskPromise;
 
@@ -33863,13 +33732,15 @@ var PDFImage = (function PDFImageClosure() {
     var mask = image.dict.get('Mask');
 
     if (smask) {
-      smaskPromise = handleImageData(handler, xref, res, smask);
+      smaskPromise = handleImageData(handler, xref, res, smask,
+                                     forceDataSchema);
       maskPromise = Promise.resolve(null);
     } else {
       smaskPromise = Promise.resolve(null);
       if (mask) {
         if (isStream(mask)) {
-          maskPromise = handleImageData(handler, xref, res, mask);
+          maskPromise = handleImageData(handler, xref, res, mask,
+                                        forceDataSchema);
         } else if (isArray(mask)) {
           maskPromise = Promise.resolve(mask);
         } else {
@@ -36849,8 +36720,15 @@ var getUnicodeForGlyph = coreUnicode.getUnicodeForGlyph;
 var getGlyphsUnicode = coreGlyphList.getGlyphsUnicode;
 
 var PartialEvaluator = (function PartialEvaluatorClosure() {
+  var DefaultPartialEvaluatorOptions = {
+    forceDataSchema: false,
+    maxImageSize: -1,
+    disableFontFace: false,
+    cMapOptions: { url: null, packed: false }
+  };
+
   function PartialEvaluator(pdfManager, xref, handler, pageIndex,
-                            uniquePrefix, idCounters, fontCache) {
+                            uniquePrefix, idCounters, fontCache, options) {
     this.pdfManager = pdfManager;
     this.xref = xref;
     this.handler = handler;
@@ -36858,6 +36736,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     this.uniquePrefix = uniquePrefix;
     this.idCounters = idCounters;
     this.fontCache = fontCache;
+    this.options = options || DefaultPartialEvaluatorOptions;
   }
 
   // Trying to minimize Date.now() usage and check every 100 time
@@ -37016,7 +36895,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         warn('Image dimensions are missing, or not numbers.');
         return;
       }
-      if (PDFJS.maxImageSize !== -1 && w * h > PDFJS.maxImageSize) {
+      var maxImageSize = this.options.maxImageSize;
+      if (maxImageSize !== -1 && w * h > maxImageSize) {
         warn('Image exceeded maximum allowed size and was removed.');
         return;
       }
@@ -37080,11 +36960,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         // These JPEGs don't need any more processing so we can just send it.
         operatorList.addOp(OPS.paintJpegXObject, args);
         this.handler.send('obj',
-          [objId, this.pageIndex, 'JpegStream', image.getIR()]);
+          [objId, this.pageIndex, 'JpegStream',
+           image.getIR(this.options.forceDataSchema)]);
         return;
       }
 
-      PDFImage.buildImage(self.handler, self.xref, resources, image, inline).
+      PDFImage.buildImage(self.handler, self.xref, resources, image, inline,
+                          this.options.forceDataSchema).
         then(function(imageObj) {
           var imgData = imageObj.createImageData(/* forceRGBA = */ false);
           self.handler.send('obj', [objId, self.pageIndex, 'Image', imgData],
@@ -37192,7 +37074,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       var glyphs = font.charsToGlyphs(chars);
       var isAddToPathSet = !!(state.textRenderingMode &
                               TextRenderingMode.ADD_TO_PATH_FLAG);
-      if (font.data && (isAddToPathSet || PDFJS.disableFontFace)) {
+      if (font.data && (isAddToPathSet || this.options.disableFontFace)) {
         var buildPath = function (fontChar) {
           if (!font.renderer.hasBuiltPath(fontChar)) {
             var path = font.renderer.getPathJs(fontChar);
@@ -37915,7 +37797,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       function runBidiTransform(textChunk) {
         var str = textChunk.str.join('');
-        var bidiResult = PDFJS.bidi(str, -1, textChunk.vertical);
+        var bidiResult = bidi(str, -1, textChunk.vertical);
         return {
           str: (normalizeWhitespace ? replaceWhitespace(bidiResult.str) :
                                       bidiResult.str),
@@ -38498,8 +38380,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         var ucs2CMapName = new Name(registry + '-' + ordering + '-UCS2');
         // d) Obtain the CMap with the name constructed in step (c) (available
         // from the ASN Web site; see the Bibliography).
-        return CMapFactory.create(ucs2CMapName,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).then(
+        return CMapFactory.create(ucs2CMapName, this.options.cMapOptions,
+                                  null).then(
             function (ucs2CMap) {
           var cMap = properties.cMap;
           toUnicode = [];
@@ -38526,8 +38408,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     readToUnicode: function PartialEvaluator_readToUnicode(toUnicode) {
       var cmapObj = toUnicode;
       if (isName(cmapObj)) {
-        return CMapFactory.create(cmapObj,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).then(
+        return CMapFactory.create(cmapObj, this.options.cMapOptions, null).then(
             function (cmap) {
           if (cmap instanceof IdentityCMap) {
             return new IdentityToUnicodeMap(0, 0xFFFF);
@@ -38535,8 +38416,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           return new ToUnicodeMap(cmap.getMap());
         });
       } else if (isStream(cmapObj)) {
-        return CMapFactory.create(cmapObj,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).then(
+        return CMapFactory.create(cmapObj, this.options.cMapOptions, null).then(
             function (cmap) {
           if (cmap instanceof IdentityCMap) {
             return new IdentityToUnicodeMap(0, 0xFFFF);
@@ -38827,6 +38707,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       var descriptor = preEvaluatedFont.descriptor;
       var type = preEvaluatedFont.type;
       var maxCharIndex = (composite ? 0xFFFF : 0xFF);
+      var cMapOptions = this.options.cMapOptions;
       var properties;
 
       if (!descriptor) {
@@ -38954,8 +38835,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         if (isName(cidEncoding)) {
           properties.cidEncoding = cidEncoding.name;
         }
-        cMapPromise = CMapFactory.create(cidEncoding,
-          { url: PDFJS.cMapUrl, packed: PDFJS.cMapPacked }, null).then(
+        cMapPromise = CMapFactory.create(cidEncoding, cMapOptions, null).then(
             function (cMap) {
           properties.cMap = cMap;
           properties.vertical = properties.cMap.vertical;
@@ -40820,6 +40700,7 @@ var Page = (function PageClosure() {
     this.idCounters = {
       obj: 0
     };
+    this.evaluatorOptions = pdfManager.evaluatorOptions;
     this.resourcesPromise = null;
   }
 
@@ -40965,7 +40846,8 @@ var Page = (function PageClosure() {
                                                   handler, this.pageIndex,
                                                   'p' + this.pageIndex + '_',
                                                   this.idCounters,
-                                                  this.fontCache);
+                                                  this.fontCache,
+                                                  this.evaluatorOptions);
 
       var dataPromises = Promise.all([contentStreamPromise, resourcesPromise]);
       var pageListPromise = dataPromises.then(function(data) {
@@ -41030,7 +40912,8 @@ var Page = (function PageClosure() {
                                                     handler, self.pageIndex,
                                                     'p' + self.pageIndex + '_',
                                                     self.idCounters,
-                                                    self.fontCache);
+                                                    self.fontCache,
+                                                    self.evaluatorOptions);
 
         return partialEvaluator.getTextContent(contentStream,
                                                task,
@@ -41437,8 +41320,9 @@ var BasePdfManager = (function BasePdfManagerClosure() {
 })();
 
 var LocalPdfManager = (function LocalPdfManagerClosure() {
-  function LocalPdfManager(docId, data, password) {
+  function LocalPdfManager(docId, data, password, evaluatorOptions) {
     this._docId = docId;
+    this.evaluatorOptions = evaluatorOptions;
     var stream = new Stream(data);
     this.pdfDocument = new PDFDocument(this, stream, password);
     this._loadedStreamCapability = createPromiseCapability();
@@ -41484,9 +41368,10 @@ var LocalPdfManager = (function LocalPdfManagerClosure() {
 })();
 
 var NetworkPdfManager = (function NetworkPdfManagerClosure() {
-  function NetworkPdfManager(docId, pdfNetworkStream, args) {
+  function NetworkPdfManager(docId, pdfNetworkStream, args, evaluatorOptions) {
     this._docId = docId;
     this.msgHandler = args.msgHandler;
+    this.evaluatorOptions = evaluatorOptions;
 
     var params = {
       msgHandler: args.msgHandler,
@@ -41562,11 +41447,9 @@ exports.NetworkPdfManager = NetworkPdfManager;
 (function (root, factory) {
   {
     factory((root.pdfjsCoreWorker = {}), root.pdfjsSharedUtil,
-      root.pdfjsCorePrimitives, root.pdfjsCorePdfManager,
-      root.pdfjsSharedGlobal);
+      root.pdfjsCorePrimitives, root.pdfjsCorePdfManager);
   }
-}(this, function (exports, sharedUtil, corePrimitives, corePdfManager,
-                  sharedGlobal) {
+}(this, function (exports, sharedUtil, corePrimitives, corePdfManager) {
 
 var UNSUPPORTED_FEATURES = sharedUtil.UNSUPPORTED_FEATURES;
 var InvalidPDFException = sharedUtil.InvalidPDFException;
@@ -41584,11 +41467,11 @@ var createPromiseCapability = sharedUtil.createPromiseCapability;
 var error = sharedUtil.error;
 var info = sharedUtil.info;
 var warn = sharedUtil.warn;
+var setVerbosityLevel = sharedUtil.setVerbosityLevel;
 var Ref = corePrimitives.Ref;
 var LocalPdfManager = corePdfManager.LocalPdfManager;
 var NetworkPdfManager = corePdfManager.NetworkPdfManager;
-var globalScope = sharedGlobal.globalScope;
-var PDFJS = sharedGlobal.PDFJS;
+var globalScope = sharedUtil.globalScope;
 
 var WorkerTask = (function WorkerTaskClosure() {
   function WorkerTask(name) {
@@ -41835,7 +41718,7 @@ function setPDFNetworkStreamClass(cls) {
   PDFNetworkStream = cls;
 }
 
-var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
+var WorkerMessageHandler = {
   setup: function wphSetup(handler, port) {
     var testMessageProcessed = false;
     handler.on('test', function wphSetupTest(data) {
@@ -41869,6 +41752,10 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
         supportTypedArray: true,
         supportTransfers: supportTransfers
       });
+    });
+
+    handler.on('configure', function wphConfigure(data) {
+      setVerbosityLevel(data.verbosity);
     });
 
     handler.on('GetDocRequest', function wphSetupDoc(data) {
@@ -41940,14 +41827,15 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
       return loadDocumentCapability.promise;
     }
 
-    function getPdfManager(data) {
+    function getPdfManager(data, evaluatorOptions) {
       var pdfManagerCapability = createPromiseCapability();
       var pdfManager;
 
       var source = data.source;
       if (source.data) {
         try {
-          pdfManager = new LocalPdfManager(docId, source.data, source.password);
+          pdfManager = new LocalPdfManager(docId, source.data, source.password,
+                                           evaluatorOptions);
           pdfManagerCapability.resolve(pdfManager);
         } catch (ex) {
           pdfManagerCapability.reject(ex);
@@ -41996,7 +41884,7 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
           length: fullRequest.contentLength,
           disableAutoFetch: disableAutoFetch,
           rangeChunkSize: source.rangeChunkSize
-        });
+        }, evaluatorOptions);
         pdfManagerCapability.resolve(pdfManager);
         cancelXHRs = null;
       }).catch(function (reason) {
@@ -42012,7 +41900,8 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
         }
         // the data is array, instantiating directly from it
         try {
-          pdfManager = new LocalPdfManager(docId, pdfFile, source.password);
+          pdfManager = new LocalPdfManager(docId, pdfFile, source.password,
+                                           evaluatorOptions);
           pdfManagerCapability.resolve(pdfManager);
         } catch (ex) {
           pdfManagerCapability.reject(ex);
@@ -42092,16 +41981,18 @@ var WorkerMessageHandler = PDFJS.WorkerMessageHandler = {
 
       ensureNotTerminated();
 
-      PDFJS.maxImageSize = data.maxImageSize === undefined ?
-                           -1 : data.maxImageSize;
-      PDFJS.disableFontFace = data.disableFontFace;
-      PDFJS.disableCreateObjectURL = data.disableCreateObjectURL;
-      PDFJS.verbosity = data.verbosity;
-      PDFJS.cMapUrl = data.cMapUrl === undefined ?
-                           null : data.cMapUrl;
-      PDFJS.cMapPacked = data.cMapPacked === true;
+      var cMapOptions = {
+        url: data.cMapUrl === undefined ? null : data.cMapUrl,
+        packed: data.cMapPacked === true
+      };
+      var evaluatorOptions = {
+        forceDataSchema: data.disableCreateObjectURL,
+        maxImageSize: data.maxImageSize === undefined ? -1 : data.maxImageSize,
+        disableFontFace: data.disableFontFace,
+        cMapOptions: cMapOptions
+      };
 
-      getPdfManager(data).then(function (newPdfManager) {
+      getPdfManager(data, evaluatorOptions).then(function (newPdfManager) {
         if (terminated) {
           // We were in a process of setting up the manager, but it got
           // terminated in the middle.
@@ -42999,8 +42890,7 @@ var NetworkManager = (function NetworkManagerClosure() {
 
   }).call(pdfjsLibs);
 
-  exports.PDFJS = pdfjsLibs.pdfjsSharedGlobal.PDFJS;
-
+  exports.WorkerMessageHandler = pdfjsLibs.pdfjsCoreWorker.WorkerMessageHandler;
 }));
 
 
