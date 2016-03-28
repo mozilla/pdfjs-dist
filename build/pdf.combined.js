@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.164';
-var pdfjsBuild = '27dd386';
+var pdfjsVersion = '1.4.166';
+var pdfjsBuild = '553928c';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -48086,7 +48086,7 @@ var Annotation = (function AnnotationClosure() {
     var dict = params.dict;
 
     this.setFlags(dict.get('F'));
-    this.setRectangle(dict.get('Rect'));
+    this.setRectangle(dict.getArray('Rect'));
     this.setColor(dict.get('C'));
     this.setBorderStyle(dict);
     this.appearance = getDefaultAppearance(dict);
