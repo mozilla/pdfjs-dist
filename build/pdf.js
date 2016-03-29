@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.168';
-var pdfjsBuild = 'df0cbcc';
+var pdfjsVersion = '1.4.170';
+var pdfjsBuild = '4e2f704';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -10188,10 +10188,19 @@ var WorkerTransport = (function WorkerTransportClosure() {
 
         var page = this.pageCache[data.pageNum - 1];
         var intentState = page.intentStates[data.intent];
+
         if (intentState.displayReadyCapability) {
           intentState.displayReadyCapability.reject(data.error);
         } else {
           error(data.error);
+        }
+
+        if (intentState.operatorList) {
+          // Mark operator list as complete.
+          intentState.operatorList.lastChunk = true;
+          for (var i = 0; i < intentState.renderTasks.length; i++) {
+            intentState.renderTasks[i].operatorListChanged();
+          }
         }
       }, this);
 

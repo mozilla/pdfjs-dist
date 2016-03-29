@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.168';
-var pdfjsBuild = 'df0cbcc';
+var pdfjsVersion = '1.4.170';
+var pdfjsBuild = '4e2f704';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -39966,10 +39966,19 @@ var WorkerTransport = (function WorkerTransportClosure() {
 
         var page = this.pageCache[data.pageNum - 1];
         var intentState = page.intentStates[data.intent];
+
         if (intentState.displayReadyCapability) {
           intentState.displayReadyCapability.reject(data.error);
         } else {
           error(data.error);
+        }
+
+        if (intentState.operatorList) {
+          // Mark operator list as complete.
+          intentState.operatorList.lastChunk = true;
+          for (var i = 0; i < intentState.renderTasks.length; i++) {
+            intentState.renderTasks[i].operatorListChanged();
+          }
         }
       }, this);
 
@@ -45538,7 +45547,16 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
       var timeSlotManager = new TimeSlotManager();
 
-      return new Promise(function next(resolve, reject) {
+      return new Promise(function promiseBody(resolve, reject) {
+        var next = function (promise) {
+          promise.then(function () {
+            try {
+              promiseBody(resolve, reject);
+            } catch (ex) {
+              reject(ex);
+            }
+          }, reject);
+        };
         task.ensureNotTerminated();
         timeSlotManager.reset();
         var stop, operation = {}, i, ii, cs;
@@ -45581,13 +45599,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
                 if (type.name === 'Form') {
                   stateManager.save();
-                  return self.buildFormXObject(resources, xobj, null,
-                                               operatorList, task,
-                                               stateManager.state.clone()).
+                  next(self.buildFormXObject(resources, xobj, null,
+                                             operatorList, task,
+                                             stateManager.state.clone()).
                     then(function () {
                       stateManager.restore();
-                      next(resolve, reject);
-                    }, reject);
+                    }));
+                  return;
                 } else if (type.name === 'Image') {
                   self.buildPaintImageXObject(resources, xobj, false,
                     operatorList, name, imageCache);
@@ -45606,13 +45624,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             case OPS.setFont:
               var fontSize = args[1];
               // eagerly collect all fonts
-              return self.handleSetFont(resources, args, null, operatorList,
-                                        task, stateManager.state).
+              next(self.handleSetFont(resources, args, null, operatorList,
+                                      task, stateManager.state).
                 then(function (loadedName) {
                   operatorList.addDependency(loadedName);
                   operatorList.addOp(OPS.setFont, [loadedName, fontSize]);
-                  next(resolve, reject);
-                }, reject);
+                }));
+              return;
             case OPS.endInlineImage:
               var cacheKey = args[0].cacheKey;
               if (cacheKey) {
@@ -45712,10 +45730,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             case OPS.setFillColorN:
               cs = stateManager.state.fillColorSpace;
               if (cs.name === 'Pattern') {
-                return self.handleColorN(operatorList, OPS.setFillColorN,
-                  args, cs, patterns, resources, task, xref).then(function() {
-                    next(resolve, reject);
-                  }, reject);
+                next(self.handleColorN(operatorList, OPS.setFillColorN, args,
+                     cs, patterns, resources, task, xref));
+                return;
               }
               args = cs.getRgb(args, 0);
               fn = OPS.setFillRGBColor;
@@ -45723,10 +45740,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             case OPS.setStrokeColorN:
               cs = stateManager.state.strokeColorSpace;
               if (cs.name === 'Pattern') {
-                return self.handleColorN(operatorList, OPS.setStrokeColorN,
-                  args, cs, patterns, resources, task, xref).then(function() {
-                    next(resolve, reject);
-                  }, reject);
+                next(self.handleColorN(operatorList, OPS.setStrokeColorN, args,
+                     cs, patterns, resources, task, xref));
+                return;
               }
               args = cs.getRgb(args, 0);
               fn = OPS.setStrokeRGBColor;
@@ -45758,10 +45774,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               }
 
               var gState = extGState.get(dictName.name);
-              return self.setGState(resources, gState, operatorList, task,
-                xref, stateManager).then(function() {
-                  next(resolve, reject);
-                }, reject);
+              next(self.setGState(resources, gState, operatorList, task, xref,
+                   stateManager));
+              return;
             case OPS.moveTo:
             case OPS.lineTo:
             case OPS.curveTo:
@@ -45806,9 +45821,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           operatorList.addOp(fn, args);
         }
         if (stop) {
-          deferred.then(function () {
-            next(resolve, reject);
-          }, reject);
+          next(deferred);
           return;
         }
         // Some PDFs don't close all restores inside object/form.
@@ -46084,7 +46097,16 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       var timeSlotManager = new TimeSlotManager();
 
-      return new Promise(function next(resolve, reject) {
+      return new Promise(function promiseBody(resolve, reject) {
+        var next = function (promise) {
+          promise.then(function () {
+            try {
+              promiseBody(resolve, reject);
+            } catch (ex) {
+              reject(ex);
+            }
+          }, reject);
+        };
         task.ensureNotTerminated();
         timeSlotManager.reset();
         var stop, operation = {}, args = [];
@@ -46106,9 +46128,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             case OPS.setFont:
               flushTextContentItem();
               textState.fontSize = args[1];
-              return handleSetFont(args[0].name).then(function() {
-                next(resolve, reject);
-              }, reject);
+              next(handleSetFont(args[0].name));
+              return;
             case OPS.setTextRise:
               flushTextContentItem();
               textState.textRise = args[0];
@@ -46279,18 +46300,17 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                 stateManager.transform(matrix);
               }
 
-              return self.getTextContent(xobj, task,
-                xobj.dict.get('Resources') || resources, stateManager,
-                normalizeWhitespace).then(function (formTextContent) {
+              next(self.getTextContent(xobj, task,
+                   xobj.dict.get('Resources') || resources, stateManager,
+                   normalizeWhitespace).then(function (formTextContent) {
                   Util.appendToArray(textContent.items, formTextContent.items);
                   Util.extendObj(textContent.styles, formTextContent.styles);
                   stateManager.restore();
 
                   xobjsCache.key = name;
                   xobjsCache.texts = formTextContent;
-
-                  next(resolve, reject);
-                }, reject);
+                }));
+              return;
             case OPS.setGState:
               flushTextContentItem();
               var dictName = args[0];
@@ -46310,17 +46330,14 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               }
               if (gsStateFont) {
                 textState.fontSize = gsStateFont[1];
-                return handleSetFont(gsStateFont[0]).then(function() {
-                  next(resolve, reject);
-                }, reject);
+                next(handleSetFont(gsStateFont[0]));
+                return;
               }
               break;
           } // switch
         } // while
         if (stop) {
-          deferred.then(function () {
-            next(resolve, reject);
-          }, reject);
+          next(deferred);
           return;
         }
         flushTextContentItem();
