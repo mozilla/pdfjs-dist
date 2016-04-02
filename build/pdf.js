@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.185';
-var pdfjsBuild = 'a250c15';
+var pdfjsVersion = '1.4.187';
+var pdfjsBuild = '055d642';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -9770,11 +9770,32 @@ var PDFWorker = (function PDFWorkerClosure() {
           // https://bugzilla.mozilla.org/show_bug.cgi?id=683280
           var worker = new Worker(workerSrc);
           var messageHandler = new MessageHandler('main', 'worker', worker);
-          messageHandler.on('test', function PDFWorker_test(data) {
+          var terminateEarly = function() {
+            worker.removeEventListener('error', onWorkerError);
+            messageHandler.destroy();
+            worker.terminate();
             if (this.destroyed) {
               this._readyCapability.reject(new Error('Worker was destroyed'));
-              messageHandler.destroy();
-              worker.terminate();
+            } else {
+              // Fall back to fake worker if the termination is caused by an
+              // error (e.g. NetworkError / SecurityError).
+              this._setupFakeWorker();
+            }
+          }.bind(this);
+
+          var onWorkerError = function(event) {
+            if (!this._webWorker) {
+              // Worker failed to initialize due to an error. Clean up and fall
+              // back to the fake worker.
+              terminateEarly();
+            }
+          }.bind(this);
+          worker.addEventListener('error', onWorkerError);
+
+          messageHandler.on('test', function PDFWorker_test(data) {
+            worker.removeEventListener('error', onWorkerError);
+            if (this.destroyed) {
+              terminateEarly();
               return; // worker was destroyed
             }
             var supportTypedArray = data && data.supportTypedArray;
@@ -9805,10 +9826,9 @@ var PDFWorker = (function PDFWorkerClosure() {
           });
 
           messageHandler.on('ready', function (data) {
+            worker.removeEventListener('error', onWorkerError);
             if (this.destroyed) {
-              this._readyCapability.reject(new Error('Worker was destroyed'));
-              messageHandler.destroy();
-              worker.terminate();
+              terminateEarly();
               return; // worker was destroyed
             }
             try {
