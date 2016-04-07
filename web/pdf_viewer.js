@@ -17,13 +17,20 @@
            DefaultTextLayerFactory, AnnotationLayerBuilder, PDFHistory,
            DefaultAnnotationLayerFactory, DownloadManager, ProgressBar */
 
-// Initializing PDFJS global object (if still undefined)
-if (typeof PDFJS === 'undefined') {
-  (typeof window !== 'undefined' ? window : this).PDFJS = {};
-}
-
 (function pdfViewerWrapper() {
   'use strict';
+
+  var root = this;
+  if (!root.pdfjsLib) {
+    Object.defineProperty(root, 'pdfjsLib', {
+      get: function () {
+        return root.pdfjsDistBuildPdf || root.pdfjsDistBuildPdfCombined ||
+               root.pdfjsMainLoader;
+      },
+      enumerable: true,
+      configurable: true
+    });
+  }
 
 
 var CSS_UNITS = 96.0 / 72.0;
@@ -35,6 +42,59 @@ var SCROLLBAR_PADDING = 40;
 var VERTICAL_PADDING = 5;
 
 var mozL10n = document.mozL10n || document.webL10n;
+
+if (typeof PDFJS === 'undefined') {
+  (typeof window !== 'undefined' ? window : this).PDFJS = {};
+}
+
+/**
+ * Disables fullscreen support, and by extension Presentation Mode,
+ * in browsers which support the fullscreen API.
+ * @var {boolean}
+ */
+PDFJS.disableFullscreen = (PDFJS.disableFullscreen === undefined ?
+                           false : PDFJS.disableFullscreen);
+
+/**
+ * Enables CSS only zooming.
+ * @var {boolean}
+ */
+PDFJS.useOnlyCssZoom = (PDFJS.useOnlyCssZoom === undefined ?
+                        false : PDFJS.useOnlyCssZoom);
+
+/**
+ * The maximum supported canvas size in total pixels e.g. width * height.
+ * The default value is 4096 * 4096. Use -1 for no limit.
+ * @var {number}
+ */
+PDFJS.maxCanvasPixels = (PDFJS.maxCanvasPixels === undefined ?
+                         16777216 : PDFJS.maxCanvasPixels);
+
+/**
+ * Disables saving of the last position of the viewed PDF.
+ * @var {boolean}
+ */
+PDFJS.disableHistory = (PDFJS.disableHistory === undefined ?
+                        false : PDFJS.disableHistory);
+
+/**
+ * Disables creation of the text layer that used for text selection and search.
+ * @var {boolean}
+ */
+PDFJS.disableTextLayer = (PDFJS.disableTextLayer === undefined ?
+                          false : PDFJS.disableTextLayer);
+
+/**
+ * Disables maintaining the current position in the document when zooming.
+ */
+PDFJS.ignoreCurrentPositionOnZoom = (PDFJS.ignoreCurrentPositionOnZoom ===
+  undefined ? false : PDFJS.ignoreCurrentPositionOnZoom);
+
+/**
+ * Interface locale settings.
+ * @var {string}
+ */
+PDFJS.locale = (PDFJS.locale === undefined ? navigator.language : PDFJS.locale);
 
 /**
  * Returns scale factor for the canvas. It makes sense for the HiDPI displays.
@@ -707,7 +767,6 @@ var PresentationModeState = {
   FULLSCREEN: 3,
 };
 
-var IGNORE_CURRENT_POSITION_ON_ZOOM = false;
 var DEFAULT_CACHE_SIZE = 10;
 
 
@@ -1018,19 +1077,18 @@ var PDFPageView = (function PDFPageViewClosure() {
       });
 
       var isScalingRestricted = false;
-      if (this.canvas && PDFJS.maxCanvasPixels > 0) {
+      if (this.canvas && pdfjsLib.PDFJS.maxCanvasPixels > 0) {
         var outputScale = this.outputScale;
         var pixelsInViewport = this.viewport.width * this.viewport.height;
-        var maxScale = Math.sqrt(PDFJS.maxCanvasPixels / pixelsInViewport);
         if (((Math.floor(this.viewport.width) * outputScale.sx) | 0) *
             ((Math.floor(this.viewport.height) * outputScale.sy) | 0) >
-            PDFJS.maxCanvasPixels) {
+            pdfjsLib.PDFJS.maxCanvasPixels) {
           isScalingRestricted = true;
         }
       }
 
       if (this.canvas) {
-        if (PDFJS.useOnlyCssZoom ||
+        if (pdfjsLib.PDFJS.useOnlyCssZoom ||
             (this.hasRestrictedScaling && isScalingRestricted)) {
           this.cssTransform(this.canvas, true);
 
@@ -1064,7 +1122,7 @@ var PDFPageView = (function PDFPageViewClosure() {
     },
 
     cssTransform: function PDFPageView_transform(canvas, redrawAnnotations) {
-      var CustomStyle = PDFJS.CustomStyle;
+      var CustomStyle = pdfjsLib.CustomStyle;
 
       // Scale canvas, canvas wrapper, and page container.
       var width = this.viewport.width;
@@ -1183,7 +1241,7 @@ var PDFPageView = (function PDFPageViewClosure() {
       var outputScale = getOutputScale(ctx);
       this.outputScale = outputScale;
 
-      if (PDFJS.useOnlyCssZoom) {
+      if (pdfjsLib.PDFJS.useOnlyCssZoom) {
         var actualSizeViewport = viewport.clone({scale: CSS_UNITS});
         // Use a scale that will make the canvas be the original intended size
         // of the page.
@@ -1192,9 +1250,10 @@ var PDFPageView = (function PDFPageViewClosure() {
         outputScale.scaled = true;
       }
 
-      if (PDFJS.maxCanvasPixels > 0) {
+      if (pdfjsLib.PDFJS.maxCanvasPixels > 0) {
         var pixelsInViewport = viewport.width * viewport.height;
-        var maxScale = Math.sqrt(PDFJS.maxCanvasPixels / pixelsInViewport);
+        var maxScale =
+          Math.sqrt(pdfjsLib.PDFJS.maxCanvasPixels / pixelsInViewport);
         if (outputScale.sx > maxScale || outputScale.sy > maxScale) {
           outputScale.sx = maxScale;
           outputScale.sy = maxScale;
@@ -1361,7 +1420,7 @@ var PDFPageView = (function PDFPageViewClosure() {
     },
 
     beforePrint: function PDFPageView_beforePrint() {
-      var CustomStyle = PDFJS.CustomStyle;
+      var CustomStyle = pdfjsLib.CustomStyle;
       var pdfPage = this.pdfPage;
 
       var viewport = pdfPage.getViewport(1);
@@ -1488,7 +1547,7 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
 
       this.textDivs = [];
       var textLayerFrag = document.createDocumentFragment();
-      this.textLayerRenderTask = PDFJS.renderTextLayer({
+      this.textLayerRenderTask = pdfjsLib.renderTextLayer({
         textContent: this.textContent,
         container: textLayerFrag,
         viewport: this.viewport,
@@ -1802,7 +1861,7 @@ var AnnotationLayerBuilder = (function AnnotationLayerBuilderClosure() {
         if (self.div) {
           // If an annotationLayer already exists, refresh its children's
           // transformation matrices.
-          PDFJS.AnnotationLayer.update(parameters);
+          pdfjsLib.AnnotationLayer.update(parameters);
         } else {
           // Create an annotation layer div and render the annotations
           // if there is at least one annotation.
@@ -1815,7 +1874,7 @@ var AnnotationLayerBuilder = (function AnnotationLayerBuilderClosure() {
           self.pageDiv.appendChild(self.div);
           parameters.div = self.div;
 
-          PDFJS.AnnotationLayer.render(parameters);
+          pdfjsLib.AnnotationLayer.render(parameters);
           if (typeof mozL10n !== 'undefined') {
             mozL10n.translate(self.div);
           }
@@ -2107,7 +2166,7 @@ var PDFViewer = (function pdfViewer() {
         var viewport = pdfPage.getViewport(scale * CSS_UNITS);
         for (var pageNum = 1; pageNum <= pagesCount; ++pageNum) {
           var textLayerFactory = null;
-          if (!PDFJS.disableTextLayer) {
+          if (!pdfjsLib.PDFJS.disableTextLayer) {
             textLayerFactory = this;
           }
           var pageView = new PDFPageView({
@@ -2129,7 +2188,7 @@ var PDFViewer = (function pdfViewer() {
         // starts to create the correct size canvas. Wait until one page is
         // rendered so we don't tie up too many resources early on.
         onePageRendered.then(function () {
-          if (!PDFJS.disableAutoFetch) {
+          if (!pdfjsLib.PDFJS.disableAutoFetch) {
             var getPagesLeft = pagesCount;
             for (var pageNum = 1; pageNum <= pagesCount; ++pageNum) {
               pdfDocument.getPage(pageNum).then(function (pageNum, pdfPage) {
@@ -2219,7 +2278,7 @@ var PDFViewer = (function pdfViewer() {
 
       if (!noScroll) {
         var page = this._currentPageNumber, dest;
-        if (this._location && !IGNORE_CURRENT_POSITION_ON_ZOOM &&
+        if (this._location && !pdfjsLib.PDFJS.ignoreCurrentPositionOnZoom &&
             !(this.isInPresentationMode || this.isChangingPresentationMode)) {
           page = this._location.pageNumber;
           dest = [null, { name: 'XYZ' }, this._location.left,
@@ -3077,7 +3136,7 @@ var DownloadManager = (function DownloadManagerClosure() {
 
   DownloadManager.prototype = {
     downloadUrl: function DownloadManager_downloadUrl(url, filename) {
-      if (!PDFJS.isValidUrl(url, true)) {
+      if (!pdfjsLib.isValidUrl(url, true)) {
         return; // restricted/invalid URL
       }
 
@@ -3091,7 +3150,8 @@ var DownloadManager = (function DownloadManagerClosure() {
                                     filename);
       }
 
-      var blobUrl = PDFJS.createObjectURL(data, contentType);
+      var blobUrl = pdfjsLib.createObjectURL(data, contentType,
+        pdfjsLib.PDFJS.disableCreateObjectURL);
       download(blobUrl, filename);
     },
 
