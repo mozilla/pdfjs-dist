@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.215';
-var pdfjsBuild = '5f925a5';
+var pdfjsVersion = '1.4.217';
+var pdfjsBuild = '070f2d3';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -46620,13 +46620,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       });
     },
 
-    extractDataStructures: function
-      partialEvaluatorExtractDataStructures(dict, baseDict,
-                                            xref, properties) {
+    extractDataStructures:
+        function PartialEvaluator_extractDataStructures(dict, baseDict,
+                                                        xref, properties) {
       // 9.10.2
       var toUnicode = (dict.get('ToUnicode') || baseDict.get('ToUnicode'));
       var toUnicodePromise = toUnicode ?
-            this.readToUnicode(toUnicode) : Promise.resolve(undefined);
+        this.readToUnicode(toUnicode) : Promise.resolve(undefined);
 
       if (properties.composite) {
         // CIDSystemInfo helps to match CID to glyphs
@@ -46724,9 +46724,10 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
     /**
      * Builds a char code to unicode map based on section 9.10 of the spec.
      * @param {Object} properties Font properties object.
-     * @return {Promise} A Promise resolving to ToUnicodeMap object.
+     * @return {Promise} A Promise that is resolved with a
+     *   {ToUnicodeMap|IdentityToUnicodeMap} object.
      */
-    buildToUnicode: function partialEvaluator_buildToUnicode(properties) {
+    buildToUnicode: function PartialEvaluator_buildToUnicode(properties) {
       // Section 9.10.2 Mapping Character Codes to Unicode Values
       if (properties.toUnicode && properties.toUnicode.length !== 0) {
         return Promise.resolve(properties.toUnicode);
@@ -46827,7 +46828,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         // c) Construct a second CMap name by concatenating the registry and
         // ordering obtained in step (b) in the format registry–ordering–UCS2
         // (for example, Adobe–Japan1–UCS2).
-        var ucs2CMapName = new Name(registry + '-' + ordering + '-UCS2');
+        var ucs2CMapName = Name.get(registry + '-' + ordering + '-UCS2');
         // d) Obtain the CMap with the name constructed in step (c) (available
         // from the ASN Web site; see the Bibliography).
         return CMapFactory.create(ucs2CMapName, this.options.cMapOptions,
