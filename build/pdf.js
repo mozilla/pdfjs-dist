@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.229';
-var pdfjsBuild = 'b834b68';
+var pdfjsVersion = '1.4.231';
+var pdfjsBuild = 'fa2f80d';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -8612,8 +8612,6 @@ if (typeof window === 'undefined') {
   useRequireEnsure = true;
 }
 if (typeof __webpack_require__ !== 'undefined') {
-  // Webpack - get/bundle pdf.worker.js as additional file.
-  workerSrc = require('entry?name=[hash]-worker.js!./pdf.worker.js');
   useRequireEnsure = true;
 }
 if (typeof requirejs !== 'undefined' && requirejs.toUrl) {
