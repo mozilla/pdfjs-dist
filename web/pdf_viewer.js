@@ -12,26 +12,1027 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*jshint globalstrict: false */
-/* globals PDFJS, PDFViewer, PDFPageView, TextLayerBuilder, PDFLinkService,
-           DefaultTextLayerFactory, AnnotationLayerBuilder, PDFHistory,
-           DefaultAnnotationLayerFactory, DownloadManager, ProgressBar */
+/* jshint globalstrict: false */
+/* umdutils ignore */
 
-(function pdfViewerWrapper() {
+(function (root, factory) {
+  'use strict';
+  if (typeof define === 'function' && define.amd) {
+    define('pdfjs-dist/web/pdf.components', ['exports', 'pdfjs-dist/build/pdf'],
+      factory);
+  } else if (typeof exports !== 'undefined') {
+    factory(exports, require('../build/pdf.js'));
+  } else {
+    factory((root.pdfjsDistWebPDFComponents = {}), root.pdfjsDistBuildPdf);
+  }
+}(this, function (exports, pdfjsLib) {
   'use strict';
 
-  var root = this;
-  if (!root.pdfjsLib) {
-    Object.defineProperty(root, 'pdfjsLib', {
-      get: function () {
-        return root.pdfjsDistBuildPdf || root.pdfjsDistBuildPdfCombined ||
-               root.pdfjsMainLoader;
-      },
-      enumerable: true,
-      configurable: true
-    });
+  var pdfViewerLibs = {
+    pdfjsWebPDFJS: pdfjsLib
+  };
+
+  (function () {
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsWebPDFHistory = {}));
+  }
+}(this, function (exports) {
+
+  function PDFHistory(options) {
+    this.linkService = options.linkService;
+
+    this.initialized = false;
+    this.initialDestination = null;
+    this.initialBookmark = null;
   }
 
+  PDFHistory.prototype = {
+    /**
+     * @param {string} fingerprint
+     * @param {IPDFLinkService} linkService
+     */
+    initialize: function pdfHistoryInitialize(fingerprint) {
+      this.initialized = true;
+      this.reInitialized = false;
+      this.allowHashChange = true;
+      this.historyUnlocked = true;
+      this.isViewerInPresentationMode = false;
+
+      this.previousHash = window.location.hash.substring(1);
+      this.currentBookmark = '';
+      this.currentPage = 0;
+      this.updatePreviousBookmark = false;
+      this.previousBookmark = '';
+      this.previousPage = 0;
+      this.nextHashParam = '';
+
+      this.fingerprint = fingerprint;
+      this.currentUid = this.uid = 0;
+      this.current = {};
+
+      var state = window.history.state;
+      if (this._isStateObjectDefined(state)) {
+        // This corresponds to navigating back to the document
+        // from another page in the browser history.
+        if (state.target.dest) {
+          this.initialDestination = state.target.dest;
+        } else {
+          this.initialBookmark = state.target.hash;
+        }
+        this.currentUid = state.uid;
+        this.uid = state.uid + 1;
+        this.current = state.target;
+      } else {
+        // This corresponds to the loading of a new document.
+        if (state && state.fingerprint &&
+          this.fingerprint !== state.fingerprint) {
+          // Reinitialize the browsing history when a new document
+          // is opened in the web viewer.
+          this.reInitialized = true;
+        }
+        this._pushOrReplaceState({fingerprint: this.fingerprint}, true);
+      }
+
+      var self = this;
+      window.addEventListener('popstate', function pdfHistoryPopstate(evt) {
+        if (!self.historyUnlocked) {
+          return;
+        }
+        if (evt.state) {
+          // Move back/forward in the history.
+          self._goTo(evt.state);
+          return;
+        }
+
+        // If the state is not set, then the user tried to navigate to a
+        // different hash by manually editing the URL and pressing Enter, or by
+        // clicking on an in-page link (e.g. the "current view" link).
+        // Save the current view state to the browser history.
+
+        // Note: In Firefox, history.null could also be null after an in-page
+        // navigation to the same URL, and without dispatching the popstate
+        // event: https://bugzilla.mozilla.org/show_bug.cgi?id=1183881
+
+        if (self.uid === 0) {
+          // Replace the previous state if it was not explicitly set.
+          var previousParams = (self.previousHash && self.currentBookmark &&
+            self.previousHash !== self.currentBookmark) ?
+            {hash: self.currentBookmark, page: self.currentPage} :
+            {page: 1};
+          replacePreviousHistoryState(previousParams, function() {
+            updateHistoryWithCurrentHash();
+          });
+        } else {
+          updateHistoryWithCurrentHash();
+        }
+      }, false);
+
+
+      function updateHistoryWithCurrentHash() {
+        self.previousHash = window.location.hash.slice(1);
+        self._pushToHistory({hash: self.previousHash}, false, true);
+        self._updatePreviousBookmark();
+      }
+
+      function replacePreviousHistoryState(params, callback) {
+        // To modify the previous history entry, the following happens:
+        // 1. history.back()
+        // 2. _pushToHistory, which calls history.replaceState( ... )
+        // 3. history.forward()
+        // Because a navigation via the history API does not immediately update
+        // the history state, the popstate event is used for synchronization.
+        self.historyUnlocked = false;
+
+        // Suppress the hashchange event to avoid side effects caused by
+        // navigating back and forward.
+        self.allowHashChange = false;
+        window.addEventListener('popstate', rewriteHistoryAfterBack);
+        history.back();
+
+        function rewriteHistoryAfterBack() {
+          window.removeEventListener('popstate', rewriteHistoryAfterBack);
+          window.addEventListener('popstate', rewriteHistoryAfterForward);
+          self._pushToHistory(params, false, true);
+          history.forward();
+        }
+        function rewriteHistoryAfterForward() {
+          window.removeEventListener('popstate', rewriteHistoryAfterForward);
+          self.allowHashChange = true;
+          self.historyUnlocked = true;
+          callback();
+        }
+      }
+
+      function pdfHistoryBeforeUnload() {
+        var previousParams = self._getPreviousParams(null, true);
+        if (previousParams) {
+          var replacePrevious = (!self.current.dest &&
+          self.current.hash !== self.previousHash);
+          self._pushToHistory(previousParams, false, replacePrevious);
+          self._updatePreviousBookmark();
+        }
+        // Remove the event listener when navigating away from the document,
+        // since 'beforeunload' prevents Firefox from caching the document.
+        window.removeEventListener('beforeunload', pdfHistoryBeforeUnload,
+                                   false);
+      }
+
+      window.addEventListener('beforeunload', pdfHistoryBeforeUnload, false);
+
+      window.addEventListener('pageshow', function pdfHistoryPageShow(evt) {
+        // If the entire viewer (including the PDF file) is cached in
+        // the browser, we need to reattach the 'beforeunload' event listener
+        // since the 'DOMContentLoaded' event is not fired on 'pageshow'.
+        window.addEventListener('beforeunload', pdfHistoryBeforeUnload, false);
+      }, false);
+
+      window.addEventListener('presentationmodechanged', function(e) {
+        self.isViewerInPresentationMode = !!e.detail.active;
+      });
+    },
+
+    clearHistoryState: function pdfHistory_clearHistoryState() {
+      this._pushOrReplaceState(null, true);
+    },
+
+    _isStateObjectDefined: function pdfHistory_isStateObjectDefined(state) {
+      return (state && state.uid >= 0 &&
+      state.fingerprint && this.fingerprint === state.fingerprint &&
+      state.target && state.target.hash) ? true : false;
+    },
+
+    _pushOrReplaceState: function pdfHistory_pushOrReplaceState(stateObj,
+                                                                replace) {
+      if (replace) {
+        window.history.replaceState(stateObj, '', document.URL);
+      } else {
+        window.history.pushState(stateObj, '', document.URL);
+      }
+    },
+
+    get isHashChangeUnlocked() {
+      if (!this.initialized) {
+        return true;
+      }
+      return this.allowHashChange;
+    },
+
+    _updatePreviousBookmark: function pdfHistory_updatePreviousBookmark() {
+      if (this.updatePreviousBookmark &&
+        this.currentBookmark && this.currentPage) {
+        this.previousBookmark = this.currentBookmark;
+        this.previousPage = this.currentPage;
+        this.updatePreviousBookmark = false;
+      }
+    },
+
+    updateCurrentBookmark: function pdfHistoryUpdateCurrentBookmark(bookmark,
+                                                                    pageNum) {
+      if (this.initialized) {
+        this.currentBookmark = bookmark.substring(1);
+        this.currentPage = pageNum | 0;
+        this._updatePreviousBookmark();
+      }
+    },
+
+    updateNextHashParam: function pdfHistoryUpdateNextHashParam(param) {
+      if (this.initialized) {
+        this.nextHashParam = param;
+      }
+    },
+
+    push: function pdfHistoryPush(params, isInitialBookmark) {
+      if (!(this.initialized && this.historyUnlocked)) {
+        return;
+      }
+      if (params.dest && !params.hash) {
+        params.hash = (this.current.hash && this.current.dest &&
+        this.current.dest === params.dest) ?
+          this.current.hash :
+          this.linkService.getDestinationHash(params.dest).split('#')[1];
+      }
+      if (params.page) {
+        params.page |= 0;
+      }
+      if (isInitialBookmark) {
+        var target = window.history.state.target;
+        if (!target) {
+          // Invoked when the user specifies an initial bookmark,
+          // thus setting initialBookmark, when the document is loaded.
+          this._pushToHistory(params, false);
+          this.previousHash = window.location.hash.substring(1);
+        }
+        this.updatePreviousBookmark = this.nextHashParam ? false : true;
+        if (target) {
+          // If the current document is reloaded,
+          // avoid creating duplicate entries in the history.
+          this._updatePreviousBookmark();
+        }
+        return;
+      }
+      if (this.nextHashParam) {
+        if (this.nextHashParam === params.hash) {
+          this.nextHashParam = null;
+          this.updatePreviousBookmark = true;
+          return;
+        } else {
+          this.nextHashParam = null;
+        }
+      }
+
+      if (params.hash) {
+        if (this.current.hash) {
+          if (this.current.hash !== params.hash) {
+            this._pushToHistory(params, true);
+          } else {
+            if (!this.current.page && params.page) {
+              this._pushToHistory(params, false, true);
+            }
+            this.updatePreviousBookmark = true;
+          }
+        } else {
+          this._pushToHistory(params, true);
+        }
+      } else if (this.current.page && params.page &&
+        this.current.page !== params.page) {
+        this._pushToHistory(params, true);
+      }
+    },
+
+    _getPreviousParams: function pdfHistory_getPreviousParams(onlyCheckPage,
+                                                              beforeUnload) {
+      if (!(this.currentBookmark && this.currentPage)) {
+        return null;
+      } else if (this.updatePreviousBookmark) {
+        this.updatePreviousBookmark = false;
+      }
+      if (this.uid > 0 && !(this.previousBookmark && this.previousPage)) {
+        // Prevent the history from getting stuck in the current state,
+        // effectively preventing the user from going back/forward in
+        // the history.
+        //
+        // This happens if the current position in the document didn't change
+        // when the history was previously updated. The reasons for this are
+        // either:
+        // 1. The current zoom value is such that the document does not need to,
+        //    or cannot, be scrolled to display the destination.
+        // 2. The previous destination is broken, and doesn't actally point to a
+        //    position within the document.
+        //    (This is either due to a bad PDF generator, or the user making a
+        //     mistake when entering a destination in the hash parameters.)
+        return null;
+      }
+      if ((!this.current.dest && !onlyCheckPage) || beforeUnload) {
+        if (this.previousBookmark === this.currentBookmark) {
+          return null;
+        }
+      } else if (this.current.page || onlyCheckPage) {
+        if (this.previousPage === this.currentPage) {
+          return null;
+        }
+      } else {
+        return null;
+      }
+      var params = {hash: this.currentBookmark, page: this.currentPage};
+      if (this.isViewerInPresentationMode) {
+        params.hash = null;
+      }
+      return params;
+    },
+
+    _stateObj: function pdfHistory_stateObj(params) {
+      return {fingerprint: this.fingerprint, uid: this.uid, target: params};
+    },
+
+    _pushToHistory: function pdfHistory_pushToHistory(params,
+                                                      addPrevious, overwrite) {
+      if (!this.initialized) {
+        return;
+      }
+      if (!params.hash && params.page) {
+        params.hash = ('page=' + params.page);
+      }
+      if (addPrevious && !overwrite) {
+        var previousParams = this._getPreviousParams();
+        if (previousParams) {
+          var replacePrevious = (!this.current.dest &&
+          this.current.hash !== this.previousHash);
+          this._pushToHistory(previousParams, false, replacePrevious);
+        }
+      }
+      this._pushOrReplaceState(this._stateObj(params),
+        (overwrite || this.uid === 0));
+      this.currentUid = this.uid++;
+      this.current = params;
+      this.updatePreviousBookmark = true;
+    },
+
+    _goTo: function pdfHistory_goTo(state) {
+      if (!(this.initialized && this.historyUnlocked &&
+        this._isStateObjectDefined(state))) {
+        return;
+      }
+      if (!this.reInitialized && state.uid < this.currentUid) {
+        var previousParams = this._getPreviousParams(true);
+        if (previousParams) {
+          this._pushToHistory(this.current, false);
+          this._pushToHistory(previousParams, false);
+          this.currentUid = state.uid;
+          window.history.back();
+          return;
+        }
+      }
+      this.historyUnlocked = false;
+
+      if (state.target.dest) {
+        this.linkService.navigateTo(state.target.dest);
+      } else {
+        this.linkService.setHash(state.target.hash);
+      }
+      this.currentUid = state.uid;
+      if (state.uid > this.uid) {
+        this.uid = state.uid;
+      }
+      this.current = state.target;
+      this.updatePreviousBookmark = true;
+
+      var currentHash = window.location.hash.substring(1);
+      if (this.previousHash !== currentHash) {
+        this.allowHashChange = false;
+      }
+      this.previousHash = currentHash;
+
+      this.historyUnlocked = true;
+    },
+
+    back: function pdfHistoryBack() {
+      this.go(-1);
+    },
+
+    forward: function pdfHistoryForward() {
+      this.go(1);
+    },
+
+    go: function pdfHistoryGo(direction) {
+      if (this.initialized && this.historyUnlocked) {
+        var state = window.history.state;
+        if (direction === -1 && state && state.uid > 0) {
+          window.history.back();
+        } else if (direction === 1 && state && state.uid < (this.uid - 1)) {
+          window.history.forward();
+        }
+      }
+    }
+  };
+
+  exports.PDFHistory = PDFHistory;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsWebPDFRenderingQueue = {}));
+  }
+}(this, function (exports) {
+
+var CLEANUP_TIMEOUT = 30000;
+
+var RenderingStates = {
+  INITIAL: 0,
+  RUNNING: 1,
+  PAUSED: 2,
+  FINISHED: 3
+};
+
+/**
+ * Controls rendering of the views for pages and thumbnails.
+ * @class
+ */
+var PDFRenderingQueue = (function PDFRenderingQueueClosure() {
+  /**
+   * @constructs
+   */
+  function PDFRenderingQueue() {
+    this.pdfViewer = null;
+    this.pdfThumbnailViewer = null;
+    this.onIdle = null;
+
+    this.highestPriorityPage = null;
+    this.idleTimeout = null;
+    this.printing = false;
+    this.isThumbnailViewEnabled = false;
+  }
+
+  PDFRenderingQueue.prototype = /** @lends PDFRenderingQueue.prototype */ {
+    /**
+     * @param {PDFViewer} pdfViewer
+     */
+    setViewer: function PDFRenderingQueue_setViewer(pdfViewer) {
+      this.pdfViewer = pdfViewer;
+    },
+
+    /**
+     * @param {PDFThumbnailViewer} pdfThumbnailViewer
+     */
+    setThumbnailViewer:
+        function PDFRenderingQueue_setThumbnailViewer(pdfThumbnailViewer) {
+      this.pdfThumbnailViewer = pdfThumbnailViewer;
+    },
+
+    /**
+     * @param {IRenderableView} view
+     * @returns {boolean}
+     */
+    isHighestPriority: function PDFRenderingQueue_isHighestPriority(view) {
+      return this.highestPriorityPage === view.renderingId;
+    },
+
+    renderHighestPriority: function
+        PDFRenderingQueue_renderHighestPriority(currentlyVisiblePages) {
+      if (this.idleTimeout) {
+        clearTimeout(this.idleTimeout);
+        this.idleTimeout = null;
+      }
+
+      // Pages have a higher priority than thumbnails, so check them first.
+      if (this.pdfViewer.forceRendering(currentlyVisiblePages)) {
+        return;
+      }
+      // No pages needed rendering so check thumbnails.
+      if (this.pdfThumbnailViewer && this.isThumbnailViewEnabled) {
+        if (this.pdfThumbnailViewer.forceRendering()) {
+          return;
+        }
+      }
+
+      if (this.printing) {
+        // If printing is currently ongoing do not reschedule cleanup.
+        return;
+      }
+
+      if (this.onIdle) {
+        this.idleTimeout = setTimeout(this.onIdle.bind(this), CLEANUP_TIMEOUT);
+      }
+    },
+
+    getHighestPriority: function
+        PDFRenderingQueue_getHighestPriority(visible, views, scrolledDown) {
+      // The state has changed figure out which page has the highest priority to
+      // render next (if any).
+      // Priority:
+      // 1 visible pages
+      // 2 if last scrolled down page after the visible pages
+      // 2 if last scrolled up page before the visible pages
+      var visibleViews = visible.views;
+
+      var numVisible = visibleViews.length;
+      if (numVisible === 0) {
+        return false;
+      }
+      for (var i = 0; i < numVisible; ++i) {
+        var view = visibleViews[i].view;
+        if (!this.isViewFinished(view)) {
+          return view;
+        }
+      }
+
+      // All the visible views have rendered, try to render next/previous pages.
+      if (scrolledDown) {
+        var nextPageIndex = visible.last.id;
+        // ID's start at 1 so no need to add 1.
+        if (views[nextPageIndex] &&
+            !this.isViewFinished(views[nextPageIndex])) {
+          return views[nextPageIndex];
+        }
+      } else {
+        var previousPageIndex = visible.first.id - 2;
+        if (views[previousPageIndex] &&
+          !this.isViewFinished(views[previousPageIndex])) {
+          return views[previousPageIndex];
+        }
+      }
+      // Everything that needs to be rendered has been.
+      return null;
+    },
+
+    /**
+     * @param {IRenderableView} view
+     * @returns {boolean}
+     */
+    isViewFinished: function PDFRenderingQueue_isViewFinished(view) {
+      return view.renderingState === RenderingStates.FINISHED;
+    },
+
+    /**
+     * Render a page or thumbnail view. This calls the appropriate function
+     * based on the views state. If the view is already rendered it will return
+     * false.
+     * @param {IRenderableView} view
+     */
+    renderView: function PDFRenderingQueue_renderView(view) {
+      var state = view.renderingState;
+      switch (state) {
+        case RenderingStates.FINISHED:
+          return false;
+        case RenderingStates.PAUSED:
+          this.highestPriorityPage = view.renderingId;
+          view.resume();
+          break;
+        case RenderingStates.RUNNING:
+          this.highestPriorityPage = view.renderingId;
+          break;
+        case RenderingStates.INITIAL:
+          this.highestPriorityPage = view.renderingId;
+          var continueRendering = function () {
+            this.renderHighestPriority();
+          }.bind(this);
+          view.draw().then(continueRendering, continueRendering);
+          break;
+      }
+      return true;
+    },
+  };
+
+  return PDFRenderingQueue;
+})();
+
+exports.RenderingStates = RenderingStates;
+exports.PDFRenderingQueue = PDFRenderingQueue;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsWebDownloadManager = {}), root.pdfjsWebPDFJS);
+  }
+}(this, function (exports, pdfjsLib) {
+  function download(blobUrl, filename) {
+    var a = document.createElement('a');
+    if (a.click) {
+      // Use a.click() if available. Otherwise, Chrome might show
+      // "Unsafe JavaScript attempt to initiate a navigation change
+      //  for frame with URL" and not open the PDF at all.
+      // Supported by (not mentioned = untested):
+      // - Firefox 6 - 19 (4- does not support a.click, 5 ignores a.click)
+      // - Chrome 19 - 26 (18- does not support a.click)
+      // - Opera 9 - 12.15
+      // - Internet Explorer 6 - 10
+      // - Safari 6 (5.1- does not support a.click)
+      a.href = blobUrl;
+      a.target = '_parent';
+      // Use a.download if available. This increases the likelihood that
+      // the file is downloaded instead of opened by another PDF plugin.
+      if ('download' in a) {
+        a.download = filename;
+      }
+      // <a> must be in the document for IE and recent Firefox versions.
+      // (otherwise .click() is ignored)
+      (document.body || document.documentElement).appendChild(a);
+      a.click();
+      a.parentNode.removeChild(a);
+    } else {
+      if (window.top === window &&
+          blobUrl.split('#')[0] === window.location.href.split('#')[0]) {
+        // If _parent == self, then opening an identical URL with different
+        // location hash will only cause a navigation, not a download.
+        var padCharacter = blobUrl.indexOf('?') === -1 ? '?' : '&';
+        blobUrl = blobUrl.replace(/#|$/, padCharacter + '$&');
+      }
+      window.open(blobUrl, '_parent');
+    }
+  }
+
+  function DownloadManager() {}
+
+  DownloadManager.prototype = {
+    downloadUrl: function DownloadManager_downloadUrl(url, filename) {
+      if (!pdfjsLib.isValidUrl(url, true)) {
+        return; // restricted/invalid URL
+      }
+
+      download(url + '#pdfjs.action=download', filename);
+    },
+
+    downloadData: function DownloadManager_downloadData(data, filename,
+                                                        contentType) {
+      if (navigator.msSaveBlob) { // IE10 and above
+        return navigator.msSaveBlob(new Blob([data], { type: contentType }),
+                                    filename);
+      }
+
+      var blobUrl = pdfjsLib.createObjectURL(data, contentType,
+        pdfjsLib.PDFJS.disableCreateObjectURL);
+      download(blobUrl, filename);
+    },
+
+    download: function DownloadManager_download(blob, url, filename) {
+      if (!URL) {
+        // URL.createObjectURL is not supported
+        this.downloadUrl(url, filename);
+        return;
+      }
+
+      if (navigator.msSaveBlob) {
+        // IE10 / IE11
+        if (!navigator.msSaveBlob(blob, filename)) {
+          this.downloadUrl(url, filename);
+        }
+        return;
+      }
+
+      var blobUrl = URL.createObjectURL(blob);
+      download(blobUrl, filename);
+    }
+  };
+
+  exports.DownloadManager = DownloadManager;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsWebTextLayerBuilder = {}), root.pdfjsWebPDFJS);
+  }
+}(this, function (exports, pdfjsLib) {
+
+/**
+ * @typedef {Object} TextLayerBuilderOptions
+ * @property {HTMLDivElement} textLayerDiv - The text layer container.
+ * @property {number} pageIndex - The page index.
+ * @property {PageViewport} viewport - The viewport of the text layer.
+ * @property {PDFFindController} findController
+ */
+
+/**
+ * TextLayerBuilder provides text-selection functionality for the PDF.
+ * It does this by creating overlay divs over the PDF text. These divs
+ * contain text that matches the PDF text they are overlaying. This object
+ * also provides a way to highlight text that is being searched for.
+ * @class
+ */
+var TextLayerBuilder = (function TextLayerBuilderClosure() {
+  function TextLayerBuilder(options) {
+    this.textLayerDiv = options.textLayerDiv;
+    this.renderingDone = false;
+    this.divContentDone = false;
+    this.pageIdx = options.pageIndex;
+    this.pageNumber = this.pageIdx + 1;
+    this.matches = [];
+    this.viewport = options.viewport;
+    this.textDivs = [];
+    this.findController = options.findController || null;
+    this.textLayerRenderTask = null;
+    this._bindMouse();
+  }
+
+  TextLayerBuilder.prototype = {
+    _finishRendering: function TextLayerBuilder_finishRendering() {
+      this.renderingDone = true;
+
+      var endOfContent = document.createElement('div');
+      endOfContent.className = 'endOfContent';
+      this.textLayerDiv.appendChild(endOfContent);
+
+      var event = document.createEvent('CustomEvent');
+      event.initCustomEvent('textlayerrendered', true, true, {
+        pageNumber: this.pageNumber
+      });
+      this.textLayerDiv.dispatchEvent(event);
+    },
+
+    /**
+     * Renders the text layer.
+     * @param {number} timeout (optional) if specified, the rendering waits
+     *   for specified amount of ms.
+     */
+    render: function TextLayerBuilder_render(timeout) {
+      if (!this.divContentDone || this.renderingDone) {
+        return;
+      }
+
+      if (this.textLayerRenderTask) {
+        this.textLayerRenderTask.cancel();
+        this.textLayerRenderTask = null;
+      }
+
+      this.textDivs = [];
+      var textLayerFrag = document.createDocumentFragment();
+      this.textLayerRenderTask = pdfjsLib.renderTextLayer({
+        textContent: this.textContent,
+        container: textLayerFrag,
+        viewport: this.viewport,
+        textDivs: this.textDivs,
+        timeout: timeout
+      });
+      this.textLayerRenderTask.promise.then(function () {
+        this.textLayerDiv.appendChild(textLayerFrag);
+        this._finishRendering();
+        this.updateMatches();
+      }.bind(this), function (reason) {
+        // canceled or failed to render text layer -- skipping errors
+      });
+    },
+
+    setTextContent: function TextLayerBuilder_setTextContent(textContent) {
+      if (this.textLayerRenderTask) {
+        this.textLayerRenderTask.cancel();
+        this.textLayerRenderTask = null;
+      }
+      this.textContent = textContent;
+      this.divContentDone = true;
+    },
+
+    convertMatches: function TextLayerBuilder_convertMatches(matches) {
+      var i = 0;
+      var iIndex = 0;
+      var bidiTexts = this.textContent.items;
+      var end = bidiTexts.length - 1;
+      var queryLen = (this.findController === null ?
+                      0 : this.findController.state.query.length);
+      var ret = [];
+
+      for (var m = 0, len = matches.length; m < len; m++) {
+        // Calculate the start position.
+        var matchIdx = matches[m];
+
+        // Loop over the divIdxs.
+        while (i !== end && matchIdx >= (iIndex + bidiTexts[i].str.length)) {
+          iIndex += bidiTexts[i].str.length;
+          i++;
+        }
+
+        if (i === bidiTexts.length) {
+          console.error('Could not find a matching mapping');
+        }
+
+        var match = {
+          begin: {
+            divIdx: i,
+            offset: matchIdx - iIndex
+          }
+        };
+
+        // Calculate the end position.
+        matchIdx += queryLen;
+
+        // Somewhat the same array as above, but use > instead of >= to get
+        // the end position right.
+        while (i !== end && matchIdx > (iIndex + bidiTexts[i].str.length)) {
+          iIndex += bidiTexts[i].str.length;
+          i++;
+        }
+
+        match.end = {
+          divIdx: i,
+          offset: matchIdx - iIndex
+        };
+        ret.push(match);
+      }
+
+      return ret;
+    },
+
+    renderMatches: function TextLayerBuilder_renderMatches(matches) {
+      // Early exit if there is nothing to render.
+      if (matches.length === 0) {
+        return;
+      }
+
+      var bidiTexts = this.textContent.items;
+      var textDivs = this.textDivs;
+      var prevEnd = null;
+      var pageIdx = this.pageIdx;
+      var isSelectedPage = (this.findController === null ?
+        false : (pageIdx === this.findController.selected.pageIdx));
+      var selectedMatchIdx = (this.findController === null ?
+                              -1 : this.findController.selected.matchIdx);
+      var highlightAll = (this.findController === null ?
+                          false : this.findController.state.highlightAll);
+      var infinity = {
+        divIdx: -1,
+        offset: undefined
+      };
+
+      function beginText(begin, className) {
+        var divIdx = begin.divIdx;
+        textDivs[divIdx].textContent = '';
+        appendTextToDiv(divIdx, 0, begin.offset, className);
+      }
+
+      function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
+        var div = textDivs[divIdx];
+        var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
+        var node = document.createTextNode(content);
+        if (className) {
+          var span = document.createElement('span');
+          span.className = className;
+          span.appendChild(node);
+          div.appendChild(span);
+          return;
+        }
+        div.appendChild(node);
+      }
+
+      var i0 = selectedMatchIdx, i1 = i0 + 1;
+      if (highlightAll) {
+        i0 = 0;
+        i1 = matches.length;
+      } else if (!isSelectedPage) {
+        // Not highlighting all and this isn't the selected page, so do nothing.
+        return;
+      }
+
+      for (var i = i0; i < i1; i++) {
+        var match = matches[i];
+        var begin = match.begin;
+        var end = match.end;
+        var isSelected = (isSelectedPage && i === selectedMatchIdx);
+        var highlightSuffix = (isSelected ? ' selected' : '');
+
+        if (this.findController) {
+          this.findController.updateMatchPosition(pageIdx, i, textDivs,
+                                                  begin.divIdx, end.divIdx);
+        }
+
+        // Match inside new div.
+        if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
+          // If there was a previous div, then add the text at the end.
+          if (prevEnd !== null) {
+            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+          }
+          // Clear the divs and set the content until the starting point.
+          beginText(begin);
+        } else {
+          appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
+        }
+
+        if (begin.divIdx === end.divIdx) {
+          appendTextToDiv(begin.divIdx, begin.offset, end.offset,
+                          'highlight' + highlightSuffix);
+        } else {
+          appendTextToDiv(begin.divIdx, begin.offset, infinity.offset,
+                          'highlight begin' + highlightSuffix);
+          for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
+            textDivs[n0].className = 'highlight middle' + highlightSuffix;
+          }
+          beginText(end, 'highlight end' + highlightSuffix);
+        }
+        prevEnd = end;
+      }
+
+      if (prevEnd) {
+        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+      }
+    },
+
+    updateMatches: function TextLayerBuilder_updateMatches() {
+      // Only show matches when all rendering is done.
+      if (!this.renderingDone) {
+        return;
+      }
+
+      // Clear all matches.
+      var matches = this.matches;
+      var textDivs = this.textDivs;
+      var bidiTexts = this.textContent.items;
+      var clearedUntilDivIdx = -1;
+
+      // Clear all current matches.
+      for (var i = 0, len = matches.length; i < len; i++) {
+        var match = matches[i];
+        var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
+        for (var n = begin, end = match.end.divIdx; n <= end; n++) {
+          var div = textDivs[n];
+          div.textContent = bidiTexts[n].str;
+          div.className = '';
+        }
+        clearedUntilDivIdx = match.end.divIdx + 1;
+      }
+
+      if (this.findController === null || !this.findController.active) {
+        return;
+      }
+
+      // Convert the matches on the page controller into the match format
+      // used for the textLayer.
+      this.matches = this.convertMatches(this.findController === null ?
+        [] : (this.findController.pageMatches[this.pageIdx] || []));
+      this.renderMatches(this.matches);
+    },
+
+    /**
+     * Fixes text selection: adds additional div where mouse was clicked.
+     * This reduces flickering of the content if mouse slowly dragged down/up.
+     * @private
+     */
+    _bindMouse: function TextLayerBuilder_bindMouse() {
+      var div = this.textLayerDiv;
+      div.addEventListener('mousedown', function (e) {
+        var end = div.querySelector('.endOfContent');
+        if (!end) {
+          return;
+        }
+        // On non-Firefox browsers, the selection will feel better if the height
+        // of the endOfContent div will be adjusted to start at mouse click
+        // location -- this will avoid flickering when selections moves up.
+        // However it does not work when selection started on empty space.
+        var adjustTop = e.target !== div;
+        adjustTop = adjustTop && window.getComputedStyle(end).
+          getPropertyValue('-moz-user-select') !== 'none';
+        if (adjustTop) {
+          var divBounds = div.getBoundingClientRect();
+          var r = Math.max(0, (e.pageY - divBounds.top) / divBounds.height);
+          end.style.top = (r * 100).toFixed(2) + '%';
+        }
+        end.classList.add('active');
+      });
+      div.addEventListener('mouseup', function (e) {
+        var end = div.querySelector('.endOfContent');
+        if (!end) {
+          return;
+        }
+        end.style.top = '';
+        end.classList.remove('active');
+      });
+    },
+  };
+  return TextLayerBuilder;
+})();
+
+/**
+ * @constructor
+ * @implements IPDFTextLayerFactory
+ */
+function DefaultTextLayerFactory() {}
+DefaultTextLayerFactory.prototype = {
+  /**
+   * @param {HTMLDivElement} textLayerDiv
+   * @param {number} pageIndex
+   * @param {PageViewport} viewport
+   * @returns {TextLayerBuilder}
+   */
+  createTextLayerBuilder: function (textLayerDiv, pageIndex, viewport) {
+    return new TextLayerBuilder({
+      textLayerDiv: textLayerDiv,
+      pageIndex: pageIndex,
+      viewport: viewport
+    });
+  }
+};
+
+exports.TextLayerBuilder = TextLayerBuilder;
+exports.DefaultTextLayerFactory = DefaultTextLayerFactory;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsWebUIUtils = {}), root.pdfjsWebPDFJS);
+  }
+}(this, function (exports, pdfjsLib) {
 
 var CSS_UNITS = 96.0 / 72.0;
 var DEFAULT_SCALE_VALUE = 'auto';
@@ -43,9 +1044,7 @@ var VERTICAL_PADDING = 5;
 
 var mozL10n = document.mozL10n || document.webL10n;
 
-if (typeof PDFJS === 'undefined') {
-  (typeof window !== 'undefined' ? window : this).PDFJS = {};
-}
+var PDFJS = pdfjsLib.PDFJS;
 
 /**
  * Disables fullscreen support, and by extension Presentation Mode,
@@ -474,6 +1473,35 @@ var ProgressBar = (function ProgressBarClosure() {
   return ProgressBar;
 })();
 
+exports.CSS_UNITS = CSS_UNITS;
+exports.DEFAULT_SCALE_VALUE = DEFAULT_SCALE_VALUE;
+exports.DEFAULT_SCALE = DEFAULT_SCALE;
+exports.UNKNOWN_SCALE = UNKNOWN_SCALE;
+exports.MAX_AUTO_SCALE = MAX_AUTO_SCALE;
+exports.SCROLLBAR_PADDING = SCROLLBAR_PADDING;
+exports.VERTICAL_PADDING = VERTICAL_PADDING;
+exports.mozL10n = mozL10n;
+exports.ProgressBar = ProgressBar;
+exports.getPDFFileNameFromURL = getPDFFileNameFromURL;
+exports.noContextMenuHandler = noContextMenuHandler;
+exports.parseQueryString = parseQueryString;
+exports.getVisibleElements = getVisibleElements;
+exports.roundToDivide = roundToDivide;
+exports.approximateFraction = approximateFraction;
+exports.getOutputScale = getOutputScale;
+exports.scrollIntoView = scrollIntoView;
+exports.watchScroll = watchScroll;
+exports.binarySearchFirstItem = binarySearchFirstItem;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsWebPDFLinkService = {}), root.pdfjsWebUIUtils);
+  }
+}(this, function (exports, uiUtils) {
+
+var parseQueryString = uiUtils.parseQueryString;
 
 /**
  * Performs navigation functions inside PDF, such as opening specified page,
@@ -759,178 +1787,73 @@ var PDFLinkService = (function () {
   return PDFLinkService;
 })();
 
+var SimpleLinkService = (function SimpleLinkServiceClosure() {
+  function SimpleLinkService() {}
 
-var PresentationModeState = {
-  UNKNOWN: 0,
-  NORMAL: 1,
-  CHANGING: 2,
-  FULLSCREEN: 3,
-};
-
-var DEFAULT_CACHE_SIZE = 10;
-
-
-var CLEANUP_TIMEOUT = 30000;
-
-var RenderingStates = {
-  INITIAL: 0,
-  RUNNING: 1,
-  PAUSED: 2,
-  FINISHED: 3
-};
-
-/**
- * Controls rendering of the views for pages and thumbnails.
- * @class
- */
-var PDFRenderingQueue = (function PDFRenderingQueueClosure() {
-  /**
-   * @constructs
-   */
-  function PDFRenderingQueue() {
-    this.pdfViewer = null;
-    this.pdfThumbnailViewer = null;
-    this.onIdle = null;
-
-    this.highestPriorityPage = null;
-    this.idleTimeout = null;
-    this.printing = false;
-    this.isThumbnailViewEnabled = false;
-  }
-
-  PDFRenderingQueue.prototype = /** @lends PDFRenderingQueue.prototype */ {
+  SimpleLinkService.prototype = {
     /**
-     * @param {PDFViewer} pdfViewer
+     * @returns {number}
      */
-    setViewer: function PDFRenderingQueue_setViewer(pdfViewer) {
-      this.pdfViewer = pdfViewer;
+    get page() {
+      return 0;
     },
-
     /**
-     * @param {PDFThumbnailViewer} pdfThumbnailViewer
+     * @param {number} value
      */
-    setThumbnailViewer:
-        function PDFRenderingQueue_setThumbnailViewer(pdfThumbnailViewer) {
-      this.pdfThumbnailViewer = pdfThumbnailViewer;
-    },
-
+    set page(value) {},
     /**
-     * @param {IRenderableView} view
-     * @returns {boolean}
+     * @param dest - The PDF destination object.
      */
-    isHighestPriority: function PDFRenderingQueue_isHighestPriority(view) {
-      return this.highestPriorityPage === view.renderingId;
-    },
-
-    renderHighestPriority: function
-        PDFRenderingQueue_renderHighestPriority(currentlyVisiblePages) {
-      if (this.idleTimeout) {
-        clearTimeout(this.idleTimeout);
-        this.idleTimeout = null;
-      }
-
-      // Pages have a higher priority than thumbnails, so check them first.
-      if (this.pdfViewer.forceRendering(currentlyVisiblePages)) {
-        return;
-      }
-      // No pages needed rendering so check thumbnails.
-      if (this.pdfThumbnailViewer && this.isThumbnailViewEnabled) {
-        if (this.pdfThumbnailViewer.forceRendering()) {
-          return;
-        }
-      }
-
-      if (this.printing) {
-        // If printing is currently ongoing do not reschedule cleanup.
-        return;
-      }
-
-      if (this.onIdle) {
-        this.idleTimeout = setTimeout(this.onIdle.bind(this), CLEANUP_TIMEOUT);
-      }
-    },
-
-    getHighestPriority: function
-        PDFRenderingQueue_getHighestPriority(visible, views, scrolledDown) {
-      // The state has changed figure out which page has the highest priority to
-      // render next (if any).
-      // Priority:
-      // 1 visible pages
-      // 2 if last scrolled down page after the visible pages
-      // 2 if last scrolled up page before the visible pages
-      var visibleViews = visible.views;
-
-      var numVisible = visibleViews.length;
-      if (numVisible === 0) {
-        return false;
-      }
-      for (var i = 0; i < numVisible; ++i) {
-        var view = visibleViews[i].view;
-        if (!this.isViewFinished(view)) {
-          return view;
-        }
-      }
-
-      // All the visible views have rendered, try to render next/previous pages.
-      if (scrolledDown) {
-        var nextPageIndex = visible.last.id;
-        // ID's start at 1 so no need to add 1.
-        if (views[nextPageIndex] &&
-            !this.isViewFinished(views[nextPageIndex])) {
-          return views[nextPageIndex];
-        }
-      } else {
-        var previousPageIndex = visible.first.id - 2;
-        if (views[previousPageIndex] &&
-          !this.isViewFinished(views[previousPageIndex])) {
-          return views[previousPageIndex];
-        }
-      }
-      // Everything that needs to be rendered has been.
-      return null;
-    },
-
+    navigateTo: function (dest) {},
     /**
-     * @param {IRenderableView} view
-     * @returns {boolean}
+     * @param dest - The PDF destination object.
+     * @returns {string} The hyperlink to the PDF object.
      */
-    isViewFinished: function PDFRenderingQueue_isViewFinished(view) {
-      return view.renderingState === RenderingStates.FINISHED;
+    getDestinationHash: function (dest) {
+      return '#';
     },
-
     /**
-     * Render a page or thumbnail view. This calls the appropriate function
-     * based on the views state. If the view is already rendered it will return
-     * false.
-     * @param {IRenderableView} view
+     * @param hash - The PDF parameters/hash.
+     * @returns {string} The hyperlink to the PDF object.
      */
-    renderView: function PDFRenderingQueue_renderView(view) {
-      var state = view.renderingState;
-      switch (state) {
-        case RenderingStates.FINISHED:
-          return false;
-        case RenderingStates.PAUSED:
-          this.highestPriorityPage = view.renderingId;
-          view.resume();
-          break;
-        case RenderingStates.RUNNING:
-          this.highestPriorityPage = view.renderingId;
-          break;
-        case RenderingStates.INITIAL:
-          this.highestPriorityPage = view.renderingId;
-          var continueRendering = function () {
-            this.renderHighestPriority();
-          }.bind(this);
-          view.draw().then(continueRendering, continueRendering);
-          break;
-      }
-      return true;
+    getAnchorUrl: function (hash) {
+      return '#';
     },
+    /**
+     * @param {string} hash
+     */
+    setHash: function (hash) {},
+    /**
+     * @param {string} action
+     */
+    executeNamedAction: function (action) {},
+    /**
+     * @param {number} pageNum - page number.
+     * @param {Object} pageRef - reference to the page.
+     */
+    cachePageRef: function (pageNum, pageRef) {}
   };
-
-  return PDFRenderingQueue;
+  return SimpleLinkService;
 })();
 
+exports.PDFLinkService = PDFLinkService;
+exports.SimpleLinkService = SimpleLinkService;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsWebPDFPageView = {}), root.pdfjsWebUIUtils,
+      root.pdfjsWebPDFRenderingQueue, root.pdfjsWebPDFJS);
+  }
+}(this, function (exports, uiUtils, pdfRenderingQueue, pdfjsLib) {
+
+var CSS_UNITS = uiUtils.CSS_UNITS;
+var DEFAULT_SCALE = uiUtils.DEFAULT_SCALE;
+var getOutputScale = uiUtils.getOutputScale;
+var approximateFraction = uiUtils.approximateFraction;
+var roundToDivide = uiUtils.roundToDivide;
+var RenderingStates = pdfRenderingQueue.RenderingStates;
 
 var TEXT_LAYER_RENDER_DELAY = 200; // ms
 
@@ -1237,6 +2160,7 @@ var PDFPageView = (function PDFPageViewClosure() {
       }
       this.canvas = canvas;
 
+      canvas.mozOpaque = true;
       var ctx = canvas.getContext('2d', {alpha: false});
       var outputScale = getOutputScale(ctx);
       this.outputScale = outputScale;
@@ -1484,330 +2408,19 @@ var PDFPageView = (function PDFPageViewClosure() {
   return PDFPageView;
 })();
 
+exports.PDFPageView = PDFPageView;
+}));
 
-/**
- * @typedef {Object} TextLayerBuilderOptions
- * @property {HTMLDivElement} textLayerDiv - The text layer container.
- * @property {number} pageIndex - The page index.
- * @property {PageViewport} viewport - The viewport of the text layer.
- * @property {PDFFindController} findController
- */
 
-/**
- * TextLayerBuilder provides text-selection functionality for the PDF.
- * It does this by creating overlay divs over the PDF text. These divs
- * contain text that matches the PDF text they are overlaying. This object
- * also provides a way to highlight text that is being searched for.
- * @class
- */
-var TextLayerBuilder = (function TextLayerBuilderClosure() {
-  function TextLayerBuilder(options) {
-    this.textLayerDiv = options.textLayerDiv;
-    this.renderingDone = false;
-    this.divContentDone = false;
-    this.pageIdx = options.pageIndex;
-    this.pageNumber = this.pageIdx + 1;
-    this.matches = [];
-    this.viewport = options.viewport;
-    this.textDivs = [];
-    this.findController = options.findController || null;
-    this.textLayerRenderTask = null;
-    this._bindMouse();
+(function (root, factory) {
+  {
+    factory((root.pdfjsWebAnnotationLayerBuilder = {}), root.pdfjsWebUIUtils,
+      root.pdfjsWebPDFLinkService, root.pdfjsWebPDFJS);
   }
+}(this, function (exports, uiUtils, pdfLinkService, pdfjsLib) {
 
-  TextLayerBuilder.prototype = {
-    _finishRendering: function TextLayerBuilder_finishRendering() {
-      this.renderingDone = true;
-
-      var endOfContent = document.createElement('div');
-      endOfContent.className = 'endOfContent';
-      this.textLayerDiv.appendChild(endOfContent);
-
-      var event = document.createEvent('CustomEvent');
-      event.initCustomEvent('textlayerrendered', true, true, {
-        pageNumber: this.pageNumber
-      });
-      this.textLayerDiv.dispatchEvent(event);
-    },
-
-    /**
-     * Renders the text layer.
-     * @param {number} timeout (optional) if specified, the rendering waits
-     *   for specified amount of ms.
-     */
-    render: function TextLayerBuilder_render(timeout) {
-      if (!this.divContentDone || this.renderingDone) {
-        return;
-      }
-
-      if (this.textLayerRenderTask) {
-        this.textLayerRenderTask.cancel();
-        this.textLayerRenderTask = null;
-      }
-
-      this.textDivs = [];
-      var textLayerFrag = document.createDocumentFragment();
-      this.textLayerRenderTask = pdfjsLib.renderTextLayer({
-        textContent: this.textContent,
-        container: textLayerFrag,
-        viewport: this.viewport,
-        textDivs: this.textDivs,
-        timeout: timeout
-      });
-      this.textLayerRenderTask.promise.then(function () {
-        this.textLayerDiv.appendChild(textLayerFrag);
-        this._finishRendering();
-        this.updateMatches();
-      }.bind(this), function (reason) {
-        // canceled or failed to render text layer -- skipping errors
-      });
-    },
-
-    setTextContent: function TextLayerBuilder_setTextContent(textContent) {
-      if (this.textLayerRenderTask) {
-        this.textLayerRenderTask.cancel();
-        this.textLayerRenderTask = null;
-      }
-      this.textContent = textContent;
-      this.divContentDone = true;
-    },
-
-    convertMatches: function TextLayerBuilder_convertMatches(matches) {
-      var i = 0;
-      var iIndex = 0;
-      var bidiTexts = this.textContent.items;
-      var end = bidiTexts.length - 1;
-      var queryLen = (this.findController === null ?
-                      0 : this.findController.state.query.length);
-      var ret = [];
-
-      for (var m = 0, len = matches.length; m < len; m++) {
-        // Calculate the start position.
-        var matchIdx = matches[m];
-
-        // Loop over the divIdxs.
-        while (i !== end && matchIdx >= (iIndex + bidiTexts[i].str.length)) {
-          iIndex += bidiTexts[i].str.length;
-          i++;
-        }
-
-        if (i === bidiTexts.length) {
-          console.error('Could not find a matching mapping');
-        }
-
-        var match = {
-          begin: {
-            divIdx: i,
-            offset: matchIdx - iIndex
-          }
-        };
-
-        // Calculate the end position.
-        matchIdx += queryLen;
-
-        // Somewhat the same array as above, but use > instead of >= to get
-        // the end position right.
-        while (i !== end && matchIdx > (iIndex + bidiTexts[i].str.length)) {
-          iIndex += bidiTexts[i].str.length;
-          i++;
-        }
-
-        match.end = {
-          divIdx: i,
-          offset: matchIdx - iIndex
-        };
-        ret.push(match);
-      }
-
-      return ret;
-    },
-
-    renderMatches: function TextLayerBuilder_renderMatches(matches) {
-      // Early exit if there is nothing to render.
-      if (matches.length === 0) {
-        return;
-      }
-
-      var bidiTexts = this.textContent.items;
-      var textDivs = this.textDivs;
-      var prevEnd = null;
-      var pageIdx = this.pageIdx;
-      var isSelectedPage = (this.findController === null ?
-        false : (pageIdx === this.findController.selected.pageIdx));
-      var selectedMatchIdx = (this.findController === null ?
-                              -1 : this.findController.selected.matchIdx);
-      var highlightAll = (this.findController === null ?
-                          false : this.findController.state.highlightAll);
-      var infinity = {
-        divIdx: -1,
-        offset: undefined
-      };
-
-      function beginText(begin, className) {
-        var divIdx = begin.divIdx;
-        textDivs[divIdx].textContent = '';
-        appendTextToDiv(divIdx, 0, begin.offset, className);
-      }
-
-      function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
-        var div = textDivs[divIdx];
-        var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
-        var node = document.createTextNode(content);
-        if (className) {
-          var span = document.createElement('span');
-          span.className = className;
-          span.appendChild(node);
-          div.appendChild(span);
-          return;
-        }
-        div.appendChild(node);
-      }
-
-      var i0 = selectedMatchIdx, i1 = i0 + 1;
-      if (highlightAll) {
-        i0 = 0;
-        i1 = matches.length;
-      } else if (!isSelectedPage) {
-        // Not highlighting all and this isn't the selected page, so do nothing.
-        return;
-      }
-
-      for (var i = i0; i < i1; i++) {
-        var match = matches[i];
-        var begin = match.begin;
-        var end = match.end;
-        var isSelected = (isSelectedPage && i === selectedMatchIdx);
-        var highlightSuffix = (isSelected ? ' selected' : '');
-
-        if (this.findController) {
-          this.findController.updateMatchPosition(pageIdx, i, textDivs,
-                                                  begin.divIdx, end.divIdx);
-        }
-
-        // Match inside new div.
-        if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
-          // If there was a previous div, then add the text at the end.
-          if (prevEnd !== null) {
-            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-          }
-          // Clear the divs and set the content until the starting point.
-          beginText(begin);
-        } else {
-          appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
-        }
-
-        if (begin.divIdx === end.divIdx) {
-          appendTextToDiv(begin.divIdx, begin.offset, end.offset,
-                          'highlight' + highlightSuffix);
-        } else {
-          appendTextToDiv(begin.divIdx, begin.offset, infinity.offset,
-                          'highlight begin' + highlightSuffix);
-          for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
-            textDivs[n0].className = 'highlight middle' + highlightSuffix;
-          }
-          beginText(end, 'highlight end' + highlightSuffix);
-        }
-        prevEnd = end;
-      }
-
-      if (prevEnd) {
-        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-      }
-    },
-
-    updateMatches: function TextLayerBuilder_updateMatches() {
-      // Only show matches when all rendering is done.
-      if (!this.renderingDone) {
-        return;
-      }
-
-      // Clear all matches.
-      var matches = this.matches;
-      var textDivs = this.textDivs;
-      var bidiTexts = this.textContent.items;
-      var clearedUntilDivIdx = -1;
-
-      // Clear all current matches.
-      for (var i = 0, len = matches.length; i < len; i++) {
-        var match = matches[i];
-        var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
-        for (var n = begin, end = match.end.divIdx; n <= end; n++) {
-          var div = textDivs[n];
-          div.textContent = bidiTexts[n].str;
-          div.className = '';
-        }
-        clearedUntilDivIdx = match.end.divIdx + 1;
-      }
-
-      if (this.findController === null || !this.findController.active) {
-        return;
-      }
-
-      // Convert the matches on the page controller into the match format
-      // used for the textLayer.
-      this.matches = this.convertMatches(this.findController === null ?
-        [] : (this.findController.pageMatches[this.pageIdx] || []));
-      this.renderMatches(this.matches);
-    },
-
-    /**
-     * Fixes text selection: adds additional div where mouse was clicked.
-     * This reduces flickering of the content if mouse slowly dragged down/up.
-     * @private
-     */
-    _bindMouse: function TextLayerBuilder_bindMouse() {
-      var div = this.textLayerDiv;
-      div.addEventListener('mousedown', function (e) {
-        var end = div.querySelector('.endOfContent');
-        if (!end) {
-          return;
-        }
-        // On non-Firefox browsers, the selection will feel better if the height
-        // of the endOfContent div will be adjusted to start at mouse click
-        // location -- this will avoid flickering when selections moves up.
-        // However it does not work when selection started on empty space.
-        var adjustTop = e.target !== div;
-        if (adjustTop) {
-          var divBounds = div.getBoundingClientRect();
-          var r = Math.max(0, (e.pageY - divBounds.top) / divBounds.height);
-          end.style.top = (r * 100).toFixed(2) + '%';
-        }
-        end.classList.add('active');
-      });
-      div.addEventListener('mouseup', function (e) {
-        var end = div.querySelector('.endOfContent');
-        if (!end) {
-          return;
-        }
-        end.style.top = '';
-        end.classList.remove('active');
-      });
-    },
-  };
-  return TextLayerBuilder;
-})();
-
-/**
- * @constructor
- * @implements IPDFTextLayerFactory
- */
-function DefaultTextLayerFactory() {}
-DefaultTextLayerFactory.prototype = {
-  /**
-   * @param {HTMLDivElement} textLayerDiv
-   * @param {number} pageIndex
-   * @param {PageViewport} viewport
-   * @returns {TextLayerBuilder}
-   */
-  createTextLayerBuilder: function (textLayerDiv, pageIndex, viewport) {
-    return new TextLayerBuilder({
-      textLayerDiv: textLayerDiv,
-      pageIndex: pageIndex,
-      viewport: viewport
-    });
-  }
-};
-
+var mozL10n = uiUtils.mozL10n;
+var SimpleLinkService = pdfLinkService.SimpleLinkService;
 
 /**
  * @typedef {Object} AnnotationLayerBuilderOptions
@@ -1913,6 +2526,46 @@ DefaultAnnotationLayerFactory.prototype = {
   }
 };
 
+exports.AnnotationLayerBuilder = AnnotationLayerBuilder;
+}));
+
+
+(function (root, factory) {
+  {
+    factory((root.pdfjsWebPDFViewer = {}), root.pdfjsWebUIUtils,
+      root.pdfjsWebPDFPageView, root.pdfjsWebPDFRenderingQueue,
+      root.pdfjsWebTextLayerBuilder, root.pdfjsWebAnnotationLayerBuilder,
+      root.pdfjsWebPDFLinkService, root.pdfjsWebPDFJS);
+  }
+}(this, function (exports, uiUtils, pdfPageView, pdfRenderingQueue,
+                  textLayerBuilder, annotationLayerBuilder, pdfLinkService,
+                  pdfjsLib) {
+
+var UNKNOWN_SCALE = uiUtils.UNKNOWN_SCALE;
+var SCROLLBAR_PADDING = uiUtils.SCROLLBAR_PADDING;
+var VERTICAL_PADDING = uiUtils.VERTICAL_PADDING;
+var MAX_AUTO_SCALE = uiUtils.MAX_AUTO_SCALE;
+var CSS_UNITS = uiUtils.CSS_UNITS;
+var DEFAULT_SCALE = uiUtils.DEFAULT_SCALE;
+var DEFAULT_SCALE_VALUE = uiUtils.DEFAULT_SCALE_VALUE;
+var scrollIntoView = uiUtils.scrollIntoView;
+var watchScroll = uiUtils.watchScroll;
+var getVisibleElements = uiUtils.getVisibleElements;
+var PDFPageView = pdfPageView.PDFPageView;
+var RenderingStates = pdfRenderingQueue.RenderingStates;
+var PDFRenderingQueue = pdfRenderingQueue.PDFRenderingQueue;
+var TextLayerBuilder = textLayerBuilder.TextLayerBuilder;
+var AnnotationLayerBuilder = annotationLayerBuilder.AnnotationLayerBuilder;
+var SimpleLinkService = pdfLinkService.SimpleLinkService;
+
+var PresentationModeState = {
+  UNKNOWN: 0,
+  NORMAL: 1,
+  CHANGING: 2,
+  FULLSCREEN: 3,
+};
+
+var DEFAULT_CACHE_SIZE = 10;
 
 /**
  * @typedef {Object} PDFViewerOptions
@@ -2652,543 +3305,31 @@ var PDFViewer = (function pdfViewer() {
   return PDFViewer;
 })();
 
-var SimpleLinkService = (function SimpleLinkServiceClosure() {
-  function SimpleLinkService() {}
+exports.PresentationModeState = PresentationModeState;
+exports.PDFViewer = PDFViewer;
+}));
 
-  SimpleLinkService.prototype = {
-    /**
-     * @returns {number}
-     */
-    get page() {
-      return 0;
-    },
-    /**
-     * @param {number} value
-     */
-    set page(value) {},
-    /**
-     * @param dest - The PDF destination object.
-     */
-    navigateTo: function (dest) {},
-    /**
-     * @param dest - The PDF destination object.
-     * @returns {string} The hyperlink to the PDF object.
-     */
-    getDestinationHash: function (dest) {
-      return '#';
-    },
-    /**
-     * @param hash - The PDF parameters/hash.
-     * @returns {string} The hyperlink to the PDF object.
-     */
-    getAnchorUrl: function (hash) {
-      return '#';
-    },
-    /**
-     * @param {string} hash
-     */
-    setHash: function (hash) {},
-    /**
-     * @param {string} action
-     */
-    executeNamedAction: function (action) {},
-    /**
-     * @param {number} pageNum - page number.
-     * @param {Object} pageRef - reference to the page.
-     */
-    cachePageRef: function (pageNum, pageRef) {}
-  };
-  return SimpleLinkService;
-})();
+  }).call(pdfViewerLibs);
 
+  var PDFJS = pdfjsLib.PDFJS;
 
-var PDFHistory = (function () {
-  function PDFHistory(options) {
-    this.linkService = options.linkService;
+  PDFJS.PDFViewer = pdfViewerLibs.pdfjsWebPDFViewer.PDFViewer;
+  PDFJS.PDFPageView = pdfViewerLibs.pdfjsWebPDFPageView.PDFPageView;
+  PDFJS.PDFLinkService = pdfViewerLibs.pdfjsWebPDFLinkService.PDFLinkService;
+  PDFJS.TextLayerBuilder =
+    pdfViewerLibs.pdfjsWebTextLayerBuilder.TextLayerBuilder;
+  PDFJS.DefaultTextLayerFactory =
+    pdfViewerLibs.pdfjsWebTextLayerBuilder.DefaultTextLayerFactory;
+  PDFJS.AnnotationLayerBuilder =
+    pdfViewerLibs.pdfjsWebAnnotationLayerBuilder.AnnotationLayerBuilder;
+  PDFJS.DefaultAnnotationLayerFactory =
+    pdfViewerLibs.pdfjsWebAnnotationLayerBuilder.DefaultAnnotationLayerFactory;
+  PDFJS.PDFHistory = pdfViewerLibs.pdfjsWebPDFHistory.PDFHistory;
 
-    this.initialized = false;
-    this.initialDestination = null;
-    this.initialBookmark = null;
-  }
+  PDFJS.DownloadManager = pdfViewerLibs.pdfjsWebDownloadManager.DownloadManager;
+  PDFJS.ProgressBar = pdfViewerLibs.pdfjsWebUIUtils.ProgressBar;
 
-  PDFHistory.prototype = {
-    /**
-     * @param {string} fingerprint
-     * @param {IPDFLinkService} linkService
-     */
-    initialize: function pdfHistoryInitialize(fingerprint) {
-      this.initialized = true;
-      this.reInitialized = false;
-      this.allowHashChange = true;
-      this.historyUnlocked = true;
-      this.isViewerInPresentationMode = false;
+  exports.PDFJS = PDFJS;
+}));
 
-      this.previousHash = window.location.hash.substring(1);
-      this.currentBookmark = '';
-      this.currentPage = 0;
-      this.updatePreviousBookmark = false;
-      this.previousBookmark = '';
-      this.previousPage = 0;
-      this.nextHashParam = '';
-
-      this.fingerprint = fingerprint;
-      this.currentUid = this.uid = 0;
-      this.current = {};
-
-      var state = window.history.state;
-      if (this._isStateObjectDefined(state)) {
-        // This corresponds to navigating back to the document
-        // from another page in the browser history.
-        if (state.target.dest) {
-          this.initialDestination = state.target.dest;
-        } else {
-          this.initialBookmark = state.target.hash;
-        }
-        this.currentUid = state.uid;
-        this.uid = state.uid + 1;
-        this.current = state.target;
-      } else {
-        // This corresponds to the loading of a new document.
-        if (state && state.fingerprint &&
-          this.fingerprint !== state.fingerprint) {
-          // Reinitialize the browsing history when a new document
-          // is opened in the web viewer.
-          this.reInitialized = true;
-        }
-        this._pushOrReplaceState({fingerprint: this.fingerprint}, true);
-      }
-
-      var self = this;
-      window.addEventListener('popstate', function pdfHistoryPopstate(evt) {
-        if (!self.historyUnlocked) {
-          return;
-        }
-        if (evt.state) {
-          // Move back/forward in the history.
-          self._goTo(evt.state);
-          return;
-        }
-
-        // If the state is not set, then the user tried to navigate to a
-        // different hash by manually editing the URL and pressing Enter, or by
-        // clicking on an in-page link (e.g. the "current view" link).
-        // Save the current view state to the browser history.
-
-        // Note: In Firefox, history.null could also be null after an in-page
-        // navigation to the same URL, and without dispatching the popstate
-        // event: https://bugzilla.mozilla.org/show_bug.cgi?id=1183881
-
-        if (self.uid === 0) {
-          // Replace the previous state if it was not explicitly set.
-          var previousParams = (self.previousHash && self.currentBookmark &&
-            self.previousHash !== self.currentBookmark) ?
-            {hash: self.currentBookmark, page: self.currentPage} :
-            {page: 1};
-          replacePreviousHistoryState(previousParams, function() {
-            updateHistoryWithCurrentHash();
-          });
-        } else {
-          updateHistoryWithCurrentHash();
-        }
-      }, false);
-
-
-      function updateHistoryWithCurrentHash() {
-        self.previousHash = window.location.hash.slice(1);
-        self._pushToHistory({hash: self.previousHash}, false, true);
-        self._updatePreviousBookmark();
-      }
-
-      function replacePreviousHistoryState(params, callback) {
-        // To modify the previous history entry, the following happens:
-        // 1. history.back()
-        // 2. _pushToHistory, which calls history.replaceState( ... )
-        // 3. history.forward()
-        // Because a navigation via the history API does not immediately update
-        // the history state, the popstate event is used for synchronization.
-        self.historyUnlocked = false;
-
-        // Suppress the hashchange event to avoid side effects caused by
-        // navigating back and forward.
-        self.allowHashChange = false;
-        window.addEventListener('popstate', rewriteHistoryAfterBack);
-        history.back();
-
-        function rewriteHistoryAfterBack() {
-          window.removeEventListener('popstate', rewriteHistoryAfterBack);
-          window.addEventListener('popstate', rewriteHistoryAfterForward);
-          self._pushToHistory(params, false, true);
-          history.forward();
-        }
-        function rewriteHistoryAfterForward() {
-          window.removeEventListener('popstate', rewriteHistoryAfterForward);
-          self.allowHashChange = true;
-          self.historyUnlocked = true;
-          callback();
-        }
-      }
-
-      function pdfHistoryBeforeUnload() {
-        var previousParams = self._getPreviousParams(null, true);
-        if (previousParams) {
-          var replacePrevious = (!self.current.dest &&
-          self.current.hash !== self.previousHash);
-          self._pushToHistory(previousParams, false, replacePrevious);
-          self._updatePreviousBookmark();
-        }
-        // Remove the event listener when navigating away from the document,
-        // since 'beforeunload' prevents Firefox from caching the document.
-        window.removeEventListener('beforeunload', pdfHistoryBeforeUnload,
-                                   false);
-      }
-
-      window.addEventListener('beforeunload', pdfHistoryBeforeUnload, false);
-
-      window.addEventListener('pageshow', function pdfHistoryPageShow(evt) {
-        // If the entire viewer (including the PDF file) is cached in
-        // the browser, we need to reattach the 'beforeunload' event listener
-        // since the 'DOMContentLoaded' event is not fired on 'pageshow'.
-        window.addEventListener('beforeunload', pdfHistoryBeforeUnload, false);
-      }, false);
-
-      window.addEventListener('presentationmodechanged', function(e) {
-        self.isViewerInPresentationMode = !!e.detail.active;
-      });
-    },
-
-    clearHistoryState: function pdfHistory_clearHistoryState() {
-      this._pushOrReplaceState(null, true);
-    },
-
-    _isStateObjectDefined: function pdfHistory_isStateObjectDefined(state) {
-      return (state && state.uid >= 0 &&
-      state.fingerprint && this.fingerprint === state.fingerprint &&
-      state.target && state.target.hash) ? true : false;
-    },
-
-    _pushOrReplaceState: function pdfHistory_pushOrReplaceState(stateObj,
-                                                                replace) {
-      if (replace) {
-      window.history.replaceState(stateObj, '');
-      } else {
-      window.history.pushState(stateObj, '');
-      }
-    },
-
-    get isHashChangeUnlocked() {
-      if (!this.initialized) {
-        return true;
-      }
-      return this.allowHashChange;
-    },
-
-    _updatePreviousBookmark: function pdfHistory_updatePreviousBookmark() {
-      if (this.updatePreviousBookmark &&
-        this.currentBookmark && this.currentPage) {
-        this.previousBookmark = this.currentBookmark;
-        this.previousPage = this.currentPage;
-        this.updatePreviousBookmark = false;
-      }
-    },
-
-    updateCurrentBookmark: function pdfHistoryUpdateCurrentBookmark(bookmark,
-                                                                    pageNum) {
-      if (this.initialized) {
-        this.currentBookmark = bookmark.substring(1);
-        this.currentPage = pageNum | 0;
-        this._updatePreviousBookmark();
-      }
-    },
-
-    updateNextHashParam: function pdfHistoryUpdateNextHashParam(param) {
-      if (this.initialized) {
-        this.nextHashParam = param;
-      }
-    },
-
-    push: function pdfHistoryPush(params, isInitialBookmark) {
-      if (!(this.initialized && this.historyUnlocked)) {
-        return;
-      }
-      if (params.dest && !params.hash) {
-        params.hash = (this.current.hash && this.current.dest &&
-        this.current.dest === params.dest) ?
-          this.current.hash :
-          this.linkService.getDestinationHash(params.dest).split('#')[1];
-      }
-      if (params.page) {
-        params.page |= 0;
-      }
-      if (isInitialBookmark) {
-        var target = window.history.state.target;
-        if (!target) {
-          // Invoked when the user specifies an initial bookmark,
-          // thus setting initialBookmark, when the document is loaded.
-          this._pushToHistory(params, false);
-          this.previousHash = window.location.hash.substring(1);
-        }
-        this.updatePreviousBookmark = this.nextHashParam ? false : true;
-        if (target) {
-          // If the current document is reloaded,
-          // avoid creating duplicate entries in the history.
-          this._updatePreviousBookmark();
-        }
-        return;
-      }
-      if (this.nextHashParam) {
-        if (this.nextHashParam === params.hash) {
-          this.nextHashParam = null;
-          this.updatePreviousBookmark = true;
-          return;
-        } else {
-          this.nextHashParam = null;
-        }
-      }
-
-      if (params.hash) {
-        if (this.current.hash) {
-          if (this.current.hash !== params.hash) {
-            this._pushToHistory(params, true);
-          } else {
-            if (!this.current.page && params.page) {
-              this._pushToHistory(params, false, true);
-            }
-            this.updatePreviousBookmark = true;
-          }
-        } else {
-          this._pushToHistory(params, true);
-        }
-      } else if (this.current.page && params.page &&
-        this.current.page !== params.page) {
-        this._pushToHistory(params, true);
-      }
-    },
-
-    _getPreviousParams: function pdfHistory_getPreviousParams(onlyCheckPage,
-                                                              beforeUnload) {
-      if (!(this.currentBookmark && this.currentPage)) {
-        return null;
-      } else if (this.updatePreviousBookmark) {
-        this.updatePreviousBookmark = false;
-      }
-      if (this.uid > 0 && !(this.previousBookmark && this.previousPage)) {
-        // Prevent the history from getting stuck in the current state,
-        // effectively preventing the user from going back/forward in
-        // the history.
-        //
-        // This happens if the current position in the document didn't change
-        // when the history was previously updated. The reasons for this are
-        // either:
-        // 1. The current zoom value is such that the document does not need to,
-        //    or cannot, be scrolled to display the destination.
-        // 2. The previous destination is broken, and doesn't actally point to a
-        //    position within the document.
-        //    (This is either due to a bad PDF generator, or the user making a
-        //     mistake when entering a destination in the hash parameters.)
-        return null;
-      }
-      if ((!this.current.dest && !onlyCheckPage) || beforeUnload) {
-        if (this.previousBookmark === this.currentBookmark) {
-          return null;
-        }
-      } else if (this.current.page || onlyCheckPage) {
-        if (this.previousPage === this.currentPage) {
-          return null;
-        }
-      } else {
-        return null;
-      }
-      var params = {hash: this.currentBookmark, page: this.currentPage};
-      if (this.isViewerInPresentationMode) {
-        params.hash = null;
-      }
-      return params;
-    },
-
-    _stateObj: function pdfHistory_stateObj(params) {
-      return {fingerprint: this.fingerprint, uid: this.uid, target: params};
-    },
-
-    _pushToHistory: function pdfHistory_pushToHistory(params,
-                                                      addPrevious, overwrite) {
-      if (!this.initialized) {
-        return;
-      }
-      if (!params.hash && params.page) {
-        params.hash = ('page=' + params.page);
-      }
-      if (addPrevious && !overwrite) {
-        var previousParams = this._getPreviousParams();
-        if (previousParams) {
-          var replacePrevious = (!this.current.dest &&
-          this.current.hash !== this.previousHash);
-          this._pushToHistory(previousParams, false, replacePrevious);
-        }
-      }
-      this._pushOrReplaceState(this._stateObj(params),
-        (overwrite || this.uid === 0));
-      this.currentUid = this.uid++;
-      this.current = params;
-      this.updatePreviousBookmark = true;
-    },
-
-    _goTo: function pdfHistory_goTo(state) {
-      if (!(this.initialized && this.historyUnlocked &&
-        this._isStateObjectDefined(state))) {
-        return;
-      }
-      if (!this.reInitialized && state.uid < this.currentUid) {
-        var previousParams = this._getPreviousParams(true);
-        if (previousParams) {
-          this._pushToHistory(this.current, false);
-          this._pushToHistory(previousParams, false);
-          this.currentUid = state.uid;
-          window.history.back();
-          return;
-        }
-      }
-      this.historyUnlocked = false;
-
-      if (state.target.dest) {
-        this.linkService.navigateTo(state.target.dest);
-      } else {
-        this.linkService.setHash(state.target.hash);
-      }
-      this.currentUid = state.uid;
-      if (state.uid > this.uid) {
-        this.uid = state.uid;
-      }
-      this.current = state.target;
-      this.updatePreviousBookmark = true;
-
-      var currentHash = window.location.hash.substring(1);
-      if (this.previousHash !== currentHash) {
-        this.allowHashChange = false;
-      }
-      this.previousHash = currentHash;
-
-      this.historyUnlocked = true;
-    },
-
-    back: function pdfHistoryBack() {
-      this.go(-1);
-    },
-
-    forward: function pdfHistoryForward() {
-      this.go(1);
-    },
-
-    go: function pdfHistoryGo(direction) {
-      if (this.initialized && this.historyUnlocked) {
-        var state = window.history.state;
-        if (direction === -1 && state && state.uid > 0) {
-          window.history.back();
-        } else if (direction === 1 && state && state.uid < (this.uid - 1)) {
-          window.history.forward();
-        }
-      }
-    }
-  };
-
-  return PDFHistory;
-})();
-
-
-var DownloadManager = (function DownloadManagerClosure() {
-
-  function download(blobUrl, filename) {
-    var a = document.createElement('a');
-    if (a.click) {
-      // Use a.click() if available. Otherwise, Chrome might show
-      // "Unsafe JavaScript attempt to initiate a navigation change
-      //  for frame with URL" and not open the PDF at all.
-      // Supported by (not mentioned = untested):
-      // - Firefox 6 - 19 (4- does not support a.click, 5 ignores a.click)
-      // - Chrome 19 - 26 (18- does not support a.click)
-      // - Opera 9 - 12.15
-      // - Internet Explorer 6 - 10
-      // - Safari 6 (5.1- does not support a.click)
-      a.href = blobUrl;
-      a.target = '_parent';
-      // Use a.download if available. This increases the likelihood that
-      // the file is downloaded instead of opened by another PDF plugin.
-      if ('download' in a) {
-        a.download = filename;
-      }
-      // <a> must be in the document for IE and recent Firefox versions.
-      // (otherwise .click() is ignored)
-      (document.body || document.documentElement).appendChild(a);
-      a.click();
-      a.parentNode.removeChild(a);
-    } else {
-      if (window.top === window &&
-          blobUrl.split('#')[0] === window.location.href.split('#')[0]) {
-        // If _parent == self, then opening an identical URL with different
-        // location hash will only cause a navigation, not a download.
-        var padCharacter = blobUrl.indexOf('?') === -1 ? '?' : '&';
-        blobUrl = blobUrl.replace(/#|$/, padCharacter + '$&');
-      }
-      window.open(blobUrl, '_parent');
-    }
-  }
-
-  function DownloadManager() {}
-
-  DownloadManager.prototype = {
-    downloadUrl: function DownloadManager_downloadUrl(url, filename) {
-      if (!pdfjsLib.isValidUrl(url, true)) {
-        return; // restricted/invalid URL
-      }
-
-      download(url + '#pdfjs.action=download', filename);
-    },
-
-    downloadData: function DownloadManager_downloadData(data, filename,
-                                                        contentType) {
-      if (navigator.msSaveBlob) { // IE10 and above
-        return navigator.msSaveBlob(new Blob([data], { type: contentType }),
-                                    filename);
-      }
-
-      var blobUrl = pdfjsLib.createObjectURL(data, contentType,
-        pdfjsLib.PDFJS.disableCreateObjectURL);
-      download(blobUrl, filename);
-    },
-
-    download: function DownloadManager_download(blob, url, filename) {
-      if (!URL) {
-        // URL.createObjectURL is not supported
-        this.downloadUrl(url, filename);
-        return;
-      }
-
-      if (navigator.msSaveBlob) {
-        // IE10 / IE11
-        if (!navigator.msSaveBlob(blob, filename)) {
-          this.downloadUrl(url, filename);
-        }
-        return;
-      }
-
-      var blobUrl = URL.createObjectURL(blob);
-      download(blobUrl, filename);
-    }
-  };
-
-  return DownloadManager;
-})();
-
-
-  PDFJS.PDFViewer = PDFViewer;
-  PDFJS.PDFPageView = PDFPageView;
-  PDFJS.PDFLinkService = PDFLinkService;
-  PDFJS.TextLayerBuilder = TextLayerBuilder;
-  PDFJS.DefaultTextLayerFactory = DefaultTextLayerFactory;
-  PDFJS.AnnotationLayerBuilder = AnnotationLayerBuilder;
-  PDFJS.DefaultAnnotationLayerFactory = DefaultAnnotationLayerFactory;
-  PDFJS.PDFHistory = PDFHistory;
-
-  PDFJS.DownloadManager = DownloadManager;
-  PDFJS.ProgressBar = ProgressBar;
-}).call((typeof window === 'undefined') ? this : window);
 
