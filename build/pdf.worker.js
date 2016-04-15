@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.237';
-var pdfjsBuild = 'e9dbb23';
+var pdfjsVersion = '1.4.239';
+var pdfjsBuild = '5c17df9';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -19709,6 +19709,7 @@ var createObjectURL = sharedUtil.createObjectURL;
 var shadow = sharedUtil.shadow;
 var warn = sharedUtil.warn;
 var Dict = corePrimitives.Dict;
+var isDict = corePrimitives.isDict;
 var Jbig2Image = coreJbig2.Jbig2Image;
 var JpegImage = coreJpg.JpegImage;
 var JpxImage = coreJpx.JpxImage;
@@ -20350,6 +20351,9 @@ var FlateStream = (function FlateStreamClosure() {
 
 var PredictorStream = (function PredictorStreamClosure() {
   function PredictorStream(str, maybeLength, params) {
+    if (!isDict(params)) {
+      return str; // no prediction
+    }
     var predictor = this.predictor = params.get('Predictor') || 1;
 
     if (predictor <= 1) {
