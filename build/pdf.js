@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.239';
-var pdfjsBuild = '5c17df9';
+var pdfjsVersion = '1.4.241';
+var pdfjsBuild = '4a601ff';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -315,15 +315,6 @@ var UNSUPPORTED_FEATURES = {
   shadingPattern: 'shadingPattern',
   font: 'font'
 };
-
-// Combines two URLs. The baseUrl shall be absolute URL. If the url is an
-// absolute URL, it will be returned as is.
-function combineUrl(baseUrl, url) {
-  if (!url) {
-    return baseUrl;
-  }
-  return new URL(url, baseUrl).href;
-}
 
 // Checks if URLs have the same origin. For non-HTTP based URLs, returns false.
 function isSameOrigin(baseUrl, otherUrl) {
@@ -2351,7 +2342,6 @@ exports.arrayByteLength = arrayByteLength;
 exports.arraysToBytes = arraysToBytes;
 exports.assert = assert;
 exports.bytesToString = bytesToString;
-exports.combineUrl = combineUrl;
 exports.createBlob = createBlob;
 exports.createPromiseCapability = createPromiseCapability;
 exports.createObjectURL = createObjectURL;
@@ -8577,7 +8567,6 @@ var UnexpectedResponseException = sharedUtil.UnexpectedResponseException;
 var UnknownErrorException = sharedUtil.UnknownErrorException;
 var Util = sharedUtil.Util;
 var createPromiseCapability = sharedUtil.createPromiseCapability;
-var combineUrl = sharedUtil.combineUrl;
 var error = sharedUtil.error;
 var deprecated = sharedUtil.deprecated;
 var getVerbosityLevel = sharedUtil.getVerbosityLevel;
@@ -8739,7 +8728,7 @@ function getDocument(src, pdfDataRangeTransport,
   for (var key in source) {
     if (key === 'url' && typeof window !== 'undefined') {
       // The full path is required in the 'url' field.
-      params[key] = combineUrl(window.location.href, source[key]);
+      params[key] = new URL(source[key], window.location).href;
       continue;
     } else if (key === 'range') {
       rangeTransport = source[key];
@@ -9649,7 +9638,7 @@ var PDFWorker = (function PDFWorkerClosure() {
           // to the same origin.
           if (!isSameOrigin(window.location.href, workerSrc)) {
             workerSrc = createCDNWrapper(
-              combineUrl(window.location.href, workerSrc));
+              new URL(workerSrc, window.location).href);
           }
           // Some versions of FF can't create a worker on localhost, see:
           // https://bugzilla.mozilla.org/show_bug.cgi?id=683280

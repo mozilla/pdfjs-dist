@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.239';
-var pdfjsBuild = '5c17df9';
+var pdfjsVersion = '1.4.241';
+var pdfjsBuild = '4a601ff';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -2337,15 +2337,6 @@ var UNSUPPORTED_FEATURES = {
   font: 'font'
 };
 
-// Combines two URLs. The baseUrl shall be absolute URL. If the url is an
-// absolute URL, it will be returned as is.
-function combineUrl(baseUrl, url) {
-  if (!url) {
-    return baseUrl;
-  }
-  return new URL(url, baseUrl).href;
-}
-
 // Checks if URLs have the same origin. For non-HTTP based URLs, returns false.
 function isSameOrigin(baseUrl, otherUrl) {
   try {
@@ -4372,7 +4363,6 @@ exports.arrayByteLength = arrayByteLength;
 exports.arraysToBytes = arraysToBytes;
 exports.assert = assert;
 exports.bytesToString = bytesToString;
-exports.combineUrl = combineUrl;
 exports.createBlob = createBlob;
 exports.createPromiseCapability = createPromiseCapability;
 exports.createObjectURL = createObjectURL;
