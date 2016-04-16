@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.244';
-var pdfjsBuild = 'ff65c80';
+var pdfjsVersion = '1.4.248';
+var pdfjsBuild = '452c031';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -2354,7 +2354,7 @@ function isSameOrigin(baseUrl, otherUrl) {
 
 // Validates if URL is safe and allowed, e.g. to avoid XSS.
 function isValidUrl(url, allowRelative) {
-  if (!url) {
+  if (!url || typeof url !== 'string') {
     return false;
   }
   // RFC 3986 (http://tools.ietf.org/html/rfc3986#section-3.1)
@@ -19772,15 +19772,15 @@ var LinkTargetStringMap = [
 /**
  * @typedef ExternalLinkParameters
  * @typedef {Object} ExternalLinkParameters
- * @property {string} url
- * @property {LinkTarget} target
- * @property {string} rel
+ * @property {string} url - An absolute URL.
+ * @property {LinkTarget} target - The link target.
+ * @property {string} rel - The link relationship.
  */
 
 /**
  * Adds various attributes (href, title, target, rel) to hyperlinks.
  * @param {HTMLLinkElement} link - The link element.
- * @param {ExternalLinkParameters} params - An object with the properties.
+ * @param {ExternalLinkParameters} params
  */
 function addLinkAttributes(link, params) {
   var url = params && params.url;
@@ -19792,7 +19792,7 @@ function addLinkAttributes(link, params) {
       target = getDefaultSetting('externalLinkTarget');
     }
     link.target = LinkTargetStringMap[target];
-    // Strip referrer from the URL.
+
     var rel = params.rel;
     if (typeof rel === 'undefined') {
       rel = getDefaultSetting('externalLinkRel');
@@ -24052,6 +24052,7 @@ var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
 var AnnotationType = sharedUtil.AnnotationType;
 var Util = sharedUtil.Util;
 var addLinkAttributes = displayDOMUtils.addLinkAttributes;
+var LinkTarget = displayDOMUtils.LinkTarget;
 var getFilenameFromUrl = displayDOMUtils.getFilenameFromUrl;
 var warn = sharedUtil.warn;
 var CustomStyle = displayDOMUtils.CustomStyle;
@@ -24299,13 +24300,16 @@ var LinkAnnotationElement = (function LinkAnnotationElementClosure() {
       this.container.className = 'linkAnnotation';
 
       var link = document.createElement('a');
-      addLinkAttributes(link, { url: this.data.url });
+      addLinkAttributes(link, {
+        url: this.data.url,
+        target: (this.data.newWindow ? LinkTarget.BLANK : undefined),
+      });
 
       if (!this.data.url) {
         if (this.data.action) {
           this._bindNamedAction(link, this.data.action);
         } else {
-          this._bindLink(link, ('dest' in this.data) ? this.data.dest : null);
+          this._bindLink(link, (this.data.dest || null));
         }
       }
 
@@ -48322,6 +48326,8 @@ var AnnotationFlag = sharedUtil.AnnotationFlag;
 var AnnotationType = sharedUtil.AnnotationType;
 var OPS = sharedUtil.OPS;
 var Util = sharedUtil.Util;
+var isBool = sharedUtil.isBool;
+var isString = sharedUtil.isString;
 var isArray = sharedUtil.isArray;
 var isInt = sharedUtil.isInt;
 var isValidUrl = sharedUtil.isValidUrl;
@@ -48990,66 +48996,91 @@ var LinkAnnotation = (function LinkAnnotationClosure() {
     var data = this.data;
     data.annotationType = AnnotationType.LINK;
 
-    var action = dict.get('A');
+    var action = dict.get('A'), url, dest;
     if (action && isDict(action)) {
       var linkType = action.get('S').name;
-      if (linkType === 'URI') {
-        var url = action.get('URI');
-        if (isName(url)) {
-          // Some bad PDFs do not put parentheses around relative URLs.
-          url = '/' + url.name;
-        } else if (url) {
-          url = addDefaultProtocolToUrl(url);
-        }
-        // TODO: pdf spec mentions urls can be relative to a Base
-        // entry in the dictionary.
-        if (!isValidUrl(url, false)) {
-          url = '';
-        }
-        // According to ISO 32000-1:2008, section 12.6.4.7,
-        // URI should to be encoded in 7-bit ASCII.
-        // Some bad PDFs may have URIs in UTF-8 encoding, see Bugzilla 1122280.
-        try {
-          data.url = stringToUTF8String(url);
-        } catch (e) {
-          // Fall back to a simple copy.
-          data.url = url;
-        }
-      } else if (linkType === 'GoTo') {
-        data.dest = action.get('D');
-      } else if (linkType === 'GoToR') {
-        var urlDict = action.get('F');
-        if (isDict(urlDict)) {
-          // We assume that the 'url' is a Filspec dictionary
-          // and fetch the url without checking any further
-          url = urlDict.get('F') || '';
-        }
+      switch (linkType) {
+        case 'URI':
+          url = action.get('URI');
+          if (isName(url)) {
+            // Some bad PDFs do not put parentheses around relative URLs.
+            url = '/' + url.name;
+          } else if (url) {
+            url = addDefaultProtocolToUrl(url);
+          }
+          // TODO: pdf spec mentions urls can be relative to a Base
+          // entry in the dictionary.
+          break;
 
-        // TODO: pdf reference says that GoToR
-        // can also have 'NewWindow' attribute
-        if (!isValidUrl(url, false)) {
-          url = '';
-        }
-        data.url = url;
-        data.dest = action.get('D');
-      } else if (linkType === 'Named') {
-        data.action = action.get('N').name;
-      } else {
-        warn('unrecognized link type: ' + linkType);
+        case 'GoTo':
+          dest = action.get('D');
+          break;
+
+        case 'GoToR':
+          var urlDict = action.get('F');
+          if (isDict(urlDict)) {
+            // We assume that we found a FileSpec dictionary
+            // and fetch the URL without checking any further.
+            url = urlDict.get('F') || null;
+          } else if (isString(urlDict)) {
+            url = urlDict;
+          }
+
+          // NOTE: the destination is relative to the *remote* document.
+          var remoteDest = action.get('D');
+          if (remoteDest) {
+            if (isName(remoteDest)) {
+              remoteDest = remoteDest.name;
+            }
+            if (isString(remoteDest) && isString(url)) {
+              var baseUrl = url.split('#')[0];
+              url = baseUrl + '#' + remoteDest;
+            }
+          }
+          // The 'NewWindow' property, equal to `LinkTarget.BLANK`.
+          var newWindow = action.get('NewWindow');
+          if (isBool(newWindow)) {
+            data.newWindow = newWindow;
+          }
+          break;
+
+        case 'Named':
+          data.action = action.get('N').name;
+          break;
+
+        default:
+          warn('unrecognized link type: ' + linkType);
       }
-    } else if (dict.has('Dest')) {
-      // simple destination link
-      var dest = dict.get('Dest');
+    } else if (dict.has('Dest')) { // Simple destination link.
+      dest = dict.get('Dest');
+    }
+
+    if (url) {
+      if (isValidUrl(url, /* allowRelative = */ false)) {
+        data.url = tryConvertUrlEncoding(url);
+      }
+    }
+    if (dest) {
       data.dest = isName(dest) ? dest.name : dest;
     }
   }
 
   // Lets URLs beginning with 'www.' default to using the 'http://' protocol.
   function addDefaultProtocolToUrl(url) {
-    if (url && url.indexOf('www.') === 0) {
+    if (isString(url) && url.indexOf('www.') === 0) {
       return ('http://' + url);
     }
     return url;
+  }
+
+  function tryConvertUrlEncoding(url) {
+    // According to ISO 32000-1:2008, section 12.6.4.7, URIs should be encoded
+    // in 7-bit ASCII. Some bad PDFs use UTF-8 encoding, see Bugzilla 1122280.
+    try {
+      return stringToUTF8String(url);
+    } catch (e) {
+      return url;
+    }
   }
 
   Util.inherit(LinkAnnotation, Annotation, {});

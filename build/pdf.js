@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.244';
-var pdfjsBuild = 'ff65c80';
+var pdfjsVersion = '1.4.248';
+var pdfjsBuild = '452c031';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -333,7 +333,7 @@ function isSameOrigin(baseUrl, otherUrl) {
 
 // Validates if URL is safe and allowed, e.g. to avoid XSS.
 function isValidUrl(url, allowRelative) {
-  if (!url) {
+  if (!url || typeof url !== 'string') {
     return false;
   }
   // RFC 3986 (http://tools.ietf.org/html/rfc3986#section-3.1)
@@ -2469,15 +2469,15 @@ var LinkTargetStringMap = [
 /**
  * @typedef ExternalLinkParameters
  * @typedef {Object} ExternalLinkParameters
- * @property {string} url
- * @property {LinkTarget} target
- * @property {string} rel
+ * @property {string} url - An absolute URL.
+ * @property {LinkTarget} target - The link target.
+ * @property {string} rel - The link relationship.
  */
 
 /**
  * Adds various attributes (href, title, target, rel) to hyperlinks.
  * @param {HTMLLinkElement} link - The link element.
- * @param {ExternalLinkParameters} params - An object with the properties.
+ * @param {ExternalLinkParameters} params
  */
 function addLinkAttributes(link, params) {
   var url = params && params.url;
@@ -2489,7 +2489,7 @@ function addLinkAttributes(link, params) {
       target = getDefaultSetting('externalLinkTarget');
     }
     link.target = LinkTargetStringMap[target];
-    // Strip referrer from the URL.
+
     var rel = params.rel;
     if (typeof rel === 'undefined') {
       rel = getDefaultSetting('externalLinkRel');
@@ -4270,6 +4270,7 @@ var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
 var AnnotationType = sharedUtil.AnnotationType;
 var Util = sharedUtil.Util;
 var addLinkAttributes = displayDOMUtils.addLinkAttributes;
+var LinkTarget = displayDOMUtils.LinkTarget;
 var getFilenameFromUrl = displayDOMUtils.getFilenameFromUrl;
 var warn = sharedUtil.warn;
 var CustomStyle = displayDOMUtils.CustomStyle;
@@ -4517,13 +4518,16 @@ var LinkAnnotationElement = (function LinkAnnotationElementClosure() {
       this.container.className = 'linkAnnotation';
 
       var link = document.createElement('a');
-      addLinkAttributes(link, { url: this.data.url });
+      addLinkAttributes(link, {
+        url: this.data.url,
+        target: (this.data.newWindow ? LinkTarget.BLANK : undefined),
+      });
 
       if (!this.data.url) {
         if (this.data.action) {
           this._bindNamedAction(link, this.data.action);
         } else {
-          this._bindLink(link, ('dest' in this.data) ? this.data.dest : null);
+          this._bindLink(link, (this.data.dest || null));
         }
       }
 
