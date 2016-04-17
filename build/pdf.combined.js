@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.4.255';
-var pdfjsBuild = '0428fdf';
+var pdfjsVersion = '1.4.257';
+var pdfjsBuild = '3228c94';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -40498,10 +40498,42 @@ var isName = corePrimitives.isName;
 var isStream = corePrimitives.isStream;
 var PDFFunction = coreFunction.PDFFunction;
 
-var coreImage; // see _setCoreImage below
-var PDFImage; // = coreImage.PDFImage;
-
 var ColorSpace = (function ColorSpaceClosure() {
+  /**
+   * Resizes an RGB image with 3 components.
+   * @param {TypedArray} src - The source buffer.
+   * @param {Number} bpc - Number of bits per component.
+   * @param {Number} w1 - Original width.
+   * @param {Number} h1 - Original height.
+   * @param {Number} w2 - New width.
+   * @param {Number} h2 - New height.
+   * @param {Number} alpha01 - Size reserved for the alpha channel.
+   * @param {TypedArray} dest - The destination buffer.
+   */
+  function resizeRgbImage(src, bpc, w1, h1, w2, h2, alpha01, dest) {
+    var COMPONENTS = 3;
+    alpha01 = alpha01 !== 1 ? 0 : alpha01;
+    var xRatio = w1 / w2;
+    var yRatio = h1 / h2;
+    var i, j, py, newIndex = 0, oldIndex;
+    var xScaled = new Uint16Array(w2);
+    var w1Scanline = w1 * COMPONENTS;
+
+    for (i = 0; i < w2; i++) {
+      xScaled[i] = Math.floor(i * xRatio) * COMPONENTS;
+    }
+    for (i = 0; i < h2; i++) {
+      py = Math.floor(i * yRatio) * w1Scanline;
+      for (j = 0; j < w2; j++) {
+        oldIndex = py + xScaled[j];
+        dest[newIndex++] = src[oldIndex++];
+        dest[newIndex++] = src[oldIndex++];
+        dest[newIndex++] = src[oldIndex++];
+        newIndex += alpha01;
+      }
+    }
+  }
+
   // Constructor should define this.numComps, this.defaultColor, this.name
   function ColorSpace() {
     error('should not call ColorSpace constructor');
@@ -40627,8 +40659,8 @@ var ColorSpace = (function ColorSpaceClosure() {
 
       if (rgbBuf) {
         if (needsResizing) {
-          PDFImage.resize(rgbBuf, bpc, 3, originalWidth, originalHeight, width,
-                          height, dest, alpha01);
+          resizeRgbImage(rgbBuf, bpc, originalWidth, originalHeight,
+                         width, height, alpha01, dest);
         } else {
           rgbPos = 0;
           destPos = 0;
@@ -41748,13 +41780,6 @@ var LabCS = (function LabCSClosure() {
   return LabCS;
 })();
 
-// TODO refactor to remove dependency on image.js
-function _setCoreImage(coreImage_) {
-  coreImage = coreImage_;
-  PDFImage = coreImage_.PDFImage;
-}
-exports._setCoreImage = _setCoreImage;
-
 exports.ColorSpace = ColorSpace;
 }));
 
@@ -42086,6 +42111,39 @@ var PDFImage = (function PDFImageClosure() {
     return (value < 0 ? 0 : (value > max ? max : value));
   }
 
+  /**
+   * Resizes an image mask with 1 component.
+   * @param {TypedArray} src - The source buffer.
+   * @param {Number} bpc - Number of bits per component.
+   * @param {Number} w1 - Original width.
+   * @param {Number} h1 - Original height.
+   * @param {Number} w2 - New width.
+   * @param {Number} h2 - New height.
+   * @returns {TypedArray} The resized image mask buffer.
+   */
+  function resizeImageMask(src, bpc, w1, h1, w2, h2) {
+    var length = w2 * h2;
+    var dest = (bpc <= 8 ? new Uint8Array(length) :
+      (bpc <= 16 ? new Uint16Array(length) : new Uint32Array(length)));
+    var xRatio = w1 / w2;
+    var yRatio = h1 / h2;
+    var i, j, py, newIndex = 0, oldIndex;
+    var xScaled = new Uint16Array(w2);
+    var w1Scanline = w1;
+
+    for (i = 0; i < w2; i++) {
+      xScaled[i] = Math.floor(i * xRatio);
+    }
+    for (i = 0; i < h2; i++) {
+      py = Math.floor(i * yRatio) * w1Scanline;
+      for (j = 0; j < w2; j++) {
+        oldIndex = py + xScaled[j];
+        dest[newIndex++] = src[oldIndex];
+      }
+    }
+    return dest;
+  }
+
   function PDFImage(xref, res, image, inline, smask, mask, isMask) {
     this.image = image;
     var dict = image.dict;
@@ -42225,66 +42283,6 @@ var PDFImage = (function PDFImageClosure() {
         var maskData = results[2];
         return new PDFImage(xref, res, imageData, inline, smaskData, maskData);
       });
-  };
-
-  /**
-   * Resize an image using the nearest neighbor algorithm. Currently only
-   * supports one and three component images.
-   * @param {TypedArray} pixels The original image with one component.
-   * @param {Number} bpc Number of bits per component.
-   * @param {Number} components Number of color components, 1 or 3 is supported.
-   * @param {Number} w1 Original width.
-   * @param {Number} h1 Original height.
-   * @param {Number} w2 New width.
-   * @param {Number} h2 New height.
-   * @param {TypedArray} dest (Optional) The destination buffer.
-   * @param {Number} alpha01 (Optional) Size reserved for the alpha channel.
-   * @return {TypedArray} Resized image data.
-   */
-  PDFImage.resize = function PDFImage_resize(pixels, bpc, components,
-                                             w1, h1, w2, h2, dest, alpha01) {
-
-    if (components !== 1 && components !== 3) {
-      error('Unsupported component count for resizing.');
-    }
-
-    var length = w2 * h2 * components;
-    var temp = dest ? dest : (bpc <= 8 ? new Uint8Array(length) :
-        (bpc <= 16 ? new Uint16Array(length) : new Uint32Array(length)));
-    var xRatio = w1 / w2;
-    var yRatio = h1 / h2;
-    var i, j, py, newIndex = 0, oldIndex;
-    var xScaled = new Uint16Array(w2);
-    var w1Scanline = w1 * components;
-    if (alpha01 !== 1) {
-      alpha01 = 0;
-    }
-
-    for (j = 0; j < w2; j++) {
-      xScaled[j] = Math.floor(j * xRatio) * components;
-    }
-
-    if (components === 1) {
-      for (i = 0; i < h2; i++) {
-        py = Math.floor(i * yRatio) * w1Scanline;
-        for (j = 0; j < w2; j++) {
-          oldIndex = py + xScaled[j];
-          temp[newIndex++] = pixels[oldIndex];
-        }
-      }
-    } else if (components === 3) {
-      for (i = 0; i < h2; i++) {
-        py = Math.floor(i * yRatio) * w1Scanline;
-        for (j = 0; j < w2; j++) {
-          oldIndex = py + xScaled[j];
-          temp[newIndex++] = pixels[oldIndex++];
-          temp[newIndex++] = pixels[oldIndex++];
-          temp[newIndex++] = pixels[oldIndex++];
-          newIndex += alpha01;
-        }
-      }
-    }
-    return temp;
   };
 
   PDFImage.createMask =
@@ -42457,8 +42455,8 @@ var PDFImage = (function PDFImageClosure() {
         alphaBuf = new Uint8Array(sw * sh);
         smask.fillGrayBuffer(alphaBuf);
         if (sw !== width || sh !== height) {
-          alphaBuf = PDFImage.resize(alphaBuf, smask.bpc, 1, sw, sh, width,
-                                     height);
+          alphaBuf = resizeImageMask(alphaBuf, smask.bpc, sw, sh,
+                                     width, height);
         }
       } else if (mask) {
         if (mask instanceof PDFImage) {
@@ -42474,8 +42472,8 @@ var PDFImage = (function PDFImageClosure() {
           }
 
           if (sw !== width || sh !== height) {
-            alphaBuf = PDFImage.resize(alphaBuf, mask.bpc, 1, sw, sh, width,
-                                       height);
+            alphaBuf = resizeImageMask(alphaBuf, mask.bpc, sw, sh,
+                                       width, height);
           }
         } else if (isArray(mask)) {
           // Color key mask: if any of the compontents are outside the range
@@ -42711,9 +42709,6 @@ var PDFImage = (function PDFImageClosure() {
 })();
 
 exports.PDFImage = PDFImage;
-
-// TODO refactor to remove dependency on colorspace.js
-coreColorSpace._setCoreImage(exports);
 }));
 
 
