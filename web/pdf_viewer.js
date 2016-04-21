@@ -2343,7 +2343,7 @@ var PDFPageView = (function PDFPageViewClosure() {
       return promise;
     },
 
-    beforePrint: function PDFPageView_beforePrint() {
+    beforePrint: function PDFPageView_beforePrint(printContainer) {
       var CustomStyle = pdfjsLib.CustomStyle;
       var pdfPage = this.pdfPage;
 
@@ -2365,7 +2365,6 @@ var PDFPageView = (function PDFPageViewClosure() {
       CustomStyle.setProp('transform' , canvas, cssScale);
       CustomStyle.setProp('transformOrigin' , canvas, '0% 0%');
 
-      var printContainer = document.getElementById('printContainer');
       var canvasWrapper = document.createElement('div');
       canvasWrapper.appendChild(canvas);
       printContainer.appendChild(canvasWrapper);
