@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.192';
-var pdfjsBuild = 'f13119f';
+var pdfjsVersion = '1.5.194';
+var pdfjsBuild = '3d49879';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -5284,23 +5284,21 @@ var renderTextLayer = (function renderTextLayerClosure() {
       }
 
       var width = ctx.measureText(textDiv.textContent).width;
-      if (width > 0) {
-        textLayerFrag.appendChild(textDiv);
-        var transform;
-        if (textDiv.dataset.canvasWidth !== undefined) {
-          // Dataset values come of type string.
-          var textScale = textDiv.dataset.canvasWidth / width;
-          transform = 'scaleX(' + textScale + ')';
-        } else {
-          transform = '';
-        }
-        var rotation = textDiv.dataset.angle;
-        if (rotation) {
-          transform = 'rotate(' + rotation + 'deg) ' + transform;
-        }
-        if (transform) {
-          CustomStyle.setProp('transform' , textDiv, transform);
-        }
+      textLayerFrag.appendChild(textDiv);
+      var transform;
+      if (textDiv.dataset.canvasWidth !== undefined && width > 0) {
+        // Dataset values come of type string.
+        var textScale = textDiv.dataset.canvasWidth / width;
+        transform = 'scaleX(' + textScale + ')';
+      } else {
+        transform = '';
+      }
+      var rotation = textDiv.dataset.angle;
+      if (rotation) {
+        transform = 'rotate(' + rotation + 'deg) ' + transform;
+      }
+      if (transform) {
+        CustomStyle.setProp('transform' , textDiv, transform);
       }
     }
     capability.resolve();
