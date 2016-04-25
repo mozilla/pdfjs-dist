@@ -3714,7 +3714,6 @@ var PDFViewer = (function pdfViewer() {
 exports.PresentationModeState = PresentationModeState;
 exports.PDFViewer = PDFViewer;
 }));
-
   }).call(pdfViewerLibs);
 
   var PDFJS = pdfjsLib.PDFJS;
@@ -3739,5 +3738,4 @@ exports.PDFViewer = PDFViewer;
 
   exports.PDFJS = PDFJS;
 }));
-
 

@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.201';
-var pdfjsBuild = '55581b1';
+var pdfjsVersion = '1.5.203';
+var pdfjsBuild = 'f220db5';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -51436,8 +51436,6 @@ var NetworkManager = (function NetworkManagerClosure() {
   exports.PDFNetworkStream = PDFNetworkStream;
   exports.NetworkManager = NetworkManager;
 }));
-
-
   }).call(pdfjsLibs);
 
   exports.PDFJS = pdfjsLibs.pdfjsDisplayGlobal.PDFJS;
@@ -51468,5 +51466,4 @@ var NetworkManager = (function NetworkManagerClosure() {
     pdfjsLibs.pdfjsDisplayDOMUtils.getFilenameFromUrl;
   exports.addLinkAttributes = pdfjsLibs.pdfjsDisplayDOMUtils.addLinkAttributes;
 }));
-
 
