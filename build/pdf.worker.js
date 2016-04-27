@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.209';
-var pdfjsBuild = '4dc00b0';
+var pdfjsVersion = '1.5.211';
+var pdfjsBuild = 'bd49973';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -451,7 +451,7 @@ exports.ArithmeticDecoder = ArithmeticDecoder;
           types[j] = 'EN';
         }
         // do after
-        for (j = i + 1; j < strLength; --j) {
+        for (j = i + 1; j < strLength; ++j) {
           if (types[j] !== 'ET') {
             break;
           }
