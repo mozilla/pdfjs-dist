@@ -3249,23 +3249,28 @@ var PDFViewer = (function pdfViewer() {
         return;
       }
 
+      var arg;
       if (!(0 < val && val <= this.pagesCount)) {
-        this.eventBus.dispatch('pagechange', {
+        arg = {
           source: this,
           updateInProgress: this.updateInProgress,
           pageNumber: this._currentPageNumber,
           previousPageNumber: val
-        });
+        };
+        this.eventBus.dispatch('pagechanging', arg);
+        this.eventBus.dispatch('pagechange', arg);
         return;
       }
 
-      this.eventBus.dispatch('pagechange', {
+      arg = {
         source: this,
         updateInProgress: this.updateInProgress,
         pageNumber: val,
         previousPageNumber: this._currentPageNumber
-      });
+      };
+      this.eventBus.dispatch('pagechanging', arg);
       this._currentPageNumber = val;
+      this.eventBus.dispatch('pagechange', arg);
 
       // Check if the caller is `PDFViewer_update`, to avoid breaking scrolling.
       if (this.updateInProgress) {
@@ -3486,11 +3491,13 @@ var PDFViewer = (function pdfViewer() {
 
     _setScaleDispatchEvent: function pdfViewer_setScaleDispatchEvent(
         newScale, newValue, preset) {
-      this.eventBus.dispatch('scalechange', {
+      var arg = {
         source: this,
         scale: newScale,
         presetValue: preset ? newValue : undefined
-      });
+      };
+      this.eventBus.dispatch('scalechanging', arg);
+      this.eventBus.dispatch('scalechange', arg);
     },
 
     _setScaleUpdatePages: function pdfViewer_setScaleUpdatePages(
