@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.222';
-var pdfjsBuild = 'd20002b';
+var pdfjsVersion = '1.5.224';
+var pdfjsBuild = '7aff695';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -5761,7 +5761,7 @@ var CFFCompiler = (function CFFCompilerClosure() {
       if (value >= -107 && value <= 107) {
         code = [value + 139];
       } else if (value >= 108 && value <= 1131) {
-        value = [value - 108];
+        value = value - 108;
         code = [(value >> 8) + 247, value & 0xFF];
       } else if (value >= -1131 && value <= -108) {
         value = -value - 108;
