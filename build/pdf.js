@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.228';
-var pdfjsBuild = '9c95d08';
+var pdfjsVersion = '1.5.230';
+var pdfjsBuild = '8adddf0';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
