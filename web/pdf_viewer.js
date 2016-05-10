@@ -839,7 +839,6 @@ exports.binarySearchFirstItem = binarySearchFirstItem;
     eventBus.on('pagechange', function (e) {
       var event = document.createEvent('UIEvents');
       event.initUIEvent('pagechange', true, true, window, 0);
-      event.updateInProgress = e.updateInProgress;
       event.pageNumber = e.pageNumber;
       event.previousPageNumber = e.previousPageNumber;
       e.source.container.dispatchEvent(event);
@@ -3225,7 +3224,6 @@ var PDFViewer = (function pdfViewer() {
     }
 
     this.scroll = watchScroll(this.container, this._scrollUpdate.bind(this));
-    this.updateInProgress = false;
     this.presentationModeState = PresentationModeState.UNKNOWN;
     this._resetView();
 
@@ -3252,12 +3250,19 @@ var PDFViewer = (function pdfViewer() {
         this._currentPageNumber = val;
         return;
       }
+      this._setCurrentPageNumber(val);
+      // The intent can be to just reset a scroll position and/or scale.
+      this._resetCurrentPageView();
+    },
 
+    _setCurrentPageNumber: function pdfViewer_setCurrentPageNumber(val) {
+      if (this._currentPageNumber === val) {
+        return;
+      }
       var arg;
       if (!(0 < val && val <= this.pagesCount)) {
         arg = {
           source: this,
-          updateInProgress: this.updateInProgress,
           pageNumber: this._currentPageNumber,
           previousPageNumber: val
         };
@@ -3268,19 +3273,12 @@ var PDFViewer = (function pdfViewer() {
 
       arg = {
         source: this,
-        updateInProgress: this.updateInProgress,
         pageNumber: val,
         previousPageNumber: this._currentPageNumber
       };
-      this.eventBus.dispatch('pagechanging', arg);
       this._currentPageNumber = val;
+      this.eventBus.dispatch('pagechanging', arg);
       this.eventBus.dispatch('pagechange', arg);
-
-      // Check if the caller is `PDFViewer_update`, to avoid breaking scrolling.
-      if (this.updateInProgress) {
-        return;
-      }
-      this.scrollPageIntoView(val);
     },
 
     /**
@@ -3587,6 +3585,19 @@ var PDFViewer = (function pdfViewer() {
     },
 
     /**
+     * Refreshes page view: scrolls to the current page and updates the scale.
+     */
+    _resetCurrentPageView: function () {
+      if (this.isInPresentationMode) {
+        // Fixes the case when PDF has different page sizes.
+        this._setScale(this._currentScaleValue, true);
+      }
+
+      var pageView = this._pages[this._currentPageNumber - 1];
+      scrollIntoView(pageView.div);
+    },
+
+    /**
      * Scrolls page into view.
      * @param {number} pageNumber
      * @param {Array} dest - (optional) original PDF destination array:
@@ -3598,23 +3609,13 @@ var PDFViewer = (function pdfViewer() {
         return;
       }
 
-      var pageView = this._pages[pageNumber - 1];
-
-      if (this.isInPresentationMode) {
-        if (this._currentPageNumber !== pageView.id) {
-          // Avoid breaking getVisiblePages in presentation mode.
-          this.currentPageNumber = pageView.id;
-          return;
-        }
-        dest = null;
-        // Fixes the case when PDF has different page sizes.
-        this._setScale(this._currentScaleValue, true);
-      }
-      if (!dest) {
-        scrollIntoView(pageView.div);
+      if (this.isInPresentationMode || !dest) {
+        this._setCurrentPageNumber(pageNumber);
+        this._resetCurrentPageView();
         return;
       }
 
+      var pageView = this._pages[pageNumber - 1];
       var x = 0, y = 0;
       var width = 0, height = 0, widthScale, heightScale;
       var changeOrientation = (pageView.rotation % 180 === 0 ? false : true);
@@ -3731,8 +3732,6 @@ var PDFViewer = (function pdfViewer() {
         return;
       }
 
-      this.updateInProgress = true;
-
       var suggestedCacheSize = Math.max(DEFAULT_CACHE_SIZE,
           2 * visiblePages.length + 1);
       this._buffer.resize(suggestedCacheSize);
@@ -3760,12 +3759,10 @@ var PDFViewer = (function pdfViewer() {
       }
 
       if (!this.isInPresentationMode) {
-        this.currentPageNumber = currentId;
+        this._setCurrentPageNumber(currentId);
       }
 
       this._updateLocation(firstPage);
-
-      this.updateInProgress = false;
 
       this.eventBus.dispatch('updateviewarea', {
         source: this,
