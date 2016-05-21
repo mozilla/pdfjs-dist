@@ -945,7 +945,7 @@ exports.binarySearchFirstItem = binarySearchFirstItem;
   {
     factory((root.pdfjsWebPDFFindController = {}), root.pdfjsWebUIUtils);
   }
-}(this, function (exports, uiUtils, firefoxCom) {
+}(this, function (exports, uiUtils) {
 
 var scrollIntoView = uiUtils.scrollIntoView;
 
@@ -1243,10 +1243,9 @@ var PDFFindController = (function PDFFindControllerClosure() {
      * @param {number} index - match index.
      * @param {Array} elements - text layer div elements array.
      * @param {number} beginIdx - start index of the div array for the match.
-     * @param {number} endIdx - end index of the div array for the match.
      */
     updateMatchPosition: function PDFFindController_updateMatchPosition(
-        pageIndex, index, elements, beginIdx, endIdx) {
+        pageIndex, index, elements, beginIdx) {
       if (this.selected.matchIdx === index &&
           this.selected.pageIdx === pageIndex) {
         var spot = {
@@ -2245,7 +2244,6 @@ var PDFPageView = (function PDFPageViewClosure() {
       var isScalingRestricted = false;
       if (this.canvas && pdfjsLib.PDFJS.maxCanvasPixels > 0) {
         var outputScale = this.outputScale;
-        var pixelsInViewport = this.viewport.width * this.viewport.height;
         if (((Math.floor(this.viewport.width) * outputScale.sx) | 0) *
             ((Math.floor(this.viewport.height) * outputScale.sy) | 0) >
             pdfjsLib.PDFJS.maxCanvasPixels) {
@@ -2860,7 +2858,7 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
 
         if (this.findController) {
           this.findController.updateMatchPosition(pageIdx, i, textDivs,
-                                                  begin.divIdx, end.divIdx);
+                                                  begin.divIdx);
         }
 
         // Match inside new div.
