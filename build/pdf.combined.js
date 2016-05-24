@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.264';
-var pdfjsBuild = 'db46829';
+var pdfjsVersion = '1.5.266';
+var pdfjsBuild = 'b86610f';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -5374,6 +5374,11 @@ var CFFDict = (function CFFDictClosure() {
       // remove the array wrapping these types of values
       if (type === 'num' || type === 'sid' || type === 'offset') {
         value = value[0];
+        // Ignore invalid values (fixes bug 1068432).
+        if (isNaN(value)) {
+          warn('Invalid CFFDict value: ' + value + ', for key: ' + key + '.');
+          return true;
+        }
       }
       this.values[key] = value;
       return true;
