@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.289';
-var pdfjsBuild = '70b3eea';
+var pdfjsVersion = '1.5.292';
+var pdfjsBuild = 'f97d521';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -10206,7 +10206,12 @@ var WorkerTransport = (function WorkerTransportClosure() {
     },
 
     getPageIndex: function WorkerTransport_getPageIndexByRef(ref) {
-      return this.messageHandler.sendWithPromise('GetPageIndex', { ref: ref });
+      return this.messageHandler.sendWithPromise('GetPageIndex', { ref: ref }).
+        then(function (pageIndex) {
+          return pageIndex;
+        }, function (reason) {
+          return Promise.reject(new Error(reason));
+        });
     },
 
     getAnnotations: function WorkerTransport_getAnnotations(pageIndex, intent) {
