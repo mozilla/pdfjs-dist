@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.296';
-var pdfjsBuild = 'a0a6e6d';
+var pdfjsVersion = '1.5.309';
+var pdfjsBuild = 'e908b71';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -28203,6 +28203,7 @@ var ProblematicCharRanges = new Int32Array([
   0x2028, 0x2030,
   0x205F, 0x2070,
   0x25CC, 0x25CD,
+  0x3000, 0x3001,
   // Chars that is used in complex-script shaping.
   0xAA60, 0xAA80,
   // Specials Unicode block.
