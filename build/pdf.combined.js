@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.309';
-var pdfjsBuild = 'e908b71';
+var pdfjsVersion = '1.5.311';
+var pdfjsBuild = 'e2e657e';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -34273,7 +34273,7 @@ var Font = (function FontClosure() {
       }
 
       // trying to estimate space character width
-      var possibleSpaceReplacements = ['space', 'minus', 'one', 'i'];
+      var possibleSpaceReplacements = ['space', 'minus', 'one', 'i', 'I'];
       var width;
       for (var i = 0, ii = possibleSpaceReplacements.length; i < ii; i++) {
         var glyphName = possibleSpaceReplacements[i];
