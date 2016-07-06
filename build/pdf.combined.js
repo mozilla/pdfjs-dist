@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.320';
-var pdfjsBuild = '10cd37c';
+var pdfjsVersion = '1.5.322';
+var pdfjsBuild = 'b6826a4';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -49014,6 +49014,7 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
     WidgetAnnotation.call(this, params);
 
     this.data.textAlignment = Util.getInheritableProperty(params.dict, 'Q');
+    this.data.maxLen = Util.getInheritableProperty(params.dict, 'MaxLen');
   }
 
   Util.inherit(TextWidgetAnnotation, WidgetAnnotation, {
