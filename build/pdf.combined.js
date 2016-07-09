@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.326';
-var pdfjsBuild = 'bca1aeb';
+var pdfjsVersion = '1.5.328';
+var pdfjsBuild = 'd728651';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -31823,7 +31823,7 @@ function recoverGlyphName(name, glyphsUnicodeMap) {
       }
     }
   }
-  warn('Unable to recover a standard glyph name for: ' + name);
+  info('Unable to recover a standard glyph name for: ' + name);
   return name;
 }
 
