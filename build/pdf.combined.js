@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.337';
-var pdfjsBuild = '11381cd';
+var pdfjsVersion = '1.5.339';
+var pdfjsBuild = '3ab68f2';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -3142,7 +3142,7 @@ function isSpace(ch) {
  *
  * @typedef {Object} PromiseCapability
  * @property {Promise} promise - A promise object.
- * @property {function} resolve - Fullfills the promise.
+ * @property {function} resolve - Fulfills the promise.
  * @property {function} reject - Rejects the promise.
  */
 
@@ -3165,8 +3165,8 @@ function createPromiseCapability() {
 /**
  * Polyfill for Promises:
  * The following promise implementation tries to generally implement the
- * Promise/A+ spec. Some notable differences from other promise libaries are:
- * - There currently isn't a seperate deferred and promise object.
+ * Promise/A+ spec. Some notable differences from other promise libraries are:
+ * - There currently isn't a separate deferred and promise object.
  * - Unhandled rejections eventually show an error if they aren't handled.
  *
  * Based off of the work in:
@@ -3347,7 +3347,7 @@ function createPromiseCapability() {
    * Builds a promise that is resolved when all the passed in promises are
    * resolved.
    * @param {array} promises array of data and/or promises to wait for.
-   * @return {Promise} New dependant promise.
+   * @return {Promise} New dependent promise.
    */
   Promise.all = function Promise_all(promises) {
     var resolveAll, rejectAll;
@@ -5215,7 +5215,7 @@ var CFFParser = (function CFFParserClosure() {
             break;
 
           default:
-            error('Unknow encoding format: ' + format + ' in CFF');
+            error('Unknown encoding format: ' + format + ' in CFF');
             break;
         }
         var dataEnd = pos;
@@ -5688,7 +5688,7 @@ var CFFCompiler = (function CFFCompilerClosure() {
       var globalSubrIndex = this.compileIndex(cff.globalSubrIndex);
       output.add(globalSubrIndex);
 
-      // Now start on the other entries that have no specfic order.
+      // Now start on the other entries that have no specific order.
       if (cff.encoding && cff.topDict.hasName('Encoding')) {
         if (cff.encoding.predefined) {
           topDictTracker.setEntryLocation('Encoding', [cff.encoding.format],
@@ -13450,13 +13450,13 @@ var JpxImage = (function JpxImageClosure() {
         var subband = resolution.subbands[j];
         var gainLog2 = SubbandsGainLog2[subband.type];
 
-        // calulate quantization coefficient (Section E.1.1.1)
+        // calculate quantization coefficient (Section E.1.1.1)
         var delta = (reversible ? 1 :
           Math.pow(2, precision + gainLog2 - epsilon) * (1 + mu / 2048));
         var mb = (guardBits + epsilon - 1);
 
         // In the first resolution level, copyCoefficients will fill the
-        // whole array with coefficients. In the succeding passes,
+        // whole array with coefficients. In the succeeding passes,
         // copyCoefficients will consecutively fill in the values that belong
         // to the interleaved positions of the HL, LH, and HH coefficients.
         // The LL coefficients will then be interleaved in Transform.iterate().
@@ -17295,7 +17295,7 @@ exports.getMetrics = getMetrics;
 var Uint32ArrayView = sharedUtil.Uint32ArrayView;
 
 var MurmurHash3_64 = (function MurmurHash3_64Closure (seed) {
-  // Workaround for missing math precison in JS.
+  // Workaround for missing math precision in JS.
   var MASK_HIGH = 0xffff0000;
   var MASK_LOW = 0xffff;
 
@@ -29135,7 +29135,7 @@ var Lexer = (function LexerClosure() {
         } else if (ch === 0x2D) { // '-'
           // ignore minus signs in the middle of numbers to match
           // Adobe's behavior
-          warn('Badly formated number');
+          warn('Badly formatted number');
         } else if (ch === 0x45 || ch === 0x65) { // 'E', 'e'
           // 'E' can be either a scientific notation or the beginning of a new
           // operator
@@ -30357,7 +30357,7 @@ var createMeshCanvas = (function createMeshCanvasClosure() {
     // MAX_PATTERN_SIZE is used to avoid OOM situation.
     var MAX_PATTERN_SIZE = 3000; // 10in @ 300dpi shall be enough
     // We need to keep transparent border around our pattern for fill():
-    // createPattern with 'no-repeat' will bleed edges accross entire area.
+    // createPattern with 'no-repeat' will bleed edges across entire area.
     var BORDER_SIZE = 2;
 
     var offsetX = Math.floor(bounds[0]);
@@ -34257,7 +34257,7 @@ var Font = (function FontClosure() {
       // Naming tables
       builder.addTable('name', createNameTable(fontName));
 
-      // PostScript informations
+      // PostScript information
       builder.addTable('post', createPostTable(properties));
 
       return builder.toArray();
@@ -34634,7 +34634,7 @@ var Type1Font = (function Type1FontClosure() {
                           (pfbHeader[3] << 8) | pfbHeader[2];
     }
 
-    // Get the data block containing glyphs and subrs informations
+    // Get the data block containing glyphs and subrs information
     var headerBlock = getHeaderBlock(file, headerBlockLength);
     headerBlockLength = headerBlock.length;
     var headerBlockParser = new Type1Parser(headerBlock.stream, false,
@@ -36950,7 +36950,7 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       var currentCtx = this.ctx;
       // TODO non-isolated groups - according to Rik at adobe non-isolated
       // group results aren't usually that different and they even have tools
-      // that ignore this setting. Notes from Rik on implmenting:
+      // that ignore this setting. Notes from Rik on implementing:
       // - When you encounter an transparency group, create a new canvas with
       // the dimensions of the bbox
       // - copy the content from the previous canvas to the new canvas
@@ -37805,7 +37805,7 @@ var PDFFunction = (function PDFFunctionClosure() {
 
         // clip to domain
         var v = clip(src[srcOffset], domain[0], domain[1]);
-        // calulate which bound the value is in
+        // calculate which bound the value is in
         for (var i = 0, ii = bounds.length; i < ii; ++i) {
           if (v < bounds[i]) {
             break;
@@ -42426,7 +42426,7 @@ var PDFImage = (function PDFImageClosure() {
             i += 8;
           }
 
-          // handle remaing bits
+          // handle remaining bits
           if (i < loop2End) {
             buf = buffer[bufferPos++];
             mask = 128;
@@ -42494,7 +42494,7 @@ var PDFImage = (function PDFImageClosure() {
                                        width, height);
           }
         } else if (isArray(mask)) {
-          // Color key mask: if any of the compontents are outside the range
+          // Color key mask: if any of the components are outside the range
           // then they should be painted.
           alphaBuf = new Uint8Array(width * height);
           var numComps = this.numComps;
@@ -47327,7 +47327,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       // According to the spec if 'FontDescriptor' is declared, 'FirstChar',
       // 'LastChar' and 'Widths' should exist too, but some PDF encoders seem
-      // to ignore this rule when a variant of a standart font is used.
+      // to ignore this rule when a variant of a standard font is used.
       // TODO Fill the width array depending on which of the base font this is
       // a variant.
       var firstChar = (dict.get('FirstChar') || 0);
