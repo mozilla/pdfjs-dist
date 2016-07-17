@@ -3416,22 +3416,34 @@ var PDFViewer = (function pdfViewer() {
       return this._pages[index];
     },
 
+    /**
+     * @returns {number}
+     */
     get currentPageNumber() {
       return this._currentPageNumber;
     },
 
+    /**
+     * @param {number} val - The page number.
+     */
     set currentPageNumber(val) {
       if (!this.pdfDocument) {
         this._currentPageNumber = val;
         return;
       }
-      this._setCurrentPageNumber(val);
       // The intent can be to just reset a scroll position and/or scale.
-      this._resetCurrentPageView();
+      this._setCurrentPageNumber(val, /* resetCurrentPageView = */ true);
     },
 
-    _setCurrentPageNumber: function pdfViewer_setCurrentPageNumber(val) {
+    /**
+     * @private
+     */
+    _setCurrentPageNumber:
+        function pdfViewer_setCurrentPageNumber(val, resetCurrentPageView) {
       if (this._currentPageNumber === val) {
+        if (resetCurrentPageView) {
+          this._resetCurrentPageView();
+        }
         return;
       }
       var arg;
@@ -3454,6 +3466,10 @@ var PDFViewer = (function pdfViewer() {
       this._currentPageNumber = val;
       this.eventBus.dispatch('pagechanging', arg);
       this.eventBus.dispatch('pagechange', arg);
+
+      if (resetCurrentPageView) {
+        this._resetCurrentPageView();
+      }
     },
 
     /**
@@ -3761,6 +3777,7 @@ var PDFViewer = (function pdfViewer() {
 
     /**
      * Refreshes page view: scrolls to the current page and updates the scale.
+     * @private
      */
     _resetCurrentPageView: function () {
       if (this.isInPresentationMode) {
@@ -3785,8 +3802,7 @@ var PDFViewer = (function pdfViewer() {
       }
 
       if (this.isInPresentationMode || !dest) {
-        this._setCurrentPageNumber(pageNumber);
-        this._resetCurrentPageView();
+        this._setCurrentPageNumber(pageNumber, /* resetCurrentPageView */ true);
         return;
       }
 
