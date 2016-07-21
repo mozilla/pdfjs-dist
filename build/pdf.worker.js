@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.343';
-var pdfjsBuild = '9228a04';
+var pdfjsVersion = '1.5.345';
+var pdfjsBuild = '10f9f11';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -28220,6 +28220,7 @@ var ProblematicCharRanges = new Int32Array([
   0x0600, 0x0780,
   0x08A0, 0x10A0,
   0x1780, 0x1800,
+  0x1C00, 0x1C50,
   // General punctuation chars.
   0x2000, 0x2010,
   0x2011, 0x2012,
