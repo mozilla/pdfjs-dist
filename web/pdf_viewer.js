@@ -2722,12 +2722,12 @@ var PDFPageView = (function PDFPageViewClosure() {
         function pdfPageRenderCallback() {
           pageViewDrawCallback(null);
           if (textLayer) {
-            self.pdfPage.getTextContent({ normalizeWhitespace: true }).then(
-              function textContentResolved(textContent) {
-                textLayer.setTextContent(textContent);
-                textLayer.render(TEXT_LAYER_RENDER_DELAY);
-              }
-            );
+            self.pdfPage.getTextContent({
+              normalizeWhitespace: true,
+            }).then(function textContentResolved(textContent) {
+              textLayer.setTextContent(textContent);
+              textLayer.render(TEXT_LAYER_RENDER_DELAY);
+            });
           }
         },
         function pdfPageRenderError(error) {
@@ -4045,7 +4045,9 @@ var PDFViewer = (function pdfViewer() {
 
     getPageTextContent: function (pageIndex) {
       return this.pdfDocument.getPage(pageIndex + 1).then(function (page) {
-        return page.getTextContent({ normalizeWhitespace: true });
+        return page.getTextContent({
+          normalizeWhitespace: true,
+        });
       });
     },
 
