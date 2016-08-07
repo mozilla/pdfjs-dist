@@ -1889,7 +1889,7 @@ var PDFLinkService = (function PDFLinkServiceClosure() {
      * @returns {number}
      */
     get pagesCount() {
-      return this.pdfDocument.numPages;
+      return this.pdfDocument ? this.pdfDocument.numPages : 0;
     },
 
     /**
@@ -1920,7 +1920,9 @@ var PDFLinkService = (function PDFLinkServiceClosure() {
           (destRef + 1);
         if (pageNumber) {
           if (pageNumber > self.pagesCount) {
-            pageNumber = self.pagesCount;
+            console.error('PDFLinkService_navigateTo: ' +
+                          'Trying to navigate to a non-existent page.');
+            return;
           }
           self.pdfViewer.scrollPageIntoView(pageNumber, dest);
 
@@ -2097,11 +2099,15 @@ var PDFLinkService = (function PDFLinkServiceClosure() {
           break;
 
         case 'NextPage':
-          this.page++;
+          if (this.page < this.pagesCount) {
+            this.page++;
+          }
           break;
 
         case 'PrevPage':
-          this.page--;
+          if (this.page > 1) {
+            this.page--;
+          }
           break;
 
         case 'LastPage':
@@ -3441,7 +3447,7 @@ var PDFViewer = (function pdfViewer() {
      * @private
      */
     _setCurrentPageNumber:
-        function pdfViewer_setCurrentPageNumber(val, resetCurrentPageView) {
+        function PDFViewer_setCurrentPageNumber(val, resetCurrentPageView) {
       if (this._currentPageNumber === val) {
         if (resetCurrentPageView) {
           this._resetCurrentPageView();
@@ -3450,6 +3456,8 @@ var PDFViewer = (function pdfViewer() {
       }
 
       if (!(0 < val && val <= this.pagesCount)) {
+        console.error('PDFViewer_setCurrentPageNumber: "' + val +
+                      '" is out of bounds.');
         return;
       }
 
@@ -3727,7 +3735,7 @@ var PDFViewer = (function pdfViewer() {
       }
     },
 
-    _setScale: function pdfViewer_setScale(value, noScroll) {
+    _setScale: function PDFViewer_setScale(value, noScroll) {
       var scale = parseFloat(value);
 
       if (scale > 0) {
@@ -3767,8 +3775,8 @@ var PDFViewer = (function pdfViewer() {
             scale = Math.min(MAX_AUTO_SCALE, horizontalScale);
             break;
           default:
-            console.error('pdfViewSetScale: \'' + value +
-              '\' is an unknown zoom value.');
+            console.error('PDFViewer_setScale: "' + value +
+                          '" is an unknown zoom value.');
             return;
         }
         this._setScaleUpdatePages(scale, value, noScroll, true);
