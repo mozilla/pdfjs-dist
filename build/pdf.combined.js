@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.376';
-var pdfjsBuild = '9408996';
+var pdfjsVersion = '1.5.378';
+var pdfjsBuild = '084fc51';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -28459,10 +28459,11 @@ function isEOF(v) {
 var MAX_LENGTH_TO_CACHE = 1000;
 
 var Parser = (function ParserClosure() {
-  function Parser(lexer, allowStreams, xref) {
+  function Parser(lexer, allowStreams, xref, recoveryMode) {
     this.lexer = lexer;
     this.allowStreams = allowStreams;
     this.xref = xref;
+    this.recoveryMode = recoveryMode || false;
     this.imageCache = Object.create(null);
     this.refill();
   }
@@ -28508,7 +28509,10 @@ var Parser = (function ParserClosure() {
               array.push(this.getObj(cipherTransform));
             }
             if (isEOF(this.buf1)) {
-              error('End of file inside array');
+              if (!this.recoveryMode) {
+                error('End of file inside array');
+              }
+              return array;
             }
             this.shift();
             return array;
@@ -28529,7 +28533,10 @@ var Parser = (function ParserClosure() {
               dict.set(key, this.getObj(cipherTransform));
             }
             if (isEOF(this.buf1)) {
-              error('End of file inside dictionary');
+              if (!this.recoveryMode) {
+                error('End of file inside dictionary');
+              }
+              return dict;
             }
 
             // Stream objects are not allowed inside content streams or
@@ -43688,13 +43695,15 @@ var XRef = (function XRefClosure() {
       var dict;
       for (i = 0, ii = trailers.length; i < ii; ++i) {
         stream.pos = trailers[i];
-        var parser = new Parser(new Lexer(stream), true, this);
+        var parser = new Parser(new Lexer(stream), /* allowStreams = */ true,
+                                /* xref = */ this, /* recoveryMode = */ true);
         var obj = parser.getObj();
         if (!isCmd(obj, 'trailer')) {
           continue;
         }
         // read the trailer dictionary
-        if (!isDict(dict = parser.getObj())) {
+        dict = parser.getObj();
+        if (!isDict(dict)) {
           continue;
         }
         // taking the first one with 'ID'
