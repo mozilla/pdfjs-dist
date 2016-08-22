@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.387';
-var pdfjsBuild = '200c857';
+var pdfjsVersion = '1.5.389';
+var pdfjsBuild = 'e5baf7e';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -37444,7 +37444,13 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     },
     getSinglePixelWidth: function CanvasGraphics_getSinglePixelWidth(scale) {
       if (this.cachedGetSinglePixelWidth === null) {
+        // NOTE: The `save` and `restore` commands used below is a workaround
+        // that is necessary in order to prevent `mozCurrentTransformInverse`
+        // from intermittently returning incorrect values in Firefox, see:
+        // https://github.com/mozilla/pdf.js/issues/7188.
+        this.ctx.save();
         var inverse = this.ctx.mozCurrentTransformInverse;
+        this.ctx.restore();
         // max of the current horizontal and vertical scale
         this.cachedGetSinglePixelWidth = Math.sqrt(Math.max(
           (inverse[0] * inverse[0] + inverse[1] * inverse[1]),
