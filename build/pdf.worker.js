@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.393';
-var pdfjsBuild = '8aa9b79';
+var pdfjsVersion = '1.5.395';
+var pdfjsBuild = 'd944c32';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -28234,6 +28234,7 @@ var ProblematicCharRanges = new Int32Array([
   // Specials Unicode block.
   0xFFF0, 0x10000
 ]);
+
 
 /**
  * 'Font' is the class the outside world should use, it encapsulate all the font
