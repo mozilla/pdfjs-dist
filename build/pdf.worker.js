@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.397';
-var pdfjsBuild = 'fb6fde9';
+var pdfjsVersion = '1.5.399';
+var pdfjsBuild = 'f520616';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -40096,6 +40096,7 @@ var warn = sharedUtil.warn;
 var Dict = corePrimitives.Dict;
 var isDict = corePrimitives.isDict;
 var isName = corePrimitives.isName;
+var isRef = corePrimitives.isRef;
 var Stream = coreStream.Stream;
 var ColorSpace = coreColorSpace.ColorSpace;
 var ObjectLoader = coreObj.ObjectLoader;
@@ -40113,11 +40114,14 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
    * @param {Object} ref
    * @returns {Annotation}
    */
-  create: function AnnotationFactory_create(xref, ref) {
+  create: function AnnotationFactory_create(xref, ref,
+                                            uniquePrefix, idCounters) {
     var dict = xref.fetchIfRef(ref);
     if (!isDict(dict)) {
       return;
     }
+    var id = isRef(ref) ? ref.toString() :
+                          'annot_' + (uniquePrefix || '') + (++idCounters.obj);
 
     // Determine the annotation's subtype.
     var subtype = dict.get('Subtype');
@@ -40127,8 +40131,9 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
     var parameters = {
       xref: xref,
       dict: dict,
-      ref: ref,
+      ref: isRef(ref) ? ref : null,
       subtype: subtype,
+      id: id,
     };
 
     switch (subtype) {
@@ -40232,7 +40237,7 @@ var Annotation = (function AnnotationClosure() {
 
     // Expose public properties using a data object.
     this.data = {};
-    this.data.id = params.ref.toString();
+    this.data.id = params.id;
     this.data.subtype = params.subtype;
     this.data.annotationFlags = this.flags;
     this.data.rect = this.rectangle;
@@ -41051,6 +41056,7 @@ var Page = (function PageClosure() {
     this.xref = xref;
     this.ref = ref;
     this.fontCache = fontCache;
+    this.uniquePrefix = 'p' + this.pageIndex + '_';
     this.idCounters = {
       obj: 0
     };
@@ -41198,7 +41204,7 @@ var Page = (function PageClosure() {
 
       var partialEvaluator = new PartialEvaluator(pdfManager, this.xref,
                                                   handler, this.pageIndex,
-                                                  'p' + this.pageIndex + '_',
+                                                  this.uniquePrefix,
                                                   this.idCounters,
                                                   this.fontCache,
                                                   this.evaluatorOptions);
@@ -41265,7 +41271,7 @@ var Page = (function PageClosure() {
         var contentStream = data[0];
         var partialEvaluator = new PartialEvaluator(pdfManager, self.xref,
                                                     handler, self.pageIndex,
-                                                    'p' + self.pageIndex + '_',
+                                                    self.uniquePrefix,
                                                     self.idCounters,
                                                     self.fontCache,
                                                     self.evaluatorOptions);
@@ -41300,7 +41306,9 @@ var Page = (function PageClosure() {
       var annotationFactory = new AnnotationFactory();
       for (var i = 0, n = annotationRefs.length; i < n; ++i) {
         var annotationRef = annotationRefs[i];
-        var annotation = annotationFactory.create(this.xref, annotationRef);
+        var annotation = annotationFactory.create(this.xref, annotationRef,
+                                                  this.uniquePrefix,
+                                                  this.idCounters);
         if (annotation) {
           annotations.push(annotation);
         }
