@@ -2284,7 +2284,7 @@ var TEXT_LAYER_RENDER_DELAY = 200; // ms
  * @property {IPDFTextLayerFactory} textLayerFactory
  * @property {IPDFAnnotationLayerFactory} annotationLayerFactory
  * @property {boolean} enhanceTextSelection - Turns on the text selection
- * enhancement. The default is `false`.
+ *   enhancement. The default is `false`.
  */
 
 /**
@@ -2849,7 +2849,7 @@ exports.PDFPageView = PDFPageView;
  * @property {PageViewport} viewport - The viewport of the text layer.
  * @property {PDFFindController} findController
  * @property {boolean} enhanceTextSelection - Option to turn on improved
- * text selection.
+ *   text selection.
  */
 
 /**
