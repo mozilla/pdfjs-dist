@@ -2849,7 +2849,7 @@ exports.PDFPageView = PDFPageView;
  * @property {PageViewport} viewport - The viewport of the text layer.
  * @property {PDFFindController} findController
  * @property {boolean} enhanceTextSelection - Option to turn on improved
- *   text selection.
+ *   text selection. The default value is `false`.
  */
 
 /**
@@ -2872,7 +2872,7 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
     this.textDivs = [];
     this.findController = options.findController || null;
     this.textLayerRenderTask = null;
-    this.enhanceTextSelection = options.enhanceTextSelection;
+    this.enhanceTextSelection = options.enhanceTextSelection || false;
     this._bindMouse();
   }
 
