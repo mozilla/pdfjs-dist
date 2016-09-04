@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.421';
-var pdfjsBuild = '31f6180';
+var pdfjsVersion = '1.5.424';
+var pdfjsBuild = 'd03651e';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -1395,6 +1395,10 @@ var JpegImage = (function jpegImage() {
     var p0, p1, p2, p3, p4, p5, p6, p7;
     var t;
 
+    if (!qt) {
+      throw 'missing required Quantization Table.';
+    }
+
     // inverse DCT on rows
     for (var row = 0; row < 64; row += 8) {
       // gather block data
@@ -1746,7 +1750,8 @@ var JpegImage = (function jpegImage() {
               l = frame.components.push({
                 h: h,
                 v: v,
-                quantizationTable: quantizationTables[qId]
+                quantizationId: qId,
+                quantizationTable: null, // See comment below.
               });
               frame.componentIds[componentId] = l - 1;
               offset += 3;
@@ -1830,6 +1835,15 @@ var JpegImage = (function jpegImage() {
       this.components = [];
       for (i = 0; i < frame.components.length; i++) {
         component = frame.components[i];
+
+        // Prevent errors when DQT markers are placed after SOF{n} markers,
+        // by assigning the `quantizationTable` entry after the entire image
+        // has been parsed (fixes issue7406.pdf).
+        var quantizationTable = quantizationTables[component.quantizationId];
+        if (quantizationTable) {
+          component.quantizationTable = quantizationTable;
+        }
+
         this.components.push({
           output: buildComponentData(frame, component),
           scaleX: component.h / frame.maxH,
