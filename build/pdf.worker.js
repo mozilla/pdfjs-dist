@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.426';
-var pdfjsBuild = '7db1983';
+var pdfjsVersion = '1.5.430';
+var pdfjsBuild = '38c8503';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -2441,6 +2441,37 @@ function createPromiseCapability() {
   };
 
   globalScope.Promise = Promise;
+})();
+
+(function WeakMapClosure() {
+  if (globalScope.WeakMap) {
+    return;
+  }
+
+  var id = 0;
+  function WeakMap() {
+    this.id = '$weakmap' + (id++);
+  }
+  WeakMap.prototype = {
+    has: function(obj) {
+      return !!Object.getOwnPropertyDescriptor(obj, this.id);
+    },
+    get: function(obj, defaultValue) {
+      return this.has(obj) ? obj[this.id] : defaultValue;
+    },
+    set: function(obj, value) {
+      Object.defineProperty(obj, this.id, {
+        value: value,
+        enumerable: false,
+        configurable: true
+      });
+    },
+    delete: function(obj) {
+      delete obj[this.id];
+    }
+  };
+
+  globalScope.WeakMap = WeakMap;
 })();
 
 var StatTimer = (function StatTimerClosure() {
