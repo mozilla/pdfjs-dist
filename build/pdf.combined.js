@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.456';
-var pdfjsBuild = '4d15928';
+var pdfjsVersion = '1.5.458';
+var pdfjsBuild = 'a7c3502';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -24130,7 +24130,6 @@ exports.LZWStream = LZWStream;
 
 var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
 var AnnotationType = sharedUtil.AnnotationType;
-var isInt = sharedUtil.isInt;
 var Util = sharedUtil.Util;
 var addLinkAttributes = displayDOMUtils.addLinkAttributes;
 var LinkTarget = displayDOMUtils.LinkTarget;
@@ -24552,7 +24551,7 @@ var TextWidgetAnnotationElement = (
         element.type = 'text';
         element.value = this.data.fieldValue;
 
-        if (isInt(this.data.maxLen)) {
+        if (this.data.maxLen !== null) {
           element.maxLength = this.data.maxLen;
         }
       } else {
@@ -24568,7 +24567,7 @@ var TextWidgetAnnotationElement = (
         this._setTextStyle(element, font);
       }
 
-      if (isInt(this.data.textAlignment)) {
+      if (this.data.textAlignment !== null) {
         element.style.textAlign = TEXT_ALIGNMENT[this.data.textAlignment];
       }
 
@@ -49656,8 +49655,19 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
   function TextWidgetAnnotation(params) {
     WidgetAnnotation.call(this, params);
 
-    this.data.textAlignment = Util.getInheritableProperty(params.dict, 'Q');
-    this.data.maxLen = Util.getInheritableProperty(params.dict, 'MaxLen');
+    // Determine the alignment of text in the field.
+    var alignment = Util.getInheritableProperty(params.dict, 'Q');
+    if (!isInt(alignment) || alignment < 0 || alignment > 2) {
+      alignment = null;
+    }
+    this.data.textAlignment = alignment;
+
+    // Determine the maximum length of text in the field.
+    var maximumLength = Util.getInheritableProperty(params.dict, 'MaxLen');
+    if (!isInt(maximumLength) || maximumLength < 0) {
+      maximumLength = null;
+    }
+    this.data.maxLen = maximumLength;
   }
 
   Util.inherit(TextWidgetAnnotation, WidgetAnnotation, {

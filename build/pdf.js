@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.456';
-var pdfjsBuild = '4d15928';
+var pdfjsVersion = '1.5.458';
+var pdfjsBuild = 'a7c3502';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -4325,7 +4325,6 @@ exports.SVGGraphics = SVGGraphics;
 
 var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
 var AnnotationType = sharedUtil.AnnotationType;
-var isInt = sharedUtil.isInt;
 var Util = sharedUtil.Util;
 var addLinkAttributes = displayDOMUtils.addLinkAttributes;
 var LinkTarget = displayDOMUtils.LinkTarget;
@@ -4747,7 +4746,7 @@ var TextWidgetAnnotationElement = (
         element.type = 'text';
         element.value = this.data.fieldValue;
 
-        if (isInt(this.data.maxLen)) {
+        if (this.data.maxLen !== null) {
           element.maxLength = this.data.maxLen;
         }
       } else {
@@ -4763,7 +4762,7 @@ var TextWidgetAnnotationElement = (
         this._setTextStyle(element, font);
       }
 
-      if (isInt(this.data.textAlignment)) {
+      if (this.data.textAlignment !== null) {
         element.style.textAlign = TEXT_ALIGNMENT[this.data.textAlignment];
       }
 
