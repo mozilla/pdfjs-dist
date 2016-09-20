@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.458';
-var pdfjsBuild = 'a7c3502';
+var pdfjsVersion = '1.5.477';
+var pdfjsBuild = '9e927de';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -1098,6 +1098,28 @@ var AnnotationFlag = {
   LOCKED: 0x80,
   TOGGLENOVIEW: 0x100,
   LOCKEDCONTENTS: 0x200
+};
+
+var AnnotationFieldFlag = {
+  READONLY: 1,
+  REQUIRED: 2,
+  NOEXPORT: 3,
+  MULTILINE: 13,
+  PASSWORD: 14,
+  NOTOGGLETOOFF: 15,
+  RADIO: 16,
+  PUSHBUTTON: 17,
+  COMBO: 18,
+  EDIT: 19,
+  SORT: 20,
+  FILESELECT: 21,
+  MULTISELECT: 22,
+  DONOTSPELLCHECK: 23,
+  DONOTSCROLL: 24,
+  COMB: 25,
+  RICHTEXT: 26,
+  RADIOSINUNISON: 26,
+  COMMITONSELCHANGE: 27,
 };
 
 var AnnotationBorderStyleType = {
@@ -3361,6 +3383,7 @@ exports.OPS = OPS;
 exports.VERBOSITY_LEVELS = VERBOSITY_LEVELS;
 exports.UNSUPPORTED_FEATURES = UNSUPPORTED_FEATURES;
 exports.AnnotationBorderStyleType = AnnotationBorderStyleType;
+exports.AnnotationFieldFlag = AnnotationFieldFlag;
 exports.AnnotationFlag = AnnotationFlag;
 exports.AnnotationType = AnnotationType;
 exports.FontType = FontType;
@@ -24502,7 +24525,9 @@ var TextAnnotationElement = (function TextAnnotationElementClosure() {
  */
 var WidgetAnnotationElement = (function WidgetAnnotationElementClosure() {
   function WidgetAnnotationElement(parameters) {
-    AnnotationElement.call(this, parameters, true);
+    var isRenderable = parameters.renderInteractiveForms ||
+      (!parameters.data.hasAppearance && !!parameters.data.fieldValue);
+    AnnotationElement.call(this, parameters, isRenderable);
   }
 
   Util.inherit(WidgetAnnotationElement, AnnotationElement, {
@@ -24547,9 +24572,15 @@ var TextWidgetAnnotationElement = (
 
       var element = null;
       if (this.renderInteractiveForms) {
-        element = document.createElement('input');
-        element.type = 'text';
+        if (this.data.multiLine) {
+          element = document.createElement('textarea');
+        } else {
+          element = document.createElement('input');
+          element.type = 'text';
+        }
+
         element.value = this.data.fieldValue;
+        element.disabled = this.data.readOnly;
 
         if (this.data.maxLen !== null) {
           element.maxLength = this.data.maxLen;
@@ -25105,14 +25136,20 @@ var renderTextLayer = (function renderTextLayerClosure() {
     return !NonWhitespaceRegexp.test(str);
   }
 
+  // Text layers may contain many thousand div's, and using `styleBuf` avoids
+  // creating many intermediate strings when building their 'style' properties.
+  var styleBuf = ['left: ', 0, 'px; top: ', 0, 'px; font-size: ', 0,
+                  'px; font-family: ', '', ';'];
+
   function appendText(task, geom, styles) {
     // Initialize all used properties to keep the caches monomorphic.
     var textDiv = document.createElement('div');
     var textDivProperties = {
+      style: null,
       angle: 0,
       canvasWidth: 0,
       isWhitespace: false,
-      originalTransform: '',
+      originalTransform: null,
       paddingBottom: 0,
       paddingLeft: 0,
       paddingRight: 0,
@@ -25150,10 +25187,12 @@ var renderTextLayer = (function renderTextLayerClosure() {
       left = tx[4] + (fontAscent * Math.sin(angle));
       top = tx[5] - (fontAscent * Math.cos(angle));
     }
-    textDiv.style.left = left + 'px';
-    textDiv.style.top = top + 'px';
-    textDiv.style.fontSize = fontHeight + 'px';
-    textDiv.style.fontFamily = style.fontFamily;
+    styleBuf[1] = left;
+    styleBuf[3] = top;
+    styleBuf[5] = fontHeight;
+    styleBuf[7] = style.fontFamily;
+    textDivProperties.style = styleBuf.join('');
+    textDiv.setAttribute('style', textDivProperties.style);
 
     textDiv.textContent = geom.str;
     // |fontName| is only used by the Font Inspector. This test will succeed
@@ -25560,7 +25599,6 @@ var renderTextLayer = (function renderTextLayerClosure() {
     this._renderTimer = null;
     this._bounds = [];
     this._enhanceTextSelection = !!enhanceTextSelection;
-    this._expanded = false;
   }
   TextLayerRenderTask.prototype = {
     get promise() {
@@ -25598,18 +25636,20 @@ var renderTextLayer = (function renderTextLayerClosure() {
       if (!this._enhanceTextSelection || !this._renderingDone) {
         return;
       }
-      if (!this._expanded) {
+      if (this._bounds !== null) {
         expand(this);
-        this._expanded = true;
-        this._bounds.length = 0;
+        this._bounds = null;
       }
 
       for (var i = 0, ii = this._textDivs.length; i < ii; i++) {
         var div = this._textDivs[i];
         var divProperties = this._textDivProperties.get(div);
 
+        if (divProperties.isWhitespace) {
+          continue;
+        }
         if (expandDivs) {
-          var transform = '';
+          var transform = '', padding = '';
 
           if (divProperties.scale !== 1) {
             transform = 'scaleX(' + divProperties.scale + ')';
@@ -25618,21 +25658,26 @@ var renderTextLayer = (function renderTextLayerClosure() {
             transform = 'rotate(' + divProperties.angle + 'deg) ' + transform;
           }
           if (divProperties.paddingLeft !== 0) {
-            div.style.paddingLeft =
-              (divProperties.paddingLeft / divProperties.scale) + 'px';
+            padding += ' padding-left: ' +
+              (divProperties.paddingLeft / divProperties.scale) + 'px;';
             transform += ' translateX(' +
               (-divProperties.paddingLeft / divProperties.scale) + 'px)';
           }
           if (divProperties.paddingTop !== 0) {
-            div.style.paddingTop = divProperties.paddingTop + 'px';
+            padding += ' padding-top: ' + divProperties.paddingTop + 'px;';
             transform += ' translateY(' + (-divProperties.paddingTop) + 'px)';
           }
           if (divProperties.paddingRight !== 0) {
-            div.style.paddingRight =
-              (divProperties.paddingRight / divProperties.scale) + 'px';
+            padding += ' padding-right: ' +
+              (divProperties.paddingRight / divProperties.scale) + 'px;';
           }
           if (divProperties.paddingBottom !== 0) {
-            div.style.paddingBottom = divProperties.paddingBottom + 'px';
+            padding += ' padding-bottom: ' +
+              divProperties.paddingBottom + 'px;';
+          }
+
+          if (padding !== '') {
+            div.setAttribute('style', divProperties.style + padding);
           }
           if (transform !== '') {
             CustomStyle.setProp('transform', div, transform);
@@ -25640,7 +25685,7 @@ var renderTextLayer = (function renderTextLayerClosure() {
         } else {
           div.style.padding = 0;
           CustomStyle.setProp('transform', div,
-                              divProperties.originalTransform);
+                              divProperties.originalTransform || '');
         }
       }
     },
@@ -32283,6 +32328,30 @@ function adjustWidths(properties) {
   properties.defaultWidth *= scale;
 }
 
+function adjustToUnicode(properties, builtInEncoding) {
+  if (properties.hasIncludedToUnicodeMap) {
+    return; // The font dictionary has a `ToUnicode` entry.
+  }
+  if (properties.hasEncoding) {
+    return; // The font dictionary has an `Encoding` entry.
+  }
+  if (builtInEncoding === properties.defaultEncoding) {
+    return; // No point in trying to adjust `toUnicode` if the encodings match.
+  }
+  if (properties.toUnicode instanceof IdentityToUnicodeMap) {
+    return;
+  }
+  var toUnicode = [], glyphsUnicodeMap = getGlyphsUnicode();
+  for (var charCode in builtInEncoding) {
+    var glyphName = builtInEncoding[charCode];
+    var unicode = getUnicodeForGlyph(glyphName, glyphsUnicodeMap);
+    if (unicode !== -1) {
+      toUnicode[charCode] = String.fromCharCode(unicode);
+    }
+  }
+  properties.toUnicode.amend(toUnicode);
+}
+
 function getFontType(type, subtype) {
   switch (type) {
     case 'Type1':
@@ -32381,7 +32450,13 @@ var ToUnicodeMap = (function ToUnicodeMapClosure() {
 
     charCodeOf: function(v) {
       return this._map.indexOf(v);
-    }
+    },
+
+    amend: function (map) {
+      for (var charCode in map) {
+        this._map[charCode] = map[charCode];
+      }
+    },
   };
 
   return ToUnicodeMap;
@@ -32417,7 +32492,11 @@ var IdentityToUnicodeMap = (function IdentityToUnicodeMapClosure() {
 
     charCodeOf: function (v) {
       return (isInt(v) && v >= this.firstChar && v <= this.lastChar) ? v : -1;
-    }
+    },
+
+    amend: function (map) {
+      error('Should not call amend()');
+    },
   };
 
   return IdentityToUnicodeMap;
@@ -32818,6 +32897,7 @@ var Font = (function FontClosure() {
     this.fontMatrix = properties.fontMatrix;
     this.widths = properties.widths;
     this.defaultWidth = properties.defaultWidth;
+    this.toUnicode = properties.toUnicode;
     this.encoding = properties.baseEncoding;
     this.seacMap = properties.seacMap;
 
@@ -34439,10 +34519,8 @@ var Font = (function FontClosure() {
       } else {
         // Most of the following logic in this code branch is based on the
         // 9.6.6.4 of the PDF spec.
-        var hasEncoding =
-          properties.differences.length > 0 || !!properties.baseEncodingName;
-        var cmapTable =
-          readCmapTable(tables['cmap'], font, this.isSymbolicFont, hasEncoding);
+        var cmapTable = readCmapTable(tables['cmap'], font, this.isSymbolicFont,
+                                      properties.hasEncoding);
         var cmapPlatformId = cmapTable.platformId;
         var cmapEncodingId = cmapTable.encodingId;
         var cmapMappings = cmapTable.mappings;
@@ -34451,7 +34529,7 @@ var Font = (function FontClosure() {
         // The spec seems to imply that if the font is symbolic the encoding
         // should be ignored, this doesn't appear to work for 'preistabelle.pdf'
         // where the the font is symbolic and it has an encoding.
-        if (hasEncoding &&
+        if (properties.hasEncoding &&
             (cmapPlatformId === 3 && cmapEncodingId === 1 ||
              cmapPlatformId === 1 && cmapEncodingId === 0) ||
             (cmapPlatformId === -1 && cmapEncodingId === -1 && // Temporary hack
@@ -34614,6 +34692,12 @@ var Font = (function FontClosure() {
     convert: function Font_convert(fontName, font, properties) {
       // TODO: Check the charstring widths to determine this.
       properties.fixedPitch = false;
+
+      if (properties.builtInEncoding) {
+        // For Type1 fonts that do not include either `ToUnicode` or `Encoding`
+        // data, attempt to use the `builtInEncoding` to improve text selection.
+        adjustToUnicode(properties, properties.builtInEncoding);
+      }
 
       var mapping = font.getGlyphMapping(properties);
       var newMapping = adjustMapping(mapping, properties);
@@ -36302,9 +36386,6 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
     if (sourceCtx.setLineDash !== undefined) {
       destCtx.setLineDash(sourceCtx.getLineDash());
       destCtx.lineDashOffset =  sourceCtx.lineDashOffset;
-    } else if (sourceCtx.mozDashOffset !== undefined) {
-      destCtx.mozDash = sourceCtx.mozDash;
-      destCtx.mozDashOffset = sourceCtx.mozDashOffset;
     }
   }
 
@@ -36560,9 +36641,6 @@ var CanvasGraphics = (function CanvasGraphicsClosure() {
       if (ctx.setLineDash !== undefined) {
         ctx.setLineDash(dashArray);
         ctx.lineDashOffset = dashPhase;
-      } else {
-        ctx.mozDash = dashArray;
-        ctx.mozDashOffset = dashPhase;
       }
     },
     setRenderingIntent: function CanvasGraphics_setRenderingIntent(intent) {
@@ -39742,6 +39820,9 @@ var PDFDocumentProxy = (function PDFDocumentProxyClosure() {
  *                                calling of PDFPage.getViewport method.
  * @property {string} intent - Rendering intent, can be 'display' or 'print'
  *                    (default value is 'display').
+ * @property {boolean} renderInteractiveForms - (optional) Whether or not
+ *                     interactive form elements are rendered in the display
+ *                     layer. If so, we do not render them on canvas as well.
  * @property {Array}  transform - (optional) Additional transform, applied
  *                    just before viewport transform.
  * @property {Object} imageLayer - (optional) An object that has beginLayout,
@@ -39850,6 +39931,8 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
       this.pendingCleanup = false;
 
       var renderingIntent = (params.intent === 'print' ? 'print' : 'display');
+      var renderInteractiveForms = (params.renderInteractiveForms === true ?
+                                    true : /* Default */ false);
 
       if (!this.intentStates[renderingIntent]) {
         this.intentStates[renderingIntent] = Object.create(null);
@@ -39870,7 +39953,8 @@ var PDFPageProxy = (function PDFPageProxyClosure() {
         this.stats.time('Page Request');
         this.transport.messageHandler.send('RenderPageRequest', {
           pageIndex: this.pageNumber - 1,
-          intent: renderingIntent
+          intent: renderingIntent,
+          renderInteractiveForms: renderInteractiveForms,
         });
       }
 
@@ -42602,13 +42686,6 @@ exports.ColorSpace = ColorSpace;
     */
   PDFJS.isEvalSupported = (PDFJS.isEvalSupported === undefined ?
                            true : PDFJS.isEvalSupported);
-
-  /**
-   * Renders interactive form elements.
-   * @var {boolean}
-   */
-  PDFJS.renderInteractiveForms = (PDFJS.renderInteractiveForms === undefined ?
-                                  false : PDFJS.renderInteractiveForms);
 
   var savedOpenExternalLinksInNewWindow = PDFJS.openExternalLinksInNewWindow;
   delete PDFJS.openExternalLinksInNewWindow;
@@ -47454,6 +47531,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
       properties.differences = differences;
       properties.baseEncodingName = baseEncodingName;
+      properties.hasEncoding = !!baseEncodingName || differences.length > 0;
       properties.dict = dict;
       return toUnicodePromise.then(function(toUnicode) {
         properties.toUnicode = toUnicode;
@@ -47471,8 +47549,10 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
      *   {ToUnicodeMap|IdentityToUnicodeMap} object.
      */
     buildToUnicode: function PartialEvaluator_buildToUnicode(properties) {
+      properties.hasIncludedToUnicodeMap =
+        !!properties.toUnicode && properties.toUnicode.length > 0;
       // Section 9.10.2 Mapping Character Codes to Unicode Values
-      if (properties.toUnicode && properties.toUnicode.length !== 0) {
+      if (properties.hasIncludedToUnicodeMap) {
         return Promise.resolve(properties.toUnicode);
       }
       // According to the spec if the font is a simple font we should only map
@@ -49017,6 +49097,7 @@ exports.PartialEvaluator = PartialEvaluator;
                   coreColorSpace, coreObj, coreEvaluator) {
 
 var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
+var AnnotationFieldFlag = sharedUtil.AnnotationFieldFlag;
 var AnnotationFlag = sharedUtil.AnnotationFlag;
 var AnnotationType = sharedUtil.AnnotationType;
 var OPS = sharedUtil.OPS;
@@ -49049,10 +49130,14 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
   /**
    * @param {XRef} xref
    * @param {Object} ref
+   * @param {string} uniquePrefix
+   * @param {Object} idCounters
+   * @param {boolean} renderInteractiveForms
    * @returns {Annotation}
    */
   create: function AnnotationFactory_create(xref, ref,
-                                            uniquePrefix, idCounters) {
+                                            uniquePrefix, idCounters,
+                                            renderInteractiveForms) {
     var dict = xref.fetchIfRef(ref);
     if (!isDict(dict)) {
       return;
@@ -49071,6 +49156,7 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
       ref: isRef(ref) ? ref : null,
       subtype: subtype,
       id: id,
+      renderInteractiveForms: renderInteractiveForms,
     };
 
     switch (subtype) {
@@ -49605,8 +49691,12 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
     data.defaultAppearance = Util.getInheritableProperty(dict, 'DA') || '';
     var fieldType = Util.getInheritableProperty(dict, 'FT');
     data.fieldType = isName(fieldType) ? fieldType.name : null;
-    data.fieldFlags = Util.getInheritableProperty(dict, 'Ff') || 0;
     this.fieldResources = Util.getInheritableProperty(dict, 'DR') || Dict.empty;
+
+    data.fieldFlags = Util.getInheritableProperty(dict, 'Ff');
+    if (!isInt(data.fieldFlags) || data.fieldFlags < 0) {
+      data.fieldFlags = 0;
+    }
 
     // Hide signatures because we cannot validate them.
     if (data.fieldType === 'Sig') {
@@ -49646,7 +49736,22 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
     data.fullName = fieldName.join('.');
   }
 
-  Util.inherit(WidgetAnnotation, Annotation, {});
+  Util.inherit(WidgetAnnotation, Annotation, {
+    /**
+     * Check if a provided field flag is set.
+     *
+     * @public
+     * @memberof WidgetAnnotation
+     * @param {number} flag - Bit position, numbered from one instead of
+     *                        zero, to check
+     * @return {boolean}
+     * @see {@link shared/util.js}
+     */
+    hasFieldFlag: function WidgetAnnotation_hasFieldFlag(flag) {
+      var mask = 1 << (flag - 1);
+      return !!(this.data.fieldFlags & mask);
+    },
+  });
 
   return WidgetAnnotation;
 })();
@@ -49654,6 +49759,8 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
 var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
   function TextWidgetAnnotation(params) {
     WidgetAnnotation.call(this, params);
+
+    this.renderInteractiveForms = params.renderInteractiveForms;
 
     // Determine the alignment of text in the field.
     var alignment = Util.getInheritableProperty(params.dict, 'Q');
@@ -49668,29 +49775,38 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
       maximumLength = null;
     }
     this.data.maxLen = maximumLength;
+
+    // Process field flags for the display layer.
+    this.data.readOnly = this.hasFieldFlag(AnnotationFieldFlag.READONLY);
+    this.data.multiLine = this.hasFieldFlag(AnnotationFieldFlag.MULTILINE);
   }
 
   Util.inherit(TextWidgetAnnotation, WidgetAnnotation, {
     getOperatorList: function TextWidgetAnnotation_getOperatorList(evaluator,
                                                                    task) {
+      var operatorList = new OperatorList();
+
+      // Do not render form elements on the canvas when interactive forms are
+      // enabled. The display layer is responsible for rendering them instead.
+      if (this.renderInteractiveForms) {
+        return Promise.resolve(operatorList);
+      }
+
       if (this.appearance) {
         return Annotation.prototype.getOperatorList.call(this, evaluator, task);
       }
 
-      var opList = new OperatorList();
-      var data = this.data;
-
       // Even if there is an appearance stream, ignore it. This is the
       // behaviour used by Adobe Reader.
-      if (!data.defaultAppearance) {
-        return Promise.resolve(opList);
+      if (!this.data.defaultAppearance) {
+        return Promise.resolve(operatorList);
       }
 
-      var stream = new Stream(stringToBytes(data.defaultAppearance));
-      return evaluator.getOperatorList(stream, task,
-                                       this.fieldResources, opList).
+      var stream = new Stream(stringToBytes(this.data.defaultAppearance));
+      return evaluator.getOperatorList(stream, task, this.fieldResources,
+                                       operatorList).
         then(function () {
-          return opList;
+          return operatorList;
         });
     }
   });
@@ -50137,7 +50253,8 @@ var Page = (function PageClosure() {
       }.bind(this));
     },
 
-    getOperatorList: function Page_getOperatorList(handler, task, intent) {
+    getOperatorList: function Page_getOperatorList(handler, task, intent,
+                                                   renderInteractiveForms) {
       var self = this;
 
       var pdfManager = this.pdfManager;
@@ -50176,6 +50293,8 @@ var Page = (function PageClosure() {
             return opList;
           });
       });
+
+      this.renderInteractiveForms = renderInteractiveForms;
 
       var annotationsPromise = pdfManager.ensure(this, 'annotations');
       return Promise.all([pageListPromise, annotationsPromise]).then(
@@ -50260,7 +50379,8 @@ var Page = (function PageClosure() {
         var annotationRef = annotationRefs[i];
         var annotation = annotationFactory.create(this.xref, annotationRef,
                                                   this.uniquePrefix,
-                                                  this.idCounters);
+                                                  this.idCounters,
+                                                  this.renderInteractiveForms);
         if (annotation) {
           annotations.push(annotation);
         }
@@ -51447,7 +51567,8 @@ var WorkerMessageHandler = {
         var pageNum = pageIndex + 1;
         var start = Date.now();
         // Pre compile the pdf page and fetch the fonts/images.
-        page.getOperatorList(handler, task, data.intent).then(
+        page.getOperatorList(handler, task, data.intent,
+                             data.renderInteractiveForms).then(
             function(operatorList) {
           finishWorkerTask(task);
 
