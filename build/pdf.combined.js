@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.485';
-var pdfjsBuild = '7820f58';
+var pdfjsVersion = '1.5.488';
+var pdfjsBuild = '6c263c1';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -1101,25 +1101,25 @@ var AnnotationFlag = {
 };
 
 var AnnotationFieldFlag = {
-  READONLY: 1,
-  REQUIRED: 2,
-  NOEXPORT: 3,
-  MULTILINE: 13,
-  PASSWORD: 14,
-  NOTOGGLETOOFF: 15,
-  RADIO: 16,
-  PUSHBUTTON: 17,
-  COMBO: 18,
-  EDIT: 19,
-  SORT: 20,
-  FILESELECT: 21,
-  MULTISELECT: 22,
-  DONOTSPELLCHECK: 23,
-  DONOTSCROLL: 24,
-  COMB: 25,
-  RICHTEXT: 26,
-  RADIOSINUNISON: 26,
-  COMMITONSELCHANGE: 27,
+  READONLY: 0x0000001,
+  REQUIRED: 0x0000002,
+  NOEXPORT: 0x0000004,
+  MULTILINE: 0x0001000,
+  PASSWORD: 0x0002000,
+  NOTOGGLETOOFF: 0x0004000,
+  RADIO: 0x0008000,
+  PUSHBUTTON: 0x0010000,
+  COMBO: 0x0020000,
+  EDIT: 0x0040000,
+  SORT: 0x0080000,
+  FILESELECT: 0x0100000,
+  MULTISELECT: 0x0200000,
+  DONOTSPELLCHECK: 0x0400000,
+  DONOTSCROLL: 0x0800000,
+  COMB: 0x1000000,
+  RICHTEXT: 0x2000000,
+  RADIOSINUNISON: 0x2000000,
+  COMMITONSELCHANGE: 0x4000000,
 };
 
 var AnnotationBorderStyleType = {
@@ -24588,6 +24588,14 @@ var TextWidgetAnnotationElement = (
 
         if (this.data.maxLen !== null) {
           element.maxLength = this.data.maxLen;
+        }
+
+        if (this.data.comb) {
+          var fieldWidth = this.data.rect[2] - this.data.rect[0];
+          var combWidth = fieldWidth / this.data.maxLen;
+
+          element.classList.add('comb');
+          element.style.letterSpacing = 'calc(' + combWidth + 'px - 1ch)';
         }
       } else {
         element = document.createElement('div');
@@ -49751,14 +49759,13 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
      *
      * @public
      * @memberof WidgetAnnotation
-     * @param {number} flag - Bit position, numbered from one instead of
-     *                        zero, to check
+     * @param {number} flag - Hexadecimal representation for an annotation
+     *                        field characteristic
      * @return {boolean}
      * @see {@link shared/util.js}
      */
     hasFieldFlag: function WidgetAnnotation_hasFieldFlag(flag) {
-      var mask = 1 << (flag - 1);
-      return !!(this.data.fieldFlags & mask);
+      return !!(this.data.fieldFlags & flag);
     },
   });
 
@@ -49786,6 +49793,11 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
     // Process field flags for the display layer.
     this.data.readOnly = this.hasFieldFlag(AnnotationFieldFlag.READONLY);
     this.data.multiLine = this.hasFieldFlag(AnnotationFieldFlag.MULTILINE);
+    this.data.comb = this.hasFieldFlag(AnnotationFieldFlag.COMB) &&
+                     !this.hasFieldFlag(AnnotationFieldFlag.MULTILINE) &&
+                     !this.hasFieldFlag(AnnotationFieldFlag.PASSWORD) &&
+                     !this.hasFieldFlag(AnnotationFieldFlag.FILESELECT) &&
+                     this.data.maxLen !== null;
   }
 
   Util.inherit(TextWidgetAnnotation, WidgetAnnotation, {
