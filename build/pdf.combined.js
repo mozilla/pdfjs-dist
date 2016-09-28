@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.5.494';
-var pdfjsBuild = 'b4be1e9';
+var pdfjsVersion = '1.5.496';
+var pdfjsBuild = '8699145';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -11509,6 +11509,12 @@ var JpegImage = (function JpegImageClosure() {
       // find marker
       bitsCount = 0;
       marker = (data[offset] << 8) | data[offset + 1];
+      // Some bad images seem to pad Scan blocks with zero bytes, skip past
+      // those to attempt to find a valid marker (fixes issue4090.pdf).
+      while (data[offset] === 0x00 && offset < data.length - 1) {
+        offset++;
+        marker = (data[offset] << 8) | data[offset + 1];
+      }
       if (marker <= 0xFF00) {
         error('JPEG error: marker was not found');
       }
