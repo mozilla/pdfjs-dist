@@ -2870,6 +2870,8 @@ exports.PDFPageView = PDFPageView;
   }
 }(this, function (exports, domEvents, pdfjsLib) {
 
+var EXPAND_DIVS_TIMEOUT = 300; // ms
+
 /**
  * @typedef {Object} TextLayerBuilderOptions
  * @property {HTMLDivElement} textLayerDiv - The text layer container.
@@ -3163,9 +3165,14 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
     _bindMouse: function TextLayerBuilder_bindMouse() {
       var div = this.textLayerDiv;
       var self = this;
+      var expandDivsTimer = null;
       div.addEventListener('mousedown', function (e) {
         if (self.enhanceTextSelection && self.textLayerRenderTask) {
           self.textLayerRenderTask.expandTextDivs(true);
+          if (expandDivsTimer) {
+            clearTimeout(expandDivsTimer);
+            expandDivsTimer = null;
+          }
           return;
         }
         var end = div.querySelector('.endOfContent');
@@ -3188,7 +3195,10 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
       });
       div.addEventListener('mouseup', function (e) {
         if (self.enhanceTextSelection && self.textLayerRenderTask) {
-          self.textLayerRenderTask.expandTextDivs(false);
+          expandDivsTimer = setTimeout(function() {
+            self.textLayerRenderTask.expandTextDivs(false);
+            expandDivsTimer = null;
+          }, EXPAND_DIVS_TIMEOUT);
           return;
         }
         var end = div.querySelector('.endOfContent');
