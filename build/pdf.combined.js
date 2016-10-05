@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.6.212';
-var pdfjsBuild = 'b4a9012';
+var pdfjsVersion = '1.6.214';
+var pdfjsBuild = '7b2a9ee';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -29529,7 +29529,10 @@ var Parser = (function ParserClosure() {
       return stream;
     },
     makeFilter: function Parser_makeFilter(stream, name, maybeLength, params) {
-      if (stream.dict.get('Length') === 0 && !maybeLength) {
+      // Since the 'Length' entry in the stream dictionary can be completely
+      // wrong, e.g. zero for non-empty streams, only skip parsing the stream
+      // when we can be absolutely certain that it actually is empty.
+      if (maybeLength === 0) {
         warn('Empty "' + name + '" stream.');
         return new NullStream(stream);
       }
