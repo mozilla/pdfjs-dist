@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdf = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.6.214';
-var pdfjsBuild = '7b2a9ee';
+var pdfjsVersion = '1.6.217';
+var pdfjsBuild = '9b3a91f';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -892,15 +892,15 @@ var Util = (function UtilClosure() {
     }
   };
 
-  Util.getInheritableProperty = function Util_getInheritableProperty(dict,
-                                                                     name) {
+  Util.getInheritableProperty =
+      function Util_getInheritableProperty(dict, name, getArray) {
     while (dict && !dict.has(name)) {
       dict = dict.get('Parent');
     }
     if (!dict) {
       return null;
     }
-    return dict.get(name);
+    return getArray ? dict.getArray(name) : dict.get(name);
   };
 
   Util.inherit = function Util_inherit(sub, base, prototype) {
@@ -4395,6 +4395,8 @@ AnnotationElementFactory.prototype =
         switch (fieldType) {
           case 'Tx':
             return new TextWidgetAnnotationElement(parameters);
+          case 'Ch':
+            return new ChoiceWidgetAnnotationElement(parameters);
         }
         return new WidgetAnnotationElement(parameters);
 
@@ -4719,9 +4721,7 @@ var TextAnnotationElement = (function TextAnnotationElementClosure() {
  * @alias WidgetAnnotationElement
  */
 var WidgetAnnotationElement = (function WidgetAnnotationElementClosure() {
-  function WidgetAnnotationElement(parameters) {
-    var isRenderable = parameters.renderInteractiveForms ||
-      (!parameters.data.hasAppearance && !!parameters.data.fieldValue);
+  function WidgetAnnotationElement(parameters, isRenderable) {
     AnnotationElement.call(this, parameters, isRenderable);
   }
 
@@ -4751,7 +4751,9 @@ var TextWidgetAnnotationElement = (
   var TEXT_ALIGNMENT = ['left', 'center', 'right'];
 
   function TextWidgetAnnotationElement(parameters) {
-    WidgetAnnotationElement.call(this, parameters);
+    var isRenderable = parameters.renderInteractiveForms ||
+      (!parameters.data.hasAppearance && !!parameters.data.fieldValue);
+    WidgetAnnotationElement.call(this, parameters, isRenderable);
   }
 
   Util.inherit(TextWidgetAnnotationElement, WidgetAnnotationElement, {
@@ -4845,6 +4847,64 @@ var TextWidgetAnnotationElement = (
   });
 
   return TextWidgetAnnotationElement;
+})();
+
+/**
+ * @class
+ * @alias ChoiceWidgetAnnotationElement
+ */
+var ChoiceWidgetAnnotationElement = (
+    function ChoiceWidgetAnnotationElementClosure() {
+  function ChoiceWidgetAnnotationElement(parameters) {
+    WidgetAnnotationElement.call(this, parameters,
+                                 parameters.renderInteractiveForms);
+  }
+
+  Util.inherit(ChoiceWidgetAnnotationElement, WidgetAnnotationElement, {
+    /**
+     * Render the choice widget annotation's HTML element in the empty
+     * container.
+     *
+     * @public
+     * @memberof ChoiceWidgetAnnotationElement
+     * @returns {HTMLSectionElement}
+     */
+    render: function ChoiceWidgetAnnotationElement_render() {
+      this.container.className = 'choiceWidgetAnnotation';
+
+      var selectElement = document.createElement('select');
+      selectElement.disabled = this.data.readOnly;
+
+      if (!this.data.combo) {
+        // List boxes have a size and (optionally) multiple selection.
+        selectElement.size = this.data.options.length;
+
+        if (this.data.multiSelect) {
+          selectElement.multiple = true;
+        }
+      }
+
+      // Insert the options into the choice field.
+      for (var i = 0, ii = this.data.options.length; i < ii; i++) {
+        var option = this.data.options[i];
+
+        var optionElement = document.createElement('option');
+        optionElement.textContent = option.displayValue;
+        optionElement.value = option.exportValue;
+
+        if (this.data.fieldValue.indexOf(option.displayValue) >= 0) {
+          optionElement.setAttribute('selected', true);
+        }
+
+        selectElement.appendChild(optionElement);
+      }
+
+      this.container.appendChild(selectElement);
+      return this.container;
+    }
+  });
+
+  return ChoiceWidgetAnnotationElement;
 })();
 
 /**

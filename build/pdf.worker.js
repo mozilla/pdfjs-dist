@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfWorker = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.6.214';
-var pdfjsBuild = '7b2a9ee';
+var pdfjsVersion = '1.6.217';
+var pdfjsBuild = '9b3a91f';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -1878,15 +1878,15 @@ var Util = (function UtilClosure() {
     }
   };
 
-  Util.getInheritableProperty = function Util_getInheritableProperty(dict,
-                                                                     name) {
+  Util.getInheritableProperty =
+      function Util_getInheritableProperty(dict, name, getArray) {
     while (dict && !dict.has(name)) {
       dict = dict.get('Parent');
     }
     if (!dict) {
       return null;
     }
-    return dict.get(name);
+    return getArray ? dict.getArray(name) : dict.get(name);
   };
 
   Util.inherit = function Util_inherit(sub, base, prototype) {
@@ -40347,6 +40347,8 @@ AnnotationFactory.prototype = /** @lends AnnotationFactory.prototype */ {
         switch (fieldType) {
           case 'Tx':
             return new TextWidgetAnnotation(parameters);
+          case 'Ch':
+            return new ChoiceWidgetAnnotation(parameters);
         }
         warn('Unimplemented widget field type "' + fieldType + '", ' +
              'falling back to base field type.');
@@ -40860,8 +40862,8 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
     var data = this.data;
 
     data.annotationType = AnnotationType.WIDGET;
-    data.fieldValue = stringToPDFString(
-      Util.getInheritableProperty(dict, 'V') || '');
+    data.fieldValue = Util.getInheritableProperty(dict, 'V',
+                                                  /* getArray = */ true);
     data.alternativeText = stringToPDFString(dict.get('TU') || '');
     data.defaultAppearance = Util.getInheritableProperty(dict, 'DA') || '';
     var fieldType = Util.getInheritableProperty(dict, 'FT');
@@ -40872,6 +40874,8 @@ var WidgetAnnotation = (function WidgetAnnotationClosure() {
     if (!isInt(data.fieldFlags) || data.fieldFlags < 0) {
       data.fieldFlags = 0;
     }
+
+    data.readOnly = this.hasFieldFlag(AnnotationFieldFlag.READONLY);
 
     // Hide signatures because we cannot validate them.
     if (data.fieldType === 'Sig') {
@@ -40934,6 +40938,9 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
   function TextWidgetAnnotation(params) {
     WidgetAnnotation.call(this, params);
 
+    // The field value is always a string.
+    this.data.fieldValue = stringToPDFString(this.data.fieldValue || '');
+
     // Determine the alignment of text in the field.
     var alignment = Util.getInheritableProperty(params.dict, 'Q');
     if (!isInt(alignment) || alignment < 0 || alignment > 2) {
@@ -40949,7 +40956,6 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
     this.data.maxLen = maximumLength;
 
     // Process field flags for the display layer.
-    this.data.readOnly = this.hasFieldFlag(AnnotationFieldFlag.READONLY);
     this.data.multiLine = this.hasFieldFlag(AnnotationFieldFlag.MULTILINE);
     this.data.comb = this.hasFieldFlag(AnnotationFieldFlag.COMB) &&
                      !this.hasFieldFlag(AnnotationFieldFlag.MULTILINE) &&
@@ -40991,6 +40997,62 @@ var TextWidgetAnnotation = (function TextWidgetAnnotationClosure() {
   });
 
   return TextWidgetAnnotation;
+})();
+
+var ChoiceWidgetAnnotation = (function ChoiceWidgetAnnotationClosure() {
+  function ChoiceWidgetAnnotation(params) {
+    WidgetAnnotation.call(this, params);
+
+    // Determine the options. The options array may consist of strings or
+    // arrays. If the array consists of arrays, then the first element of
+    // each array is the export value and the second element of each array is
+    // the display value. If the array consists of strings, then these
+    // represent both the export and display value. In this case, we convert
+    // it to an array of arrays as well for convenience in the display layer.
+    this.data.options = [];
+
+    var options = params.dict.getArray('Opt');
+    if (isArray(options)) {
+      for (var i = 0, ii = options.length; i < ii; i++) {
+        var option = options[i];
+
+        this.data.options[i] = {
+          exportValue: isArray(option) ? option[0] : option,
+          displayValue: isArray(option) ? option[1] : option,
+        };
+      }
+    }
+
+    // Determine the field value. In this case, it may be a string or an
+    // array of strings. For convenience in the display layer, convert the
+    // string to an array of one string as well.
+    if (!isArray(this.data.fieldValue)) {
+      this.data.fieldValue = [this.data.fieldValue];
+    }
+
+    // Process field flags for the display layer.
+    this.data.combo = this.hasFieldFlag(AnnotationFieldFlag.COMBO);
+    this.data.multiSelect = this.hasFieldFlag(AnnotationFieldFlag.MULTISELECT);
+  }
+
+  Util.inherit(ChoiceWidgetAnnotation, WidgetAnnotation, {
+    getOperatorList:
+        function ChoiceWidgetAnnotation_getOperatorList(evaluator, task,
+                                                        renderForms) {
+      var operatorList = new OperatorList();
+
+      // Do not render form elements on the canvas when interactive forms are
+      // enabled. The display layer is responsible for rendering them instead.
+      if (renderForms) {
+        return Promise.resolve(operatorList);
+      }
+
+      return Annotation.prototype.getOperatorList.call(this, evaluator, task,
+                                                       renderForms);
+    }
+  });
+
+  return ChoiceWidgetAnnotation;
 })();
 
 var TextAnnotation = (function TextAnnotationClosure() {
