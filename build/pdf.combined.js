@@ -28,8 +28,8 @@ factory((root.pdfjsDistBuildPdfCombined = {}));
   // Use strict in our context only - users might not want it
   'use strict';
 
-var pdfjsVersion = '1.6.219';
-var pdfjsBuild = 'e48f388';
+var pdfjsVersion = '1.6.221';
+var pdfjsBuild = 'f8bd3d4';
 
   var pdfjsFilePath =
     typeof document !== 'undefined' && document.currentScript ?
@@ -20118,6 +20118,10 @@ FontLoader.prototype = {
         warn('Failed to load font "' + nativeFontFace.family + '": ' + e);
       });
     };
+    // Firefox Font Loading API does not work with mozPrintCallback --
+    // disabling it in this case.
+    var isFontLoadingAPISupported = FontLoader.isFontLoadingAPISupported &&
+                                    !FontLoader.isSyncFontLoadingSupported;
     for (var i = 0, ii = fonts.length; i < ii; i++) {
       var font = fonts[i];
 
@@ -20128,7 +20132,7 @@ FontLoader.prototype = {
       }
       font.attached = true;
 
-      if (FontLoader.isFontLoadingAPISupported) {
+      if (isFontLoadingAPISupported) {
         var nativeFontFace = font.createNativeFontFace();
         if (nativeFontFace) {
           this.addNativeFontFace(nativeFontFace);
@@ -20145,7 +20149,7 @@ FontLoader.prototype = {
     }
 
     var request = this.queueLoadingCallback(callback);
-    if (FontLoader.isFontLoadingAPISupported) {
+    if (isFontLoadingAPISupported) {
       Promise.all(fontLoadPromises).then(function() {
         request.complete();
       });
