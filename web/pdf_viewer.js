@@ -2794,59 +2794,6 @@ var PDFPageView = (function PDFPageViewClosure() {
       }
       return promise;
     },
-
-    beforePrint: function PDFPageView_beforePrint(printContainer) {
-      var CustomStyle = pdfjsLib.CustomStyle;
-      var pdfPage = this.pdfPage;
-
-      var viewport = pdfPage.getViewport(1);
-
-      var canvas = document.createElement('canvas');
-
-      // The size of the canvas in pixels for printing.
-      var PRINT_RESOLUTION = 150;
-      var PRINT_UNITS = PRINT_RESOLUTION / 72.0;
-      canvas.width = Math.floor(viewport.width * PRINT_UNITS);
-      canvas.height = Math.floor(viewport.height * PRINT_UNITS);
-
-      // The physical size of the canvas as specified by the PDF document.
-      canvas.style.width = Math.floor(viewport.width * CSS_UNITS) + 'px';
-      canvas.style.height = Math.floor(viewport.height * CSS_UNITS) + 'px';
-
-      var canvasWrapper = document.createElement('div');
-      canvasWrapper.appendChild(canvas);
-      printContainer.appendChild(canvasWrapper);
-
-      canvas.mozPrintCallback = function(obj) {
-        var ctx = obj.context;
-
-        ctx.save();
-        ctx.fillStyle = 'rgb(255, 255, 255)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.restore();
-
-        var renderContext = {
-          canvasContext: ctx,
-          transform: [PRINT_UNITS, 0, 0, PRINT_UNITS, 0, 0],
-          viewport: viewport,
-          intent: 'print'
-        };
-
-        pdfPage.render(renderContext).promise.then(function() {
-          // Tell the printEngine that rendering this canvas/page has finished.
-          obj.done();
-        }, function(error) {
-          console.error(error);
-          // Tell the printEngine that rendering this canvas/page has failed.
-          // This will make the print process stop.
-          if ('abort' in obj) {
-            obj.abort();
-          } else {
-            obj.done();
-          }
-        });
-      };
-    },
   };
 
   return PDFPageView;
@@ -3495,6 +3442,13 @@ var PDFViewer = (function pdfViewer() {
     },
 
     /**
+     * @returns {boolean} true if all {PDFPageView} objects are initialized.
+     */
+    get pageViewsReady() {
+      return this._pageViewsReady;
+    },
+
+    /**
      * @returns {number}
      */
     get currentPageNumber() {
@@ -3642,6 +3596,7 @@ var PDFViewer = (function pdfViewer() {
       });
       this.pagesPromise = pagesPromise;
       pagesPromise.then(function () {
+        self._pageViewsReady = true;
         self.eventBus.dispatch('pagesloaded', {
           source: self,
           pagesCount: pagesCount
@@ -3747,6 +3702,7 @@ var PDFViewer = (function pdfViewer() {
       this._location = null;
       this._pagesRotation = 0;
       this._pagesRequests = [];
+      this._pageViewsReady = false;
 
       var container = this.viewer;
       while (container.hasChildNodes()) {
@@ -4207,6 +4163,17 @@ var PDFViewer = (function pdfViewer() {
 
     setFindController: function (findController) {
       this.findController = findController;
+    },
+
+    /**
+     * Returns sizes of the pages.
+     * @returns {Array} Array of objects with width/height fields.
+     */
+    getPagesOverview: function () {
+      return this._pages.map(function (pageView) {
+        var viewport = pageView.pdfPage.getViewport(1);
+        return {width: viewport.width, height: viewport.height};
+      });
     },
   };
 
