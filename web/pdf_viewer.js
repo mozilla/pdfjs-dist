@@ -2348,6 +2348,7 @@ var PDFPageView = (function PDFPageViewClosure() {
     this.textLayerFactory = textLayerFactory;
     this.annotationLayerFactory = annotationLayerFactory;
 
+    this.renderTask = null;
     this.renderingState = RenderingStates.INITIAL;
     this.resume = null;
 
@@ -2391,11 +2392,7 @@ var PDFPageView = (function PDFPageViewClosure() {
     },
 
     reset: function PDFPageView_reset(keepZoomLayer, keepAnnotations) {
-      if (this.renderTask) {
-        this.renderTask.cancel();
-      }
-      this.resume = null;
-      this.renderingState = RenderingStates.INITIAL;
+      this.cancelRendering();
 
       var div = this.div;
       div.style.width = Math.floor(this.viewport.width) + 'px';
@@ -2479,6 +2476,20 @@ var PDFPageView = (function PDFPageViewClosure() {
         this.cssTransform(this.zoomLayer.firstChild);
       }
       this.reset(/* keepZoomLayer = */ true, /* keepAnnotations = */ true);
+    },
+
+    cancelRendering: function PDFPageView_cancelRendering() {
+      if (this.renderTask) {
+        this.renderTask.cancel();
+        this.renderTask = null;
+      }
+      this.renderingState = RenderingStates.INITIAL;
+      this.resume = null;
+
+      if (this.textLayer) {
+        this.textLayer.cancel();
+        this.textLayer = null;
+      }
     },
 
     /**
@@ -2576,6 +2587,7 @@ var PDFPageView = (function PDFPageViewClosure() {
     draw: function PDFPageView_draw() {
       if (this.renderingState !== RenderingStates.INITIAL) {
         console.error('Must be in new state before drawing');
+        this.reset(); // Ensure that we reset all state to prevent issues.
       }
 
       this.renderingState = RenderingStates.RUNNING;
@@ -2834,8 +2846,8 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
   function TextLayerBuilder(options) {
     this.textLayerDiv = options.textLayerDiv;
     this.eventBus = options.eventBus || domEvents.getGlobalEventBus();
+    this.textContent = null;
     this.renderingDone = false;
-    this.divContentDone = false;
     this.pageIdx = options.pageIndex;
     this.pageNumber = this.pageIdx + 1;
     this.matches = [];
@@ -2848,6 +2860,9 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
   }
 
   TextLayerBuilder.prototype = {
+    /**
+     * @private
+     */
     _finishRendering: function TextLayerBuilder_finishRendering() {
       this.renderingDone = true;
 
@@ -2859,7 +2874,8 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
 
       this.eventBus.dispatch('textlayerrendered', {
         source: this,
-        pageNumber: this.pageNumber
+        pageNumber: this.pageNumber,
+        numTextDivs: this.textDivs.length,
       });
     },
 
@@ -2869,14 +2885,10 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
      *   for specified amount of ms.
      */
     render: function TextLayerBuilder_render(timeout) {
-      if (!this.divContentDone || this.renderingDone) {
+      if (!this.textContent || this.renderingDone) {
         return;
       }
-
-      if (this.textLayerRenderTask) {
-        this.textLayerRenderTask.cancel();
-        this.textLayerRenderTask = null;
-      }
+      this.cancel();
 
       this.textDivs = [];
       var textLayerFrag = document.createDocumentFragment();
@@ -2893,17 +2905,23 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
         this._finishRendering();
         this.updateMatches();
       }.bind(this), function (reason) {
-        // canceled or failed to render text layer -- skipping errors
+        // cancelled or failed to render text layer -- skipping errors
       });
     },
 
-    setTextContent: function TextLayerBuilder_setTextContent(textContent) {
+    /**
+     * Cancels rendering of the text layer.
+     */
+    cancel: function TextLayerBuilder_cancel() {
       if (this.textLayerRenderTask) {
         this.textLayerRenderTask.cancel();
         this.textLayerRenderTask = null;
       }
+    },
+
+    setTextContent: function TextLayerBuilder_setTextContent(textContent) {
+      this.cancel();
       this.textContent = textContent;
-      this.divContentDone = true;
     },
 
     convertMatches: function TextLayerBuilder_convertMatches(matches,
@@ -3106,6 +3124,7 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
       var div = this.textLayerDiv;
       var self = this;
       var expandDivsTimer = null;
+
       div.addEventListener('mousedown', function (e) {
         if (self.enhanceTextSelection && self.textLayerRenderTask) {
           self.textLayerRenderTask.expandTextDivs(true);
@@ -3133,10 +3152,13 @@ var TextLayerBuilder = (function TextLayerBuilderClosure() {
         }
         end.classList.add('active');
       });
+
       div.addEventListener('mouseup', function (e) {
         if (self.enhanceTextSelection && self.textLayerRenderTask) {
           expandDivsTimer = setTimeout(function() {
-            self.textLayerRenderTask.expandTextDivs(false);
+            if (self.textLayerRenderTask) {
+              self.textLayerRenderTask.expandTextDivs(false);
+            }
             expandDivsTimer = null;
           }, EXPAND_DIVS_TIMEOUT);
           return;
@@ -3579,6 +3601,7 @@ var PDFViewer = (function pdfViewer() {
      */
     setDocument: function (pdfDocument) {
       if (this.pdfDocument) {
+        this._cancelRendering();
         this._resetView();
       }
 
@@ -3704,10 +3727,8 @@ var PDFViewer = (function pdfViewer() {
       this._pagesRequests = [];
       this._pageViewsReady = false;
 
-      var container = this.viewer;
-      while (container.hasChildNodes()) {
-        container.removeChild(container.lastChild);
-      }
+      // Remove the pages from the DOM.
+      this.viewer.textContent = '';
     },
 
     _scrollUpdate: function PDFViewer_scrollUpdate() {
@@ -4076,6 +4097,17 @@ var PDFViewer = (function pdfViewer() {
         if (this._pages[i] &&
             this._pages[i].renderingState !== RenderingStates.FINISHED) {
           this._pages[i].reset();
+        }
+      }
+    },
+
+    /**
+     * @private
+     */
+    _cancelRendering: function PDFViewer_cancelRendering() {
+      for (var i = 0, ii = this._pages.length; i < ii; i++) {
+        if (this._pages[i]) {
+          this._pages[i].cancelRendering();
         }
       }
     },
