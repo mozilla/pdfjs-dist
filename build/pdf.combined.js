@@ -24,8 +24,8 @@
 }(this, function (exports) {
   // Use strict in our context only - users might not want it
   'use strict';
-  var pdfjsVersion = '1.6.242';
-  var pdfjsBuild = 'ea5949f';
+  var pdfjsVersion = '1.6.244';
+  var pdfjsBuild = '2e20000';
   var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
   var pdfjsLibs = {};
   (function pdfjsWrapper() {
@@ -25741,6 +25741,7 @@
       var isSpace = sharedUtil.isSpace;
       var Dict = corePrimitives.Dict;
       var isDict = corePrimitives.isDict;
+      var isStream = corePrimitives.isStream;
       var Jbig2Image = coreJbig2.Jbig2Image;
       var JpegImage = coreJpg.JpegImage;
       var JpxImage = coreJpx.JpxImage;
@@ -27067,7 +27068,7 @@
        * DecodeStreams.
        */
       var JpegStream = function JpegStreamClosure() {
-        function JpegStream(stream, maybeLength, dict) {
+        function JpegStream(stream, maybeLength, dict, params) {
           // Some images may contain 'junk' before the SOI (start-of-image) marker.
           // Note: this seems to mainly affect inline images.
           var ch;
@@ -27082,6 +27083,7 @@
           this.stream = stream;
           this.maybeLength = maybeLength;
           this.dict = dict;
+          this.params = params;
           DecodeStream.call(this, maybeLength);
         }
         JpegStream.prototype = Object.create(DecodeStream.prototype);
@@ -27117,9 +27119,8 @@
             }
           }
           // Fetching the 'ColorTransform' entry, if it exists.
-          var decodeParams = this.dict.get('DecodeParms', 'DP');
-          if (isDict(decodeParams)) {
-            var colorTransform = decodeParams.get('ColorTransform');
+          if (isDict(this.params)) {
+            var colorTransform = this.params.get('ColorTransform');
             if (isInt(colorTransform)) {
               jpegImage.colorTransform = colorTransform;
             }
@@ -27144,10 +27145,11 @@
        * the stream behaves like all the other DecodeStreams.
        */
       var JpxStream = function JpxStreamClosure() {
-        function JpxStream(stream, maybeLength, dict) {
+        function JpxStream(stream, maybeLength, dict, params) {
           this.stream = stream;
           this.maybeLength = maybeLength;
           this.dict = dict;
+          this.params = params;
           DecodeStream.call(this, maybeLength);
         }
         JpxStream.prototype = Object.create(DecodeStream.prototype);
@@ -27202,10 +27204,11 @@
        * the stream behaves like all the other DecodeStreams.
        */
       var Jbig2Stream = function Jbig2StreamClosure() {
-        function Jbig2Stream(stream, maybeLength, dict) {
+        function Jbig2Stream(stream, maybeLength, dict, params) {
           this.stream = stream;
           this.maybeLength = maybeLength;
           this.dict = dict;
+          this.params = params;
           DecodeStream.call(this, maybeLength);
         }
         Jbig2Stream.prototype = Object.create(DecodeStream.prototype);
@@ -27222,23 +27225,16 @@
           }
           var jbig2Image = new Jbig2Image();
           var chunks = [];
-          var decodeParams = this.dict.getArray('DecodeParms', 'DP');
-          // According to the PDF specification, DecodeParms can be either
-          // a dictionary, or an array whose elements are dictionaries.
-          if (isArray(decodeParams)) {
-            if (decodeParams.length > 1) {
-              warn('JBIG2 - \'DecodeParms\' array with multiple elements ' + 'not supported.');
+          if (isDict(this.params)) {
+            var globalsStream = this.params.get('JBIG2Globals');
+            if (isStream(globalsStream)) {
+              var globals = globalsStream.getBytes();
+              chunks.push({
+                data: globals,
+                start: 0,
+                end: globals.length
+              });
             }
-            decodeParams = decodeParams[0];
-          }
-          if (decodeParams && decodeParams.has('JBIG2Globals')) {
-            var globalsStream = decodeParams.get('JBIG2Globals');
-            var globals = globalsStream.getBytes();
-            chunks.push({
-              data: globals,
-              start: 0,
-              end: globals.length
-            });
           }
           chunks.push({
             data: this.bytes,
@@ -39806,6 +39802,9 @@
             var filter = dict.get('Filter', 'F');
             var params = dict.get('DecodeParms', 'DP');
             if (isName(filter)) {
+              if (isArray(params)) {
+                params = params[0];
+              }
               return this.makeFilter(stream, filter.name, length, params);
             }
             var maybeLength = length;
@@ -39861,11 +39860,11 @@
               }
               if (name === 'DCTDecode' || name === 'DCT') {
                 xrefStreamStats[StreamType.DCT] = true;
-                return new JpegStream(stream, maybeLength, stream.dict);
+                return new JpegStream(stream, maybeLength, stream.dict, params);
               }
               if (name === 'JPXDecode' || name === 'JPX') {
                 xrefStreamStats[StreamType.JPX] = true;
-                return new JpxStream(stream, maybeLength, stream.dict);
+                return new JpxStream(stream, maybeLength, stream.dict, params);
               }
               if (name === 'ASCII85Decode' || name === 'A85') {
                 xrefStreamStats[StreamType.A85] = true;
@@ -39885,7 +39884,7 @@
               }
               if (name === 'JBIG2Decode') {
                 xrefStreamStats[StreamType.JBIG] = true;
-                return new Jbig2Stream(stream, maybeLength, stream.dict);
+                return new Jbig2Stream(stream, maybeLength, stream.dict, params);
               }
               warn('filter "' + name + '" not supported yet');
               return stream;
