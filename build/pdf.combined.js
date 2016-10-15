@@ -24,8 +24,8 @@
 }(this, function (exports) {
   // Use strict in our context only - users might not want it
   'use strict';
-  var pdfjsVersion = '1.6.239';
-  var pdfjsBuild = 'f209030';
+  var pdfjsVersion = '1.6.242';
+  var pdfjsBuild = 'ea5949f';
   var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
   var pdfjsLibs = {};
   (function pdfjsWrapper() {
@@ -21098,6 +21098,7 @@
           this.map = Object.create(null);
           this.xref = xref;
           this.objId = null;
+          this.suppressEncryption = false;
           this.__nonSerializable__ = nonSerializable;
         }
         // disable cloning of the Dict
@@ -21108,42 +21109,42 @@
           // automatically dereferences Ref objects
           get: function Dict_get(key1, key2, key3) {
             var value;
-            var xref = this.xref;
+            var xref = this.xref, suppressEncryption = this.suppressEncryption;
             if (typeof (value = this.map[key1]) !== 'undefined' || key1 in this.map || typeof key2 === 'undefined') {
-              return xref ? xref.fetchIfRef(value) : value;
+              return xref ? xref.fetchIfRef(value, suppressEncryption) : value;
             }
             if (typeof (value = this.map[key2]) !== 'undefined' || key2 in this.map || typeof key3 === 'undefined') {
-              return xref ? xref.fetchIfRef(value) : value;
+              return xref ? xref.fetchIfRef(value, suppressEncryption) : value;
             }
             value = this.map[key3] || null;
-            return xref ? xref.fetchIfRef(value) : value;
+            return xref ? xref.fetchIfRef(value, suppressEncryption) : value;
           },
           // Same as get(), but returns a promise and uses fetchIfRefAsync().
           getAsync: function Dict_getAsync(key1, key2, key3) {
             var value;
-            var xref = this.xref;
+            var xref = this.xref, suppressEncryption = this.suppressEncryption;
             if (typeof (value = this.map[key1]) !== 'undefined' || key1 in this.map || typeof key2 === 'undefined') {
               if (xref) {
-                return xref.fetchIfRefAsync(value);
+                return xref.fetchIfRefAsync(value, suppressEncryption);
               }
               return Promise.resolve(value);
             }
             if (typeof (value = this.map[key2]) !== 'undefined' || key2 in this.map || typeof key3 === 'undefined') {
               if (xref) {
-                return xref.fetchIfRefAsync(value);
+                return xref.fetchIfRefAsync(value, suppressEncryption);
               }
               return Promise.resolve(value);
             }
             value = this.map[key3] || null;
             if (xref) {
-              return xref.fetchIfRefAsync(value);
+              return xref.fetchIfRefAsync(value, suppressEncryption);
             }
             return Promise.resolve(value);
           },
           // Same as get(), but dereferences all elements if the result is an Array.
           getArray: function Dict_getArray(key1, key2, key3) {
             var value = this.get(key1, key2, key3);
-            var xref = this.xref;
+            var xref = this.xref, suppressEncryption = this.suppressEncryption;
             if (!isArray(value) || !xref) {
               return value;
             }
@@ -21153,7 +21154,7 @@
               if (!isRef(value[i])) {
                 continue;
               }
-              value[i] = xref.fetch(value[i]);
+              value[i] = xref.fetch(value[i], suppressEncryption);
             }
             return value;
           },
@@ -34454,11 +34455,12 @@
       var PasswordException = sharedUtil.PasswordException;
       var PasswordResponses = sharedUtil.PasswordResponses;
       var bytesToString = sharedUtil.bytesToString;
+      var warn = sharedUtil.warn;
       var error = sharedUtil.error;
+      var assert = sharedUtil.assert;
       var isInt = sharedUtil.isInt;
       var stringToBytes = sharedUtil.stringToBytes;
       var utf8StringToString = sharedUtil.utf8StringToString;
-      var warn = sharedUtil.warn;
       var Name = corePrimitives.Name;
       var isName = corePrimitives.isName;
       var isDict = corePrimitives.isDict;
@@ -38306,6 +38308,8 @@
               var cfDict = dict.get('CF');
               var streamCryptoName = dict.get('StmF');
               if (isDict(cfDict) && isName(streamCryptoName)) {
+                cfDict.suppressEncryption = true;
+                // See comment below.
                 var handlerDict = cfDict.get(streamCryptoName.name);
                 keyLength = handlerDict && handlerDict.get('Length') || 128;
                 if (keyLength < 40) {
@@ -38364,7 +38368,15 @@
           }
           this.encryptionKey = encryptionKey;
           if (algorithm >= 4) {
-            this.cf = dict.get('CF');
+            var cf = dict.get('CF');
+            if (isDict(cf)) {
+              // The 'CF' dictionary itself should not be encrypted, and by setting
+              // `suppressEncryption` we can prevent an infinite loop inside of
+              // `XRef_fetchUncompressed` if the dictionary contains indirect objects
+              // (fixes issue7665.pdf).
+              cf.suppressEncryption = true;
+            }
+            this.cf = cf;
             this.stmf = dict.get('StmF') || identityName;
             this.strf = dict.get('StrF') || identityName;
             this.eff = dict.get('EFF') || this.stmf;
@@ -38390,6 +38402,7 @@
           return hash.subarray(0, Math.min(encryptionKey.length + 5, 16));
         }
         function buildCipherConstructor(cf, name, num, gen, key) {
+          assert(isName(name), 'Invalid crypt filter name.');
           var cryptFilter = cf.get(name.name);
           var cfm;
           if (cryptFilter !== null && cryptFilter !== undefined) {
@@ -53809,6 +53822,11 @@
             if (encrypt) {
               var ids = trailerDict.get('ID');
               var fileId = ids && ids.length ? ids[0] : '';
+              // The 'Encrypt' dictionary itself should not be encrypted, and by
+              // setting `suppressEncryption` we can prevent an infinite loop inside
+              // of `XRef_fetchUncompressed` if the dictionary contains indirect
+              // objects (fixes issue7665.pdf).
+              encrypt.suppressEncryption = true;
               this.encrypt = new CipherTransformFactory(encrypt, fileId, this.password);
             }
             // get the root dictionary (catalog) object
@@ -54241,11 +54259,11 @@
             }
             return null;
           },
-          fetchIfRef: function XRef_fetchIfRef(obj) {
+          fetchIfRef: function XRef_fetchIfRef(obj, suppressEncryption) {
             if (!isRef(obj)) {
               return obj;
             }
-            return this.fetch(obj);
+            return this.fetch(obj, suppressEncryption);
           },
           fetch: function XRef_fetch(ref, suppressEncryption) {
             assert(isRef(ref), 'ref object is not a reference');
@@ -54351,11 +54369,11 @@
             }
             return xrefEntry;
           },
-          fetchIfRefAsync: function XRef_fetchIfRefAsync(obj) {
+          fetchIfRefAsync: function XRef_fetchIfRefAsync(obj, suppressEncryption) {
             if (!isRef(obj)) {
               return Promise.resolve(obj);
             }
-            return this.fetchAsync(obj);
+            return this.fetchAsync(obj, suppressEncryption);
           },
           fetchAsync: function XRef_fetchAsync(ref, suppressEncryption) {
             var streamManager = this.stream.manager;
