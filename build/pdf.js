@@ -24,8 +24,8 @@
 }(this, function (exports) {
   // Use strict in our context only - users might not want it
   'use strict';
-  var pdfjsVersion = '1.6.248';
-  var pdfjsBuild = '1369997';
+  var pdfjsVersion = '1.6.250';
+  var pdfjsBuild = '960e344';
   var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
   var pdfjsLibs = {};
   (function pdfjsWrapper() {
@@ -9004,9 +9004,9 @@
        * Page getTextContent parameters.
        *
        * @typedef {Object} getTextContentParameters
-       * @param {boolean} normalizeWhitespace - replaces all occurrences of
+       * @property {boolean} normalizeWhitespace - replaces all occurrences of
        *   whitespace with standard spaces (0x20). The default value is `false`.
-       * @param {boolean} disableCombineTextItems - do not attempt to combine
+       * @property {boolean} disableCombineTextItems - do not attempt to combine
        *   same line {@link TextItem}'s. The default value is `false`.
        */
       /**
@@ -9014,8 +9014,7 @@
        *
        * @typedef {Object} TextContent
        * @property {array} items - array of {@link TextItem}
-       * @property {Object} styles - {@link TextStyles} objects, indexed by font
-       *                    name.
+       * @property {Object} styles - {@link TextStyles} objects, indexed by font name.
        */
       /**
        * Page text content part.
@@ -9041,10 +9040,10 @@
        * Page annotation parameters.
        *
        * @typedef {Object} GetAnnotationsParameters
-       * @param {string} intent - Determines the annotations that will be fetched,
-       *                 can be either 'display' (viewable annotations) or 'print'
-       *                 (printable annotations).
-       *                 If the parameter is omitted, all annotations are fetched.
+       * @property {string} intent - Determines the annotations that will be fetched,
+       *                    can be either 'display' (viewable annotations) or 'print'
+       *                    (printable annotations).
+       *                    If the parameter is omitted, all annotations are fetched.
        */
       /**
        * Page render parameters.
