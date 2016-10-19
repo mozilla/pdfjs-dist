@@ -24,8 +24,8 @@
 }(this, function (exports) {
   // Use strict in our context only - users might not want it
   'use strict';
-  var pdfjsVersion = '1.6.258';
-  var pdfjsBuild = '6906623';
+  var pdfjsVersion = '1.6.263';
+  var pdfjsBuild = '7e392c0';
   var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
   var pdfjsLibs = {};
   (function pdfjsWrapper() {
@@ -320,28 +320,40 @@
         var other = new URL(otherUrl, base);
         return base.origin === other.origin;
       }
-      // Validates if URL is safe and allowed, e.g. to avoid XSS.
-      function isValidUrl(url, allowRelative) {
-        if (!url || typeof url !== 'string') {
+      // Checks if URLs use one of the whitelisted protocols, e.g. to avoid XSS.
+      function isValidProtocol(url) {
+        if (!url) {
           return false;
         }
-        // RFC 3986 (http://tools.ietf.org/html/rfc3986#section-3.1)
-        // scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-        var protocol = /^[a-z][a-z0-9+\-.]*(?=:)/i.exec(url);
-        if (!protocol) {
-          return allowRelative;
-        }
-        protocol = protocol[0].toLowerCase();
-        switch (protocol) {
-        case 'http':
-        case 'https':
-        case 'ftp':
-        case 'mailto':
-        case 'tel':
+        switch (url.protocol) {
+        case 'http:':
+        case 'https:':
+        case 'ftp:':
+        case 'mailto:':
+        case 'tel:':
           return true;
         default:
           return false;
         }
+      }
+      /**
+       * Attempts to create a valid absolute URL (utilizing `isValidProtocol`).
+       * @param {URL|string} url - An absolute, or relative, URL.
+       * @param {URL|string} baseUrl - An absolute URL.
+       * @returns Either a valid {URL}, or `null` otherwise.
+       */
+      function createValidAbsoluteUrl(url, baseUrl) {
+        if (!url) {
+          return null;
+        }
+        try {
+          var absoluteUrl = baseUrl ? new URL(url, baseUrl) : new URL(url);
+          if (isValidProtocol(absoluteUrl)) {
+            return absoluteUrl;
+          }
+        } catch (ex) {
+        }
+        return null;
       }
       function shadow(obj, prop, value) {
         Object.defineProperty(obj, prop, {
@@ -2449,7 +2461,7 @@
       exports.isString = isString;
       exports.isSpace = isSpace;
       exports.isSameOrigin = isSameOrigin;
-      exports.isValidUrl = isValidUrl;
+      exports.createValidAbsoluteUrl = createValidAbsoluteUrl;
       exports.isLittleEndian = isLittleEndian;
       exports.isEvalSupported = isEvalSupported;
       exports.loadJpegStream = loadJpegStream;
@@ -2472,6 +2484,8 @@
     }(this, function (exports, sharedUtil) {
       var removeNullCharacters = sharedUtil.removeNullCharacters;
       var warn = sharedUtil.warn;
+      var deprecated = sharedUtil.deprecated;
+      var createValidAbsoluteUrl = sharedUtil.createValidAbsoluteUrl;
       /**
        * Optimised CSS custom property getter/setter.
        * @class
@@ -2650,9 +2664,15 @@
           return true;
         }
       }
+      function isValidUrl(url, allowRelative) {
+        deprecated('isValidUrl(), please use createValidAbsoluteUrl() instead.');
+        var baseUrl = allowRelative ? 'http://example.com' : null;
+        return createValidAbsoluteUrl(url, baseUrl) !== null;
+      }
       exports.CustomStyle = CustomStyle;
       exports.addLinkAttributes = addLinkAttributes;
       exports.isExternalLinkTargetSet = isExternalLinkTargetSet;
+      exports.isValidUrl = isValidUrl;
       exports.getFilenameFromUrl = getFilenameFromUrl;
       exports.LinkTarget = LinkTarget;
       exports.hasCanvasTypedArrays = hasCanvasTypedArrays;
@@ -8539,6 +8559,9 @@
        *   2^16 = 65536.
        * @property {PDFWorker}  worker - The worker that will be used for the loading
        *   and parsing of the PDF data.
+       * @property {string} docBaseUrl - (optional) The base URL of the document,
+       *   used when attempting to recover valid absolute URLs for annotations, and
+       *   outline items, that (incorrectly) only specify relative URLs.
        */
       /**
        * @typedef {Object} PDFDocumentStats
@@ -8693,7 +8716,8 @@
           cMapPacked: getDefaultSetting('cMapPacked'),
           disableFontFace: getDefaultSetting('disableFontFace'),
           disableCreateObjectURL: getDefaultSetting('disableCreateObjectURL'),
-          postMessageTransfers: getDefaultSetting('postMessageTransfers') && !isPostMessageTransfersDisabled
+          postMessageTransfers: getDefaultSetting('postMessageTransfers') && !isPostMessageTransfersDisabled,
+          docBaseUrl: source.docBaseUrl
         }).then(function (workerId) {
           if (worker.destroyed) {
             throw new Error('Worker was destroyed');
@@ -10339,7 +10363,7 @@
       PDFJS.VERBOSITY_LEVELS = sharedUtil.VERBOSITY_LEVELS;
       PDFJS.OPS = sharedUtil.OPS;
       PDFJS.UNSUPPORTED_FEATURES = sharedUtil.UNSUPPORTED_FEATURES;
-      PDFJS.isValidUrl = sharedUtil.isValidUrl;
+      PDFJS.isValidUrl = displayDOMUtils.isValidUrl;
       PDFJS.shadow = sharedUtil.shadow;
       PDFJS.createBlob = sharedUtil.createBlob;
       PDFJS.createObjectURL = function PDFJS_createObjectURL(data, contentType) {
@@ -10545,7 +10569,8 @@
   exports.UnexpectedResponseException = pdfjsLibs.pdfjsSharedUtil.UnexpectedResponseException;
   exports.OPS = pdfjsLibs.pdfjsSharedUtil.OPS;
   exports.UNSUPPORTED_FEATURES = pdfjsLibs.pdfjsSharedUtil.UNSUPPORTED_FEATURES;
-  exports.isValidUrl = pdfjsLibs.pdfjsSharedUtil.isValidUrl;
+  exports.isValidUrl = pdfjsLibs.pdfjsDisplayDOMUtils.isValidUrl;
+  exports.createValidAbsoluteUrl = pdfjsLibs.pdfjsSharedUtil.createValidAbsoluteUrl;
   exports.createObjectURL = pdfjsLibs.pdfjsSharedUtil.createObjectURL;
   exports.removeNullCharacters = pdfjsLibs.pdfjsSharedUtil.removeNullCharacters;
   exports.shadow = pdfjsLibs.pdfjsSharedUtil.shadow;

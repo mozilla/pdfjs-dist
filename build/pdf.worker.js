@@ -24,8 +24,8 @@
 }(this, function (exports) {
   // Use strict in our context only - users might not want it
   'use strict';
-  var pdfjsVersion = '1.6.258';
-  var pdfjsBuild = '6906623';
+  var pdfjsVersion = '1.6.263';
+  var pdfjsBuild = '7e392c0';
   var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
   var pdfjsLibs = {};
   (function pdfjsWrapper() {
@@ -3877,28 +3877,40 @@
         var other = new URL(otherUrl, base);
         return base.origin === other.origin;
       }
-      // Validates if URL is safe and allowed, e.g. to avoid XSS.
-      function isValidUrl(url, allowRelative) {
-        if (!url || typeof url !== 'string') {
+      // Checks if URLs use one of the whitelisted protocols, e.g. to avoid XSS.
+      function isValidProtocol(url) {
+        if (!url) {
           return false;
         }
-        // RFC 3986 (http://tools.ietf.org/html/rfc3986#section-3.1)
-        // scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-        var protocol = /^[a-z][a-z0-9+\-.]*(?=:)/i.exec(url);
-        if (!protocol) {
-          return allowRelative;
-        }
-        protocol = protocol[0].toLowerCase();
-        switch (protocol) {
-        case 'http':
-        case 'https':
-        case 'ftp':
-        case 'mailto':
-        case 'tel':
+        switch (url.protocol) {
+        case 'http:':
+        case 'https:':
+        case 'ftp:':
+        case 'mailto:':
+        case 'tel:':
           return true;
         default:
           return false;
         }
+      }
+      /**
+       * Attempts to create a valid absolute URL (utilizing `isValidProtocol`).
+       * @param {URL|string} url - An absolute, or relative, URL.
+       * @param {URL|string} baseUrl - An absolute URL.
+       * @returns Either a valid {URL}, or `null` otherwise.
+       */
+      function createValidAbsoluteUrl(url, baseUrl) {
+        if (!url) {
+          return null;
+        }
+        try {
+          var absoluteUrl = baseUrl ? new URL(url, baseUrl) : new URL(url);
+          if (isValidProtocol(absoluteUrl)) {
+            return absoluteUrl;
+          }
+        } catch (ex) {
+        }
+        return null;
       }
       function shadow(obj, prop, value) {
         Object.defineProperty(obj, prop, {
@@ -6006,7 +6018,7 @@
       exports.isString = isString;
       exports.isSpace = isSpace;
       exports.isSameOrigin = isSameOrigin;
-      exports.isValidUrl = isValidUrl;
+      exports.createValidAbsoluteUrl = createValidAbsoluteUrl;
       exports.isLittleEndian = isLittleEndian;
       exports.isEvalSupported = isEvalSupported;
       exports.loadJpegStream = loadJpegStream;
@@ -45331,13 +45343,14 @@
       var error = sharedUtil.error;
       var info = sharedUtil.info;
       var isArray = sharedUtil.isArray;
+      var isBool = sharedUtil.isBool;
       var isInt = sharedUtil.isInt;
       var isString = sharedUtil.isString;
       var shadow = sharedUtil.shadow;
       var stringToPDFString = sharedUtil.stringToPDFString;
       var stringToUTF8String = sharedUtil.stringToUTF8String;
       var warn = sharedUtil.warn;
-      var isValidUrl = sharedUtil.isValidUrl;
+      var createValidAbsoluteUrl = sharedUtil.createValidAbsoluteUrl;
       var Util = sharedUtil.Util;
       var Ref = corePrimitives.Ref;
       var RefSet = corePrimitives.RefSet;
@@ -45434,23 +45447,15 @@
                 continue;
               }
               assert(outlineDict.has('Title'), 'Invalid outline item');
-              var actionDict = outlineDict.get('A'), dest = null, url = null;
-              if (actionDict) {
-                var destEntry = actionDict.get('D');
-                if (destEntry) {
-                  dest = destEntry;
-                } else {
-                  var uriEntry = actionDict.get('URI');
-                  if (isString(uriEntry) && isValidUrl(uriEntry, false)) {
-                    url = uriEntry;
-                  }
-                }
-              } else if (outlineDict.has('Dest')) {
-                dest = outlineDict.getRaw('Dest');
-                if (isName(dest)) {
-                  dest = dest.name;
-                }
-              }
+              var data = {
+                url: null,
+                dest: null
+              };
+              Catalog.parseDestDictionary({
+                destDict: outlineDict,
+                resultObj: data,
+                docBaseUrl: this.pdfManager.docBaseUrl
+              });
               var title = outlineDict.get('Title');
               var flags = outlineDict.get('F') || 0;
               var color = outlineDict.getArray('C'), rgbColor = blackColor;
@@ -45459,8 +45464,9 @@
                 rgbColor = ColorSpace.singletons.rgb.getRgb(color, 0);
               }
               var outlineItem = {
-                dest: dest,
-                url: url,
+                dest: data.dest,
+                url: data.url,
+                newWindow: data.newWindow,
                 title: stringToPDFString(title),
                 color: rgbColor,
                 count: outlineDict.get('Count'),
@@ -45845,6 +45851,124 @@
               });
             }
             return next(pageRef);
+          }
+        };
+        /**
+         * Helper function used to parse the contents of destination dictionaries.
+         * @param {Dict} destDict - The dictionary containing the destination.
+         * @param {Object} resultObj - The object where the parsed destination
+         *   properties will be placed.
+         * @param {string} docBaseUrl - (optional) The document base URL that is used
+         *   when attempting to recover valid absolute URLs from relative ones.
+         */
+        Catalog.parseDestDictionary = function Catalog_parseDestDictionary(params) {
+          // Lets URLs beginning with 'www.' default to using the 'http://' protocol.
+          function addDefaultProtocolToUrl(url) {
+            if (url.indexOf('www.') === 0) {
+              return 'http://' + url;
+            }
+            return url;
+          }
+          // According to ISO 32000-1:2008, section 12.6.4.7, URIs should be encoded
+          // in 7-bit ASCII. Some bad PDFs use UTF-8 encoding, see Bugzilla 1122280.
+          function tryConvertUrlEncoding(url) {
+            try {
+              return stringToUTF8String(url);
+            } catch (e) {
+              return url;
+            }
+          }
+          var destDict = params.destDict;
+          if (!isDict(destDict)) {
+            warn('Catalog_parseDestDictionary: "destDict" must be a dictionary.');
+            return;
+          }
+          var resultObj = params.resultObj;
+          if (typeof resultObj !== 'object') {
+            warn('Catalog_parseDestDictionary: "resultObj" must be an object.');
+            return;
+          }
+          var docBaseUrl = params.docBaseUrl || null;
+          var action = destDict.get('A'), url, dest;
+          if (isDict(action)) {
+            var linkType = action.get('S').name;
+            switch (linkType) {
+            case 'URI':
+              url = action.get('URI');
+              if (isName(url)) {
+                // Some bad PDFs do not put parentheses around relative URLs.
+                url = '/' + url.name;
+              } else if (isString(url)) {
+                url = addDefaultProtocolToUrl(url);
+              }
+              // TODO: pdf spec mentions urls can be relative to a Base
+              // entry in the dictionary.
+              break;
+            case 'GoTo':
+              dest = action.get('D');
+              break;
+            case 'GoToR':
+              var urlDict = action.get('F');
+              if (isDict(urlDict)) {
+                // We assume that we found a FileSpec dictionary
+                // and fetch the URL without checking any further.
+                url = urlDict.get('F') || null;
+              } else if (isString(urlDict)) {
+                url = urlDict;
+              }
+              // NOTE: the destination is relative to the *remote* document.
+              var remoteDest = action.get('D');
+              if (remoteDest) {
+                if (isName(remoteDest)) {
+                  remoteDest = remoteDest.name;
+                }
+                if (isString(url)) {
+                  var baseUrl = url.split('#')[0];
+                  if (isString(remoteDest)) {
+                    // In practice, a named destination may contain only a number.
+                    // If that happens, use the '#nameddest=' form to avoid the link
+                    // redirecting to a page, instead of the correct destination.
+                    url = baseUrl + '#' + (/^\d+$/.test(remoteDest) ? 'nameddest=' : '') + remoteDest;
+                  } else if (isArray(remoteDest)) {
+                    url = baseUrl + '#' + JSON.stringify(remoteDest);
+                  }
+                }
+              }
+              // The 'NewWindow' property, equal to `LinkTarget.BLANK`.
+              var newWindow = action.get('NewWindow');
+              if (isBool(newWindow)) {
+                resultObj.newWindow = newWindow;
+              }
+              break;
+            case 'Named':
+              var namedAction = action.get('N');
+              if (isName(namedAction)) {
+                resultObj.action = namedAction.name;
+              }
+              break;
+            default:
+              warn('Catalog_parseDestDictionary: Unrecognized link type "' + linkType + '".');
+              break;
+            }
+          } else if (destDict.has('Dest')) {
+            // Simple destination link.
+            dest = destDict.get('Dest');
+          }
+          if (isString(url)) {
+            url = tryConvertUrlEncoding(url);
+            var absoluteUrl = createValidAbsoluteUrl(url, docBaseUrl);
+            if (absoluteUrl) {
+              resultObj.url = absoluteUrl.href;
+            }
+            resultObj.unsafeUrl = url;
+          }
+          if (dest) {
+            if (isName(dest)) {
+              dest = dest.name;
+            }
+            if (isString(dest) || isArray(dest)) {
+              resultObj.dest = dest;
+            }
           }
         };
         return Catalog;
@@ -50954,14 +51078,11 @@
       var AnnotationType = sharedUtil.AnnotationType;
       var OPS = sharedUtil.OPS;
       var Util = sharedUtil.Util;
-      var isBool = sharedUtil.isBool;
       var isString = sharedUtil.isString;
       var isArray = sharedUtil.isArray;
       var isInt = sharedUtil.isInt;
-      var isValidUrl = sharedUtil.isValidUrl;
       var stringToBytes = sharedUtil.stringToBytes;
       var stringToPDFString = sharedUtil.stringToPDFString;
-      var stringToUTF8String = sharedUtil.stringToUTF8String;
       var warn = sharedUtil.warn;
       var Dict = corePrimitives.Dict;
       var isDict = corePrimitives.isDict;
@@ -50969,6 +51090,7 @@
       var isRef = corePrimitives.isRef;
       var Stream = coreStream.Stream;
       var ColorSpace = coreColorSpace.ColorSpace;
+      var Catalog = coreObj.Catalog;
       var ObjectLoader = coreObj.ObjectLoader;
       var FileSpec = coreObj.FileSpec;
       var OperatorList = coreEvaluator.OperatorList;
@@ -50983,11 +51105,12 @@
         /**
          * @param {XRef} xref
          * @param {Object} ref
+         * @param {PDFManager} pdfManager
          * @param {string} uniquePrefix
          * @param {Object} idCounters
          * @returns {Annotation}
          */
-        create: function AnnotationFactory_create(xref, ref, uniquePrefix, idCounters) {
+        create: function AnnotationFactory_create(xref, ref, pdfManager, uniquePrefix, idCounters) {
           var dict = xref.fetchIfRef(ref);
           if (!isDict(dict)) {
             return;
@@ -51002,7 +51125,8 @@
             dict: dict,
             ref: isRef(ref) ? ref : null,
             subtype: subtype,
-            id: id
+            id: id,
+            pdfManager: pdfManager
           };
           switch (subtype) {
           case 'Link':
@@ -51669,95 +51793,13 @@
       var LinkAnnotation = function LinkAnnotationClosure() {
         function LinkAnnotation(params) {
           Annotation.call(this, params);
-          var dict = params.dict;
           var data = this.data;
           data.annotationType = AnnotationType.LINK;
-          var action = dict.get('A'), url, dest;
-          if (action && isDict(action)) {
-            var linkType = action.get('S').name;
-            switch (linkType) {
-            case 'URI':
-              url = action.get('URI');
-              if (isName(url)) {
-                // Some bad PDFs do not put parentheses around relative URLs.
-                url = '/' + url.name;
-              } else if (url) {
-                url = addDefaultProtocolToUrl(url);
-              }
-              // TODO: pdf spec mentions urls can be relative to a Base
-              // entry in the dictionary.
-              break;
-            case 'GoTo':
-              dest = action.get('D');
-              break;
-            case 'GoToR':
-              var urlDict = action.get('F');
-              if (isDict(urlDict)) {
-                // We assume that we found a FileSpec dictionary
-                // and fetch the URL without checking any further.
-                url = urlDict.get('F') || null;
-              } else if (isString(urlDict)) {
-                url = urlDict;
-              }
-              // NOTE: the destination is relative to the *remote* document.
-              var remoteDest = action.get('D');
-              if (remoteDest) {
-                if (isName(remoteDest)) {
-                  remoteDest = remoteDest.name;
-                }
-                if (isString(url)) {
-                  var baseUrl = url.split('#')[0];
-                  if (isString(remoteDest)) {
-                    // In practice, a named destination may contain only a number.
-                    // If that happens, use the '#nameddest=' form to avoid the link
-                    // redirecting to a page, instead of the correct destination.
-                    url = baseUrl + '#' + (/^\d+$/.test(remoteDest) ? 'nameddest=' : '') + remoteDest;
-                  } else if (isArray(remoteDest)) {
-                    url = baseUrl + '#' + JSON.stringify(remoteDest);
-                  }
-                }
-              }
-              // The 'NewWindow' property, equal to `LinkTarget.BLANK`.
-              var newWindow = action.get('NewWindow');
-              if (isBool(newWindow)) {
-                data.newWindow = newWindow;
-              }
-              break;
-            case 'Named':
-              data.action = action.get('N').name;
-              break;
-            default:
-              warn('unrecognized link type: ' + linkType);
-            }
-          } else if (dict.has('Dest')) {
-            // Simple destination link.
-            dest = dict.get('Dest');
-          }
-          if (url) {
-            if (isValidUrl(url, /* allowRelative = */
-              false)) {
-              data.url = tryConvertUrlEncoding(url);
-            }
-          }
-          if (dest) {
-            data.dest = isName(dest) ? dest.name : dest;
-          }
-        }
-        // Lets URLs beginning with 'www.' default to using the 'http://' protocol.
-        function addDefaultProtocolToUrl(url) {
-          if (isString(url) && url.indexOf('www.') === 0) {
-            return 'http://' + url;
-          }
-          return url;
-        }
-        function tryConvertUrlEncoding(url) {
-          // According to ISO 32000-1:2008, section 12.6.4.7, URIs should be encoded
-          // in 7-bit ASCII. Some bad PDFs use UTF-8 encoding, see Bugzilla 1122280.
-          try {
-            return stringToUTF8String(url);
-          } catch (e) {
-            return url;
-          }
+          Catalog.parseDestDictionary({
+            destDict: params.dict,
+            resultObj: data,
+            docBaseUrl: params.pdfManager.docBaseUrl
+          });
         }
         Util.inherit(LinkAnnotation, Annotation, {});
         return LinkAnnotation;
@@ -52107,7 +52149,7 @@
             var annotationFactory = new AnnotationFactory();
             for (var i = 0, n = annotationRefs.length; i < n; ++i) {
               var annotationRef = annotationRefs[i];
-              var annotation = annotationFactory.create(this.xref, annotationRef, this.uniquePrefix, this.idCounters);
+              var annotation = annotationFactory.create(this.xref, annotationRef, this.pdfManager, this.uniquePrefix, this.idCounters);
               if (annotation) {
                 annotations.push(annotation);
               }
@@ -52378,6 +52420,9 @@
     (function (root, factory) {
       factory(root.pdfjsCorePdfManager = {}, root.pdfjsSharedUtil, root.pdfjsCoreStream, root.pdfjsCoreChunkedStream, root.pdfjsCoreDocument);
     }(this, function (exports, sharedUtil, coreStream, coreChunkedStream, coreDocument) {
+      var warn = sharedUtil.warn;
+      var createValidAbsoluteUrl = sharedUtil.createValidAbsoluteUrl;
+      var shadow = sharedUtil.shadow;
       var NotImplementedException = sharedUtil.NotImplementedException;
       var MissingDataException = sharedUtil.MissingDataException;
       var createPromiseCapability = sharedUtil.createPromiseCapability;
@@ -52392,6 +52437,18 @@
         BasePdfManager.prototype = {
           get docId() {
             return this._docId;
+          },
+          get docBaseUrl() {
+            var docBaseUrl = null;
+            if (this._docBaseUrl) {
+              var absoluteUrl = createValidAbsoluteUrl(this._docBaseUrl);
+              if (absoluteUrl) {
+                docBaseUrl = absoluteUrl.href;
+              } else {
+                warn('Invalid absolute docBaseUrl: "' + this._docBaseUrl + '".');
+              }
+            }
+            return shadow(this, 'docBaseUrl', docBaseUrl);
           },
           onLoadedStream: function BasePdfManager_onLoadedStream() {
             throw new NotImplementedException();
@@ -52440,8 +52497,9 @@
         return BasePdfManager;
       }();
       var LocalPdfManager = function LocalPdfManagerClosure() {
-        function LocalPdfManager(docId, data, password, evaluatorOptions) {
+        function LocalPdfManager(docId, data, password, evaluatorOptions, docBaseUrl) {
           this._docId = docId;
+          this._docBaseUrl = docBaseUrl;
           this.evaluatorOptions = evaluatorOptions;
           var stream = new Stream(data);
           this.pdfDocument = new PDFDocument(this, stream, password);
@@ -52481,8 +52539,9 @@
         return LocalPdfManager;
       }();
       var NetworkPdfManager = function NetworkPdfManagerClosure() {
-        function NetworkPdfManager(docId, pdfNetworkStream, args, evaluatorOptions) {
+        function NetworkPdfManager(docId, pdfNetworkStream, args, evaluatorOptions, docBaseUrl) {
           this._docId = docId;
+          this._docBaseUrl = docBaseUrl;
           this.msgHandler = args.msgHandler;
           this.evaluatorOptions = evaluatorOptions;
           var params = {
@@ -52861,6 +52920,7 @@
           var cancelXHRs = null;
           var WorkerTasks = [];
           var docId = docParams.docId;
+          var docBaseUrl = docParams.docBaseUrl;
           var workerHandlerName = docParams.docId + '_worker';
           var handler = new MessageHandler(workerHandlerName, docId, port);
           // Ensure that postMessage transfers are correctly enabled/disabled,
@@ -52914,7 +52974,7 @@
             var source = data.source;
             if (source.data) {
               try {
-                pdfManager = new LocalPdfManager(docId, source.data, source.password, evaluatorOptions);
+                pdfManager = new LocalPdfManager(docId, source.data, source.password, evaluatorOptions, docBaseUrl);
                 pdfManagerCapability.resolve(pdfManager);
               } catch (ex) {
                 pdfManagerCapability.reject(ex);
@@ -52957,7 +53017,7 @@
                 length: fullRequest.contentLength,
                 disableAutoFetch: disableAutoFetch,
                 rangeChunkSize: source.rangeChunkSize
-              }, evaluatorOptions);
+              }, evaluatorOptions, docBaseUrl);
               pdfManagerCapability.resolve(pdfManager);
               cancelXHRs = null;
             }).catch(function (reason) {
@@ -52972,7 +53032,7 @@
               }
               // the data is array, instantiating directly from it
               try {
-                pdfManager = new LocalPdfManager(docId, pdfFile, source.password, evaluatorOptions);
+                pdfManager = new LocalPdfManager(docId, pdfFile, source.password, evaluatorOptions, docBaseUrl);
                 pdfManagerCapability.resolve(pdfManager);
               } catch (ex) {
                 pdfManagerCapability.reject(ex);
