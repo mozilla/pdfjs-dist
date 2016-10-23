@@ -24,8 +24,8 @@
 }(this, function (exports) {
   // Use strict in our context only - users might not want it
   'use strict';
-  var pdfjsVersion = '1.6.263';
-  var pdfjsBuild = '7e392c0';
+  var pdfjsVersion = '1.6.264';
+  var pdfjsBuild = '47a1c77';
   var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
   var pdfjsLibs = {};
   (function pdfjsWrapper() {
