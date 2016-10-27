@@ -24,8 +24,8 @@
 }(this, function (exports) {
   // Use strict in our context only - users might not want it
   'use strict';
-  var pdfjsVersion = '1.6.268';
-  var pdfjsBuild = 'a28a710';
+  var pdfjsVersion = '1.6.271';
+  var pdfjsBuild = 'abc417c';
   var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
   var pdfjsLibs = {};
   (function pdfjsWrapper() {
@@ -32837,7 +32837,7 @@
               if (this.data.action) {
                 this._bindNamedAction(link, this.data.action);
               } else {
-                this._bindLink(link, this.data.dest || null);
+                this._bindLink(link, this.data.dest);
               }
             }
             this.container.appendChild(link);
