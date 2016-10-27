@@ -1861,11 +1861,12 @@
                   mode: params.pagemode
                 });
               }
-            } else if (isPageNumber(hash)) {
-              // Page number.
-              this.page = hash | 0;
             } else {
               // Named (or explicit) destination.
+              if (isPageNumber(hash) && hash <= this.pagesCount) {
+                console.warn('PDFLinkService_setHash: specifying a page number ' + 'directly after the hash symbol (#) is deprecated, ' + 'please use the "#page=' + hash + '" form instead.');
+                this.page = hash | 0;
+              }
               dest = unescape(hash);
               try {
                 dest = JSON.parse(dest);
