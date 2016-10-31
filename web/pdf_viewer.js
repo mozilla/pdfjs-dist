@@ -2096,6 +2096,7 @@
           var renderInteractiveForms = options.renderInteractiveForms || false;
           this.id = id;
           this.renderingId = 'page' + id;
+          this.pageLabel = null;
           this.rotation = 0;
           this.scale = scale || DEFAULT_SCALE;
           this.viewport = defaultViewport;
@@ -2494,6 +2495,17 @@
               self.onBeforeDraw();
             }
             return promise;
+          },
+          /**
+           * @param {string|null} label
+           */
+          setPageLabel: function PDFView_setPageLabel(label) {
+            this.pageLabel = typeof label === 'string' ? label : null;
+            if (this.pageLabel !== null) {
+              this.div.setAttribute('data-page-label', this.pageLabel);
+            } else {
+              this.div.removeAttribute('data-page-label');
+            }
           }
         };
         return PDFPageView;
@@ -3100,7 +3112,8 @@
             }
             var arg = {
               source: this,
-              pageNumber: val
+              pageNumber: val,
+              pageLabel: this._pageLabels && this._pageLabels[val - 1]
             };
             this._currentPageNumber = val;
             this.eventBus.dispatch('pagechanging', arg);
@@ -3108,6 +3121,27 @@
             if (resetCurrentPageView) {
               this._resetCurrentPageView();
             }
+          },
+          /**
+           * @returns {string|null} Returns the current page label,
+           *                        or `null` if no page labels exist.
+           */
+          get currentPageLabel() {
+            return this._pageLabels && this._pageLabels[this._currentPageNumber - 1];
+          },
+          /**
+           * @param {string} val - The page label.
+           */
+          set currentPageLabel(val) {
+            var pageNumber = val | 0;
+            // Fallback page number.
+            if (this._pageLabels) {
+              var i = this._pageLabels.indexOf(val);
+              if (i >= 0) {
+                pageNumber = i + 1;
+              }
+            }
+            this.currentPageNumber = pageNumber;
           },
           /**
            * @returns {number}
@@ -3279,11 +3313,34 @@
               }
             }.bind(this));
           },
+          /**
+           * @param {Array|null} labels
+           */
+          setPageLabels: function PDFViewer_setPageLabels(labels) {
+            if (!this.pdfDocument) {
+              return;
+            }
+            if (!labels) {
+              this._pageLabels = null;
+            } else if (!(labels instanceof Array && this.pdfDocument.numPages === labels.length)) {
+              this._pageLabels = null;
+              console.error('PDFViewer_setPageLabels: Invalid page labels.');
+            } else {
+              this._pageLabels = labels;
+            }
+            // Update all the `PDFPageView` instances.
+            for (var i = 0, ii = this._pages.length; i < ii; i++) {
+              var pageView = this._pages[i];
+              var label = this._pageLabels && this._pageLabels[i];
+              pageView.setPageLabel(label);
+            }
+          },
           _resetView: function () {
             this._pages = [];
             this._currentPageNumber = 1;
             this._currentScale = UNKNOWN_SCALE;
             this._currentScaleValue = null;
+            this._pageLabels = null;
             this._buffer = new PDFPageViewBuffer(DEFAULT_CACHE_SIZE);
             this._location = null;
             this._pagesRotation = 0;
