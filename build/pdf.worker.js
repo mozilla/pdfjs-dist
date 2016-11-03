@@ -24,8 +24,8 @@
 }(this, function (exports) {
   // Use strict in our context only - users might not want it
   'use strict';
-  var pdfjsVersion = '1.6.302';
-  var pdfjsBuild = '1d82521';
+  var pdfjsVersion = '1.6.304';
+  var pdfjsBuild = 'b4100ba';
   var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
   var pdfjsLibs = {};
   (function pdfjsWrapper() {
@@ -6848,9 +6848,9 @@
               } else if (value >= 251 && value <= 254) {
                 return -((value - 251) * 256) - dict[pos++] - 108;
               } else {
-                error('255 is not a valid DICT command');
+                warn('CFFParser_parseDict: "' + value + '" is a reserved command.');
+                return NaN;
               }
-              return -1;
             }
             function parseFloatOperand() {
               var str = '';
@@ -7489,19 +7489,22 @@
             if (!(key in this.keyToNameMap)) {
               return false;
             }
+            var valueLength = value.length;
             // ignore empty values
-            if (value.length === 0) {
+            if (valueLength === 0) {
               return true;
+            }
+            // Ignore invalid values (fixes bug1068432.pdf and bug1308536.pdf).
+            for (var i = 0; i < valueLength; i++) {
+              if (isNaN(value[i])) {
+                warn('Invalid CFFDict value: "' + value + '" for key "' + key + '".');
+                return true;
+              }
             }
             var type = this.types[key];
             // remove the array wrapping these types of values
             if (type === 'num' || type === 'sid' || type === 'offset') {
               value = value[0];
-              // Ignore invalid values (fixes bug 1068432).
-              if (isNaN(value)) {
-                warn('Invalid CFFDict value: ' + value + ', for key: ' + key + '.');
-                return true;
-              }
             }
             this.values[key] = value;
             return true;
