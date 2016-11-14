@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.317';
- var pdfjsBuild = '7ec8adc';
+ var pdfjsVersion = '1.6.319';
+ var pdfjsBuild = '7f6a607';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -50093,6 +50093,9 @@
       return false;
      }
      var networkManager = this._manager;
+     if (!networkManager.isHttp) {
+      return false;
+     }
      var fullRequestXhrId = this._fullRequestId;
      var fullRequestXhr = networkManager.getRequestXhr(fullRequestXhrId);
      if (fullRequestXhr.getResponseHeader('Accept-Ranges') !== 'bytes') {
