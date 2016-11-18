@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.324';
- var pdfjsBuild = 'f6a8d9c';
+ var pdfjsVersion = '1.6.327';
+ var pdfjsBuild = 'eaf9bff';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -24541,6 +24541,7 @@
       svg.setAttributeNS(null, 'version', '1.1');
       svg.setAttributeNS(null, 'width', viewport.width + 'px');
       svg.setAttributeNS(null, 'height', viewport.height + 'px');
+      svg.setAttributeNS(null, 'preserveAspectRatio', 'none');
       svg.setAttributeNS(null, 'viewBox', '0 0 ' + viewport.width + ' ' + viewport.height);
       var definitions = document.createElementNS(NS, 'svg:defs');
       svg.appendChild(definitions);
