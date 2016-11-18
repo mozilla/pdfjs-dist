@@ -195,6 +195,8 @@
    var CSS_UNITS = 96.0 / 72.0;
    var DEFAULT_SCALE_VALUE = 'auto';
    var DEFAULT_SCALE = 1.0;
+   var MIN_SCALE = 0.25;
+   var MAX_SCALE = 10.0;
    var UNKNOWN_SCALE = 0;
    var MAX_AUTO_SCALE = 1.25;
    var SCROLLBAR_PADDING = 40;
@@ -451,6 +453,22 @@
     }
     return delta;
    }
+   var animationStarted = new Promise(function (resolve) {
+    window.requestAnimationFrame(resolve);
+   });
+   var localized = new Promise(function (resolve, reject) {
+    if (!mozL10n) {
+     reject(new Error('mozL10n service is not available.'));
+     return;
+    }
+    if (mozL10n.getReadyState() !== 'loading') {
+     resolve();
+     return;
+    }
+    window.addEventListener('localized', function localized(evt) {
+     resolve();
+    });
+   });
    var EventBus = function EventBusClosure() {
     function EventBus() {
      this._listeners = Object.create(null);
@@ -549,6 +567,8 @@
    exports.CSS_UNITS = CSS_UNITS;
    exports.DEFAULT_SCALE_VALUE = DEFAULT_SCALE_VALUE;
    exports.DEFAULT_SCALE = DEFAULT_SCALE;
+   exports.MIN_SCALE = MIN_SCALE;
+   exports.MAX_SCALE = MAX_SCALE;
    exports.UNKNOWN_SCALE = UNKNOWN_SCALE;
    exports.MAX_AUTO_SCALE = MAX_AUTO_SCALE;
    exports.SCROLLBAR_PADDING = SCROLLBAR_PADDING;
@@ -567,6 +587,8 @@
    exports.watchScroll = watchScroll;
    exports.binarySearchFirstItem = binarySearchFirstItem;
    exports.normalizeWheelEventDelta = normalizeWheelEventDelta;
+   exports.animationStarted = animationStarted;
+   exports.localized = localized;
   }));
   (function (root, factory) {
    factory(root.pdfjsWebDOMEvents = {}, root.pdfjsWebUIUtils);
