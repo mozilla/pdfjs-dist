@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.320';
- var pdfjsBuild = '7f678e3';
+ var pdfjsVersion = '1.6.322';
+ var pdfjsBuild = '043cea2';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -47447,7 +47447,7 @@
            argsLength--;
           }
           while (argsLength < numArgs && nonProcessedArgs.length !== 0) {
-           if (!args) {
+           if (args === null) {
             args = [];
            }
            args.unshift(nonProcessedArgs.pop());
@@ -47455,12 +47455,14 @@
           }
          }
          if (argsLength < numArgs) {
-          info('Command ' + fn + ': because expected ' + numArgs + ' args, but received ' + argsLength + ' args; skipping');
-          args = null;
+          warn('Skipping command ' + fn + ': expected ' + numArgs + ' args, but received ' + argsLength + ' args.');
+          if (args !== null) {
+           args.length = 0;
+          }
           continue;
          }
         } else if (argsLength > numArgs) {
-         info('Command ' + fn + ': expected [0,' + numArgs + '] args, but received ' + argsLength + ' args');
+         info('Command ' + fn + ': expected [0,' + numArgs + '] args, but received ' + argsLength + ' args.');
         }
         this.preprocessCommand(fn, args);
         operation.fn = fn;
@@ -47471,7 +47473,7 @@
          return false;
         }
         if (obj !== null) {
-         if (!args) {
+         if (args === null) {
           args = [];
          }
          args.push(obj);
