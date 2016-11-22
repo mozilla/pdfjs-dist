@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.334';
- var pdfjsBuild = '787d887';
+ var pdfjsVersion = '1.6.336';
+ var pdfjsBuild = '9d8fb02';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -20458,6 +20458,10 @@
     t['ArialBlack-Bold'] = 'Helvetica-Bold';
     t['ArialBlack-BoldItalic'] = 'Helvetica-BoldOblique';
     t['ArialBlack-Italic'] = 'Helvetica-Oblique';
+    t['Arial-Black'] = 'Helvetica';
+    t['Arial-Black-Bold'] = 'Helvetica-Bold';
+    t['Arial-Black-BoldItalic'] = 'Helvetica-BoldOblique';
+    t['Arial-Black-Italic'] = 'Helvetica-Oblique';
     t['Arial'] = 'Helvetica';
     t['Arial-Bold'] = 'Helvetica-Bold';
     t['Arial-BoldItalic'] = 'Helvetica-BoldOblique';
@@ -37617,7 +37621,7 @@
        for (charCode in GlyphMapForStandardFonts) {
         map[+charCode] = GlyphMapForStandardFonts[charCode];
        }
-       if (/ArialBlack/i.test(name)) {
+       if (/Arial-?Black/i.test(name)) {
         var SupplementalGlyphMapForArialBlack = getSupplementalGlyphMapForArialBlack();
         for (charCode in SupplementalGlyphMapForArialBlack) {
          map[+charCode] = SupplementalGlyphMapForArialBlack[charCode];

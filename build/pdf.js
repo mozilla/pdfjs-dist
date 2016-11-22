@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.334';
- var pdfjsBuild = '787d887';
+ var pdfjsVersion = '1.6.336';
+ var pdfjsBuild = '9d8fb02';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -6745,7 +6745,7 @@
        return;
       }
       var name = fontObj.loadedName || 'sans-serif';
-      var bold = fontObj.black ? fontObj.bold ? '900' : 'bold' : fontObj.bold ? 'bold' : 'normal';
+      var bold = fontObj.black ? '900' : fontObj.bold ? 'bold' : 'normal';
       var italic = fontObj.italic ? 'italic' : 'normal';
       var typeface = '"' + name + '", ' + fontObj.fallbackName;
       var browserFontSize = size < MIN_FONT_SIZE ? MIN_FONT_SIZE : size > MAX_FONT_SIZE ? MAX_FONT_SIZE : size;
