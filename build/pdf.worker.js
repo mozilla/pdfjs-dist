@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.336';
- var pdfjsBuild = '9d8fb02';
+ var pdfjsVersion = '1.6.338';
+ var pdfjsBuild = '9ff1998';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -48467,6 +48467,7 @@
    var info = sharedUtil.info;
    var isArray = sharedUtil.isArray;
    var isArrayBuffer = sharedUtil.isArrayBuffer;
+   var isNum = sharedUtil.isNum;
    var isString = sharedUtil.isString;
    var shadow = sharedUtil.shadow;
    var stringToBytes = sharedUtil.stringToBytes;
@@ -48490,6 +48491,7 @@
    var Annotation = coreAnnotation.Annotation;
    var AnnotationFactory = coreAnnotation.AnnotationFactory;
    var Page = function PageClosure() {
+    var DEFAULT_USER_UNIT = 1.0;
     var LETTER_SIZE_MEDIABOX = [
      0,
      0,
@@ -48549,6 +48551,13 @@
        obj = LETTER_SIZE_MEDIABOX;
       }
       return shadow(this, 'mediaBox', obj);
+     },
+     get userUnit() {
+      var obj = this.getPageProp('UserUnit');
+      if (!isNum(obj) || obj <= 0) {
+       obj = DEFAULT_USER_UNIT;
+      }
+      return shadow(this, 'userUnit', obj);
      },
      get view() {
       var mediaBox = this.mediaBox;
@@ -49633,16 +49642,19 @@
       return pdfManager.getPage(data.pageIndex).then(function (page) {
        var rotatePromise = pdfManager.ensure(page, 'rotate');
        var refPromise = pdfManager.ensure(page, 'ref');
+       var userUnitPromise = pdfManager.ensure(page, 'userUnit');
        var viewPromise = pdfManager.ensure(page, 'view');
        return Promise.all([
         rotatePromise,
         refPromise,
+        userUnitPromise,
         viewPromise
        ]).then(function (results) {
         return {
          rotate: results[0],
          ref: results[1],
-         view: results[2]
+         userUnit: results[2],
+         view: results[3]
         };
        });
       });
