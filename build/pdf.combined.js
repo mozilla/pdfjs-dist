@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.351';
- var pdfjsBuild = '362d20b';
+ var pdfjsVersion = '1.6.353';
+ var pdfjsBuild = '013f69e';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -20539,6 +20539,7 @@
     t['MS-PMincho-Bold'] = 'MS PMincho-Bold';
     t['MS-PMincho-BoldItalic'] = 'MS PMincho-BoldItalic';
     t['MS-PMincho-Italic'] = 'MS PMincho-Italic';
+    t['NuptialScript'] = 'Times-Italic';
     t['Wingdings'] = 'ZapfDingbats';
    });
    var getSerifFonts = getLookupTableFactory(function (t) {
@@ -20639,6 +20640,7 @@
     t['New York'] = true;
     t['Nimbus Roman'] = true;
     t['NPS Rawlinson Roadway'] = true;
+    t['NuptialScript'] = true;
     t['Palatino'] = true;
     t['Perpetua'] = true;
     t['Plantin'] = true;
