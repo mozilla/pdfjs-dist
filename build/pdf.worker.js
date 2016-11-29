@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.353';
- var pdfjsBuild = '013f69e';
+ var pdfjsVersion = '1.6.355';
+ var pdfjsBuild = '451956c';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -46275,8 +46275,13 @@
       if (baseEncodingName) {
        properties.defaultEncoding = getEncoding(baseEncodingName).slice();
       } else {
-       encoding = properties.type === 'TrueType' ? WinAnsiEncoding : StandardEncoding;
-       if (!!(properties.flags & FontFlags.Symbolic)) {
+       var isSymbolicFont = !!(properties.flags & FontFlags.Symbolic);
+       var isNonsymbolicFont = !!(properties.flags & FontFlags.Nonsymbolic);
+       encoding = StandardEncoding;
+       if (properties.type === 'TrueType' && !isNonsymbolicFont) {
+        encoding = WinAnsiEncoding;
+       }
+       if (isSymbolicFont) {
         encoding = MacRomanEncoding;
         if (!properties.file) {
          if (/Symbol/i.test(properties.name)) {
