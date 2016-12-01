@@ -462,7 +462,7 @@
    });
    var localized = new Promise(function (resolve, reject) {
     if (!mozL10n) {
-     reject(new Error('mozL10n service is not available.'));
+     resolve();
      return;
     }
     if (mozL10n.getReadyState() !== 'loading') {
