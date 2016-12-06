@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.366';
- var pdfjsBuild = 'caf8168';
+ var pdfjsVersion = '1.6.370';
+ var pdfjsBuild = '94ddd8f';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -41280,11 +41280,8 @@
       }
      }
      cs = xref.fetchIfRef(cs);
-     var mode;
      if (isName(cs)) {
-      mode = cs.name;
-      this.mode = mode;
-      switch (mode) {
+      switch (cs.name) {
       case 'DeviceGray':
       case 'G':
        return 'DeviceGrayCS';
@@ -41300,11 +41297,10 @@
         null
        ];
       default:
-       error('unrecognized colorspace ' + mode);
+       error('unrecognized colorspace ' + cs.name);
       }
      } else if (isArray(cs)) {
-      mode = xref.fetchIfRef(cs[0]).name;
-      this.mode = mode;
+      var mode = xref.fetchIfRef(cs[0]).name;
       var numComps, params, alt, whitePoint, blackPoint, gamma;
       switch (mode) {
       case 'DeviceGray':
@@ -41387,12 +41383,7 @@
       case 'Separation':
       case 'DeviceN':
        var name = xref.fetchIfRef(cs[1]);
-       numComps = 1;
-       if (isName(name)) {
-        numComps = 1;
-       } else if (isArray(name)) {
-        numComps = name.length;
-       }
+       numComps = isArray(name) ? name.length : 1;
        alt = ColorSpace.parseToIR(cs[2], xref, res);
        var tintFnIR = PDFFunction.getIR(xref, xref.fetchIfRef(cs[3]));
        return [
@@ -41480,22 +41471,16 @@
       var scaled = new Float32Array(numComps);
       var tinted = new Float32Array(baseNumComps);
       var i, j;
-      if (usesZeroToOneRange) {
-       for (i = 0; i < count; i++) {
-        for (j = 0; j < numComps; j++) {
-         scaled[j] = src[srcOffset++] * scale;
-        }
-        tintFn(scaled, 0, tinted, 0);
+      for (i = 0; i < count; i++) {
+       for (j = 0; j < numComps; j++) {
+        scaled[j] = src[srcOffset++] * scale;
+       }
+       tintFn(scaled, 0, tinted, 0);
+       if (usesZeroToOneRange) {
         for (j = 0; j < baseNumComps; j++) {
          baseBuf[pos++] = tinted[j] * 255;
         }
-       }
-      } else {
-       for (i = 0; i < count; i++) {
-        for (j = 0; j < numComps; j++) {
-         scaled[j] = src[srcOffset++] * scale;
-        }
-        tintFn(scaled, 0, tinted, 0);
+       } else {
         base.getRgbItem(tinted, 0, baseBuf, pos);
         pos += baseNumComps;
        }
@@ -41528,27 +41513,25 @@
     function IndexedCS(base, highVal, lookup) {
      this.name = 'Indexed';
      this.numComps = 1;
-     this.defaultColor = new Uint8Array([0]);
+     this.defaultColor = new Uint8Array(this.numComps);
      this.base = base;
      this.highVal = highVal;
      var baseNumComps = base.numComps;
      var length = baseNumComps * highVal;
-     var lookupArray;
      if (isStream(lookup)) {
-      lookupArray = new Uint8Array(length);
+      this.lookup = new Uint8Array(length);
       var bytes = lookup.getBytes(length);
-      lookupArray.set(bytes);
+      this.lookup.set(bytes);
      } else if (isString(lookup)) {
-      lookupArray = new Uint8Array(length);
+      this.lookup = new Uint8Array(length);
       for (var i = 0; i < length; ++i) {
-       lookupArray[i] = lookup.charCodeAt(i);
+       this.lookup[i] = lookup.charCodeAt(i);
       }
      } else if (lookup instanceof Uint8Array || lookup instanceof Array) {
-      lookupArray = lookup;
+      this.lookup = lookup;
      } else {
       error('Unrecognized lookup table: ' + lookup);
      }
-     this.lookup = lookupArray;
     }
     IndexedCS.prototype = {
      getRgb: ColorSpace.prototype.getRgb,
@@ -41584,7 +41567,7 @@
     function DeviceGrayCS() {
      this.name = 'DeviceGray';
      this.numComps = 1;
-     this.defaultColor = new Float32Array([0]);
+     this.defaultColor = new Float32Array(this.numComps);
     }
     DeviceGrayCS.prototype = {
      getRgb: ColorSpace.prototype.getRgb,
@@ -41620,11 +41603,7 @@
     function DeviceRgbCS() {
      this.name = 'DeviceRGB';
      this.numComps = 3;
-     this.defaultColor = new Float32Array([
-      0,
-      0,
-      0
-     ]);
+     this.defaultColor = new Float32Array(this.numComps);
     }
     DeviceRgbCS.prototype = {
      getRgb: ColorSpace.prototype.getRgb,
@@ -41680,12 +41659,8 @@
     function DeviceCmykCS() {
      this.name = 'DeviceCMYK';
      this.numComps = 4;
-     this.defaultColor = new Float32Array([
-      0,
-      0,
-      0,
-      1
-     ]);
+     this.defaultColor = new Float32Array(this.numComps);
+     this.defaultColor[3] = 1;
     }
     DeviceCmykCS.prototype = {
      getRgb: ColorSpace.prototype.getRgb,
@@ -41716,7 +41691,7 @@
     function CalGrayCS(whitePoint, blackPoint, gamma) {
      this.name = 'CalGray';
      this.numComps = 1;
-     this.defaultColor = new Float32Array([0]);
+     this.defaultColor = new Float32Array(this.numComps);
      if (!whitePoint) {
       error('WhitePoint missing - required for color space CalGray');
      }
@@ -41828,7 +41803,7 @@
     function CalRGBCS(whitePoint, blackPoint, gamma, matrix) {
      this.name = 'CalRGB';
      this.numComps = 3;
-     this.defaultColor = new Float32Array(3);
+     this.defaultColor = new Float32Array(this.numComps);
      if (!whitePoint) {
       error('WhitePoint missing - required for color space CalRGB');
      }
@@ -42028,11 +42003,7 @@
     function LabCS(whitePoint, blackPoint, range) {
      this.name = 'Lab';
      this.numComps = 3;
-     this.defaultColor = new Float32Array([
-      0,
-      0,
-      0
-     ]);
+     this.defaultColor = new Float32Array(this.numComps);
      if (!whitePoint) {
       error('WhitePoint missing - required for color space Lab');
      }
