@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.370';
- var pdfjsBuild = '94ddd8f';
+ var pdfjsVersion = '1.6.372';
+ var pdfjsBuild = 'aaec490';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -2715,7 +2715,7 @@
      var chars = '';
      for (var i = 0; i < bytes.length; i += 2) {
       var code = bytes.charCodeAt(i) * 256 + bytes.charCodeAt(i + 1);
-      chars += code >= 32 && code < 127 && code !== 60 && code !== 62 && code !== 38 && false ? String.fromCharCode(code) : '&#x' + (0x10000 + code).toString(16).substring(1) + ';';
+      chars += code >= 32 && code < 127 && code !== 60 && code !== 62 && code !== 38 ? String.fromCharCode(code) : '&#x' + (0x10000 + code).toString(16).substring(1) + ';';
      }
      return '>' + chars;
     });
