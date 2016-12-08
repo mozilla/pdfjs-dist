@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.374';
- var pdfjsBuild = '407dee3';
+ var pdfjsVersion = '1.6.377';
+ var pdfjsBuild = '47f03b6';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -48496,11 +48496,12 @@
      getPageProp: function Page_getPageProp(key) {
       return this.pageDict.get(key);
      },
-     getInheritedPageProp: function Page_getInheritedPageProp(key) {
+     getInheritedPageProp: function Page_getInheritedPageProp(key, getArray) {
       var dict = this.pageDict, valueArray = null, loopCount = 0;
       var MAX_LOOP_COUNT = 100;
+      getArray = getArray || false;
       while (dict) {
-       var value = dict.get(key);
+       var value = getArray ? dict.getArray(key) : dict.get(key);
        if (value) {
         if (!valueArray) {
          valueArray = [];
@@ -48528,11 +48529,18 @@
       return shadow(this, 'resources', this.getInheritedPageProp('Resources'));
      },
      get mediaBox() {
-      var obj = this.getInheritedPageProp('MediaBox');
-      if (!isArray(obj) || obj.length !== 4) {
-       obj = LETTER_SIZE_MEDIABOX;
+      var mediaBox = this.getInheritedPageProp('MediaBox', true);
+      if (!isArray(mediaBox) || mediaBox.length !== 4) {
+       return shadow(this, 'mediaBox', LETTER_SIZE_MEDIABOX);
       }
-      return shadow(this, 'mediaBox', obj);
+      return shadow(this, 'mediaBox', mediaBox);
+     },
+     get cropBox() {
+      var cropBox = this.getInheritedPageProp('CropBox', true);
+      if (!isArray(cropBox) || cropBox.length !== 4) {
+       return shadow(this, 'cropBox', this.mediaBox);
+      }
+      return shadow(this, 'cropBox', cropBox);
      },
      get userUnit() {
       var obj = this.getPageProp('UserUnit');
@@ -48542,16 +48550,12 @@
       return shadow(this, 'userUnit', obj);
      },
      get view() {
-      var mediaBox = this.mediaBox;
-      var cropBox = this.getInheritedPageProp('CropBox');
-      if (!isArray(cropBox) || cropBox.length !== 4) {
+      var mediaBox = this.mediaBox, cropBox = this.cropBox;
+      if (mediaBox === cropBox) {
        return shadow(this, 'view', mediaBox);
       }
-      cropBox = Util.intersect(cropBox, mediaBox);
-      if (!cropBox) {
-       return shadow(this, 'view', mediaBox);
-      }
-      return shadow(this, 'view', cropBox);
+      var intersection = Util.intersect(cropBox, mediaBox);
+      return shadow(this, 'view', intersection || mediaBox);
      },
      get rotate() {
       var rotate = this.getInheritedPageProp('Rotate') || 0;
