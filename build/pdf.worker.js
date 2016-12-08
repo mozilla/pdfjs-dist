@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.372';
- var pdfjsBuild = 'aaec490';
+ var pdfjsVersion = '1.6.374';
+ var pdfjsBuild = '407dee3';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -34617,8 +34617,11 @@
       var filter = dict.get('Filter', 'F'), filterName;
       if (isName(filter)) {
        filterName = filter.name;
-      } else if (isArray(filter) && isName(filter[0])) {
-       filterName = filter[0].name;
+      } else if (isArray(filter)) {
+       var filterZero = this.xref.fetchIfRef(filter[0]);
+       if (isName(filterZero)) {
+        filterName = filterZero.name;
+       }
       }
       var startPos = stream.pos, length, i, ii;
       if (filterName === 'DCTDecode' || filterName === 'DCT') {
@@ -34742,7 +34745,7 @@
       var params = dict.get('DecodeParms', 'DP');
       if (isName(filter)) {
        if (isArray(params)) {
-        params = params[0];
+        params = this.xref.fetchIfRef(params[0]);
        }
        return this.makeFilter(stream, filter.name, length, params);
       }
@@ -34751,13 +34754,13 @@
        var filterArray = filter;
        var paramsArray = params;
        for (var i = 0, ii = filterArray.length; i < ii; ++i) {
-        filter = filterArray[i];
+        filter = this.xref.fetchIfRef(filterArray[i]);
         if (!isName(filter)) {
          error('Bad filter name: ' + filter);
         }
         params = null;
         if (isArray(paramsArray) && i in paramsArray) {
-         params = paramsArray[i];
+         params = this.xref.fetchIfRef(paramsArray[i]);
         }
         stream = this.makeFilter(stream, filter.name, maybeLength, params);
         maybeLength = null;
@@ -34771,9 +34774,6 @@
        return new NullStream(stream);
       }
       try {
-       if (params && this.xref) {
-        params = this.xref.fetchIfRef(params);
-       }
        var xrefStreamStats = this.xref.stats.streamTypes;
        if (name === 'FlateDecode' || name === 'Fl') {
         xrefStreamStats[StreamType.FLATE] = true;
