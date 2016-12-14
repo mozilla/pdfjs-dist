@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.380';
- var pdfjsBuild = '00a006e';
+ var pdfjsVersion = '1.6.396';
+ var pdfjsBuild = '7d8fa13';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -33306,18 +33306,18 @@
    }();
    var CipherTransform = function CipherTransformClosure() {
     function CipherTransform(stringCipherConstructor, streamCipherConstructor) {
-     this.stringCipherConstructor = stringCipherConstructor;
-     this.streamCipherConstructor = streamCipherConstructor;
+     this.StringCipherConstructor = stringCipherConstructor;
+     this.StreamCipherConstructor = streamCipherConstructor;
     }
     CipherTransform.prototype = {
      createStream: function CipherTransform_createStream(stream, length) {
-      var cipher = new this.streamCipherConstructor();
+      var cipher = new this.StreamCipherConstructor();
       return new DecryptStream(stream, length, function cipherTransformDecryptStream(data, finalize) {
        return cipher.decryptBlock(data, finalize);
       });
      },
      decryptString: function CipherTransform_decryptString(s) {
-      var cipher = new this.stringCipherConstructor();
+      var cipher = new this.StringCipherConstructor();
       var data = stringToBytes(s);
       data = cipher.decryptBlock(data, true);
       return bytesToString(data);
@@ -33602,17 +33602,17 @@
        return new NullCipher();
       };
      }
-     if ('V2' === cfm.name) {
+     if (cfm.name === 'V2') {
       return function cipherTransformFactoryBuildCipherConstructorV2() {
        return new ARCFourCipher(buildObjectKey(num, gen, key, false));
       };
      }
-     if ('AESV2' === cfm.name) {
+     if (cfm.name === 'AESV2') {
       return function cipherTransformFactoryBuildCipherConstructorAESV2() {
        return new AES128Cipher(buildObjectKey(num, gen, key, true));
       };
      }
-     if ('AESV3' === cfm.name) {
+     if (cfm.name === 'AESV3') {
       return function cipherTransformFactoryBuildCipherConstructorAESV3() {
        return new AES256Cipher(key);
       };
@@ -39628,6 +39628,7 @@
    function type1FontGlyphMapping(properties, builtInEncoding, glyphNames) {
     var charCodeToGlyphId = Object.create(null);
     var glyphId, charCode, baseEncoding;
+    var isSymbolicFont = !!(properties.flags & FontFlags.Symbolic);
     if (properties.baseEncodingName) {
      baseEncoding = getEncoding(properties.baseEncodingName);
      for (charCode = 0; charCode < baseEncoding.length; charCode++) {
@@ -39638,7 +39639,7 @@
        charCodeToGlyphId[charCode] = 0;
       }
      }
-    } else if (!!(properties.flags & FontFlags.Symbolic)) {
+    } else if (isSymbolicFont) {
      for (charCode in builtInEncoding) {
       charCodeToGlyphId[charCode] = builtInEncoding[charCode];
      }
