@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.412';
- var pdfjsBuild = '33063a4';
+ var pdfjsVersion = '1.6.414';
+ var pdfjsBuild = '3b3a179';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -46071,10 +46071,10 @@
        }
        if (!font.vertical) {
         textChunk.lastAdvanceWidth = width;
-        textChunk.width += width * textChunk.textAdvanceScale;
+        textChunk.width += width;
        } else {
         textChunk.lastAdvanceHeight = height;
-        textChunk.height += Math.abs(height * textChunk.textAdvanceScale);
+        textChunk.height += Math.abs(height);
        }
        return textChunk;
       }
@@ -46095,6 +46095,8 @@
        if (!textContentItem.initialized) {
         return;
        }
+       textContentItem.width *= textContentItem.textAdvanceScale;
+       textContentItem.height *= textContentItem.textAdvanceScale;
        textContent.items.push(runBidiTransform(textContentItem));
        textContentItem.initialized = false;
        textContentItem.str.length = 0;
@@ -46207,16 +46209,16 @@
            advance = items[j] * textState.fontSize / 1000;
            var breakTextRun = false;
            if (textState.font.vertical) {
-            offset = advance * (textState.textHScale * textState.textMatrix[2] + textState.textMatrix[3]);
-            textState.translateTextMatrix(0, advance);
+            offset = advance;
+            textState.translateTextMatrix(0, offset);
             breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
             if (!breakTextRun) {
              textContentItem.height += offset;
             }
            } else {
             advance = -advance;
-            offset = advance * (textState.textHScale * textState.textMatrix[0] + textState.textMatrix[1]);
-            textState.translateTextMatrix(advance, 0);
+            offset = advance * textState.textHScale;
+            textState.translateTextMatrix(offset, 0);
             breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
             if (!breakTextRun) {
              textContentItem.width += offset;
