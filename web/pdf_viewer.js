@@ -1986,7 +1986,7 @@
        }
        if (error === 'cancelled') {
         self.error = null;
-        return;
+        return Promise.resolve(undefined);
        }
        self.renderingState = RenderingStates.FINISHED;
        if (self.loadingIconDiv) {
@@ -2012,21 +2012,25 @@
         pageNumber: self.id,
         cssTransform: false
        });
+       if (error) {
+        return Promise.reject(error);
+       }
+       return Promise.resolve(undefined);
       };
       var paintTask = this.renderer === RendererType.SVG ? this.paintOnSvg(canvasWrapper) : this.paintOnCanvas(canvasWrapper);
       paintTask.onRenderContinue = renderContinueCallback;
       this.paintTask = paintTask;
       var resultPromise = paintTask.promise.then(function () {
-       finishPaintTask(null);
-       if (textLayer) {
-        pdfPage.getTextContent({ normalizeWhitespace: true }).then(function textContentResolved(textContent) {
-         textLayer.setTextContent(textContent);
-         textLayer.render(TEXT_LAYER_RENDER_DELAY);
-        });
-       }
+       return finishPaintTask(null).then(function () {
+        if (textLayer) {
+         pdfPage.getTextContent({ normalizeWhitespace: true }).then(function textContentResolved(textContent) {
+          textLayer.setTextContent(textContent);
+          textLayer.render(TEXT_LAYER_RENDER_DELAY);
+         });
+        }
+       });
       }, function (reason) {
-       finishPaintTask(reason);
-       throw reason;
+       return finishPaintTask(reason);
       });
       if (this.annotationLayerFactory) {
        if (!this.annotationLayer) {
