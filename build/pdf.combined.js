@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.416';
- var pdfjsBuild = '22f0a04';
+ var pdfjsVersion = '1.6.418';
+ var pdfjsBuild = '59afb4b';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -53377,7 +53377,16 @@
          } else if (isRef(entry)) {
           hash.update(entry.toString());
          } else if (isArray(entry)) {
-          hash.update(entry.length.toString());
+          var diffLength = entry.length, diffBuf = new Array(diffLength);
+          for (var j = 0; j < diffLength; j++) {
+           var diffEntry = entry[j];
+           if (isName(diffEntry)) {
+            diffBuf[j] = diffEntry.name;
+           } else if (isNum(diffEntry) || isRef(diffEntry)) {
+            diffBuf[j] = diffEntry.toString();
+           }
+          }
+          hash.update(diffBuf.join());
          }
         }
        }
