@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.419';
- var pdfjsBuild = '4e62562';
+ var pdfjsVersion = '1.6.422';
+ var pdfjsBuild = 'aabfb77';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -43324,12 +43324,12 @@
     return Catalog;
    }();
    var XRef = function XRefClosure() {
-    function XRef(stream, password) {
+    function XRef(stream, pdfManager) {
      this.stream = stream;
+     this.pdfManager = pdfManager;
      this.entries = [];
      this.xrefstms = Object.create(null);
      this.cache = [];
-     this.password = password;
      this.stats = {
       streamTypes: [],
       fontTypes: []
@@ -43350,11 +43350,11 @@
       trailerDict.assignXref(this);
       this.trailer = trailerDict;
       var encrypt = trailerDict.get('Encrypt');
-      if (encrypt) {
+      if (isDict(encrypt)) {
        var ids = trailerDict.get('ID');
        var fileId = ids && ids.length ? ids[0] : '';
        encrypt.suppressEncryption = true;
-       this.encrypt = new CipherTransformFactory(encrypt, fileId, this.password);
+       this.encrypt = new CipherTransformFactory(encrypt, fileId, this.pdfManager.password);
       }
       if (!(this.root = trailerDict.get('Root'))) {
        error('Invalid root reference');
@@ -48887,21 +48887,19 @@
    var PDFDocument = function PDFDocumentClosure() {
     var FINGERPRINT_FIRST_BYTES = 1024;
     var EMPTY_FINGERPRINT = '\x00\x00\x00\x00\x00\x00\x00' + '\x00\x00\x00\x00\x00\x00\x00\x00\x00';
-    function PDFDocument(pdfManager, arg, password) {
+    function PDFDocument(pdfManager, arg) {
+     var stream;
      if (isStream(arg)) {
-      init.call(this, pdfManager, arg, password);
+      stream = arg;
      } else if (isArrayBuffer(arg)) {
-      init.call(this, pdfManager, new Stream(arg), password);
+      stream = new Stream(arg);
      } else {
       error('PDFDocument: Unknown argument type');
      }
-    }
-    function init(pdfManager, stream, password) {
      assert(stream.length > 0, 'stream must have data');
      this.pdfManager = pdfManager;
      this.stream = stream;
-     var xref = new XRef(this.stream, password, pdfManager);
-     this.xref = xref;
+     this.xref = new XRef(stream, pdfManager);
     }
     function find(stream, needle, limit, backwards) {
      var pos = stream.pos;
@@ -49134,6 +49132,9 @@
      get docId() {
       return this._docId;
      },
+     get password() {
+      return this._password;
+     },
      get docBaseUrl() {
       var docBaseUrl = null;
       if (this._docBaseUrl) {
@@ -49177,14 +49178,7 @@
       return new NotImplementedException();
      },
      updatePassword: function BasePdfManager_updatePassword(password) {
-      this.pdfDocument.xref.password = this.password = password;
-      if (this._passwordChangedCapability) {
-       this._passwordChangedCapability.resolve();
-      }
-     },
-     passwordChanged: function BasePdfManager_passwordChanged() {
-      this._passwordChangedCapability = createPromiseCapability();
-      return this._passwordChangedCapability.promise;
+      this._password = password;
      },
      terminate: function BasePdfManager_terminate() {
       return new NotImplementedException();
@@ -49195,10 +49189,11 @@
    var LocalPdfManager = function LocalPdfManagerClosure() {
     function LocalPdfManager(docId, data, password, evaluatorOptions, docBaseUrl) {
      this._docId = docId;
+     this._password = password;
      this._docBaseUrl = docBaseUrl;
      this.evaluatorOptions = evaluatorOptions;
      var stream = new Stream(data);
-     this.pdfDocument = new PDFDocument(this, stream, password);
+     this.pdfDocument = new PDFDocument(this, stream);
      this._loadedStreamCapability = createPromiseCapability();
      this._loadedStreamCapability.resolve(stream);
     }
@@ -49237,6 +49232,7 @@
    var NetworkPdfManager = function NetworkPdfManagerClosure() {
     function NetworkPdfManager(docId, pdfNetworkStream, args, evaluatorOptions, docBaseUrl) {
      this._docId = docId;
+     this._password = args.password;
      this._docBaseUrl = docBaseUrl;
      this.msgHandler = args.msgHandler;
      this.evaluatorOptions = evaluatorOptions;
@@ -49248,7 +49244,7 @@
       rangeChunkSize: args.rangeChunkSize
      };
      this.streamManager = new ChunkedStreamManager(pdfNetworkStream, params);
-     this.pdfDocument = new PDFDocument(this, this.streamManager.getStream(), args.password);
+     this.pdfDocument = new PDFDocument(this, this.streamManager.getStream());
     }
     Util.inherit(NetworkPdfManager, BasePdfManager, {
      ensure: function NetworkPdfManager_ensure(obj, prop, args) {
@@ -49750,18 +49746,23 @@
       };
       return pdfManagerCapability.promise;
      }
-     var setupDoc = function (data) {
-      var onSuccess = function (doc) {
+     function setupDoc(data) {
+      function onSuccess(doc) {
        ensureNotTerminated();
        handler.send('GetDoc', { pdfInfo: doc });
-      };
-      var onFailure = function (e) {
+      }
+      function onFailure(e) {
        if (e instanceof PasswordException) {
-        if (e.code === PasswordResponses.NEED_PASSWORD) {
-         handler.send('NeedPassword', e);
-        } else if (e.code === PasswordResponses.INCORRECT_PASSWORD) {
-         handler.send('IncorrectPassword', e);
-        }
+        var task = new WorkerTask('PasswordException: response ' + e.code);
+        startWorkerTask(task);
+        handler.sendWithPromise('PasswordRequest', e).then(function (data) {
+         finishWorkerTask(task);
+         pdfManager.updatePassword(data.password);
+         pdfManagerReady();
+        }).catch(function (ex) {
+         finishWorkerTask(task);
+         handler.send('PasswordException', ex);
+        }.bind(null, e));
        } else if (e instanceof InvalidPDFException) {
         handler.send('InvalidPDF', e);
        } else if (e instanceof MissingPDFException) {
@@ -49771,7 +49772,22 @@
        } else {
         handler.send('UnknownError', new UnknownErrorException(e.message, e.toString()));
        }
-      };
+      }
+      function pdfManagerReady() {
+       ensureNotTerminated();
+       loadDocument(false).then(onSuccess, function loadFailure(ex) {
+        ensureNotTerminated();
+        if (!(ex instanceof XRefParseException)) {
+         onFailure(ex);
+         return;
+        }
+        pdfManager.requestLoadedStream();
+        pdfManager.onLoadedStream().then(function () {
+         ensureNotTerminated();
+         loadDocument(true).then(onSuccess, onFailure);
+        });
+       }, onFailure);
+      }
       ensureNotTerminated();
       var cMapOptions = {
        url: data.cMapUrl === undefined ? null : data.cMapUrl,
@@ -49793,25 +49809,8 @@
        pdfManager.onLoadedStream().then(function (stream) {
         handler.send('DataLoaded', { length: stream.bytes.byteLength });
        });
-      }).then(function pdfManagerReady() {
-       ensureNotTerminated();
-       loadDocument(false).then(onSuccess, function loadFailure(ex) {
-        ensureNotTerminated();
-        if (!(ex instanceof XRefParseException)) {
-         if (ex instanceof PasswordException) {
-          pdfManager.passwordChanged().then(pdfManagerReady);
-         }
-         onFailure(ex);
-         return;
-        }
-        pdfManager.requestLoadedStream();
-        pdfManager.onLoadedStream().then(function () {
-         ensureNotTerminated();
-         loadDocument(true).then(onSuccess, onFailure);
-        });
-       }, onFailure);
-      }, onFailure);
-     };
+      }).then(pdfManagerReady, onFailure);
+     }
      handler.on('GetPage', function wphSetupGetPage(data) {
       return pdfManager.getPage(data.pageIndex).then(function (page) {
        var rotatePromise = pdfManager.ensure(page, 'rotate');
@@ -49870,9 +49869,6 @@
      });
      handler.on('GetStats', function wphSetupGetStats(data) {
       return pdfManager.pdfDocument.xref.stats;
-     });
-     handler.on('UpdatePassword', function wphSetupUpdatePassword(data) {
-      pdfManager.updatePassword(data);
      });
      handler.on('GetAnnotations', function wphSetupGetAnnotations(data) {
       return pdfManager.getPage(data.pageIndex).then(function (page) {
