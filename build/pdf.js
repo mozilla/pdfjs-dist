@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.424';
- var pdfjsBuild = '049d7fa';
+ var pdfjsVersion = '1.6.426';
+ var pdfjsBuild = '098acb1';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -3805,9 +3805,8 @@
         return new RadioButtonWidgetAnnotationElement(parameters);
        } else if (parameters.data.checkBox) {
         return new CheckboxWidgetAnnotationElement(parameters);
-       } else {
-        warn('Unimplemented button widget annotation: pushbutton');
        }
+       warn('Unimplemented button widget annotation: pushbutton');
        break;
       case 'Ch':
        return new ChoiceWidgetAnnotationElement(parameters);
@@ -8745,9 +8744,8 @@
       var objs = this.objs;
       if (!objs[objId]) {
        return false;
-      } else {
-       return objs[objId].resolved;
       }
+      return objs[objId].resolved;
      },
      hasData: function PDFObjects_hasData(objId) {
       return this.isResolved(objId);
@@ -8756,9 +8754,8 @@
       var objs = this.objs;
       if (!objs[objId] || !objs[objId].resolved) {
        return null;
-      } else {
-       return objs[objId].data;
       }
+      return objs[objId].data;
      },
      clear: function PDFObjects_clear() {
       this.objs = Object.create(null);

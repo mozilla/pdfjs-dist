@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.424';
- var pdfjsBuild = '049d7fa';
+ var pdfjsVersion = '1.6.426';
+ var pdfjsBuild = '098acb1';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -6495,10 +6495,9 @@
         return (value - 247) * 256 + dict[pos++] + 108;
        } else if (value >= 251 && value <= 254) {
         return -((value - 251) * 256) - dict[pos++] - 108;
-       } else {
-        warn('CFFParser_parseDict: "' + value + '" is a reserved command.');
-        return NaN;
        }
+       warn('CFFParser_parseDict: "' + value + '" is a reserved command.');
+       return NaN;
       }
       function parseFloatOperand() {
        var str = '';
@@ -7780,9 +7779,8 @@
      encodeNumber: function CFFCompiler_encodeNumber(value) {
       if (parseFloat(value) === parseInt(value, 10) && !isNaN(value)) {
        return this.encodeInteger(value);
-      } else {
-       return this.encodeFloat(value);
       }
+      return this.encodeFloat(value);
      },
      encodeFloat: function CFFCompiler_encodeFloat(num) {
       var value = num.toString();
@@ -15070,12 +15068,11 @@
         return false;
        }
        return true;
-      } else {
-       if (!this.adobe && this.colorTransform === 1) {
-        return true;
-       }
-       return false;
       }
+      if (!this.adobe && this.colorTransform === 1) {
+       return true;
+      }
+      return false;
      },
      _convertYccToRgb: function convertYccToRgb(data) {
       var Y, Cb, Cr;
@@ -15159,9 +15156,8 @@
        if (this._isColorConversionNeeded()) {
         if (forceRGBoutput) {
          return this._convertYcckToRgb(data);
-        } else {
-         return this._convertYcckToCmyk(data);
         }
+        return this._convertYcckToCmyk(data);
        } else if (forceRGBoutput) {
         return this._convertCmykToRgb(data);
        }
@@ -34415,9 +34411,8 @@
         0
        ];
        return new TrueTypeCompiled(parseGlyfTable(glyf, loca, indexToLocFormat), cmap, fontMatrix);
-      } else {
-       return new Type2Compiled(cff, cmap, font.fontMatrix, font.glyphNameMap);
       }
+      return new Type2Compiled(cff, cmap, font.fontMatrix, font.glyphNameMap);
      }
     };
    }();
@@ -42164,11 +42159,13 @@
      }
     }
     function fn_g(x) {
+     var result;
      if (x >= 6 / 29) {
-      return x * x * x;
+      result = x * x * x;
      } else {
-      return 108 / 841 * (x - 4 / 29);
+      result = 108 / 841 * (x - 4 / 29);
      }
+     return result;
     }
     function decode(value, high1, low2, high2) {
      return low2 + value * (high2 - low2) / high1;
@@ -42250,9 +42247,8 @@
     function handleImageData(image, nativeDecoder) {
      if (nativeDecoder && nativeDecoder.canDecode(image)) {
       return nativeDecoder.decode(image);
-     } else {
-      return Promise.resolve(image);
      }
+     return Promise.resolve(image);
     }
     function decodeAndClamp(value, addend, coefficient, max) {
      value = addend + value * coefficient;
@@ -44004,9 +44000,8 @@
       return dict.get('Mac');
      } else if (dict.has('DOS')) {
       return dict.get('DOS');
-     } else {
-      return null;
      }
+     return null;
     }
     FileSpec.prototype = {
      get filename() {
@@ -45629,9 +45624,8 @@
         pattern = Pattern.parseShading(shading, matrix, xref, resources, this.handler);
         operatorList.addOp(fn, pattern.getIR());
         return Promise.resolve();
-       } else {
-        return Promise.reject('Unknown PatternType: ' + typeNum);
        }
+       return Promise.reject('Unknown PatternType: ' + typeNum);
       }
       operatorList.addOp(fn, args);
       return Promise.resolve();
@@ -47585,17 +47579,16 @@
         operation.fn = fn;
         operation.args = args;
         return true;
-       } else {
-        if (isEOF(obj)) {
-         return false;
+       }
+       if (isEOF(obj)) {
+        return false;
+       }
+       if (obj !== null) {
+        if (args === null) {
+         args = [];
         }
-        if (obj !== null) {
-         if (args === null) {
-          args = [];
-         }
-         args.push(obj);
-         assert(args.length <= 33, 'Too many arguments');
-        }
+        args.push(obj);
+        assert(args.length <= 33, 'Too many arguments');
        }
       }
      },
