@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.428';
- var pdfjsBuild = 'e259bc2';
+ var pdfjsVersion = '1.6.430';
+ var pdfjsBuild = 'f828f07';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -45104,13 +45104,12 @@
      var cs = ColorSpace.parse(dict.get('ColorSpace', 'CS'), xref, res);
      return (cs.numComps === 1 || cs.numComps === 3) && cs.isDefaultDecode(dict.getArray('Decode', 'D'));
     };
-    function PartialEvaluator(pdfManager, xref, handler, pageIndex, uniquePrefix, idCounters, fontCache, options) {
+    function PartialEvaluator(pdfManager, xref, handler, pageIndex, idFactory, fontCache, options) {
      this.pdfManager = pdfManager;
      this.xref = xref;
      this.handler = handler;
      this.pageIndex = pageIndex;
-     this.uniquePrefix = uniquePrefix;
-     this.idCounters = idCounters;
+     this.idFactory = idFactory;
      this.fontCache = fontCache;
      this.options = options || DefaultPartialEvaluatorOptions;
     }
@@ -45273,8 +45272,7 @@
        operatorList.addOp(OPS.paintInlineImageXObject, [imgData]);
        return;
       }
-      var uniquePrefix = this.uniquePrefix || '';
-      var objId = 'img_' + uniquePrefix + ++this.idCounters.obj;
+      var objId = 'img_' + this.idFactory.createObjId();
       operatorList.addDependency(objId);
       args = [
        objId,
@@ -45558,7 +45556,7 @@
        this.fontCache.put(fontRef, fontCapability.promise);
       } else {
        if (!fontID) {
-        fontID = (this.uniquePrefix || 'F_') + ++this.idCounters.obj;
+        fontID = this.idFactory.createObjId();
        }
        this.fontCache.put('id_' + fontID, fontCapability.promise);
       }
@@ -47963,12 +47961,12 @@
    function AnnotationFactory() {
    }
    AnnotationFactory.prototype = {
-    create: function AnnotationFactory_create(xref, ref, pdfManager, uniquePrefix, idCounters) {
+    create: function AnnotationFactory_create(xref, ref, pdfManager, idFactory) {
      var dict = xref.fetchIfRef(ref);
      if (!isDict(dict)) {
       return;
      }
-     var id = isRef(ref) ? ref.toString() : 'annot_' + (uniquePrefix || '') + ++idCounters.obj;
+     var id = isRef(ref) ? ref.toString() : 'annot_' + idFactory.createObjId();
      var subtype = dict.get('Subtype');
      subtype = isName(subtype) ? subtype.name : null;
      var parameters = {
@@ -48668,10 +48666,15 @@
      this.xref = xref;
      this.ref = ref;
      this.fontCache = fontCache;
-     this.uniquePrefix = 'p' + this.pageIndex + '_';
-     this.idCounters = { obj: 0 };
      this.evaluatorOptions = pdfManager.evaluatorOptions;
      this.resourcesPromise = null;
+     var uniquePrefix = 'p' + this.pageIndex + '_';
+     var idCounters = { obj: 0 };
+     this.idFactory = {
+      createObjId: function () {
+       return uniquePrefix + ++idCounters.obj;
+      }
+     };
     }
     Page.prototype = {
      getPageProp: function Page_getPageProp(key) {
@@ -48788,7 +48791,7 @@
        'XObject',
        'Font'
       ]);
-      var partialEvaluator = new PartialEvaluator(pdfManager, this.xref, handler, this.pageIndex, this.uniquePrefix, this.idCounters, this.fontCache, this.evaluatorOptions);
+      var partialEvaluator = new PartialEvaluator(pdfManager, this.xref, handler, this.pageIndex, this.idFactory, this.fontCache, this.evaluatorOptions);
       var dataPromises = Promise.all([
        contentStreamPromise,
        resourcesPromise
@@ -48844,7 +48847,7 @@
       ]);
       return dataPromises.then(function (data) {
        var contentStream = data[0];
-       var partialEvaluator = new PartialEvaluator(pdfManager, self.xref, handler, self.pageIndex, self.uniquePrefix, self.idCounters, self.fontCache, self.evaluatorOptions);
+       var partialEvaluator = new PartialEvaluator(pdfManager, self.xref, handler, self.pageIndex, self.idFactory, self.fontCache, self.evaluatorOptions);
        return partialEvaluator.getTextContent(contentStream, task, self.resources, null, normalizeWhitespace, combineTextItems);
       });
      },
@@ -48867,7 +48870,7 @@
       var annotationFactory = new AnnotationFactory();
       for (var i = 0, n = annotationRefs.length; i < n; ++i) {
        var annotationRef = annotationRefs[i];
-       var annotation = annotationFactory.create(this.xref, annotationRef, this.pdfManager, this.uniquePrefix, this.idCounters);
+       var annotation = annotationFactory.create(this.xref, annotationRef, this.pdfManager, this.idFactory);
        if (annotation) {
         annotations.push(annotation);
        }
