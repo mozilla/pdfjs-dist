@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.440';
- var pdfjsBuild = 'e5cea05';
+ var pdfjsVersion = '1.6.442';
+ var pdfjsBuild = '393740e';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -25876,12 +25876,14 @@
      var inbits = 0, outbits = 0;
      var pos = bufferLength;
      var i;
-     if (bits === 1) {
+     if (bits === 1 && colors === 1) {
       for (i = 0; i < rowBytes; ++i) {
-       var c = rawBytes[i];
-       inbuf = inbuf << 8 | c;
-       buffer[pos++] = (c ^ inbuf >> colors) & 0xFF;
-       inbuf &= 0xFFFF;
+       var c = rawBytes[i] ^ inbuf;
+       c ^= c >> 1;
+       c ^= c >> 2;
+       c ^= c >> 4;
+       inbuf = (c & 1) << 7;
+       buffer[pos++] = c;
       }
      } else if (bits === 8) {
       for (i = 0; i < colors; ++i) {
