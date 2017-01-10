@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.430';
- var pdfjsBuild = 'f828f07';
+ var pdfjsVersion = '1.6.433';
+ var pdfjsBuild = 'ca0ebdf';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -55879,13 +55879,11 @@
       return Promise.resolve();
      },
      requestLoadedStream: function LocalPdfManager_requestLoadedStream() {
-      return;
      },
      onLoadedStream: function LocalPdfManager_onLoadedStream() {
       return this._loadedStreamCapability.promise;
      },
      terminate: function LocalPdfManager_terminate() {
-      return;
      }
     });
     return LocalPdfManager;

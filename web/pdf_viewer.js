@@ -1439,7 +1439,6 @@
          goToDestination(destRef);
         }).catch(function () {
          console.error('PDFLinkService_navigateTo: "' + destRef + '" is not a valid page reference.');
-         return;
         });
        }
       };
