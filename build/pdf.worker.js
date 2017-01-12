@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.449';
- var pdfjsBuild = 'c0d7029';
+ var pdfjsVersion = '1.6.451';
+ var pdfjsBuild = '1fda987';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -39157,7 +39157,7 @@
       }
       var isTrueType = !tables['CFF '];
       if (!isTrueType) {
-       if (header.version === 'OTTO' && properties.type !== 'CIDFontType2' || !tables['head'] || !tables['hhea'] || !tables['maxp'] || !tables['post']) {
+       if (header.version === 'OTTO' && !properties.composite || !tables['head'] || !tables['hhea'] || !tables['maxp'] || !tables['post']) {
         cffFile = new Stream(tables['CFF '].data);
         cff = new CFFFont(cffFile, properties);
         adjustWidths(properties);
@@ -39259,7 +39259,7 @@
        }
        return false;
       }
-      if (properties.type === 'CIDFontType2') {
+      if (properties.composite) {
        var cidToGidMap = properties.cidToGidMap || [];
        var isCidToGidMapEmpty = cidToGidMap.length === 0;
        properties.cMap.forEach(function (charCode, cid) {
