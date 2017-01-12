@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.444';
- var pdfjsBuild = '00ab0ab';
+ var pdfjsVersion = '1.6.446';
+ var pdfjsBuild = '1af35a6';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -5538,7 +5538,7 @@
      return createBidiText(str, isLTR);
     }
     if (startLevel === -1) {
-     if (strLength / numBidi < 0.3) {
+     if (numBidi / strLength < 0.3) {
       isLTR = true;
       startLevel = 0;
      } else {
