@@ -1132,7 +1132,7 @@
       } else {
        updateHistoryWithCurrentHash();
       }
-     }, false);
+     });
      function updateHistoryWithCurrentHash() {
       self.previousHash = window.location.hash.slice(1);
       self._pushToHistory({ hash: self.previousHash }, false, true);
@@ -1163,12 +1163,12 @@
        self._pushToHistory(previousParams, false, replacePrevious);
        self._updatePreviousBookmark();
       }
-      window.removeEventListener('beforeunload', pdfHistoryBeforeUnload, false);
+      window.removeEventListener('beforeunload', pdfHistoryBeforeUnload);
      }
-     window.addEventListener('beforeunload', pdfHistoryBeforeUnload, false);
+     window.addEventListener('beforeunload', pdfHistoryBeforeUnload);
      window.addEventListener('pageshow', function pdfHistoryPageShow(evt) {
-      window.addEventListener('beforeunload', pdfHistoryBeforeUnload, false);
-     }, false);
+      window.addEventListener('beforeunload', pdfHistoryBeforeUnload);
+     });
      self.eventBus.on('presentationmodechanged', function (e) {
       self.isViewerInPresentationMode = e.active;
      });
