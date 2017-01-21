@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.465';
- var pdfjsBuild = 'f8e793f';
+ var pdfjsVersion = '1.6.467';
+ var pdfjsBuild = '54d55e8';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -1663,7 +1663,7 @@
      this._isInvalid = true;
     }
     function IDNAToASCII(h) {
-     if ('' === h) {
+     if (h === '') {
       invalid.call(this);
      }
      return h.toLowerCase();
@@ -1721,7 +1721,7 @@
        case 'scheme':
         if (c && ALPHANUMERIC.test(c)) {
          buffer += c.toLowerCase();
-        } else if (':' === c) {
+        } else if (c === ':') {
          this._scheme = buffer;
          buffer = '';
          if (stateOverride) {
@@ -1730,7 +1730,7 @@
          if (isRelativeScheme(this._scheme)) {
           this._isRelative = true;
          }
-         if ('file' === this._scheme) {
+         if (this._scheme === 'file') {
           state = 'relative';
          } else if (this._isRelative && base && base._scheme === this._scheme) {
           state = 'relative or authority';
@@ -1752,10 +1752,10 @@
         }
         break;
        case 'scheme data':
-        if ('?' === c) {
+        if (c === '?') {
          this._query = '?';
          state = 'query';
-        } else if ('#' === c) {
+        } else if (c === '#') {
          this._fragment = '#';
          state = 'fragment';
         } else {
@@ -1774,7 +1774,7 @@
         }
         break;
        case 'relative or authority':
-        if ('/' === c && '/' === input[cursor + 1]) {
+        if (c === '/' && input[cursor + 1] === '/') {
          state = 'authority ignore slashes';
         } else {
          err('Expected /, got: ' + c);
@@ -1795,12 +1795,12 @@
          this._username = base._username;
          this._password = base._password;
          break loop;
-        } else if ('/' === c || '\\' === c) {
-         if ('\\' === c) {
+        } else if (c === '/' || c === '\\') {
+         if (c === '\\') {
           err('\\ is an invalid code point.');
          }
          state = 'relative slash';
-        } else if ('?' === c) {
+        } else if (c === '?') {
          this._host = base._host;
          this._port = base._port;
          this._path = base._path.slice();
@@ -1808,7 +1808,7 @@
          this._username = base._username;
          this._password = base._password;
          state = 'query';
-        } else if ('#' === c) {
+        } else if (c === '#') {
          this._host = base._host;
          this._port = base._port;
          this._path = base._path.slice();
@@ -1833,11 +1833,11 @@
         }
         break;
        case 'relative slash':
-        if ('/' === c || '\\' === c) {
-         if ('\\' === c) {
+        if (c === '/' || c === '\\') {
+         if (c === '\\') {
           err('\\ is an invalid code point.');
          }
-         if ('file' === this._scheme) {
+         if (this._scheme === 'file') {
           state = 'file host';
          } else {
           state = 'authority ignore slashes';
@@ -1854,7 +1854,7 @@
         }
         break;
        case 'authority first slash':
-        if ('/' === c) {
+        if (c === '/') {
          state = 'authority second slash';
         } else {
          err('Expected \'/\', got: ' + c);
@@ -1878,7 +1878,7 @@
         }
         break;
        case 'authority':
-        if ('@' === c) {
+        if (c === '@') {
          if (seenAt) {
           err('@ already seen.');
           buffer += '%40';
@@ -1886,11 +1886,11 @@
          seenAt = true;
          for (var i = 0; i < buffer.length; i++) {
           var cp = buffer[i];
-          if ('\t' === cp || '\n' === cp || '\r' === cp) {
+          if (cp === '\t' || cp === '\n' || cp === '\r') {
            err('Invalid whitespace in authority.');
            continue;
           }
-          if (':' === cp && null === this._password) {
+          if (cp === ':' && this._password === null) {
            this._password = '';
            continue;
           }
@@ -1902,7 +1902,7 @@
           }
          }
          buffer = '';
-        } else if (EOF === c || '/' === c || '\\' === c || '?' === c || '#' === c) {
+        } else if (c === EOF || c === '/' || c === '\\' || c === '?' || c === '#') {
          cursor -= buffer.length;
          buffer = '';
          state = 'host';
@@ -1912,7 +1912,7 @@
         }
         break;
        case 'file host':
-        if (EOF === c || '/' === c || '\\' === c || '?' === c || '#' === c) {
+        if (c === EOF || c === '/' || c === '\\' || c === '?' || c === '#') {
          if (buffer.length === 2 && ALPHA.test(buffer[0]) && (buffer[1] === ':' || buffer[1] === '|')) {
           state = 'relative path';
          } else if (buffer.length === 0) {
@@ -1923,7 +1923,7 @@
           state = 'relative path start';
          }
          continue;
-        } else if ('\t' === c || '\n' === c || '\r' === c) {
+        } else if (c === '\t' || c === '\n' || c === '\r') {
          err('Invalid whitespace in file host.');
         } else {
          buffer += c;
@@ -1931,14 +1931,14 @@
         break;
        case 'host':
        case 'hostname':
-        if (':' === c && !seenBracket) {
+        if (c === ':' && !seenBracket) {
          this._host = IDNAToASCII.call(this, buffer);
          buffer = '';
          state = 'port';
-         if ('hostname' === stateOverride) {
+         if (stateOverride === 'hostname') {
           break loop;
          }
-        } else if (EOF === c || '/' === c || '\\' === c || '?' === c || '#' === c) {
+        } else if (c === EOF || c === '/' || c === '\\' || c === '?' || c === '#') {
          this._host = IDNAToASCII.call(this, buffer);
          buffer = '';
          state = 'relative path start';
@@ -1947,9 +1947,9 @@
          }
          continue;
         } else if ('\t' !== c && '\n' !== c && '\r' !== c) {
-         if ('[' === c) {
+         if (c === '[') {
           seenBracket = true;
-         } else if (']' === c) {
+         } else if (c === ']') {
           seenBracket = false;
          }
          buffer += c;
@@ -1960,7 +1960,7 @@
        case 'port':
         if (/[0-9]/.test(c)) {
          buffer += c;
-        } else if (EOF === c || '/' === c || '\\' === c || '?' === c || '#' === c || stateOverride) {
+        } else if (c === EOF || c === '/' || c === '\\' || c === '?' || c === '#' || stateOverride) {
          if ('' !== buffer) {
           var temp = parseInt(buffer, 10);
           if (temp !== relative[this._scheme]) {
@@ -1973,14 +1973,14 @@
          }
          state = 'relative path start';
          continue;
-        } else if ('\t' === c || '\n' === c || '\r' === c) {
+        } else if (c === '\t' || c === '\n' || c === '\r') {
          err('Invalid code point in port: ' + c);
         } else {
          invalid.call(this);
         }
         break;
        case 'relative path start':
-        if ('\\' === c) {
+        if (c === '\\') {
          err('\'\\\' not allowed in path.');
         }
         state = 'relative path';
@@ -1989,32 +1989,32 @@
         }
         break;
        case 'relative path':
-        if (EOF === c || '/' === c || '\\' === c || !stateOverride && ('?' === c || '#' === c)) {
-         if ('\\' === c) {
+        if (c === EOF || c === '/' || c === '\\' || !stateOverride && (c === '?' || c === '#')) {
+         if (c === '\\') {
           err('\\ not allowed in relative path.');
          }
          var tmp;
          if (tmp = relativePathDotMapping[buffer.toLowerCase()]) {
           buffer = tmp;
          }
-         if ('..' === buffer) {
+         if (buffer === '..') {
           this._path.pop();
           if ('/' !== c && '\\' !== c) {
            this._path.push('');
           }
-         } else if ('.' === buffer && '/' !== c && '\\' !== c) {
+         } else if (buffer === '.' && '/' !== c && '\\' !== c) {
           this._path.push('');
          } else if ('.' !== buffer) {
-          if ('file' === this._scheme && this._path.length === 0 && buffer.length === 2 && ALPHA.test(buffer[0]) && buffer[1] === '|') {
+          if (this._scheme === 'file' && this._path.length === 0 && buffer.length === 2 && ALPHA.test(buffer[0]) && buffer[1] === '|') {
            buffer = buffer[0] + ':';
           }
           this._path.push(buffer);
          }
          buffer = '';
-         if ('?' === c) {
+         if (c === '?') {
           this._query = '?';
           state = 'query';
-         } else if ('#' === c) {
+         } else if (c === '#') {
           this._fragment = '#';
           state = 'fragment';
          }
@@ -2023,7 +2023,7 @@
         }
         break;
        case 'query':
-        if (!stateOverride && '#' === c) {
+        if (!stateOverride && c === '#') {
          this._fragment = '#';
          state = 'fragment';
         } else if (EOF !== c && '\t' !== c && '\n' !== c && '\r' !== c) {
@@ -2127,27 +2127,27 @@
       parse.call(this, pathname, 'relative path start');
      },
      get search() {
-      return this._isInvalid || !this._query || '?' === this._query ? '' : this._query;
+      return this._isInvalid || !this._query || this._query === '?' ? '' : this._query;
      },
      set search(search) {
       if (this._isInvalid || !this._isRelative) {
        return;
       }
       this._query = '?';
-      if ('?' === search[0]) {
+      if (search[0] === '?') {
        search = search.slice(1);
       }
       parse.call(this, search, 'query');
      },
      get hash() {
-      return this._isInvalid || !this._fragment || '#' === this._fragment ? '' : this._fragment;
+      return this._isInvalid || !this._fragment || this._fragment === '#' ? '' : this._fragment;
      },
      set hash(hash) {
       if (this._isInvalid) {
        return;
       }
       this._fragment = '#';
-      if ('#' === hash[0]) {
+      if (hash[0] === '#') {
        hash = hash.slice(1);
       }
       parse.call(this, hash, 'fragment');
