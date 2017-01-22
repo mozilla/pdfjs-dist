@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.6.467';
- var pdfjsBuild = '54d55e8';
+ var pdfjsVersion = '1.6.469';
+ var pdfjsBuild = '17dd2e6';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -47702,7 +47702,7 @@
        return;
       }
       if (this.task.onContinue) {
-       this.task.onContinue.call(this.task, this._scheduleNextBound);
+       this.task.onContinue(this._scheduleNextBound);
       } else {
        this._scheduleNext();
       }
