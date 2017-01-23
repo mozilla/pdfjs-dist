@@ -1736,7 +1736,7 @@
      this.annotationLayerFactory = annotationLayerFactory;
      this.renderer = options.renderer || RendererType.CANVAS;
      this.paintTask = null;
-     this.paintedViewport = null;
+     this.paintedViewportMap = new WeakMap();
      this.renderingState = RenderingStates.INITIAL;
      this.resume = null;
      this.error = null;
@@ -1792,15 +1792,14 @@
        this.annotationLayer = null;
       }
       if (this.canvas && !currentZoomLayerNode) {
+       this.paintedViewportMap.delete(this.canvas);
        this.canvas.width = 0;
        this.canvas.height = 0;
        delete this.canvas;
       }
       if (this.svg) {
+       this.paintedViewportMap.delete(this.svg);
        delete this.svg;
-      }
-      if (!currentZoomLayerNode) {
-       this.paintedViewport = null;
       }
       this.loadingIconDiv = document.createElement('div');
       this.loadingIconDiv.className = 'loadingIcon';
@@ -1876,7 +1875,7 @@
       var div = this.div;
       target.style.width = target.parentNode.style.width = div.style.width = Math.floor(width) + 'px';
       target.style.height = target.parentNode.style.height = div.style.height = Math.floor(height) + 'px';
-      var relativeRotation = this.viewport.rotation - this.paintedViewport.rotation;
+      var relativeRotation = this.viewport.rotation - this.paintedViewportMap.get(target).rotation;
       var absRotation = Math.abs(relativeRotation);
       var scaleX = 1, scaleY = 1;
       if (absRotation === 90 || absRotation === 270) {
@@ -1994,6 +1993,7 @@
        }
        if (self.zoomLayer) {
         var zoomLayerCanvas = self.zoomLayer.firstChild;
+        self.paintedViewportMap.delete(zoomLayerCanvas);
         zoomLayerCanvas.width = 0;
         zoomLayerCanvas.height = 0;
         if (div.contains(self.zoomLayer)) {
@@ -2101,7 +2101,7 @@
       canvas.height = roundToDivide(viewport.height * outputScale.sy, sfy[0]);
       canvas.style.width = roundToDivide(viewport.width, sfx[1]) + 'px';
       canvas.style.height = roundToDivide(viewport.height, sfy[1]) + 'px';
-      this.paintedViewport = viewport;
+      this.paintedViewportMap.set(canvas, viewport);
       var transform = !outputScale.scaled ? null : [
        outputScale.sx,
        0,
@@ -2151,7 +2151,7 @@
        return svgGfx.getSVG(opList, actualSizeViewport).then(function (svg) {
         ensureNotCancelled();
         self.svg = svg;
-        self.paintedViewport = actualSizeViewport;
+        self.paintedViewportMap.set(svg, actualSizeViewport);
         svg.style.width = wrapper.style.width;
         svg.style.height = wrapper.style.height;
         self.renderingState = RenderingStates.FINISHED;
