@@ -1746,7 +1746,6 @@
      this.zoomLayer = null;
      this.annotationLayer = null;
      var div = document.createElement('div');
-     div.id = 'pageContainer' + this.id;
      div.className = 'page';
      div.style.width = Math.floor(this.viewport.width) + 'px';
      div.style.height = Math.floor(this.viewport.height) + 'px';
