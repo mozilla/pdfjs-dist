@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.7.233';
- var pdfjsBuild = '8d684b5';
+ var pdfjsVersion = '1.7.235';
+ var pdfjsBuild = '3f320f0';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -46668,13 +46668,7 @@
        needRestore = true;
       }
       if (this.pendingEOFill) {
-       if (ctx.mozFillRule !== undefined) {
-        ctx.mozFillRule = 'evenodd';
-        ctx.fill();
-        ctx.mozFillRule = 'nonzero';
-       } else {
-        ctx.fill('evenodd');
-       }
+       ctx.fill('evenodd');
        this.pendingEOFill = false;
       } else {
        ctx.fill();
@@ -47506,13 +47500,7 @@
       var ctx = this.ctx;
       if (this.pendingClip) {
        if (this.pendingClip === EO_CLIP) {
-        if (ctx.mozFillRule !== undefined) {
-         ctx.mozFillRule = 'evenodd';
-         ctx.clip();
-         ctx.mozFillRule = 'nonzero';
-        } else {
-         ctx.clip('evenodd');
-        }
+        ctx.clip('evenodd');
        } else {
         ctx.clip();
        }
