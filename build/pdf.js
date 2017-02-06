@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.7.252';
- var pdfjsBuild = '3e5c6e42';
+ var pdfjsVersion = '1.7.254';
+ var pdfjsBuild = 'ec26a7e5';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -2475,7 +2475,9 @@
     clear: function fontLoaderClear() {
      var styleElement = this.styleElement;
      if (styleElement) {
-      styleElement.parentNode.removeChild(styleElement);
+      if (styleElement.parentNode) {
+       styleElement.parentNode.removeChild(styleElement);
+      }
       styleElement = this.styleElement = null;
      }
      this.nativeFontFaces.forEach(function (nativeFontFace) {
