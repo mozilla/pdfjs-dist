@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.7.248';
- var pdfjsBuild = '66304f7c';
+ var pdfjsVersion = '1.7.250';
+ var pdfjsBuild = 'd842c9c6';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -23180,11 +23180,34 @@
   (function (root, factory) {
    factory(root.pdfjsDisplayDOMUtils = {}, root.pdfjsSharedUtil);
   }(this, function (exports, sharedUtil) {
+   var assert = sharedUtil.assert;
    var removeNullCharacters = sharedUtil.removeNullCharacters;
    var warn = sharedUtil.warn;
    var deprecated = sharedUtil.deprecated;
    var createValidAbsoluteUrl = sharedUtil.createValidAbsoluteUrl;
    var DEFAULT_LINK_REL = 'noopener noreferrer nofollow';
+   function DOMCanvasFactory() {
+   }
+   DOMCanvasFactory.prototype = {
+    create: function DOMCanvasFactory_create(width, height) {
+     assert(width > 0 && height > 0, 'invalid canvas size');
+     var canvas = document.createElement('canvas');
+     canvas.width = width;
+     canvas.height = height;
+     return canvas;
+    },
+    reset: function DOMCanvasFactory_reset(canvas, width, height) {
+     assert(canvas, 'canvas is not specified');
+     assert(width > 0 && height > 0, 'invalid canvas size');
+     canvas.width = width;
+     canvas.height = height;
+    },
+    destroy: function DOMCanvasFactory_destroy(canvas) {
+     assert(canvas, 'canvas is not specified');
+     canvas.width = 0;
+     canvas.height = 0;
+    }
+   };
    var CustomStyle = function CustomStyleClosure() {
     var prefixes = [
      'ms',
@@ -23347,6 +23370,7 @@
    exports.hasCanvasTypedArrays = hasCanvasTypedArrays;
    exports.getDefaultSetting = getDefaultSetting;
    exports.DEFAULT_LINK_REL = DEFAULT_LINK_REL;
+   exports.DOMCanvasFactory = DOMCanvasFactory;
   }));
   (function (root, factory) {
    factory(root.pdfjsDisplayFontLoader = {}, root.pdfjsSharedUtil);
@@ -45433,12 +45457,6 @@
      return shadow(IsLittleEndianCached, 'value', isLittleEndian());
     }
    };
-   function createScratchCanvas(width, height) {
-    var canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    return canvas;
-   }
    function addContextCurrentTransform(ctx) {
     if (!ctx.mozCurrentTransform) {
      ctx._originalSave = ctx.save;
@@ -45545,7 +45563,8 @@
     }
    }
    var CachedCanvases = function CachedCanvasesClosure() {
-    function CachedCanvases() {
+    function CachedCanvases(canvasFactory) {
+     this.canvasFactory = canvasFactory;
      this.cache = Object.create(null);
     }
     CachedCanvases.prototype = {
@@ -45553,11 +45572,10 @@
       var canvasEntry;
       if (this.cache[id] !== undefined) {
        canvasEntry = this.cache[id];
-       canvasEntry.canvas.width = width;
-       canvasEntry.canvas.height = height;
+       this.canvasFactory.reset(canvasEntry.canvas, width, height);
        canvasEntry.context.setTransform(1, 0, 0, 1, 0, 0);
       } else {
-       var canvas = createScratchCanvas(width, height);
+       var canvas = this.canvasFactory.create(width, height);
        var ctx = canvas.getContext('2d');
        if (trackTransform) {
         addContextCurrentTransform(ctx);
@@ -45572,8 +45590,7 @@
      clear: function () {
       for (var id in this.cache) {
        var canvasEntry = this.cache[id];
-       canvasEntry.canvas.width = 0;
-       canvasEntry.canvas.height = 0;
+       this.canvasFactory.destroy(canvasEntry.canvas);
        delete this.cache[id];
       }
      }
@@ -45779,7 +45796,7 @@
    var CanvasGraphics = function CanvasGraphicsClosure() {
     var EXECUTION_TIME = 15;
     var EXECUTION_STEPS = 10;
-    function CanvasGraphics(canvasCtx, commonObjs, objs, imageLayer) {
+    function CanvasGraphics(canvasCtx, commonObjs, objs, canvasFactory, imageLayer) {
      this.ctx = canvasCtx;
      this.current = new CanvasExtraState();
      this.stateStack = [];
@@ -45789,6 +45806,7 @@
      this.xobjs = null;
      this.commonObjs = commonObjs;
      this.objs = objs;
+     this.canvasFactory = canvasFactory;
      this.imageLayer = imageLayer;
      this.groupStack = [];
      this.processingType3 = null;
@@ -45798,7 +45816,7 @@
      this.smaskStack = [];
      this.smaskCounter = 0;
      this.tempSMask = null;
-     this.cachedCanvases = new CachedCanvases();
+     this.cachedCanvases = new CachedCanvases(this.canvasFactory);
      if (canvasCtx) {
       addContextCurrentTransform(canvasCtx);
      }
@@ -46591,7 +46609,7 @@
       }
      },
      get isFontSubpixelAAEnabled() {
-      var ctx = document.createElement('canvas').getContext('2d');
+      var ctx = this.canvasFactory.create(10, 10).getContext('2d');
       ctx.scale(1.5, 1);
       ctx.fillText('I', 0, 10);
       var data = ctx.getImageData(0, 0, 10, 10).data;
@@ -46784,7 +46802,7 @@
        var self = this;
        var canvasGraphicsFactory = {
         createCanvasGraphics: function (ctx) {
-         return new CanvasGraphics(ctx, self.commonObjs, self.objs);
+         return new CanvasGraphics(ctx, self.commonObjs, self.objs, self.canvasFactory);
         }
        };
        pattern = new TilingPattern(IR, color, this.ctx, canvasGraphicsFactory, baseTransform);
@@ -47269,7 +47287,6 @@
     return CanvasGraphics;
    }();
    exports.CanvasGraphics = CanvasGraphics;
-   exports.createScratchCanvas = createScratchCanvas;
   }));
   (function (root, factory) {
    factory(root.pdfjsCoreImage = {}, root.pdfjsSharedUtil, root.pdfjsCorePrimitives, root.pdfjsCoreColorSpace, root.pdfjsCoreStream, root.pdfjsCoreJpx);
@@ -50062,9 +50079,9 @@
    var FontFaceObject = displayFontLoader.FontFaceObject;
    var FontLoader = displayFontLoader.FontLoader;
    var CanvasGraphics = displayCanvas.CanvasGraphics;
-   var createScratchCanvas = displayCanvas.createScratchCanvas;
    var Metadata = displayMetadata.Metadata;
    var getDefaultSetting = displayDOMUtils.getDefaultSetting;
+   var DOMCanvasFactory = displayDOMUtils.DOMCanvasFactory;
    var DEFAULT_RANGE_CHUNK_SIZE = 65536;
    var isWorkerDisabled = false;
    var workerSrc;
@@ -50379,6 +50396,7 @@
       this.pendingCleanup = false;
       var renderingIntent = params.intent === 'print' ? 'print' : 'display';
       var renderInteractiveForms = params.renderInteractiveForms === true ? true : false;
+      var canvasFactory = params.canvasFactory || new DOMCanvasFactory();
       if (!this.intentStates[renderingIntent]) {
        this.intentStates[renderingIntent] = Object.create(null);
       }
@@ -50398,7 +50416,7 @@
         renderInteractiveForms: renderInteractiveForms
        });
       }
-      var internalRenderTask = new InternalRenderTask(complete, params, this.objs, this.commonObjs, intentState.operatorList, this.pageNumber);
+      var internalRenderTask = new InternalRenderTask(complete, params, this.objs, this.commonObjs, intentState.operatorList, this.pageNumber, canvasFactory);
       internalRenderTask.useRequestAnimationFrame = renderingIntent !== 'print';
       if (!intentState.renderTasks) {
        intentState.renderTasks = [];
@@ -50949,6 +50967,9 @@
        if (this.destroyed) {
         return Promise.reject(new Error('Worker was destroyed'));
        }
+       if (typeof document === 'undefined') {
+        return Promise.reject(new Error('"document" is not defined.'));
+       }
        var imageUrl = data[0];
        var components = data[1];
        if (components !== 3 && components !== 1) {
@@ -50962,7 +50983,9 @@
          var size = width * height;
          var rgbaLength = size * 4;
          var buf = new Uint8Array(size * components);
-         var tmpCanvas = createScratchCanvas(width, height);
+         var tmpCanvas = document.createElement('canvas');
+         tmpCanvas.width = width;
+         tmpCanvas.height = height;
          var tmpCtx = tmpCanvas.getContext('2d');
          tmpCtx.drawImage(img, 0, 0);
          var data = tmpCtx.getImageData(0, 0, width, height).data;
@@ -51144,7 +51167,7 @@
     return RenderTask;
    }();
    var InternalRenderTask = function InternalRenderTaskClosure() {
-    function InternalRenderTask(callback, params, objs, commonObjs, operatorList, pageNumber) {
+    function InternalRenderTask(callback, params, objs, commonObjs, operatorList, pageNumber, canvasFactory) {
      this.callback = callback;
      this.params = params;
      this.objs = objs;
@@ -51152,6 +51175,7 @@
      this.operatorListIdx = null;
      this.operatorList = operatorList;
      this.pageNumber = pageNumber;
+     this.canvasFactory = canvasFactory;
      this.running = false;
      this.graphicsReadyCallback = null;
      this.graphicsReady = false;
@@ -51174,7 +51198,7 @@
        this.stepper.nextBreakPoint = this.stepper.getNextBreakPoint();
       }
       var params = this.params;
-      this.gfx = new CanvasGraphics(params.canvasContext, this.commonObjs, this.objs, params.imageLayer);
+      this.gfx = new CanvasGraphics(params.canvasContext, this.commonObjs, this.objs, this.canvasFactory, params.imageLayer);
       this.gfx.beginDrawing(params.transform, params.viewport, transparency);
       this.operatorListIdx = 0;
       this.graphicsReady = true;
