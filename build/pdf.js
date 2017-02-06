@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.7.254';
- var pdfjsBuild = 'ec26a7e5';
+ var pdfjsVersion = '1.7.256';
+ var pdfjsBuild = 'd3ae5b38';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -7701,6 +7701,7 @@
      params[key] = source[key];
     }
     params.rangeChunkSize = params.rangeChunkSize || DEFAULT_RANGE_CHUNK_SIZE;
+    params.disableNativeImageDecoder = params.disableNativeImageDecoder === true;
     if (!worker) {
      worker = new PDFWorker();
      task._worker = worker;
@@ -7743,7 +7744,8 @@
      disableFontFace: getDefaultSetting('disableFontFace'),
      disableCreateObjectURL: getDefaultSetting('disableCreateObjectURL'),
      postMessageTransfers: getDefaultSetting('postMessageTransfers') && !isPostMessageTransfersDisabled,
-     docBaseUrl: source.docBaseUrl
+     docBaseUrl: source.docBaseUrl,
+     disableNativeImageDecoder: source.disableNativeImageDecoder
     }).then(function (workerId) {
      if (worker.destroyed) {
       throw new Error('Worker was destroyed');

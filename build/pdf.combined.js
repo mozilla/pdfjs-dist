@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.7.254';
- var pdfjsBuild = 'ec26a7e5';
+ var pdfjsVersion = '1.7.256';
+ var pdfjsBuild = 'd3ae5b38';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -50155,6 +50155,7 @@
      params[key] = source[key];
     }
     params.rangeChunkSize = params.rangeChunkSize || DEFAULT_RANGE_CHUNK_SIZE;
+    params.disableNativeImageDecoder = params.disableNativeImageDecoder === true;
     if (!worker) {
      worker = new PDFWorker();
      task._worker = worker;
@@ -50197,7 +50198,8 @@
      disableFontFace: getDefaultSetting('disableFontFace'),
      disableCreateObjectURL: getDefaultSetting('disableCreateObjectURL'),
      postMessageTransfers: getDefaultSetting('postMessageTransfers') && !isPostMessageTransfersDisabled,
-     docBaseUrl: source.docBaseUrl
+     docBaseUrl: source.docBaseUrl,
+     disableNativeImageDecoder: source.disableNativeImageDecoder
     }).then(function (workerId) {
      if (worker.destroyed) {
       throw new Error('Worker was destroyed');
@@ -51359,7 +51361,8 @@
      cMapOptions: {
       url: null,
       packed: false
-     }
+     },
+     disableNativeImageDecoder: false
     };
     function NativeImageDecoder(xref, resources, handler, forceDataSchema) {
      this.xref = xref;
@@ -51570,6 +51573,7 @@
        operatorList.addOp(OPS.paintInlineImageXObject, [imgData]);
        return;
       }
+      var useNativeImageDecoder = !this.options.disableNativeImageDecoder;
       var objId = 'img_' + this.idFactory.createObjId();
       operatorList.addDependency(objId);
       args = [
@@ -51577,7 +51581,7 @@
        w,
        h
       ];
-      if (!softMask && !mask && image instanceof JpegStream && NativeImageDecoder.isSupported(image, this.xref, resources)) {
+      if (useNativeImageDecoder && !softMask && !mask && image instanceof JpegStream && NativeImageDecoder.isSupported(image, this.xref, resources)) {
        operatorList.addOp(OPS.paintJpegXObject, args);
        this.handler.send('obj', [
         objId,
@@ -51588,7 +51592,7 @@
        return;
       }
       var nativeImageDecoder = null;
-      if (image instanceof JpegStream || mask instanceof JpegStream || softMask instanceof JpegStream) {
+      if (useNativeImageDecoder && (image instanceof JpegStream || mask instanceof JpegStream || softMask instanceof JpegStream)) {
        nativeImageDecoder = new NativeImageDecoder(self.xref, resources, self.handler, self.options.forceDataSchema);
       }
       PDFImage.buildImage(self.handler, self.xref, resources, image, inline, nativeImageDecoder).then(function (imageObj) {
@@ -56199,7 +56203,8 @@
        forceDataSchema: data.disableCreateObjectURL,
        maxImageSize: data.maxImageSize === undefined ? -1 : data.maxImageSize,
        disableFontFace: data.disableFontFace,
-       cMapOptions: cMapOptions
+       cMapOptions: cMapOptions,
+       disableNativeImageDecoder: data.disableNativeImageDecoder
       };
       getPdfManager(data, evaluatorOptions).then(function (newPdfManager) {
        if (terminated) {
