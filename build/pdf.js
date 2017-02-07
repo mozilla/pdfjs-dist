@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.7.256';
- var pdfjsBuild = 'd3ae5b38';
+ var pdfjsVersion = '1.7.258';
+ var pdfjsBuild = '9b0e0954';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -2263,20 +2263,26 @@
     create: function DOMCanvasFactory_create(width, height) {
      assert(width > 0 && height > 0, 'invalid canvas size');
      var canvas = document.createElement('canvas');
+     var context = canvas.getContext('2d');
      canvas.width = width;
      canvas.height = height;
-     return canvas;
+     return {
+      canvas: canvas,
+      context: context
+     };
     },
-    reset: function DOMCanvasFactory_reset(canvas, width, height) {
-     assert(canvas, 'canvas is not specified');
+    reset: function DOMCanvasFactory_reset(canvasAndContextPair, width, height) {
+     assert(canvasAndContextPair.canvas, 'canvas is not specified');
      assert(width > 0 && height > 0, 'invalid canvas size');
-     canvas.width = width;
-     canvas.height = height;
+     canvasAndContextPair.canvas.width = width;
+     canvasAndContextPair.canvas.height = height;
     },
-    destroy: function DOMCanvasFactory_destroy(canvas) {
-     assert(canvas, 'canvas is not specified');
-     canvas.width = 0;
-     canvas.height = 0;
+    destroy: function DOMCanvasFactory_destroy(canvasAndContextPair) {
+     assert(canvasAndContextPair.canvas, 'canvas is not specified');
+     canvasAndContextPair.canvas.width = 0;
+     canvasAndContextPair.canvas.height = 0;
+     canvasAndContextPair.canvas = null;
+     canvasAndContextPair.context = null;
     }
    };
    var CustomStyle = function CustomStyleClosure() {
@@ -5859,25 +5865,21 @@
       var canvasEntry;
       if (this.cache[id] !== undefined) {
        canvasEntry = this.cache[id];
-       this.canvasFactory.reset(canvasEntry.canvas, width, height);
+       this.canvasFactory.reset(canvasEntry, width, height);
        canvasEntry.context.setTransform(1, 0, 0, 1, 0, 0);
       } else {
-       var canvas = this.canvasFactory.create(width, height);
-       var ctx = canvas.getContext('2d');
-       if (trackTransform) {
-        addContextCurrentTransform(ctx);
-       }
-       this.cache[id] = canvasEntry = {
-        canvas: canvas,
-        context: ctx
-       };
+       canvasEntry = this.canvasFactory.create(width, height);
+       this.cache[id] = canvasEntry;
+      }
+      if (trackTransform) {
+       addContextCurrentTransform(canvasEntry.context);
       }
       return canvasEntry;
      },
      clear: function () {
       for (var id in this.cache) {
        var canvasEntry = this.cache[id];
-       this.canvasFactory.destroy(canvasEntry.canvas);
+       this.canvasFactory.destroy(canvasEntry);
        delete this.cache[id];
       }
      }
@@ -6896,7 +6898,7 @@
       }
      },
      get isFontSubpixelAAEnabled() {
-      var ctx = this.canvasFactory.create(10, 10).getContext('2d');
+      var ctx = this.canvasFactory.create(10, 10).context;
       ctx.scale(1.5, 1);
       ctx.fillText('I', 0, 10);
       var data = ctx.getImageData(0, 0, 10, 10).data;
