@@ -23,8 +23,8 @@
  }
 }(this, function (exports) {
  'use strict';
- var pdfjsVersion = '1.7.264';
- var pdfjsBuild = '1a2f3f95';
+ var pdfjsVersion = '1.7.267';
+ var pdfjsBuild = '35102c02';
  var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : null;
  var pdfjsLibs = {};
  (function pdfjsWrapper() {
@@ -54846,14 +54846,12 @@
      if (this.data.radioButton) {
       this.data.fieldValue = this.data.buttonValue = null;
       var fieldParent = params.dict.get('Parent');
-      if (!isDict(fieldParent) || !fieldParent.has('V')) {
-       return;
+      if (isDict(fieldParent) && fieldParent.has('V')) {
+       var fieldParentValue = fieldParent.get('V');
+       if (isName(fieldParentValue)) {
+        this.data.fieldValue = fieldParentValue.name;
+       }
       }
-      var fieldParentValue = fieldParent.get('V');
-      if (!isName(fieldParentValue)) {
-       return;
-      }
-      this.data.fieldValue = fieldParentValue.name;
       var appearanceStates = params.dict.get('AP');
       if (!isDict(appearanceStates)) {
        return;
