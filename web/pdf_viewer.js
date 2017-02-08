@@ -2584,6 +2584,9 @@
      }
      return false;
     }
+    function isPortraitOrientation(size) {
+     return size.width <= size.height;
+    }
     function PDFViewer(options) {
      this.container = options.container;
      this.viewer = options.viewer || options.container.firstElementChild;
@@ -2593,6 +2596,7 @@
      this.removePageBorders = options.removePageBorders || false;
      this.enhanceTextSelection = options.enhanceTextSelection || false;
      this.renderInteractiveForms = options.renderInteractiveForms || false;
+     this.enablePrintAutoRotate = options.enablePrintAutoRotate || false;
      this.renderer = options.renderer || RendererType.CANVAS;
      this.defaultRenderingQueue = !options.renderingQueue;
      if (this.defaultRenderingQueue) {
@@ -3191,11 +3195,26 @@
       this.findController = findController;
      },
      getPagesOverview: function () {
-      return this._pages.map(function (pageView) {
+      var pagesOverview = this._pages.map(function (pageView) {
        var viewport = pageView.pdfPage.getViewport(1);
        return {
         width: viewport.width,
-        height: viewport.height
+        height: viewport.height,
+        rotation: viewport.rotation
+       };
+      });
+      if (!this.enablePrintAutoRotate) {
+       return pagesOverview;
+      }
+      var isFirstPagePortrait = isPortraitOrientation(pagesOverview[0]);
+      return pagesOverview.map(function (size) {
+       if (isFirstPagePortrait === isPortraitOrientation(size)) {
+        return size;
+       }
+       return {
+        width: size.height,
+        height: size.width,
+        rotation: (size.rotation + 90) % 360
        };
       });
      }
