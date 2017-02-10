@@ -4485,8 +4485,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.280';
-exports.build = '1549a46e';
+exports.version = '1.7.282';
+exports.build = '466760ef';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -6502,8 +6502,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.280';
-PDFJS.build = '1549a46e';
+PDFJS.version = '1.7.282';
+PDFJS.build = '466760ef';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -8530,12 +8530,9 @@ FontLoader.prototype = {
   styleSheet.insertRule(rule, styleSheet.cssRules.length);
  },
  clear: function fontLoaderClear() {
-  var styleElement = this.styleElement;
-  if (styleElement) {
-   if (styleElement.parentNode) {
-    styleElement.parentNode.removeChild(styleElement);
-   }
-   styleElement = this.styleElement = null;
+  if (this.styleElement) {
+   this.styleElement.remove();
+   this.styleElement = null;
   }
   this.nativeFontFaces.forEach(function (nativeFontFace) {
    document.fonts.delete(nativeFontFace);
@@ -9188,8 +9185,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.280';
-var pdfjsBuild = '1549a46e';
+var pdfjsVersion = '1.7.282';
+var pdfjsBuild = '466760ef';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(8);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
