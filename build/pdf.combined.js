@@ -2310,7 +2310,7 @@ exports.stringToPDFString = stringToPDFString;
 exports.stringToUTF8String = stringToUTF8String;
 exports.utf8StringToString = utf8StringToString;
 exports.warn = warn;
-/* WEBPACK VAR INJECTION */}.call(exports, __w_pdfjs_require__(27)))
+/* WEBPACK VAR INJECTION */}.call(exports, __w_pdfjs_require__(26)))
 
 /***/ }),
 /* 1 */
@@ -2550,9 +2550,9 @@ exports.isStream = isStream;
 
 var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
-var coreJbig2 = __w_pdfjs_require__(37);
-var coreJpg = __w_pdfjs_require__(38);
-var coreJpx = __w_pdfjs_require__(19);
+var coreJbig2 = __w_pdfjs_require__(36);
+var coreJpg = __w_pdfjs_require__(37);
+var coreJpx = __w_pdfjs_require__(18);
 var Util = sharedUtil.Util;
 var error = sharedUtil.error;
 var info = sharedUtil.info;
@@ -18916,734 +18916,6 @@ exports.getDingbatsGlyphsUnicode = getDingbatsGlyphsUnicode;
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(module) {
-var sharedUtil = __w_pdfjs_require__(0);
-var corePrimitives = __w_pdfjs_require__(1);
-var corePdfManager = __w_pdfjs_require__(42);
-var UNSUPPORTED_FEATURES = sharedUtil.UNSUPPORTED_FEATURES;
-var InvalidPDFException = sharedUtil.InvalidPDFException;
-var MessageHandler = sharedUtil.MessageHandler;
-var MissingPDFException = sharedUtil.MissingPDFException;
-var UnexpectedResponseException = sharedUtil.UnexpectedResponseException;
-var PasswordException = sharedUtil.PasswordException;
-var UnknownErrorException = sharedUtil.UnknownErrorException;
-var XRefParseException = sharedUtil.XRefParseException;
-var arrayByteLength = sharedUtil.arrayByteLength;
-var arraysToBytes = sharedUtil.arraysToBytes;
-var assert = sharedUtil.assert;
-var createPromiseCapability = sharedUtil.createPromiseCapability;
-var error = sharedUtil.error;
-var info = sharedUtil.info;
-var warn = sharedUtil.warn;
-var setVerbosityLevel = sharedUtil.setVerbosityLevel;
-var Ref = corePrimitives.Ref;
-var LocalPdfManager = corePdfManager.LocalPdfManager;
-var NetworkPdfManager = corePdfManager.NetworkPdfManager;
-var globalScope = sharedUtil.globalScope;
-var WorkerTask = function WorkerTaskClosure() {
- function WorkerTask(name) {
-  this.name = name;
-  this.terminated = false;
-  this._capability = createPromiseCapability();
- }
- WorkerTask.prototype = {
-  get finished() {
-   return this._capability.promise;
-  },
-  finish: function () {
-   this._capability.resolve();
-  },
-  terminate: function () {
-   this.terminated = true;
-  },
-  ensureNotTerminated: function () {
-   if (this.terminated) {
-    throw new Error('Worker task was terminated');
-   }
-  }
- };
- return WorkerTask;
-}();
-var PDFWorkerStream = function PDFWorkerStreamClosure() {
- function PDFWorkerStream(params, msgHandler) {
-  this._queuedChunks = [];
-  var initialData = params.initialData;
-  if (initialData && initialData.length > 0) {
-   this._queuedChunks.push(initialData);
-  }
-  this._msgHandler = msgHandler;
-  this._isRangeSupported = !params.disableRange;
-  this._isStreamingSupported = !params.disableStream;
-  this._contentLength = params.length;
-  this._fullRequestReader = null;
-  this._rangeReaders = [];
-  msgHandler.on('OnDataRange', this._onReceiveData.bind(this));
-  msgHandler.on('OnDataProgress', this._onProgress.bind(this));
- }
- PDFWorkerStream.prototype = {
-  _onReceiveData: function PDFWorkerStream_onReceiveData(args) {
-   if (args.begin === undefined) {
-    if (this._fullRequestReader) {
-     this._fullRequestReader._enqueue(args.chunk);
-    } else {
-     this._queuedChunks.push(args.chunk);
-    }
-   } else {
-    var found = this._rangeReaders.some(function (rangeReader) {
-     if (rangeReader._begin !== args.begin) {
-      return false;
-     }
-     rangeReader._enqueue(args.chunk);
-     return true;
-    });
-    assert(found);
-   }
-  },
-  _onProgress: function PDFWorkerStream_onProgress(evt) {
-   if (this._rangeReaders.length > 0) {
-    var firstReader = this._rangeReaders[0];
-    if (firstReader.onProgress) {
-     firstReader.onProgress({ loaded: evt.loaded });
-    }
-   }
-  },
-  _removeRangeReader: function PDFWorkerStream_removeRangeReader(reader) {
-   var i = this._rangeReaders.indexOf(reader);
-   if (i >= 0) {
-    this._rangeReaders.splice(i, 1);
-   }
-  },
-  getFullReader: function PDFWorkerStream_getFullReader() {
-   assert(!this._fullRequestReader);
-   var queuedChunks = this._queuedChunks;
-   this._queuedChunks = null;
-   return new PDFWorkerStreamReader(this, queuedChunks);
-  },
-  getRangeReader: function PDFWorkerStream_getRangeReader(begin, end) {
-   var reader = new PDFWorkerStreamRangeReader(this, begin, end);
-   this._msgHandler.send('RequestDataRange', {
-    begin: begin,
-    end: end
-   });
-   this._rangeReaders.push(reader);
-   return reader;
-  },
-  cancelAllRequests: function PDFWorkerStream_cancelAllRequests(reason) {
-   if (this._fullRequestReader) {
-    this._fullRequestReader.cancel(reason);
-   }
-   var readers = this._rangeReaders.slice(0);
-   readers.forEach(function (rangeReader) {
-    rangeReader.cancel(reason);
-   });
-  }
- };
- function PDFWorkerStreamReader(stream, queuedChunks) {
-  this._stream = stream;
-  this._done = false;
-  this._queuedChunks = queuedChunks || [];
-  this._requests = [];
-  this._headersReady = Promise.resolve();
-  stream._fullRequestReader = this;
-  this.onProgress = null;
- }
- PDFWorkerStreamReader.prototype = {
-  _enqueue: function PDFWorkerStreamReader_enqueue(chunk) {
-   if (this._done) {
-    return;
-   }
-   if (this._requests.length > 0) {
-    var requestCapability = this._requests.shift();
-    requestCapability.resolve({
-     value: chunk,
-     done: false
-    });
-    return;
-   }
-   this._queuedChunks.push(chunk);
-  },
-  get headersReady() {
-   return this._headersReady;
-  },
-  get isRangeSupported() {
-   return this._stream._isRangeSupported;
-  },
-  get isStreamingSupported() {
-   return this._stream._isStreamingSupported;
-  },
-  get contentLength() {
-   return this._stream._contentLength;
-  },
-  read: function PDFWorkerStreamReader_read() {
-   if (this._queuedChunks.length > 0) {
-    var chunk = this._queuedChunks.shift();
-    return Promise.resolve({
-     value: chunk,
-     done: false
-    });
-   }
-   if (this._done) {
-    return Promise.resolve({
-     value: undefined,
-     done: true
-    });
-   }
-   var requestCapability = createPromiseCapability();
-   this._requests.push(requestCapability);
-   return requestCapability.promise;
-  },
-  cancel: function PDFWorkerStreamReader_cancel(reason) {
-   this._done = true;
-   this._requests.forEach(function (requestCapability) {
-    requestCapability.resolve({
-     value: undefined,
-     done: true
-    });
-   });
-   this._requests = [];
-  }
- };
- function PDFWorkerStreamRangeReader(stream, begin, end) {
-  this._stream = stream;
-  this._begin = begin;
-  this._end = end;
-  this._queuedChunk = null;
-  this._requests = [];
-  this._done = false;
-  this.onProgress = null;
- }
- PDFWorkerStreamRangeReader.prototype = {
-  _enqueue: function PDFWorkerStreamRangeReader_enqueue(chunk) {
-   if (this._done) {
-    return;
-   }
-   if (this._requests.length === 0) {
-    this._queuedChunk = chunk;
-   } else {
-    var requestsCapability = this._requests.shift();
-    requestsCapability.resolve({
-     value: chunk,
-     done: false
-    });
-    this._requests.forEach(function (requestCapability) {
-     requestCapability.resolve({
-      value: undefined,
-      done: true
-     });
-    });
-    this._requests = [];
-   }
-   this._done = true;
-   this._stream._removeRangeReader(this);
-  },
-  get isStreamingSupported() {
-   return false;
-  },
-  read: function PDFWorkerStreamRangeReader_read() {
-   if (this._queuedChunk) {
-    return Promise.resolve({
-     value: this._queuedChunk,
-     done: false
-    });
-   }
-   if (this._done) {
-    return Promise.resolve({
-     value: undefined,
-     done: true
-    });
-   }
-   var requestCapability = createPromiseCapability();
-   this._requests.push(requestCapability);
-   return requestCapability.promise;
-  },
-  cancel: function PDFWorkerStreamRangeReader_cancel(reason) {
-   this._done = true;
-   this._requests.forEach(function (requestCapability) {
-    requestCapability.resolve({
-     value: undefined,
-     done: true
-    });
-   });
-   this._requests = [];
-   this._stream._removeRangeReader(this);
-  }
- };
- return PDFWorkerStream;
-}();
-var PDFNetworkStream;
-function setPDFNetworkStreamClass(cls) {
- PDFNetworkStream = cls;
-}
-var WorkerMessageHandler = {
- setup: function wphSetup(handler, port) {
-  var testMessageProcessed = false;
-  handler.on('test', function wphSetupTest(data) {
-   if (testMessageProcessed) {
-    return;
-   }
-   testMessageProcessed = true;
-   if (!(data instanceof Uint8Array)) {
-    handler.send('test', 'main', false);
-    return;
-   }
-   var supportTransfers = data[0] === 255;
-   handler.postMessageTransfers = supportTransfers;
-   var xhr = new XMLHttpRequest();
-   var responseExists = 'response' in xhr;
-   try {
-    xhr.responseType;
-   } catch (e) {
-    responseExists = false;
-   }
-   if (!responseExists) {
-    handler.send('test', false);
-    return;
-   }
-   handler.send('test', {
-    supportTypedArray: true,
-    supportTransfers: supportTransfers
-   });
-  });
-  handler.on('configure', function wphConfigure(data) {
-   setVerbosityLevel(data.verbosity);
-  });
-  handler.on('GetDocRequest', function wphSetupDoc(data) {
-   return WorkerMessageHandler.createDocumentHandler(data, port);
-  });
- },
- createDocumentHandler: function wphCreateDocumentHandler(docParams, port) {
-  var pdfManager;
-  var terminated = false;
-  var cancelXHRs = null;
-  var WorkerTasks = [];
-  var docId = docParams.docId;
-  var docBaseUrl = docParams.docBaseUrl;
-  var workerHandlerName = docParams.docId + '_worker';
-  var handler = new MessageHandler(workerHandlerName, docId, port);
-  handler.postMessageTransfers = docParams.postMessageTransfers;
-  function ensureNotTerminated() {
-   if (terminated) {
-    throw new Error('Worker was terminated');
-   }
-  }
-  function startWorkerTask(task) {
-   WorkerTasks.push(task);
-  }
-  function finishWorkerTask(task) {
-   task.finish();
-   var i = WorkerTasks.indexOf(task);
-   WorkerTasks.splice(i, 1);
-  }
-  function loadDocument(recoveryMode) {
-   var loadDocumentCapability = createPromiseCapability();
-   var parseSuccess = function parseSuccess() {
-    var numPagesPromise = pdfManager.ensureDoc('numPages');
-    var fingerprintPromise = pdfManager.ensureDoc('fingerprint');
-    var encryptedPromise = pdfManager.ensureXRef('encrypt');
-    Promise.all([
-     numPagesPromise,
-     fingerprintPromise,
-     encryptedPromise
-    ]).then(function onDocReady(results) {
-     var doc = {
-      numPages: results[0],
-      fingerprint: results[1],
-      encrypted: !!results[2]
-     };
-     loadDocumentCapability.resolve(doc);
-    }, parseFailure);
-   };
-   var parseFailure = function parseFailure(e) {
-    loadDocumentCapability.reject(e);
-   };
-   pdfManager.ensureDoc('checkHeader', []).then(function () {
-    pdfManager.ensureDoc('parseStartXRef', []).then(function () {
-     pdfManager.ensureDoc('parse', [recoveryMode]).then(parseSuccess, parseFailure);
-    }, parseFailure);
-   }, parseFailure);
-   return loadDocumentCapability.promise;
-  }
-  function getPdfManager(data, evaluatorOptions) {
-   var pdfManagerCapability = createPromiseCapability();
-   var pdfManager;
-   var source = data.source;
-   if (source.data) {
-    try {
-     pdfManager = new LocalPdfManager(docId, source.data, source.password, evaluatorOptions, docBaseUrl);
-     pdfManagerCapability.resolve(pdfManager);
-    } catch (ex) {
-     pdfManagerCapability.reject(ex);
-    }
-    return pdfManagerCapability.promise;
-   }
-   var pdfStream;
-   try {
-    if (source.chunkedViewerLoading) {
-     pdfStream = new PDFWorkerStream(source, handler);
-    } else {
-     assert(PDFNetworkStream, 'pdfjs/core/network module is not loaded');
-     pdfStream = new PDFNetworkStream(data);
-    }
-   } catch (ex) {
-    pdfManagerCapability.reject(ex);
-    return pdfManagerCapability.promise;
-   }
-   var fullRequest = pdfStream.getFullReader();
-   fullRequest.headersReady.then(function () {
-    if (!fullRequest.isStreamingSupported || !fullRequest.isRangeSupported) {
-     fullRequest.onProgress = function (evt) {
-      handler.send('DocProgress', {
-       loaded: evt.loaded,
-       total: evt.total
-      });
-     };
-    }
-    if (!fullRequest.isRangeSupported) {
-     return;
-    }
-    var disableAutoFetch = source.disableAutoFetch || fullRequest.isStreamingSupported;
-    pdfManager = new NetworkPdfManager(docId, pdfStream, {
-     msgHandler: handler,
-     url: source.url,
-     password: source.password,
-     length: fullRequest.contentLength,
-     disableAutoFetch: disableAutoFetch,
-     rangeChunkSize: source.rangeChunkSize
-    }, evaluatorOptions, docBaseUrl);
-    pdfManagerCapability.resolve(pdfManager);
-    cancelXHRs = null;
-   }).catch(function (reason) {
-    pdfManagerCapability.reject(reason);
-    cancelXHRs = null;
-   });
-   var cachedChunks = [], loaded = 0;
-   var flushChunks = function () {
-    var pdfFile = arraysToBytes(cachedChunks);
-    if (source.length && pdfFile.length !== source.length) {
-     warn('reported HTTP length is different from actual');
-    }
-    try {
-     pdfManager = new LocalPdfManager(docId, pdfFile, source.password, evaluatorOptions, docBaseUrl);
-     pdfManagerCapability.resolve(pdfManager);
-    } catch (ex) {
-     pdfManagerCapability.reject(ex);
-    }
-    cachedChunks = [];
-   };
-   var readPromise = new Promise(function (resolve, reject) {
-    var readChunk = function (chunk) {
-     try {
-      ensureNotTerminated();
-      if (chunk.done) {
-       if (!pdfManager) {
-        flushChunks();
-       }
-       cancelXHRs = null;
-       return;
-      }
-      var data = chunk.value;
-      loaded += arrayByteLength(data);
-      if (!fullRequest.isStreamingSupported) {
-       handler.send('DocProgress', {
-        loaded: loaded,
-        total: Math.max(loaded, fullRequest.contentLength || 0)
-       });
-      }
-      if (pdfManager) {
-       pdfManager.sendProgressiveData(data);
-      } else {
-       cachedChunks.push(data);
-      }
-      fullRequest.read().then(readChunk, reject);
-     } catch (e) {
-      reject(e);
-     }
-    };
-    fullRequest.read().then(readChunk, reject);
-   });
-   readPromise.catch(function (e) {
-    pdfManagerCapability.reject(e);
-    cancelXHRs = null;
-   });
-   cancelXHRs = function () {
-    pdfStream.cancelAllRequests('abort');
-   };
-   return pdfManagerCapability.promise;
-  }
-  function setupDoc(data) {
-   function onSuccess(doc) {
-    ensureNotTerminated();
-    handler.send('GetDoc', { pdfInfo: doc });
-   }
-   function onFailure(e) {
-    if (e instanceof PasswordException) {
-     var task = new WorkerTask('PasswordException: response ' + e.code);
-     startWorkerTask(task);
-     handler.sendWithPromise('PasswordRequest', e).then(function (data) {
-      finishWorkerTask(task);
-      pdfManager.updatePassword(data.password);
-      pdfManagerReady();
-     }).catch(function (ex) {
-      finishWorkerTask(task);
-      handler.send('PasswordException', ex);
-     }.bind(null, e));
-    } else if (e instanceof InvalidPDFException) {
-     handler.send('InvalidPDF', e);
-    } else if (e instanceof MissingPDFException) {
-     handler.send('MissingPDF', e);
-    } else if (e instanceof UnexpectedResponseException) {
-     handler.send('UnexpectedResponse', e);
-    } else {
-     handler.send('UnknownError', new UnknownErrorException(e.message, e.toString()));
-    }
-   }
-   function pdfManagerReady() {
-    ensureNotTerminated();
-    loadDocument(false).then(onSuccess, function loadFailure(ex) {
-     ensureNotTerminated();
-     if (!(ex instanceof XRefParseException)) {
-      onFailure(ex);
-      return;
-     }
-     pdfManager.requestLoadedStream();
-     pdfManager.onLoadedStream().then(function () {
-      ensureNotTerminated();
-      loadDocument(true).then(onSuccess, onFailure);
-     });
-    }, onFailure);
-   }
-   ensureNotTerminated();
-   var cMapOptions = {
-    url: data.cMapUrl === undefined ? null : data.cMapUrl,
-    packed: data.cMapPacked === true
-   };
-   var evaluatorOptions = {
-    forceDataSchema: data.disableCreateObjectURL,
-    maxImageSize: data.maxImageSize === undefined ? -1 : data.maxImageSize,
-    disableFontFace: data.disableFontFace,
-    cMapOptions: cMapOptions,
-    disableNativeImageDecoder: data.disableNativeImageDecoder
-   };
-   getPdfManager(data, evaluatorOptions).then(function (newPdfManager) {
-    if (terminated) {
-     newPdfManager.terminate();
-     throw new Error('Worker was terminated');
-    }
-    pdfManager = newPdfManager;
-    handler.send('PDFManagerReady', null);
-    pdfManager.onLoadedStream().then(function (stream) {
-     handler.send('DataLoaded', { length: stream.bytes.byteLength });
-    });
-   }).then(pdfManagerReady, onFailure);
-  }
-  handler.on('GetPage', function wphSetupGetPage(data) {
-   return pdfManager.getPage(data.pageIndex).then(function (page) {
-    var rotatePromise = pdfManager.ensure(page, 'rotate');
-    var refPromise = pdfManager.ensure(page, 'ref');
-    var userUnitPromise = pdfManager.ensure(page, 'userUnit');
-    var viewPromise = pdfManager.ensure(page, 'view');
-    return Promise.all([
-     rotatePromise,
-     refPromise,
-     userUnitPromise,
-     viewPromise
-    ]).then(function (results) {
-     return {
-      rotate: results[0],
-      ref: results[1],
-      userUnit: results[2],
-      view: results[3]
-     };
-    });
-   });
-  });
-  handler.on('GetPageIndex', function wphSetupGetPageIndex(data) {
-   var ref = new Ref(data.ref.num, data.ref.gen);
-   var catalog = pdfManager.pdfDocument.catalog;
-   return catalog.getPageIndex(ref);
-  });
-  handler.on('GetDestinations', function wphSetupGetDestinations(data) {
-   return pdfManager.ensureCatalog('destinations');
-  });
-  handler.on('GetDestination', function wphSetupGetDestination(data) {
-   return pdfManager.ensureCatalog('getDestination', [data.id]);
-  });
-  handler.on('GetPageLabels', function wphSetupGetPageLabels(data) {
-   return pdfManager.ensureCatalog('pageLabels');
-  });
-  handler.on('GetAttachments', function wphSetupGetAttachments(data) {
-   return pdfManager.ensureCatalog('attachments');
-  });
-  handler.on('GetJavaScript', function wphSetupGetJavaScript(data) {
-   return pdfManager.ensureCatalog('javaScript');
-  });
-  handler.on('GetOutline', function wphSetupGetOutline(data) {
-   return pdfManager.ensureCatalog('documentOutline');
-  });
-  handler.on('GetMetadata', function wphSetupGetMetadata(data) {
-   return Promise.all([
-    pdfManager.ensureDoc('documentInfo'),
-    pdfManager.ensureCatalog('metadata')
-   ]);
-  });
-  handler.on('GetData', function wphSetupGetData(data) {
-   pdfManager.requestLoadedStream();
-   return pdfManager.onLoadedStream().then(function (stream) {
-    return stream.bytes;
-   });
-  });
-  handler.on('GetStats', function wphSetupGetStats(data) {
-   return pdfManager.pdfDocument.xref.stats;
-  });
-  handler.on('GetAnnotations', function wphSetupGetAnnotations(data) {
-   return pdfManager.getPage(data.pageIndex).then(function (page) {
-    return pdfManager.ensure(page, 'getAnnotationsData', [data.intent]);
-   });
-  });
-  handler.on('RenderPageRequest', function wphSetupRenderPage(data) {
-   var pageIndex = data.pageIndex;
-   pdfManager.getPage(pageIndex).then(function (page) {
-    var task = new WorkerTask('RenderPageRequest: page ' + pageIndex);
-    startWorkerTask(task);
-    var pageNum = pageIndex + 1;
-    var start = Date.now();
-    page.getOperatorList(handler, task, data.intent, data.renderInteractiveForms).then(function (operatorList) {
-     finishWorkerTask(task);
-     info('page=' + pageNum + ' - getOperatorList: time=' + (Date.now() - start) + 'ms, len=' + operatorList.totalLength);
-    }, function (e) {
-     finishWorkerTask(task);
-     if (task.terminated) {
-      return;
-     }
-     handler.send('UnsupportedFeature', { featureId: UNSUPPORTED_FEATURES.unknown });
-     var minimumStackMessage = 'worker.js: while trying to getPage() and getOperatorList()';
-     var wrappedException;
-     if (typeof e === 'string') {
-      wrappedException = {
-       message: e,
-       stack: minimumStackMessage
-      };
-     } else if (typeof e === 'object') {
-      wrappedException = {
-       message: e.message || e.toString(),
-       stack: e.stack || minimumStackMessage
-      };
-     } else {
-      wrappedException = {
-       message: 'Unknown exception type: ' + typeof e,
-       stack: minimumStackMessage
-      };
-     }
-     handler.send('PageError', {
-      pageNum: pageNum,
-      error: wrappedException,
-      intent: data.intent
-     });
-    });
-   });
-  }, this);
-  handler.on('GetTextContent', function wphExtractText(data) {
-   var pageIndex = data.pageIndex;
-   var normalizeWhitespace = data.normalizeWhitespace;
-   var combineTextItems = data.combineTextItems;
-   return pdfManager.getPage(pageIndex).then(function (page) {
-    var task = new WorkerTask('GetTextContent: page ' + pageIndex);
-    startWorkerTask(task);
-    var pageNum = pageIndex + 1;
-    var start = Date.now();
-    return page.extractTextContent(task, normalizeWhitespace, combineTextItems).then(function (textContent) {
-     finishWorkerTask(task);
-     info('text indexing: page=' + pageNum + ' - time=' + (Date.now() - start) + 'ms');
-     return textContent;
-    }, function (reason) {
-     finishWorkerTask(task);
-     if (task.terminated) {
-      return;
-     }
-     throw reason;
-    });
-   });
-  });
-  handler.on('Cleanup', function wphCleanup(data) {
-   return pdfManager.cleanup();
-  });
-  handler.on('Terminate', function wphTerminate(data) {
-   terminated = true;
-   if (pdfManager) {
-    pdfManager.terminate();
-    pdfManager = null;
-   }
-   if (cancelXHRs) {
-    cancelXHRs();
-   }
-   var waitOn = [];
-   WorkerTasks.forEach(function (task) {
-    waitOn.push(task.finished);
-    task.terminate();
-   });
-   return Promise.all(waitOn).then(function () {
-    handler.destroy();
-    handler = null;
-   });
-  });
-  handler.on('Ready', function wphReady(data) {
-   setupDoc(docParams);
-   docParams = null;
-  });
-  return workerHandlerName;
- }
-};
-function initializeWorker() {
- if (!('console' in globalScope)) {
-  var consoleTimer = {};
-  var workerConsole = {
-   log: function log() {
-    var args = Array.prototype.slice.call(arguments);
-    globalScope.postMessage({
-     targetName: 'main',
-     action: 'console_log',
-     data: args
-    });
-   },
-   error: function error() {
-    var args = Array.prototype.slice.call(arguments);
-    globalScope.postMessage({
-     targetName: 'main',
-     action: 'console_error',
-     data: args
-    });
-    throw 'pdf.js execution error';
-   },
-   time: function time(name) {
-    consoleTimer[name] = Date.now();
-   },
-   timeEnd: function timeEnd(name) {
-    var time = consoleTimer[name];
-    if (!time) {
-     error('Unknown timer name ' + name);
-    }
-    this.log('Timer:', name, Date.now() - time);
-   }
-  };
-  globalScope.console = workerConsole;
- }
- var handler = new MessageHandler('worker', 'main', self);
- WorkerMessageHandler.setup(handler, self);
- handler.send('ready', null);
-}
-if (typeof window === 'undefined' && !(typeof module !== 'undefined' && module.require)) {
- initializeWorker();
-}
-exports.setPDFNetworkStreamClass = setPDFNetworkStreamClass;
-exports.WorkerTask = WorkerTask;
-exports.WorkerMessageHandler = WorkerMessageHandler;
-/* WEBPACK VAR INJECTION */}.call(exports, __w_pdfjs_require__(28)(module)))
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
 
 var sharedUtil = __w_pdfjs_require__(0);
 var displayDOMUtils = __w_pdfjs_require__(3);
@@ -20263,7 +19535,7 @@ var AnnotationLayer = function AnnotationLayerClosure() {
 exports.AnnotationLayer = AnnotationLayer;
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -20812,7 +20084,9 @@ var PDFWorker = function PDFWorkerClosure() {
    return fakeWorkerFilesLoadedCapability.promise;
   }
   fakeWorkerFilesLoadedCapability = createPromiseCapability();
-  WorkerMessageHandler = pdfjsLibs.pdfjsCoreWorker.WorkerMessageHandler;
+  var pdfjsCoreWorker = __w_pdfjs_require__(22);
+  __w_pdfjs_require__(40);
+  WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
   fakeWorkerFilesLoadedCapability.resolve(WorkerMessageHandler);
   return fakeWorkerFilesLoadedCapability.promise;
  }
@@ -21497,8 +20771,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.278';
-exports.build = 'f8879d98';
+exports.version = '1.7.280';
+exports.build = '1549a46e';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -21507,7 +20781,7 @@ exports.PDFPageProxy = PDFPageProxy;
 exports._UnsupportedManager = _UnsupportedManager;
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -22514,7 +21788,7 @@ var SVGGraphics = function SVGGraphicsClosure() {
 exports.SVGGraphics = SVGGraphics;
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -23035,7 +22309,7 @@ var renderTextLayer = function renderTextLayerClosure() {
 exports.renderTextLayer = renderTextLayer;
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -23418,13 +22692,13 @@ var ArithmeticDecoder = function ArithmeticDecoderClosure() {
 exports.ArithmeticDecoder = ArithmeticDecoder;
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 var sharedUtil = __w_pdfjs_require__(0);
-var coreCharsets = __w_pdfjs_require__(31);
+var coreCharsets = __w_pdfjs_require__(30);
 var coreEncodings = __w_pdfjs_require__(5);
 var error = sharedUtil.error;
 var info = sharedUtil.info;
@@ -25785,7 +25059,7 @@ exports.CFFPrivateDict = CFFPrivateDict;
 exports.CFFCompiler = CFFCompiler;
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -26248,7 +25522,7 @@ exports.ChunkedStream = ChunkedStream;
 exports.ChunkedStreamManager = ChunkedStreamManager;
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -29904,7 +29178,7 @@ exports.calculateSHA384 = calculateSHA384;
 exports.calculateSHA512 = calculateSHA512;
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -29913,18 +29187,18 @@ var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
 var coreStream = __w_pdfjs_require__(2);
 var coreParser = __w_pdfjs_require__(6);
-var coreImage = __w_pdfjs_require__(36);
+var coreImage = __w_pdfjs_require__(35);
 var coreColorSpace = __w_pdfjs_require__(4);
-var coreMurmurHash3 = __w_pdfjs_require__(40);
-var coreFonts = __w_pdfjs_require__(35);
+var coreMurmurHash3 = __w_pdfjs_require__(39);
+var coreFonts = __w_pdfjs_require__(34);
 var coreFunction = __w_pdfjs_require__(7);
 var corePattern = __w_pdfjs_require__(41);
-var coreCMap = __w_pdfjs_require__(32);
-var coreMetrics = __w_pdfjs_require__(39);
-var coreBidi = __w_pdfjs_require__(30);
+var coreCMap = __w_pdfjs_require__(31);
+var coreMetrics = __w_pdfjs_require__(38);
+var coreBidi = __w_pdfjs_require__(29);
 var coreEncodings = __w_pdfjs_require__(5);
-var coreStandardFonts = __w_pdfjs_require__(21);
-var coreUnicode = __w_pdfjs_require__(22);
+var coreStandardFonts = __w_pdfjs_require__(20);
+var coreUnicode = __w_pdfjs_require__(21);
 var coreGlyphList = __w_pdfjs_require__(8);
 var FONT_IDENTITY_MATRIX = sharedUtil.FONT_IDENTITY_MATRIX;
 var IDENTITY_MATRIX = sharedUtil.IDENTITY_MATRIX;
@@ -32856,13 +32130,13 @@ exports.OperatorList = OperatorList;
 exports.PartialEvaluator = PartialEvaluator;
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 var sharedUtil = __w_pdfjs_require__(0);
-var coreArithmeticDecoder = __w_pdfjs_require__(14);
+var coreArithmeticDecoder = __w_pdfjs_require__(13);
 var info = sharedUtil.info;
 var warn = sharedUtil.warn;
 var error = sharedUtil.error;
@@ -34968,16 +34242,16 @@ var JpxImage = function JpxImageClosure() {
 exports.JpxImage = JpxImage;
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
-var coreCrypto = __w_pdfjs_require__(17);
+var coreCrypto = __w_pdfjs_require__(16);
 var coreParser = __w_pdfjs_require__(6);
-var coreChunkedStream = __w_pdfjs_require__(16);
+var coreChunkedStream = __w_pdfjs_require__(15);
 var coreColorSpace = __w_pdfjs_require__(4);
 var InvalidPDFException = sharedUtil.InvalidPDFException;
 var MissingDataException = sharedUtil.MissingDataException;
@@ -36425,7 +35699,7 @@ exports.XRef = XRef;
 exports.FileSpec = FileSpec;
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -37069,7 +36343,7 @@ exports.getGlyphMapForStandardFonts = getGlyphMapForStandardFonts;
 exports.getSupplementalGlyphMapForArialBlack = getSupplementalGlyphMapForArialBlack;
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -39047,6 +38321,734 @@ exports.getNormalizedUnicodes = getNormalizedUnicodes;
 exports.getUnicodeForGlyph = getUnicodeForGlyph;
 
 /***/ }),
+/* 22 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(module) {
+var sharedUtil = __w_pdfjs_require__(0);
+var corePrimitives = __w_pdfjs_require__(1);
+var corePdfManager = __w_pdfjs_require__(42);
+var UNSUPPORTED_FEATURES = sharedUtil.UNSUPPORTED_FEATURES;
+var InvalidPDFException = sharedUtil.InvalidPDFException;
+var MessageHandler = sharedUtil.MessageHandler;
+var MissingPDFException = sharedUtil.MissingPDFException;
+var UnexpectedResponseException = sharedUtil.UnexpectedResponseException;
+var PasswordException = sharedUtil.PasswordException;
+var UnknownErrorException = sharedUtil.UnknownErrorException;
+var XRefParseException = sharedUtil.XRefParseException;
+var arrayByteLength = sharedUtil.arrayByteLength;
+var arraysToBytes = sharedUtil.arraysToBytes;
+var assert = sharedUtil.assert;
+var createPromiseCapability = sharedUtil.createPromiseCapability;
+var error = sharedUtil.error;
+var info = sharedUtil.info;
+var warn = sharedUtil.warn;
+var setVerbosityLevel = sharedUtil.setVerbosityLevel;
+var Ref = corePrimitives.Ref;
+var LocalPdfManager = corePdfManager.LocalPdfManager;
+var NetworkPdfManager = corePdfManager.NetworkPdfManager;
+var globalScope = sharedUtil.globalScope;
+var WorkerTask = function WorkerTaskClosure() {
+ function WorkerTask(name) {
+  this.name = name;
+  this.terminated = false;
+  this._capability = createPromiseCapability();
+ }
+ WorkerTask.prototype = {
+  get finished() {
+   return this._capability.promise;
+  },
+  finish: function () {
+   this._capability.resolve();
+  },
+  terminate: function () {
+   this.terminated = true;
+  },
+  ensureNotTerminated: function () {
+   if (this.terminated) {
+    throw new Error('Worker task was terminated');
+   }
+  }
+ };
+ return WorkerTask;
+}();
+var PDFWorkerStream = function PDFWorkerStreamClosure() {
+ function PDFWorkerStream(params, msgHandler) {
+  this._queuedChunks = [];
+  var initialData = params.initialData;
+  if (initialData && initialData.length > 0) {
+   this._queuedChunks.push(initialData);
+  }
+  this._msgHandler = msgHandler;
+  this._isRangeSupported = !params.disableRange;
+  this._isStreamingSupported = !params.disableStream;
+  this._contentLength = params.length;
+  this._fullRequestReader = null;
+  this._rangeReaders = [];
+  msgHandler.on('OnDataRange', this._onReceiveData.bind(this));
+  msgHandler.on('OnDataProgress', this._onProgress.bind(this));
+ }
+ PDFWorkerStream.prototype = {
+  _onReceiveData: function PDFWorkerStream_onReceiveData(args) {
+   if (args.begin === undefined) {
+    if (this._fullRequestReader) {
+     this._fullRequestReader._enqueue(args.chunk);
+    } else {
+     this._queuedChunks.push(args.chunk);
+    }
+   } else {
+    var found = this._rangeReaders.some(function (rangeReader) {
+     if (rangeReader._begin !== args.begin) {
+      return false;
+     }
+     rangeReader._enqueue(args.chunk);
+     return true;
+    });
+    assert(found);
+   }
+  },
+  _onProgress: function PDFWorkerStream_onProgress(evt) {
+   if (this._rangeReaders.length > 0) {
+    var firstReader = this._rangeReaders[0];
+    if (firstReader.onProgress) {
+     firstReader.onProgress({ loaded: evt.loaded });
+    }
+   }
+  },
+  _removeRangeReader: function PDFWorkerStream_removeRangeReader(reader) {
+   var i = this._rangeReaders.indexOf(reader);
+   if (i >= 0) {
+    this._rangeReaders.splice(i, 1);
+   }
+  },
+  getFullReader: function PDFWorkerStream_getFullReader() {
+   assert(!this._fullRequestReader);
+   var queuedChunks = this._queuedChunks;
+   this._queuedChunks = null;
+   return new PDFWorkerStreamReader(this, queuedChunks);
+  },
+  getRangeReader: function PDFWorkerStream_getRangeReader(begin, end) {
+   var reader = new PDFWorkerStreamRangeReader(this, begin, end);
+   this._msgHandler.send('RequestDataRange', {
+    begin: begin,
+    end: end
+   });
+   this._rangeReaders.push(reader);
+   return reader;
+  },
+  cancelAllRequests: function PDFWorkerStream_cancelAllRequests(reason) {
+   if (this._fullRequestReader) {
+    this._fullRequestReader.cancel(reason);
+   }
+   var readers = this._rangeReaders.slice(0);
+   readers.forEach(function (rangeReader) {
+    rangeReader.cancel(reason);
+   });
+  }
+ };
+ function PDFWorkerStreamReader(stream, queuedChunks) {
+  this._stream = stream;
+  this._done = false;
+  this._queuedChunks = queuedChunks || [];
+  this._requests = [];
+  this._headersReady = Promise.resolve();
+  stream._fullRequestReader = this;
+  this.onProgress = null;
+ }
+ PDFWorkerStreamReader.prototype = {
+  _enqueue: function PDFWorkerStreamReader_enqueue(chunk) {
+   if (this._done) {
+    return;
+   }
+   if (this._requests.length > 0) {
+    var requestCapability = this._requests.shift();
+    requestCapability.resolve({
+     value: chunk,
+     done: false
+    });
+    return;
+   }
+   this._queuedChunks.push(chunk);
+  },
+  get headersReady() {
+   return this._headersReady;
+  },
+  get isRangeSupported() {
+   return this._stream._isRangeSupported;
+  },
+  get isStreamingSupported() {
+   return this._stream._isStreamingSupported;
+  },
+  get contentLength() {
+   return this._stream._contentLength;
+  },
+  read: function PDFWorkerStreamReader_read() {
+   if (this._queuedChunks.length > 0) {
+    var chunk = this._queuedChunks.shift();
+    return Promise.resolve({
+     value: chunk,
+     done: false
+    });
+   }
+   if (this._done) {
+    return Promise.resolve({
+     value: undefined,
+     done: true
+    });
+   }
+   var requestCapability = createPromiseCapability();
+   this._requests.push(requestCapability);
+   return requestCapability.promise;
+  },
+  cancel: function PDFWorkerStreamReader_cancel(reason) {
+   this._done = true;
+   this._requests.forEach(function (requestCapability) {
+    requestCapability.resolve({
+     value: undefined,
+     done: true
+    });
+   });
+   this._requests = [];
+  }
+ };
+ function PDFWorkerStreamRangeReader(stream, begin, end) {
+  this._stream = stream;
+  this._begin = begin;
+  this._end = end;
+  this._queuedChunk = null;
+  this._requests = [];
+  this._done = false;
+  this.onProgress = null;
+ }
+ PDFWorkerStreamRangeReader.prototype = {
+  _enqueue: function PDFWorkerStreamRangeReader_enqueue(chunk) {
+   if (this._done) {
+    return;
+   }
+   if (this._requests.length === 0) {
+    this._queuedChunk = chunk;
+   } else {
+    var requestsCapability = this._requests.shift();
+    requestsCapability.resolve({
+     value: chunk,
+     done: false
+    });
+    this._requests.forEach(function (requestCapability) {
+     requestCapability.resolve({
+      value: undefined,
+      done: true
+     });
+    });
+    this._requests = [];
+   }
+   this._done = true;
+   this._stream._removeRangeReader(this);
+  },
+  get isStreamingSupported() {
+   return false;
+  },
+  read: function PDFWorkerStreamRangeReader_read() {
+   if (this._queuedChunk) {
+    return Promise.resolve({
+     value: this._queuedChunk,
+     done: false
+    });
+   }
+   if (this._done) {
+    return Promise.resolve({
+     value: undefined,
+     done: true
+    });
+   }
+   var requestCapability = createPromiseCapability();
+   this._requests.push(requestCapability);
+   return requestCapability.promise;
+  },
+  cancel: function PDFWorkerStreamRangeReader_cancel(reason) {
+   this._done = true;
+   this._requests.forEach(function (requestCapability) {
+    requestCapability.resolve({
+     value: undefined,
+     done: true
+    });
+   });
+   this._requests = [];
+   this._stream._removeRangeReader(this);
+  }
+ };
+ return PDFWorkerStream;
+}();
+var PDFNetworkStream;
+function setPDFNetworkStreamClass(cls) {
+ PDFNetworkStream = cls;
+}
+var WorkerMessageHandler = {
+ setup: function wphSetup(handler, port) {
+  var testMessageProcessed = false;
+  handler.on('test', function wphSetupTest(data) {
+   if (testMessageProcessed) {
+    return;
+   }
+   testMessageProcessed = true;
+   if (!(data instanceof Uint8Array)) {
+    handler.send('test', 'main', false);
+    return;
+   }
+   var supportTransfers = data[0] === 255;
+   handler.postMessageTransfers = supportTransfers;
+   var xhr = new XMLHttpRequest();
+   var responseExists = 'response' in xhr;
+   try {
+    xhr.responseType;
+   } catch (e) {
+    responseExists = false;
+   }
+   if (!responseExists) {
+    handler.send('test', false);
+    return;
+   }
+   handler.send('test', {
+    supportTypedArray: true,
+    supportTransfers: supportTransfers
+   });
+  });
+  handler.on('configure', function wphConfigure(data) {
+   setVerbosityLevel(data.verbosity);
+  });
+  handler.on('GetDocRequest', function wphSetupDoc(data) {
+   return WorkerMessageHandler.createDocumentHandler(data, port);
+  });
+ },
+ createDocumentHandler: function wphCreateDocumentHandler(docParams, port) {
+  var pdfManager;
+  var terminated = false;
+  var cancelXHRs = null;
+  var WorkerTasks = [];
+  var docId = docParams.docId;
+  var docBaseUrl = docParams.docBaseUrl;
+  var workerHandlerName = docParams.docId + '_worker';
+  var handler = new MessageHandler(workerHandlerName, docId, port);
+  handler.postMessageTransfers = docParams.postMessageTransfers;
+  function ensureNotTerminated() {
+   if (terminated) {
+    throw new Error('Worker was terminated');
+   }
+  }
+  function startWorkerTask(task) {
+   WorkerTasks.push(task);
+  }
+  function finishWorkerTask(task) {
+   task.finish();
+   var i = WorkerTasks.indexOf(task);
+   WorkerTasks.splice(i, 1);
+  }
+  function loadDocument(recoveryMode) {
+   var loadDocumentCapability = createPromiseCapability();
+   var parseSuccess = function parseSuccess() {
+    var numPagesPromise = pdfManager.ensureDoc('numPages');
+    var fingerprintPromise = pdfManager.ensureDoc('fingerprint');
+    var encryptedPromise = pdfManager.ensureXRef('encrypt');
+    Promise.all([
+     numPagesPromise,
+     fingerprintPromise,
+     encryptedPromise
+    ]).then(function onDocReady(results) {
+     var doc = {
+      numPages: results[0],
+      fingerprint: results[1],
+      encrypted: !!results[2]
+     };
+     loadDocumentCapability.resolve(doc);
+    }, parseFailure);
+   };
+   var parseFailure = function parseFailure(e) {
+    loadDocumentCapability.reject(e);
+   };
+   pdfManager.ensureDoc('checkHeader', []).then(function () {
+    pdfManager.ensureDoc('parseStartXRef', []).then(function () {
+     pdfManager.ensureDoc('parse', [recoveryMode]).then(parseSuccess, parseFailure);
+    }, parseFailure);
+   }, parseFailure);
+   return loadDocumentCapability.promise;
+  }
+  function getPdfManager(data, evaluatorOptions) {
+   var pdfManagerCapability = createPromiseCapability();
+   var pdfManager;
+   var source = data.source;
+   if (source.data) {
+    try {
+     pdfManager = new LocalPdfManager(docId, source.data, source.password, evaluatorOptions, docBaseUrl);
+     pdfManagerCapability.resolve(pdfManager);
+    } catch (ex) {
+     pdfManagerCapability.reject(ex);
+    }
+    return pdfManagerCapability.promise;
+   }
+   var pdfStream;
+   try {
+    if (source.chunkedViewerLoading) {
+     pdfStream = new PDFWorkerStream(source, handler);
+    } else {
+     assert(PDFNetworkStream, 'pdfjs/core/network module is not loaded');
+     pdfStream = new PDFNetworkStream(data);
+    }
+   } catch (ex) {
+    pdfManagerCapability.reject(ex);
+    return pdfManagerCapability.promise;
+   }
+   var fullRequest = pdfStream.getFullReader();
+   fullRequest.headersReady.then(function () {
+    if (!fullRequest.isStreamingSupported || !fullRequest.isRangeSupported) {
+     fullRequest.onProgress = function (evt) {
+      handler.send('DocProgress', {
+       loaded: evt.loaded,
+       total: evt.total
+      });
+     };
+    }
+    if (!fullRequest.isRangeSupported) {
+     return;
+    }
+    var disableAutoFetch = source.disableAutoFetch || fullRequest.isStreamingSupported;
+    pdfManager = new NetworkPdfManager(docId, pdfStream, {
+     msgHandler: handler,
+     url: source.url,
+     password: source.password,
+     length: fullRequest.contentLength,
+     disableAutoFetch: disableAutoFetch,
+     rangeChunkSize: source.rangeChunkSize
+    }, evaluatorOptions, docBaseUrl);
+    pdfManagerCapability.resolve(pdfManager);
+    cancelXHRs = null;
+   }).catch(function (reason) {
+    pdfManagerCapability.reject(reason);
+    cancelXHRs = null;
+   });
+   var cachedChunks = [], loaded = 0;
+   var flushChunks = function () {
+    var pdfFile = arraysToBytes(cachedChunks);
+    if (source.length && pdfFile.length !== source.length) {
+     warn('reported HTTP length is different from actual');
+    }
+    try {
+     pdfManager = new LocalPdfManager(docId, pdfFile, source.password, evaluatorOptions, docBaseUrl);
+     pdfManagerCapability.resolve(pdfManager);
+    } catch (ex) {
+     pdfManagerCapability.reject(ex);
+    }
+    cachedChunks = [];
+   };
+   var readPromise = new Promise(function (resolve, reject) {
+    var readChunk = function (chunk) {
+     try {
+      ensureNotTerminated();
+      if (chunk.done) {
+       if (!pdfManager) {
+        flushChunks();
+       }
+       cancelXHRs = null;
+       return;
+      }
+      var data = chunk.value;
+      loaded += arrayByteLength(data);
+      if (!fullRequest.isStreamingSupported) {
+       handler.send('DocProgress', {
+        loaded: loaded,
+        total: Math.max(loaded, fullRequest.contentLength || 0)
+       });
+      }
+      if (pdfManager) {
+       pdfManager.sendProgressiveData(data);
+      } else {
+       cachedChunks.push(data);
+      }
+      fullRequest.read().then(readChunk, reject);
+     } catch (e) {
+      reject(e);
+     }
+    };
+    fullRequest.read().then(readChunk, reject);
+   });
+   readPromise.catch(function (e) {
+    pdfManagerCapability.reject(e);
+    cancelXHRs = null;
+   });
+   cancelXHRs = function () {
+    pdfStream.cancelAllRequests('abort');
+   };
+   return pdfManagerCapability.promise;
+  }
+  function setupDoc(data) {
+   function onSuccess(doc) {
+    ensureNotTerminated();
+    handler.send('GetDoc', { pdfInfo: doc });
+   }
+   function onFailure(e) {
+    if (e instanceof PasswordException) {
+     var task = new WorkerTask('PasswordException: response ' + e.code);
+     startWorkerTask(task);
+     handler.sendWithPromise('PasswordRequest', e).then(function (data) {
+      finishWorkerTask(task);
+      pdfManager.updatePassword(data.password);
+      pdfManagerReady();
+     }).catch(function (ex) {
+      finishWorkerTask(task);
+      handler.send('PasswordException', ex);
+     }.bind(null, e));
+    } else if (e instanceof InvalidPDFException) {
+     handler.send('InvalidPDF', e);
+    } else if (e instanceof MissingPDFException) {
+     handler.send('MissingPDF', e);
+    } else if (e instanceof UnexpectedResponseException) {
+     handler.send('UnexpectedResponse', e);
+    } else {
+     handler.send('UnknownError', new UnknownErrorException(e.message, e.toString()));
+    }
+   }
+   function pdfManagerReady() {
+    ensureNotTerminated();
+    loadDocument(false).then(onSuccess, function loadFailure(ex) {
+     ensureNotTerminated();
+     if (!(ex instanceof XRefParseException)) {
+      onFailure(ex);
+      return;
+     }
+     pdfManager.requestLoadedStream();
+     pdfManager.onLoadedStream().then(function () {
+      ensureNotTerminated();
+      loadDocument(true).then(onSuccess, onFailure);
+     });
+    }, onFailure);
+   }
+   ensureNotTerminated();
+   var cMapOptions = {
+    url: data.cMapUrl === undefined ? null : data.cMapUrl,
+    packed: data.cMapPacked === true
+   };
+   var evaluatorOptions = {
+    forceDataSchema: data.disableCreateObjectURL,
+    maxImageSize: data.maxImageSize === undefined ? -1 : data.maxImageSize,
+    disableFontFace: data.disableFontFace,
+    cMapOptions: cMapOptions,
+    disableNativeImageDecoder: data.disableNativeImageDecoder
+   };
+   getPdfManager(data, evaluatorOptions).then(function (newPdfManager) {
+    if (terminated) {
+     newPdfManager.terminate();
+     throw new Error('Worker was terminated');
+    }
+    pdfManager = newPdfManager;
+    handler.send('PDFManagerReady', null);
+    pdfManager.onLoadedStream().then(function (stream) {
+     handler.send('DataLoaded', { length: stream.bytes.byteLength });
+    });
+   }).then(pdfManagerReady, onFailure);
+  }
+  handler.on('GetPage', function wphSetupGetPage(data) {
+   return pdfManager.getPage(data.pageIndex).then(function (page) {
+    var rotatePromise = pdfManager.ensure(page, 'rotate');
+    var refPromise = pdfManager.ensure(page, 'ref');
+    var userUnitPromise = pdfManager.ensure(page, 'userUnit');
+    var viewPromise = pdfManager.ensure(page, 'view');
+    return Promise.all([
+     rotatePromise,
+     refPromise,
+     userUnitPromise,
+     viewPromise
+    ]).then(function (results) {
+     return {
+      rotate: results[0],
+      ref: results[1],
+      userUnit: results[2],
+      view: results[3]
+     };
+    });
+   });
+  });
+  handler.on('GetPageIndex', function wphSetupGetPageIndex(data) {
+   var ref = new Ref(data.ref.num, data.ref.gen);
+   var catalog = pdfManager.pdfDocument.catalog;
+   return catalog.getPageIndex(ref);
+  });
+  handler.on('GetDestinations', function wphSetupGetDestinations(data) {
+   return pdfManager.ensureCatalog('destinations');
+  });
+  handler.on('GetDestination', function wphSetupGetDestination(data) {
+   return pdfManager.ensureCatalog('getDestination', [data.id]);
+  });
+  handler.on('GetPageLabels', function wphSetupGetPageLabels(data) {
+   return pdfManager.ensureCatalog('pageLabels');
+  });
+  handler.on('GetAttachments', function wphSetupGetAttachments(data) {
+   return pdfManager.ensureCatalog('attachments');
+  });
+  handler.on('GetJavaScript', function wphSetupGetJavaScript(data) {
+   return pdfManager.ensureCatalog('javaScript');
+  });
+  handler.on('GetOutline', function wphSetupGetOutline(data) {
+   return pdfManager.ensureCatalog('documentOutline');
+  });
+  handler.on('GetMetadata', function wphSetupGetMetadata(data) {
+   return Promise.all([
+    pdfManager.ensureDoc('documentInfo'),
+    pdfManager.ensureCatalog('metadata')
+   ]);
+  });
+  handler.on('GetData', function wphSetupGetData(data) {
+   pdfManager.requestLoadedStream();
+   return pdfManager.onLoadedStream().then(function (stream) {
+    return stream.bytes;
+   });
+  });
+  handler.on('GetStats', function wphSetupGetStats(data) {
+   return pdfManager.pdfDocument.xref.stats;
+  });
+  handler.on('GetAnnotations', function wphSetupGetAnnotations(data) {
+   return pdfManager.getPage(data.pageIndex).then(function (page) {
+    return pdfManager.ensure(page, 'getAnnotationsData', [data.intent]);
+   });
+  });
+  handler.on('RenderPageRequest', function wphSetupRenderPage(data) {
+   var pageIndex = data.pageIndex;
+   pdfManager.getPage(pageIndex).then(function (page) {
+    var task = new WorkerTask('RenderPageRequest: page ' + pageIndex);
+    startWorkerTask(task);
+    var pageNum = pageIndex + 1;
+    var start = Date.now();
+    page.getOperatorList(handler, task, data.intent, data.renderInteractiveForms).then(function (operatorList) {
+     finishWorkerTask(task);
+     info('page=' + pageNum + ' - getOperatorList: time=' + (Date.now() - start) + 'ms, len=' + operatorList.totalLength);
+    }, function (e) {
+     finishWorkerTask(task);
+     if (task.terminated) {
+      return;
+     }
+     handler.send('UnsupportedFeature', { featureId: UNSUPPORTED_FEATURES.unknown });
+     var minimumStackMessage = 'worker.js: while trying to getPage() and getOperatorList()';
+     var wrappedException;
+     if (typeof e === 'string') {
+      wrappedException = {
+       message: e,
+       stack: minimumStackMessage
+      };
+     } else if (typeof e === 'object') {
+      wrappedException = {
+       message: e.message || e.toString(),
+       stack: e.stack || minimumStackMessage
+      };
+     } else {
+      wrappedException = {
+       message: 'Unknown exception type: ' + typeof e,
+       stack: minimumStackMessage
+      };
+     }
+     handler.send('PageError', {
+      pageNum: pageNum,
+      error: wrappedException,
+      intent: data.intent
+     });
+    });
+   });
+  }, this);
+  handler.on('GetTextContent', function wphExtractText(data) {
+   var pageIndex = data.pageIndex;
+   var normalizeWhitespace = data.normalizeWhitespace;
+   var combineTextItems = data.combineTextItems;
+   return pdfManager.getPage(pageIndex).then(function (page) {
+    var task = new WorkerTask('GetTextContent: page ' + pageIndex);
+    startWorkerTask(task);
+    var pageNum = pageIndex + 1;
+    var start = Date.now();
+    return page.extractTextContent(task, normalizeWhitespace, combineTextItems).then(function (textContent) {
+     finishWorkerTask(task);
+     info('text indexing: page=' + pageNum + ' - time=' + (Date.now() - start) + 'ms');
+     return textContent;
+    }, function (reason) {
+     finishWorkerTask(task);
+     if (task.terminated) {
+      return;
+     }
+     throw reason;
+    });
+   });
+  });
+  handler.on('Cleanup', function wphCleanup(data) {
+   return pdfManager.cleanup();
+  });
+  handler.on('Terminate', function wphTerminate(data) {
+   terminated = true;
+   if (pdfManager) {
+    pdfManager.terminate();
+    pdfManager = null;
+   }
+   if (cancelXHRs) {
+    cancelXHRs();
+   }
+   var waitOn = [];
+   WorkerTasks.forEach(function (task) {
+    waitOn.push(task.finished);
+    task.terminate();
+   });
+   return Promise.all(waitOn).then(function () {
+    handler.destroy();
+    handler = null;
+   });
+  });
+  handler.on('Ready', function wphReady(data) {
+   setupDoc(docParams);
+   docParams = null;
+  });
+  return workerHandlerName;
+ }
+};
+function initializeWorker() {
+ if (!('console' in globalScope)) {
+  var consoleTimer = {};
+  var workerConsole = {
+   log: function log() {
+    var args = Array.prototype.slice.call(arguments);
+    globalScope.postMessage({
+     targetName: 'main',
+     action: 'console_log',
+     data: args
+    });
+   },
+   error: function error() {
+    var args = Array.prototype.slice.call(arguments);
+    globalScope.postMessage({
+     targetName: 'main',
+     action: 'console_error',
+     data: args
+    });
+    throw 'pdf.js execution error';
+   },
+   time: function time(name) {
+    consoleTimer[name] = Date.now();
+   },
+   timeEnd: function timeEnd(name) {
+    var time = consoleTimer[name];
+    if (!time) {
+     error('Unknown timer name ' + name);
+    }
+    this.log('Timer:', name, Date.now() - time);
+   }
+  };
+  globalScope.console = workerConsole;
+ }
+ var handler = new MessageHandler('worker', 'main', self);
+ WorkerMessageHandler.setup(handler, self);
+ handler.send('ready', null);
+}
+if (typeof window === 'undefined' && !(typeof module !== 'undefined' && module.require)) {
+ initializeWorker();
+}
+exports.setPDFNetworkStreamClass = setPDFNetworkStreamClass;
+exports.WorkerTask = WorkerTask;
+exports.WorkerMessageHandler = WorkerMessageHandler;
+/* WEBPACK VAR INJECTION */}.call(exports, __w_pdfjs_require__(27)(module)))
+
+/***/ }),
 /* 23 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
@@ -39509,504 +39511,12 @@ exports.WebGLUtils = WebGLUtils;
 "use strict";
 
 var sharedUtil = __w_pdfjs_require__(0);
-var coreWorker = __w_pdfjs_require__(9);
-var OK_RESPONSE = 200;
-var PARTIAL_CONTENT_RESPONSE = 206;
-function NetworkManager(url, args) {
- this.url = url;
- args = args || {};
- this.isHttp = /^https?:/i.test(url);
- this.httpHeaders = this.isHttp && args.httpHeaders || {};
- this.withCredentials = args.withCredentials || false;
- this.getXhr = args.getXhr || function NetworkManager_getXhr() {
-  return new XMLHttpRequest();
- };
- this.currXhrId = 0;
- this.pendingRequests = Object.create(null);
- this.loadedRequests = Object.create(null);
-}
-function getArrayBuffer(xhr) {
- var data = xhr.response;
- if (typeof data !== 'string') {
-  return data;
- }
- var length = data.length;
- var array = new Uint8Array(length);
- for (var i = 0; i < length; i++) {
-  array[i] = data.charCodeAt(i) & 0xFF;
- }
- return array.buffer;
-}
-var supportsMozChunked = function supportsMozChunkedClosure() {
- try {
-  var x = new XMLHttpRequest();
-  x.open('GET', 'https://example.com');
-  x.responseType = 'moz-chunked-arraybuffer';
-  return x.responseType === 'moz-chunked-arraybuffer';
- } catch (e) {
-  return false;
- }
-}();
-NetworkManager.prototype = {
- requestRange: function NetworkManager_requestRange(begin, end, listeners) {
-  var args = {
-   begin: begin,
-   end: end
-  };
-  for (var prop in listeners) {
-   args[prop] = listeners[prop];
-  }
-  return this.request(args);
- },
- requestFull: function NetworkManager_requestFull(listeners) {
-  return this.request(listeners);
- },
- request: function NetworkManager_request(args) {
-  var xhr = this.getXhr();
-  var xhrId = this.currXhrId++;
-  var pendingRequest = this.pendingRequests[xhrId] = { xhr: xhr };
-  xhr.open('GET', this.url);
-  xhr.withCredentials = this.withCredentials;
-  for (var property in this.httpHeaders) {
-   var value = this.httpHeaders[property];
-   if (typeof value === 'undefined') {
-    continue;
-   }
-   xhr.setRequestHeader(property, value);
-  }
-  if (this.isHttp && 'begin' in args && 'end' in args) {
-   var rangeStr = args.begin + '-' + (args.end - 1);
-   xhr.setRequestHeader('Range', 'bytes=' + rangeStr);
-   pendingRequest.expectedStatus = 206;
-  } else {
-   pendingRequest.expectedStatus = 200;
-  }
-  var useMozChunkedLoading = supportsMozChunked && !!args.onProgressiveData;
-  if (useMozChunkedLoading) {
-   xhr.responseType = 'moz-chunked-arraybuffer';
-   pendingRequest.onProgressiveData = args.onProgressiveData;
-   pendingRequest.mozChunked = true;
-  } else {
-   xhr.responseType = 'arraybuffer';
-  }
-  if (args.onError) {
-   xhr.onerror = function (evt) {
-    args.onError(xhr.status);
-   };
-  }
-  xhr.onreadystatechange = this.onStateChange.bind(this, xhrId);
-  xhr.onprogress = this.onProgress.bind(this, xhrId);
-  pendingRequest.onHeadersReceived = args.onHeadersReceived;
-  pendingRequest.onDone = args.onDone;
-  pendingRequest.onError = args.onError;
-  pendingRequest.onProgress = args.onProgress;
-  xhr.send(null);
-  return xhrId;
- },
- onProgress: function NetworkManager_onProgress(xhrId, evt) {
-  var pendingRequest = this.pendingRequests[xhrId];
-  if (!pendingRequest) {
-   return;
-  }
-  if (pendingRequest.mozChunked) {
-   var chunk = getArrayBuffer(pendingRequest.xhr);
-   pendingRequest.onProgressiveData(chunk);
-  }
-  var onProgress = pendingRequest.onProgress;
-  if (onProgress) {
-   onProgress(evt);
-  }
- },
- onStateChange: function NetworkManager_onStateChange(xhrId, evt) {
-  var pendingRequest = this.pendingRequests[xhrId];
-  if (!pendingRequest) {
-   return;
-  }
-  var xhr = pendingRequest.xhr;
-  if (xhr.readyState >= 2 && pendingRequest.onHeadersReceived) {
-   pendingRequest.onHeadersReceived();
-   delete pendingRequest.onHeadersReceived;
-  }
-  if (xhr.readyState !== 4) {
-   return;
-  }
-  if (!(xhrId in this.pendingRequests)) {
-   return;
-  }
-  delete this.pendingRequests[xhrId];
-  if (xhr.status === 0 && this.isHttp) {
-   if (pendingRequest.onError) {
-    pendingRequest.onError(xhr.status);
-   }
-   return;
-  }
-  var xhrStatus = xhr.status || OK_RESPONSE;
-  var ok_response_on_range_request = xhrStatus === OK_RESPONSE && pendingRequest.expectedStatus === PARTIAL_CONTENT_RESPONSE;
-  if (!ok_response_on_range_request && xhrStatus !== pendingRequest.expectedStatus) {
-   if (pendingRequest.onError) {
-    pendingRequest.onError(xhr.status);
-   }
-   return;
-  }
-  this.loadedRequests[xhrId] = true;
-  var chunk = getArrayBuffer(xhr);
-  if (xhrStatus === PARTIAL_CONTENT_RESPONSE) {
-   var rangeHeader = xhr.getResponseHeader('Content-Range');
-   var matches = /bytes (\d+)-(\d+)\/(\d+)/.exec(rangeHeader);
-   var begin = parseInt(matches[1], 10);
-   pendingRequest.onDone({
-    begin: begin,
-    chunk: chunk
-   });
-  } else if (pendingRequest.onProgressiveData) {
-   pendingRequest.onDone(null);
-  } else if (chunk) {
-   pendingRequest.onDone({
-    begin: 0,
-    chunk: chunk
-   });
-  } else if (pendingRequest.onError) {
-   pendingRequest.onError(xhr.status);
-  }
- },
- hasPendingRequests: function NetworkManager_hasPendingRequests() {
-  for (var xhrId in this.pendingRequests) {
-   return true;
-  }
-  return false;
- },
- getRequestXhr: function NetworkManager_getXhr(xhrId) {
-  return this.pendingRequests[xhrId].xhr;
- },
- isStreamingRequest: function NetworkManager_isStreamingRequest(xhrId) {
-  return !!this.pendingRequests[xhrId].onProgressiveData;
- },
- isPendingRequest: function NetworkManager_isPendingRequest(xhrId) {
-  return xhrId in this.pendingRequests;
- },
- isLoadedRequest: function NetworkManager_isLoadedRequest(xhrId) {
-  return xhrId in this.loadedRequests;
- },
- abortAllRequests: function NetworkManager_abortAllRequests() {
-  for (var xhrId in this.pendingRequests) {
-   this.abortRequest(xhrId | 0);
-  }
- },
- abortRequest: function NetworkManager_abortRequest(xhrId) {
-  var xhr = this.pendingRequests[xhrId].xhr;
-  delete this.pendingRequests[xhrId];
-  xhr.abort();
- }
-};
-var assert = sharedUtil.assert;
-var createPromiseCapability = sharedUtil.createPromiseCapability;
-var isInt = sharedUtil.isInt;
-var MissingPDFException = sharedUtil.MissingPDFException;
-var UnexpectedResponseException = sharedUtil.UnexpectedResponseException;
-function PDFNetworkStream(options) {
- this._options = options;
- var source = options.source;
- this._manager = new NetworkManager(source.url, {
-  httpHeaders: source.httpHeaders,
-  withCredentials: source.withCredentials
- });
- this._rangeChunkSize = source.rangeChunkSize;
- this._fullRequestReader = null;
- this._rangeRequestReaders = [];
-}
-PDFNetworkStream.prototype = {
- _onRangeRequestReaderClosed: function PDFNetworkStream_onRangeRequestReaderClosed(reader) {
-  var i = this._rangeRequestReaders.indexOf(reader);
-  if (i >= 0) {
-   this._rangeRequestReaders.splice(i, 1);
-  }
- },
- getFullReader: function PDFNetworkStream_getFullReader() {
-  assert(!this._fullRequestReader);
-  this._fullRequestReader = new PDFNetworkStreamFullRequestReader(this._manager, this._options);
-  return this._fullRequestReader;
- },
- getRangeReader: function PDFNetworkStream_getRangeReader(begin, end) {
-  var reader = new PDFNetworkStreamRangeRequestReader(this._manager, begin, end);
-  reader.onClosed = this._onRangeRequestReaderClosed.bind(this);
-  this._rangeRequestReaders.push(reader);
-  return reader;
- },
- cancelAllRequests: function PDFNetworkStream_cancelAllRequests(reason) {
-  if (this._fullRequestReader) {
-   this._fullRequestReader.cancel(reason);
-  }
-  var readers = this._rangeRequestReaders.slice(0);
-  readers.forEach(function (reader) {
-   reader.cancel(reason);
-  });
- }
-};
-function PDFNetworkStreamFullRequestReader(manager, options) {
- this._manager = manager;
- var source = options.source;
- var args = {
-  onHeadersReceived: this._onHeadersReceived.bind(this),
-  onProgressiveData: source.disableStream ? null : this._onProgressiveData.bind(this),
-  onDone: this._onDone.bind(this),
-  onError: this._onError.bind(this),
-  onProgress: this._onProgress.bind(this)
- };
- this._url = source.url;
- this._fullRequestId = manager.requestFull(args);
- this._headersReceivedCapability = createPromiseCapability();
- this._disableRange = options.disableRange || false;
- this._contentLength = source.length;
- this._rangeChunkSize = source.rangeChunkSize;
- if (!this._rangeChunkSize && !this._disableRange) {
-  this._disableRange = true;
- }
- this._isStreamingSupported = false;
- this._isRangeSupported = false;
- this._cachedChunks = [];
- this._requests = [];
- this._done = false;
- this._storedError = undefined;
- this.onProgress = null;
-}
-PDFNetworkStreamFullRequestReader.prototype = {
- _validateRangeRequestCapabilities: function PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities() {
-  if (this._disableRange) {
-   return false;
-  }
-  var networkManager = this._manager;
-  if (!networkManager.isHttp) {
-   return false;
-  }
-  var fullRequestXhrId = this._fullRequestId;
-  var fullRequestXhr = networkManager.getRequestXhr(fullRequestXhrId);
-  if (fullRequestXhr.getResponseHeader('Accept-Ranges') !== 'bytes') {
-   return false;
-  }
-  var contentEncoding = fullRequestXhr.getResponseHeader('Content-Encoding') || 'identity';
-  if (contentEncoding !== 'identity') {
-   return false;
-  }
-  var length = fullRequestXhr.getResponseHeader('Content-Length');
-  length = parseInt(length, 10);
-  if (!isInt(length)) {
-   return false;
-  }
-  this._contentLength = length;
-  if (length <= 2 * this._rangeChunkSize) {
-   return false;
-  }
-  return true;
- },
- _onHeadersReceived: function PDFNetworkStreamFullRequestReader_onHeadersReceived() {
-  if (this._validateRangeRequestCapabilities()) {
-   this._isRangeSupported = true;
-  }
-  var networkManager = this._manager;
-  var fullRequestXhrId = this._fullRequestId;
-  if (networkManager.isStreamingRequest(fullRequestXhrId)) {
-   this._isStreamingSupported = true;
-  } else if (this._isRangeSupported) {
-   networkManager.abortRequest(fullRequestXhrId);
-  }
-  this._headersReceivedCapability.resolve();
- },
- _onProgressiveData: function PDFNetworkStreamFullRequestReader_onProgressiveData(chunk) {
-  if (this._requests.length > 0) {
-   var requestCapability = this._requests.shift();
-   requestCapability.resolve({
-    value: chunk,
-    done: false
-   });
-  } else {
-   this._cachedChunks.push(chunk);
-  }
- },
- _onDone: function PDFNetworkStreamFullRequestReader_onDone(args) {
-  if (args) {
-   this._onProgressiveData(args.chunk);
-  }
-  this._done = true;
-  if (this._cachedChunks.length > 0) {
-   return;
-  }
-  this._requests.forEach(function (requestCapability) {
-   requestCapability.resolve({
-    value: undefined,
-    done: true
-   });
-  });
-  this._requests = [];
- },
- _onError: function PDFNetworkStreamFullRequestReader_onError(status) {
-  var url = this._url;
-  var exception;
-  if (status === 404 || status === 0 && /^file:/.test(url)) {
-   exception = new MissingPDFException('Missing PDF "' + url + '".');
-  } else {
-   exception = new UnexpectedResponseException('Unexpected server response (' + status + ') while retrieving PDF "' + url + '".', status);
-  }
-  this._storedError = exception;
-  this._headersReceivedCapability.reject(exception);
-  this._requests.forEach(function (requestCapability) {
-   requestCapability.reject(exception);
-  });
-  this._requests = [];
-  this._cachedChunks = [];
- },
- _onProgress: function PDFNetworkStreamFullRequestReader_onProgress(data) {
-  if (this.onProgress) {
-   this.onProgress({
-    loaded: data.loaded,
-    total: data.lengthComputable ? data.total : this._contentLength
-   });
-  }
- },
- get isRangeSupported() {
-  return this._isRangeSupported;
- },
- get isStreamingSupported() {
-  return this._isStreamingSupported;
- },
- get contentLength() {
-  return this._contentLength;
- },
- get headersReady() {
-  return this._headersReceivedCapability.promise;
- },
- read: function PDFNetworkStreamFullRequestReader_read() {
-  if (this._storedError) {
-   return Promise.reject(this._storedError);
-  }
-  if (this._cachedChunks.length > 0) {
-   var chunk = this._cachedChunks.shift();
-   return Promise.resolve(chunk);
-  }
-  if (this._done) {
-   return Promise.resolve({
-    value: undefined,
-    done: true
-   });
-  }
-  var requestCapability = createPromiseCapability();
-  this._requests.push(requestCapability);
-  return requestCapability.promise;
- },
- cancel: function PDFNetworkStreamFullRequestReader_cancel(reason) {
-  this._done = true;
-  this._headersReceivedCapability.reject(reason);
-  this._requests.forEach(function (requestCapability) {
-   requestCapability.resolve({
-    value: undefined,
-    done: true
-   });
-  });
-  this._requests = [];
-  if (this._manager.isPendingRequest(this._fullRequestId)) {
-   this._manager.abortRequest(this._fullRequestId);
-  }
-  this._fullRequestReader = null;
- }
-};
-function PDFNetworkStreamRangeRequestReader(manager, begin, end) {
- this._manager = manager;
- var args = {
-  onDone: this._onDone.bind(this),
-  onProgress: this._onProgress.bind(this)
- };
- this._requestId = manager.requestRange(begin, end, args);
- this._requests = [];
- this._queuedChunk = null;
- this._done = false;
- this.onProgress = null;
- this.onClosed = null;
-}
-PDFNetworkStreamRangeRequestReader.prototype = {
- _close: function PDFNetworkStreamRangeRequestReader_close() {
-  if (this.onClosed) {
-   this.onClosed(this);
-  }
- },
- _onDone: function PDFNetworkStreamRangeRequestReader_onDone(data) {
-  var chunk = data.chunk;
-  if (this._requests.length > 0) {
-   var requestCapability = this._requests.shift();
-   requestCapability.resolve({
-    value: chunk,
-    done: false
-   });
-  } else {
-   this._queuedChunk = chunk;
-  }
-  this._done = true;
-  this._requests.forEach(function (requestCapability) {
-   requestCapability.resolve({
-    value: undefined,
-    done: true
-   });
-  });
-  this._requests = [];
-  this._close();
- },
- _onProgress: function PDFNetworkStreamRangeRequestReader_onProgress(evt) {
-  if (!this.isStreamingSupported && this.onProgress) {
-   this.onProgress({ loaded: evt.loaded });
-  }
- },
- get isStreamingSupported() {
-  return false;
- },
- read: function PDFNetworkStreamRangeRequestReader_read() {
-  if (this._queuedChunk !== null) {
-   var chunk = this._queuedChunk;
-   this._queuedChunk = null;
-   return Promise.resolve({
-    value: chunk,
-    done: false
-   });
-  }
-  if (this._done) {
-   return Promise.resolve({
-    value: undefined,
-    done: true
-   });
-  }
-  var requestCapability = createPromiseCapability();
-  this._requests.push(requestCapability);
-  return requestCapability.promise;
- },
- cancel: function PDFNetworkStreamRangeRequestReader_cancel(reason) {
-  this._done = true;
-  this._requests.forEach(function (requestCapability) {
-   requestCapability.resolve({
-    value: undefined,
-    done: true
-   });
-  });
-  this._requests = [];
-  if (this._manager.isPendingRequest(this._requestId)) {
-   this._manager.abortRequest(this._requestId);
-  }
-  this._close();
- }
-};
-coreWorker.setPDFNetworkStreamClass(PDFNetworkStream);
-exports.PDFNetworkStream = PDFNetworkStream;
-exports.NetworkManager = NetworkManager;
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-var sharedUtil = __w_pdfjs_require__(0);
 var displayDOMUtils = __w_pdfjs_require__(3);
-var displayAPI = __w_pdfjs_require__(11);
-var displayAnnotationLayer = __w_pdfjs_require__(10);
-var displayTextLayer = __w_pdfjs_require__(13);
+var displayAPI = __w_pdfjs_require__(10);
+var displayAnnotationLayer = __w_pdfjs_require__(9);
+var displayTextLayer = __w_pdfjs_require__(12);
 var displayMetadata = __w_pdfjs_require__(23);
-var displaySVG = __w_pdfjs_require__(12);
+var displaySVG = __w_pdfjs_require__(11);
 var globalScope = sharedUtil.globalScope;
 var deprecated = sharedUtil.deprecated;
 var warn = sharedUtil.warn;
@@ -40017,8 +39527,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.278';
-PDFJS.build = 'f8879d98';
+PDFJS.version = '1.7.280';
+PDFJS.build = '1549a46e';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -40124,7 +39634,7 @@ exports.isWorker = isWorker;
 exports.PDFJS = globalScope.PDFJS;
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports) {
 
 var g;
@@ -40140,7 +39650,7 @@ try {
 module.exports = g;
 
 /***/ }),
-/* 28 */
+/* 27 */
 /***/ (function(module, exports) {
 
 module.exports = function (module) {
@@ -40168,7 +39678,7 @@ module.exports = function (module) {
 };
 
 /***/ }),
-/* 29 */
+/* 28 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -40177,8 +39687,8 @@ var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
 var coreStream = __w_pdfjs_require__(2);
 var coreColorSpace = __w_pdfjs_require__(4);
-var coreObj = __w_pdfjs_require__(20);
-var coreEvaluator = __w_pdfjs_require__(18);
+var coreObj = __w_pdfjs_require__(19);
+var coreEvaluator = __w_pdfjs_require__(17);
 var AnnotationBorderStyleType = sharedUtil.AnnotationBorderStyleType;
 var AnnotationFieldFlag = sharedUtil.AnnotationFieldFlag;
 var AnnotationFlag = sharedUtil.AnnotationFlag;
@@ -40859,7 +40369,7 @@ exports.AnnotationBorderStyle = AnnotationBorderStyle;
 exports.AnnotationFactory = AnnotationFactory;
 
 /***/ }),
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -41612,7 +41122,7 @@ function bidi(str, startLevel, vertical) {
 exports.bidi = bidi;
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -42110,7 +41620,7 @@ exports.ExpertCharset = ExpertCharset;
 exports.ExpertSubsetCharset = ExpertSubsetCharset;
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -43015,7 +42525,7 @@ exports.CMapFactory = CMapFactory;
 exports.IdentityCMap = IdentityCMap;
 
 /***/ }),
-/* 33 */
+/* 32 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -43023,11 +42533,11 @@ exports.IdentityCMap = IdentityCMap;
 var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
 var coreStream = __w_pdfjs_require__(2);
-var coreObj = __w_pdfjs_require__(20);
+var coreObj = __w_pdfjs_require__(19);
 var coreParser = __w_pdfjs_require__(6);
-var coreCrypto = __w_pdfjs_require__(17);
-var coreEvaluator = __w_pdfjs_require__(18);
-var coreAnnotation = __w_pdfjs_require__(29);
+var coreCrypto = __w_pdfjs_require__(16);
+var coreEvaluator = __w_pdfjs_require__(17);
+var coreAnnotation = __w_pdfjs_require__(28);
 var MissingDataException = sharedUtil.MissingDataException;
 var Util = sharedUtil.Util;
 var assert = sharedUtil.assert;
@@ -43515,7 +43025,7 @@ exports.Page = Page;
 exports.PDFDocument = PDFDocument;
 
 /***/ }),
-/* 34 */
+/* 33 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -43524,7 +43034,7 @@ var sharedUtil = __w_pdfjs_require__(0);
 var coreStream = __w_pdfjs_require__(2);
 var coreGlyphList = __w_pdfjs_require__(8);
 var coreEncodings = __w_pdfjs_require__(5);
-var coreCFFParser = __w_pdfjs_require__(15);
+var coreCFFParser = __w_pdfjs_require__(14);
 var Util = sharedUtil.Util;
 var bytesToString = sharedUtil.bytesToString;
 var error = sharedUtil.error;
@@ -44301,7 +43811,7 @@ var FontRendererFactory = function FontRendererFactoryClosure() {
 exports.FontRendererFactory = FontRendererFactory;
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -44310,12 +43820,12 @@ var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
 var coreStream = __w_pdfjs_require__(2);
 var coreGlyphList = __w_pdfjs_require__(8);
-var coreFontRenderer = __w_pdfjs_require__(34);
+var coreFontRenderer = __w_pdfjs_require__(33);
 var coreEncodings = __w_pdfjs_require__(5);
-var coreStandardFonts = __w_pdfjs_require__(21);
-var coreUnicode = __w_pdfjs_require__(22);
+var coreStandardFonts = __w_pdfjs_require__(20);
+var coreUnicode = __w_pdfjs_require__(21);
 var coreType1Parser = __w_pdfjs_require__(44);
-var coreCFFParser = __w_pdfjs_require__(15);
+var coreCFFParser = __w_pdfjs_require__(14);
 var FONT_IDENTITY_MATRIX = sharedUtil.FONT_IDENTITY_MATRIX;
 var FontType = sharedUtil.FontType;
 var assert = sharedUtil.assert;
@@ -47267,7 +46777,7 @@ exports.ToUnicodeMap = ToUnicodeMap;
 exports.getFontType = getFontType;
 
 /***/ }),
-/* 36 */
+/* 35 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -47276,7 +46786,7 @@ var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
 var coreColorSpace = __w_pdfjs_require__(4);
 var coreStream = __w_pdfjs_require__(2);
-var coreJpx = __w_pdfjs_require__(19);
+var coreJpx = __w_pdfjs_require__(18);
 var ImageKind = sharedUtil.ImageKind;
 var assert = sharedUtil.assert;
 var error = sharedUtil.error;
@@ -47758,13 +47268,13 @@ var PDFImage = function PDFImageClosure() {
 exports.PDFImage = PDFImage;
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 var sharedUtil = __w_pdfjs_require__(0);
-var coreArithmeticDecoder = __w_pdfjs_require__(14);
+var coreArithmeticDecoder = __w_pdfjs_require__(13);
 var error = sharedUtil.error;
 var log2 = sharedUtil.log2;
 var readInt8 = sharedUtil.readInt8;
@@ -48959,7 +48469,7 @@ var Jbig2Image = function Jbig2ImageClosure() {
 exports.Jbig2Image = Jbig2Image;
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -49876,7 +49386,7 @@ var JpegImage = function JpegImageClosure() {
 exports.JpegImage = JpegImage;
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -52824,7 +52334,7 @@ var getMetrics = getLookupTableFactory(function (t) {
 exports.getMetrics = getMetrics;
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -52948,6 +52458,498 @@ var MurmurHash3_64 = function MurmurHash3_64Closure(seed) {
  return MurmurHash3_64;
 }();
 exports.MurmurHash3_64 = MurmurHash3_64;
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+var sharedUtil = __w_pdfjs_require__(0);
+var coreWorker = __w_pdfjs_require__(22);
+var OK_RESPONSE = 200;
+var PARTIAL_CONTENT_RESPONSE = 206;
+function NetworkManager(url, args) {
+ this.url = url;
+ args = args || {};
+ this.isHttp = /^https?:/i.test(url);
+ this.httpHeaders = this.isHttp && args.httpHeaders || {};
+ this.withCredentials = args.withCredentials || false;
+ this.getXhr = args.getXhr || function NetworkManager_getXhr() {
+  return new XMLHttpRequest();
+ };
+ this.currXhrId = 0;
+ this.pendingRequests = Object.create(null);
+ this.loadedRequests = Object.create(null);
+}
+function getArrayBuffer(xhr) {
+ var data = xhr.response;
+ if (typeof data !== 'string') {
+  return data;
+ }
+ var length = data.length;
+ var array = new Uint8Array(length);
+ for (var i = 0; i < length; i++) {
+  array[i] = data.charCodeAt(i) & 0xFF;
+ }
+ return array.buffer;
+}
+var supportsMozChunked = function supportsMozChunkedClosure() {
+ try {
+  var x = new XMLHttpRequest();
+  x.open('GET', 'https://example.com');
+  x.responseType = 'moz-chunked-arraybuffer';
+  return x.responseType === 'moz-chunked-arraybuffer';
+ } catch (e) {
+  return false;
+ }
+}();
+NetworkManager.prototype = {
+ requestRange: function NetworkManager_requestRange(begin, end, listeners) {
+  var args = {
+   begin: begin,
+   end: end
+  };
+  for (var prop in listeners) {
+   args[prop] = listeners[prop];
+  }
+  return this.request(args);
+ },
+ requestFull: function NetworkManager_requestFull(listeners) {
+  return this.request(listeners);
+ },
+ request: function NetworkManager_request(args) {
+  var xhr = this.getXhr();
+  var xhrId = this.currXhrId++;
+  var pendingRequest = this.pendingRequests[xhrId] = { xhr: xhr };
+  xhr.open('GET', this.url);
+  xhr.withCredentials = this.withCredentials;
+  for (var property in this.httpHeaders) {
+   var value = this.httpHeaders[property];
+   if (typeof value === 'undefined') {
+    continue;
+   }
+   xhr.setRequestHeader(property, value);
+  }
+  if (this.isHttp && 'begin' in args && 'end' in args) {
+   var rangeStr = args.begin + '-' + (args.end - 1);
+   xhr.setRequestHeader('Range', 'bytes=' + rangeStr);
+   pendingRequest.expectedStatus = 206;
+  } else {
+   pendingRequest.expectedStatus = 200;
+  }
+  var useMozChunkedLoading = supportsMozChunked && !!args.onProgressiveData;
+  if (useMozChunkedLoading) {
+   xhr.responseType = 'moz-chunked-arraybuffer';
+   pendingRequest.onProgressiveData = args.onProgressiveData;
+   pendingRequest.mozChunked = true;
+  } else {
+   xhr.responseType = 'arraybuffer';
+  }
+  if (args.onError) {
+   xhr.onerror = function (evt) {
+    args.onError(xhr.status);
+   };
+  }
+  xhr.onreadystatechange = this.onStateChange.bind(this, xhrId);
+  xhr.onprogress = this.onProgress.bind(this, xhrId);
+  pendingRequest.onHeadersReceived = args.onHeadersReceived;
+  pendingRequest.onDone = args.onDone;
+  pendingRequest.onError = args.onError;
+  pendingRequest.onProgress = args.onProgress;
+  xhr.send(null);
+  return xhrId;
+ },
+ onProgress: function NetworkManager_onProgress(xhrId, evt) {
+  var pendingRequest = this.pendingRequests[xhrId];
+  if (!pendingRequest) {
+   return;
+  }
+  if (pendingRequest.mozChunked) {
+   var chunk = getArrayBuffer(pendingRequest.xhr);
+   pendingRequest.onProgressiveData(chunk);
+  }
+  var onProgress = pendingRequest.onProgress;
+  if (onProgress) {
+   onProgress(evt);
+  }
+ },
+ onStateChange: function NetworkManager_onStateChange(xhrId, evt) {
+  var pendingRequest = this.pendingRequests[xhrId];
+  if (!pendingRequest) {
+   return;
+  }
+  var xhr = pendingRequest.xhr;
+  if (xhr.readyState >= 2 && pendingRequest.onHeadersReceived) {
+   pendingRequest.onHeadersReceived();
+   delete pendingRequest.onHeadersReceived;
+  }
+  if (xhr.readyState !== 4) {
+   return;
+  }
+  if (!(xhrId in this.pendingRequests)) {
+   return;
+  }
+  delete this.pendingRequests[xhrId];
+  if (xhr.status === 0 && this.isHttp) {
+   if (pendingRequest.onError) {
+    pendingRequest.onError(xhr.status);
+   }
+   return;
+  }
+  var xhrStatus = xhr.status || OK_RESPONSE;
+  var ok_response_on_range_request = xhrStatus === OK_RESPONSE && pendingRequest.expectedStatus === PARTIAL_CONTENT_RESPONSE;
+  if (!ok_response_on_range_request && xhrStatus !== pendingRequest.expectedStatus) {
+   if (pendingRequest.onError) {
+    pendingRequest.onError(xhr.status);
+   }
+   return;
+  }
+  this.loadedRequests[xhrId] = true;
+  var chunk = getArrayBuffer(xhr);
+  if (xhrStatus === PARTIAL_CONTENT_RESPONSE) {
+   var rangeHeader = xhr.getResponseHeader('Content-Range');
+   var matches = /bytes (\d+)-(\d+)\/(\d+)/.exec(rangeHeader);
+   var begin = parseInt(matches[1], 10);
+   pendingRequest.onDone({
+    begin: begin,
+    chunk: chunk
+   });
+  } else if (pendingRequest.onProgressiveData) {
+   pendingRequest.onDone(null);
+  } else if (chunk) {
+   pendingRequest.onDone({
+    begin: 0,
+    chunk: chunk
+   });
+  } else if (pendingRequest.onError) {
+   pendingRequest.onError(xhr.status);
+  }
+ },
+ hasPendingRequests: function NetworkManager_hasPendingRequests() {
+  for (var xhrId in this.pendingRequests) {
+   return true;
+  }
+  return false;
+ },
+ getRequestXhr: function NetworkManager_getXhr(xhrId) {
+  return this.pendingRequests[xhrId].xhr;
+ },
+ isStreamingRequest: function NetworkManager_isStreamingRequest(xhrId) {
+  return !!this.pendingRequests[xhrId].onProgressiveData;
+ },
+ isPendingRequest: function NetworkManager_isPendingRequest(xhrId) {
+  return xhrId in this.pendingRequests;
+ },
+ isLoadedRequest: function NetworkManager_isLoadedRequest(xhrId) {
+  return xhrId in this.loadedRequests;
+ },
+ abortAllRequests: function NetworkManager_abortAllRequests() {
+  for (var xhrId in this.pendingRequests) {
+   this.abortRequest(xhrId | 0);
+  }
+ },
+ abortRequest: function NetworkManager_abortRequest(xhrId) {
+  var xhr = this.pendingRequests[xhrId].xhr;
+  delete this.pendingRequests[xhrId];
+  xhr.abort();
+ }
+};
+var assert = sharedUtil.assert;
+var createPromiseCapability = sharedUtil.createPromiseCapability;
+var isInt = sharedUtil.isInt;
+var MissingPDFException = sharedUtil.MissingPDFException;
+var UnexpectedResponseException = sharedUtil.UnexpectedResponseException;
+function PDFNetworkStream(options) {
+ this._options = options;
+ var source = options.source;
+ this._manager = new NetworkManager(source.url, {
+  httpHeaders: source.httpHeaders,
+  withCredentials: source.withCredentials
+ });
+ this._rangeChunkSize = source.rangeChunkSize;
+ this._fullRequestReader = null;
+ this._rangeRequestReaders = [];
+}
+PDFNetworkStream.prototype = {
+ _onRangeRequestReaderClosed: function PDFNetworkStream_onRangeRequestReaderClosed(reader) {
+  var i = this._rangeRequestReaders.indexOf(reader);
+  if (i >= 0) {
+   this._rangeRequestReaders.splice(i, 1);
+  }
+ },
+ getFullReader: function PDFNetworkStream_getFullReader() {
+  assert(!this._fullRequestReader);
+  this._fullRequestReader = new PDFNetworkStreamFullRequestReader(this._manager, this._options);
+  return this._fullRequestReader;
+ },
+ getRangeReader: function PDFNetworkStream_getRangeReader(begin, end) {
+  var reader = new PDFNetworkStreamRangeRequestReader(this._manager, begin, end);
+  reader.onClosed = this._onRangeRequestReaderClosed.bind(this);
+  this._rangeRequestReaders.push(reader);
+  return reader;
+ },
+ cancelAllRequests: function PDFNetworkStream_cancelAllRequests(reason) {
+  if (this._fullRequestReader) {
+   this._fullRequestReader.cancel(reason);
+  }
+  var readers = this._rangeRequestReaders.slice(0);
+  readers.forEach(function (reader) {
+   reader.cancel(reason);
+  });
+ }
+};
+function PDFNetworkStreamFullRequestReader(manager, options) {
+ this._manager = manager;
+ var source = options.source;
+ var args = {
+  onHeadersReceived: this._onHeadersReceived.bind(this),
+  onProgressiveData: source.disableStream ? null : this._onProgressiveData.bind(this),
+  onDone: this._onDone.bind(this),
+  onError: this._onError.bind(this),
+  onProgress: this._onProgress.bind(this)
+ };
+ this._url = source.url;
+ this._fullRequestId = manager.requestFull(args);
+ this._headersReceivedCapability = createPromiseCapability();
+ this._disableRange = options.disableRange || false;
+ this._contentLength = source.length;
+ this._rangeChunkSize = source.rangeChunkSize;
+ if (!this._rangeChunkSize && !this._disableRange) {
+  this._disableRange = true;
+ }
+ this._isStreamingSupported = false;
+ this._isRangeSupported = false;
+ this._cachedChunks = [];
+ this._requests = [];
+ this._done = false;
+ this._storedError = undefined;
+ this.onProgress = null;
+}
+PDFNetworkStreamFullRequestReader.prototype = {
+ _validateRangeRequestCapabilities: function PDFNetworkStreamFullRequestReader_validateRangeRequestCapabilities() {
+  if (this._disableRange) {
+   return false;
+  }
+  var networkManager = this._manager;
+  if (!networkManager.isHttp) {
+   return false;
+  }
+  var fullRequestXhrId = this._fullRequestId;
+  var fullRequestXhr = networkManager.getRequestXhr(fullRequestXhrId);
+  if (fullRequestXhr.getResponseHeader('Accept-Ranges') !== 'bytes') {
+   return false;
+  }
+  var contentEncoding = fullRequestXhr.getResponseHeader('Content-Encoding') || 'identity';
+  if (contentEncoding !== 'identity') {
+   return false;
+  }
+  var length = fullRequestXhr.getResponseHeader('Content-Length');
+  length = parseInt(length, 10);
+  if (!isInt(length)) {
+   return false;
+  }
+  this._contentLength = length;
+  if (length <= 2 * this._rangeChunkSize) {
+   return false;
+  }
+  return true;
+ },
+ _onHeadersReceived: function PDFNetworkStreamFullRequestReader_onHeadersReceived() {
+  if (this._validateRangeRequestCapabilities()) {
+   this._isRangeSupported = true;
+  }
+  var networkManager = this._manager;
+  var fullRequestXhrId = this._fullRequestId;
+  if (networkManager.isStreamingRequest(fullRequestXhrId)) {
+   this._isStreamingSupported = true;
+  } else if (this._isRangeSupported) {
+   networkManager.abortRequest(fullRequestXhrId);
+  }
+  this._headersReceivedCapability.resolve();
+ },
+ _onProgressiveData: function PDFNetworkStreamFullRequestReader_onProgressiveData(chunk) {
+  if (this._requests.length > 0) {
+   var requestCapability = this._requests.shift();
+   requestCapability.resolve({
+    value: chunk,
+    done: false
+   });
+  } else {
+   this._cachedChunks.push(chunk);
+  }
+ },
+ _onDone: function PDFNetworkStreamFullRequestReader_onDone(args) {
+  if (args) {
+   this._onProgressiveData(args.chunk);
+  }
+  this._done = true;
+  if (this._cachedChunks.length > 0) {
+   return;
+  }
+  this._requests.forEach(function (requestCapability) {
+   requestCapability.resolve({
+    value: undefined,
+    done: true
+   });
+  });
+  this._requests = [];
+ },
+ _onError: function PDFNetworkStreamFullRequestReader_onError(status) {
+  var url = this._url;
+  var exception;
+  if (status === 404 || status === 0 && /^file:/.test(url)) {
+   exception = new MissingPDFException('Missing PDF "' + url + '".');
+  } else {
+   exception = new UnexpectedResponseException('Unexpected server response (' + status + ') while retrieving PDF "' + url + '".', status);
+  }
+  this._storedError = exception;
+  this._headersReceivedCapability.reject(exception);
+  this._requests.forEach(function (requestCapability) {
+   requestCapability.reject(exception);
+  });
+  this._requests = [];
+  this._cachedChunks = [];
+ },
+ _onProgress: function PDFNetworkStreamFullRequestReader_onProgress(data) {
+  if (this.onProgress) {
+   this.onProgress({
+    loaded: data.loaded,
+    total: data.lengthComputable ? data.total : this._contentLength
+   });
+  }
+ },
+ get isRangeSupported() {
+  return this._isRangeSupported;
+ },
+ get isStreamingSupported() {
+  return this._isStreamingSupported;
+ },
+ get contentLength() {
+  return this._contentLength;
+ },
+ get headersReady() {
+  return this._headersReceivedCapability.promise;
+ },
+ read: function PDFNetworkStreamFullRequestReader_read() {
+  if (this._storedError) {
+   return Promise.reject(this._storedError);
+  }
+  if (this._cachedChunks.length > 0) {
+   var chunk = this._cachedChunks.shift();
+   return Promise.resolve(chunk);
+  }
+  if (this._done) {
+   return Promise.resolve({
+    value: undefined,
+    done: true
+   });
+  }
+  var requestCapability = createPromiseCapability();
+  this._requests.push(requestCapability);
+  return requestCapability.promise;
+ },
+ cancel: function PDFNetworkStreamFullRequestReader_cancel(reason) {
+  this._done = true;
+  this._headersReceivedCapability.reject(reason);
+  this._requests.forEach(function (requestCapability) {
+   requestCapability.resolve({
+    value: undefined,
+    done: true
+   });
+  });
+  this._requests = [];
+  if (this._manager.isPendingRequest(this._fullRequestId)) {
+   this._manager.abortRequest(this._fullRequestId);
+  }
+  this._fullRequestReader = null;
+ }
+};
+function PDFNetworkStreamRangeRequestReader(manager, begin, end) {
+ this._manager = manager;
+ var args = {
+  onDone: this._onDone.bind(this),
+  onProgress: this._onProgress.bind(this)
+ };
+ this._requestId = manager.requestRange(begin, end, args);
+ this._requests = [];
+ this._queuedChunk = null;
+ this._done = false;
+ this.onProgress = null;
+ this.onClosed = null;
+}
+PDFNetworkStreamRangeRequestReader.prototype = {
+ _close: function PDFNetworkStreamRangeRequestReader_close() {
+  if (this.onClosed) {
+   this.onClosed(this);
+  }
+ },
+ _onDone: function PDFNetworkStreamRangeRequestReader_onDone(data) {
+  var chunk = data.chunk;
+  if (this._requests.length > 0) {
+   var requestCapability = this._requests.shift();
+   requestCapability.resolve({
+    value: chunk,
+    done: false
+   });
+  } else {
+   this._queuedChunk = chunk;
+  }
+  this._done = true;
+  this._requests.forEach(function (requestCapability) {
+   requestCapability.resolve({
+    value: undefined,
+    done: true
+   });
+  });
+  this._requests = [];
+  this._close();
+ },
+ _onProgress: function PDFNetworkStreamRangeRequestReader_onProgress(evt) {
+  if (!this.isStreamingSupported && this.onProgress) {
+   this.onProgress({ loaded: evt.loaded });
+  }
+ },
+ get isStreamingSupported() {
+  return false;
+ },
+ read: function PDFNetworkStreamRangeRequestReader_read() {
+  if (this._queuedChunk !== null) {
+   var chunk = this._queuedChunk;
+   this._queuedChunk = null;
+   return Promise.resolve({
+    value: chunk,
+    done: false
+   });
+  }
+  if (this._done) {
+   return Promise.resolve({
+    value: undefined,
+    done: true
+   });
+  }
+  var requestCapability = createPromiseCapability();
+  this._requests.push(requestCapability);
+  return requestCapability.promise;
+ },
+ cancel: function PDFNetworkStreamRangeRequestReader_cancel(reason) {
+  this._done = true;
+  this._requests.forEach(function (requestCapability) {
+   requestCapability.resolve({
+    value: undefined,
+    done: true
+   });
+  });
+  this._requests = [];
+  if (this._manager.isPendingRequest(this._requestId)) {
+   this._manager.abortRequest(this._requestId);
+  }
+  this._close();
+ }
+};
+coreWorker.setPDFNetworkStreamClass(PDFNetworkStream);
+exports.PDFNetworkStream = PDFNetworkStream;
+exports.NetworkManager = NetworkManager;
 
 /***/ }),
 /* 41 */
@@ -53796,8 +53798,8 @@ exports.getTilingPatternIR = getTilingPatternIR;
 
 var sharedUtil = __w_pdfjs_require__(0);
 var coreStream = __w_pdfjs_require__(2);
-var coreChunkedStream = __w_pdfjs_require__(16);
-var coreDocument = __w_pdfjs_require__(33);
+var coreChunkedStream = __w_pdfjs_require__(15);
+var coreDocument = __w_pdfjs_require__(32);
 var warn = sharedUtil.warn;
 var createValidAbsoluteUrl = sharedUtil.createValidAbsoluteUrl;
 var shadow = sharedUtil.shadow;
@@ -57283,19 +57285,15 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.278';
-var pdfjsBuild = 'f8879d98';
+var pdfjsVersion = '1.7.280';
+var pdfjsBuild = '1549a46e';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
-var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
-var pdfjsDisplayAPI = __w_pdfjs_require__(11);
-var pdfjsDisplayTextLayer = __w_pdfjs_require__(13);
-var pdfjsDisplayAnnotationLayer = __w_pdfjs_require__(10);
+var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
+var pdfjsDisplayAPI = __w_pdfjs_require__(10);
+var pdfjsDisplayTextLayer = __w_pdfjs_require__(12);
+var pdfjsDisplayAnnotationLayer = __w_pdfjs_require__(9);
 var pdfjsDisplayDOMUtils = __w_pdfjs_require__(3);
-var pdfjsDisplaySVG = __w_pdfjs_require__(12);
-{
- __w_pdfjs_require__(9);
- __w_pdfjs_require__(25);
-}
+var pdfjsDisplaySVG = __w_pdfjs_require__(11);
 exports.PDFJS = pdfjsDisplayGlobal.PDFJS;
 exports.build = pdfjsDisplayAPI.build;
 exports.version = pdfjsDisplayAPI.version;

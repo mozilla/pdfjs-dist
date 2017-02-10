@@ -4485,8 +4485,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.278';
-exports.build = 'f8879d98';
+exports.version = '1.7.280';
+exports.build = '1549a46e';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -6502,8 +6502,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.278';
-PDFJS.build = 'f8879d98';
+PDFJS.version = '1.7.280';
+PDFJS.build = '1549a46e';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -9188,8 +9188,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.278';
-var pdfjsBuild = 'f8879d98';
+var pdfjsVersion = '1.7.280';
+var pdfjsBuild = '1549a46e';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(8);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
@@ -9197,7 +9197,6 @@ var pdfjsDisplayTextLayer = __w_pdfjs_require__(5);
 var pdfjsDisplayAnnotationLayer = __w_pdfjs_require__(2);
 var pdfjsDisplayDOMUtils = __w_pdfjs_require__(1);
 var pdfjsDisplaySVG = __w_pdfjs_require__(4);
-;
 exports.PDFJS = pdfjsDisplayGlobal.PDFJS;
 exports.build = pdfjsDisplayAPI.build;
 exports.version = pdfjsDisplayAPI.version;
