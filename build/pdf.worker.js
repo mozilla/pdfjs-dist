@@ -13072,6 +13072,7 @@ var Lexer = function LexerClosure() {
     this.nextChar();
     return Cmd.get('}');
    case 0x29:
+    this.nextChar();
     error('Illegal character: ' + ch);
     break;
    }
@@ -50540,8 +50541,8 @@ exports.Type1Parser = Type1Parser;
 
 "use strict";
 
-var pdfjsVersion = '1.7.286';
-var pdfjsBuild = 'da08b801';
+var pdfjsVersion = '1.7.288';
+var pdfjsBuild = '41041c15';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(18);
