@@ -20771,8 +20771,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.282';
-exports.build = '466760ef';
+exports.version = '1.7.284';
+exports.build = '7be8bd9f';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -23421,8 +23421,8 @@ var CFFParser = function CFFParserClosure() {
    }
    var fontBBox = topDict.getByName('FontBBox');
    if (fontBBox) {
-    properties.ascent = fontBBox[3];
-    properties.descent = fontBBox[1];
+    properties.ascent = Math.max(fontBBox[3], fontBBox[1]);
+    properties.descent = Math.min(fontBBox[1], fontBBox[3]);
     properties.ascentScaled = true;
    }
    var charset, encoding;
@@ -39527,8 +39527,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.282';
-PDFJS.build = '466760ef';
+PDFJS.version = '1.7.284';
+PDFJS.build = '7be8bd9f';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -54709,8 +54709,8 @@ var Type1Parser = function Type1ParserClosure() {
      break;
     case 'FontBBox':
      var fontBBox = this.readNumberArray();
-     properties.ascent = fontBBox[3];
-     properties.descent = fontBBox[1];
+     properties.ascent = Math.max(fontBBox[3], fontBBox[1]);
+     properties.descent = Math.min(fontBBox[1], fontBBox[3]);
      properties.ascentScaled = true;
      break;
     }
@@ -57282,8 +57282,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.282';
-var pdfjsBuild = '466760ef';
+var pdfjsVersion = '1.7.284';
+var pdfjsBuild = '7be8bd9f';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);

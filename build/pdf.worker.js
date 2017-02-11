@@ -20547,8 +20547,8 @@ var CFFParser = function CFFParserClosure() {
    }
    var fontBBox = topDict.getByName('FontBBox');
    if (fontBBox) {
-    properties.ascent = fontBBox[3];
-    properties.descent = fontBBox[1];
+    properties.ascent = Math.max(fontBBox[3], fontBBox[1]);
+    properties.descent = Math.min(fontBBox[1], fontBBox[3]);
     properties.ascentScaled = true;
    }
    var charset, encoding;
@@ -50522,8 +50522,8 @@ var Type1Parser = function Type1ParserClosure() {
      break;
     case 'FontBBox':
      var fontBBox = this.readNumberArray();
-     properties.ascent = fontBBox[3];
-     properties.descent = fontBBox[1];
+     properties.ascent = Math.max(fontBBox[3], fontBBox[1]);
+     properties.descent = Math.min(fontBBox[1], fontBBox[3]);
      properties.ascentScaled = true;
      break;
     }
@@ -50540,8 +50540,8 @@ exports.Type1Parser = Type1Parser;
 
 "use strict";
 
-var pdfjsVersion = '1.7.282';
-var pdfjsBuild = '466760ef';
+var pdfjsVersion = '1.7.284';
+var pdfjsBuild = '7be8bd9f';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(18);
