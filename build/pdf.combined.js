@@ -20772,8 +20772,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.292';
-exports.build = 'fde609e8';
+exports.version = '1.7.294';
+exports.build = '8aad33e8';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -39533,8 +39533,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.292';
-PDFJS.build = 'fde609e8';
+PDFJS.version = '1.7.294';
+PDFJS.build = '8aad33e8';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -39682,6 +39682,7 @@ var Dict = corePrimitives.Dict;
 var isDict = corePrimitives.isDict;
 var isName = corePrimitives.isName;
 var isRef = corePrimitives.isRef;
+var isStream = corePrimitives.isStream;
 var Stream = coreStream.Stream;
 var ColorSpace = coreColorSpace.ColorSpace;
 var Catalog = coreObj.Catalog;
@@ -39775,30 +39776,13 @@ var Annotation = function AnnotationClosure() {
    rect[1] - minY * yRatio
   ];
  }
- function getDefaultAppearance(dict) {
-  var appearanceState = dict.get('AP');
-  if (!isDict(appearanceState)) {
-   return;
-  }
-  var appearance;
-  var appearances = appearanceState.get('N');
-  if (isDict(appearances)) {
-   var as = dict.get('AS');
-   if (as && appearances.has(as.name)) {
-    appearance = appearances.get(as.name);
-   }
-  } else {
-   appearance = appearances;
-  }
-  return appearance;
- }
  function Annotation(params) {
   var dict = params.dict;
   this.setFlags(dict.get('F'));
   this.setRectangle(dict.getArray('Rect'));
   this.setColor(dict.getArray('C'));
   this.setBorderStyle(dict);
-  this.appearance = getDefaultAppearance(dict);
+  this.setAppearance(dict);
   this.data = {};
   this.data.id = params.id;
   this.data.subtype = params.subtype;
@@ -39901,6 +39885,26 @@ var Annotation = function AnnotationClosure() {
    } else {
     this.borderStyle.setWidth(0);
    }
+  },
+  setAppearance: function Annotation_setAppearance(dict) {
+   this.appearance = null;
+   var appearanceStates = dict.get('AP');
+   if (!isDict(appearanceStates)) {
+    return;
+   }
+   var normalAppearanceState = appearanceStates.get('N');
+   if (isStream(normalAppearanceState)) {
+    this.appearance = normalAppearanceState;
+    return;
+   }
+   if (!isDict(normalAppearanceState)) {
+    return;
+   }
+   var as = dict.get('AS');
+   if (!isName(as) || !normalAppearanceState.has(as.name)) {
+    return;
+   }
+   this.appearance = normalAppearanceState.get(as.name);
   },
   _preparePopup: function Annotation_preparePopup(dict) {
    if (!dict.has('C')) {
@@ -57260,8 +57264,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.292';
-var pdfjsBuild = 'fde609e8';
+var pdfjsVersion = '1.7.294';
+var pdfjsBuild = '8aad33e8';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
