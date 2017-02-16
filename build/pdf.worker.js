@@ -41327,7 +41327,7 @@ var Font = function FontClosure() {
       useTable = true;
      } else if (platformId === 1 && encodingId === 0) {
       useTable = true;
-     } else if (platformId === 3 && encodingId === 1 && (!isSymbolicFont && hasEncoding || !potentialTable)) {
+     } else if (platformId === 3 && encodingId === 1 && (hasEncoding || !potentialTable)) {
       useTable = true;
       if (!isSymbolicFont) {
        canBreak = true;
@@ -50522,8 +50522,8 @@ exports.Type1Parser = Type1Parser;
 
 "use strict";
 
-var pdfjsVersion = '1.7.295';
-var pdfjsBuild = '63c472ce';
+var pdfjsVersion = '1.7.297';
+var pdfjsBuild = '425ad309';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(18);
