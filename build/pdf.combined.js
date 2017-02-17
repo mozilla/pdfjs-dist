@@ -221,6 +221,11 @@ var VERBOSITY_LEVELS = {
  warnings: 1,
  infos: 5
 };
+var CMapCompressionType = {
+ NONE: 0,
+ BINARY: 1,
+ STREAM: 2
+};
 var OPS = {
  dependency: 1,
  setLineWidth: 2,
@@ -2256,6 +2261,7 @@ exports.AnnotationFlag = AnnotationFlag;
 exports.AnnotationType = AnnotationType;
 exports.FontType = FontType;
 exports.ImageKind = ImageKind;
+exports.CMapCompressionType = CMapCompressionType;
 exports.InvalidPDFException = InvalidPDFException;
 exports.MessageHandler = MessageHandler;
 exports.MissingDataException = MissingDataException;
@@ -9118,6 +9124,8 @@ var removeNullCharacters = sharedUtil.removeNullCharacters;
 var warn = sharedUtil.warn;
 var deprecated = sharedUtil.deprecated;
 var createValidAbsoluteUrl = sharedUtil.createValidAbsoluteUrl;
+var stringToBytes = sharedUtil.stringToBytes;
+var CMapCompressionType = sharedUtil.CMapCompressionType;
 var DEFAULT_LINK_REL = 'noopener noreferrer nofollow';
 function DOMCanvasFactory() {
 }
@@ -9147,6 +9155,48 @@ DOMCanvasFactory.prototype = {
   canvasAndContextPair.context = null;
  }
 };
+var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
+ function DOMCMapReaderFactory(params) {
+  this.baseUrl = params.baseUrl || null;
+  this.isCompressed = params.isCompressed || false;
+ }
+ DOMCMapReaderFactory.prototype = {
+  fetch: function (params) {
+   if (!params.name) {
+    return Promise.reject(new Error('CMap name must be specified.'));
+   }
+   return new Promise(function (resolve, reject) {
+    var url = this.baseUrl + params.name;
+    var request = new XMLHttpRequest();
+    if (this.isCompressed) {
+     url += '.bcmap';
+     request.responseType = 'arraybuffer';
+    }
+    request.onreadystatechange = function () {
+     if (request.readyState === XMLHttpRequest.DONE && (request.status === 200 || request.status === 0)) {
+      var data;
+      if (this.isCompressed && request.response) {
+       data = new Uint8Array(request.response);
+      } else if (!this.isCompressed && request.responseText) {
+       data = stringToBytes(request.responseText);
+      }
+      if (data) {
+       resolve({
+        cMapData: data,
+        compressionType: this.isCompressed ? CMapCompressionType.BINARY : CMapCompressionType.NONE
+       });
+       return;
+      }
+      reject(new Error('Unable to load ' + (this.isCompressed ? 'binary' : '') + ' CMap at: ' + url));
+     }
+    }.bind(this);
+    request.open('GET', url, true);
+    request.send(null);
+   }.bind(this));
+  }
+ };
+ return DOMCMapReaderFactory;
+}();
 var CustomStyle = function CustomStyleClosure() {
  var prefixes = [
   'ms',
@@ -9310,6 +9360,7 @@ exports.hasCanvasTypedArrays = hasCanvasTypedArrays;
 exports.getDefaultSetting = getDefaultSetting;
 exports.DEFAULT_LINK_REL = DEFAULT_LINK_REL;
 exports.DOMCanvasFactory = DOMCanvasFactory;
+exports.DOMCMapReaderFactory = DOMCMapReaderFactory;
 
 /***/ }),
 /* 4 */
@@ -19575,6 +19626,7 @@ var CanvasGraphics = displayCanvas.CanvasGraphics;
 var Metadata = displayMetadata.Metadata;
 var getDefaultSetting = displayDOMUtils.getDefaultSetting;
 var DOMCanvasFactory = displayDOMUtils.DOMCanvasFactory;
+var DOMCMapReaderFactory = displayDOMUtils.DOMCMapReaderFactory;
 var DEFAULT_RANGE_CHUNK_SIZE = 65536;
 var isWorkerDisabled = false;
 var workerSrc;
@@ -19648,6 +19700,7 @@ function getDocument(src, pdfDataRangeTransport, passwordCallback, progressCallb
  }
  params.rangeChunkSize = params.rangeChunkSize || DEFAULT_RANGE_CHUNK_SIZE;
  params.disableNativeImageDecoder = params.disableNativeImageDecoder === true;
+ var CMapReaderFactory = params.CMapReaderFactory || DOMCMapReaderFactory;
  if (!worker) {
   worker = new PDFWorker();
   task._worker = worker;
@@ -19662,7 +19715,7 @@ function getDocument(src, pdfDataRangeTransport, passwordCallback, progressCallb
     throw new Error('Loading aborted');
    }
    var messageHandler = new MessageHandler(docId, workerId, worker.port);
-   var transport = new WorkerTransport(messageHandler, task, rangeTransport);
+   var transport = new WorkerTransport(messageHandler, task, rangeTransport, CMapReaderFactory);
    task._transport = transport;
    messageHandler.send('Ready', null);
   });
@@ -19685,8 +19738,6 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   source: source,
   disableRange: getDefaultSetting('disableRange'),
   maxImageSize: getDefaultSetting('maxImageSize'),
-  cMapUrl: getDefaultSetting('cMapUrl'),
-  cMapPacked: getDefaultSetting('cMapPacked'),
   disableFontFace: getDefaultSetting('disableFontFace'),
   disableCreateObjectURL: getDefaultSetting('disableCreateObjectURL'),
   postMessageTransfers: getDefaultSetting('postMessageTransfers') && !isPostMessageTransfersDisabled,
@@ -20221,12 +20272,16 @@ var PDFWorker = function PDFWorkerClosure() {
  return PDFWorker;
 }();
 var WorkerTransport = function WorkerTransportClosure() {
- function WorkerTransport(messageHandler, loadingTask, pdfDataRangeTransport) {
+ function WorkerTransport(messageHandler, loadingTask, pdfDataRangeTransport, CMapReaderFactory) {
   this.messageHandler = messageHandler;
   this.loadingTask = loadingTask;
   this.pdfDataRangeTransport = pdfDataRangeTransport;
   this.commonObjs = new PDFObjects();
   this.fontLoader = new FontLoader(loadingTask.docId);
+  this.CMapReaderFactory = new CMapReaderFactory({
+   baseUrl: getDefaultSetting('cMapUrl'),
+   isCompressed: getDefaultSetting('cMapPacked')
+  });
   this.destroyed = false;
   this.destroyCapability = null;
   this._passwordCapability = null;
@@ -20511,6 +20566,12 @@ var WorkerTransport = function WorkerTransportClosure() {
      img.src = imageUrl;
     });
    }, this);
+   messageHandler.on('FetchBuiltInCMap', function (data) {
+    if (this.destroyed) {
+     return Promise.reject(new Error('Worker was destroyed'));
+    }
+    return this.CMapReaderFactory.fetch({ name: data.name });
+   }, this);
   },
   getData: function WorkerTransport_getData() {
    return this.messageHandler.sendWithPromise('GetData', null);
@@ -20772,8 +20833,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.297';
-exports.build = '425ad309';
+exports.version = '1.7.300';
+exports.build = 'cfaa621a';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -29207,6 +29268,7 @@ var UNSUPPORTED_FEATURES = sharedUtil.UNSUPPORTED_FEATURES;
 var ImageKind = sharedUtil.ImageKind;
 var OPS = sharedUtil.OPS;
 var TextRenderingMode = sharedUtil.TextRenderingMode;
+var CMapCompressionType = sharedUtil.CMapCompressionType;
 var Util = sharedUtil.Util;
 var assert = sharedUtil.assert;
 var createPromiseCapability = sharedUtil.createPromiseCapability;
@@ -29265,10 +29327,6 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
   forceDataSchema: false,
   maxImageSize: -1,
   disableFontFace: false,
-  cMapOptions: {
-   url: null,
-   packed: false
-  },
   disableNativeImageDecoder: false
  };
  function NativeImageDecoder(xref, resources, handler, forceDataSchema) {
@@ -29312,14 +29370,27 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
   var cs = ColorSpace.parse(dict.get('ColorSpace', 'CS'), xref, res);
   return (cs.numComps === 1 || cs.numComps === 3) && cs.isDefaultDecode(dict.getArray('Decode', 'D'));
  };
- function PartialEvaluator(pdfManager, xref, handler, pageIndex, idFactory, fontCache, options) {
+ function PartialEvaluator(pdfManager, xref, handler, pageIndex, idFactory, fontCache, builtInCMapCache, options) {
   this.pdfManager = pdfManager;
   this.xref = xref;
   this.handler = handler;
   this.pageIndex = pageIndex;
   this.idFactory = idFactory;
   this.fontCache = fontCache;
+  this.builtInCMapCache = builtInCMapCache;
   this.options = options || DefaultPartialEvaluatorOptions;
+  this.fetchBuiltInCMap = function (name) {
+   var cachedCMap = builtInCMapCache[name];
+   if (cachedCMap) {
+    return Promise.resolve(cachedCMap);
+   }
+   return handler.sendWithPromise('FetchBuiltInCMap', { name: name }).then(function (data) {
+    if (data.compressionType !== CMapCompressionType.NONE) {
+     builtInCMapCache[name] = data;
+    }
+    return data;
+   });
+  };
  }
  var TIME_SLOT_DURATION_MS = 20;
  var CHECK_TIME_EVERY = 100;
@@ -30656,7 +30727,11 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     var registry = properties.cidSystemInfo.registry;
     var ordering = properties.cidSystemInfo.ordering;
     var ucs2CMapName = Name.get(registry + '-' + ordering + '-UCS2');
-    return CMapFactory.create(ucs2CMapName, this.options.cMapOptions, null).then(function (ucs2CMap) {
+    return CMapFactory.create({
+     encoding: ucs2CMapName,
+     fetchBuiltInCMap: this.fetchBuiltInCMap,
+     useCMap: null
+    }).then(function (ucs2CMap) {
      var cMap = properties.cMap;
      toUnicode = [];
      cMap.forEach(function (charcode, cid) {
@@ -30674,14 +30749,22 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
   readToUnicode: function PartialEvaluator_readToUnicode(toUnicode) {
    var cmapObj = toUnicode;
    if (isName(cmapObj)) {
-    return CMapFactory.create(cmapObj, this.options.cMapOptions, null).then(function (cmap) {
+    return CMapFactory.create({
+     encoding: cmapObj,
+     fetchBuiltInCMap: this.fetchBuiltInCMap,
+     useCMap: null
+    }).then(function (cmap) {
      if (cmap instanceof IdentityCMap) {
       return new IdentityToUnicodeMap(0, 0xFFFF);
      }
      return new ToUnicodeMap(cmap.getMap());
     });
    } else if (isStream(cmapObj)) {
-    return CMapFactory.create(cmapObj, this.options.cMapOptions, null).then(function (cmap) {
+    return CMapFactory.create({
+     encoding: cmapObj,
+     fetchBuiltInCMap: this.fetchBuiltInCMap,
+     useCMap: null
+    }).then(function (cmap) {
      if (cmap instanceof IdentityCMap) {
       return new IdentityToUnicodeMap(0, 0xFFFF);
      }
@@ -30944,7 +31027,6 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
    var descriptor = preEvaluatedFont.descriptor;
    var type = preEvaluatedFont.type;
    var maxCharIndex = composite ? 0xFFFF : 0xFF;
-   var cMapOptions = this.options.cMapOptions;
    var properties;
    if (!descriptor) {
     if (type === 'Type3') {
@@ -31039,7 +31121,11 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     if (isName(cidEncoding)) {
      properties.cidEncoding = cidEncoding.name;
     }
-    cMapPromise = CMapFactory.create(cidEncoding, cMapOptions, null).then(function (cMap) {
+    cMapPromise = CMapFactory.create({
+     encoding: cidEncoding,
+     fetchBuiltInCMap: this.fetchBuiltInCMap,
+     useCMap: null
+    }).then(function (cMap) {
      properties.cMap = cMap;
      properties.vertical = properties.cMap.vertical;
     });
@@ -34292,6 +34378,7 @@ var Catalog = function CatalogClosure() {
   this.xref = xref;
   this.catDict = xref.getCatalogObj();
   this.fontCache = new RefSetCache();
+  this.builtInCMapCache = Object.create(null);
   assert(isDict(this.catDict), 'catalog object is not a dictionary');
   this.pageFactory = pageFactory;
   this.pagePromises = [];
@@ -34606,6 +34693,7 @@ var Catalog = function CatalogClosure() {
      delete font.translated;
     }
     this.fontCache.clear();
+    this.builtInCMapCache = Object.create(null);
    }.bind(this));
   },
   getPage: function Catalog_getPage(pageIndex) {
@@ -34613,7 +34701,7 @@ var Catalog = function CatalogClosure() {
     this.pagePromises[pageIndex] = this.getPageDict(pageIndex).then(function (a) {
      var dict = a[0];
      var ref = a[1];
-     return this.pageFactory.createPage(pageIndex, dict, ref, this.fontCache);
+     return this.pageFactory.createPage(pageIndex, dict, ref, this.fontCache, this.builtInCMapCache);
     }.bind(this));
    }
    return this.pagePromises[pageIndex];
@@ -38823,15 +38911,10 @@ var WorkerMessageHandler = {
     }, onFailure);
    }
    ensureNotTerminated();
-   var cMapOptions = {
-    url: data.cMapUrl === undefined ? null : data.cMapUrl,
-    packed: data.cMapPacked === true
-   };
    var evaluatorOptions = {
     forceDataSchema: data.disableCreateObjectURL,
     maxImageSize: data.maxImageSize === undefined ? -1 : data.maxImageSize,
     disableFontFace: data.disableFontFace,
-    cMapOptions: cMapOptions,
     disableNativeImageDecoder: data.disableNativeImageDecoder
    };
    getPdfManager(data, evaluatorOptions).then(function (newPdfManager) {
@@ -39533,8 +39616,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.297';
-PDFJS.build = '425ad309';
+PDFJS.version = '1.7.300';
+PDFJS.build = 'cfaa621a';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -41618,11 +41701,12 @@ var error = sharedUtil.error;
 var isInt = sharedUtil.isInt;
 var isString = sharedUtil.isString;
 var MissingDataException = sharedUtil.MissingDataException;
+var CMapCompressionType = sharedUtil.CMapCompressionType;
 var isEOF = corePrimitives.isEOF;
 var isName = corePrimitives.isName;
 var isCmd = corePrimitives.isCmd;
 var isStream = corePrimitives.isStream;
-var StringStream = coreStream.StringStream;
+var Stream = coreStream.Stream;
 var Lexer = coreParser.Lexer;
 var BUILT_IN_CMAPS = [
  'Adobe-GB1-UCS2',
@@ -41957,23 +42041,6 @@ var IdentityCMap = function IdentityCMapClosure() {
  return IdentityCMap;
 }();
 var BinaryCMapReader = function BinaryCMapReaderClosure() {
- function fetchBinaryData(url) {
-  return new Promise(function (resolve, reject) {
-   var request = new XMLHttpRequest();
-   request.open('GET', url, true);
-   request.responseType = 'arraybuffer';
-   request.onreadystatechange = function () {
-    if (request.readyState === XMLHttpRequest.DONE) {
-     if (!request.response || request.status !== 200 && request.status !== 0) {
-      reject(new Error('Unable to get binary cMap at: ' + url));
-     } else {
-      resolve(new Uint8Array(request.response));
-     }
-    }
-   };
-   request.send(null);
-  });
- }
  function hexToInt(a, size) {
   var n = 0;
   for (var i = 0; i <= size; i++) {
@@ -42083,8 +42150,8 @@ var BinaryCMapReader = function BinaryCMapReaderClosure() {
    return s;
   }
  };
- function processBinaryCMap(url, cMap, extend) {
-  return fetchBinaryData(url).then(function (data) {
+ function processBinaryCMap(data, cMap, extend) {
+  return new Promise(function (resolve, reject) {
    var stream = new BinaryCMapStream(data);
    var header = stream.readByte();
    cMap.vertical = !!(header & 1);
@@ -42215,19 +42282,20 @@ var BinaryCMapReader = function BinaryCMapReaderClosure() {
      }
      break;
     default:
-     error('Unknown type: ' + type);
-     break;
+     reject(new Error('processBinaryCMap: Unknown type: ' + type));
+     return;
     }
    }
    if (useCMap) {
-    return extend(useCMap);
+    resolve(extend(useCMap));
+    return;
    }
-   return cMap;
+   resolve(cMap);
   });
  }
  function BinaryCMapReader() {
  }
- BinaryCMapReader.prototype = { read: processBinaryCMap };
+ BinaryCMapReader.prototype = { process: processBinaryCMap };
  return BinaryCMapReader;
 }();
 var CMapFactory = function CMapFactoryClosure() {
@@ -42368,7 +42436,7 @@ var CMapFactory = function CMapFactoryClosure() {
    cMap.name = obj.name;
   }
  }
- function parseCMap(cMap, lexer, builtInCMapParams, useCMap) {
+ function parseCMap(cMap, lexer, fetchBuiltInCMap, useCMap) {
   var previous;
   var embededUseCMap;
   objLoop:
@@ -42422,12 +42490,12 @@ var CMapFactory = function CMapFactoryClosure() {
    useCMap = embededUseCMap;
   }
   if (useCMap) {
-   return extendCMap(cMap, builtInCMapParams, useCMap);
+   return extendCMap(cMap, fetchBuiltInCMap, useCMap);
   }
   return Promise.resolve(cMap);
  }
- function extendCMap(cMap, builtInCMapParams, useCMap) {
-  return createBuiltInCMap(useCMap, builtInCMapParams).then(function (newCMap) {
+ function extendCMap(cMap, fetchBuiltInCMap, useCMap) {
+  return createBuiltInCMap(useCMap, fetchBuiltInCMap).then(function (newCMap) {
    cMap.useCMap = newCMap;
    if (cMap.numCodespaceRanges === 0) {
     var useCodespaceRanges = cMap.useCMap.codespaceRanges;
@@ -42444,14 +42512,7 @@ var CMapFactory = function CMapFactoryClosure() {
    return cMap;
   });
  }
- function parseBinaryCMap(name, builtInCMapParams) {
-  var url = builtInCMapParams.url + name + '.bcmap';
-  var cMap = new CMap(true);
-  return new BinaryCMapReader().read(url, cMap, function (useCMap) {
-   return extendCMap(cMap, builtInCMapParams, useCMap);
-  });
- }
- function createBuiltInCMap(name, builtInCMapParams) {
+ function createBuiltInCMap(name, fetchBuiltInCMap) {
   if (name === 'Identity-H') {
    return Promise.resolve(new IdentityCMap(false, 2));
   } else if (name === 'Identity-V') {
@@ -42460,40 +42521,33 @@ var CMapFactory = function CMapFactoryClosure() {
   if (BUILT_IN_CMAPS.indexOf(name) === -1) {
    return Promise.reject(new Error('Unknown cMap name: ' + name));
   }
-  assert(builtInCMapParams, 'built-in cMap parameters are not provided');
-  if (builtInCMapParams.packed) {
-   return parseBinaryCMap(name, builtInCMapParams);
-  }
-  return new Promise(function (resolve, reject) {
-   var url = builtInCMapParams.url + name;
-   var request = new XMLHttpRequest();
-   request.onreadystatechange = function () {
-    if (request.readyState === XMLHttpRequest.DONE) {
-     if (request.status === 200 || request.status === 0) {
-      var cMap = new CMap(true);
-      var lexer = new Lexer(new StringStream(request.responseText));
-      parseCMap(cMap, lexer, builtInCMapParams, null).then(function (parsedCMap) {
-       resolve(parsedCMap);
-      });
-     } else {
-      reject(new Error('Unable to get cMap at: ' + url));
-     }
-    }
-   };
-   request.open('GET', url, true);
-   request.send(null);
+  assert(fetchBuiltInCMap, 'Built-in CMap parameters are not provided.');
+  return fetchBuiltInCMap(name).then(function (data) {
+   var cMapData = data.cMapData, compressionType = data.compressionType;
+   var cMap = new CMap(true);
+   if (compressionType === CMapCompressionType.BINARY) {
+    return new BinaryCMapReader().process(cMapData, cMap, function (useCMap) {
+     return extendCMap(cMap, fetchBuiltInCMap, useCMap);
+    });
+   }
+   assert(compressionType === CMapCompressionType.NONE, 'TODO: Only BINARY/NONE CMap compression is currently supported.');
+   var lexer = new Lexer(new Stream(cMapData));
+   return parseCMap(cMap, lexer, fetchBuiltInCMap, null);
   });
  }
  return {
-  create: function (encoding, builtInCMapParams, useCMap) {
+  create: function (params) {
+   var encoding = params.encoding;
+   var fetchBuiltInCMap = params.fetchBuiltInCMap;
+   var useCMap = params.useCMap;
    if (isName(encoding)) {
-    return createBuiltInCMap(encoding.name, builtInCMapParams);
+    return createBuiltInCMap(encoding.name, fetchBuiltInCMap);
    } else if (isStream(encoding)) {
     var cMap = new CMap();
     var lexer = new Lexer(encoding);
-    return parseCMap(cMap, lexer, builtInCMapParams, useCMap).then(function (parsedCMap) {
+    return parseCMap(cMap, lexer, fetchBuiltInCMap, useCMap).then(function (parsedCMap) {
      if (parsedCMap.isIdentityCMap) {
-      return createBuiltInCMap(parsedCMap.name, builtInCMapParams);
+      return createBuiltInCMap(parsedCMap.name, fetchBuiltInCMap);
      }
      return parsedCMap;
     });
@@ -42558,13 +42612,14 @@ var Page = function PageClosure() {
   612,
   792
  ];
- function Page(pdfManager, xref, pageIndex, pageDict, ref, fontCache) {
+ function Page(pdfManager, xref, pageIndex, pageDict, ref, fontCache, builtInCMapCache) {
   this.pdfManager = pdfManager;
   this.pageIndex = pageIndex;
   this.pageDict = pageDict;
   this.xref = xref;
   this.ref = ref;
   this.fontCache = fontCache;
+  this.builtInCMapCache = builtInCMapCache;
   this.evaluatorOptions = pdfManager.evaluatorOptions;
   this.resourcesPromise = null;
   var uniquePrefix = 'p' + this.pageIndex + '_';
@@ -42690,7 +42745,7 @@ var Page = function PageClosure() {
     'XObject',
     'Font'
    ]);
-   var partialEvaluator = new PartialEvaluator(pdfManager, this.xref, handler, this.pageIndex, this.idFactory, this.fontCache, this.evaluatorOptions);
+   var partialEvaluator = new PartialEvaluator(pdfManager, this.xref, handler, this.pageIndex, this.idFactory, this.fontCache, this.builtInCMapCache, this.evaluatorOptions);
    var dataPromises = Promise.all([
     contentStreamPromise,
     resourcesPromise
@@ -42746,7 +42801,7 @@ var Page = function PageClosure() {
    ]);
    return dataPromises.then(function (data) {
     var contentStream = data[0];
-    var partialEvaluator = new PartialEvaluator(pdfManager, self.xref, handler, self.pageIndex, self.idFactory, self.fontCache, self.evaluatorOptions);
+    var partialEvaluator = new PartialEvaluator(pdfManager, self.xref, handler, self.pageIndex, self.idFactory, self.fontCache, self.builtInCMapCache, self.evaluatorOptions);
     return partialEvaluator.getTextContent(contentStream, task, self.resources, null, normalizeWhitespace, combineTextItems);
    });
   },
@@ -42939,8 +42994,8 @@ var PDFDocument = function PDFDocumentClosure() {
    this.xref.parse(recoveryMode);
    var self = this;
    var pageFactory = {
-    createPage: function (pageIndex, dict, ref, fontCache) {
-     return new Page(self.pdfManager, self.xref, pageIndex, dict, ref, fontCache);
+    createPage: function (pageIndex, dict, ref, fontCache, builtInCMapCache) {
+     return new Page(self.pdfManager, self.xref, pageIndex, dict, ref, fontCache, builtInCMapCache);
     }
    };
    this.catalog = new Catalog(this.pdfManager, this.xref, pageFactory);
@@ -57264,8 +57319,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.297';
-var pdfjsBuild = '425ad309';
+var pdfjsVersion = '1.7.300';
+var pdfjsBuild = 'cfaa621a';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
