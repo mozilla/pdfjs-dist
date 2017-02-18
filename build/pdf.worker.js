@@ -1204,6 +1204,12 @@ function isArrayBuffer(v) {
 function isSpace(ch) {
  return ch === 0x20 || ch === 0x09 || ch === 0x0D || ch === 0x0A;
 }
+function isNodeJS() {
+ if (typeof __pdfjsdev_webpack__ === 'undefined') {
+  return typeof process === 'object' && process + '' === '[object process]';
+ }
+ return false;
+}
 function createPromiseCapability() {
  var capability = {};
  capability.promise = new Promise(function (resolve, reject) {
@@ -2298,6 +2304,7 @@ exports.isInt = isInt;
 exports.isNum = isNum;
 exports.isString = isString;
 exports.isSpace = isSpace;
+exports.isNodeJS = isNodeJS;
 exports.isSameOrigin = isSameOrigin;
 exports.createValidAbsoluteUrl = createValidAbsoluteUrl;
 exports.isLittleEndian = isLittleEndian;
@@ -18738,6 +18745,7 @@ var error = sharedUtil.error;
 var info = sharedUtil.info;
 var warn = sharedUtil.warn;
 var setVerbosityLevel = sharedUtil.setVerbosityLevel;
+var isNodeJS = sharedUtil.isNodeJS;
 var Ref = corePrimitives.Ref;
 var LocalPdfManager = corePdfManager.LocalPdfManager;
 var NetworkPdfManager = corePdfManager.NetworkPdfManager;
@@ -19427,12 +19435,6 @@ function initializeWorker() {
  var handler = new MessageHandler('worker', 'main', self);
  WorkerMessageHandler.setup(handler, self);
  handler.send('ready', null);
-}
-function isNodeJS() {
- if (typeof __pdfjsdev_webpack__ === 'undefined') {
-  return typeof process === 'object' && process + '' === '[object process]';
- }
- return false;
 }
 if (typeof window === 'undefined' && !isNodeJS()) {
  initializeWorker();
@@ -50522,8 +50524,8 @@ exports.Type1Parser = Type1Parser;
 
 "use strict";
 
-var pdfjsVersion = '1.7.300';
-var pdfjsBuild = 'cfaa621a';
+var pdfjsVersion = '1.7.302';
+var pdfjsBuild = 'f99e4e46';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(18);

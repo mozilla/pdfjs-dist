@@ -1204,6 +1204,12 @@ function isArrayBuffer(v) {
 function isSpace(ch) {
  return ch === 0x20 || ch === 0x09 || ch === 0x0D || ch === 0x0A;
 }
+function isNodeJS() {
+ if (typeof __pdfjsdev_webpack__ === 'undefined') {
+  return typeof process === 'object' && process + '' === '[object process]';
+ }
+ return false;
+}
 function createPromiseCapability() {
  var capability = {};
  capability.promise = new Promise(function (resolve, reject) {
@@ -2298,6 +2304,7 @@ exports.isInt = isInt;
 exports.isNum = isNum;
 exports.isString = isString;
 exports.isSpace = isSpace;
+exports.isNodeJS = isNodeJS;
 exports.isSameOrigin = isSameOrigin;
 exports.createValidAbsoluteUrl = createValidAbsoluteUrl;
 exports.isLittleEndian = isLittleEndian;
@@ -4546,8 +4553,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.300';
-exports.build = 'cfaa621a';
+exports.version = '1.7.302';
+exports.build = 'f99e4e46';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -6563,8 +6570,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.300';
-PDFJS.build = 'cfaa621a';
+PDFJS.version = '1.7.302';
+PDFJS.build = 'f99e4e46';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -9246,8 +9253,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.300';
-var pdfjsBuild = 'cfaa621a';
+var pdfjsVersion = '1.7.302';
+var pdfjsBuild = 'f99e4e46';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(8);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
