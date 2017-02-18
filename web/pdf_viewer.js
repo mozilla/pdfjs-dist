@@ -342,8 +342,11 @@ function getVisibleElements(scrollEl, views, sortByVisibility) {
 function noContextMenuHandler(e) {
  e.preventDefault();
 }
-function getPDFFileNameFromURL(url) {
- var reURI = /^(?:([^:]+:)?\/\/[^\/]+)?([^?#]*)(\?[^#]*)?(#.*)?$/;
+function getPDFFileNameFromURL(url, defaultFilename) {
+ if (typeof defaultFilename === 'undefined') {
+  defaultFilename = 'document.pdf';
+ }
+ var reURI = /^(?:(?:[^:]+:)?\/\/[^\/]+)?([^?#]*)(\?[^#]*)?(#.*)?$/;
  var reFilename = /[^\/?#=]+\.pdf\b(?!.*\.pdf\b)/i;
  var splitURI = reURI.exec(url);
  var suggestedFilename = reFilename.exec(splitURI[1]) || reFilename.exec(splitURI[2]) || reFilename.exec(splitURI[3]);
@@ -356,7 +359,7 @@ function getPDFFileNameFromURL(url) {
    }
   }
  }
- return suggestedFilename || 'document.pdf';
+ return suggestedFilename || defaultFilename;
 }
 function normalizeWheelEventDelta(evt) {
  var delta = Math.sqrt(evt.deltaX * evt.deltaX + evt.deltaY * evt.deltaY);
