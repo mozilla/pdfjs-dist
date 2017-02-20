@@ -1970,14 +1970,14 @@ DownloadManager.prototype = {
   download(blobUrl, filename);
  },
  download: function DownloadManager_download(blob, url, filename) {
-  if (!URL) {
-   this.downloadUrl(url, filename);
-   return;
-  }
   if (navigator.msSaveBlob) {
    if (!navigator.msSaveBlob(blob, filename)) {
     this.downloadUrl(url, filename);
    }
+   return;
+  }
+  if (pdfjsLib.PDFJS.disableCreateObjectURL) {
+   this.downloadUrl(url, filename);
    return;
   }
   var blobUrl = URL.createObjectURL(blob);
