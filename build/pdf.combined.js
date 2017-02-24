@@ -20840,8 +20840,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.312';
-exports.build = 'cada411a';
+exports.version = '1.7.314';
+exports.build = '912c952d';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -34718,7 +34718,6 @@ var Catalog = function CatalogClosure() {
    var nodesToVisit = [this.catDict.getRaw('Pages')];
    var currentPageIndex = 0;
    var xref = this.xref;
-   var checkAllKids = false;
    function next() {
     while (nodesToVisit.length) {
      var currentNode = nodesToVisit.pop();
@@ -34743,23 +34742,14 @@ var Catalog = function CatalogClosure() {
      }
      assert(isDict(currentNode), 'page dictionary kid reference points to wrong type of object');
      var count = currentNode.get('Count');
-     if (count === 0) {
-      checkAllKids = true;
-     }
      if (currentPageIndex + count <= pageIndex) {
       currentPageIndex += count;
       continue;
      }
      var kids = currentNode.get('Kids');
      assert(isArray(kids), 'page dictionary kids object is not an array');
-     if (!checkAllKids && count === kids.length) {
-      nodesToVisit = [kids[pageIndex - currentPageIndex]];
-      currentPageIndex = pageIndex;
-      continue;
-     } else {
-      for (var last = kids.length - 1; last >= 0; last--) {
-       nodesToVisit.push(kids[last]);
-      }
+     for (var last = kids.length - 1; last >= 0; last--) {
+      nodesToVisit.push(kids[last]);
      }
     }
     capability.reject('Page index ' + pageIndex + ' not found.');
@@ -39618,8 +39608,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.312';
-PDFJS.build = 'cada411a';
+PDFJS.version = '1.7.314';
+PDFJS.build = '912c952d';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -57321,8 +57311,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.312';
-var pdfjsBuild = 'cada411a';
+var pdfjsVersion = '1.7.314';
+var pdfjsBuild = '912c952d';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);

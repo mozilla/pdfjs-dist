@@ -31784,7 +31784,6 @@ var Catalog = function CatalogClosure() {
    var nodesToVisit = [this.catDict.getRaw('Pages')];
    var currentPageIndex = 0;
    var xref = this.xref;
-   var checkAllKids = false;
    function next() {
     while (nodesToVisit.length) {
      var currentNode = nodesToVisit.pop();
@@ -31809,23 +31808,14 @@ var Catalog = function CatalogClosure() {
      }
      assert(isDict(currentNode), 'page dictionary kid reference points to wrong type of object');
      var count = currentNode.get('Count');
-     if (count === 0) {
-      checkAllKids = true;
-     }
      if (currentPageIndex + count <= pageIndex) {
       currentPageIndex += count;
       continue;
      }
      var kids = currentNode.get('Kids');
      assert(isArray(kids), 'page dictionary kids object is not an array');
-     if (!checkAllKids && count === kids.length) {
-      nodesToVisit = [kids[pageIndex - currentPageIndex]];
-      currentPageIndex = pageIndex;
-      continue;
-     } else {
-      for (var last = kids.length - 1; last >= 0; last--) {
-       nodesToVisit.push(kids[last]);
-      }
+     for (var last = kids.length - 1; last >= 0; last--) {
+      nodesToVisit.push(kids[last]);
      }
     }
     capability.reject('Page index ' + pageIndex + ' not found.');
@@ -50524,8 +50514,8 @@ exports.Type1Parser = Type1Parser;
 
 "use strict";
 
-var pdfjsVersion = '1.7.312';
-var pdfjsBuild = 'cada411a';
+var pdfjsVersion = '1.7.314';
+var pdfjsBuild = '912c952d';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(18);
