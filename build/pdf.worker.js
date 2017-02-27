@@ -35434,21 +35434,6 @@ var Annotation = function AnnotationClosure() {
    });
   }
  };
- Annotation.appendToOperatorList = function Annotation_appendToOperatorList(annotations, opList, partialEvaluator, task, intent, renderForms) {
-  var annotationPromises = [];
-  for (var i = 0, n = annotations.length; i < n; ++i) {
-   if (intent === 'display' && annotations[i].viewable || intent === 'print' && annotations[i].printable) {
-    annotationPromises.push(annotations[i].getOperatorList(partialEvaluator, task, renderForms));
-   }
-  }
-  return Promise.all(annotationPromises).then(function (operatorLists) {
-   opList.addOp(OPS.beginAnnotations, []);
-   for (var i = 0, n = operatorLists.length; i < n; ++i) {
-    opList.addOpList(operatorLists[i]);
-   }
-   opList.addOp(OPS.endAnnotations, []);
-  });
- };
  return Annotation;
 }();
 var AnnotationBorderStyle = function AnnotationBorderStyleClosure() {
@@ -37952,6 +37937,7 @@ var coreParser = __w_pdfjs_require__(5);
 var coreCrypto = __w_pdfjs_require__(13);
 var coreEvaluator = __w_pdfjs_require__(14);
 var coreAnnotation = __w_pdfjs_require__(20);
+var OPS = sharedUtil.OPS;
 var MissingDataException = sharedUtil.MissingDataException;
 var Util = sharedUtil.Util;
 var assert = sharedUtil.assert;
@@ -37980,7 +37966,6 @@ var Linearization = coreParser.Linearization;
 var calculateMD5 = coreCrypto.calculateMD5;
 var OperatorList = coreEvaluator.OperatorList;
 var PartialEvaluator = coreEvaluator.PartialEvaluator;
-var Annotation = coreAnnotation.Annotation;
 var AnnotationFactory = coreAnnotation.AnnotationFactory;
 var Page = function PageClosure() {
  var DEFAULT_USER_UNIT = 1.0;
@@ -37990,6 +37975,9 @@ var Page = function PageClosure() {
   612,
   792
  ];
+ function isAnnotationRenderable(annotation, intent) {
+  return intent === 'display' && annotation.viewable || intent === 'print' && annotation.printable;
+ }
  function Page(pdfManager, xref, pageIndex, pageDict, ref, fontCache, builtInCMapCache) {
   this.pdfManager = pdfManager;
   this.pageIndex = pageIndex;
@@ -38151,8 +38139,18 @@ var Page = function PageClosure() {
      pageOpList.flush(true);
      return pageOpList;
     }
-    var annotationsReadyPromise = Annotation.appendToOperatorList(annotations, pageOpList, partialEvaluator, task, intent, renderInteractiveForms);
-    return annotationsReadyPromise.then(function () {
+    var i, ii, opListPromises = [];
+    for (i = 0, ii = annotations.length; i < ii; i++) {
+     if (isAnnotationRenderable(annotations[i], intent)) {
+      opListPromises.push(annotations[i].getOperatorList(partialEvaluator, task, renderInteractiveForms));
+     }
+    }
+    return Promise.all(opListPromises).then(function (opLists) {
+     pageOpList.addOp(OPS.beginAnnotations, []);
+     for (i = 0, ii = opLists.length; i < ii; i++) {
+      pageOpList.addOpList(opLists[i]);
+     }
+     pageOpList.addOp(OPS.endAnnotations, []);
      pageOpList.flush(true);
      return pageOpList;
     });
@@ -38187,12 +38185,9 @@ var Page = function PageClosure() {
    var annotations = this.annotations;
    var annotationsData = [];
    for (var i = 0, n = annotations.length; i < n; ++i) {
-    if (intent) {
-     if (!(intent === 'display' && annotations[i].viewable) && !(intent === 'print' && annotations[i].printable)) {
-      continue;
-     }
+    if (!intent || isAnnotationRenderable(annotations[i], intent)) {
+     annotationsData.push(annotations[i].data);
     }
-    annotationsData.push(annotations[i].data);
    }
    return annotationsData;
   },
@@ -51069,8 +51064,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.325';
-var pdfjsBuild = '9db4240b';
+var pdfjsVersion = '1.7.327';
+var pdfjsBuild = '4e201d37';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
