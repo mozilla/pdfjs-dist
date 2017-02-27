@@ -35667,7 +35667,7 @@ var ChoiceWidgetAnnotation = function ChoiceWidgetAnnotationClosure() {
  function ChoiceWidgetAnnotation(params) {
   WidgetAnnotation.call(this, params);
   this.data.options = [];
-  var options = params.dict.get('Opt');
+  var options = Util.getInheritableProperty(params.dict, 'Opt');
   if (isArray(options)) {
    var xref = params.xref;
    for (var i = 0, ii = options.length; i < ii; i++) {
@@ -51069,8 +51069,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.323';
-var pdfjsBuild = '1da7123f';
+var pdfjsVersion = '1.7.325';
+var pdfjsBuild = '9db4240b';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
