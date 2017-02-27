@@ -31572,6 +31572,9 @@ var XRef = function XRefClosure() {
    var num = ref.num;
    if (num in this.cache) {
     var cacheEntry = this.cache[num];
+    if (isDict(cacheEntry) && !cacheEntry.objId) {
+     cacheEntry.objId = ref.toString();
+    }
     return cacheEntry;
    }
    var xrefEntry = this.getEntry(num);
@@ -51066,8 +51069,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.316';
-var pdfjsBuild = '59392fd5';
+var pdfjsVersion = '1.7.323';
+var pdfjsBuild = '1da7123f';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
