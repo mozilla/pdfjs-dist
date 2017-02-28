@@ -51064,8 +51064,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.329';
-var pdfjsBuild = '25f772a2';
+var pdfjsVersion = '1.7.331';
+var pdfjsBuild = 'b75d53a7';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
