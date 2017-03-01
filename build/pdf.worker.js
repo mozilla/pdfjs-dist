@@ -31126,10 +31126,13 @@ var Catalog = function CatalogClosure() {
       'app.launchURL',
       'window.open'
      ];
-     var regex = new RegExp('^(?:' + URL_OPEN_METHODS.join('|') + ')' + '\\((?:\'|\")(\\S+)(?:\'|\")(?:,|\\))');
-     var jsUrl = regex.exec(stringToPDFString(js), 'i');
-     if (jsUrl && jsUrl[1]) {
-      url = jsUrl[1];
+     var regex = new RegExp('^\\s*(' + URL_OPEN_METHODS.join('|').split('.').join('\\.') + ')\\((?:\'|\")([^\'\"]*)(?:\'|\")(?:,\\s*(\\w+)\\)|\\))', 'i');
+     var jsUrl = regex.exec(stringToPDFString(js));
+     if (jsUrl && jsUrl[2]) {
+      url = jsUrl[2];
+      if (jsUrl[3] === 'true' && jsUrl[1] === 'app.launchURL') {
+       resultObj.newWindow = true;
+      }
       break;
      }
     }
@@ -51064,8 +51067,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.331';
-var pdfjsBuild = 'b75d53a7';
+var pdfjsVersion = '1.7.337';
+var pdfjsBuild = '9163a6fb';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
