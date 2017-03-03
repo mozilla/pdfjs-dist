@@ -34635,6 +34635,7 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 
 var sharedUtil = __w_pdfjs_require__(0);
 var coreWorker = __w_pdfjs_require__(8);
+var globalScope = sharedUtil.globalScope;
 var OK_RESPONSE = 200;
 var PARTIAL_CONTENT_RESPONSE = 206;
 function NetworkManager(url, args) {
@@ -34665,7 +34666,7 @@ function getArrayBuffer(xhr) {
 var supportsMozChunked = function supportsMozChunkedClosure() {
  try {
   var x = new XMLHttpRequest();
-  x.open('GET', 'https://example.com');
+  x.open('GET', globalScope.location.href);
   x.responseType = 'moz-chunked-arraybuffer';
   return x.responseType === 'moz-chunked-arraybuffer';
  } catch (e) {
@@ -51067,8 +51068,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.339';
-var pdfjsBuild = '24e5b6ee';
+var pdfjsVersion = '1.7.341';
+var pdfjsBuild = '1eb96d7c';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
