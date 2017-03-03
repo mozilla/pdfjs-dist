@@ -38009,7 +38009,7 @@ var Page = function PageClosure() {
    getArray = getArray || false;
    while (dict) {
     var value = getArray ? dict.getArray(key) : dict.get(key);
-    if (value) {
+    if (value !== undefined) {
      if (!valueArray) {
       valueArray = [];
      }
@@ -51067,8 +51067,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.337';
-var pdfjsBuild = '9163a6fb';
+var pdfjsVersion = '1.7.339';
+var pdfjsBuild = '24e5b6ee';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
