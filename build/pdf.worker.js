@@ -42183,10 +42183,14 @@ var CFFFont = function CFFFontClosure() {
   SKIP_PRIVATE_USE_RANGE_F000_TO_F01F = true;
  }
 }());
+exports.SEAC_ANALYSIS_ENABLED = SEAC_ANALYSIS_ENABLED;
+exports.PRIVATE_USE_OFFSET_START = PRIVATE_USE_OFFSET_START;
+exports.PRIVATE_USE_OFFSET_END = PRIVATE_USE_OFFSET_END;
 exports.ErrorFont = ErrorFont;
 exports.Font = Font;
 exports.FontFlags = FontFlags;
 exports.IdentityToUnicodeMap = IdentityToUnicodeMap;
+exports.ProblematicCharRanges = ProblematicCharRanges;
 exports.ToUnicodeMap = ToUnicodeMap;
 exports.getFontType = getFontType;
 
@@ -51068,8 +51072,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.341';
-var pdfjsBuild = '1eb96d7c';
+var pdfjsVersion = '1.7.344';
+var pdfjsBuild = 'c2905614';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
