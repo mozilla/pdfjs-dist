@@ -38017,15 +38017,15 @@ var Page = function PageClosure() {
      valueArray.push(value);
     }
     if (++loopCount > MAX_LOOP_COUNT) {
-     warn('Page_getInheritedPageProp: maximum loop count exceeded.');
-     break;
+     warn('getInheritedPageProp: maximum loop count exceeded for ' + key);
+     return valueArray ? valueArray[0] : undefined;
     }
     dict = dict.get('Parent');
    }
    if (!valueArray) {
-    return Dict.empty;
+    return undefined;
    }
-   if (valueArray.length === 1 || !isDict(valueArray[0]) || loopCount > MAX_LOOP_COUNT) {
+   if (valueArray.length === 1 || !isDict(valueArray[0])) {
     return valueArray[0];
    }
    return Dict.merge(this.xref, valueArray);
@@ -38034,7 +38034,7 @@ var Page = function PageClosure() {
    return this.getPageProp('Contents');
   },
   get resources() {
-   return shadow(this, 'resources', this.getInheritedPageProp('Resources'));
+   return shadow(this, 'resources', this.getInheritedPageProp('Resources') || Dict.empty);
   },
   get mediaBox() {
    var mediaBox = this.getInheritedPageProp('MediaBox', true);
@@ -51072,8 +51072,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.344';
-var pdfjsBuild = 'c2905614';
+var pdfjsVersion = '1.7.346';
+var pdfjsBuild = '4e3e97be';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);

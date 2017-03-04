@@ -20022,8 +20022,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.344';
-exports.build = 'c2905614';
+exports.version = '1.7.346';
+exports.build = '4e3e97be';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -38777,8 +38777,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.344';
-PDFJS.build = 'c2905614';
+PDFJS.version = '1.7.346';
+PDFJS.build = '4e3e97be';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -41781,15 +41781,15 @@ var Page = function PageClosure() {
      valueArray.push(value);
     }
     if (++loopCount > MAX_LOOP_COUNT) {
-     warn('Page_getInheritedPageProp: maximum loop count exceeded.');
-     break;
+     warn('getInheritedPageProp: maximum loop count exceeded for ' + key);
+     return valueArray ? valueArray[0] : undefined;
     }
     dict = dict.get('Parent');
    }
    if (!valueArray) {
-    return Dict.empty;
+    return undefined;
    }
-   if (valueArray.length === 1 || !isDict(valueArray[0]) || loopCount > MAX_LOOP_COUNT) {
+   if (valueArray.length === 1 || !isDict(valueArray[0])) {
     return valueArray[0];
    }
    return Dict.merge(this.xref, valueArray);
@@ -41798,7 +41798,7 @@ var Page = function PageClosure() {
    return this.getPageProp('Contents');
   },
   get resources() {
-   return shadow(this, 'resources', this.getInheritedPageProp('Resources'));
+   return shadow(this, 'resources', this.getInheritedPageProp('Resources') || Dict.empty);
   },
   get mediaBox() {
    var mediaBox = this.getInheritedPageProp('MediaBox', true);
@@ -57884,8 +57884,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.344';
-var pdfjsBuild = 'c2905614';
+var pdfjsVersion = '1.7.346';
+var pdfjsBuild = '4e3e97be';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
