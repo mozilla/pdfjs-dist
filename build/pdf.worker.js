@@ -19912,7 +19912,7 @@ var CFFParser = function CFFParserClosure() {
    return cffDict;
   },
   parseCharString: function CFFParser_parseCharString(state, data, localSubrIndex, globalSubrIndex) {
-   if (state.callDepth > MAX_SUBR_NESTING) {
+   if (!data || state.callDepth > MAX_SUBR_NESTING) {
     return false;
    }
    var stackSize = state.stackSize;
@@ -19978,7 +19978,7 @@ var CFFParser = function CFFParserClosure() {
       bias = 1131;
      }
      var subrNumber = stack[--stackSize] + bias;
-     if (subrNumber < 0 || subrNumber >= subrsIndex.count) {
+     if (subrNumber < 0 || subrNumber >= subrsIndex.count || isNaN(subrNumber)) {
       validationCommand = CharstringValidationData[value];
       warn('Out of bounds subrIndex for ' + validationCommand.id);
       return false;
@@ -51075,8 +51075,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.359';
-var pdfjsBuild = 'd471e356';
+var pdfjsVersion = '1.7.361';
+var pdfjsBuild = '224613a5';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
