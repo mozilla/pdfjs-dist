@@ -26753,7 +26753,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       assert(isStream(xobj), 'XObject should be a stream');
       var type = xobj.dict.get('Subtype');
       assert(isName(type), 'XObject should have a Name subtype');
-      if ('Form' !== type.name) {
+      if (type.name !== 'Form') {
        xobjsCache.key = name;
        xobjsCache.texts = null;
        break;
@@ -28514,7 +28514,7 @@ var JpxImage = function JpxImageClosure() {
      this.parseCodestream(data, position, position + dataLength);
      break;
     case 0x6A502020:
-     if (0x0d0a870a !== readUint32(data, position)) {
+     if (readUint32(data, position) !== 0x0d0a870a) {
       warn('Invalid JP2 signature');
      }
      break;
@@ -50629,7 +50629,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
        cursor = 0;
        state = 'no scheme';
        continue;
-      } else if (EOF === c) {
+      } else if (c === EOF) {
        break loop;
       } else {
        err('Code point not allowed in scheme: ' + c);
@@ -50644,7 +50644,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
        this._fragment = '#';
        state = 'fragment';
       } else {
-       if (EOF !== c && '\t' !== c && '\n' !== c && '\r' !== c) {
+       if (c !== EOF && c !== '\t' && c !== '\n' && c !== '\r') {
         this._schemeData += percentEscape(c);
        }
       }
@@ -50669,10 +50669,10 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       break;
      case 'relative':
       this._isRelative = true;
-      if ('file' !== this._scheme) {
+      if (this._scheme !== 'file') {
        this._scheme = base._scheme;
       }
-      if (EOF === c) {
+      if (c === EOF) {
        this._host = base._host;
        this._port = base._port;
        this._path = base._path.slice();
@@ -50705,7 +50705,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       } else {
        var nextC = input[cursor + 1];
        var nextNextC = input[cursor + 2];
-       if ('file' !== this._scheme || !ALPHA.test(c) || nextC !== ':' && nextC !== '|' || EOF !== nextNextC && '/' !== nextNextC && '\\' !== nextNextC && '?' !== nextNextC && '#' !== nextNextC) {
+       if (this._scheme !== 'file' || !ALPHA.test(c) || nextC !== ':' && nextC !== '|' || nextNextC !== EOF && nextNextC !== '/' && nextNextC !== '\\' && nextNextC !== '?' && nextNextC !== '#') {
         this._host = base._host;
         this._port = base._port;
         this._username = base._username;
@@ -50728,7 +50728,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         state = 'authority ignore slashes';
        }
       } else {
-       if ('file' !== this._scheme) {
+       if (this._scheme !== 'file') {
         this._host = base._host;
         this._port = base._port;
         this._username = base._username;
@@ -50749,13 +50749,13 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       break;
      case 'authority second slash':
       state = 'authority ignore slashes';
-      if ('/' !== c) {
+      if (c !== '/') {
        err('Expected \'/\', got: ' + c);
        continue;
       }
       break;
      case 'authority ignore slashes':
-      if ('/' !== c && '\\' !== c) {
+      if (c !== '/' && c !== '\\') {
        state = 'authority';
        continue;
       } else {
@@ -50780,7 +50780,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
          continue;
         }
         var tempC = percentEscape(cp);
-        if (null !== this._password) {
+        if (this._password !== null) {
          this._password += tempC;
         } else {
          this._username += tempC;
@@ -50831,7 +50831,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         break loop;
        }
        continue;
-      } else if ('\t' !== c && '\n' !== c && '\r' !== c) {
+      } else if (c !== '\t' && c !== '\n' && c !== '\r') {
        if (c === '[') {
         seenBracket = true;
        } else if (c === ']') {
@@ -50846,7 +50846,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       if (/[0-9]/.test(c)) {
        buffer += c;
       } else if (c === EOF || c === '/' || c === '\\' || c === '?' || c === '#' || stateOverride) {
-       if ('' !== buffer) {
+       if (buffer !== '') {
         var temp = parseInt(buffer, 10);
         if (temp !== relative[this._scheme]) {
          this._port = temp + '';
@@ -50869,7 +50869,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
        err('\'\\\' not allowed in path.');
       }
       state = 'relative path';
-      if ('/' !== c && '\\' !== c) {
+      if (c !== '/' && c !== '\\') {
        continue;
       }
       break;
@@ -50884,12 +50884,12 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
        }
        if (buffer === '..') {
         this._path.pop();
-        if ('/' !== c && '\\' !== c) {
+        if (c !== '/' && c !== '\\') {
          this._path.push('');
         }
-       } else if (buffer === '.' && '/' !== c && '\\' !== c) {
+       } else if (buffer === '.' && c !== '/' && c !== '\\') {
         this._path.push('');
-       } else if ('.' !== buffer) {
+       } else if (buffer !== '.') {
         if (this._scheme === 'file' && this._path.length === 0 && buffer.length === 2 && ALPHA.test(buffer[0]) && buffer[1] === '|') {
          buffer = buffer[0] + ':';
         }
@@ -50903,7 +50903,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         this._fragment = '#';
         state = 'fragment';
        }
-      } else if ('\t' !== c && '\n' !== c && '\r' !== c) {
+      } else if (c !== '\t' && c !== '\n' && c !== '\r') {
        buffer += percentEscape(c);
       }
       break;
@@ -50911,12 +50911,12 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       if (!stateOverride && c === '#') {
        this._fragment = '#';
        state = 'fragment';
-      } else if (EOF !== c && '\t' !== c && '\n' !== c && '\r' !== c) {
+      } else if (c !== EOF && c !== '\t' && c !== '\n' && c !== '\r') {
        this._query += percentEscapeQuery(c);
       }
       break;
      case 'fragment':
-      if (EOF !== c && '\t' !== c && '\n' !== c && '\r' !== c) {
+      if (c !== EOF && c !== '\t' && c !== '\n' && c !== '\r') {
        this._fragment += c;
       }
       break;
@@ -50955,8 +50955,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
      return this._url;
     }
     var authority = '';
-    if ('' !== this._username || null !== this._password) {
-     authority = this._username + (null !== this._password ? ':' + this._password : '') + '@';
+    if (this._username !== '' || this._password !== null) {
+     authority = this._username + (this._password !== null ? ':' + this._password : '') + '@';
     }
     return this.protocol + (this._isRelative ? '//' + authority + this.host : '') + this.pathname + this._query + this._fragment;
    },
@@ -51075,8 +51075,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.368';
-var pdfjsBuild = 'da326a31';
+var pdfjsVersion = '1.7.370';
+var pdfjsBuild = '3ff872b7';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
