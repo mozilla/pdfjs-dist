@@ -44219,23 +44219,21 @@ var JpegImage = function JpegImageClosure() {
   } else {
    mcuExpected = mcusPerLine * frame.mcusPerColumn;
   }
-  if (!resetInterval) {
-   resetInterval = mcuExpected;
-  }
   var h, v;
   while (mcu < mcuExpected) {
+   var mcuToRead = resetInterval ? Math.min(mcuExpected - mcu, resetInterval) : mcuExpected;
    for (i = 0; i < componentsLength; i++) {
     components[i].pred = 0;
    }
    eobrun = 0;
    if (componentsLength === 1) {
     component = components[0];
-    for (n = 0; n < resetInterval; n++) {
+    for (n = 0; n < mcuToRead; n++) {
      decodeBlock(component, decodeFn, mcu);
      mcu++;
     }
    } else {
-    for (n = 0; n < resetInterval; n++) {
+    for (n = 0; n < mcuToRead; n++) {
      for (i = 0; i < componentsLength; i++) {
       component = components[i];
       h = component.h;
@@ -51091,8 +51089,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.374';
-var pdfjsBuild = 'cfc45e55';
+var pdfjsVersion = '1.7.376';
+var pdfjsBuild = 'e2e13df4';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
