@@ -20022,8 +20022,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.372';
-exports.build = 'b2ed788e';
+exports.version = '1.7.374';
+exports.build = 'cfc45e55';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -38777,8 +38777,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.372';
-PDFJS.build = 'b2ed788e';
+PDFJS.version = '1.7.374';
+PDFJS.build = 'cfc45e55';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -47660,6 +47660,7 @@ exports.Jbig2Image = Jbig2Image;
 "use strict";
 
 var sharedUtil = __w_pdfjs_require__(0);
+var warn = sharedUtil.warn;
 var error = sharedUtil.error;
 var JpegImage = function JpegImageClosure() {
  var dctZigZag = new Uint8Array([
@@ -48200,8 +48201,23 @@ var JpegImage = function JpegImageClosure() {
     return value;
    }
    function readDataBlock() {
+    function isValidMarkerAt(pos) {
+     if (pos < data.length - 1) {
+      return data[pos] === 0xFF && data[pos + 1] >= 0xC0 && data[pos + 1] <= 0xFE;
+     }
+     return true;
+    }
     var length = readUint16();
-    var array = data.subarray(offset, offset + length - 2);
+    var endOffset = offset + length - 2;
+    if (!isValidMarkerAt(endOffset)) {
+     warn('readDataBlock - incorrect length, next marker is: ' + (data[endOffset] << 8 | data[endOffset + 1]).toString('16'));
+     var pos = offset;
+     while (!isValidMarkerAt(pos)) {
+      pos++;
+     }
+     endOffset = pos;
+    }
+    var array = data.subarray(offset, endOffset);
     offset += array.length;
     return array;
    }
@@ -57887,8 +57903,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
 "use strict";
 
-var pdfjsVersion = '1.7.372';
-var pdfjsBuild = 'b2ed788e';
+var pdfjsVersion = '1.7.374';
+var pdfjsBuild = 'cfc45e55';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
