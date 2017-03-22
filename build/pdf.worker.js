@@ -88,7 +88,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__w_pdfjs_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __w_pdfjs_require__(__w_pdfjs_require__.s = 37);
+/******/ 	return __w_pdfjs_require__(__w_pdfjs_require__.s = 36);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -97,7 +97,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
-var compatibility = __w_pdfjs_require__(36);
+var compatibility = __w_pdfjs_require__(37);
 var globalScope = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this;
 var FONT_IDENTITY_MATRIX = [
  0.001,
@@ -38395,6 +38395,9 @@ var PDFDocument = function PDFDocumentClosure() {
    try {
     infoDict = this.xref.trailer.get('Info');
    } catch (err) {
+    if (err instanceof MissingDataException) {
+     throw err;
+    }
     info('The document information dictionary is invalid.');
    }
    if (infoDict) {
@@ -49669,6 +49672,20 @@ exports.Type1Parser = Type1Parser;
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
+
+var pdfjsVersion = '1.7.378';
+var pdfjsBuild = '086021b2';
+var pdfjsCoreWorker = __w_pdfjs_require__(8);
+{
+ __w_pdfjs_require__(19);
+}
+exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
  var globalScope = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : this;
@@ -51082,20 +51099,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
  }());
 }
 /* WEBPACK VAR INJECTION */}.call(exports, __w_pdfjs_require__(9)))
-
-/***/ }),
-/* 37 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-var pdfjsVersion = '1.7.376';
-var pdfjsBuild = 'e2e13df4';
-var pdfjsCoreWorker = __w_pdfjs_require__(8);
-{
- __w_pdfjs_require__(19);
-}
-exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
 /***/ })
 /******/ ]);
