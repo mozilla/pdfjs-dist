@@ -20022,8 +20022,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.378';
-exports.build = '086021b2';
+exports.version = '1.7.381';
+exports.build = '68f2bf3b';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -33604,6 +33604,9 @@ var Catalog = function CatalogClosure() {
      try {
       metadata = stringToUTF8String(bytesToString(stream.getBytes()));
      } catch (e) {
+      if (e instanceof MissingDataException) {
+       throw e;
+      }
       info('Skipping invalid metadata.');
      }
     }
@@ -38777,8 +38780,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.378';
-PDFJS.build = '086021b2';
+PDFJS.version = '1.7.381';
+PDFJS.build = '68f2bf3b';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -42046,6 +42049,9 @@ var PDFDocument = function PDFDocumentClosure() {
      }
     }
    } catch (ex) {
+    if (ex instanceof MissingDataException) {
+     throw ex;
+    }
     info('Something wrong with AcroForm entry');
     this.acroForm = null;
    }
@@ -56485,8 +56491,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.378';
-var pdfjsBuild = '086021b2';
+var pdfjsVersion = '1.7.381';
+var pdfjsBuild = '68f2bf3b';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);

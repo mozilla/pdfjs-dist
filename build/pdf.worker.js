@@ -30621,6 +30621,9 @@ var Catalog = function CatalogClosure() {
      try {
       metadata = stringToUTF8String(bytesToString(stream.getBytes()));
      } catch (e) {
+      if (e instanceof MissingDataException) {
+       throw e;
+      }
       info('Skipping invalid metadata.');
      }
     }
@@ -38282,6 +38285,9 @@ var PDFDocument = function PDFDocumentClosure() {
      }
     }
    } catch (ex) {
+    if (ex instanceof MissingDataException) {
+     throw ex;
+    }
     info('Something wrong with AcroForm entry');
     this.acroForm = null;
    }
@@ -49673,8 +49679,8 @@ exports.Type1Parser = Type1Parser;
 
 "use strict";
 
-var pdfjsVersion = '1.7.378';
-var pdfjsBuild = '086021b2';
+var pdfjsVersion = '1.7.381';
+var pdfjsBuild = '68f2bf3b';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
  __w_pdfjs_require__(19);
