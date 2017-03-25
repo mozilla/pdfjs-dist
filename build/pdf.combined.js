@@ -8337,14 +8337,15 @@ var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
  }
  DOMCMapReaderFactory.prototype = {
   fetch: function (params) {
-   if (!params.name) {
+   var name = params.name;
+   if (!name) {
     return Promise.reject(new Error('CMap name must be specified.'));
    }
    return new Promise(function (resolve, reject) {
-    var url = this.baseUrl + params.name;
+    var url = this.baseUrl + name + (this.isCompressed ? '.bcmap' : '');
     var request = new XMLHttpRequest();
+    request.open('GET', url, true);
     if (this.isCompressed) {
-     url += '.bcmap';
      request.responseType = 'arraybuffer';
     }
     request.onreadystatechange = function () {
@@ -8362,10 +8363,9 @@ var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
        });
        return;
       }
-      reject(new Error('Unable to load ' + (this.isCompressed ? 'binary' : '') + ' CMap at: ' + url));
+      reject(new Error('Unable to load ' + (this.isCompressed ? 'binary ' : '') + 'CMap at: ' + url));
      }
     }.bind(this);
-    request.open('GET', url, true);
     request.send(null);
    }.bind(this));
   }
@@ -20022,8 +20022,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.381';
-exports.build = '68f2bf3b';
+exports.version = '1.7.384';
+exports.build = 'b7ba44b5';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -38247,7 +38247,7 @@ var WorkerMessageHandler = {
     startWorkerTask(task);
     var pageNum = pageIndex + 1;
     var start = Date.now();
-    return page.extractTextContent(task, normalizeWhitespace, combineTextItems).then(function (textContent) {
+    return page.extractTextContent(handler, task, normalizeWhitespace, combineTextItems).then(function (textContent) {
      finishWorkerTask(task);
      info('text indexing: page=' + pageNum + ' - time=' + (Date.now() - start) + 'ms');
      return textContent;
@@ -38780,8 +38780,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.381';
-PDFJS.build = '68f2bf3b';
+PDFJS.version = '1.7.384';
+PDFJS.build = 'b7ba44b5';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -41930,13 +41930,7 @@ var Page = function PageClosure() {
     });
    });
   },
-  extractTextContent: function Page_extractTextContent(task, normalizeWhitespace, combineTextItems) {
-   var handler = {
-    on: function nullHandlerOn() {
-    },
-    send: function nullHandlerSend() {
-    }
-   };
+  extractTextContent: function Page_extractTextContent(handler, task, normalizeWhitespace, combineTextItems) {
    var self = this;
    var pdfManager = this.pdfManager;
    var contentStreamPromise = pdfManager.ensure(this, 'getContentStream', []);
@@ -56491,8 +56485,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.381';
-var pdfjsBuild = '68f2bf3b';
+var pdfjsVersion = '1.7.384';
+var pdfjsBuild = 'b7ba44b5';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
