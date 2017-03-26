@@ -20022,8 +20022,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
   }
  };
 }();
-exports.version = '1.7.384';
-exports.build = 'b7ba44b5';
+exports.version = '1.7.387';
+exports.build = 'b6bf1a3e';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -28845,7 +28845,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     fontName = fontArgs[0].name;
    }
    var self = this;
-   return this.loadFont(fontName, fontRef, this.xref, resources).then(function (translated) {
+   return this.loadFont(fontName, fontRef, resources).then(function (translated) {
     if (!translated.font.isType3Font) {
      return translated;
     }
@@ -28887,7 +28887,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
    }
    return glyphs;
   },
-  setGState: function PartialEvaluator_setGState(resources, gState, operatorList, task, xref, stateManager) {
+  setGState: function PartialEvaluator_setGState(resources, gState, operatorList, task, stateManager) {
    var gStateObj = [];
    var gStateKeys = gState.getKeys();
    var self = this;
@@ -28979,11 +28979,11 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     }
    });
   },
-  loadFont: function PartialEvaluator_loadFont(fontName, font, xref, resources) {
+  loadFont: function PartialEvaluator_loadFont(fontName, font, resources) {
    function errorFont() {
     return Promise.resolve(new TranslatedFont('g_font_error', new ErrorFont('Font ' + fontName + ' is not available'), font));
    }
-   var fontRef;
+   var fontRef, xref = this.xref;
    if (font) {
     assert(isRef(font));
     fontRef = font;
@@ -29011,7 +29011,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     return font.translated;
    }
    var fontCapability = createPromiseCapability();
-   var preEvaluatedFont = this.preEvaluateFont(font, xref);
+   var preEvaluatedFont = this.preEvaluateFont(font);
    var descriptor = preEvaluatedFont.descriptor;
    var fontRefIsRef = isRef(fontRef), fontID;
    if (fontRefIsRef) {
@@ -29050,7 +29050,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
    font.translated = fontCapability.promise;
    var translatedPromise;
    try {
-    translatedPromise = this.translateFont(preEvaluatedFont, xref);
+    translatedPromise = this.translateFont(preEvaluatedFont);
    } catch (e) {
     translatedPromise = Promise.reject(e);
    }
@@ -29092,7 +29092,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     Array.prototype.push.apply(opArgs[1], args);
    }
   },
-  handleColorN: function PartialEvaluator_handleColorN(operatorList, fn, args, cs, patterns, resources, task, xref) {
+  handleColorN: function PartialEvaluator_handleColorN(operatorList, fn, args, cs, patterns, resources, task) {
    var patternName = args[args.length - 1];
    var pattern;
    if (isName(patternName) && (pattern = patterns.get(patternName.name))) {
@@ -29104,7 +29104,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     } else if (typeNum === SHADING_PATTERN) {
      var shading = dict.get('Shading');
      var matrix = dict.getArray('Matrix');
-     pattern = Pattern.parseShading(shading, matrix, xref, resources, this.handler);
+     pattern = Pattern.parseShading(shading, matrix, this.xref, resources, this.handler);
      operatorList.addOp(fn, pattern.getIR());
      return Promise.resolve();
     }
@@ -29286,7 +29286,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
      case OPS.setFillColorN:
       cs = stateManager.state.fillColorSpace;
       if (cs.name === 'Pattern') {
-       next(self.handleColorN(operatorList, OPS.setFillColorN, args, cs, patterns, resources, task, xref));
+       next(self.handleColorN(operatorList, OPS.setFillColorN, args, cs, patterns, resources, task));
        return;
       }
       args = cs.getRgb(args, 0);
@@ -29295,7 +29295,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
      case OPS.setStrokeColorN:
       cs = stateManager.state.strokeColorSpace;
       if (cs.name === 'Pattern') {
-       next(self.handleColorN(operatorList, OPS.setStrokeColorN, args, cs, patterns, resources, task, xref));
+       next(self.handleColorN(operatorList, OPS.setStrokeColorN, args, cs, patterns, resources, task));
        return;
       }
       args = cs.getRgb(args, 0);
@@ -29303,13 +29303,9 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       break;
      case OPS.shadingFill:
       var shadingRes = resources.get('Shading');
-      if (!shadingRes) {
-       error('No shading resource found');
-      }
+      assert(shadingRes, 'No shading resource found');
       var shading = shadingRes.get(args[0].name);
-      if (!shading) {
-       error('No shading object found');
-      }
+      assert(shading, 'No shading object found');
       var shadingFill = Pattern.parseShading(shading, null, xref, resources, self.handler);
       var patternIR = shadingFill.getIR();
       args = [patternIR];
@@ -29322,7 +29318,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
        break;
       }
       var gState = extGState.get(dictName.name);
-      next(self.setGState(resources, gState, operatorList, task, xref, stateManager));
+      next(self.setGState(resources, gState, operatorList, task, stateManager));
       return;
      case OPS.moveTo:
      case OPS.lineTo:
@@ -29488,7 +29484,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     };
    }
    function handleSetFont(fontName, fontRef) {
-    return self.loadFont(fontName, fontRef, xref, resources).then(function (translated) {
+    return self.loadFont(fontName, fontRef, resources).then(function (translated) {
      textState.font = translated.font;
      textState.fontMatrix = translated.font.fontMatrix || FONT_IDENTITY_MATRIX;
     });
@@ -29783,7 +29779,8 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     resolve(textContent);
    });
   },
-  extractDataStructures: function PartialEvaluator_extractDataStructures(dict, baseDict, xref, properties) {
+  extractDataStructures: function PartialEvaluator_extractDataStructures(dict, baseDict, properties) {
+   var xref = this.xref;
    var toUnicode = dict.get('ToUnicode') || baseDict.get('ToUnicode');
    var toUnicodePromise = toUnicode ? this.readToUnicode(toUnicode) : Promise.resolve(undefined);
    if (properties.composite) {
@@ -30006,7 +30003,8 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
    }
    return result;
   },
-  extractWidths: function PartialEvaluator_extractWidths(dict, xref, descriptor, properties) {
+  extractWidths: function PartialEvaluator_extractWidths(dict, descriptor, properties) {
+   var xref = this.xref;
    var glyphsWidths = [];
    var defaultWidth = 0;
    var glyphsVMetrics = [];
@@ -30156,7 +30154,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
    }
    return widths;
   },
-  preEvaluateFont: function PartialEvaluator_preEvaluateFont(dict, xref) {
+  preEvaluateFont: function PartialEvaluator_preEvaluateFont(dict) {
    var baseDict = dict;
    var type = dict.get('Subtype');
    assert(isName(type), 'invalid font Subtype');
@@ -30164,10 +30162,8 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
    var uint8array;
    if (type.name === 'Type0') {
     var df = dict.get('DescendantFonts');
-    if (!df) {
-     error('Descendant fonts are not specified');
-    }
-    dict = isArray(df) ? xref.fetchIfRef(df[0]) : df;
+    assert(df, 'Descendant fonts are not specified');
+    dict = isArray(df) ? this.xref.fetchIfRef(df[0]) : df;
     type = dict.get('Subtype');
     assert(isName(type), 'invalid font Subtype');
     composite = true;
@@ -30225,7 +30221,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     hash: hash ? hash.hexdigest() : ''
    };
   },
-  translateFont: function PartialEvaluator_translateFont(preEvaluatedFont, xref) {
+  translateFont: function PartialEvaluator_translateFont(preEvaluatedFont) {
    var baseDict = preEvaluatedFont.baseDict;
    var dict = preEvaluatedFont.dict;
    var composite = preEvaluatedFont.composite;
@@ -30240,9 +30236,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
      descriptor.set('FontBBox', dict.getArray('FontBBox'));
     } else {
      var baseFontName = dict.get('BaseFont');
-     if (!isName(baseFontName)) {
-      error('Base font is not specified');
-     }
+     assert(isName(baseFontName), 'Base font is not specified');
      baseFontName = baseFontName.name.replace(/[,_]/g, '-');
      var metrics = this.getBaseFontMetrics(baseFontName);
      var fontNameWoStyle = baseFontName.split('-')[0];
@@ -30256,7 +30250,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       firstChar: 0,
       lastChar: maxCharIndex
      };
-     return this.extractDataStructures(dict, dict, xref, properties).then(function (properties) {
+     return this.extractDataStructures(dict, dict, properties).then(function (properties) {
       properties.widths = this.buildCharCodeToWidth(metrics.widths, properties);
       return new Font(baseFontName, null, properties);
      }.bind(this));
@@ -30338,9 +30332,9 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     cMapPromise = Promise.resolve(undefined);
    }
    return cMapPromise.then(function () {
-    return this.extractDataStructures(dict, baseDict, xref, properties);
+    return this.extractDataStructures(dict, baseDict, properties);
    }.bind(this)).then(function (properties) {
-    this.extractWidths(dict, xref, descriptor, properties);
+    this.extractWidths(dict, descriptor, properties);
     if (type === 'Type3') {
      properties.isType3Font = true;
     }
@@ -38780,8 +38774,8 @@ if (!globalScope.PDFJS) {
  globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.384';
-PDFJS.build = 'b7ba44b5';
+PDFJS.version = '1.7.387';
+PDFJS.build = 'b6bf1a3e';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
  sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -56485,8 +56479,8 @@ exports.TilingPattern = TilingPattern;
 
 "use strict";
 
-var pdfjsVersion = '1.7.384';
-var pdfjsBuild = 'b7ba44b5';
+var pdfjsVersion = '1.7.387';
+var pdfjsBuild = 'b6bf1a3e';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
