@@ -12716,8 +12716,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
     }
   };
 }();
-exports.version = '1.7.391';
-exports.build = 'cd5acf50';
+exports.version = '1.7.393';
+exports.build = 'ede4d3c7';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -27891,8 +27891,8 @@ if (!globalScope.PDFJS) {
   globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.391';
-PDFJS.build = 'cd5acf50';
+PDFJS.version = '1.7.393';
+PDFJS.build = 'ede4d3c7';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
   sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -35104,7 +35104,7 @@ var JpegImage = function JpegImageClosure() {
       decodeFn = decodeBaseline;
     }
     var mcu = 0,
-        marker;
+        fileMarker;
     var mcuExpected;
     if (componentsLength === 1) {
       mcuExpected = components[0].blocksPerLine * components[0].blocksPerColumn;
@@ -35140,12 +35140,13 @@ var JpegImage = function JpegImageClosure() {
         }
       }
       bitsCount = 0;
-      marker = data[offset] << 8 | data[offset + 1];
-      while (data[offset] === 0x00 && offset < data.length - 1) {
-        offset++;
-        marker = data[offset] << 8 | data[offset + 1];
+      fileMarker = findNextFileMarker(data, offset);
+      if (fileMarker && fileMarker.invalid) {
+        warn('decodeScan - unexpected MCU data, next marker is: ' + fileMarker.invalid);
+        offset = fileMarker.offset;
       }
-      if (marker <= 0xFF00) {
+      var marker = fileMarker && fileMarker.marker;
+      if (!marker || marker <= 0xFF00) {
         error('JPEG error: marker was not found');
       }
       if (marker >= 0xFFD0 && marker <= 0xFFD7) {
@@ -35153,6 +35154,11 @@ var JpegImage = function JpegImageClosure() {
       } else {
         break;
       }
+    }
+    fileMarker = findNextFileMarker(data, offset);
+    if (fileMarker && fileMarker.invalid) {
+      warn('decodeScan - unexpected Scan data, next marker is: ' + fileMarker.invalid);
+      offset = fileMarker.offset;
     }
     return offset - startOffset;
   }
@@ -35320,6 +35326,36 @@ var JpegImage = function JpegImageClosure() {
   function clamp0to255(a) {
     return a <= 0 ? 0 : a >= 255 ? 255 : a;
   }
+  function findNextFileMarker(data, currentPos, startPos) {
+    function peekUint16(pos) {
+      return data[pos] << 8 | data[pos + 1];
+    }
+    var maxPos = data.length - 1;
+    var newPos = startPos < currentPos ? startPos : currentPos;
+    if (currentPos >= maxPos) {
+      return null;
+    }
+    var currentMarker = peekUint16(currentPos);
+    if (currentMarker >= 0xFFC0 && currentMarker <= 0xFFFE) {
+      return {
+        invalid: null,
+        marker: currentMarker,
+        offset: currentPos
+      };
+    }
+    var newMarker = peekUint16(newPos);
+    while (!(newMarker >= 0xFFC0 && newMarker <= 0xFFFE)) {
+      if (++newPos >= maxPos) {
+        return null;
+      }
+      newMarker = peekUint16(newPos);
+    }
+    return {
+      invalid: currentMarker.toString(16),
+      marker: newMarker,
+      offset: newPos
+    };
+  }
   JpegImage.prototype = {
     parse: function parse(data) {
       function readUint16() {
@@ -35328,21 +35364,12 @@ var JpegImage = function JpegImageClosure() {
         return value;
       }
       function readDataBlock() {
-        function isValidMarkerAt(pos) {
-          if (pos < data.length - 1) {
-            return data[pos] === 0xFF && data[pos + 1] >= 0xC0 && data[pos + 1] <= 0xFE;
-          }
-          return true;
-        }
         var length = readUint16();
         var endOffset = offset + length - 2;
-        if (!isValidMarkerAt(endOffset)) {
-          warn('readDataBlock - incorrect length, next marker is: ' + (data[endOffset] << 8 | data[endOffset + 1]).toString('16'));
-          var pos = offset;
-          while (!isValidMarkerAt(pos)) {
-            pos++;
-          }
-          endOffset = pos;
+        var fileMarker = findNextFileMarker(data, endOffset, offset);
+        if (fileMarker && fileMarker.invalid) {
+          warn('readDataBlock - incorrect length, next marker is: ' + fileMarker.invalid);
+          endOffset = fileMarker.offset;
         }
         var array = data.subarray(offset, endOffset);
         offset += array.length;
@@ -43403,8 +43430,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.7.391';
-var pdfjsBuild = 'cd5acf50';
+var pdfjsVersion = '1.7.393';
+var pdfjsBuild = 'ede4d3c7';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
