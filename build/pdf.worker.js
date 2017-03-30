@@ -25925,7 +25925,7 @@ var CMapFactory = function CMapFactoryClosure() {
       return Promise.resolve(new IdentityCMap(true, 2));
     }
     if (BUILT_IN_CMAPS.indexOf(name) === -1) {
-      return Promise.reject(new Error('Unknown cMap name: ' + name));
+      return Promise.reject(new Error('Unknown CMap name: ' + name));
     }
     assert(fetchBuiltInCMap, 'Built-in CMap parameters are not provided.');
     return fetchBuiltInCMap(name).then(function (data) {
@@ -36907,8 +36907,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.7.397';
-var pdfjsBuild = '72eeb1cc';
+var pdfjsVersion = '1.7.399';
+var pdfjsBuild = '8cee63df';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);

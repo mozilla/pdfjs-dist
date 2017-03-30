@@ -3199,7 +3199,10 @@ var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
           request.responseType = 'arraybuffer';
         }
         request.onreadystatechange = function () {
-          if (request.readyState === XMLHttpRequest.DONE && (request.status === 200 || request.status === 0)) {
+          if (request.readyState !== XMLHttpRequest.DONE) {
+            return;
+          }
+          if (request.status === 200 || request.status === 0) {
             var data;
             if (this.isCompressed && request.response) {
               data = new Uint8Array(request.response);
@@ -3213,8 +3216,8 @@ var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
               });
               return;
             }
-            reject(new Error('Unable to load ' + (this.isCompressed ? 'binary ' : '') + 'CMap at: ' + url));
           }
+          reject(new Error('Unable to load ' + (this.isCompressed ? 'binary ' : '') + 'CMap at: ' + url));
         }.bind(this);
         request.send(null);
       }.bind(this));
@@ -12716,8 +12719,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
     }
   };
 }();
-exports.version = '1.7.397';
-exports.build = '72eeb1cc';
+exports.version = '1.7.399';
+exports.build = '8cee63df';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -27908,8 +27911,8 @@ if (!globalScope.PDFJS) {
   globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.397';
-PDFJS.build = '72eeb1cc';
+PDFJS.version = '1.7.399';
+PDFJS.build = '8cee63df';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
   sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -29574,7 +29577,7 @@ var CMapFactory = function CMapFactoryClosure() {
       return Promise.resolve(new IdentityCMap(true, 2));
     }
     if (BUILT_IN_CMAPS.indexOf(name) === -1) {
-      return Promise.reject(new Error('Unknown cMap name: ' + name));
+      return Promise.reject(new Error('Unknown CMap name: ' + name));
     }
     assert(fetchBuiltInCMap, 'Built-in CMap parameters are not provided.');
     return fetchBuiltInCMap(name).then(function (data) {
@@ -43447,8 +43450,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.7.397';
-var pdfjsBuild = '72eeb1cc';
+var pdfjsVersion = '1.7.399';
+var pdfjsBuild = '8cee63df';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
