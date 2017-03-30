@@ -1102,11 +1102,23 @@ var PDFPageView = function PDFPageViewClosure() {
       this.reset();
     },
     destroy: function PDFPageView_destroy() {
-      this.zoomLayer = null;
       this.reset();
       if (this.pdfPage) {
         this.pdfPage.cleanup();
       }
+    },
+    _resetZoomLayer: function (removeFromDOM) {
+      if (!this.zoomLayer) {
+        return;
+      }
+      var zoomLayerCanvas = this.zoomLayer.firstChild;
+      this.paintedViewportMap.delete(zoomLayerCanvas);
+      zoomLayerCanvas.width = 0;
+      zoomLayerCanvas.height = 0;
+      if (removeFromDOM) {
+        this.zoomLayer.remove();
+      }
+      this.zoomLayer = null;
     },
     reset: function PDFPageView_reset(keepZoomLayer, keepAnnotations) {
       this.cancelRendering();
@@ -1129,11 +1141,14 @@ var PDFPageView = function PDFPageViewClosure() {
       } else {
         this.annotationLayer = null;
       }
-      if (this.canvas && !currentZoomLayerNode) {
-        this.paintedViewportMap.delete(this.canvas);
-        this.canvas.width = 0;
-        this.canvas.height = 0;
-        delete this.canvas;
+      if (!currentZoomLayerNode) {
+        if (this.canvas) {
+          this.paintedViewportMap.delete(this.canvas);
+          this.canvas.width = 0;
+          this.canvas.height = 0;
+          delete this.canvas;
+        }
+        this._resetZoomLayer();
       }
       if (this.svg) {
         this.paintedViewportMap.delete(this.svg);
@@ -1329,16 +1344,7 @@ var PDFPageView = function PDFPageViewClosure() {
           div.removeChild(self.loadingIconDiv);
           delete self.loadingIconDiv;
         }
-        if (self.zoomLayer) {
-          var zoomLayerCanvas = self.zoomLayer.firstChild;
-          self.paintedViewportMap.delete(zoomLayerCanvas);
-          zoomLayerCanvas.width = 0;
-          zoomLayerCanvas.height = 0;
-          if (div.contains(self.zoomLayer)) {
-            div.removeChild(self.zoomLayer);
-          }
-          self.zoomLayer = null;
-        }
+        self._resetZoomLayer(true);
         self.error = error;
         self.stats = pdfPage.stats;
         if (self.onAfterDraw) {
