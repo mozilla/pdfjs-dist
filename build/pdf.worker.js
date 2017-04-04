@@ -36907,8 +36907,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.7.410';
-var pdfjsBuild = '31f88756';
+var pdfjsVersion = '1.7.412';
+var pdfjsBuild = 'b665b031';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
@@ -37393,20 +37393,28 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     }
   })();
   (function checkRequestAnimationFrame() {
-    function fakeRequestAnimationFrame(callback) {
-      window.setTimeout(callback, 20);
+    function installFakeAnimationFrameFunctions() {
+      window.requestAnimationFrame = function (callback) {
+        return window.setTimeout(callback, 20);
+      };
+      window.cancelAnimationFrame = function (timeoutID) {
+        window.clearTimeout(timeoutID);
+      };
     }
     if (!hasDOM) {
       return;
     }
     if (isIOS) {
-      window.requestAnimationFrame = fakeRequestAnimationFrame;
+      installFakeAnimationFrameFunctions();
       return;
     }
     if ('requestAnimationFrame' in window) {
       return;
     }
-    window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || fakeRequestAnimationFrame;
+    window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+    if (!('requestAnimationFrame' in window)) {
+      installFakeAnimationFrameFunctions();
+    }
   })();
   (function checkCanvasSizeLimitation() {
     if (isIOS || isAndroid) {

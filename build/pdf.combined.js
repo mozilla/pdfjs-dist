@@ -12737,8 +12737,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
     }
   };
 }();
-exports.version = '1.7.410';
-exports.build = '31f88756';
+exports.version = '1.7.412';
+exports.build = 'b665b031';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -27929,8 +27929,8 @@ if (!globalScope.PDFJS) {
   globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.410';
-PDFJS.build = '31f88756';
+PDFJS.version = '1.7.412';
+PDFJS.build = 'b665b031';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
   sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -43469,8 +43469,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.7.410';
-var pdfjsBuild = '31f88756';
+var pdfjsVersion = '1.7.412';
+var pdfjsBuild = 'b665b031';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
@@ -43983,20 +43983,28 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     }
   })();
   (function checkRequestAnimationFrame() {
-    function fakeRequestAnimationFrame(callback) {
-      window.setTimeout(callback, 20);
+    function installFakeAnimationFrameFunctions() {
+      window.requestAnimationFrame = function (callback) {
+        return window.setTimeout(callback, 20);
+      };
+      window.cancelAnimationFrame = function (timeoutID) {
+        window.clearTimeout(timeoutID);
+      };
     }
     if (!hasDOM) {
       return;
     }
     if (isIOS) {
-      window.requestAnimationFrame = fakeRequestAnimationFrame;
+      installFakeAnimationFrameFunctions();
       return;
     }
     if ('requestAnimationFrame' in window) {
       return;
     }
-    window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || fakeRequestAnimationFrame;
+    window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
+    if (!('requestAnimationFrame' in window)) {
+      installFakeAnimationFrameFunctions();
+    }
   })();
   (function checkCanvasSizeLimitation() {
     if (isIOS || isAndroid) {
