@@ -1335,7 +1335,7 @@ var PDFPageView = function PDFPageViewClosure() {
         if (paintTask === self.paintTask) {
           self.paintTask = null;
         }
-        if (error === 'cancelled') {
+        if (error === 'cancelled' || error instanceof pdfjsLib.RenderingCancelledException) {
           self.error = null;
           return Promise.resolve(undefined);
         }
@@ -1473,7 +1473,11 @@ var PDFPageView = function PDFPageViewClosure() {
       var cancelled = false;
       var ensureNotCancelled = function () {
         if (cancelled) {
-          throw 'cancelled';
+          if (pdfjsLib.PDFJS.pdfjsNext) {
+            throw new pdfjsLib.RenderingCancelledException('Rendering cancelled, page ' + self.id, 'svg');
+          } else {
+            throw 'cancelled';
+          }
         }
       };
       var self = this;
