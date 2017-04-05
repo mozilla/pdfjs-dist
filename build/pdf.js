@@ -2644,9 +2644,13 @@ var PDFWorker = function PDFWorkerClosure() {
     if (getDefaultSetting('workerSrc')) {
       return getDefaultSetting('workerSrc');
     }
-    if (pdfjsFilePath) {
-      return pdfjsFilePath.replace(/\.js$/i, '.worker.js');
-    }
+      if (pdfjsFilePath) {
+          if(pdfjsFilePath.indexOf('.min.js') !== -1) {
+              return pdfjsFilePath.replace(/\.min.js$/i, '.worker.min.js');
+          } else {
+              return pdfjsFilePath.replace(/\.js$/i, '.worker.js');
+          }
+      }
     error('No PDFJS.workerSrc specified');
   }
   var fakeWorkerFilesLoadedCapability;
