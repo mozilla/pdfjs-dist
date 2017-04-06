@@ -12737,8 +12737,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
     }
   };
 }();
-exports.version = '1.7.416';
-exports.build = 'c380d254';
+exports.version = '1.7.418';
+exports.build = 'a662d268';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -27929,8 +27929,8 @@ if (!globalScope.PDFJS) {
   globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.7.416';
-PDFJS.build = 'c380d254';
+PDFJS.version = '1.7.418';
+PDFJS.build = 'a662d268';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
   sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -31876,9 +31876,6 @@ var Font = function FontClosure() {
               }
               glyphId = offsetIndex < 0 ? j : offsets[offsetIndex + j - start];
               glyphId = glyphId + delta & 0xFFFF;
-              if (glyphId === 0) {
-                continue;
-              }
               mappings.push({
                 charCode: j,
                 glyphId: glyphId
@@ -43469,8 +43466,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.7.416';
-var pdfjsBuild = 'c380d254';
+var pdfjsVersion = '1.7.418';
+var pdfjsBuild = 'a662d268';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);

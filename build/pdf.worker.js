@@ -28205,9 +28205,6 @@ var Font = function FontClosure() {
               }
               glyphId = offsetIndex < 0 ? j : offsets[offsetIndex + j - start];
               glyphId = glyphId + delta & 0xFFFF;
-              if (glyphId === 0) {
-                continue;
-              }
               mappings.push({
                 charCode: j,
                 glyphId: glyphId
@@ -36907,8 +36904,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.7.416';
-var pdfjsBuild = 'c380d254';
+var pdfjsVersion = '1.7.418';
+var pdfjsBuild = 'a662d268';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
