@@ -15720,7 +15720,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           operatorList.addOp(fn, pattern.getIR());
           return Promise.resolve();
         }
-        return Promise.reject('Unknown PatternType: ' + typeNum);
+        return Promise.reject(new Error('Unknown PatternType: ' + typeNum));
       }
       operatorList.addOp(fn, args);
       return Promise.resolve();
@@ -36904,8 +36904,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.175';
-var pdfjsBuild = '55a853b6';
+var pdfjsVersion = '1.8.177';
+var pdfjsBuild = 'd6dfc26d';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
