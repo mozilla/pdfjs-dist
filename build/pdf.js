@@ -3451,8 +3451,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
     }
   };
 }();
-exports.version = '1.8.177';
-exports.build = 'd6dfc26d';
+exports.version = '1.8.179';
+exports.build = '10e5f766';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -5391,8 +5391,8 @@ if (!globalScope.PDFJS) {
   globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.8.177';
-PDFJS.build = 'd6dfc26d';
+PDFJS.version = '1.8.179';
+PDFJS.build = '10e5f766';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
   sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -6219,17 +6219,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
             this.ctx.globalAlpha = state[1];
             break;
           case 'BM':
-            if (value && value.name && value.name !== 'Normal') {
-              var mode = value.name.replace(/([A-Z])/g, function (c) {
-                return '-' + c.toLowerCase();
-              }).substring(1);
-              this.ctx.globalCompositeOperation = mode;
-              if (this.ctx.globalCompositeOperation !== mode) {
-                warn('globalCompositeOperation "' + mode + '" is not supported');
-              }
-            } else {
-              this.ctx.globalCompositeOperation = 'source-over';
-            }
+            this.ctx.globalCompositeOperation = value;
             break;
           case 'SMask':
             if (this.current.activeSMask) {
@@ -6264,7 +6254,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       activeSMask.startTransformInverse = groupCtx.mozCurrentTransformInverse;
       copyCtxState(currentCtx, groupCtx);
       this.ctx = groupCtx;
-      this.setGState([['BM', 'Normal'], ['ca', 1], ['CA', 1]]);
+      this.setGState([['BM', 'source-over'], ['ca', 1], ['CA', 1]]);
       this.groupStack.push(currentCtx);
       this.groupLevel++;
     },
@@ -6933,7 +6923,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       }
       copyCtxState(currentCtx, groupCtx);
       this.ctx = groupCtx;
-      this.setGState([['BM', 'Normal'], ['ca', 1], ['CA', 1]]);
+      this.setGState([['BM', 'source-over'], ['ca', 1], ['CA', 1]]);
       this.groupStack.push(currentCtx);
       this.groupLevel++;
       this.current.activeSMask = null;
@@ -7903,8 +7893,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.177';
-var pdfjsBuild = 'd6dfc26d';
+var pdfjsVersion = '1.8.179';
+var pdfjsBuild = '10e5f766';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);

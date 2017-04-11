@@ -15274,6 +15274,48 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       this.checked = 0;
     }
   };
+  function normalizeBlendMode(value) {
+    if (!isName(value)) {
+      return 'source-over';
+    }
+    switch (value.name) {
+      case 'Normal':
+      case 'Compatible':
+        return 'source-over';
+      case 'Multiply':
+        return 'multiply';
+      case 'Screen':
+        return 'screen';
+      case 'Overlay':
+        return 'overlay';
+      case 'Darken':
+        return 'darken';
+      case 'Lighten':
+        return 'lighten';
+      case 'ColorDodge':
+        return 'color-dodge';
+      case 'ColorBurn':
+        return 'color-burn';
+      case 'HardLight':
+        return 'hard-light';
+      case 'SoftLight':
+        return 'soft-light';
+      case 'Difference':
+        return 'difference';
+      case 'Exclusion':
+        return 'exclusion';
+      case 'Hue':
+        return 'hue';
+      case 'Saturation':
+        return 'saturation';
+      case 'Color':
+        return 'color';
+      case 'Luminosity':
+        return 'luminosity';
+    }
+    warn('Unsupported blend mode: ' + value.name);
+    return 'source-over';
+  }
   var deferred = Promise.resolve();
   var TILING_PATTERN = 1,
       SHADING_PATTERN = 2;
@@ -15550,7 +15592,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
             });
             break;
           case 'BM':
-            gStateObj.push([key, value]);
+            gStateObj.push([key, normalizeBlendMode(value)]);
             break;
           case 'SMask':
             if (isName(value, 'None')) {
@@ -36904,8 +36946,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.177';
-var pdfjsBuild = 'd6dfc26d';
+var pdfjsVersion = '1.8.179';
+var pdfjsBuild = '10e5f766';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
