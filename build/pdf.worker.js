@@ -36946,8 +36946,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.179';
-var pdfjsBuild = '10e5f766';
+var pdfjsVersion = '1.8.181';
+var pdfjsBuild = '7052316f';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
@@ -37451,9 +37451,10 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       return;
     }
     window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
-    if (!('requestAnimationFrame' in window)) {
-      installFakeAnimationFrameFunctions();
+    if (window.requestAnimationFrame) {
+      return;
     }
+    installFakeAnimationFrameFunctions();
   })();
   (function checkCanvasSizeLimitation() {
     if (isIOS || isAndroid) {
