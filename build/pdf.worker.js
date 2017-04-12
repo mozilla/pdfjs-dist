@@ -24481,6 +24481,8 @@ AnnotationFactory.prototype = {
         return new WidgetAnnotation(parameters);
       case 'Popup':
         return new PopupAnnotation(parameters);
+      case 'Line':
+        return new LineAnnotation(parameters);
       case 'Highlight':
         return new HighlightAnnotation(parameters);
       case 'Underline':
@@ -24975,6 +24977,8 @@ var PopupAnnotation = function PopupAnnotationClosure() {
       warn('Popup annotation has a missing or invalid parent annotation.');
       return;
     }
+    var parentSubtype = parentItem.get('Subtype');
+    this.data.parentType = isName(parentSubtype) ? parentSubtype.name : null;
     this.data.parentId = dict.getRaw('Parent').toString();
     this.data.title = stringToPDFString(parentItem.get('T') || '');
     this.data.contents = stringToPDFString(parentItem.get('Contents') || '');
@@ -24994,12 +24998,22 @@ var PopupAnnotation = function PopupAnnotationClosure() {
   Util.inherit(PopupAnnotation, Annotation, {});
   return PopupAnnotation;
 }();
+var LineAnnotation = function LineAnnotationClosure() {
+  function LineAnnotation(parameters) {
+    Annotation.call(this, parameters);
+    this.data.annotationType = AnnotationType.LINE;
+    var dict = parameters.dict;
+    this.data.lineCoordinates = Util.normalizeRect(dict.getArray('L'));
+    this._preparePopup(dict);
+  }
+  Util.inherit(LineAnnotation, Annotation, {});
+  return LineAnnotation;
+}();
 var HighlightAnnotation = function HighlightAnnotationClosure() {
   function HighlightAnnotation(parameters) {
     Annotation.call(this, parameters);
     this.data.annotationType = AnnotationType.HIGHLIGHT;
     this._preparePopup(parameters.dict);
-    this.data.borderStyle.setWidth(0);
   }
   Util.inherit(HighlightAnnotation, Annotation, {});
   return HighlightAnnotation;
@@ -25009,7 +25023,6 @@ var UnderlineAnnotation = function UnderlineAnnotationClosure() {
     Annotation.call(this, parameters);
     this.data.annotationType = AnnotationType.UNDERLINE;
     this._preparePopup(parameters.dict);
-    this.data.borderStyle.setWidth(0);
   }
   Util.inherit(UnderlineAnnotation, Annotation, {});
   return UnderlineAnnotation;
@@ -25019,7 +25032,6 @@ var SquigglyAnnotation = function SquigglyAnnotationClosure() {
     Annotation.call(this, parameters);
     this.data.annotationType = AnnotationType.SQUIGGLY;
     this._preparePopup(parameters.dict);
-    this.data.borderStyle.setWidth(0);
   }
   Util.inherit(SquigglyAnnotation, Annotation, {});
   return SquigglyAnnotation;
@@ -25029,7 +25041,6 @@ var StrikeOutAnnotation = function StrikeOutAnnotationClosure() {
     Annotation.call(this, parameters);
     this.data.annotationType = AnnotationType.STRIKEOUT;
     this._preparePopup(parameters.dict);
-    this.data.borderStyle.setWidth(0);
   }
   Util.inherit(StrikeOutAnnotation, Annotation, {});
   return StrikeOutAnnotation;
@@ -36946,8 +36957,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.183';
-var pdfjsBuild = '22744655';
+var pdfjsVersion = '1.8.186';
+var pdfjsBuild = '32e01cda';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
