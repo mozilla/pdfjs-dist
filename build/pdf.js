@@ -2260,6 +2260,7 @@ function getDocument(src, pdfDataRangeTransport, passwordCallback, progressCallb
   }
   params.rangeChunkSize = params.rangeChunkSize || DEFAULT_RANGE_CHUNK_SIZE;
   params.disableNativeImageDecoder = params.disableNativeImageDecoder === true;
+  params.ignoreErrors = params.stopAtErrors !== true;
   var CMapReaderFactory = params.CMapReaderFactory || DOMCMapReaderFactory;
   if (!worker) {
     var workerPort = getDefaultSetting('workerPort');
@@ -2303,7 +2304,8 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
     disableCreateObjectURL: getDefaultSetting('disableCreateObjectURL'),
     postMessageTransfers: getDefaultSetting('postMessageTransfers') && !isPostMessageTransfersDisabled,
     docBaseUrl: source.docBaseUrl,
-    disableNativeImageDecoder: source.disableNativeImageDecoder
+    disableNativeImageDecoder: source.disableNativeImageDecoder,
+    ignoreErrors: source.ignoreErrors
   }).then(function (workerId) {
     if (worker.destroyed) {
       throw new Error('Worker was destroyed');
@@ -2502,7 +2504,6 @@ var PDFPageProxy = function PDFPageProxyClosure() {
       stats.time('Overall');
       this.pendingCleanup = false;
       var renderingIntent = params.intent === 'print' ? 'print' : 'display';
-      var renderInteractiveForms = params.renderInteractiveForms === true ? true : false;
       var canvasFactory = params.canvasFactory || new DOMCanvasFactory();
       if (!this.intentStates[renderingIntent]) {
         this.intentStates[renderingIntent] = Object.create(null);
@@ -2520,7 +2521,7 @@ var PDFPageProxy = function PDFPageProxyClosure() {
         this.transport.messageHandler.send('RenderPageRequest', {
           pageIndex: this.pageNumber - 1,
           intent: renderingIntent,
-          renderInteractiveForms: renderInteractiveForms
+          renderInteractiveForms: params.renderInteractiveForms === true
         });
       }
       var internalRenderTask = new InternalRenderTask(complete, params, this.objs, this.commonObjs, intentState.operatorList, this.pageNumber, canvasFactory);
@@ -2601,10 +2602,11 @@ var PDFPageProxy = function PDFPageProxyClosure() {
       return intentState.opListReadCapability.promise;
     },
     getTextContent: function PDFPageProxy_getTextContent(params) {
+      params = params || {};
       return this.transport.messageHandler.sendWithPromise('GetTextContent', {
         pageIndex: this.pageNumber - 1,
-        normalizeWhitespace: params && params.normalizeWhitespace === true ? true : false,
-        combineTextItems: params && params.disableCombineTextItems === true ? false : true
+        normalizeWhitespace: params.normalizeWhitespace === true,
+        combineTextItems: params.disableCombineTextItems !== true
       });
     },
     _destroy: function PDFPageProxy_destroy() {
@@ -3490,8 +3492,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
     }
   };
 }();
-exports.version = '1.8.192';
-exports.build = '46646a9d';
+exports.version = '1.8.195';
+exports.build = 'c4c44c1b';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -5430,8 +5432,8 @@ if (!globalScope.PDFJS) {
   globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.8.192';
-PDFJS.build = '46646a9d';
+PDFJS.version = '1.8.195';
+PDFJS.build = 'c4c44c1b';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
   sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -7932,8 +7934,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.192';
-var pdfjsBuild = '46646a9d';
+var pdfjsVersion = '1.8.195';
+var pdfjsBuild = 'c4c44c1b';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);

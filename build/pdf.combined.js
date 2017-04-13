@@ -11629,6 +11629,7 @@ function getDocument(src, pdfDataRangeTransport, passwordCallback, progressCallb
   }
   params.rangeChunkSize = params.rangeChunkSize || DEFAULT_RANGE_CHUNK_SIZE;
   params.disableNativeImageDecoder = params.disableNativeImageDecoder === true;
+  params.ignoreErrors = params.stopAtErrors !== true;
   var CMapReaderFactory = params.CMapReaderFactory || DOMCMapReaderFactory;
   if (!worker) {
     var workerPort = getDefaultSetting('workerPort');
@@ -11672,7 +11673,8 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
     disableCreateObjectURL: getDefaultSetting('disableCreateObjectURL'),
     postMessageTransfers: getDefaultSetting('postMessageTransfers') && !isPostMessageTransfersDisabled,
     docBaseUrl: source.docBaseUrl,
-    disableNativeImageDecoder: source.disableNativeImageDecoder
+    disableNativeImageDecoder: source.disableNativeImageDecoder,
+    ignoreErrors: source.ignoreErrors
   }).then(function (workerId) {
     if (worker.destroyed) {
       throw new Error('Worker was destroyed');
@@ -11871,7 +11873,6 @@ var PDFPageProxy = function PDFPageProxyClosure() {
       stats.time('Overall');
       this.pendingCleanup = false;
       var renderingIntent = params.intent === 'print' ? 'print' : 'display';
-      var renderInteractiveForms = params.renderInteractiveForms === true ? true : false;
       var canvasFactory = params.canvasFactory || new DOMCanvasFactory();
       if (!this.intentStates[renderingIntent]) {
         this.intentStates[renderingIntent] = Object.create(null);
@@ -11889,7 +11890,7 @@ var PDFPageProxy = function PDFPageProxyClosure() {
         this.transport.messageHandler.send('RenderPageRequest', {
           pageIndex: this.pageNumber - 1,
           intent: renderingIntent,
-          renderInteractiveForms: renderInteractiveForms
+          renderInteractiveForms: params.renderInteractiveForms === true
         });
       }
       var internalRenderTask = new InternalRenderTask(complete, params, this.objs, this.commonObjs, intentState.operatorList, this.pageNumber, canvasFactory);
@@ -11970,10 +11971,11 @@ var PDFPageProxy = function PDFPageProxyClosure() {
       return intentState.opListReadCapability.promise;
     },
     getTextContent: function PDFPageProxy_getTextContent(params) {
+      params = params || {};
       return this.transport.messageHandler.sendWithPromise('GetTextContent', {
         pageIndex: this.pageNumber - 1,
-        normalizeWhitespace: params && params.normalizeWhitespace === true ? true : false,
-        combineTextItems: params && params.disableCombineTextItems === true ? false : true
+        normalizeWhitespace: params.normalizeWhitespace === true,
+        combineTextItems: params.disableCombineTextItems !== true
       });
     },
     _destroy: function PDFPageProxy_destroy() {
@@ -12776,8 +12778,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
     }
   };
 }();
-exports.version = '1.8.192';
-exports.build = '46646a9d';
+exports.version = '1.8.195';
+exports.build = 'c4c44c1b';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -18147,7 +18149,8 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     forceDataSchema: false,
     maxImageSize: -1,
     disableFontFace: false,
-    disableNativeImageDecoder: false
+    disableNativeImageDecoder: false,
+    ignoreErrors: false
   };
   function NativeImageDecoder(xref, resources, handler, forceDataSchema) {
     this.xref = xref;
@@ -18273,6 +18276,12 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
   var TILING_PATTERN = 1,
       SHADING_PATTERN = 2;
   PartialEvaluator.prototype = {
+    clone: function (newOptions) {
+      newOptions = newOptions || DefaultPartialEvaluatorOptions;
+      var newEvaluator = Object.create(this);
+      newEvaluator.options = newOptions;
+      return newEvaluator;
+    },
     hasBlendModes: function PartialEvaluator_hasBlendModes(resources) {
       if (!isDict(resources)) {
         return false;
@@ -18333,9 +18342,10 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       return false;
     },
     buildFormXObject: function PartialEvaluator_buildFormXObject(resources, xobj, smask, operatorList, task, initialState) {
-      var matrix = xobj.dict.getArray('Matrix');
-      var bbox = xobj.dict.getArray('BBox');
-      var group = xobj.dict.get('Group');
+      var dict = xobj.dict;
+      var matrix = dict.getArray('Matrix');
+      var bbox = dict.getArray('BBox');
+      var group = dict.get('Group');
       if (group) {
         var groupOptions = {
           matrix: matrix,
@@ -18358,7 +18368,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         operatorList.addOp(OPS.beginGroup, [groupOptions]);
       }
       operatorList.addOp(OPS.paintFormXObjectBegin, [matrix, bbox]);
-      return this.getOperatorList(xobj, task, xobj.dict.get('Resources') || resources, operatorList, initialState).then(function () {
+      return this.getOperatorList(xobj, task, dict.get('Resources') || resources, operatorList, initialState).then(function () {
         operatorList.addOp(OPS.paintFormXObjectEnd, []);
         if (group) {
           operatorList.addOp(OPS.endGroup, [groupOptions]);
@@ -18731,6 +18741,11 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       var stateManager = new StateManager(initialState || new EvalState());
       var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
       var timeSlotManager = new TimeSlotManager();
+      function closePendingRestoreOPS(argument) {
+        for (var i = 0, ii = preprocessor.savedStatesDepth; i < ii; i++) {
+          operatorList.addOp(OPS.restore, []);
+        }
+      }
       return new Promise(function promiseBody(resolve, reject) {
         var next = function (promise) {
           promise.then(function () {
@@ -18966,11 +18981,17 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           next(deferred);
           return;
         }
-        for (i = 0, ii = preprocessor.savedStatesDepth; i < ii; i++) {
-          operatorList.addOp(OPS.restore, []);
-        }
+        closePendingRestoreOPS();
         resolve();
-      });
+      }).catch(function (reason) {
+        if (this.options.ignoreErrors) {
+          this.handler.send('UnsupportedFeature', { featureId: UNSUPPORTED_FEATURES.unknown });
+          warn('getOperatorList - ignoring errors during task: ' + task.name);
+          closePendingRestoreOPS();
+          return;
+        }
+        throw reason;
+      }.bind(this));
     },
     getTextContent: function PartialEvaluator_getTextContent(stream, task, resources, stateManager, normalizeWhitespace, combineTextItems) {
       stateManager = stateManager || new StateManager(new TextState());
@@ -19343,15 +19364,15 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
                 xobjsCache.texts = null;
                 break;
               }
-              stateManager.save();
+              var currentState = stateManager.state.clone();
+              var xObjStateManager = new StateManager(currentState);
               var matrix = xobj.dict.getArray('Matrix');
               if (isArray(matrix) && matrix.length === 6) {
-                stateManager.transform(matrix);
+                xObjStateManager.transform(matrix);
               }
-              next(self.getTextContent(xobj, task, xobj.dict.get('Resources') || resources, stateManager, normalizeWhitespace, combineTextItems).then(function (formTextContent) {
+              next(self.getTextContent(xobj, task, xobj.dict.get('Resources') || resources, xObjStateManager, normalizeWhitespace, combineTextItems).then(function (formTextContent) {
                 Util.appendToArray(textContent.items, formTextContent.items);
                 Util.extendObj(textContent.styles, formTextContent.styles);
-                stateManager.restore();
                 xobjsCache.key = name;
                 xobjsCache.texts = formTextContent;
               }));
@@ -19383,7 +19404,14 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         }
         flushTextContentItem();
         resolve(textContent);
-      });
+      }).catch(function (reason) {
+        if (this.options.ignoreErrors) {
+          warn('getTextContent - ignoring errors during task: ' + task.name);
+          flushTextContentItem();
+          return textContent;
+        }
+        throw reason;
+      }.bind(this));
     },
     extractDataStructures: function PartialEvaluator_extractDataStructures(dict, baseDict, properties) {
       var xref = this.xref;
@@ -19958,6 +19986,9 @@ var TranslatedFont = function TranslatedFontClosure() {
       if (this.type3Loaded) {
         return this.type3Loaded;
       }
+      var type3Options = Object.create(evaluator.options);
+      type3Options.ignoreErrors = false;
+      var type3Evaluator = evaluator.clone(type3Options);
       var translatedFont = this.font;
       var loadCharProcsPromise = Promise.resolve();
       var charProcs = this.dict.get('CharProcs');
@@ -19968,7 +19999,7 @@ var TranslatedFont = function TranslatedFontClosure() {
         loadCharProcsPromise = loadCharProcsPromise.then(function (key) {
           var glyphStream = charProcs.get(key);
           var operatorList = new OperatorList();
-          return evaluator.getOperatorList(glyphStream, task, fontResources, operatorList).then(function () {
+          return type3Evaluator.getOperatorList(glyphStream, task, fontResources, operatorList).then(function () {
             charProcOperatorList[key] = operatorList.getIR();
             parentOperatorList.addDependencies(operatorList.dependencies);
           }, function (reason) {
@@ -27370,7 +27401,8 @@ var WorkerMessageHandler = {
         forceDataSchema: data.disableCreateObjectURL,
         maxImageSize: data.maxImageSize === undefined ? -1 : data.maxImageSize,
         disableFontFace: data.disableFontFace,
-        disableNativeImageDecoder: data.disableNativeImageDecoder
+        disableNativeImageDecoder: data.disableNativeImageDecoder,
+        ignoreErrors: data.ignoreErrors
       };
       getPdfManager(data, evaluatorOptions).then(function (newPdfManager) {
         if (terminated) {
@@ -27484,14 +27516,12 @@ var WorkerMessageHandler = {
     }, this);
     handler.on('GetTextContent', function wphExtractText(data) {
       var pageIndex = data.pageIndex;
-      var normalizeWhitespace = data.normalizeWhitespace;
-      var combineTextItems = data.combineTextItems;
       return pdfManager.getPage(pageIndex).then(function (page) {
         var task = new WorkerTask('GetTextContent: page ' + pageIndex);
         startWorkerTask(task);
         var pageNum = pageIndex + 1;
         var start = Date.now();
-        return page.extractTextContent(handler, task, normalizeWhitespace, combineTextItems).then(function (textContent) {
+        return page.extractTextContent(handler, task, data.normalizeWhitespace, data.combineTextItems).then(function (textContent) {
           finishWorkerTask(task);
           info('text indexing: page=' + pageNum + ' - time=' + (Date.now() - start) + 'ms');
           return textContent;
@@ -28010,8 +28040,8 @@ if (!globalScope.PDFJS) {
   globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.8.192';
-PDFJS.build = '46646a9d';
+PDFJS.version = '1.8.195';
+PDFJS.build = 'c4c44c1b';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
   sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -43548,8 +43578,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.192';
-var pdfjsBuild = '46646a9d';
+var pdfjsVersion = '1.8.195';
+var pdfjsBuild = 'c4c44c1b';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);

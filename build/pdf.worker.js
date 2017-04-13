@@ -11104,7 +11104,8 @@ var WorkerMessageHandler = {
         forceDataSchema: data.disableCreateObjectURL,
         maxImageSize: data.maxImageSize === undefined ? -1 : data.maxImageSize,
         disableFontFace: data.disableFontFace,
-        disableNativeImageDecoder: data.disableNativeImageDecoder
+        disableNativeImageDecoder: data.disableNativeImageDecoder,
+        ignoreErrors: data.ignoreErrors
       };
       getPdfManager(data, evaluatorOptions).then(function (newPdfManager) {
         if (terminated) {
@@ -11218,14 +11219,12 @@ var WorkerMessageHandler = {
     }, this);
     handler.on('GetTextContent', function wphExtractText(data) {
       var pageIndex = data.pageIndex;
-      var normalizeWhitespace = data.normalizeWhitespace;
-      var combineTextItems = data.combineTextItems;
       return pdfManager.getPage(pageIndex).then(function (page) {
         var task = new WorkerTask('GetTextContent: page ' + pageIndex);
         startWorkerTask(task);
         var pageNum = pageIndex + 1;
         var start = Date.now();
-        return page.extractTextContent(handler, task, normalizeWhitespace, combineTextItems).then(function (textContent) {
+        return page.extractTextContent(handler, task, data.normalizeWhitespace, data.combineTextItems).then(function (textContent) {
           finishWorkerTask(task);
           info('text indexing: page=' + pageNum + ' - time=' + (Date.now() - start) + 'ms');
           return textContent;
@@ -15194,7 +15193,8 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     forceDataSchema: false,
     maxImageSize: -1,
     disableFontFace: false,
-    disableNativeImageDecoder: false
+    disableNativeImageDecoder: false,
+    ignoreErrors: false
   };
   function NativeImageDecoder(xref, resources, handler, forceDataSchema) {
     this.xref = xref;
@@ -15320,6 +15320,12 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
   var TILING_PATTERN = 1,
       SHADING_PATTERN = 2;
   PartialEvaluator.prototype = {
+    clone: function (newOptions) {
+      newOptions = newOptions || DefaultPartialEvaluatorOptions;
+      var newEvaluator = Object.create(this);
+      newEvaluator.options = newOptions;
+      return newEvaluator;
+    },
     hasBlendModes: function PartialEvaluator_hasBlendModes(resources) {
       if (!isDict(resources)) {
         return false;
@@ -15380,9 +15386,10 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       return false;
     },
     buildFormXObject: function PartialEvaluator_buildFormXObject(resources, xobj, smask, operatorList, task, initialState) {
-      var matrix = xobj.dict.getArray('Matrix');
-      var bbox = xobj.dict.getArray('BBox');
-      var group = xobj.dict.get('Group');
+      var dict = xobj.dict;
+      var matrix = dict.getArray('Matrix');
+      var bbox = dict.getArray('BBox');
+      var group = dict.get('Group');
       if (group) {
         var groupOptions = {
           matrix: matrix,
@@ -15405,7 +15412,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         operatorList.addOp(OPS.beginGroup, [groupOptions]);
       }
       operatorList.addOp(OPS.paintFormXObjectBegin, [matrix, bbox]);
-      return this.getOperatorList(xobj, task, xobj.dict.get('Resources') || resources, operatorList, initialState).then(function () {
+      return this.getOperatorList(xobj, task, dict.get('Resources') || resources, operatorList, initialState).then(function () {
         operatorList.addOp(OPS.paintFormXObjectEnd, []);
         if (group) {
           operatorList.addOp(OPS.endGroup, [groupOptions]);
@@ -15778,6 +15785,11 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       var stateManager = new StateManager(initialState || new EvalState());
       var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
       var timeSlotManager = new TimeSlotManager();
+      function closePendingRestoreOPS(argument) {
+        for (var i = 0, ii = preprocessor.savedStatesDepth; i < ii; i++) {
+          operatorList.addOp(OPS.restore, []);
+        }
+      }
       return new Promise(function promiseBody(resolve, reject) {
         var next = function (promise) {
           promise.then(function () {
@@ -16013,11 +16025,17 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           next(deferred);
           return;
         }
-        for (i = 0, ii = preprocessor.savedStatesDepth; i < ii; i++) {
-          operatorList.addOp(OPS.restore, []);
-        }
+        closePendingRestoreOPS();
         resolve();
-      });
+      }).catch(function (reason) {
+        if (this.options.ignoreErrors) {
+          this.handler.send('UnsupportedFeature', { featureId: UNSUPPORTED_FEATURES.unknown });
+          warn('getOperatorList - ignoring errors during task: ' + task.name);
+          closePendingRestoreOPS();
+          return;
+        }
+        throw reason;
+      }.bind(this));
     },
     getTextContent: function PartialEvaluator_getTextContent(stream, task, resources, stateManager, normalizeWhitespace, combineTextItems) {
       stateManager = stateManager || new StateManager(new TextState());
@@ -16390,15 +16408,15 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
                 xobjsCache.texts = null;
                 break;
               }
-              stateManager.save();
+              var currentState = stateManager.state.clone();
+              var xObjStateManager = new StateManager(currentState);
               var matrix = xobj.dict.getArray('Matrix');
               if (isArray(matrix) && matrix.length === 6) {
-                stateManager.transform(matrix);
+                xObjStateManager.transform(matrix);
               }
-              next(self.getTextContent(xobj, task, xobj.dict.get('Resources') || resources, stateManager, normalizeWhitespace, combineTextItems).then(function (formTextContent) {
+              next(self.getTextContent(xobj, task, xobj.dict.get('Resources') || resources, xObjStateManager, normalizeWhitespace, combineTextItems).then(function (formTextContent) {
                 Util.appendToArray(textContent.items, formTextContent.items);
                 Util.extendObj(textContent.styles, formTextContent.styles);
-                stateManager.restore();
                 xobjsCache.key = name;
                 xobjsCache.texts = formTextContent;
               }));
@@ -16430,7 +16448,14 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         }
         flushTextContentItem();
         resolve(textContent);
-      });
+      }).catch(function (reason) {
+        if (this.options.ignoreErrors) {
+          warn('getTextContent - ignoring errors during task: ' + task.name);
+          flushTextContentItem();
+          return textContent;
+        }
+        throw reason;
+      }.bind(this));
     },
     extractDataStructures: function PartialEvaluator_extractDataStructures(dict, baseDict, properties) {
       var xref = this.xref;
@@ -17005,6 +17030,9 @@ var TranslatedFont = function TranslatedFontClosure() {
       if (this.type3Loaded) {
         return this.type3Loaded;
       }
+      var type3Options = Object.create(evaluator.options);
+      type3Options.ignoreErrors = false;
+      var type3Evaluator = evaluator.clone(type3Options);
       var translatedFont = this.font;
       var loadCharProcsPromise = Promise.resolve();
       var charProcs = this.dict.get('CharProcs');
@@ -17015,7 +17043,7 @@ var TranslatedFont = function TranslatedFontClosure() {
         loadCharProcsPromise = loadCharProcsPromise.then(function (key) {
           var glyphStream = charProcs.get(key);
           var operatorList = new OperatorList();
-          return evaluator.getOperatorList(glyphStream, task, fontResources, operatorList).then(function () {
+          return type3Evaluator.getOperatorList(glyphStream, task, fontResources, operatorList).then(function () {
             charProcOperatorList[key] = operatorList.getIR();
             parentOperatorList.addDependencies(operatorList.dependencies);
           }, function (reason) {
@@ -36957,8 +36985,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.192';
-var pdfjsBuild = '46646a9d';
+var pdfjsVersion = '1.8.195';
+var pdfjsBuild = 'c4c44c1b';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
