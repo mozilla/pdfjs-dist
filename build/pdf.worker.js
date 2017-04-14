@@ -31,9 +31,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	function __w_pdfjs_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -36985,8 +36985,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.199';
-var pdfjsBuild = '74b31ab1';
+var pdfjsVersion = '1.8.201';
+var pdfjsBuild = '5feb2a25';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
