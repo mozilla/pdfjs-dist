@@ -592,10 +592,10 @@ function readUint32(data, offset) {
   return (data[offset] << 24 | data[offset + 1] << 16 | data[offset + 2] << 8 | data[offset + 3]) >>> 0;
 }
 function isLittleEndian() {
-  var buffer8 = new Uint8Array(2);
+  var buffer8 = new Uint8Array(4);
   buffer8[0] = 1;
-  var buffer16 = new Uint16Array(buffer8.buffer);
-  return buffer16[0] === 1;
+  var view32 = new Uint32Array(buffer8.buffer, 0, 1);
+  return view32[0] === 1;
 }
 function isEvalSupported() {
   try {
@@ -605,41 +605,6 @@ function isEvalSupported() {
     return false;
   }
 }
-var Uint32ArrayView = function Uint32ArrayViewClosure() {
-  function Uint32ArrayView(buffer, length) {
-    this.buffer = buffer;
-    this.byteLength = buffer.length;
-    this.length = length === undefined ? this.byteLength >> 2 : length;
-    ensureUint32ArrayViewProps(this.length);
-  }
-  Uint32ArrayView.prototype = Object.create(null);
-  var uint32ArrayViewSetters = 0;
-  function createUint32ArrayProp(index) {
-    return {
-      get: function () {
-        var buffer = this.buffer,
-            offset = index << 2;
-        return (buffer[offset] | buffer[offset + 1] << 8 | buffer[offset + 2] << 16 | buffer[offset + 3] << 24) >>> 0;
-      },
-      set: function (value) {
-        var buffer = this.buffer,
-            offset = index << 2;
-        buffer[offset] = value & 255;
-        buffer[offset + 1] = value >> 8 & 255;
-        buffer[offset + 2] = value >> 16 & 255;
-        buffer[offset + 3] = value >>> 24 & 255;
-      }
-    };
-  }
-  function ensureUint32ArrayViewProps(length) {
-    while (uint32ArrayViewSetters < length) {
-      Object.defineProperty(Uint32ArrayView.prototype, uint32ArrayViewSetters, createUint32ArrayProp(uint32ArrayViewSetters));
-      uint32ArrayViewSetters++;
-    }
-  }
-  return Uint32ArrayView;
-}();
-exports.Uint32ArrayView = Uint32ArrayView;
 var IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 var Util = function UtilClosure() {
   function Util() {}
@@ -1337,14 +1302,6 @@ var RenderingCancelledException = function RenderingCancelledException() {
   RenderingCancelledException.constructor = RenderingCancelledException;
   return RenderingCancelledException;
 }();
-var hasCanvasTypedArrays;
-hasCanvasTypedArrays = function hasCanvasTypedArrays() {
-  var canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 1;
-  var ctx = canvas.getContext('2d');
-  var imageData = ctx.createImageData(1, 1);
-  return typeof imageData.data.buffer !== 'undefined';
-};
 var LinkTarget = {
   NONE: 0,
   SELF: 1,
@@ -1459,7 +1416,6 @@ exports.isValidUrl = isValidUrl;
 exports.getFilenameFromUrl = getFilenameFromUrl;
 exports.LinkTarget = LinkTarget;
 exports.RenderingCancelledException = RenderingCancelledException;
-exports.hasCanvasTypedArrays = hasCanvasTypedArrays;
 exports.getDefaultSetting = getDefaultSetting;
 exports.DEFAULT_LINK_REL = DEFAULT_LINK_REL;
 exports.DOMCanvasFactory = DOMCanvasFactory;
@@ -3492,8 +3448,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
     }
   };
 }();
-exports.version = '1.8.201';
-exports.build = '5feb2a25';
+exports.version = '1.8.203';
+exports.build = 'f6d4de98';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -5432,8 +5388,8 @@ if (!globalScope.PDFJS) {
   globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.8.201';
-PDFJS.build = '5feb2a25';
+PDFJS.version = '1.8.203';
+PDFJS.build = 'f6d4de98';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
   sharedUtil.setVerbosityLevel(PDFJS.verbosity);
@@ -5519,13 +5475,7 @@ if (savedOpenExternalLinksInNewWindow) {
 PDFJS.getDocument = displayAPI.getDocument;
 PDFJS.PDFDataRangeTransport = displayAPI.PDFDataRangeTransport;
 PDFJS.PDFWorker = displayAPI.PDFWorker;
-Object.defineProperty(PDFJS, 'hasCanvasTypedArrays', {
-  configurable: true,
-  get: function PDFJS_hasCanvasTypedArrays() {
-    var value = displayDOMUtils.hasCanvasTypedArrays();
-    return sharedUtil.shadow(PDFJS, 'hasCanvasTypedArrays', value);
-  }
-});
+PDFJS.hasCanvasTypedArrays = true;
 PDFJS.CustomStyle = displayDOMUtils.CustomStyle;
 PDFJS.LinkTarget = LinkTarget;
 PDFJS.addLinkAttributes = displayDOMUtils.addLinkAttributes;
@@ -5556,7 +5506,6 @@ var IDENTITY_MATRIX = sharedUtil.IDENTITY_MATRIX;
 var ImageKind = sharedUtil.ImageKind;
 var OPS = sharedUtil.OPS;
 var TextRenderingMode = sharedUtil.TextRenderingMode;
-var Uint32ArrayView = sharedUtil.Uint32ArrayView;
 var Util = sharedUtil.Util;
 var assert = sharedUtil.assert;
 var info = sharedUtil.info;
@@ -5569,7 +5518,6 @@ var warn = sharedUtil.warn;
 var TilingPattern = displayPatternHelper.TilingPattern;
 var getShadingPatternFromIR = displayPatternHelper.getShadingPatternFromIR;
 var WebGLUtils = displayWebGL.WebGLUtils;
-var hasCanvasTypedArrays = displayDOMUtils.hasCanvasTypedArrays;
 var MIN_FONT_SIZE = 16;
 var MAX_FONT_SIZE = 100;
 var MAX_GROUP_SIZE = 4096;
@@ -5577,11 +5525,6 @@ var MIN_WIDTH_FACTOR = 0.65;
 var COMPILE_TYPE3_GLYPHS = true;
 var MAX_SIZE_TO_COMPILE = 1000;
 var FULL_CHUNK_HEIGHT = 16;
-var HasCanvasTypedArraysCached = {
-  get value() {
-    return shadow(HasCanvasTypedArraysCached, 'value', hasCanvasTypedArrays());
-  }
-};
 var IsLittleEndianCached = {
   get value() {
     return shadow(IsLittleEndianCached, 'value', isLittleEndian());
@@ -5916,11 +5859,11 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
     var i, j, thisChunkHeight, elemsInThisChunk;
     if (imgData.kind === ImageKind.GRAYSCALE_1BPP) {
       var srcLength = src.byteLength;
-      var dest32 = HasCanvasTypedArraysCached.value ? new Uint32Array(dest.buffer) : new Uint32ArrayView(dest);
+      var dest32 = new Uint32Array(dest.buffer, 0, dest.byteLength >> 2);
       var dest32DataLength = dest32.length;
       var fullSrcDiff = width + 7 >> 3;
       var white = 0xFFFFFFFF;
-      var black = IsLittleEndianCached.value || !HasCanvasTypedArraysCached.value ? 0xFF000000 : 0x000000FF;
+      var black = IsLittleEndianCached.value ? 0xFF000000 : 0x000000FF;
       for (i = 0; i < totalChunks; i++) {
         thisChunkHeight = i < fullChunks ? FULL_CHUNK_HEIGHT : partialChunkHeight;
         destPos = 0;
@@ -7934,8 +7877,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.201';
-var pdfjsBuild = '5feb2a25';
+var pdfjsVersion = '1.8.203';
+var pdfjsBuild = 'f6d4de98';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
@@ -8021,6 +7964,37 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         this[offset] = array[i] & 0xFF;
       }
     }
+    function Uint32ArrayView(buffer, length) {
+      this.buffer = buffer;
+      this.byteLength = buffer.length;
+      this.length = length;
+      ensureUint32ArrayViewProps(this.length);
+    }
+    Uint32ArrayView.prototype = Object.create(null);
+    var uint32ArrayViewSetters = 0;
+    function createUint32ArrayProp(index) {
+      return {
+        get: function () {
+          var buffer = this.buffer,
+              offset = index << 2;
+          return (buffer[offset] | buffer[offset + 1] << 8 | buffer[offset + 2] << 16 | buffer[offset + 3] << 24) >>> 0;
+        },
+        set: function (value) {
+          var buffer = this.buffer,
+              offset = index << 2;
+          buffer[offset] = value & 255;
+          buffer[offset + 1] = value >> 8 & 255;
+          buffer[offset + 2] = value >> 16 & 255;
+          buffer[offset + 3] = value >>> 24 & 255;
+        }
+      };
+    }
+    function ensureUint32ArrayViewProps(length) {
+      while (uint32ArrayViewSetters < length) {
+        Object.defineProperty(Uint32ArrayView.prototype, uint32ArrayViewSetters, createUint32ArrayProp(uint32ArrayViewSetters));
+        uint32ArrayViewSetters++;
+      }
+    }
     function TypedArray(arg1) {
       var result, i, n;
       if (typeof arg1 === 'number') {
@@ -8047,11 +8021,42 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     }
     globalScope.Uint8Array = TypedArray;
     globalScope.Int8Array = TypedArray;
-    globalScope.Uint32Array = TypedArray;
     globalScope.Int32Array = TypedArray;
     globalScope.Uint16Array = TypedArray;
     globalScope.Float32Array = TypedArray;
     globalScope.Float64Array = TypedArray;
+    globalScope.Uint32Array = function () {
+      if (arguments.length === 3) {
+        if (arguments[1] !== 0) {
+          throw new Error('offset !== 0 is not supported');
+        }
+        return new Uint32ArrayView(arguments[0], arguments[2]);
+      }
+      return TypedArray.apply(this, arguments);
+    };
+  })();
+  (function canvasPixelArrayBuffer() {
+    if (!hasDOM || !window.CanvasPixelArray) {
+      return;
+    }
+    var cpaProto = window.CanvasPixelArray.prototype;
+    if ('buffer' in cpaProto) {
+      return;
+    }
+    Object.defineProperty(cpaProto, 'buffer', {
+      get: function () {
+        return this;
+      },
+      enumerable: false,
+      configurable: true
+    });
+    Object.defineProperty(cpaProto, 'byteLength', {
+      get: function () {
+        return this.length;
+      },
+      enumerable: false,
+      configurable: true
+    });
   })();
   (function normalizeURLObject() {
     if (!globalScope.URL) {

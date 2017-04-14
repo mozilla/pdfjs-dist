@@ -592,10 +592,10 @@ function readUint32(data, offset) {
   return (data[offset] << 24 | data[offset + 1] << 16 | data[offset + 2] << 8 | data[offset + 3]) >>> 0;
 }
 function isLittleEndian() {
-  var buffer8 = new Uint8Array(2);
+  var buffer8 = new Uint8Array(4);
   buffer8[0] = 1;
-  var buffer16 = new Uint16Array(buffer8.buffer);
-  return buffer16[0] === 1;
+  var view32 = new Uint32Array(buffer8.buffer, 0, 1);
+  return view32[0] === 1;
 }
 function isEvalSupported() {
   try {
@@ -605,41 +605,6 @@ function isEvalSupported() {
     return false;
   }
 }
-var Uint32ArrayView = function Uint32ArrayViewClosure() {
-  function Uint32ArrayView(buffer, length) {
-    this.buffer = buffer;
-    this.byteLength = buffer.length;
-    this.length = length === undefined ? this.byteLength >> 2 : length;
-    ensureUint32ArrayViewProps(this.length);
-  }
-  Uint32ArrayView.prototype = Object.create(null);
-  var uint32ArrayViewSetters = 0;
-  function createUint32ArrayProp(index) {
-    return {
-      get: function () {
-        var buffer = this.buffer,
-            offset = index << 2;
-        return (buffer[offset] | buffer[offset + 1] << 8 | buffer[offset + 2] << 16 | buffer[offset + 3] << 24) >>> 0;
-      },
-      set: function (value) {
-        var buffer = this.buffer,
-            offset = index << 2;
-        buffer[offset] = value & 255;
-        buffer[offset + 1] = value >> 8 & 255;
-        buffer[offset + 2] = value >> 16 & 255;
-        buffer[offset + 3] = value >>> 24 & 255;
-      }
-    };
-  }
-  function ensureUint32ArrayViewProps(length) {
-    while (uint32ArrayViewSetters < length) {
-      Object.defineProperty(Uint32ArrayView.prototype, uint32ArrayViewSetters, createUint32ArrayProp(uint32ArrayViewSetters));
-      uint32ArrayViewSetters++;
-    }
-  }
-  return Uint32ArrayView;
-}();
-exports.Uint32ArrayView = Uint32ArrayView;
 var IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 var Util = function UtilClosure() {
   function Util() {}
@@ -35148,7 +35113,6 @@ exports.getMetrics = getMetrics;
 
 
 var sharedUtil = __w_pdfjs_require__(0);
-var Uint32ArrayView = sharedUtil.Uint32ArrayView;
 var MurmurHash3_64 = function MurmurHash3_64Closure(seed) {
   var MASK_HIGH = 0xffff0000;
   var MASK_LOW = 0xffff;
@@ -35157,15 +35121,8 @@ var MurmurHash3_64 = function MurmurHash3_64Closure(seed) {
     this.h1 = seed ? seed & 0xffffffff : SEED;
     this.h2 = seed ? seed & 0xffffffff : SEED;
   }
-  var alwaysUseUint32ArrayView = false;
-  try {
-    new Uint32Array(new Uint8Array(5).buffer, 0, 1);
-  } catch (e) {
-    alwaysUseUint32ArrayView = true;
-  }
   MurmurHash3_64.prototype = {
     update: function MurmurHash3_64_update(input) {
-      var useUint32ArrayView = alwaysUseUint32ArrayView;
       var i;
       if (typeof input === 'string') {
         var data = new Uint8Array(input.length * 2);
@@ -35179,19 +35136,15 @@ var MurmurHash3_64 = function MurmurHash3_64Closure(seed) {
             data[length++] = code & 0xff;
           }
         }
-      } else if (input instanceof Uint8Array) {
+      } else if (typeof input === 'object' && 'byteLength' in input) {
         data = input;
-        length = data.length;
-      } else if (typeof input === 'object' && 'length' in input) {
-        data = input;
-        length = data.length;
-        useUint32ArrayView = true;
+        length = data.byteLength;
       } else {
         throw new Error('Wrong data format in MurmurHash3_64_update. ' + 'Input must be a string or array.');
       }
       var blockCounts = length >> 2;
       var tailLength = length - blockCounts * 4;
-      var dataUint32 = useUint32ArrayView ? new Uint32ArrayView(data, blockCounts) : new Uint32Array(data.buffer, 0, blockCounts);
+      var dataUint32 = new Uint32Array(data.buffer, 0, blockCounts);
       var k1 = 0;
       var k2 = 0;
       var h1 = this.h1;
@@ -36985,8 +36938,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.201';
-var pdfjsBuild = '5feb2a25';
+var pdfjsVersion = '1.8.203';
+var pdfjsBuild = 'f6d4de98';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
@@ -37044,6 +36997,37 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         this[offset] = array[i] & 0xFF;
       }
     }
+    function Uint32ArrayView(buffer, length) {
+      this.buffer = buffer;
+      this.byteLength = buffer.length;
+      this.length = length;
+      ensureUint32ArrayViewProps(this.length);
+    }
+    Uint32ArrayView.prototype = Object.create(null);
+    var uint32ArrayViewSetters = 0;
+    function createUint32ArrayProp(index) {
+      return {
+        get: function () {
+          var buffer = this.buffer,
+              offset = index << 2;
+          return (buffer[offset] | buffer[offset + 1] << 8 | buffer[offset + 2] << 16 | buffer[offset + 3] << 24) >>> 0;
+        },
+        set: function (value) {
+          var buffer = this.buffer,
+              offset = index << 2;
+          buffer[offset] = value & 255;
+          buffer[offset + 1] = value >> 8 & 255;
+          buffer[offset + 2] = value >> 16 & 255;
+          buffer[offset + 3] = value >>> 24 & 255;
+        }
+      };
+    }
+    function ensureUint32ArrayViewProps(length) {
+      while (uint32ArrayViewSetters < length) {
+        Object.defineProperty(Uint32ArrayView.prototype, uint32ArrayViewSetters, createUint32ArrayProp(uint32ArrayViewSetters));
+        uint32ArrayViewSetters++;
+      }
+    }
     function TypedArray(arg1) {
       var result, i, n;
       if (typeof arg1 === 'number') {
@@ -37070,11 +37054,42 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     }
     globalScope.Uint8Array = TypedArray;
     globalScope.Int8Array = TypedArray;
-    globalScope.Uint32Array = TypedArray;
     globalScope.Int32Array = TypedArray;
     globalScope.Uint16Array = TypedArray;
     globalScope.Float32Array = TypedArray;
     globalScope.Float64Array = TypedArray;
+    globalScope.Uint32Array = function () {
+      if (arguments.length === 3) {
+        if (arguments[1] !== 0) {
+          throw new Error('offset !== 0 is not supported');
+        }
+        return new Uint32ArrayView(arguments[0], arguments[2]);
+      }
+      return TypedArray.apply(this, arguments);
+    };
+  })();
+  (function canvasPixelArrayBuffer() {
+    if (!hasDOM || !window.CanvasPixelArray) {
+      return;
+    }
+    var cpaProto = window.CanvasPixelArray.prototype;
+    if ('buffer' in cpaProto) {
+      return;
+    }
+    Object.defineProperty(cpaProto, 'buffer', {
+      get: function () {
+        return this;
+      },
+      enumerable: false,
+      configurable: true
+    });
+    Object.defineProperty(cpaProto, 'byteLength', {
+      get: function () {
+        return this.length;
+      },
+      enumerable: false,
+      configurable: true
+    });
   })();
   (function normalizeURLObject() {
     if (!globalScope.URL) {
