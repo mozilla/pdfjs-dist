@@ -98,6 +98,8 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var compatibility = __w_pdfjs_require__(48);
 var globalScope = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : undefined;
 var FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
@@ -510,7 +512,7 @@ function removeNullCharacters(str) {
   return str.replace(NullCharactersRegExp, '');
 }
 function bytesToString(bytes) {
-  assert(bytes !== null && typeof bytes === 'object' && bytes.length !== undefined, 'Invalid argument for bytesToString');
+  assert(bytes !== null && (typeof bytes === 'undefined' ? 'undefined' : _typeof(bytes)) === 'object' && bytes.length !== undefined, 'Invalid argument for bytesToString');
   var length = bytes.length;
   var MAX_ARGUMENT_COUNT = 8192;
   if (length < MAX_ARGUMENT_COUNT) {
@@ -881,14 +883,14 @@ function isArray(v) {
   return v instanceof Array;
 }
 function isArrayBuffer(v) {
-  return typeof v === 'object' && v !== null && v.byteLength !== undefined;
+  return (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === 'object' && v !== null && v.byteLength !== undefined;
 }
 function isSpace(ch) {
   return ch === 0x20 || ch === 0x09 || ch === 0x0D || ch === 0x0A;
 }
 function isNodeJS() {
   if (typeof __pdfjsdev_webpack__ === 'undefined') {
-    return typeof process === 'object' && process + '' === '[object process]';
+    return (typeof process === 'undefined' ? 'undefined' : _typeof(process)) === 'object' && process + '' === '[object process]';
   }
   return false;
 }
@@ -1081,14 +1083,14 @@ MessageHandler.prototype = {
     }
     return capability.promise;
   },
-  postMessage: function (message, transfers) {
+  postMessage: function postMessage(message, transfers) {
     if (transfers && this.postMessageTransfers) {
       this.comObj.postMessage(message, transfers);
     } else {
       this.comObj.postMessage(message);
     }
   },
-  destroy: function () {
+  destroy: function destroy() {
     this.comObj.removeEventListener('message', this._onComObjOnMessage);
   }
 };
@@ -1178,6 +1180,8 @@ exports.warn = warn;
 
 "use strict";
 
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var sharedUtil = __w_pdfjs_require__(0);
 var isArray = sharedUtil.isArray;
@@ -1389,7 +1393,7 @@ function isRefsEqual(v1, v2) {
   return v1.num === v2.num && v1.gen === v2.gen;
 }
 function isStream(v) {
-  return typeof v === 'object' && v !== null && v.getBytes !== undefined;
+  return (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === 'object' && v !== null && v.getBytes !== undefined;
 }
 exports.EOF = EOF;
 exports.Cmd = Cmd;
@@ -3151,7 +3155,7 @@ var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
     this.isCompressed = params.isCompressed || false;
   }
   DOMCMapReaderFactory.prototype = {
-    fetch: function (params) {
+    fetch: function fetch(params) {
       var name = params.name;
       if (!name) {
         return Promise.reject(new Error('CMap name must be specified.'));
@@ -5310,6 +5314,8 @@ exports.Parser = Parser;
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
 var corePsParser = __w_pdfjs_require__(42);
@@ -5651,7 +5657,7 @@ var PDFFunction = function PDFFunctionClosure() {
 }();
 function isPDFFunction(v) {
   var fnDict;
-  if (typeof v !== 'object') {
+  if ((typeof v === 'undefined' ? 'undefined' : _typeof(v)) !== 'object') {
     return false;
   } else if (isDict(v)) {
     fnDict = v;
@@ -6022,35 +6028,35 @@ var PostScriptCompiler = function PostScriptCompilerClosure() {
     this.parts = [];
   }
   ExpressionBuilderVisitor.prototype = {
-    visitArgument: function (arg) {
+    visitArgument: function visitArgument(arg) {
       this.parts.push('Math.max(', arg.min, ', Math.min(', arg.max, ', src[srcOffset + ', arg.index, ']))');
     },
-    visitVariable: function (variable) {
+    visitVariable: function visitVariable(variable) {
       this.parts.push('v', variable.index);
     },
-    visitLiteral: function (literal) {
+    visitLiteral: function visitLiteral(literal) {
       this.parts.push(literal.number);
     },
-    visitBinaryOperation: function (operation) {
+    visitBinaryOperation: function visitBinaryOperation(operation) {
       this.parts.push('(');
       operation.arg1.visit(this);
       this.parts.push(' ', operation.op, ' ');
       operation.arg2.visit(this);
       this.parts.push(')');
     },
-    visitVariableDefinition: function (definition) {
+    visitVariableDefinition: function visitVariableDefinition(definition) {
       this.parts.push('var ');
       definition.variable.visit(this);
       this.parts.push(' = ');
       definition.arg.visit(this);
       this.parts.push(';');
     },
-    visitMin: function (max) {
+    visitMin: function visitMin(max) {
       this.parts.push('Math.min(');
       max.arg.visit(this);
       this.parts.push(', ', max.max, ')');
     },
-    toString: function () {
+    toString: function toString() {
       return this.parts.join('');
     }
   };
@@ -11477,6 +11483,8 @@ exports.AnnotationLayer = AnnotationLayer;
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var sharedUtil = __w_pdfjs_require__(0);
 var displayFontLoader = __w_pdfjs_require__(45);
 var displayCanvas = __w_pdfjs_require__(44);
@@ -11547,7 +11555,7 @@ function getDocument(src, pdfDataRangeTransport, passwordCallback, progressCallb
   } else if (src instanceof PDFDataRangeTransport) {
     source = { range: src };
   } else {
-    if (typeof src !== 'object') {
+    if ((typeof src === 'undefined' ? 'undefined' : _typeof(src)) !== 'object') {
       error('Invalid parameter in getDocument, need either Uint8Array, ' + 'string or a parameter object');
     }
     if (!src.url && !src.data && !src.range) {
@@ -11572,7 +11580,7 @@ function getDocument(src, pdfDataRangeTransport, passwordCallback, progressCallb
       var pdfBytes = source[key];
       if (typeof pdfBytes === 'string') {
         params[key] = stringToBytes(pdfBytes);
-      } else if (typeof pdfBytes === 'object' && pdfBytes !== null && !isNaN(pdfBytes.length)) {
+      } else if ((typeof pdfBytes === 'undefined' ? 'undefined' : _typeof(pdfBytes)) === 'object' && pdfBytes !== null && !isNaN(pdfBytes.length)) {
         params[key] = new Uint8Array(pdfBytes);
       } else if (isArrayBuffer(pdfBytes)) {
         params[key] = new Uint8Array(pdfBytes);
@@ -11654,7 +11662,7 @@ var PDFDocumentLoadingTask = function PDFDocumentLoadingTaskClosure() {
     get promise() {
       return this._capability.promise;
     },
-    destroy: function () {
+    destroy: function destroy() {
       this.destroyed = true;
       var transportDestroyed = !this._transport ? Promise.resolve() : this._transport.destroy();
       return transportDestroyed.then(function () {
@@ -11954,7 +11962,7 @@ var PDFPageProxy = function PDFPageProxyClosure() {
       this.pendingCleanup = false;
       return Promise.all(waitOn);
     },
-    destroy: function () {
+    destroy: function destroy() {
       deprecated('page destroy method, use cleanup() instead');
       this.cleanup();
     },
@@ -12034,9 +12042,9 @@ var PDFWorker = function PDFWorkerClosure() {
     this._deferred = Promise.resolve(undefined);
   }
   FakeWorkerPort.prototype = {
-    postMessage: function (obj, transfers) {
+    postMessage: function postMessage(obj, transfers) {
       function cloneValue(value) {
-        if (typeof value !== 'object' || value === null) {
+        if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object' || value === null) {
           return value;
         }
         if (cloned.has(value)) {
@@ -12085,14 +12093,14 @@ var PDFWorker = function PDFWorkerClosure() {
         }, this);
       }.bind(this));
     },
-    addEventListener: function (name, listener) {
+    addEventListener: function addEventListener(name, listener) {
       this._listeners.push(listener);
     },
-    removeEventListener: function (name, listener) {
+    removeEventListener: function removeEventListener(name, listener) {
       var i = this._listeners.indexOf(listener);
       this._listeners.splice(i, 1);
     },
-    terminate: function () {
+    terminate: function terminate() {
       this._listeners = [];
     }
   };
@@ -12322,7 +12330,7 @@ var WorkerTransport = function WorkerTransportClosure() {
             var fontRegistry = null;
             if (getDefaultSetting('pdfBug') && globalScope.FontInspector && globalScope['FontInspector'].enabled) {
               fontRegistry = {
-                registerFont: function (font, url) {
+                registerFont: function registerFont(font, url) {
                   globalScope['FontInspector'].fontAdded(font, url);
                 }
               };
@@ -12723,19 +12731,19 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 var _UnsupportedManager = function UnsupportedManagerClosure() {
   var listeners = [];
   return {
-    listen: function (cb) {
+    listen: function listen(cb) {
       deprecated('Global UnsupportedManager.listen is used: ' + ' use PDFDocumentLoadingTask.onUnsupportedFeature instead');
       listeners.push(cb);
     },
-    notify: function (featureId) {
+    notify: function notify(featureId) {
       for (var i = 0, ii = listeners.length; i < ii; i++) {
         listeners[i](featureId);
       }
     }
   };
 }();
-exports.version = '1.8.205';
-exports.build = 'bc1f4dd9';
+exports.version = '1.8.207';
+exports.build = 'fd51a7cb';
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
@@ -13906,7 +13914,7 @@ var renderTextLayer = function renderTextLayerClosure() {
         ts[i + 56] = s && (e.right - t[0]) / s;
         ts[i + 60] = c && (e.bottom - t[1]) / -c;
       });
-      var findPositiveMin = function (ts, offset, count) {
+      var findPositiveMin = function findPositiveMin(ts, offset, count) {
         var result = 0;
         for (var i = 0; i < count; i++) {
           var t = ts[offset++];
@@ -14197,6 +14205,8 @@ exports.renderTextLayer = renderTextLayer;
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var g;
 g = function () {
   return this;
@@ -14204,7 +14214,7 @@ g = function () {
 try {
   g = g || Function("return this")() || (1, eval)("this");
 } catch (e) {
-  if (typeof window === "object") g = window;
+  if ((typeof window === "undefined" ? "undefined" : _typeof(window)) === "object") g = window;
 }
 module.exports = g;
 
@@ -16200,7 +16210,7 @@ var ChunkedStreamManager = function ChunkedStreamManagerClosure() {
           loaded = 0;
       var manager = this;
       var promise = new Promise(function (resolve, reject) {
-        var readChunk = function (chunk) {
+        var readChunk = function readChunk(chunk) {
           try {
             if (!chunk.done) {
               var data = chunk.value;
@@ -18115,10 +18125,10 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     this.forceDataSchema = forceDataSchema;
   }
   NativeImageDecoder.prototype = {
-    canDecode: function (image) {
+    canDecode: function canDecode(image) {
       return image instanceof JpegStream && NativeImageDecoder.isDecodable(image, this.xref, this.resources);
     },
-    decode: function (image) {
+    decode: function decode(image) {
       var dict = image.dict;
       var colorSpace = dict.get('ColorSpace', 'CS');
       colorSpace = ColorSpace.parse(colorSpace, this.xref, this.resources);
@@ -18232,7 +18242,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
   var TILING_PATTERN = 1,
       SHADING_PATTERN = 2;
   PartialEvaluator.prototype = {
-    clone: function (newOptions) {
+    clone: function clone(newOptions) {
       newOptions = newOptions || DefaultPartialEvaluatorOptions;
       var newEvaluator = Object.create(this);
       newEvaluator.options = newOptions;
@@ -18703,7 +18713,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         }
       }
       return new Promise(function promiseBody(resolve, reject) {
-        var next = function (promise) {
+        var next = function next(promise) {
           promise.then(function () {
             try {
               promiseBody(resolve, reject);
@@ -19145,7 +19155,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       }
       var timeSlotManager = new TimeSlotManager();
       return new Promise(function promiseBody(resolve, reject) {
-        var next = function (promise) {
+        var next = function next(promise) {
           promise.then(function () {
             try {
               promiseBody(resolve, reject);
@@ -19929,7 +19939,7 @@ var TranslatedFont = function TranslatedFontClosure() {
     this.sent = false;
   }
   TranslatedFont.prototype = {
-    send: function (handler) {
+    send: function send(handler) {
       if (this.sent) {
         return;
       }
@@ -19937,7 +19947,7 @@ var TranslatedFont = function TranslatedFontClosure() {
       handler.send('commonobj', [this.loadedName, 'Font', fontData]);
       this.sent = true;
     },
-    loadType3Data: function (evaluator, resources, parentOperatorList, task) {
+    loadType3Data: function loadType3Data(evaluator, resources, parentOperatorList, task) {
       assert(this.font.isType3Font);
       if (this.type3Loaded) {
         return this.type3Loaded;
@@ -20010,7 +20020,7 @@ var OperatorList = function OperatorListClosure() {
     get totalLength() {
       return this._totalLength + this.length;
     },
-    addOp: function (fn, args) {
+    addOp: function addOp(fn, args) {
       this.fnArray.push(fn);
       this.argsArray.push(args);
       if (this.messageHandler) {
@@ -20021,32 +20031,32 @@ var OperatorList = function OperatorListClosure() {
         }
       }
     },
-    addDependency: function (dependency) {
+    addDependency: function addDependency(dependency) {
       if (dependency in this.dependencies) {
         return;
       }
       this.dependencies[dependency] = true;
       this.addOp(OPS.dependency, [dependency]);
     },
-    addDependencies: function (dependencies) {
+    addDependencies: function addDependencies(dependencies) {
       for (var key in dependencies) {
         this.addDependency(key);
       }
     },
-    addOpList: function (opList) {
+    addOpList: function addOpList(opList) {
       Util.extendObj(this.dependencies, opList.dependencies);
       for (var i = 0, ii = opList.length; i < ii; i++) {
         this.addOp(opList.fnArray[i], opList.argsArray[i]);
       }
     },
-    getIR: function () {
+    getIR: function getIR() {
       return {
         fnArray: this.fnArray,
         argsArray: this.argsArray,
         length: this.length
       };
     },
-    flush: function (lastChunk) {
+    flush: function flush(lastChunk) {
       if (this.intent !== 'oplist') {
         new QueueOptimizer().optimize(this);
       }
@@ -20076,18 +20086,18 @@ var StateManager = function StateManagerClosure() {
     this.stateStack = [];
   }
   StateManager.prototype = {
-    save: function () {
+    save: function save() {
       var old = this.state;
       this.stateStack.push(this.state);
       this.state = old.clone();
     },
-    restore: function () {
+    restore: function restore() {
       var prev = this.stateStack.pop();
       if (prev) {
         this.state = prev;
       }
     },
-    transform: function (args) {
+    transform: function transform(args) {
       this.state.ctm = Util.transform(this.state.ctm, args);
     }
   };
@@ -22902,6 +22912,8 @@ exports.JpxImage = JpxImage;
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
 var coreCrypto = __w_pdfjs_require__(17);
@@ -23430,7 +23442,7 @@ var Catalog = function CatalogClosure() {
       return;
     }
     var resultObj = params.resultObj;
-    if (typeof resultObj !== 'object') {
+    if ((typeof resultObj === 'undefined' ? 'undefined' : _typeof(resultObj)) !== 'object') {
       warn('Catalog_parseDestDictionary: "resultObj" must be an object.');
       return;
     }
@@ -25459,37 +25471,37 @@ function isRTLRangeFor(value) {
   return false;
 }
 var getNormalizedUnicodes = getLookupTableFactory(function (t) {
-  t['\u00A8'] = '\u0020\u0308';
-  t['\u00AF'] = '\u0020\u0304';
-  t['\u00B4'] = '\u0020\u0301';
-  t['\u00B5'] = '\u03BC';
-  t['\u00B8'] = '\u0020\u0327';
-  t['\u0132'] = '\u0049\u004A';
-  t['\u0133'] = '\u0069\u006A';
-  t['\u013F'] = '\u004C\u00B7';
-  t['\u0140'] = '\u006C\u00B7';
-  t['\u0149'] = '\u02BC\u006E';
-  t['\u017F'] = '\u0073';
-  t['\u01C4'] = '\u0044\u017D';
-  t['\u01C5'] = '\u0044\u017E';
-  t['\u01C6'] = '\u0064\u017E';
-  t['\u01C7'] = '\u004C\u004A';
-  t['\u01C8'] = '\u004C\u006A';
-  t['\u01C9'] = '\u006C\u006A';
-  t['\u01CA'] = '\u004E\u004A';
-  t['\u01CB'] = '\u004E\u006A';
-  t['\u01CC'] = '\u006E\u006A';
-  t['\u01F1'] = '\u0044\u005A';
-  t['\u01F2'] = '\u0044\u007A';
-  t['\u01F3'] = '\u0064\u007A';
-  t['\u02D8'] = '\u0020\u0306';
-  t['\u02D9'] = '\u0020\u0307';
-  t['\u02DA'] = '\u0020\u030A';
-  t['\u02DB'] = '\u0020\u0328';
-  t['\u02DC'] = '\u0020\u0303';
-  t['\u02DD'] = '\u0020\u030B';
-  t['\u037A'] = '\u0020\u0345';
-  t['\u0384'] = '\u0020\u0301';
+  t['\xA8'] = ' \u0308';
+  t['\xAF'] = ' \u0304';
+  t['\xB4'] = ' \u0301';
+  t['\xB5'] = '\u03BC';
+  t['\xB8'] = ' \u0327';
+  t['\u0132'] = 'IJ';
+  t['\u0133'] = 'ij';
+  t['\u013F'] = 'L\xB7';
+  t['\u0140'] = 'l\xB7';
+  t['\u0149'] = '\u02BCn';
+  t['\u017F'] = 's';
+  t['\u01C4'] = 'D\u017D';
+  t['\u01C5'] = 'D\u017E';
+  t['\u01C6'] = 'd\u017E';
+  t['\u01C7'] = 'LJ';
+  t['\u01C8'] = 'Lj';
+  t['\u01C9'] = 'lj';
+  t['\u01CA'] = 'NJ';
+  t['\u01CB'] = 'Nj';
+  t['\u01CC'] = 'nj';
+  t['\u01F1'] = 'DZ';
+  t['\u01F2'] = 'Dz';
+  t['\u01F3'] = 'dz';
+  t['\u02D8'] = ' \u0306';
+  t['\u02D9'] = ' \u0307';
+  t['\u02DA'] = ' \u030A';
+  t['\u02DB'] = ' \u0328';
+  t['\u02DC'] = ' \u0303';
+  t['\u02DD'] = ' \u030B';
+  t['\u037A'] = ' \u0345';
+  t['\u0384'] = ' \u0301';
   t['\u03D0'] = '\u03B2';
   t['\u03D1'] = '\u03B8';
   t['\u03D2'] = '\u03A5';
@@ -25512,155 +25524,155 @@ var getNormalizedUnicodes = getLookupTableFactory(function (t) {
   t['\u0EDD'] = '\u0EAB\u0EA1';
   t['\u0F77'] = '\u0FB2\u0F81';
   t['\u0F79'] = '\u0FB3\u0F81';
-  t['\u1E9A'] = '\u0061\u02BE';
-  t['\u1FBD'] = '\u0020\u0313';
-  t['\u1FBF'] = '\u0020\u0313';
-  t['\u1FC0'] = '\u0020\u0342';
-  t['\u1FFE'] = '\u0020\u0314';
-  t['\u2002'] = '\u0020';
-  t['\u2003'] = '\u0020';
-  t['\u2004'] = '\u0020';
-  t['\u2005'] = '\u0020';
-  t['\u2006'] = '\u0020';
-  t['\u2008'] = '\u0020';
-  t['\u2009'] = '\u0020';
-  t['\u200A'] = '\u0020';
-  t['\u2017'] = '\u0020\u0333';
-  t['\u2024'] = '\u002E';
-  t['\u2025'] = '\u002E\u002E';
-  t['\u2026'] = '\u002E\u002E\u002E';
+  t['\u1E9A'] = 'a\u02BE';
+  t['\u1FBD'] = ' \u0313';
+  t['\u1FBF'] = ' \u0313';
+  t['\u1FC0'] = ' \u0342';
+  t['\u1FFE'] = ' \u0314';
+  t['\u2002'] = ' ';
+  t['\u2003'] = ' ';
+  t['\u2004'] = ' ';
+  t['\u2005'] = ' ';
+  t['\u2006'] = ' ';
+  t['\u2008'] = ' ';
+  t['\u2009'] = ' ';
+  t['\u200A'] = ' ';
+  t['\u2017'] = ' \u0333';
+  t['\u2024'] = '.';
+  t['\u2025'] = '..';
+  t['\u2026'] = '...';
   t['\u2033'] = '\u2032\u2032';
   t['\u2034'] = '\u2032\u2032\u2032';
   t['\u2036'] = '\u2035\u2035';
   t['\u2037'] = '\u2035\u2035\u2035';
-  t['\u203C'] = '\u0021\u0021';
-  t['\u203E'] = '\u0020\u0305';
-  t['\u2047'] = '\u003F\u003F';
-  t['\u2048'] = '\u003F\u0021';
-  t['\u2049'] = '\u0021\u003F';
+  t['\u203C'] = '!!';
+  t['\u203E'] = ' \u0305';
+  t['\u2047'] = '??';
+  t['\u2048'] = '?!';
+  t['\u2049'] = '!?';
   t['\u2057'] = '\u2032\u2032\u2032\u2032';
-  t['\u205F'] = '\u0020';
-  t['\u20A8'] = '\u0052\u0073';
-  t['\u2100'] = '\u0061\u002F\u0063';
-  t['\u2101'] = '\u0061\u002F\u0073';
-  t['\u2103'] = '\u00B0\u0043';
-  t['\u2105'] = '\u0063\u002F\u006F';
-  t['\u2106'] = '\u0063\u002F\u0075';
+  t['\u205F'] = ' ';
+  t['\u20A8'] = 'Rs';
+  t['\u2100'] = 'a/c';
+  t['\u2101'] = 'a/s';
+  t['\u2103'] = '\xB0C';
+  t['\u2105'] = 'c/o';
+  t['\u2106'] = 'c/u';
   t['\u2107'] = '\u0190';
-  t['\u2109'] = '\u00B0\u0046';
-  t['\u2116'] = '\u004E\u006F';
-  t['\u2121'] = '\u0054\u0045\u004C';
+  t['\u2109'] = '\xB0F';
+  t['\u2116'] = 'No';
+  t['\u2121'] = 'TEL';
   t['\u2135'] = '\u05D0';
   t['\u2136'] = '\u05D1';
   t['\u2137'] = '\u05D2';
   t['\u2138'] = '\u05D3';
-  t['\u213B'] = '\u0046\u0041\u0058';
-  t['\u2160'] = '\u0049';
-  t['\u2161'] = '\u0049\u0049';
-  t['\u2162'] = '\u0049\u0049\u0049';
-  t['\u2163'] = '\u0049\u0056';
-  t['\u2164'] = '\u0056';
-  t['\u2165'] = '\u0056\u0049';
-  t['\u2166'] = '\u0056\u0049\u0049';
-  t['\u2167'] = '\u0056\u0049\u0049\u0049';
-  t['\u2168'] = '\u0049\u0058';
-  t['\u2169'] = '\u0058';
-  t['\u216A'] = '\u0058\u0049';
-  t['\u216B'] = '\u0058\u0049\u0049';
-  t['\u216C'] = '\u004C';
-  t['\u216D'] = '\u0043';
-  t['\u216E'] = '\u0044';
-  t['\u216F'] = '\u004D';
-  t['\u2170'] = '\u0069';
-  t['\u2171'] = '\u0069\u0069';
-  t['\u2172'] = '\u0069\u0069\u0069';
-  t['\u2173'] = '\u0069\u0076';
-  t['\u2174'] = '\u0076';
-  t['\u2175'] = '\u0076\u0069';
-  t['\u2176'] = '\u0076\u0069\u0069';
-  t['\u2177'] = '\u0076\u0069\u0069\u0069';
-  t['\u2178'] = '\u0069\u0078';
-  t['\u2179'] = '\u0078';
-  t['\u217A'] = '\u0078\u0069';
-  t['\u217B'] = '\u0078\u0069\u0069';
-  t['\u217C'] = '\u006C';
-  t['\u217D'] = '\u0063';
-  t['\u217E'] = '\u0064';
-  t['\u217F'] = '\u006D';
+  t['\u213B'] = 'FAX';
+  t['\u2160'] = 'I';
+  t['\u2161'] = 'II';
+  t['\u2162'] = 'III';
+  t['\u2163'] = 'IV';
+  t['\u2164'] = 'V';
+  t['\u2165'] = 'VI';
+  t['\u2166'] = 'VII';
+  t['\u2167'] = 'VIII';
+  t['\u2168'] = 'IX';
+  t['\u2169'] = 'X';
+  t['\u216A'] = 'XI';
+  t['\u216B'] = 'XII';
+  t['\u216C'] = 'L';
+  t['\u216D'] = 'C';
+  t['\u216E'] = 'D';
+  t['\u216F'] = 'M';
+  t['\u2170'] = 'i';
+  t['\u2171'] = 'ii';
+  t['\u2172'] = 'iii';
+  t['\u2173'] = 'iv';
+  t['\u2174'] = 'v';
+  t['\u2175'] = 'vi';
+  t['\u2176'] = 'vii';
+  t['\u2177'] = 'viii';
+  t['\u2178'] = 'ix';
+  t['\u2179'] = 'x';
+  t['\u217A'] = 'xi';
+  t['\u217B'] = 'xii';
+  t['\u217C'] = 'l';
+  t['\u217D'] = 'c';
+  t['\u217E'] = 'd';
+  t['\u217F'] = 'm';
   t['\u222C'] = '\u222B\u222B';
   t['\u222D'] = '\u222B\u222B\u222B';
   t['\u222F'] = '\u222E\u222E';
   t['\u2230'] = '\u222E\u222E\u222E';
-  t['\u2474'] = '\u0028\u0031\u0029';
-  t['\u2475'] = '\u0028\u0032\u0029';
-  t['\u2476'] = '\u0028\u0033\u0029';
-  t['\u2477'] = '\u0028\u0034\u0029';
-  t['\u2478'] = '\u0028\u0035\u0029';
-  t['\u2479'] = '\u0028\u0036\u0029';
-  t['\u247A'] = '\u0028\u0037\u0029';
-  t['\u247B'] = '\u0028\u0038\u0029';
-  t['\u247C'] = '\u0028\u0039\u0029';
-  t['\u247D'] = '\u0028\u0031\u0030\u0029';
-  t['\u247E'] = '\u0028\u0031\u0031\u0029';
-  t['\u247F'] = '\u0028\u0031\u0032\u0029';
-  t['\u2480'] = '\u0028\u0031\u0033\u0029';
-  t['\u2481'] = '\u0028\u0031\u0034\u0029';
-  t['\u2482'] = '\u0028\u0031\u0035\u0029';
-  t['\u2483'] = '\u0028\u0031\u0036\u0029';
-  t['\u2484'] = '\u0028\u0031\u0037\u0029';
-  t['\u2485'] = '\u0028\u0031\u0038\u0029';
-  t['\u2486'] = '\u0028\u0031\u0039\u0029';
-  t['\u2487'] = '\u0028\u0032\u0030\u0029';
-  t['\u2488'] = '\u0031\u002E';
-  t['\u2489'] = '\u0032\u002E';
-  t['\u248A'] = '\u0033\u002E';
-  t['\u248B'] = '\u0034\u002E';
-  t['\u248C'] = '\u0035\u002E';
-  t['\u248D'] = '\u0036\u002E';
-  t['\u248E'] = '\u0037\u002E';
-  t['\u248F'] = '\u0038\u002E';
-  t['\u2490'] = '\u0039\u002E';
-  t['\u2491'] = '\u0031\u0030\u002E';
-  t['\u2492'] = '\u0031\u0031\u002E';
-  t['\u2493'] = '\u0031\u0032\u002E';
-  t['\u2494'] = '\u0031\u0033\u002E';
-  t['\u2495'] = '\u0031\u0034\u002E';
-  t['\u2496'] = '\u0031\u0035\u002E';
-  t['\u2497'] = '\u0031\u0036\u002E';
-  t['\u2498'] = '\u0031\u0037\u002E';
-  t['\u2499'] = '\u0031\u0038\u002E';
-  t['\u249A'] = '\u0031\u0039\u002E';
-  t['\u249B'] = '\u0032\u0030\u002E';
-  t['\u249C'] = '\u0028\u0061\u0029';
-  t['\u249D'] = '\u0028\u0062\u0029';
-  t['\u249E'] = '\u0028\u0063\u0029';
-  t['\u249F'] = '\u0028\u0064\u0029';
-  t['\u24A0'] = '\u0028\u0065\u0029';
-  t['\u24A1'] = '\u0028\u0066\u0029';
-  t['\u24A2'] = '\u0028\u0067\u0029';
-  t['\u24A3'] = '\u0028\u0068\u0029';
-  t['\u24A4'] = '\u0028\u0069\u0029';
-  t['\u24A5'] = '\u0028\u006A\u0029';
-  t['\u24A6'] = '\u0028\u006B\u0029';
-  t['\u24A7'] = '\u0028\u006C\u0029';
-  t['\u24A8'] = '\u0028\u006D\u0029';
-  t['\u24A9'] = '\u0028\u006E\u0029';
-  t['\u24AA'] = '\u0028\u006F\u0029';
-  t['\u24AB'] = '\u0028\u0070\u0029';
-  t['\u24AC'] = '\u0028\u0071\u0029';
-  t['\u24AD'] = '\u0028\u0072\u0029';
-  t['\u24AE'] = '\u0028\u0073\u0029';
-  t['\u24AF'] = '\u0028\u0074\u0029';
-  t['\u24B0'] = '\u0028\u0075\u0029';
-  t['\u24B1'] = '\u0028\u0076\u0029';
-  t['\u24B2'] = '\u0028\u0077\u0029';
-  t['\u24B3'] = '\u0028\u0078\u0029';
-  t['\u24B4'] = '\u0028\u0079\u0029';
-  t['\u24B5'] = '\u0028\u007A\u0029';
+  t['\u2474'] = '(1)';
+  t['\u2475'] = '(2)';
+  t['\u2476'] = '(3)';
+  t['\u2477'] = '(4)';
+  t['\u2478'] = '(5)';
+  t['\u2479'] = '(6)';
+  t['\u247A'] = '(7)';
+  t['\u247B'] = '(8)';
+  t['\u247C'] = '(9)';
+  t['\u247D'] = '(10)';
+  t['\u247E'] = '(11)';
+  t['\u247F'] = '(12)';
+  t['\u2480'] = '(13)';
+  t['\u2481'] = '(14)';
+  t['\u2482'] = '(15)';
+  t['\u2483'] = '(16)';
+  t['\u2484'] = '(17)';
+  t['\u2485'] = '(18)';
+  t['\u2486'] = '(19)';
+  t['\u2487'] = '(20)';
+  t['\u2488'] = '1.';
+  t['\u2489'] = '2.';
+  t['\u248A'] = '3.';
+  t['\u248B'] = '4.';
+  t['\u248C'] = '5.';
+  t['\u248D'] = '6.';
+  t['\u248E'] = '7.';
+  t['\u248F'] = '8.';
+  t['\u2490'] = '9.';
+  t['\u2491'] = '10.';
+  t['\u2492'] = '11.';
+  t['\u2493'] = '12.';
+  t['\u2494'] = '13.';
+  t['\u2495'] = '14.';
+  t['\u2496'] = '15.';
+  t['\u2497'] = '16.';
+  t['\u2498'] = '17.';
+  t['\u2499'] = '18.';
+  t['\u249A'] = '19.';
+  t['\u249B'] = '20.';
+  t['\u249C'] = '(a)';
+  t['\u249D'] = '(b)';
+  t['\u249E'] = '(c)';
+  t['\u249F'] = '(d)';
+  t['\u24A0'] = '(e)';
+  t['\u24A1'] = '(f)';
+  t['\u24A2'] = '(g)';
+  t['\u24A3'] = '(h)';
+  t['\u24A4'] = '(i)';
+  t['\u24A5'] = '(j)';
+  t['\u24A6'] = '(k)';
+  t['\u24A7'] = '(l)';
+  t['\u24A8'] = '(m)';
+  t['\u24A9'] = '(n)';
+  t['\u24AA'] = '(o)';
+  t['\u24AB'] = '(p)';
+  t['\u24AC'] = '(q)';
+  t['\u24AD'] = '(r)';
+  t['\u24AE'] = '(s)';
+  t['\u24AF'] = '(t)';
+  t['\u24B0'] = '(u)';
+  t['\u24B1'] = '(v)';
+  t['\u24B2'] = '(w)';
+  t['\u24B3'] = '(x)';
+  t['\u24B4'] = '(y)';
+  t['\u24B5'] = '(z)';
   t['\u2A0C'] = '\u222B\u222B\u222B\u222B';
-  t['\u2A74'] = '\u003A\u003A\u003D';
-  t['\u2A75'] = '\u003D\u003D';
-  t['\u2A76'] = '\u003D\u003D\u003D';
+  t['\u2A74'] = '::=';
+  t['\u2A75'] = '==';
+  t['\u2A76'] = '===';
   t['\u2E9F'] = '\u6BCD';
   t['\u2EF3'] = '\u9F9F';
   t['\u2F00'] = '\u4E00';
@@ -25881,8 +25893,8 @@ var getNormalizedUnicodes = getLookupTableFactory(function (t) {
   t['\u3038'] = '\u5341';
   t['\u3039'] = '\u5344';
   t['\u303A'] = '\u5345';
-  t['\u309B'] = '\u0020\u3099';
-  t['\u309C'] = '\u0020\u309A';
+  t['\u309B'] = ' \u3099';
+  t['\u309C'] = ' \u309A';
   t['\u3131'] = '\u1100';
   t['\u3132'] = '\u1101';
   t['\u3133'] = '\u11AA';
@@ -25977,148 +25989,148 @@ var getNormalizedUnicodes = getLookupTableFactory(function (t) {
   t['\u318C'] = '\u1194';
   t['\u318D'] = '\u119E';
   t['\u318E'] = '\u11A1';
-  t['\u3200'] = '\u0028\u1100\u0029';
-  t['\u3201'] = '\u0028\u1102\u0029';
-  t['\u3202'] = '\u0028\u1103\u0029';
-  t['\u3203'] = '\u0028\u1105\u0029';
-  t['\u3204'] = '\u0028\u1106\u0029';
-  t['\u3205'] = '\u0028\u1107\u0029';
-  t['\u3206'] = '\u0028\u1109\u0029';
-  t['\u3207'] = '\u0028\u110B\u0029';
-  t['\u3208'] = '\u0028\u110C\u0029';
-  t['\u3209'] = '\u0028\u110E\u0029';
-  t['\u320A'] = '\u0028\u110F\u0029';
-  t['\u320B'] = '\u0028\u1110\u0029';
-  t['\u320C'] = '\u0028\u1111\u0029';
-  t['\u320D'] = '\u0028\u1112\u0029';
-  t['\u320E'] = '\u0028\u1100\u1161\u0029';
-  t['\u320F'] = '\u0028\u1102\u1161\u0029';
-  t['\u3210'] = '\u0028\u1103\u1161\u0029';
-  t['\u3211'] = '\u0028\u1105\u1161\u0029';
-  t['\u3212'] = '\u0028\u1106\u1161\u0029';
-  t['\u3213'] = '\u0028\u1107\u1161\u0029';
-  t['\u3214'] = '\u0028\u1109\u1161\u0029';
-  t['\u3215'] = '\u0028\u110B\u1161\u0029';
-  t['\u3216'] = '\u0028\u110C\u1161\u0029';
-  t['\u3217'] = '\u0028\u110E\u1161\u0029';
-  t['\u3218'] = '\u0028\u110F\u1161\u0029';
-  t['\u3219'] = '\u0028\u1110\u1161\u0029';
-  t['\u321A'] = '\u0028\u1111\u1161\u0029';
-  t['\u321B'] = '\u0028\u1112\u1161\u0029';
-  t['\u321C'] = '\u0028\u110C\u116E\u0029';
-  t['\u321D'] = '\u0028\u110B\u1169\u110C\u1165\u11AB\u0029';
-  t['\u321E'] = '\u0028\u110B\u1169\u1112\u116E\u0029';
-  t['\u3220'] = '\u0028\u4E00\u0029';
-  t['\u3221'] = '\u0028\u4E8C\u0029';
-  t['\u3222'] = '\u0028\u4E09\u0029';
-  t['\u3223'] = '\u0028\u56DB\u0029';
-  t['\u3224'] = '\u0028\u4E94\u0029';
-  t['\u3225'] = '\u0028\u516D\u0029';
-  t['\u3226'] = '\u0028\u4E03\u0029';
-  t['\u3227'] = '\u0028\u516B\u0029';
-  t['\u3228'] = '\u0028\u4E5D\u0029';
-  t['\u3229'] = '\u0028\u5341\u0029';
-  t['\u322A'] = '\u0028\u6708\u0029';
-  t['\u322B'] = '\u0028\u706B\u0029';
-  t['\u322C'] = '\u0028\u6C34\u0029';
-  t['\u322D'] = '\u0028\u6728\u0029';
-  t['\u322E'] = '\u0028\u91D1\u0029';
-  t['\u322F'] = '\u0028\u571F\u0029';
-  t['\u3230'] = '\u0028\u65E5\u0029';
-  t['\u3231'] = '\u0028\u682A\u0029';
-  t['\u3232'] = '\u0028\u6709\u0029';
-  t['\u3233'] = '\u0028\u793E\u0029';
-  t['\u3234'] = '\u0028\u540D\u0029';
-  t['\u3235'] = '\u0028\u7279\u0029';
-  t['\u3236'] = '\u0028\u8CA1\u0029';
-  t['\u3237'] = '\u0028\u795D\u0029';
-  t['\u3238'] = '\u0028\u52B4\u0029';
-  t['\u3239'] = '\u0028\u4EE3\u0029';
-  t['\u323A'] = '\u0028\u547C\u0029';
-  t['\u323B'] = '\u0028\u5B66\u0029';
-  t['\u323C'] = '\u0028\u76E3\u0029';
-  t['\u323D'] = '\u0028\u4F01\u0029';
-  t['\u323E'] = '\u0028\u8CC7\u0029';
-  t['\u323F'] = '\u0028\u5354\u0029';
-  t['\u3240'] = '\u0028\u796D\u0029';
-  t['\u3241'] = '\u0028\u4F11\u0029';
-  t['\u3242'] = '\u0028\u81EA\u0029';
-  t['\u3243'] = '\u0028\u81F3\u0029';
-  t['\u32C0'] = '\u0031\u6708';
-  t['\u32C1'] = '\u0032\u6708';
-  t['\u32C2'] = '\u0033\u6708';
-  t['\u32C3'] = '\u0034\u6708';
-  t['\u32C4'] = '\u0035\u6708';
-  t['\u32C5'] = '\u0036\u6708';
-  t['\u32C6'] = '\u0037\u6708';
-  t['\u32C7'] = '\u0038\u6708';
-  t['\u32C8'] = '\u0039\u6708';
-  t['\u32C9'] = '\u0031\u0030\u6708';
-  t['\u32CA'] = '\u0031\u0031\u6708';
-  t['\u32CB'] = '\u0031\u0032\u6708';
-  t['\u3358'] = '\u0030\u70B9';
-  t['\u3359'] = '\u0031\u70B9';
-  t['\u335A'] = '\u0032\u70B9';
-  t['\u335B'] = '\u0033\u70B9';
-  t['\u335C'] = '\u0034\u70B9';
-  t['\u335D'] = '\u0035\u70B9';
-  t['\u335E'] = '\u0036\u70B9';
-  t['\u335F'] = '\u0037\u70B9';
-  t['\u3360'] = '\u0038\u70B9';
-  t['\u3361'] = '\u0039\u70B9';
-  t['\u3362'] = '\u0031\u0030\u70B9';
-  t['\u3363'] = '\u0031\u0031\u70B9';
-  t['\u3364'] = '\u0031\u0032\u70B9';
-  t['\u3365'] = '\u0031\u0033\u70B9';
-  t['\u3366'] = '\u0031\u0034\u70B9';
-  t['\u3367'] = '\u0031\u0035\u70B9';
-  t['\u3368'] = '\u0031\u0036\u70B9';
-  t['\u3369'] = '\u0031\u0037\u70B9';
-  t['\u336A'] = '\u0031\u0038\u70B9';
-  t['\u336B'] = '\u0031\u0039\u70B9';
-  t['\u336C'] = '\u0032\u0030\u70B9';
-  t['\u336D'] = '\u0032\u0031\u70B9';
-  t['\u336E'] = '\u0032\u0032\u70B9';
-  t['\u336F'] = '\u0032\u0033\u70B9';
-  t['\u3370'] = '\u0032\u0034\u70B9';
-  t['\u33E0'] = '\u0031\u65E5';
-  t['\u33E1'] = '\u0032\u65E5';
-  t['\u33E2'] = '\u0033\u65E5';
-  t['\u33E3'] = '\u0034\u65E5';
-  t['\u33E4'] = '\u0035\u65E5';
-  t['\u33E5'] = '\u0036\u65E5';
-  t['\u33E6'] = '\u0037\u65E5';
-  t['\u33E7'] = '\u0038\u65E5';
-  t['\u33E8'] = '\u0039\u65E5';
-  t['\u33E9'] = '\u0031\u0030\u65E5';
-  t['\u33EA'] = '\u0031\u0031\u65E5';
-  t['\u33EB'] = '\u0031\u0032\u65E5';
-  t['\u33EC'] = '\u0031\u0033\u65E5';
-  t['\u33ED'] = '\u0031\u0034\u65E5';
-  t['\u33EE'] = '\u0031\u0035\u65E5';
-  t['\u33EF'] = '\u0031\u0036\u65E5';
-  t['\u33F0'] = '\u0031\u0037\u65E5';
-  t['\u33F1'] = '\u0031\u0038\u65E5';
-  t['\u33F2'] = '\u0031\u0039\u65E5';
-  t['\u33F3'] = '\u0032\u0030\u65E5';
-  t['\u33F4'] = '\u0032\u0031\u65E5';
-  t['\u33F5'] = '\u0032\u0032\u65E5';
-  t['\u33F6'] = '\u0032\u0033\u65E5';
-  t['\u33F7'] = '\u0032\u0034\u65E5';
-  t['\u33F8'] = '\u0032\u0035\u65E5';
-  t['\u33F9'] = '\u0032\u0036\u65E5';
-  t['\u33FA'] = '\u0032\u0037\u65E5';
-  t['\u33FB'] = '\u0032\u0038\u65E5';
-  t['\u33FC'] = '\u0032\u0039\u65E5';
-  t['\u33FD'] = '\u0033\u0030\u65E5';
-  t['\u33FE'] = '\u0033\u0031\u65E5';
-  t['\uFB00'] = '\u0066\u0066';
-  t['\uFB01'] = '\u0066\u0069';
-  t['\uFB02'] = '\u0066\u006C';
-  t['\uFB03'] = '\u0066\u0066\u0069';
-  t['\uFB04'] = '\u0066\u0066\u006C';
-  t['\uFB05'] = '\u017F\u0074';
-  t['\uFB06'] = '\u0073\u0074';
+  t['\u3200'] = '(\u1100)';
+  t['\u3201'] = '(\u1102)';
+  t['\u3202'] = '(\u1103)';
+  t['\u3203'] = '(\u1105)';
+  t['\u3204'] = '(\u1106)';
+  t['\u3205'] = '(\u1107)';
+  t['\u3206'] = '(\u1109)';
+  t['\u3207'] = '(\u110B)';
+  t['\u3208'] = '(\u110C)';
+  t['\u3209'] = '(\u110E)';
+  t['\u320A'] = '(\u110F)';
+  t['\u320B'] = '(\u1110)';
+  t['\u320C'] = '(\u1111)';
+  t['\u320D'] = '(\u1112)';
+  t['\u320E'] = '(\u1100\u1161)';
+  t['\u320F'] = '(\u1102\u1161)';
+  t['\u3210'] = '(\u1103\u1161)';
+  t['\u3211'] = '(\u1105\u1161)';
+  t['\u3212'] = '(\u1106\u1161)';
+  t['\u3213'] = '(\u1107\u1161)';
+  t['\u3214'] = '(\u1109\u1161)';
+  t['\u3215'] = '(\u110B\u1161)';
+  t['\u3216'] = '(\u110C\u1161)';
+  t['\u3217'] = '(\u110E\u1161)';
+  t['\u3218'] = '(\u110F\u1161)';
+  t['\u3219'] = '(\u1110\u1161)';
+  t['\u321A'] = '(\u1111\u1161)';
+  t['\u321B'] = '(\u1112\u1161)';
+  t['\u321C'] = '(\u110C\u116E)';
+  t['\u321D'] = '(\u110B\u1169\u110C\u1165\u11AB)';
+  t['\u321E'] = '(\u110B\u1169\u1112\u116E)';
+  t['\u3220'] = '(\u4E00)';
+  t['\u3221'] = '(\u4E8C)';
+  t['\u3222'] = '(\u4E09)';
+  t['\u3223'] = '(\u56DB)';
+  t['\u3224'] = '(\u4E94)';
+  t['\u3225'] = '(\u516D)';
+  t['\u3226'] = '(\u4E03)';
+  t['\u3227'] = '(\u516B)';
+  t['\u3228'] = '(\u4E5D)';
+  t['\u3229'] = '(\u5341)';
+  t['\u322A'] = '(\u6708)';
+  t['\u322B'] = '(\u706B)';
+  t['\u322C'] = '(\u6C34)';
+  t['\u322D'] = '(\u6728)';
+  t['\u322E'] = '(\u91D1)';
+  t['\u322F'] = '(\u571F)';
+  t['\u3230'] = '(\u65E5)';
+  t['\u3231'] = '(\u682A)';
+  t['\u3232'] = '(\u6709)';
+  t['\u3233'] = '(\u793E)';
+  t['\u3234'] = '(\u540D)';
+  t['\u3235'] = '(\u7279)';
+  t['\u3236'] = '(\u8CA1)';
+  t['\u3237'] = '(\u795D)';
+  t['\u3238'] = '(\u52B4)';
+  t['\u3239'] = '(\u4EE3)';
+  t['\u323A'] = '(\u547C)';
+  t['\u323B'] = '(\u5B66)';
+  t['\u323C'] = '(\u76E3)';
+  t['\u323D'] = '(\u4F01)';
+  t['\u323E'] = '(\u8CC7)';
+  t['\u323F'] = '(\u5354)';
+  t['\u3240'] = '(\u796D)';
+  t['\u3241'] = '(\u4F11)';
+  t['\u3242'] = '(\u81EA)';
+  t['\u3243'] = '(\u81F3)';
+  t['\u32C0'] = '1\u6708';
+  t['\u32C1'] = '2\u6708';
+  t['\u32C2'] = '3\u6708';
+  t['\u32C3'] = '4\u6708';
+  t['\u32C4'] = '5\u6708';
+  t['\u32C5'] = '6\u6708';
+  t['\u32C6'] = '7\u6708';
+  t['\u32C7'] = '8\u6708';
+  t['\u32C8'] = '9\u6708';
+  t['\u32C9'] = '10\u6708';
+  t['\u32CA'] = '11\u6708';
+  t['\u32CB'] = '12\u6708';
+  t['\u3358'] = '0\u70B9';
+  t['\u3359'] = '1\u70B9';
+  t['\u335A'] = '2\u70B9';
+  t['\u335B'] = '3\u70B9';
+  t['\u335C'] = '4\u70B9';
+  t['\u335D'] = '5\u70B9';
+  t['\u335E'] = '6\u70B9';
+  t['\u335F'] = '7\u70B9';
+  t['\u3360'] = '8\u70B9';
+  t['\u3361'] = '9\u70B9';
+  t['\u3362'] = '10\u70B9';
+  t['\u3363'] = '11\u70B9';
+  t['\u3364'] = '12\u70B9';
+  t['\u3365'] = '13\u70B9';
+  t['\u3366'] = '14\u70B9';
+  t['\u3367'] = '15\u70B9';
+  t['\u3368'] = '16\u70B9';
+  t['\u3369'] = '17\u70B9';
+  t['\u336A'] = '18\u70B9';
+  t['\u336B'] = '19\u70B9';
+  t['\u336C'] = '20\u70B9';
+  t['\u336D'] = '21\u70B9';
+  t['\u336E'] = '22\u70B9';
+  t['\u336F'] = '23\u70B9';
+  t['\u3370'] = '24\u70B9';
+  t['\u33E0'] = '1\u65E5';
+  t['\u33E1'] = '2\u65E5';
+  t['\u33E2'] = '3\u65E5';
+  t['\u33E3'] = '4\u65E5';
+  t['\u33E4'] = '5\u65E5';
+  t['\u33E5'] = '6\u65E5';
+  t['\u33E6'] = '7\u65E5';
+  t['\u33E7'] = '8\u65E5';
+  t['\u33E8'] = '9\u65E5';
+  t['\u33E9'] = '10\u65E5';
+  t['\u33EA'] = '11\u65E5';
+  t['\u33EB'] = '12\u65E5';
+  t['\u33EC'] = '13\u65E5';
+  t['\u33ED'] = '14\u65E5';
+  t['\u33EE'] = '15\u65E5';
+  t['\u33EF'] = '16\u65E5';
+  t['\u33F0'] = '17\u65E5';
+  t['\u33F1'] = '18\u65E5';
+  t['\u33F2'] = '19\u65E5';
+  t['\u33F3'] = '20\u65E5';
+  t['\u33F4'] = '21\u65E5';
+  t['\u33F5'] = '22\u65E5';
+  t['\u33F6'] = '23\u65E5';
+  t['\u33F7'] = '24\u65E5';
+  t['\u33F8'] = '25\u65E5';
+  t['\u33F9'] = '26\u65E5';
+  t['\u33FA'] = '27\u65E5';
+  t['\u33FB'] = '28\u65E5';
+  t['\u33FC'] = '29\u65E5';
+  t['\u33FD'] = '30\u65E5';
+  t['\u33FE'] = '31\u65E5';
+  t['\uFB00'] = 'ff';
+  t['\uFB01'] = 'fi';
+  t['\uFB02'] = 'fl';
+  t['\uFB03'] = 'ffi';
+  t['\uFB04'] = 'ffl';
+  t['\uFB05'] = '\u017Ft';
+  t['\uFB06'] = 'st';
   t['\uFB13'] = '\u0574\u0576';
   t['\uFB14'] = '\u0574\u0565';
   t['\uFB15'] = '\u0574\u056B';
@@ -26362,12 +26374,12 @@ var getNormalizedUnicodes = getLookupTableFactory(function (t) {
   t['\uFC5B'] = '\u0630\u0670';
   t['\uFC5C'] = '\u0631\u0670';
   t['\uFC5D'] = '\u0649\u0670';
-  t['\uFC5E'] = '\u0020\u064C\u0651';
-  t['\uFC5F'] = '\u0020\u064D\u0651';
-  t['\uFC60'] = '\u0020\u064E\u0651';
-  t['\uFC61'] = '\u0020\u064F\u0651';
-  t['\uFC62'] = '\u0020\u0650\u0651';
-  t['\uFC63'] = '\u0020\u0651\u0670';
+  t['\uFC5E'] = ' \u064C\u0651';
+  t['\uFC5F'] = ' \u064D\u0651';
+  t['\uFC60'] = ' \u064E\u0651';
+  t['\uFC61'] = ' \u064F\u0651';
+  t['\uFC62'] = ' \u0650\u0651';
+  t['\uFC63'] = ' \u0651\u0670';
   t['\uFC64'] = '\u0626\u0631';
   t['\uFC65'] = '\u0626\u0632';
   t['\uFC66'] = '\u0626\u0645';
@@ -26708,9 +26720,9 @@ var getNormalizedUnicodes = getLookupTableFactory(function (t) {
   t['\uFE4A'] = '\u203E';
   t['\uFE4B'] = '\u203E';
   t['\uFE4C'] = '\u203E';
-  t['\uFE4D'] = '\u005F';
-  t['\uFE4E'] = '\u005F';
-  t['\uFE4F'] = '\u005F';
+  t['\uFE4D'] = '_';
+  t['\uFE4E'] = '_';
+  t['\uFE4F'] = '_';
   t['\uFE80'] = '\u0621';
   t['\uFE81'] = '\u0622';
   t['\uFE82'] = '\u0622';
@@ -26861,6 +26873,8 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var sharedUtil = __w_pdfjs_require__(0);
 var corePrimitives = __w_pdfjs_require__(1);
 var corePdfManager = __w_pdfjs_require__(41);
@@ -26893,13 +26907,13 @@ var WorkerTask = function WorkerTaskClosure() {
     get finished() {
       return this._capability.promise;
     },
-    finish: function () {
+    finish: function finish() {
       this._capability.resolve();
     },
-    terminate: function () {
+    terminate: function terminate() {
       this.terminated = true;
     },
-    ensureNotTerminated: function () {
+    ensureNotTerminated: function ensureNotTerminated() {
       if (this.terminated) {
         throw new Error('Worker task was terminated');
       }
@@ -27257,7 +27271,7 @@ var WorkerMessageHandler = {
       });
       var cachedChunks = [],
           loaded = 0;
-      var flushChunks = function () {
+      var flushChunks = function flushChunks() {
         var pdfFile = arraysToBytes(cachedChunks);
         if (source.length && pdfFile.length !== source.length) {
           warn('reported HTTP length is different from actual');
@@ -27271,7 +27285,7 @@ var WorkerMessageHandler = {
         cachedChunks = [];
       };
       var readPromise = new Promise(function (resolve, reject) {
-        var readChunk = function (chunk) {
+        var readChunk = function readChunk(chunk) {
           try {
             ensureNotTerminated();
             if (chunk.done) {
@@ -27305,7 +27319,7 @@ var WorkerMessageHandler = {
         pdfManagerCapability.reject(e);
         cancelXHRs = null;
       });
-      cancelXHRs = function () {
+      cancelXHRs = function cancelXHRs() {
         pdfStream.cancelAllRequests('abort');
       };
       return pdfManagerCapability.promise;
@@ -27451,14 +27465,14 @@ var WorkerMessageHandler = {
               message: e,
               stack: minimumStackMessage
             };
-          } else if (typeof e === 'object') {
+          } else if ((typeof e === 'undefined' ? 'undefined' : _typeof(e)) === 'object') {
             wrappedException = {
               message: e.message || e.toString(),
               stack: e.stack || minimumStackMessage
             };
           } else {
             wrappedException = {
-              message: 'Unknown exception type: ' + typeof e,
+              message: 'Unknown exception type: ' + (typeof e === 'undefined' ? 'undefined' : _typeof(e)),
               stack: minimumStackMessage
             };
           }
@@ -27996,18 +28010,18 @@ if (!globalScope.PDFJS) {
   globalScope.PDFJS = {};
 }
 var PDFJS = globalScope.PDFJS;
-PDFJS.version = '1.8.205';
-PDFJS.build = 'bc1f4dd9';
+PDFJS.version = '1.8.207';
+PDFJS.build = 'fd51a7cb';
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
   sharedUtil.setVerbosityLevel(PDFJS.verbosity);
 }
 delete PDFJS.verbosity;
 Object.defineProperty(PDFJS, 'verbosity', {
-  get: function () {
+  get: function get() {
     return sharedUtil.getVerbosityLevel();
   },
-  set: function (level) {
+  set: function set(level) {
     sharedUtil.setVerbosityLevel(level);
   },
   enumerable: true,
@@ -28061,10 +28075,10 @@ PDFJS.pdfjsNext = PDFJS.pdfjsNext === undefined ? false : PDFJS.pdfjsNext;
 var savedOpenExternalLinksInNewWindow = PDFJS.openExternalLinksInNewWindow;
 delete PDFJS.openExternalLinksInNewWindow;
 Object.defineProperty(PDFJS, 'openExternalLinksInNewWindow', {
-  get: function () {
+  get: function get() {
     return PDFJS.externalLinkTarget === LinkTarget.BLANK;
   },
-  set: function (value) {
+  set: function set(value) {
     if (value) {
       deprecated('PDFJS.openExternalLinksInNewWindow, please use ' + '"PDFJS.externalLinkTarget = PDFJS.LinkTarget.BLANK" instead.');
     }
@@ -29041,23 +29055,23 @@ var CMap = function CMapClosure() {
     this.builtInCMap = builtInCMap;
   }
   CMap.prototype = {
-    addCodespaceRange: function (n, low, high) {
+    addCodespaceRange: function addCodespaceRange(n, low, high) {
       this.codespaceRanges[n - 1].push(low, high);
       this.numCodespaceRanges++;
     },
-    mapCidRange: function (low, high, dstLow) {
+    mapCidRange: function mapCidRange(low, high, dstLow) {
       while (low <= high) {
         this._map[low++] = dstLow++;
       }
     },
-    mapBfRange: function (low, high, dstLow) {
+    mapBfRange: function mapBfRange(low, high, dstLow) {
       var lastByte = dstLow.length - 1;
       while (low <= high) {
         this._map[low++] = dstLow;
         dstLow = dstLow.substr(0, lastByte) + String.fromCharCode(dstLow.charCodeAt(lastByte) + 1);
       }
     },
-    mapBfRangeToArray: function (low, high, array) {
+    mapBfRangeToArray: function mapBfRangeToArray(low, high, array) {
       var i = 0,
           ii = array.length;
       while (low <= high && i < ii) {
@@ -29065,16 +29079,16 @@ var CMap = function CMapClosure() {
         ++low;
       }
     },
-    mapOne: function (src, dst) {
+    mapOne: function mapOne(src, dst) {
       this._map[src] = dst;
     },
-    lookup: function (code) {
+    lookup: function lookup(code) {
       return this._map[code];
     },
-    contains: function (code) {
+    contains: function contains(code) {
       return this._map[code] !== undefined;
     },
-    forEach: function (callback) {
+    forEach: function forEach(callback) {
       var map = this._map;
       var length = map.length;
       var i;
@@ -29090,13 +29104,13 @@ var CMap = function CMapClosure() {
         }
       }
     },
-    charCodeOf: function (value) {
+    charCodeOf: function charCodeOf(value) {
       return this._map.indexOf(value);
     },
-    getMap: function () {
+    getMap: function getMap() {
       return this._map;
     },
-    readCharCode: function (str, offset, out) {
+    readCharCode: function readCharCode(str, offset, out) {
       var c = 0;
       var codespaceRanges = this.codespaceRanges;
       var codespaceRangesLen = this.codespaceRanges.length;
@@ -29145,33 +29159,33 @@ var IdentityCMap = function IdentityCMapClosure() {
   Util.inherit(IdentityCMap, CMap, {});
   IdentityCMap.prototype = {
     addCodespaceRange: CMap.prototype.addCodespaceRange,
-    mapCidRange: function (low, high, dstLow) {
+    mapCidRange: function mapCidRange(low, high, dstLow) {
       error('should not call mapCidRange');
     },
-    mapBfRange: function (low, high, dstLow) {
+    mapBfRange: function mapBfRange(low, high, dstLow) {
       error('should not call mapBfRange');
     },
-    mapBfRangeToArray: function (low, high, array) {
+    mapBfRangeToArray: function mapBfRangeToArray(low, high, array) {
       error('should not call mapBfRangeToArray');
     },
-    mapOne: function (src, dst) {
+    mapOne: function mapOne(src, dst) {
       error('should not call mapCidOne');
     },
-    lookup: function (code) {
+    lookup: function lookup(code) {
       return isInt(code) && code <= 0xffff ? code : undefined;
     },
-    contains: function (code) {
+    contains: function contains(code) {
       return isInt(code) && code <= 0xffff;
     },
-    forEach: function (callback) {
+    forEach: function forEach(callback) {
       for (var i = 0; i <= 0xffff; i++) {
         callback(i, i);
       }
     },
-    charCodeOf: function (value) {
+    charCodeOf: function charCodeOf(value) {
       return isInt(value) && value <= 0xffff ? value : -1;
     },
-    getMap: function () {
+    getMap: function getMap() {
       var map = new Array(0x10000);
       for (var i = 0; i <= 0xffff; i++) {
         map[i] = i;
@@ -29230,13 +29244,13 @@ var BinaryCMapReader = function BinaryCMapReaderClosure() {
     this.tmpBuf = new Uint8Array(MAX_ENCODED_NUM_SIZE);
   }
   BinaryCMapStream.prototype = {
-    readByte: function () {
+    readByte: function readByte() {
       if (this.pos >= this.end) {
         return -1;
       }
       return this.buffer[this.pos++];
     },
-    readNumber: function () {
+    readNumber: function readNumber() {
       var n = 0;
       var last;
       do {
@@ -29249,15 +29263,15 @@ var BinaryCMapReader = function BinaryCMapReaderClosure() {
       } while (!last);
       return n;
     },
-    readSigned: function () {
+    readSigned: function readSigned() {
       var n = this.readNumber();
       return n & 1 ? ~(n >>> 1) : n >>> 1;
     },
-    readHex: function (num, size) {
+    readHex: function readHex(num, size) {
       num.set(this.buffer.subarray(this.pos, this.pos + size + 1));
       this.pos += size + 1;
     },
-    readHexNumber: function (num, size) {
+    readHexNumber: function readHexNumber(num, size) {
       var last;
       var stack = this.tmpBuf,
           sp = 0;
@@ -29283,7 +29297,7 @@ var BinaryCMapReader = function BinaryCMapReaderClosure() {
         bufferSize -= 8;
       }
     },
-    readHexSigned: function (num, size) {
+    readHexSigned: function readHexSigned(num, size) {
       this.readHexNumber(num, size);
       var sign = num[size] & 1 ? 255 : 0;
       var c = 0;
@@ -29292,7 +29306,7 @@ var BinaryCMapReader = function BinaryCMapReaderClosure() {
         num[i] = c >> 1 ^ sign;
       }
     },
-    readString: function () {
+    readString: function readString() {
       var len = this.readNumber();
       var s = '';
       for (var i = 0; i < len; i++) {
@@ -29686,7 +29700,7 @@ var CMapFactory = function CMapFactoryClosure() {
     });
   }
   return {
-    create: function (params) {
+    create: function create(params) {
       var encoding = params.encoding;
       var fetchBuiltInCMap = params.fetchBuiltInCMap;
       var useCMap = params.useCMap;
@@ -29774,7 +29788,7 @@ var Page = function PageClosure() {
     var uniquePrefix = 'p' + this.pageIndex + '_';
     var idCounters = { obj: 0 };
     this.idFactory = {
-      createObjId: function () {
+      createObjId: function createObjId() {
         return uniquePrefix + ++idCounters.obj;
       }
     };
@@ -30135,7 +30149,7 @@ var PDFDocument = function PDFDocumentClosure() {
       this.xref.parse(recoveryMode);
       var self = this;
       var pageFactory = {
-        createPage: function (pageIndex, dict, ref, fontCache, builtInCMapCache) {
+        createPage: function createPage(pageIndex, dict, ref, fontCache, builtInCMapCache) {
           return new Page(self.pdfManager, self.xref, pageIndex, dict, ref, fontCache, builtInCMapCache);
         }
       };
@@ -30841,7 +30855,7 @@ var FontRendererFactory = function FontRendererFactoryClosure() {
     this.fontMatrix = fontMatrix;
   }
   CompiledFont.prototype = {
-    getPathJs: function (unicode) {
+    getPathJs: function getPathJs(unicode) {
       var cmap = lookupCmap(this.cmap, unicode);
       var fn = this.compiledGlyphs[cmap.glyphId];
       if (!fn) {
@@ -30853,7 +30867,7 @@ var FontRendererFactory = function FontRendererFactoryClosure() {
       }
       return fn;
     },
-    compileGlyph: function (code) {
+    compileGlyph: function compileGlyph(code) {
       if (!code || code.length === 0 || code[0] === 14) {
         return noop;
       }
@@ -30871,10 +30885,10 @@ var FontRendererFactory = function FontRendererFactoryClosure() {
       cmds.push({ cmd: 'restore' });
       return cmds;
     },
-    compileGlyphImpl: function () {
+    compileGlyphImpl: function compileGlyphImpl() {
       error('Children classes should implement this.');
     },
-    hasBuiltPath: function (unicode) {
+    hasBuiltPath: function hasBuiltPath(unicode) {
       var cmap = lookupCmap(this.cmap, unicode);
       return this.compiledGlyphs[cmap.glyphId] !== undefined && this.compiledCharCodeToGlyphId[cmap.charCode] !== undefined;
     }
@@ -30886,7 +30900,7 @@ var FontRendererFactory = function FontRendererFactoryClosure() {
     this.cmap = cmap;
   }
   Util.inherit(TrueTypeCompiled, CompiledFont, {
-    compileGlyphImpl: function (code, cmds) {
+    compileGlyphImpl: function compileGlyphImpl(code, cmds) {
       compileGlyf(code, cmds, this);
     }
   });
@@ -30902,7 +30916,7 @@ var FontRendererFactory = function FontRendererFactoryClosure() {
     this.subrsBias = this.subrs.length < 1240 ? 107 : this.subrs.length < 33900 ? 1131 : 32768;
   }
   Util.inherit(Type2Compiled, CompiledFont, {
-    compileGlyphImpl: function (code, cmds) {
+    compileGlyphImpl: function compileGlyphImpl(code, cmds) {
       compileCharString(code, cmds, this);
     }
   });
@@ -31117,21 +31131,21 @@ var ToUnicodeMap = function ToUnicodeMapClosure() {
     get length() {
       return this._map.length;
     },
-    forEach: function (callback) {
+    forEach: function forEach(callback) {
       for (var charCode in this._map) {
         callback(charCode, this._map[charCode].charCodeAt(0));
       }
     },
-    has: function (i) {
+    has: function has(i) {
       return this._map[i] !== undefined;
     },
-    get: function (i) {
+    get: function get(i) {
       return this._map[i];
     },
-    charCodeOf: function (v) {
+    charCodeOf: function charCodeOf(v) {
       return this._map.indexOf(v);
     },
-    amend: function (map) {
+    amend: function amend(map) {
       for (var charCode in map) {
         this._map[charCode] = map[charCode];
       }
@@ -31148,24 +31162,24 @@ var IdentityToUnicodeMap = function IdentityToUnicodeMapClosure() {
     get length() {
       return this.lastChar + 1 - this.firstChar;
     },
-    forEach: function (callback) {
+    forEach: function forEach(callback) {
       for (var i = this.firstChar, ii = this.lastChar; i <= ii; i++) {
         callback(i, i);
       }
     },
-    has: function (i) {
+    has: function has(i) {
       return this.firstChar <= i && i <= this.lastChar;
     },
-    get: function (i) {
+    get: function get(i) {
       if (this.firstChar <= i && i <= this.lastChar) {
         return String.fromCharCode(i);
       }
       return undefined;
     },
-    charCodeOf: function (v) {
+    charCodeOf: function charCodeOf(v) {
       return isInt(v) && v >= this.firstChar && v <= this.lastChar ? v : -1;
     },
-    amend: function (map) {
+    amend: function amend(map) {
       error('Should not call amend()');
     }
   };
@@ -32592,7 +32606,7 @@ var Font = function FontClosure() {
         maxFunctionDefs = font.getUint16();
       }
       var dupFirstEntry = false;
-      if (properties.type === 'CIDFontType2' && properties.toUnicode && properties.toUnicode.get(0) > '\u0000') {
+      if (properties.type === 'CIDFontType2' && properties.toUnicode && properties.toUnicode.get(0) > '\0') {
         dupFirstEntry = true;
         numGlyphs++;
         tables['maxp'].data[4] = numGlyphs >> 8;
@@ -33910,7 +33924,7 @@ var ArithmeticDecoder = coreArithmeticDecoder.ArithmeticDecoder;
 var Jbig2Image = function Jbig2ImageClosure() {
   function ContextCache() {}
   ContextCache.prototype = {
-    getContexts: function (id) {
+    getContexts: function getContexts(id) {
       if (id in this) {
         return this[id];
       }
@@ -34948,6 +34962,8 @@ exports.Jbig2Image = Jbig2Image;
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var sharedUtil = __w_pdfjs_require__(0);
 var warn = sharedUtil.warn;
 var error = sharedUtil.error;
@@ -35041,7 +35057,7 @@ var JpegImage = function JpegImageClosure() {
         if (typeof node === 'number') {
           return node;
         }
-        if (typeof node !== 'object') {
+        if ((typeof node === 'undefined' ? 'undefined' : _typeof(node)) !== 'object') {
           error('JPEG error: invalid huffman sequence');
         }
       }
@@ -38809,6 +38825,8 @@ exports.getMetrics = getMetrics;
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var sharedUtil = __w_pdfjs_require__(0);
 var MurmurHash3_64 = function MurmurHash3_64Closure(seed) {
   var MASK_HIGH = 0xffff0000;
@@ -38833,7 +38851,7 @@ var MurmurHash3_64 = function MurmurHash3_64Closure(seed) {
             data[length++] = code & 0xff;
           }
         }
-      } else if (typeof input === 'object' && 'byteLength' in input) {
+      } else if ((typeof input === 'undefined' ? 'undefined' : _typeof(input)) === 'object' && 'byteLength' in input) {
         data = input;
         length = data.byteLength;
       } else {
@@ -40801,7 +40819,7 @@ var Type1CharString = function Type1CharStringClosure() {
       }
       return error;
     },
-    executeCommand: function (howManyArgs, command, keepStack) {
+    executeCommand: function executeCommand(howManyArgs, command, keepStack) {
       var stackLength = this.stack.length;
       if (howManyArgs > stackLength) {
         return true;
@@ -41258,7 +41276,7 @@ var CachedCanvases = function CachedCanvasesClosure() {
       }
       return canvasEntry;
     },
-    clear: function () {
+    clear: function clear() {
       for (var id in this.cache) {
         var canvasEntry = this.cache[id];
         this.canvasFactory.destroy(canvasEntry);
@@ -41387,7 +41405,7 @@ function compileType3Glyph(imgData) {
     outlines.push(coords);
     --i;
   }
-  var drawOutline = function (c) {
+  var drawOutline = function drawOutline(c) {
     c.save();
     c.scale(1 / width, -1 / height);
     c.translate(0, -height);
@@ -42402,7 +42420,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
         var baseTransform = this.baseTransform || this.ctx.mozCurrentTransform.slice();
         var self = this;
         var canvasGraphicsFactory = {
-          createCanvasGraphics: function (ctx) {
+          createCanvasGraphics: function createCanvasGraphics(ctx) {
             return new CanvasGraphics(ctx, self.commonObjs, self.objs, self.canvasFactory);
           }
         };
@@ -42888,11 +42906,11 @@ FontLoader.prototype = {
     this.nativeFontFaces.length = 0;
   }
 };
-var getLoadTestFont = function () {
+var getLoadTestFont = function getLoadTestFont() {
   return atob('T1RUTwALAIAAAwAwQ0ZGIDHtZg4AAAOYAAAAgUZGVE1lkzZwAAAEHAAAABxHREVGABQAFQ' + 'AABDgAAAAeT1MvMlYNYwkAAAEgAAAAYGNtYXABDQLUAAACNAAAAUJoZWFk/xVFDQAAALwA' + 'AAA2aGhlYQdkA+oAAAD0AAAAJGhtdHgD6AAAAAAEWAAAAAZtYXhwAAJQAAAAARgAAAAGbm' + 'FtZVjmdH4AAAGAAAAAsXBvc3T/hgAzAAADeAAAACAAAQAAAAEAALZRFsRfDzz1AAsD6AAA' + 'AADOBOTLAAAAAM4KHDwAAAAAA+gDIQAAAAgAAgAAAAAAAAABAAADIQAAAFoD6AAAAAAD6A' + 'ABAAAAAAAAAAAAAAAAAAAAAQAAUAAAAgAAAAQD6AH0AAUAAAKKArwAAACMAooCvAAAAeAA' + 'MQECAAACAAYJAAAAAAAAAAAAAQAAAAAAAAAAAAAAAFBmRWQAwAAuAC4DIP84AFoDIQAAAA' + 'AAAQAAAAAAAAAAACAAIAABAAAADgCuAAEAAAAAAAAAAQAAAAEAAAAAAAEAAQAAAAEAAAAA' + 'AAIAAQAAAAEAAAAAAAMAAQAAAAEAAAAAAAQAAQAAAAEAAAAAAAUAAQAAAAEAAAAAAAYAAQ' + 'AAAAMAAQQJAAAAAgABAAMAAQQJAAEAAgABAAMAAQQJAAIAAgABAAMAAQQJAAMAAgABAAMA' + 'AQQJAAQAAgABAAMAAQQJAAUAAgABAAMAAQQJAAYAAgABWABYAAAAAAAAAwAAAAMAAAAcAA' + 'EAAAAAADwAAwABAAAAHAAEACAAAAAEAAQAAQAAAC7//wAAAC7////TAAEAAAAAAAABBgAA' + 'AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAA' + 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' + 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' + 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' + 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAA' + 'AAAAD/gwAyAAAAAQAAAAAAAAAAAAAAAAAAAAABAAQEAAEBAQJYAAEBASH4DwD4GwHEAvgc' + 'A/gXBIwMAYuL+nz5tQXkD5j3CBLnEQACAQEBIVhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWF' + 'hYWFhYWFhYAAABAQAADwACAQEEE/t3Dov6fAH6fAT+fPp8+nwHDosMCvm1Cvm1DAz6fBQA' + 'AAAAAAABAAAAAMmJbzEAAAAAzgTjFQAAAADOBOQpAAEAAAAAAAAADAAUAAQAAAABAAAAAg' + 'ABAAAAAAAAAAAD6AAAAAAAAA==');
 };
 Object.defineProperty(FontLoader.prototype, 'loadTestFont', {
-  get: function () {
+  get: function get() {
     return shadow(this, 'loadTestFont', getLoadTestFont());
   },
   configurable: true
@@ -42905,7 +42923,7 @@ FontLoader.prototype.bind = function fontLoaderBind(fonts, callback) {
   var rules = [];
   var fontsToLoad = [];
   var fontLoadPromises = [];
-  var getNativeFontPromise = function (nativeFontFace) {
+  var getNativeFontPromise = function getNativeFontPromise(nativeFontFace) {
     return nativeFontFace.loaded.catch(function (e) {
       warn('Failed to load font "' + nativeFontFace.family + '": ' + e);
     });
@@ -43043,7 +43061,7 @@ var isSyncFontLoadingSupported = function isSyncFontLoadingSupported() {
   return supported;
 };
 Object.defineProperty(FontLoader, 'isSyncFontLoadingSupported', {
-  get: function () {
+  get: function get() {
     return shadow(FontLoader, 'isSyncFontLoadingSupported', isSyncFontLoadingSupported());
   },
   enumerable: true,
@@ -43509,8 +43527,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.205';
-var pdfjsBuild = 'bc1f4dd9';
+var pdfjsVersion = '1.8.207';
+var pdfjsBuild = 'fd51a7cb';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
@@ -43552,6 +43570,8 @@ exports.addLinkAttributes = pdfjsDisplayDOMUtils.addLinkAttributes;
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
   var globalScope = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : undefined;
   var userAgent = typeof navigator !== 'undefined' && navigator.userAgent || '';
@@ -43565,7 +43585,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
   var isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent);
   var isOpera = userAgent.indexOf('Opera') >= 0;
   var isSafari = /Safari\//.test(userAgent) && !/(Chrome\/|Android\s)/.test(userAgent);
-  var hasDOM = typeof window === 'object' && typeof document === 'object';
+  var hasDOM = (typeof window === 'undefined' ? 'undefined' : _typeof(window)) === 'object' && (typeof document === 'undefined' ? 'undefined' : _typeof(document)) === 'object';
   if (typeof PDFJS === 'undefined') {
     globalScope.PDFJS = {};
   }
@@ -43606,12 +43626,12 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     var uint32ArrayViewSetters = 0;
     function createUint32ArrayProp(index) {
       return {
-        get: function () {
+        get: function get() {
           var buffer = this.buffer,
               offset = index << 2;
           return (buffer[offset] | buffer[offset + 1] << 8 | buffer[offset + 2] << 16 | buffer[offset + 3] << 24) >>> 0;
         },
-        set: function (value) {
+        set: function set(value) {
           var buffer = this.buffer,
               offset = index << 2;
           buffer[offset] = value & 255;
@@ -43646,7 +43666,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       result.buffer = result;
       result.byteLength = result.length;
       result.set = setArrayOffset;
-      if (typeof arg1 === 'object' && arg1.buffer) {
+      if ((typeof arg1 === 'undefined' ? 'undefined' : _typeof(arg1)) === 'object' && arg1.buffer) {
         result.buffer = arg1.buffer;
       }
       return result;
@@ -43676,14 +43696,14 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       return;
     }
     Object.defineProperty(cpaProto, 'buffer', {
-      get: function () {
+      get: function get() {
         return this;
       },
       enumerable: false,
       configurable: true
     });
     Object.defineProperty(cpaProto, 'byteLength', {
-      get: function () {
+      get: function get() {
         return this.length;
       },
       enumerable: false,
@@ -43852,7 +43872,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       return;
     }
     Object.defineProperty(HTMLElement.prototype, 'dataset', {
-      get: function () {
+      get: function get() {
         if (this._dataset) {
           return this._dataset;
         }
@@ -43902,21 +43922,21 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       return;
     }
     var classListPrototype = {
-      add: function (name) {
+      add: function add(name) {
         changeList(this.element, name, true, false);
       },
-      contains: function (name) {
+      contains: function contains(name) {
         return changeList(this.element, name, false, false);
       },
-      remove: function (name) {
+      remove: function remove(name) {
         changeList(this.element, name, false, true);
       },
-      toggle: function (name) {
+      toggle: function toggle(name) {
         changeList(this.element, name, true, true);
       }
     };
     Object.defineProperty(HTMLElement.prototype, 'classList', {
-      get: function () {
+      get: function get() {
         if (this._classList) {
           return this._classList;
         }
@@ -43978,9 +43998,9 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     }
     if (!('console' in window)) {
       window.console = {
-        log: function () {},
-        error: function () {},
-        warn: function () {}
+        log: function log() {},
+        error: function error() {},
+        warn: function warn() {}
       };
       return;
     }
@@ -44130,7 +44150,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       return;
     }
     Object.defineProperty(document, 'currentScript', {
-      get: function () {
+      get: function get() {
         var scripts = document.getElementsByTagName('script');
         return scripts[scripts.length - 1];
       },
@@ -44149,10 +44169,10 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       var inputProto = el.constructor.prototype;
       var typeProperty = Object.getOwnPropertyDescriptor(inputProto, 'type');
       Object.defineProperty(inputProto, 'type', {
-        get: function () {
+        get: function get() {
           return typeProperty.get.call(this);
         },
-        set: function (value) {
+        set: function set(value) {
           typeProperty.set.call(this, value === 'number' ? 'text' : value);
         },
         enumerable: true,
@@ -44170,11 +44190,11 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     var documentProto = document.constructor.prototype;
     var readyStateProto = Object.getOwnPropertyDescriptor(documentProto, 'readyState');
     Object.defineProperty(documentProto, 'readyState', {
-      get: function () {
+      get: function get() {
         var value = readyStateProto.get.call(this);
         return value === 'interactive' ? 'loading' : value;
       },
-      set: function (value) {
+      set: function set(value) {
         readyStateProto.set.call(this, value);
       },
       enumerable: true,
@@ -44463,20 +44483,20 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       this.id = '$weakmap' + id++;
     }
     WeakMap.prototype = {
-      has: function (obj) {
+      has: function has(obj) {
         return !!Object.getOwnPropertyDescriptor(obj, this.id);
       },
-      get: function (obj, defaultValue) {
+      get: function get(obj, defaultValue) {
         return this.has(obj) ? obj[this.id] : defaultValue;
       },
-      set: function (obj, value) {
+      set: function set(obj, value) {
         Object.defineProperty(obj, this.id, {
           value: value,
           enumerable: false,
           configurable: true
         });
       },
-      delete: function (obj) {
+      delete: function _delete(obj) {
         delete obj[this.id];
       }
     };
@@ -44485,7 +44505,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
   (function checkURLConstructor() {
     var hasWorkingUrl = false;
     try {
-      if (typeof URL === 'function' && typeof URL.prototype === 'object' && 'origin' in URL.prototype) {
+      if (typeof URL === 'function' && _typeof(URL.prototype) === 'object' && 'origin' in URL.prototype) {
         var u = new URL('b', 'http://a');
         u.pathname = 'c%20d';
         hasWorkingUrl = u.href === 'http://a/c%20d';
@@ -44907,7 +44927,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       parse.call(this, input, null, base);
     }
     JURL.prototype = {
-      toString: function () {
+      toString: function toString() {
         return this.href;
       },
       get href() {
