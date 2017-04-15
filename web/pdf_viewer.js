@@ -6665,6 +6665,8 @@ exports.PDFThumbnailView = undefined;
 
 var _ui_utils = __w_pdfjs_require__(0);
 
+var _pdfjs = __w_pdfjs_require__(1);
+
 var _pdf_rendering_queue = __w_pdfjs_require__(3);
 
 var THUMBNAIL_WIDTH = 98;
@@ -6853,8 +6855,8 @@ var PDFThumbnailView = function PDFThumbnailViewClosure() {
         if (renderTask === self.renderTask) {
           self.renderTask = null;
         }
-        if (error === 'cancelled') {
-          rejectRenderPromise(error);
+        if (error === 'cancelled' || error instanceof _pdfjs.RenderingCancelledException) {
+          resolveRenderPromise(undefined);
           return;
         }
         self.renderingState = _pdf_rendering_queue.RenderingStates.FINISHED;
