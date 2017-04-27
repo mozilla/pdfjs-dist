@@ -970,7 +970,7 @@ var createObjectURL = function createObjectURLClosure() {
   return function createObjectURL(data, contentType) {
     var forceDataSchema = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
-    if (!forceDataSchema) {
+    if (!forceDataSchema && URL.createObjectURL) {
       var blob = createBlob(data, contentType);
       return URL.createObjectURL(blob);
     }
@@ -1051,14 +1051,14 @@ function MessageHandler(sourceName, targetName, comObj) {
   comObj.addEventListener('message', this._onComObjOnMessage);
 }
 MessageHandler.prototype = {
-  on: function messageHandlerOn(actionName, handler, scope) {
+  on: function on(actionName, handler, scope) {
     var ah = this.actionHandler;
     if (ah[actionName]) {
       error('There is already an actionName called "' + actionName + '"');
     }
     ah[actionName] = [handler, scope];
   },
-  send: function messageHandlerSend(actionName, data, transfers) {
+  send: function send(actionName, data, transfers) {
     var message = {
       sourceName: this.sourceName,
       targetName: this.targetName,
@@ -1067,7 +1067,7 @@ MessageHandler.prototype = {
     };
     this.postMessage(message, transfers);
   },
-  sendWithPromise: function messageHandlerSendWithPromise(actionName, data, transfers) {
+  sendWithPromise: function sendWithPromise(actionName, data, transfers) {
     var callbackId = this.callbackIndex++;
     var message = {
       sourceName: this.sourceName,
@@ -36956,8 +36956,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.254';
-var pdfjsBuild = '366277d1';
+var pdfjsVersion = '1.8.271';
+var pdfjsBuild = '7fd20847';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
@@ -37100,6 +37100,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       get: function get() {
         return this;
       },
+
       enumerable: false,
       configurable: true
     });
@@ -37107,6 +37108,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       get: function get() {
         return this.length;
       },
+
       enumerable: false,
       configurable: true
     });
@@ -37295,6 +37297,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         });
         return dataset;
       },
+
       enumerable: true
     });
   })();
@@ -37355,6 +37358,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         });
         return classList;
       },
+
       enumerable: true
     });
   })();
@@ -37555,6 +37559,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         var scripts = document.getElementsByTagName('script');
         return scripts[scripts.length - 1];
       },
+
       enumerable: true,
       configurable: true
     });
@@ -37576,6 +37581,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         set: function set(value) {
           typeProperty.set.call(this, value === 'number' ? 'text' : value);
         },
+
         enumerable: true,
         configurable: true
       });
@@ -37598,6 +37604,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       set: function set(value) {
         readyStateProto.set.call(this, value);
       },
+
       enumerable: true,
       configurable: true
     });
@@ -38331,6 +38338,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       toString: function toString() {
         return this.href;
       },
+
       get href() {
         if (this._isInvalid) {
           return this._url;

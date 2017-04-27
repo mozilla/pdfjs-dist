@@ -970,7 +970,7 @@ var createObjectURL = function createObjectURLClosure() {
   return function createObjectURL(data, contentType) {
     var forceDataSchema = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
-    if (!forceDataSchema) {
+    if (!forceDataSchema && URL.createObjectURL) {
       var blob = createBlob(data, contentType);
       return URL.createObjectURL(blob);
     }
@@ -1051,14 +1051,14 @@ function MessageHandler(sourceName, targetName, comObj) {
   comObj.addEventListener('message', this._onComObjOnMessage);
 }
 MessageHandler.prototype = {
-  on: function messageHandlerOn(actionName, handler, scope) {
+  on: function on(actionName, handler, scope) {
     var ah = this.actionHandler;
     if (ah[actionName]) {
       error('There is already an actionName called "' + actionName + '"');
     }
     ah[actionName] = [handler, scope];
   },
-  send: function messageHandlerSend(actionName, data, transfers) {
+  send: function send(actionName, data, transfers) {
     var message = {
       sourceName: this.sourceName,
       targetName: this.targetName,
@@ -1067,7 +1067,7 @@ MessageHandler.prototype = {
     };
     this.postMessage(message, transfers);
   },
-  sendWithPromise: function messageHandlerSendWithPromise(actionName, data, transfers) {
+  sendWithPromise: function sendWithPromise(actionName, data, transfers) {
     var callbackId = this.callbackIndex++;
     var message = {
       sourceName: this.sourceName,
@@ -2277,6 +2277,7 @@ var PDFDocumentLoadingTask = function PDFDocumentLoadingTaskClosure() {
         }
       }.bind(this));
     },
+
     then: function PDFDocumentLoadingTask_then(onFulfilled, onRejected) {
       return this.promise.then.apply(this.promise, arguments);
     }
@@ -2570,6 +2571,7 @@ var PDFPageProxy = function PDFPageProxyClosure() {
       (0, _util.deprecated)('page destroy method, use cleanup() instead');
       this.cleanup();
     },
+
     cleanup: function PDFPageProxy_cleanup() {
       this.pendingCleanup = true;
       this._tryCleanup();
@@ -2947,11 +2949,13 @@ var WorkerTransport = function WorkerTransportClosure() {
         loadingTask._capability.resolve(pdfDocument);
       }, this);
       messageHandler.on('PasswordRequest', function transportPasswordRequest(exception) {
+        var _this = this;
+
         this._passwordCapability = (0, _util.createPromiseCapability)();
         if (loadingTask.onPassword) {
-          var updatePassword = function (password) {
-            this._passwordCapability.resolve({ password: password });
-          }.bind(this);
+          var updatePassword = function updatePassword(password) {
+            _this._passwordCapability.resolve({ password: password });
+          };
           loadingTask.onPassword(updatePassword, exception.code);
         } else {
           this._passwordCapability.reject(new _util.PasswordException(exception.message, exception.code));
@@ -3431,8 +3435,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.254';
-  exports.build = build = '366277d1';
+  exports.version = version = '1.8.271';
+  exports.build = build = '7fd20847';
 }
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
@@ -5399,8 +5403,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.254';
-  PDFJS.build = '366277d1';
+  PDFJS.version = '1.8.271';
+  PDFJS.build = '7fd20847';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -5414,6 +5418,7 @@ Object.defineProperty(PDFJS, 'verbosity', {
   set: function set(level) {
     (0, _util.setVerbosityLevel)(level);
   },
+
   enumerable: true,
   configurable: true
 });
@@ -5478,6 +5483,7 @@ PDFJS.pdfjsNext = PDFJS.pdfjsNext === undefined ? false : PDFJS.pdfjsNext;
       }
       PDFJS.externalLinkTarget = value ? _dom_utils.LinkTarget.BLANK : _dom_utils.LinkTarget.NONE;
     },
+
     enumerable: true,
     configurable: true
   });
@@ -6767,14 +6773,15 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       this.endPath();
     },
     getColorN_Pattern: function CanvasGraphics_getColorN_Pattern(IR) {
+      var _this = this;
+
       var pattern;
       if (IR[0] === 'TilingPattern') {
         var color = IR[1];
         var baseTransform = this.baseTransform || this.ctx.mozCurrentTransform.slice();
-        var self = this;
         var canvasGraphicsFactory = {
           createCanvasGraphics: function createCanvasGraphics(ctx) {
-            return new CanvasGraphics(ctx, self.commonObjs, self.objs, self.canvasFactory);
+            return new CanvasGraphics(ctx, _this.commonObjs, _this.objs, _this.canvasFactory);
           }
         };
         pattern = new _pattern_helper.TilingPattern(IR, color, this.ctx, canvasGraphicsFactory, baseTransform);
@@ -7268,6 +7275,7 @@ FontLoader.prototype = {
     get: function get() {
       return (0, _util.shadow)(this, 'loadTestFont', getLoadTestFont());
     },
+
     configurable: true
   });
   FontLoader.prototype.addNativeFontFace = function fontLoader_addNativeFontFace(nativeFontFace) {
@@ -7423,6 +7431,7 @@ FontLoader.prototype = {
     get: function get() {
       return (0, _util.shadow)(FontLoader, 'isSyncFontLoadingSupported', isSyncFontLoadingSupported());
     },
+
     enumerable: true,
     configurable: true
   });
@@ -7889,8 +7898,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.254';
-var pdfjsBuild = '366277d1';
+var pdfjsVersion = '1.8.271';
+var pdfjsBuild = '7fd20847';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
@@ -8061,6 +8070,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       get: function get() {
         return this;
       },
+
       enumerable: false,
       configurable: true
     });
@@ -8068,6 +8078,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       get: function get() {
         return this.length;
       },
+
       enumerable: false,
       configurable: true
     });
@@ -8256,6 +8267,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         });
         return dataset;
       },
+
       enumerable: true
     });
   })();
@@ -8316,6 +8328,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         });
         return classList;
       },
+
       enumerable: true
     });
   })();
@@ -8516,6 +8529,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         var scripts = document.getElementsByTagName('script');
         return scripts[scripts.length - 1];
       },
+
       enumerable: true,
       configurable: true
     });
@@ -8537,6 +8551,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         set: function set(value) {
           typeProperty.set.call(this, value === 'number' ? 'text' : value);
         },
+
         enumerable: true,
         configurable: true
       });
@@ -8559,6 +8574,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       set: function set(value) {
         readyStateProto.set.call(this, value);
       },
+
       enumerable: true,
       configurable: true
     });
@@ -9292,6 +9308,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       toString: function toString() {
         return this.href;
       },
+
       get href() {
         if (this._isInvalid) {
           return this._url;

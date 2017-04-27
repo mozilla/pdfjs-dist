@@ -227,6 +227,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       get: function get() {
         return this;
       },
+
       enumerable: false,
       configurable: true
     });
@@ -234,6 +235,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       get: function get() {
         return this.length;
       },
+
       enumerable: false,
       configurable: true
     });
@@ -422,6 +424,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         });
         return dataset;
       },
+
       enumerable: true
     });
   })();
@@ -482,6 +485,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         });
         return classList;
       },
+
       enumerable: true
     });
   })();
@@ -682,6 +686,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         var scripts = document.getElementsByTagName('script');
         return scripts[scripts.length - 1];
       },
+
       enumerable: true,
       configurable: true
     });
@@ -703,6 +708,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         set: function set(value) {
           typeProperty.set.call(this, value === 'number' ? 'text' : value);
         },
+
         enumerable: true,
         configurable: true
       });
@@ -725,6 +731,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       set: function set(value) {
         readyStateProto.set.call(this, value);
       },
+
       enumerable: true,
       configurable: true
     });
@@ -1458,6 +1465,7 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       toString: function toString() {
         return this.href;
       },
+
       get href() {
         if (this._isInvalid) {
           return this._url;

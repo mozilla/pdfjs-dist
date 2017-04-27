@@ -139,7 +139,7 @@ var RendererType = {
   CANVAS: 'canvas',
   SVG: 'svg'
 };
-var mozL10n = document.mozL10n || document.webL10n;
+var mozL10n = typeof document !== 'undefined' ? document.mozL10n || document.webL10n : undefined;
 _pdfjs.PDFJS.disableFullscreen = _pdfjs.PDFJS.disableFullscreen === undefined ? false : _pdfjs.PDFJS.disableFullscreen;
 _pdfjs.PDFJS.useOnlyCssZoom = _pdfjs.PDFJS.useOnlyCssZoom === undefined ? false : _pdfjs.PDFJS.useOnlyCssZoom;
 _pdfjs.PDFJS.maxCanvasPixels = _pdfjs.PDFJS.maxCanvasPixels === undefined ? 16777216 : _pdfjs.PDFJS.maxCanvasPixels;
@@ -147,7 +147,7 @@ _pdfjs.PDFJS.disableHistory = _pdfjs.PDFJS.disableHistory === undefined ? false 
 _pdfjs.PDFJS.disableTextLayer = _pdfjs.PDFJS.disableTextLayer === undefined ? false : _pdfjs.PDFJS.disableTextLayer;
 _pdfjs.PDFJS.ignoreCurrentPositionOnZoom = _pdfjs.PDFJS.ignoreCurrentPositionOnZoom === undefined ? false : _pdfjs.PDFJS.ignoreCurrentPositionOnZoom;
 {
-  _pdfjs.PDFJS.locale = _pdfjs.PDFJS.locale === undefined ? navigator.language : _pdfjs.PDFJS.locale;
+  _pdfjs.PDFJS.locale = _pdfjs.PDFJS.locale === undefined && typeof navigator !== 'undefined' ? navigator.language : _pdfjs.PDFJS.locale;
 }
 function getOutputScale(ctx) {
   var devicePixelRatio = window.devicePixelRatio || 1;
@@ -996,14 +996,20 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.DefaultAnnotationLayerFactory = exports.AnnotationLayerBuilder = undefined;
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _pdfjs = __w_pdfjs_require__(0);
 
 var _ui_utils = __w_pdfjs_require__(1);
 
 var _pdf_link_service = __w_pdfjs_require__(3);
 
-var AnnotationLayerBuilder = function AnnotationLayerBuilderClosure() {
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var AnnotationLayerBuilder = function () {
   function AnnotationLayerBuilder(options) {
+    _classCallCheck(this, AnnotationLayerBuilder);
+
     this.pageDiv = options.pageDiv;
     this.pdfPage = options.pdfPage;
     this.renderInteractiveForms = options.renderInteractiveForms;
@@ -1011,58 +1017,76 @@ var AnnotationLayerBuilder = function AnnotationLayerBuilderClosure() {
     this.downloadManager = options.downloadManager;
     this.div = null;
   }
-  AnnotationLayerBuilder.prototype = {
-    render: function AnnotationLayerBuilder_render(viewport, intent) {
-      var self = this;
-      var parameters = { intent: intent === undefined ? 'display' : intent };
-      this.pdfPage.getAnnotations(parameters).then(function (annotations) {
-        viewport = viewport.clone({ dontFlip: true });
-        parameters = {
-          viewport: viewport,
-          div: self.div,
+
+  _createClass(AnnotationLayerBuilder, [{
+    key: 'render',
+    value: function render(viewport) {
+      var _this = this;
+
+      var intent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'display';
+
+      this.pdfPage.getAnnotations({ intent: intent }).then(function (annotations) {
+        var parameters = {
+          viewport: viewport.clone({ dontFlip: true }),
+          div: _this.div,
           annotations: annotations,
-          page: self.pdfPage,
-          renderInteractiveForms: self.renderInteractiveForms,
-          linkService: self.linkService,
-          downloadManager: self.downloadManager
+          page: _this.pdfPage,
+          renderInteractiveForms: _this.renderInteractiveForms,
+          linkService: _this.linkService,
+          downloadManager: _this.downloadManager
         };
-        if (self.div) {
+        if (_this.div) {
           _pdfjs.AnnotationLayer.update(parameters);
         } else {
           if (annotations.length === 0) {
             return;
           }
-          self.div = document.createElement('div');
-          self.div.className = 'annotationLayer';
-          self.pageDiv.appendChild(self.div);
-          parameters.div = self.div;
+          _this.div = document.createElement('div');
+          _this.div.className = 'annotationLayer';
+          _this.pageDiv.appendChild(_this.div);
+          parameters.div = _this.div;
           _pdfjs.AnnotationLayer.render(parameters);
           if (typeof _ui_utils.mozL10n !== 'undefined') {
-            _ui_utils.mozL10n.translate(self.div);
+            _ui_utils.mozL10n.translate(_this.div);
           }
         }
       });
-    },
-    hide: function AnnotationLayerBuilder_hide() {
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
       if (!this.div) {
         return;
       }
       this.div.setAttribute('hidden', 'true');
     }
-  };
+  }]);
+
   return AnnotationLayerBuilder;
 }();
-function DefaultAnnotationLayerFactory() {}
-DefaultAnnotationLayerFactory.prototype = {
-  createAnnotationLayerBuilder: function createAnnotationLayerBuilder(pageDiv, pdfPage, renderInteractiveForms) {
-    return new AnnotationLayerBuilder({
-      pageDiv: pageDiv,
-      pdfPage: pdfPage,
-      renderInteractiveForms: renderInteractiveForms,
-      linkService: new _pdf_link_service.SimpleLinkService()
-    });
+
+var DefaultAnnotationLayerFactory = function () {
+  function DefaultAnnotationLayerFactory() {
+    _classCallCheck(this, DefaultAnnotationLayerFactory);
   }
-};
+
+  _createClass(DefaultAnnotationLayerFactory, [{
+    key: 'createAnnotationLayerBuilder',
+    value: function createAnnotationLayerBuilder(pageDiv, pdfPage) {
+      var renderInteractiveForms = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      return new AnnotationLayerBuilder({
+        pageDiv: pageDiv,
+        pdfPage: pdfPage,
+        renderInteractiveForms: renderInteractiveForms,
+        linkService: new _pdf_link_service.SimpleLinkService()
+      });
+    }
+  }]);
+
+  return DefaultAnnotationLayerFactory;
+}();
+
 exports.AnnotationLayerBuilder = AnnotationLayerBuilder;
 exports.DefaultAnnotationLayerFactory = DefaultAnnotationLayerFactory;
 
@@ -1846,6 +1870,11 @@ exports.DefaultTextLayerFactory = DefaultTextLayerFactory;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 var CLEANUP_TIMEOUT = 30000;
 var RenderingStates = {
   INITIAL: 0,
@@ -1853,8 +1882,11 @@ var RenderingStates = {
   PAUSED: 2,
   FINISHED: 3
 };
-var PDFRenderingQueue = function PDFRenderingQueueClosure() {
+
+var PDFRenderingQueue = function () {
   function PDFRenderingQueue() {
+    _classCallCheck(this, PDFRenderingQueue);
+
     this.pdfViewer = null;
     this.pdfThumbnailViewer = null;
     this.onIdle = null;
@@ -1863,17 +1895,25 @@ var PDFRenderingQueue = function PDFRenderingQueueClosure() {
     this.printing = false;
     this.isThumbnailViewEnabled = false;
   }
-  PDFRenderingQueue.prototype = {
-    setViewer: function PDFRenderingQueue_setViewer(pdfViewer) {
+
+  _createClass(PDFRenderingQueue, [{
+    key: "setViewer",
+    value: function setViewer(pdfViewer) {
       this.pdfViewer = pdfViewer;
-    },
-    setThumbnailViewer: function PDFRenderingQueue_setThumbnailViewer(pdfThumbnailViewer) {
+    }
+  }, {
+    key: "setThumbnailViewer",
+    value: function setThumbnailViewer(pdfThumbnailViewer) {
       this.pdfThumbnailViewer = pdfThumbnailViewer;
-    },
-    isHighestPriority: function PDFRenderingQueue_isHighestPriority(view) {
+    }
+  }, {
+    key: "isHighestPriority",
+    value: function isHighestPriority(view) {
       return this.highestPriorityPage === view.renderingId;
-    },
-    renderHighestPriority: function PDFRenderingQueue_renderHighestPriority(currentlyVisiblePages) {
+    }
+  }, {
+    key: "renderHighestPriority",
+    value: function renderHighestPriority(currentlyVisiblePages) {
       if (this.idleTimeout) {
         clearTimeout(this.idleTimeout);
         this.idleTimeout = null;
@@ -1892,8 +1932,10 @@ var PDFRenderingQueue = function PDFRenderingQueueClosure() {
       if (this.onIdle) {
         this.idleTimeout = setTimeout(this.onIdle.bind(this), CLEANUP_TIMEOUT);
       }
-    },
-    getHighestPriority: function PDFRenderingQueue_getHighestPriority(visible, views, scrolledDown) {
+    }
+  }, {
+    key: "getHighestPriority",
+    value: function getHighestPriority(visible, views, scrolledDown) {
       var visibleViews = visible.views;
       var numVisible = visibleViews.length;
       if (numVisible === 0) {
@@ -1917,13 +1959,18 @@ var PDFRenderingQueue = function PDFRenderingQueueClosure() {
         }
       }
       return null;
-    },
-    isViewFinished: function PDFRenderingQueue_isViewFinished(view) {
+    }
+  }, {
+    key: "isViewFinished",
+    value: function isViewFinished(view) {
       return view.renderingState === RenderingStates.FINISHED;
-    },
-    renderView: function PDFRenderingQueue_renderView(view) {
-      var state = view.renderingState;
-      switch (state) {
+    }
+  }, {
+    key: "renderView",
+    value: function renderView(view) {
+      var _this = this;
+
+      switch (view.renderingState) {
         case RenderingStates.FINISHED:
           return false;
         case RenderingStates.PAUSED:
@@ -1935,17 +1982,19 @@ var PDFRenderingQueue = function PDFRenderingQueueClosure() {
           break;
         case RenderingStates.INITIAL:
           this.highestPriorityPage = view.renderingId;
-          var continueRendering = function () {
-            this.renderHighestPriority();
-          }.bind(this);
+          var continueRendering = function continueRendering() {
+            _this.renderHighestPriority();
+          };
           view.draw().then(continueRendering, continueRendering);
           break;
       }
       return true;
     }
-  };
+  }]);
+
   return PDFRenderingQueue;
 }();
+
 exports.RenderingStates = RenderingStates;
 exports.PDFRenderingQueue = PDFRenderingQueue;
 
