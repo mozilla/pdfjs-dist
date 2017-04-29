@@ -12726,8 +12726,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.282';
-  exports.build = build = '5fb779d2';
+  exports.version = version = '1.8.284';
+  exports.build = build = '06c93d8f';
 }
 exports.getDocument = getDocument;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
@@ -18149,6 +18149,8 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     return (cs.numComps === 1 || cs.numComps === 3) && cs.isDefaultDecode(dict.getArray('Decode', 'D'));
   };
   function PartialEvaluator(pdfManager, xref, handler, pageIndex, idFactory, fontCache, builtInCMapCache, options) {
+    var _this = this;
+
     this.pdfManager = pdfManager;
     this.xref = xref;
     this.handler = handler;
@@ -18158,13 +18160,13 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     this.builtInCMapCache = builtInCMapCache;
     this.options = options || DefaultPartialEvaluatorOptions;
     this.fetchBuiltInCMap = function (name) {
-      var cachedCMap = builtInCMapCache[name];
+      var cachedCMap = _this.builtInCMapCache[name];
       if (cachedCMap) {
         return Promise.resolve(cachedCMap);
       }
       return handler.sendWithPromise('FetchBuiltInCMap', { name: name }).then(function (data) {
         if (data.compressionType !== CMapCompressionType.NONE) {
-          builtInCMapCache[name] = data;
+          _this.builtInCMapCache[name] = data;
         }
         return data;
       });
@@ -18234,12 +18236,14 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
   var TILING_PATTERN = 1,
       SHADING_PATTERN = 2;
   PartialEvaluator.prototype = {
-    clone: function clone(newOptions) {
-      newOptions = newOptions || DefaultPartialEvaluatorOptions;
+    clone: function clone() {
+      var newOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DefaultPartialEvaluatorOptions;
+
       var newEvaluator = Object.create(this);
       newEvaluator.options = newOptions;
       return newEvaluator;
     },
+
     hasBlendModes: function PartialEvaluator_hasBlendModes(resources) {
       if (!isDict(resources)) {
         return false;
@@ -28020,8 +28024,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.282';
-  PDFJS.build = '5fb779d2';
+  PDFJS.version = '1.8.284';
+  PDFJS.build = '06c93d8f';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -29144,6 +29148,7 @@ var CMap = function CMapClosure() {
       out.charcode = 0;
       out.length = 1;
     },
+
     get length() {
       return this._map.length;
     },
@@ -29206,6 +29211,7 @@ var IdentityCMap = function IdentityCMapClosure() {
       }
       return map;
     },
+
     readCharCode: CMap.prototype.readCharCode,
     get length() {
       return 0x10000;
@@ -30160,11 +30166,12 @@ var PDFDocument = function PDFDocumentClosure() {
       this.xref.setStartXRef(startXRef);
     },
     setup: function PDFDocument_setup(recoveryMode) {
+      var _this = this;
+
       this.xref.parse(recoveryMode);
-      var self = this;
       var pageFactory = {
         createPage: function createPage(pageIndex, dict, ref, fontCache, builtInCMapCache) {
-          return new Page(self.pdfManager, self.xref, pageIndex, dict, ref, fontCache, builtInCMapCache);
+          return new Page(_this.pdfManager, _this.xref, pageIndex, dict, ref, fontCache, builtInCMapCache);
         }
       };
       this.catalog = new Catalog(this.pdfManager, this.xref, pageFactory);
@@ -43543,8 +43550,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.282';
-var pdfjsBuild = '5fb779d2';
+var pdfjsVersion = '1.8.284';
+var pdfjsBuild = '06c93d8f';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
