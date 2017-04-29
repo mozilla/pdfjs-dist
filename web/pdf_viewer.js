@@ -890,7 +890,9 @@ var PDFLinkService = function PDFLinkServiceClosure() {
         action: action
       });
     },
-    onFileAttachmentAnnotation: function onFileAttachmentAnnotation(params) {
+    onFileAttachmentAnnotation: function onFileAttachmentAnnotation() {
+      var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
       this.eventBus.dispatch('fileattachmentannotation', {
         source: this,
         id: params.id,
@@ -898,6 +900,7 @@ var PDFLinkService = function PDFLinkServiceClosure() {
         content: params.content
       });
     },
+
     cachePageRef: function PDFLinkService_cachePageRef(pageNum, pageRef) {
       var refStr = pageRef.num + ' ' + pageRef.gen + ' R';
       this._pagesRefCache[refStr] = pageNum;
@@ -1170,7 +1173,9 @@ var PDFPageView = function PDFPageViewClosure() {
         this.pdfPage.cleanup();
       }
     },
-    _resetZoomLayer: function _resetZoomLayer(removeFromDOM) {
+    _resetZoomLayer: function _resetZoomLayer() {
+      var removeFromDOM = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
       if (!this.zoomLayer) {
         return;
       }
@@ -1183,6 +1188,7 @@ var PDFPageView = function PDFPageViewClosure() {
       }
       this.zoomLayer = null;
     },
+
     reset: function PDFPageView_reset(keepZoomLayer, keepAnnotations) {
       this.cancelRendering();
       var div = this.div;
@@ -1527,6 +1533,7 @@ var PDFPageView = function PDFPageViewClosure() {
       });
       return result;
     },
+
     paintOnSvg: function PDFPageView_paintOnSvg(wrapper) {
       var cancelled = false;
       var ensureNotCancelled = function ensureNotCancelled() {
@@ -1848,7 +1855,9 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
 }();
 function DefaultTextLayerFactory() {}
 DefaultTextLayerFactory.prototype = {
-  createTextLayerBuilder: function createTextLayerBuilder(textLayerDiv, pageIndex, viewport, enhanceTextSelection) {
+  createTextLayerBuilder: function createTextLayerBuilder(textLayerDiv, pageIndex, viewport) {
+    var enhanceTextSelection = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
     return new TextLayerBuilder({
       textLayerDiv: textLayerDiv,
       pageIndex: pageIndex,
@@ -2842,6 +2851,7 @@ var PDFViewer = function pdfViewer() {
     getPageView: function getPageView(index) {
       return this._pages[index];
     },
+
     get pageViewsReady() {
       return this._pageViewsReady;
     },
@@ -3028,6 +3038,7 @@ var PDFViewer = function pdfViewer() {
         }
       });
     },
+
     setPageLabels: function PDFViewer_setPageLabels(labels) {
       if (!this.pdfDocument) {
         return;
@@ -3059,6 +3070,7 @@ var PDFViewer = function pdfViewer() {
       this._pageViewsReady = false;
       this.viewer.textContent = '';
     },
+
     _scrollUpdate: function PDFViewer_scrollUpdate() {
       if (this.pagesCount === 0) {
         return;
@@ -3152,6 +3164,7 @@ var PDFViewer = function pdfViewer() {
       var pageView = this._pages[this._currentPageNumber - 1];
       (0, _ui_utils.scrollIntoView)(pageView.div);
     },
+
     scrollPageIntoView: function PDFViewer_scrollPageIntoView(params) {
       if (!this.pdfDocument) {
         return;
@@ -3274,6 +3287,7 @@ var PDFViewer = function pdfViewer() {
         pdfOpenParams: pdfOpenParams
       };
     },
+
     update: function PDFViewer_update() {
       var visible = this._getVisiblePages();
       var visiblePages = visible.views;
@@ -3313,6 +3327,7 @@ var PDFViewer = function pdfViewer() {
     focus: function focus() {
       this.container.focus();
     },
+
     get isInPresentationMode() {
       return this.presentationModeState === PresentationModeState.FULLSCREEN;
     },
@@ -3345,6 +3360,7 @@ var PDFViewer = function pdfViewer() {
         }
       }
     },
+
     _cancelRendering: function PDFViewer_cancelRendering() {
       for (var i = 0, ii = this._pages.length; i < ii; i++) {
         if (this._pages[i]) {
@@ -3390,7 +3406,9 @@ var PDFViewer = function pdfViewer() {
         return page.getTextContent({ normalizeWhitespace: true });
       });
     },
-    createTextLayerBuilder: function createTextLayerBuilder(textLayerDiv, pageIndex, viewport, enhanceTextSelection) {
+    createTextLayerBuilder: function createTextLayerBuilder(textLayerDiv, pageIndex, viewport) {
+      var enhanceTextSelection = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
       return new _text_layer_builder.TextLayerBuilder({
         textLayerDiv: textLayerDiv,
         eventBus: this.eventBus,
@@ -3400,7 +3418,9 @@ var PDFViewer = function pdfViewer() {
         enhanceTextSelection: this.isInPresentationMode ? false : enhanceTextSelection
       });
     },
-    createAnnotationLayerBuilder: function createAnnotationLayerBuilder(pageDiv, pdfPage, renderInteractiveForms) {
+    createAnnotationLayerBuilder: function createAnnotationLayerBuilder(pageDiv, pdfPage) {
+      var renderInteractiveForms = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
       return new _annotation_layer_builder.AnnotationLayerBuilder({
         pageDiv: pageDiv,
         pdfPage: pdfPage,
