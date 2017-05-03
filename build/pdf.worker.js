@@ -4675,9 +4675,13 @@ var Lexer = function LexerClosure() {
         divideBy = 10;
         ch = this.nextChar();
       }
+      if (ch === 0x0A || ch === 0x0D) {
+        do {
+          ch = this.nextChar();
+        } while (ch === 0x0A || ch === 0x0D);
+      }
       if (ch < 0x30 || ch > 0x39) {
-        error('Invalid number: ' + String.fromCharCode(ch));
-        return 0;
+        error('Invalid number: ' + String.fromCharCode(ch) + ' (charCode ' + ch + ')');
       }
       var baseValue = ch - 0x30;
       var powerValue = 0;
@@ -37016,8 +37020,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.306';
-var pdfjsBuild = '2ac41062';
+var pdfjsVersion = '1.8.308';
+var pdfjsBuild = '74ba3033';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
