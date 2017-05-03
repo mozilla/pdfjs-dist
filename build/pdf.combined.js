@@ -989,6 +989,8 @@ var createObjectURL = function createObjectURLClosure() {
   };
 }();
 function MessageHandler(sourceName, targetName, comObj) {
+  var _this = this;
+
   this.sourceName = sourceName;
   this.targetName = targetName;
   this.comObj = comObj;
@@ -996,9 +998,9 @@ function MessageHandler(sourceName, targetName, comObj) {
   this.postMessageTransfers = true;
   var callbacksCapabilities = this.callbacksCapabilities = Object.create(null);
   var ah = this.actionHandler = Object.create(null);
-  this._onComObjOnMessage = function messageHandlerComObjOnMessage(event) {
+  this._onComObjOnMessage = function (event) {
     var data = event.data;
-    if (data.targetName !== this.sourceName) {
+    if (data.targetName !== _this.sourceName) {
       return;
     }
     if (data.isReply) {
@@ -1017,7 +1019,7 @@ function MessageHandler(sourceName, targetName, comObj) {
     } else if (data.action in ah) {
       var action = ah[data.action];
       if (data.callbackId) {
-        var sourceName = this.sourceName;
+        var sourceName = _this.sourceName;
         var targetName = data.sourceName;
         Promise.resolve().then(function () {
           return action[0].call(action[1], data.data);
@@ -1047,7 +1049,7 @@ function MessageHandler(sourceName, targetName, comObj) {
     } else {
       error('Unknown action from worker: ' + data.action);
     }
-  }.bind(this);
+  };
   comObj.addEventListener('message', this._onComObjOnMessage);
 }
 MessageHandler.prototype = {
@@ -3157,15 +3159,17 @@ var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
   }
   DOMCMapReaderFactory.prototype = {
     fetch: function fetch(params) {
+      var _this = this;
+
       var name = params.name;
       if (!name) {
         return Promise.reject(new Error('CMap name must be specified.'));
       }
       return new Promise(function (resolve, reject) {
-        var url = this.baseUrl + name + (this.isCompressed ? '.bcmap' : '');
+        var url = _this.baseUrl + name + (_this.isCompressed ? '.bcmap' : '');
         var request = new XMLHttpRequest();
         request.open('GET', url, true);
-        if (this.isCompressed) {
+        if (_this.isCompressed) {
           request.responseType = 'arraybuffer';
         }
         request.onreadystatechange = function () {
@@ -3174,23 +3178,23 @@ var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
           }
           if (request.status === 200 || request.status === 0) {
             var data;
-            if (this.isCompressed && request.response) {
+            if (_this.isCompressed && request.response) {
               data = new Uint8Array(request.response);
-            } else if (!this.isCompressed && request.responseText) {
+            } else if (!_this.isCompressed && request.responseText) {
               data = (0, _util.stringToBytes)(request.responseText);
             }
             if (data) {
               resolve({
                 cMapData: data,
-                compressionType: this.isCompressed ? _util.CMapCompressionType.BINARY : _util.CMapCompressionType.NONE
+                compressionType: _this.isCompressed ? _util.CMapCompressionType.BINARY : _util.CMapCompressionType.NONE
               });
               return;
             }
           }
-          reject(new Error('Unable to load ' + (this.isCompressed ? 'binary ' : '') + 'CMap at: ' + url));
-        }.bind(this);
+          reject(new Error('Unable to load ' + (_this.isCompressed ? 'binary ' : '') + 'CMap at: ' + url));
+        };
         request.send(null);
-      }.bind(this));
+      });
     }
   };
   return DOMCMapReaderFactory;
@@ -11004,12 +11008,13 @@ var LinkAnnotationElement = function LinkAnnotationElementClosure() {
       this.container.appendChild(link);
       return this.container;
     },
-    _bindLink: function LinkAnnotationElement_bindLink(link, destination) {
-      var self = this;
+    _bindLink: function _bindLink(link, destination) {
+      var _this = this;
+
       link.href = this.linkService.getDestinationHash(destination);
       link.onclick = function () {
         if (destination) {
-          self.linkService.navigateTo(destination);
+          _this.linkService.navigateTo(destination);
         }
         return false;
       };
@@ -11017,11 +11022,12 @@ var LinkAnnotationElement = function LinkAnnotationElementClosure() {
         link.className = 'internalLink';
       }
     },
-    _bindNamedAction: function LinkAnnotationElement_bindNamedAction(link, action) {
-      var self = this;
+    _bindNamedAction: function _bindNamedAction(link, action) {
+      var _this2 = this;
+
       link.href = this.linkService.getAnchorUrl('');
       link.onclick = function () {
-        self.linkService.executeNamedAction(action);
+        _this2.linkService.executeNamedAction(action);
         return false;
       };
       link.className = 'internalLink';
@@ -11649,15 +11655,17 @@ var PDFDocumentLoadingTask = function PDFDocumentLoadingTaskClosure() {
       return this._capability.promise;
     },
     destroy: function destroy() {
+      var _this = this;
+
       this.destroyed = true;
       var transportDestroyed = !this._transport ? Promise.resolve() : this._transport.destroy();
       return transportDestroyed.then(function () {
-        this._transport = null;
-        if (this._worker) {
-          this._worker.destroy();
-          this._worker = null;
+        _this._transport = null;
+        if (_this._worker) {
+          _this._worker.destroy();
+          _this._worker = null;
         }
-      }.bind(this));
+      });
     },
 
     then: function PDFDocumentLoadingTask_then(onFulfilled, onRejected) {
@@ -11692,20 +11700,24 @@ var PDFDataRangeTransport = function pdfDataRangeTransportClosure() {
       }
     },
     onDataProgress: function PDFDataRangeTransport_onDataProgress(loaded) {
+      var _this2 = this;
+
       this._readyCapability.promise.then(function () {
-        var listeners = this._progressListeners;
+        var listeners = _this2._progressListeners;
         for (var i = 0, n = listeners.length; i < n; ++i) {
           listeners[i](loaded);
         }
-      }.bind(this));
+      });
     },
     onDataProgressiveRead: function PDFDataRangeTransport_onDataProgress(chunk) {
+      var _this3 = this;
+
       this._readyCapability.promise.then(function () {
-        var listeners = this._progressiveReadListeners;
+        var listeners = _this3._progressiveReadListeners;
         for (var i = 0, n = listeners.length; i < n; ++i) {
           listeners[i](chunk);
         }
-      }.bind(this));
+      });
     },
     transportReady: function PDFDataRangeTransport_transportReady() {
       this._readyCapability.resolve();
@@ -11820,6 +11832,8 @@ var PDFPageProxy = function PDFPageProxyClosure() {
       return this.annotationsPromise;
     },
     render: function PDFPageProxy_render(params) {
+      var _this4 = this;
+
       var stats = this.stats;
       stats.time('Overall');
       this.pendingCleanup = false;
@@ -11844,6 +11858,23 @@ var PDFPageProxy = function PDFPageProxyClosure() {
           renderInteractiveForms: params.renderInteractiveForms === true
         });
       }
+      var complete = function complete(error) {
+        var i = intentState.renderTasks.indexOf(internalRenderTask);
+        if (i >= 0) {
+          intentState.renderTasks.splice(i, 1);
+        }
+        if (_this4.cleanupAfterRender) {
+          _this4.pendingCleanup = true;
+        }
+        _this4._tryCleanup();
+        if (error) {
+          internalRenderTask.capability.reject(error);
+        } else {
+          internalRenderTask.capability.resolve();
+        }
+        stats.timeEnd('Rendering');
+        stats.timeEnd('Overall');
+      };
       var internalRenderTask = new InternalRenderTask(complete, params, this.objs, this.commonObjs, intentState.operatorList, this.pageNumber, canvasFactory);
       internalRenderTask.useRequestAnimationFrame = renderingIntent !== 'print';
       if (!intentState.renderTasks) {
@@ -11855,35 +11886,15 @@ var PDFPageProxy = function PDFPageProxyClosure() {
         (0, _util.deprecated)('render is used with continueCallback parameter');
         renderTask.onContinue = params.continueCallback;
       }
-      var self = this;
-      intentState.displayReadyCapability.promise.then(function pageDisplayReadyPromise(transparency) {
-        if (self.pendingCleanup) {
+      intentState.displayReadyCapability.promise.then(function (transparency) {
+        if (_this4.pendingCleanup) {
           complete();
           return;
         }
         stats.time('Rendering');
         internalRenderTask.initializeGraphics(transparency);
         internalRenderTask.operatorListChanged();
-      }, function pageDisplayReadPromiseError(reason) {
-        complete(reason);
-      });
-      function complete(error) {
-        var i = intentState.renderTasks.indexOf(internalRenderTask);
-        if (i >= 0) {
-          intentState.renderTasks.splice(i, 1);
-        }
-        if (self.cleanupAfterRender) {
-          self.pendingCleanup = true;
-        }
-        self._tryCleanup();
-        if (error) {
-          internalRenderTask.capability.reject(error);
-        } else {
-          internalRenderTask.capability.resolve();
-        }
-        stats.timeEnd('Rendering');
-        stats.timeEnd('Overall');
-      }
+      }, complete);
       return renderTask;
     },
     getOperatorList: function PDFPageProxy_getOperatorList() {
@@ -12010,6 +12021,8 @@ var LoopbackPort = function () {
   _createClass(LoopbackPort, [{
     key: 'postMessage',
     value: function postMessage(obj, transfers) {
+      var _this5 = this;
+
       function cloneValue(value) {
         if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object' || value === null) {
           return value;
@@ -12055,10 +12068,10 @@ var LoopbackPort = function () {
       var cloned = new WeakMap();
       var e = { data: cloneValue(obj) };
       this._deferred.then(function () {
-        this._listeners.forEach(function (listener) {
+        _this5._listeners.forEach(function (listener) {
           listener.call(this, e);
-        }, this);
-      }.bind(this));
+        }, _this5);
+      });
     }
   }, {
     key: 'addEventListener',
@@ -12145,25 +12158,27 @@ var PDFWorker = function PDFWorkerClosure() {
       this._setupFakeWorker();
     },
     _setupFakeWorker: function PDFWorker_setupFakeWorker() {
+      var _this6 = this;
+
       if (!isWorkerDisabled && !(0, _dom_utils.getDefaultSetting)('disableWorker')) {
         (0, _util.warn)('Setting up fake worker.');
         isWorkerDisabled = true;
       }
       setupFakeWorkerGlobal().then(function (WorkerMessageHandler) {
-        if (this.destroyed) {
-          this._readyCapability.reject(new Error('Worker was destroyed'));
+        if (_this6.destroyed) {
+          _this6._readyCapability.reject(new Error('Worker was destroyed'));
           return;
         }
         var isTypedArraysPresent = Uint8Array !== Float32Array;
         var port = new LoopbackPort(isTypedArraysPresent);
-        this._port = port;
+        _this6._port = port;
         var id = 'fake' + nextFakeWorkerId++;
         var workerHandler = new _util.MessageHandler(id + '_worker', id, port);
         WorkerMessageHandler.setup(workerHandler, port);
         var messageHandler = new _util.MessageHandler(id, id + '_worker', port);
-        this._messageHandler = messageHandler;
-        this._readyCapability.resolve();
-      }.bind(this));
+        _this6._messageHandler = messageHandler;
+        _this6._readyCapability.resolve();
+      });
     },
     destroy: function PDFWorker_destroy() {
       this.destroyed = true;
@@ -12201,6 +12216,8 @@ var WorkerTransport = function WorkerTransportClosure() {
   }
   WorkerTransport.prototype = {
     destroy: function WorkerTransport_destroy() {
+      var _this7 = this;
+
       if (this.destroyCapability) {
         return this.destroyCapability.promise;
       }
@@ -12217,20 +12234,19 @@ var WorkerTransport = function WorkerTransportClosure() {
       });
       this.pageCache = [];
       this.pagePromises = [];
-      var self = this;
       var terminated = this.messageHandler.sendWithPromise('Terminate', null);
       waitOn.push(terminated);
       Promise.all(waitOn).then(function () {
-        self.fontLoader.clear();
-        if (self.pdfDataRangeTransport) {
-          self.pdfDataRangeTransport.abort();
-          self.pdfDataRangeTransport = null;
+        _this7.fontLoader.clear();
+        if (_this7.pdfDataRangeTransport) {
+          _this7.pdfDataRangeTransport.abort();
+          _this7.pdfDataRangeTransport = null;
         }
-        if (self.messageHandler) {
-          self.messageHandler.destroy();
-          self.messageHandler = null;
+        if (_this7.messageHandler) {
+          _this7.messageHandler.destroy();
+          _this7.messageHandler = null;
         }
-        self.destroyCapability.resolve();
+        _this7.destroyCapability.resolve();
       }, this.destroyCapability.reject);
       return this.destroyCapability.promise;
     },
@@ -12264,12 +12280,12 @@ var WorkerTransport = function WorkerTransportClosure() {
         loadingTask._capability.resolve(pdfDocument);
       }, this);
       messageHandler.on('PasswordRequest', function transportPasswordRequest(exception) {
-        var _this = this;
+        var _this8 = this;
 
         this._passwordCapability = (0, _util.createPromiseCapability)();
         if (loadingTask.onPassword) {
           var updatePassword = function updatePassword(password) {
-            _this._passwordCapability.resolve({ password: password });
+            _this8._passwordCapability.resolve({ password: password });
           };
           loadingTask.onPassword(updatePassword, exception.code);
         } else {
@@ -12316,6 +12332,8 @@ var WorkerTransport = function WorkerTransportClosure() {
         page._renderPageChunk(data.operatorList, data.intent);
       }, this);
       messageHandler.on('commonobj', function transportObj(data) {
+        var _this9 = this;
+
         if (this.destroyed) {
           return;
         }
@@ -12346,9 +12364,10 @@ var WorkerTransport = function WorkerTransportClosure() {
               disableFontFace: (0, _dom_utils.getDefaultSetting)('disableFontFace'),
               fontRegistry: fontRegistry
             });
-            this.fontLoader.bind([font], function fontReady(fontObjs) {
-              this.commonObjs.resolve(id, font);
-            }.bind(this));
+            var fontReady = function fontReady(fontObjs) {
+              _this9.commonObjs.resolve(id, font);
+            };
+            this.fontLoader.bind([font], fontReady);
             break;
           case 'FontPath':
             this.commonObjs.resolve(id, data[2]);
@@ -12488,6 +12507,8 @@ var WorkerTransport = function WorkerTransportClosure() {
       return this.messageHandler.sendWithPromise('GetData', null);
     },
     getPage: function WorkerTransport_getPage(pageNumber, capability) {
+      var _this10 = this;
+
       if (!(0, _util.isInt)(pageNumber) || pageNumber <= 0 || pageNumber > this.numPages) {
         return Promise.reject(new Error('Invalid page request'));
       }
@@ -12496,13 +12517,13 @@ var WorkerTransport = function WorkerTransportClosure() {
         return this.pagePromises[pageIndex];
       }
       var promise = this.messageHandler.sendWithPromise('GetPage', { pageIndex: pageIndex }).then(function (pageInfo) {
-        if (this.destroyed) {
+        if (_this10.destroyed) {
           throw new Error('Transport destroyed');
         }
-        var page = new PDFPageProxy(pageIndex, pageInfo, this);
-        this.pageCache[pageIndex] = page;
+        var page = new PDFPageProxy(pageIndex, pageInfo, _this10);
+        _this10.pageCache[pageIndex] = page;
         return page;
-      }.bind(this));
+      });
       this.pagePromises[pageIndex] = promise;
       return promise;
     },
@@ -12547,16 +12568,18 @@ var WorkerTransport = function WorkerTransportClosure() {
       return this.messageHandler.sendWithPromise('GetStats', null);
     },
     startCleanup: function WorkerTransport_startCleanup() {
-      this.messageHandler.sendWithPromise('Cleanup', null).then(function endCleanup() {
-        for (var i = 0, ii = this.pageCache.length; i < ii; i++) {
-          var page = this.pageCache[i];
+      var _this11 = this;
+
+      this.messageHandler.sendWithPromise('Cleanup', null).then(function () {
+        for (var i = 0, ii = _this11.pageCache.length; i < ii; i++) {
+          var page = _this11.pageCache[i];
           if (page) {
             page.cleanup();
           }
         }
-        this.commonObjs.clear();
-        this.fontLoader.clear();
-      }.bind(this));
+        _this11.commonObjs.clear();
+        _this11.fontLoader.clear();
+      });
     }
   };
   return WorkerTransport;
@@ -12750,8 +12773,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.310';
-  exports.build = build = 'e42fc546';
+  exports.version = version = '1.8.312';
+  exports.build = build = 'e81c067d';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -13069,10 +13092,11 @@ var SVGGraphics = function SVGGraphics() {
         this.restore();
       },
       loadDependencies: function SVGGraphics_loadDependencies(operatorList) {
+        var _this = this;
+
         var fnArray = operatorList.fnArray;
         var fnArrayLen = fnArray.length;
         var argsArray = operatorList.argsArray;
-        var self = this;
         for (var i = 0; i < fnArrayLen; i++) {
           if (_util.OPS.dependency === fnArray[i]) {
             var deps = argsArray[i];
@@ -13082,11 +13106,11 @@ var SVGGraphics = function SVGGraphics() {
               var promise;
               if (common) {
                 promise = new Promise(function (resolve) {
-                  self.commonObjs.get(obj, resolve);
+                  _this.commonObjs.get(obj, resolve);
                 });
               } else {
                 promise = new Promise(function (resolve) {
-                  self.objs.get(obj, resolve);
+                  _this.objs.get(obj, resolve);
                 });
               }
               this.current.dependencies.push(promise);
@@ -13101,14 +13125,16 @@ var SVGGraphics = function SVGGraphics() {
         this.tgrp = null;
       },
       getSVG: function SVGGraphics_getSVG(operatorList, viewport) {
+        var _this2 = this;
+
         this.viewport = viewport;
         var svgElement = this._initialize(viewport);
         return this.loadDependencies(operatorList).then(function () {
-          this.transformMatrix = _util.IDENTITY_MATRIX;
-          var opTree = this.convertOpList(operatorList);
-          this.executeOpTree(opTree);
+          _this2.transformMatrix = _util.IDENTITY_MATRIX;
+          var opTree = _this2.convertOpList(operatorList);
+          _this2.executeOpTree(opTree);
           return svgElement;
-        }.bind(this));
+        });
       },
       convertOpList: function SVGGraphics_convertOpList(operatorList) {
         var argsArray = operatorList.argsArray;
@@ -14141,6 +14167,8 @@ var renderTextLayer = function renderTextLayerClosure() {
       this._capability.reject('canceled');
     },
     _render: function TextLayer_render(timeout) {
+      var _this = this;
+
       var textItems = this._textContent.items;
       var textStyles = this._textContent.styles;
       for (var i = 0, len = textItems.length; i < len; i++) {
@@ -14149,10 +14177,9 @@ var renderTextLayer = function renderTextLayerClosure() {
       if (!timeout) {
         render(this);
       } else {
-        var self = this;
         this._renderTimer = setTimeout(function () {
-          render(self);
-          self._renderTimer = null;
+          render(_this);
+          _this._renderTimer = null;
         }, timeout);
       }
     },
@@ -28089,8 +28116,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.310';
-  PDFJS.build = 'e42fc546';
+  PDFJS.version = '1.8.312';
+  PDFJS.build = 'e81c067d';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -43629,8 +43656,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.310';
-var pdfjsBuild = 'e42fc546';
+var pdfjsVersion = '1.8.312';
+var pdfjsBuild = 'e81c067d';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
@@ -44445,16 +44472,18 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         }
       },
       scheduleRejectionCheck: function scheduleRejectionCheck() {
+        var _this = this;
+
         if (this.pendingRejectionCheck) {
           return;
         }
         this.pendingRejectionCheck = true;
-        setTimeout(function rejectionCheck() {
-          this.pendingRejectionCheck = false;
+        setTimeout(function () {
+          _this.pendingRejectionCheck = false;
           var now = Date.now();
-          for (var i = 0; i < this.unhandledRejections.length; i++) {
-            if (now - this.unhandledRejections[i].time > REJECTION_TIMEOUT) {
-              var unhandled = this.unhandledRejections[i].promise._value;
+          for (var i = 0; i < _this.unhandledRejections.length; i++) {
+            if (now - _this.unhandledRejections[i].time > REJECTION_TIMEOUT) {
+              var unhandled = _this.unhandledRejections[i].promise._value;
               var msg = 'Unhandled rejection: ' + unhandled;
               if (unhandled.stack) {
                 msg += '\n' + unhandled.stack;
@@ -44464,14 +44493,14 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
               } catch (_) {
                 console.warn(msg);
               }
-              this.unhandledRejections.splice(i);
+              _this.unhandledRejections.splice(i);
               i--;
             }
           }
-          if (this.unhandledRejections.length) {
-            this.scheduleRejectionCheck();
+          if (_this.unhandledRejections.length) {
+            _this.scheduleRejectionCheck();
           }
-        }.bind(this), REJECTION_TIMEOUT);
+        }, REJECTION_TIMEOUT);
       }
     };
     var Promise = function Promise(resolver) {
