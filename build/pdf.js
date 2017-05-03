@@ -2086,7 +2086,9 @@ exports.AnnotationLayer = AnnotationLayer;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.build = exports.version = exports._UnsupportedManager = exports.PDFPageProxy = exports.PDFDocumentProxy = exports.PDFWorker = exports.PDFDataRangeTransport = exports.getDocument = undefined;
+exports.build = exports.version = exports._UnsupportedManager = exports.PDFPageProxy = exports.PDFDocumentProxy = exports.PDFWorker = exports.PDFDataRangeTransport = exports.LoopbackPort = exports.getDocument = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -2099,6 +2101,8 @@ var _font_loader = __w_pdfjs_require__(11);
 var _canvas = __w_pdfjs_require__(10);
 
 var _metadata = __w_pdfjs_require__(7);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DEFAULT_RANGE_CHUNK_SIZE = 65536;
 var isWorkerDisabled = false;
@@ -2615,42 +2619,19 @@ var PDFPageProxy = function PDFPageProxyClosure() {
   };
   return PDFPageProxy;
 }();
-var PDFWorker = function PDFWorkerClosure() {
-  var nextFakeWorkerId = 0;
-  function getWorkerSrc() {
-    if (typeof workerSrc !== 'undefined') {
-      return workerSrc;
-    }
-    if ((0, _dom_utils.getDefaultSetting)('workerSrc')) {
-      return (0, _dom_utils.getDefaultSetting)('workerSrc');
-    }
-    if (pdfjsFilePath) {
-      return pdfjsFilePath.replace(/(\.(?:min\.)?js)(\?.*)?$/i, '.worker$1$2');
-    }
-    (0, _util.error)('No PDFJS.workerSrc specified');
-  }
-  var fakeWorkerFilesLoadedCapability;
-  function setupFakeWorkerGlobal() {
-    var WorkerMessageHandler;
-    if (fakeWorkerFilesLoadedCapability) {
-      return fakeWorkerFilesLoadedCapability.promise;
-    }
-    fakeWorkerFilesLoadedCapability = (0, _util.createPromiseCapability)();
-    var loader = fakeWorkerFilesLoader || function (callback) {
-      _util.Util.loadScript(getWorkerSrc(), function () {
-        callback(window.pdfjsDistBuildPdfWorker.WorkerMessageHandler);
-      });
-    };
-    loader(fakeWorkerFilesLoadedCapability.resolve);
-    return fakeWorkerFilesLoadedCapability.promise;
-  }
-  function FakeWorkerPort(defer) {
+
+var LoopbackPort = function () {
+  function LoopbackPort(defer) {
+    _classCallCheck(this, LoopbackPort);
+
     this._listeners = [];
     this._defer = defer;
     this._deferred = Promise.resolve(undefined);
   }
-  FakeWorkerPort.prototype = {
-    postMessage: function postMessage(obj, transfers) {
+
+  _createClass(LoopbackPort, [{
+    key: 'postMessage',
+    value: function postMessage(obj, transfers) {
       function cloneValue(value) {
         if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) !== 'object' || value === null) {
           return value;
@@ -2700,18 +2681,57 @@ var PDFWorker = function PDFWorkerClosure() {
           listener.call(this, e);
         }, this);
       }.bind(this));
-    },
-    addEventListener: function addEventListener(name, listener) {
+    }
+  }, {
+    key: 'addEventListener',
+    value: function addEventListener(name, listener) {
       this._listeners.push(listener);
-    },
-    removeEventListener: function removeEventListener(name, listener) {
+    }
+  }, {
+    key: 'removeEventListener',
+    value: function removeEventListener(name, listener) {
       var i = this._listeners.indexOf(listener);
       this._listeners.splice(i, 1);
-    },
-    terminate: function terminate() {
+    }
+  }, {
+    key: 'terminate',
+    value: function terminate() {
       this._listeners = [];
     }
-  };
+  }]);
+
+  return LoopbackPort;
+}();
+
+var PDFWorker = function PDFWorkerClosure() {
+  var nextFakeWorkerId = 0;
+  function getWorkerSrc() {
+    if (typeof workerSrc !== 'undefined') {
+      return workerSrc;
+    }
+    if ((0, _dom_utils.getDefaultSetting)('workerSrc')) {
+      return (0, _dom_utils.getDefaultSetting)('workerSrc');
+    }
+    if (pdfjsFilePath) {
+      return pdfjsFilePath.replace(/(\.(?:min\.)?js)(\?.*)?$/i, '.worker$1$2');
+    }
+    (0, _util.error)('No PDFJS.workerSrc specified');
+  }
+  var fakeWorkerFilesLoadedCapability;
+  function setupFakeWorkerGlobal() {
+    var WorkerMessageHandler;
+    if (fakeWorkerFilesLoadedCapability) {
+      return fakeWorkerFilesLoadedCapability.promise;
+    }
+    fakeWorkerFilesLoadedCapability = (0, _util.createPromiseCapability)();
+    var loader = fakeWorkerFilesLoader || function (callback) {
+      _util.Util.loadScript(getWorkerSrc(), function () {
+        callback(window.pdfjsDistBuildPdfWorker.WorkerMessageHandler);
+      });
+    };
+    loader(fakeWorkerFilesLoadedCapability.resolve);
+    return fakeWorkerFilesLoadedCapability.promise;
+  }
   function createCDNWrapper(url) {
     var wrapper = 'importScripts(\'' + url + '\');';
     return URL.createObjectURL(new Blob([wrapper]));
@@ -2840,7 +2860,7 @@ var PDFWorker = function PDFWorkerClosure() {
           return;
         }
         var isTypedArraysPresent = Uint8Array !== Float32Array;
-        var port = new FakeWorkerPort(isTypedArraysPresent);
+        var port = new LoopbackPort(isTypedArraysPresent);
         this._port = port;
         var id = 'fake' + nextFakeWorkerId++;
         var workerHandler = new _util.MessageHandler(id + '_worker', id, port);
@@ -3435,10 +3455,11 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.292';
-  exports.build = build = 'e18a08ff';
+  exports.version = version = '1.8.306';
+  exports.build = build = '2ac41062';
 }
 exports.getDocument = getDocument;
+exports.LoopbackPort = LoopbackPort;
 exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
 exports.PDFDocumentProxy = PDFDocumentProxy;
@@ -5403,8 +5424,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.292';
-  PDFJS.build = 'e18a08ff';
+  PDFJS.version = '1.8.306';
+  PDFJS.build = '2ac41062';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -5492,6 +5513,7 @@ PDFJS.pdfjsNext = PDFJS.pdfjsNext === undefined ? false : PDFJS.pdfjsNext;
   }
 }
 PDFJS.getDocument = _api.getDocument;
+PDFJS.LoopbackPort = _api.LoopbackPort;
 PDFJS.PDFDataRangeTransport = _api.PDFDataRangeTransport;
 PDFJS.PDFWorker = _api.PDFWorker;
 PDFJS.hasCanvasTypedArrays = true;
@@ -7898,8 +7920,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.292';
-var pdfjsBuild = 'e18a08ff';
+var pdfjsVersion = '1.8.306';
+var pdfjsBuild = '2ac41062';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
@@ -7911,6 +7933,7 @@ exports.PDFJS = pdfjsDisplayGlobal.PDFJS;
 exports.build = pdfjsDisplayAPI.build;
 exports.version = pdfjsDisplayAPI.version;
 exports.getDocument = pdfjsDisplayAPI.getDocument;
+exports.LoobpackPort = pdfjsDisplayAPI.LoopbackPort;
 exports.PDFDataRangeTransport = pdfjsDisplayAPI.PDFDataRangeTransport;
 exports.PDFWorker = pdfjsDisplayAPI.PDFWorker;
 exports.renderTextLayer = pdfjsDisplayTextLayer.renderTextLayer;
