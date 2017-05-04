@@ -1632,6 +1632,8 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
       });
     },
     render: function TextLayerBuilder_render(timeout) {
+      var _this = this;
+
       if (!this.textContent || this.renderingDone) {
         return;
       }
@@ -1647,10 +1649,10 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
         enhanceTextSelection: this.enhanceTextSelection
       });
       this.textLayerRenderTask.promise.then(function () {
-        this.textLayerDiv.appendChild(textLayerFrag);
-        this._finishRendering();
-        this.updateMatches();
-      }.bind(this), function (reason) {});
+        _this.textLayerDiv.appendChild(textLayerFrag);
+        _this._finishRendering();
+        _this.updateMatches();
+      }, function (reason) {});
     },
     cancel: function TextLayerBuilder_cancel() {
       if (this.textLayerRenderTask) {
@@ -2286,20 +2288,22 @@ var PDFFindController = function PDFFindControllerClosure() {
       extractPageText(0);
     },
     executeCommand: function PDFFindController_executeCommand(cmd, state) {
+      var _this2 = this;
+
       if (this.state === null || cmd !== 'findagain') {
         this.dirtyMatch = true;
       }
       this.state = state;
       this.updateUIState(FindStates.FIND_PENDING);
       this._firstPagePromise.then(function () {
-        this.extractText();
-        clearTimeout(this.findTimeout);
+        _this2.extractText();
+        clearTimeout(_this2.findTimeout);
         if (cmd === 'find') {
-          this.findTimeout = setTimeout(this.nextMatch.bind(this), 250);
+          _this2.findTimeout = setTimeout(_this2.nextMatch.bind(_this2), 250);
         } else {
-          this.nextMatch();
+          _this2.nextMatch();
         }
-      }.bind(this));
+      });
     },
     updatePage: function PDFFindController_updatePage(index) {
       if (this.selected.pageIdx === index) {
@@ -3016,17 +3020,22 @@ var PDFViewer = function pdfViewer() {
             return;
           }
           var getPagesLeft = pagesCount;
-          for (var pageNum = 1; pageNum <= pagesCount; ++pageNum) {
-            pdfDocument.getPage(pageNum).then(function (pageNum, pdfPage) {
-              var pageView = this._pages[pageNum - 1];
+
+          var _loop = function _loop(_pageNum) {
+            pdfDocument.getPage(_pageNum).then(function (pdfPage) {
+              var pageView = _this._pages[_pageNum - 1];
               if (!pageView.pdfPage) {
                 pageView.setPdfPage(pdfPage);
               }
-              this.linkService.cachePageRef(pageNum, pdfPage.ref);
+              _this.linkService.cachePageRef(_pageNum, pdfPage.ref);
               if (--getPagesLeft === 0) {
                 pagesCapability.resolve();
               }
-            }.bind(_this, pageNum));
+            });
+          };
+
+          for (var _pageNum = 1; _pageNum <= pagesCount; ++_pageNum) {
+            _loop(_pageNum);
           }
         });
         _this.eventBus.dispatch('pagesinit', { source: _this });
