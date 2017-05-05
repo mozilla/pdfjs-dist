@@ -12779,8 +12779,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.318';
-  exports.build = build = '206ad8d8';
+  exports.version = version = '1.8.320';
+  exports.build = build = 'c3cfcbe7';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -13370,7 +13370,8 @@ var SVGGraphics = function SVGGraphics() {
           current.xcoords.push(current.x + x * textHScale);
           var width = glyph.width;
           var character = glyph.fontChar;
-          var charWidth = width * widthAdvanceScale + charSpacing * fontDirection;
+          var spacing = (glyph.isSpace ? wordSpacing : 0) + charSpacing;
+          var charWidth = width * widthAdvanceScale + spacing * fontDirection;
           x += charWidth;
           current.tspan.textContent += character;
         }
@@ -28184,8 +28185,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.318';
-  PDFJS.build = '206ad8d8';
+  PDFJS.version = '1.8.320';
+  PDFJS.build = 'c3cfcbe7';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -43771,8 +43772,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.318';
-var pdfjsBuild = '206ad8d8';
+var pdfjsVersion = '1.8.320';
+var pdfjsBuild = 'c3cfcbe7';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
