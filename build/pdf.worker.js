@@ -37137,8 +37137,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.320';
-var pdfjsBuild = 'c3cfcbe7';
+var pdfjsVersion = '1.8.323';
+var pdfjsBuild = 'deae2d8c';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
@@ -38644,3 +38644,4 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 /***/ })
 /******/ ]);
 });
+//# sourceMappingURL=pdf.worker.js.map
