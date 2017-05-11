@@ -1202,46 +1202,74 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.DOMCMapReaderFactory = exports.DOMCanvasFactory = exports.DEFAULT_LINK_REL = exports.getDefaultSetting = exports.LinkTarget = exports.getFilenameFromUrl = exports.isValidUrl = exports.isExternalLinkTargetSet = exports.addLinkAttributes = exports.RenderingCancelledException = exports.CustomStyle = undefined;
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _util = __w_pdfjs_require__(0);
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 var DEFAULT_LINK_REL = 'noopener noreferrer nofollow';
-function DOMCanvasFactory() {}
-DOMCanvasFactory.prototype = {
-  create: function DOMCanvasFactory_create(width, height) {
-    (0, _util.assert)(width > 0 && height > 0, 'invalid canvas size');
-    var canvas = document.createElement('canvas');
-    var context = canvas.getContext('2d');
-    canvas.width = width;
-    canvas.height = height;
-    return {
-      canvas: canvas,
-      context: context
-    };
-  },
-  reset: function DOMCanvasFactory_reset(canvasAndContextPair, width, height) {
-    (0, _util.assert)(canvasAndContextPair.canvas, 'canvas is not specified');
-    (0, _util.assert)(width > 0 && height > 0, 'invalid canvas size');
-    canvasAndContextPair.canvas.width = width;
-    canvasAndContextPair.canvas.height = height;
-  },
-  destroy: function DOMCanvasFactory_destroy(canvasAndContextPair) {
-    (0, _util.assert)(canvasAndContextPair.canvas, 'canvas is not specified');
-    canvasAndContextPair.canvas.width = 0;
-    canvasAndContextPair.canvas.height = 0;
-    canvasAndContextPair.canvas = null;
-    canvasAndContextPair.context = null;
+
+var DOMCanvasFactory = function () {
+  function DOMCanvasFactory() {
+    _classCallCheck(this, DOMCanvasFactory);
   }
-};
-var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
-  function DOMCMapReaderFactory(params) {
-    this.baseUrl = params.baseUrl || null;
-    this.isCompressed = params.isCompressed || false;
+
+  _createClass(DOMCanvasFactory, [{
+    key: 'create',
+    value: function create(width, height) {
+      (0, _util.assert)(width > 0 && height > 0, 'invalid canvas size');
+      var canvas = document.createElement('canvas');
+      var context = canvas.getContext('2d');
+      canvas.width = width;
+      canvas.height = height;
+      return {
+        canvas: canvas,
+        context: context
+      };
+    }
+  }, {
+    key: 'reset',
+    value: function reset(canvasAndContext, width, height) {
+      (0, _util.assert)(canvasAndContext.canvas, 'canvas is not specified');
+      (0, _util.assert)(width > 0 && height > 0, 'invalid canvas size');
+      canvasAndContext.canvas.width = width;
+      canvasAndContext.canvas.height = height;
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy(canvasAndContext) {
+      (0, _util.assert)(canvasAndContext.canvas, 'canvas is not specified');
+      canvasAndContext.canvas.width = 0;
+      canvasAndContext.canvas.height = 0;
+      canvasAndContext.canvas = null;
+      canvasAndContext.context = null;
+    }
+  }]);
+
+  return DOMCanvasFactory;
+}();
+
+var DOMCMapReaderFactory = function () {
+  function DOMCMapReaderFactory(_ref) {
+    var _ref$baseUrl = _ref.baseUrl,
+        baseUrl = _ref$baseUrl === undefined ? null : _ref$baseUrl,
+        _ref$isCompressed = _ref.isCompressed,
+        isCompressed = _ref$isCompressed === undefined ? false : _ref$isCompressed;
+
+    _classCallCheck(this, DOMCMapReaderFactory);
+
+    this.baseUrl = baseUrl;
+    this.isCompressed = isCompressed;
   }
-  DOMCMapReaderFactory.prototype = {
-    fetch: function fetch(params) {
+
+  _createClass(DOMCMapReaderFactory, [{
+    key: 'fetch',
+    value: function fetch(_ref2) {
       var _this = this;
 
-      var name = params.name;
+      var name = _ref2.name;
+
       if (!name) {
         return Promise.reject(new Error('CMap name must be specified.'));
       }
@@ -1257,7 +1285,7 @@ var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
             return;
           }
           if (request.status === 200 || request.status === 0) {
-            var data;
+            var data = void 0;
             if (_this.isCompressed && request.response) {
               data = new Uint8Array(request.response);
             } else if (!_this.isCompressed && request.responseText) {
@@ -1276,9 +1304,11 @@ var DOMCMapReaderFactory = function DOMCMapReaderFactoryClosure() {
         request.send(null);
       });
     }
-  };
+  }]);
+
   return DOMCMapReaderFactory;
 }();
+
 var CustomStyle = function CustomStyleClosure() {
   var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
   var _cache = Object.create(null);
@@ -3499,8 +3529,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.346';
-  exports.build = build = '15425d5b';
+  exports.version = version = '1.8.349';
+  exports.build = build = '028d3421';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -5473,8 +5503,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.346';
-  PDFJS.build = '15425d5b';
+  PDFJS.version = '1.8.349';
+  PDFJS.build = '028d3421';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -7969,8 +7999,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.346';
-var pdfjsBuild = '15425d5b';
+var pdfjsVersion = '1.8.349';
+var pdfjsBuild = '028d3421';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
