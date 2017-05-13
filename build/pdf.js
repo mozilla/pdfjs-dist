@@ -2175,7 +2175,8 @@ if (typeof __pdfjsdev_webpack__ === 'undefined') {
   var dynamicLoaderSupported = typeof requirejs !== 'undefined' && requirejs.load;
   fakeWorkerFilesLoader = useRequireEnsure ? function (callback) {
     require.ensure([], function () {
-      var worker = require('./pdf.worker.js');
+      var worker;
+      worker = require('./pdf.worker.js');
       callback(worker.WorkerMessageHandler);
     });
   } : dynamicLoaderSupported ? function (callback) {
@@ -3529,8 +3530,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.349';
-  exports.build = build = '028d3421';
+  exports.version = version = '1.8.351';
+  exports.build = build = '63597cc5';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -5503,8 +5504,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.349';
-  PDFJS.build = '028d3421';
+  PDFJS.version = '1.8.351';
+  PDFJS.build = '63597cc5';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -7999,8 +8000,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.349';
-var pdfjsBuild = '028d3421';
+var pdfjsVersion = '1.8.351';
+var pdfjsBuild = '63597cc5';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
