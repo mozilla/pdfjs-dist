@@ -15502,6 +15502,12 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       if (nativeImageDecoderSupport !== NativeImageDecoding.NONE && !softMask && !mask && image instanceof JpegStream && NativeImageDecoder.isSupported(image, this.xref, resources)) {
         operatorList.addOp(OPS.paintJpegXObject, args);
         this.handler.send('obj', [objId, this.pageIndex, 'JpegStream', image.getIR(this.options.forceDataSchema)]);
+        if (cacheKey) {
+          imageCache[cacheKey] = {
+            fn: OPS.paintJpegXObject,
+            args: args
+          };
+        }
         return;
       }
       var nativeImageDecoder = null;
@@ -37144,8 +37150,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.359';
-var pdfjsBuild = '5958dafd';
+var pdfjsVersion = '1.8.361';
+var pdfjsBuild = '5dc8dcdc';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
