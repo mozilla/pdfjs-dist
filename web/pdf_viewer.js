@@ -682,10 +682,6 @@ var _dom_events = __w_pdfjs_require__(2);
 
 var _ui_utils = __w_pdfjs_require__(1);
 
-var PageNumberRegExp = /^\d+$/;
-function isPageNumber(str) {
-  return PageNumberRegExp.test(str);
-}
 var PDFLinkService = function PDFLinkServiceClosure() {
   function PDFLinkService(options) {
     options = options || {};
@@ -771,9 +767,9 @@ var PDFLinkService = function PDFLinkServiceClosure() {
         goToDestination(destination[0]);
       });
     },
-    getDestinationHash: function PDFLinkService_getDestinationHash(dest) {
+    getDestinationHash: function getDestinationHash(dest) {
       if (typeof dest === 'string') {
-        return this.getAnchorUrl('#' + (isPageNumber(dest) ? 'nameddest=' : '') + escape(dest));
+        return this.getAnchorUrl('#' + escape(dest));
       }
       if (dest instanceof Array) {
         var str = JSON.stringify(dest);
@@ -781,6 +777,7 @@ var PDFLinkService = function PDFLinkServiceClosure() {
       }
       return this.getAnchorUrl('');
     },
+
     getAnchorUrl: function PDFLinkService_getAnchorUrl(anchor) {
       return (this.baseUrl || '') + anchor;
     },
@@ -843,7 +840,7 @@ var PDFLinkService = function PDFLinkServiceClosure() {
           });
         }
       } else {
-        if (isPageNumber(hash) && hash <= this.pagesCount) {
+        if (/^\d+$/.test(hash) && hash <= this.pagesCount) {
           console.warn('PDFLinkService_setHash: specifying a page number ' + 'directly after the hash symbol (#) is deprecated, ' + 'please use the "#page=' + hash + '" form instead.');
           this.page = hash | 0;
         }

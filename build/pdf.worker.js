@@ -20664,7 +20664,7 @@ var Catalog = function CatalogClosure() {
             if (isString(url)) {
               var baseUrl = url.split('#')[0];
               if (isString(remoteDest)) {
-                url = baseUrl + '#' + (/^\d+$/.test(remoteDest) ? 'nameddest=' : '') + remoteDest;
+                url = baseUrl + '#' + remoteDest;
               } else if (isArray(remoteDest)) {
                 url = baseUrl + '#' + JSON.stringify(remoteDest);
               }
@@ -37150,8 +37150,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.374';
-var pdfjsBuild = 'b4c35857';
+var pdfjsVersion = '1.8.376';
+var pdfjsBuild = '5df0ccca';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
