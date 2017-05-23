@@ -12827,8 +12827,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.378';
-  exports.build = build = 'f2161345';
+  exports.version = version = '1.8.380';
+  exports.build = build = 'ad797fa7';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -28240,8 +28240,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.378';
-  PDFJS.build = 'f2161345';
+  PDFJS.version = '1.8.380';
+  PDFJS.build = 'ad797fa7';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -31587,7 +31587,7 @@ var OpenTypeFileBuilder = function OpenTypeFileBuilderClosure() {
   };
   return OpenTypeFileBuilder;
 }();
-var ProblematicCharRanges = new Int32Array([0x0000, 0x0020, 0x007F, 0x00A1, 0x00AD, 0x00AE, 0x0600, 0x0780, 0x08A0, 0x10A0, 0x1780, 0x1800, 0x1C00, 0x1C50, 0x2000, 0x2010, 0x2011, 0x2012, 0x2028, 0x2030, 0x205F, 0x2070, 0x25CC, 0x25CD, 0x3000, 0x3001, 0xAA60, 0xAA80, 0xFFF0, 0x10000]);
+var ProblematicCharRanges = new Int32Array([0x0000, 0x0020, 0x007F, 0x00A1, 0x00AD, 0x00AE, 0x0600, 0x0780, 0x08A0, 0x10A0, 0x1780, 0x1800, 0x1C00, 0x1C50, 0x2000, 0x2010, 0x2011, 0x2012, 0x2028, 0x2030, 0x205F, 0x2070, 0x25CC, 0x25CD, 0x3000, 0x3001, 0x3164, 0x3165, 0xAA60, 0xAA80, 0xFFF0, 0x10000]);
 var Font = function FontClosure() {
   function Font(name, file, properties) {
     var _this = this;
@@ -43834,8 +43834,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.378';
-var pdfjsBuild = 'f2161345';
+var pdfjsVersion = '1.8.380';
+var pdfjsBuild = 'ad797fa7';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
