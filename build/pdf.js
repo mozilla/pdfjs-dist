@@ -3535,8 +3535,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.380';
-  exports.build = build = 'ad797fa7';
+  exports.version = version = '1.8.382';
+  exports.build = build = 'ac942ac6';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -5509,8 +5509,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.380';
-  PDFJS.build = 'ad797fa7';
+  PDFJS.version = '1.8.382';
+  PDFJS.build = 'ac942ac6';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -5890,7 +5890,7 @@ function compileType3Glyph(imgData) {
   return drawOutline;
 }
 var CanvasExtraState = function CanvasExtraStateClosure() {
-  function CanvasExtraState(old) {
+  function CanvasExtraState() {
     this.alphaIsShape = false;
     this.fontSize = 0;
     this.fontSizeScale = 1;
@@ -5915,7 +5915,6 @@ var CanvasExtraState = function CanvasExtraStateClosure() {
     this.lineWidth = 1;
     this.activeSMask = null;
     this.resumeSMaskCtx = null;
-    this.old = old;
   }
   CanvasExtraState.prototype = {
     clone: function CanvasExtraState_clone() {
@@ -6091,6 +6090,22 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       destCtx.lineDashOffset = sourceCtx.lineDashOffset;
     }
   }
+  function resetCtxToDefault(ctx) {
+    ctx.strokeStyle = '#000000';
+    ctx.fillStyle = '#000000';
+    ctx.fillRule = 'nonzero';
+    ctx.globalAlpha = 1;
+    ctx.lineWidth = 1;
+    ctx.lineCap = 'butt';
+    ctx.lineJoin = 'miter';
+    ctx.miterLimit = 10;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.font = '10px sans-serif';
+    if (ctx.setLineDash !== undefined) {
+      ctx.setLineDash([]);
+      ctx.lineDashOffset = 0;
+    }
+  }
   function composeSMaskBackdrop(bytes, r0, g0, b0) {
     var length = bytes.length;
     for (var i = 3; i < length; i += 4) {
@@ -6190,6 +6205,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
         this.ctx.transform.apply(this.ctx, this.compositeCtx.mozCurrentTransform);
       }
       this.ctx.save();
+      resetCtxToDefault(this.ctx);
       if (transform) {
         this.ctx.transform.apply(this.ctx, transform);
       }
@@ -7054,7 +7070,6 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
     },
     beginAnnotations: function CanvasGraphics_beginAnnotations() {
       this.save();
-      this.current = new CanvasExtraState();
       if (this.baseTransform) {
         this.ctx.setTransform.apply(this.ctx, this.baseTransform);
       }
@@ -7064,6 +7079,8 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
     },
     beginAnnotation: function CanvasGraphics_beginAnnotation(rect, transform, matrix) {
       this.save();
+      resetCtxToDefault(this.ctx);
+      this.current = new CanvasExtraState();
       if ((0, _util.isArray)(rect) && rect.length === 4) {
         var width = rect[2] - rect[0];
         var height = rect[3] - rect[1];
@@ -8012,8 +8029,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.380';
-var pdfjsBuild = 'ad797fa7';
+var pdfjsVersion = '1.8.382';
+var pdfjsBuild = 'ac942ac6';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
