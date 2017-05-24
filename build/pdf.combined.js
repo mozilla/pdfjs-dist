@@ -12827,8 +12827,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.382';
-  exports.build = build = 'ac942ac6';
+  exports.version = version = '1.8.384';
+  exports.build = build = '8d55e6a0';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -28240,8 +28240,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.382';
-  PDFJS.build = 'ac942ac6';
+  PDFJS.version = '1.8.384';
+  PDFJS.build = '8d55e6a0';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -29334,21 +29334,29 @@ var CMap = function CMapClosure() {
     forEach: function forEach(callback) {
       var map = this._map;
       var length = map.length;
-      var i;
       if (length <= 0x10000) {
-        for (i = 0; i < length; i++) {
+        for (var i = 0; i < length; i++) {
           if (map[i] !== undefined) {
             callback(i, map[i]);
           }
         }
       } else {
-        for (i in this._map) {
-          callback(i, map[i]);
+        for (var _i in map) {
+          callback(_i, map[_i]);
         }
       }
     },
     charCodeOf: function charCodeOf(value) {
-      return this._map.indexOf(value);
+      var map = this._map;
+      if (map.length <= 0x10000) {
+        return map.indexOf(value);
+      }
+      for (var charCode in map) {
+        if (map[charCode] === value) {
+          return charCode | 0;
+        }
+      }
+      return -1;
     },
     getMap: function getMap() {
       return this._map;
@@ -31438,8 +31446,17 @@ var ToUnicodeMap = function ToUnicodeMapClosure() {
     get: function get(i) {
       return this._map[i];
     },
-    charCodeOf: function charCodeOf(v) {
-      return this._map.indexOf(v);
+    charCodeOf: function charCodeOf(value) {
+      var map = this._map;
+      if (map.length <= 0x10000) {
+        return map.indexOf(value);
+      }
+      for (var charCode in map) {
+        if (map[charCode] === value) {
+          return charCode | 0;
+        }
+      }
+      return -1;
     },
     amend: function amend(map) {
       for (var charCode in map) {
@@ -43851,8 +43868,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.382';
-var pdfjsBuild = 'ac942ac6';
+var pdfjsVersion = '1.8.384';
+var pdfjsBuild = '8d55e6a0';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
