@@ -1,6 +1,6 @@
 {
   "name": "pdfjs-dist",
-  "version": "1.8.388",
+  "version": "1.8.390",
   "main": [
     "build/pdf.js",
     "build/pdf.worker.js"
