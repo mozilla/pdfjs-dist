@@ -3535,8 +3535,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.391';
-  exports.build = build = '263479fd';
+  exports.version = version = '1.8.394';
+  exports.build = build = 'e5171871';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -5509,8 +5509,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.391';
-  PDFJS.build = '263479fd';
+  PDFJS.version = '1.8.394';
+  PDFJS.build = 'e5171871';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -8029,8 +8029,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.391';
-var pdfjsBuild = '263479fd';
+var pdfjsVersion = '1.8.394';
+var pdfjsBuild = 'e5171871';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
@@ -8066,6 +8066,7 @@ exports.createBlob = pdfjsSharedUtil.createBlob;
 exports.RenderingCancelledException = pdfjsDisplayDOMUtils.RenderingCancelledException;
 exports.getFilenameFromUrl = pdfjsDisplayDOMUtils.getFilenameFromUrl;
 exports.addLinkAttributes = pdfjsDisplayDOMUtils.addLinkAttributes;
+exports.StatTimer = pdfjsSharedUtil.StatTimer;
 
 /***/ }),
 /* 14 */
