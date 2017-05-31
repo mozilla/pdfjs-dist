@@ -98,19 +98,17 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
-{
-  var pdfjsLib;
-  if (typeof __pdfjsdev_webpack__ === 'undefined') {
-    if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
-      pdfjsLib = window['pdfjs-dist/build/pdf'];
-    } else if (typeof require === 'function') {
-      pdfjsLib = require('../build/pdf.js');
-    } else {
-      throw new Error('Neither `require` nor `window` found');
-    }
+var pdfjsLib;
+if (typeof __pdfjsdev_webpack__ === 'undefined') {
+  if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
+    pdfjsLib = window['pdfjs-dist/build/pdf'];
+  } else if (typeof require === 'function') {
+    pdfjsLib = require('../build/pdf.js');
+  } else {
+    throw new Error('Neither `require` nor `window` found');
   }
-  module.exports = pdfjsLib;
 }
+module.exports = pdfjsLib;
 
 /***/ }),
 /* 1 */
@@ -124,7 +122,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.localized = exports.animationStarted = exports.normalizeWheelEventDelta = exports.binarySearchFirstItem = exports.watchScroll = exports.scrollIntoView = exports.getOutputScale = exports.approximateFraction = exports.roundToDivide = exports.getVisibleElements = exports.parseQueryString = exports.noContextMenuHandler = exports.getPDFFileNameFromURL = exports.ProgressBar = exports.EventBus = exports.mozL10n = exports.RendererType = exports.cloneObj = exports.VERTICAL_PADDING = exports.SCROLLBAR_PADDING = exports.MAX_AUTO_SCALE = exports.UNKNOWN_SCALE = exports.MAX_SCALE = exports.MIN_SCALE = exports.DEFAULT_SCALE = exports.DEFAULT_SCALE_VALUE = exports.CSS_UNITS = undefined;
 
-var _pdfjs = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(0);
 
 var CSS_UNITS = 96.0 / 72.0;
 var DEFAULT_SCALE_VALUE = 'auto';
@@ -140,14 +138,14 @@ var RendererType = {
   SVG: 'svg'
 };
 var mozL10n = typeof document !== 'undefined' ? document.mozL10n || document.webL10n : undefined;
-_pdfjs.PDFJS.disableFullscreen = _pdfjs.PDFJS.disableFullscreen === undefined ? false : _pdfjs.PDFJS.disableFullscreen;
-_pdfjs.PDFJS.useOnlyCssZoom = _pdfjs.PDFJS.useOnlyCssZoom === undefined ? false : _pdfjs.PDFJS.useOnlyCssZoom;
-_pdfjs.PDFJS.maxCanvasPixels = _pdfjs.PDFJS.maxCanvasPixels === undefined ? 16777216 : _pdfjs.PDFJS.maxCanvasPixels;
-_pdfjs.PDFJS.disableHistory = _pdfjs.PDFJS.disableHistory === undefined ? false : _pdfjs.PDFJS.disableHistory;
-_pdfjs.PDFJS.disableTextLayer = _pdfjs.PDFJS.disableTextLayer === undefined ? false : _pdfjs.PDFJS.disableTextLayer;
-_pdfjs.PDFJS.ignoreCurrentPositionOnZoom = _pdfjs.PDFJS.ignoreCurrentPositionOnZoom === undefined ? false : _pdfjs.PDFJS.ignoreCurrentPositionOnZoom;
+_pdfjsLib.PDFJS.disableFullscreen = _pdfjsLib.PDFJS.disableFullscreen === undefined ? false : _pdfjsLib.PDFJS.disableFullscreen;
+_pdfjsLib.PDFJS.useOnlyCssZoom = _pdfjsLib.PDFJS.useOnlyCssZoom === undefined ? false : _pdfjsLib.PDFJS.useOnlyCssZoom;
+_pdfjsLib.PDFJS.maxCanvasPixels = _pdfjsLib.PDFJS.maxCanvasPixels === undefined ? 16777216 : _pdfjsLib.PDFJS.maxCanvasPixels;
+_pdfjsLib.PDFJS.disableHistory = _pdfjsLib.PDFJS.disableHistory === undefined ? false : _pdfjsLib.PDFJS.disableHistory;
+_pdfjsLib.PDFJS.disableTextLayer = _pdfjsLib.PDFJS.disableTextLayer === undefined ? false : _pdfjsLib.PDFJS.disableTextLayer;
+_pdfjsLib.PDFJS.ignoreCurrentPositionOnZoom = _pdfjsLib.PDFJS.ignoreCurrentPositionOnZoom === undefined ? false : _pdfjsLib.PDFJS.ignoreCurrentPositionOnZoom;
 {
-  _pdfjs.PDFJS.locale = _pdfjs.PDFJS.locale === undefined && typeof navigator !== 'undefined' ? navigator.language : _pdfjs.PDFJS.locale;
+  _pdfjsLib.PDFJS.locale = _pdfjsLib.PDFJS.locale === undefined && typeof navigator !== 'undefined' ? navigator.language : _pdfjsLib.PDFJS.locale;
 }
 function getOutputScale(ctx) {
   var devicePixelRatio = window.devicePixelRatio || 1;
@@ -1021,7 +1019,7 @@ exports.DefaultAnnotationLayerFactory = exports.AnnotationLayerBuilder = undefin
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pdfjs = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(0);
 
 var _ui_utils = __w_pdfjs_require__(1);
 
@@ -1059,7 +1057,7 @@ var AnnotationLayerBuilder = function () {
           downloadManager: _this.downloadManager
         };
         if (_this.div) {
-          _pdfjs.AnnotationLayer.update(parameters);
+          _pdfjsLib.AnnotationLayer.update(parameters);
         } else {
           if (annotations.length === 0) {
             return;
@@ -1068,7 +1066,7 @@ var AnnotationLayerBuilder = function () {
           _this.div.className = 'annotationLayer';
           _this.pageDiv.appendChild(_this.div);
           parameters.div = _this.div;
-          _pdfjs.AnnotationLayer.render(parameters);
+          _pdfjsLib.AnnotationLayer.render(parameters);
           if (typeof _ui_utils.mozL10n !== 'undefined') {
             _ui_utils.mozL10n.translate(_this.div);
           }
@@ -1129,7 +1127,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _ui_utils = __w_pdfjs_require__(1);
 
-var _pdfjs = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(0);
 
 var _dom_events = __w_pdfjs_require__(2);
 
@@ -1279,14 +1277,14 @@ var PDFPageView = function () {
         return;
       }
       var isScalingRestricted = false;
-      if (this.canvas && _pdfjs.PDFJS.maxCanvasPixels > 0) {
+      if (this.canvas && _pdfjsLib.PDFJS.maxCanvasPixels > 0) {
         var outputScale = this.outputScale;
-        if ((Math.floor(this.viewport.width) * outputScale.sx | 0) * (Math.floor(this.viewport.height) * outputScale.sy | 0) > _pdfjs.PDFJS.maxCanvasPixels) {
+        if ((Math.floor(this.viewport.width) * outputScale.sx | 0) * (Math.floor(this.viewport.height) * outputScale.sy | 0) > _pdfjsLib.PDFJS.maxCanvasPixels) {
           isScalingRestricted = true;
         }
       }
       if (this.canvas) {
-        if (_pdfjs.PDFJS.useOnlyCssZoom || this.hasRestrictedScaling && isScalingRestricted) {
+        if (_pdfjsLib.PDFJS.useOnlyCssZoom || this.hasRestrictedScaling && isScalingRestricted) {
           this.cssTransform(this.canvas, true);
           this.eventBus.dispatch('pagerendered', {
             source: this,
@@ -1345,7 +1343,7 @@ var PDFPageView = function () {
         scaleY = width / height;
       }
       var cssTransform = 'rotate(' + relativeRotation + 'deg) ' + 'scale(' + scaleX + ',' + scaleY + ')';
-      _pdfjs.CustomStyle.setProp('transform', target, cssTransform);
+      _pdfjsLib.CustomStyle.setProp('transform', target, cssTransform);
       if (this.textLayer) {
         var textLayerViewport = this.textLayer.viewport;
         var textRelativeRotation = this.viewport.rotation - textLayerViewport.rotation;
@@ -1377,8 +1375,8 @@ var PDFPageView = function () {
             console.error('Bad rotation value.');
             break;
         }
-        _pdfjs.CustomStyle.setProp('transform', textLayerDiv, 'rotate(' + textAbsRotation + 'deg) ' + 'scale(' + scale + ', ' + scale + ') ' + 'translate(' + transX + ', ' + transY + ')');
-        _pdfjs.CustomStyle.setProp('transformOrigin', textLayerDiv, '0% 0%');
+        _pdfjsLib.CustomStyle.setProp('transform', textLayerDiv, 'rotate(' + textAbsRotation + 'deg) ' + 'scale(' + scale + ', ' + scale + ') ' + 'translate(' + transX + ', ' + transY + ')');
+        _pdfjsLib.CustomStyle.setProp('transformOrigin', textLayerDiv, '0% 0%');
       }
       if (redrawAnnotations && this.annotationLayer) {
         this.annotationLayer.render(this.viewport, 'display');
@@ -1442,7 +1440,7 @@ var PDFPageView = function () {
         if (paintTask === _this.paintTask) {
           _this.paintTask = null;
         }
-        if (error === 'cancelled' || error instanceof _pdfjs.RenderingCancelledException) {
+        if (error === 'cancelled' || error instanceof _pdfjsLib.RenderingCancelledException) {
           _this.error = null;
           return Promise.resolve(undefined);
         }
@@ -1497,7 +1495,7 @@ var PDFPageView = function () {
   }, {
     key: 'paintOnCanvas',
     value: function paintOnCanvas(canvasWrapper) {
-      var renderCapability = (0, _pdfjs.createPromiseCapability)();
+      var renderCapability = (0, _pdfjsLib.createPromiseCapability)();
       var result = {
         promise: renderCapability.promise,
         onRenderContinue: function onRenderContinue(cont) {
@@ -1524,15 +1522,15 @@ var PDFPageView = function () {
       var ctx = canvas.getContext('2d', { alpha: false });
       var outputScale = (0, _ui_utils.getOutputScale)(ctx);
       this.outputScale = outputScale;
-      if (_pdfjs.PDFJS.useOnlyCssZoom) {
+      if (_pdfjsLib.PDFJS.useOnlyCssZoom) {
         var actualSizeViewport = viewport.clone({ scale: _ui_utils.CSS_UNITS });
         outputScale.sx *= actualSizeViewport.width / viewport.width;
         outputScale.sy *= actualSizeViewport.height / viewport.height;
         outputScale.scaled = true;
       }
-      if (_pdfjs.PDFJS.maxCanvasPixels > 0) {
+      if (_pdfjsLib.PDFJS.maxCanvasPixels > 0) {
         var pixelsInViewport = viewport.width * viewport.height;
-        var maxScale = Math.sqrt(_pdfjs.PDFJS.maxCanvasPixels / pixelsInViewport);
+        var maxScale = Math.sqrt(_pdfjsLib.PDFJS.maxCanvasPixels / pixelsInViewport);
         if (outputScale.sx > maxScale || outputScale.sy > maxScale) {
           outputScale.sx = maxScale;
           outputScale.sy = maxScale;
@@ -1582,8 +1580,8 @@ var PDFPageView = function () {
       var cancelled = false;
       var ensureNotCancelled = function ensureNotCancelled() {
         if (cancelled) {
-          if (_pdfjs.PDFJS.pdfjsNext) {
-            throw new _pdfjs.RenderingCancelledException('Rendering cancelled, page ' + _this2.id, 'svg');
+          if (_pdfjsLib.PDFJS.pdfjsNext) {
+            throw new _pdfjsLib.RenderingCancelledException('Rendering cancelled, page ' + _this2.id, 'svg');
           } else {
             throw 'cancelled';
           }
@@ -1593,7 +1591,7 @@ var PDFPageView = function () {
       var actualSizeViewport = this.viewport.clone({ scale: _ui_utils.CSS_UNITS });
       var promise = pdfPage.getOperatorList().then(function (opList) {
         ensureNotCancelled();
-        var svgGfx = new _pdfjs.SVGGraphics(pdfPage.commonObjs, pdfPage.objs);
+        var svgGfx = new _pdfjsLib.SVGGraphics(pdfPage.commonObjs, pdfPage.objs);
         return svgGfx.getSVG(opList, actualSizeViewport).then(function (svg) {
           ensureNotCancelled();
           _this2.svg = svg;
@@ -1655,7 +1653,7 @@ exports.DefaultTextLayerFactory = exports.TextLayerBuilder = undefined;
 
 var _dom_events = __w_pdfjs_require__(2);
 
-var _pdfjs = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(0);
 
 var EXPAND_DIVS_TIMEOUT = 300;
 var TextLayerBuilder = function TextLayerBuilderClosure() {
@@ -1697,7 +1695,7 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
       this.cancel();
       this.textDivs = [];
       var textLayerFrag = document.createDocumentFragment();
-      this.textLayerRenderTask = (0, _pdfjs.renderTextLayer)({
+      this.textLayerRenderTask = (0, _pdfjsLib.renderTextLayer)({
         textContent: this.textContent,
         container: textLayerFrag,
         viewport: this.viewport,
@@ -2078,7 +2076,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.DownloadManager = undefined;
 
-var _pdfjs = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(0);
 
 ;
 function download(blobUrl, filename) {
@@ -2103,7 +2101,7 @@ function download(blobUrl, filename) {
 function DownloadManager() {}
 DownloadManager.prototype = {
   downloadUrl: function DownloadManager_downloadUrl(url, filename) {
-    if (!(0, _pdfjs.createValidAbsoluteUrl)(url, 'http://example.com')) {
+    if (!(0, _pdfjsLib.createValidAbsoluteUrl)(url, 'http://example.com')) {
       return;
     }
     download(url + '#pdfjs.action=download', filename);
@@ -2112,7 +2110,7 @@ DownloadManager.prototype = {
     if (navigator.msSaveBlob) {
       return navigator.msSaveBlob(new Blob([data], { type: contentType }), filename);
     }
-    var blobUrl = (0, _pdfjs.createObjectURL)(data, contentType, _pdfjs.PDFJS.disableCreateObjectURL);
+    var blobUrl = (0, _pdfjsLib.createObjectURL)(data, contentType, _pdfjsLib.PDFJS.disableCreateObjectURL);
     download(blobUrl, filename);
   },
   download: function DownloadManager_download(blob, url, filename) {
@@ -2122,7 +2120,7 @@ DownloadManager.prototype = {
       }
       return;
     }
-    if (_pdfjs.PDFJS.disableCreateObjectURL) {
+    if (_pdfjsLib.PDFJS.disableCreateObjectURL) {
       this.downloadUrl(url, filename);
       return;
     }
@@ -2144,7 +2142,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.PDFFindController = exports.FindStates = undefined;
 
-var _pdfjs = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(0);
 
 var _ui_utils = __w_pdfjs_require__(1);
 
@@ -2327,7 +2325,7 @@ var PDFFindController = function PDFFindControllerClosure() {
       var promise = Promise.resolve();
 
       var _loop = function _loop(i, ii) {
-        var extractTextCapability = (0, _pdfjs.createPromiseCapability)();
+        var extractTextCapability = (0, _pdfjsLib.createPromiseCapability)();
         _this2.extractTextPromises[i] = extractTextCapability.promise;
         promise = promise.then(function () {
           return _this2.pdfViewer.getPageTextContent(i).then(function (textContent) {
@@ -2829,7 +2827,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.PDFViewer = exports.PresentationModeState = undefined;
 
-var _pdfjs = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(0);
 
 var _ui_utils = __w_pdfjs_require__(1);
 
@@ -3026,7 +3024,7 @@ var PDFViewer = function pdfViewer() {
         return;
       }
       var pagesCount = pdfDocument.numPages;
-      var pagesCapability = (0, _pdfjs.createPromiseCapability)();
+      var pagesCapability = (0, _pdfjsLib.createPromiseCapability)();
       this.pagesPromise = pagesCapability.promise;
       pagesCapability.promise.then(function () {
         _this._pageViewsReady = true;
@@ -3036,7 +3034,7 @@ var PDFViewer = function pdfViewer() {
         });
       });
       var isOnePageRenderedResolved = false;
-      var onePageRenderedCapability = (0, _pdfjs.createPromiseCapability)();
+      var onePageRenderedCapability = (0, _pdfjsLib.createPromiseCapability)();
       this.onePageRendered = onePageRenderedCapability.promise;
       var bindOnAfterAndBeforeDraw = function bindOnAfterAndBeforeDraw(pageView) {
         pageView.onBeforeDraw = function () {
@@ -3056,7 +3054,7 @@ var PDFViewer = function pdfViewer() {
         var viewport = pdfPage.getViewport(scale * _ui_utils.CSS_UNITS);
         for (var pageNum = 1; pageNum <= pagesCount; ++pageNum) {
           var textLayerFactory = null;
-          if (!_pdfjs.PDFJS.disableTextLayer) {
+          if (!_pdfjsLib.PDFJS.disableTextLayer) {
             textLayerFactory = _this;
           }
           var pageView = new _pdf_page_view.PDFPageView({
@@ -3076,7 +3074,7 @@ var PDFViewer = function pdfViewer() {
           _this._pages.push(pageView);
         }
         onePageRenderedCapability.promise.then(function () {
-          if (_pdfjs.PDFJS.disableAutoFetch) {
+          if (_pdfjsLib.PDFJS.disableAutoFetch) {
             pagesCapability.resolve();
             return;
           }
@@ -3174,7 +3172,7 @@ var PDFViewer = function pdfViewer() {
       if (!noScroll) {
         var page = this._currentPageNumber,
             dest;
-        if (this._location && !_pdfjs.PDFJS.ignoreCurrentPositionOnZoom && !(this.isInPresentationMode || this.isChangingPresentationMode)) {
+        if (this._location && !_pdfjsLib.PDFJS.ignoreCurrentPositionOnZoom && !(this.isInPresentationMode || this.isChangingPresentationMode)) {
           page = this._location.pageNumber;
           dest = [null, { name: 'XYZ' }, this._location.left, this._location.top, null];
         }
