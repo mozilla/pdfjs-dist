@@ -15717,7 +15717,9 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       }
       return this.buildFormXObject(resources, smaskContent, smaskOptions, operatorList, task, stateManager.state.clone());
     },
-    handleTilingType: function PartialEvaluator_handleTilingType(fn, args, resources, pattern, patternDict, operatorList, task) {
+    handleTilingType: function handleTilingType(fn, args, resources, pattern, patternDict, operatorList, task) {
+      var _this3 = this;
+
       var tilingOpList = new OperatorList();
       var resourcesArray = [patternDict.get('Resources'), resources];
       var patternResources = _primitives.Dict.merge(this.xref, resourcesArray);
@@ -15727,15 +15729,25 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         resources: patternResources,
         operatorList: tilingOpList
       }).then(function () {
-        operatorList.addDependencies(tilingOpList.dependencies);
-        operatorList.addOp(fn, (0, _pattern.getTilingPatternIR)({
+        return (0, _pattern.getTilingPatternIR)({
           fnArray: tilingOpList.fnArray,
           argsArray: tilingOpList.argsArray
-        }, patternDict, args));
+        }, patternDict, args);
+      }).then(function (tilingPatternIR) {
+        operatorList.addDependencies(tilingOpList.dependencies);
+        operatorList.addOp(fn, tilingPatternIR);
+      }, function (reason) {
+        if (_this3.options.ignoreErrors) {
+          _this3.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.unknown });
+          (0, _util.warn)('handleTilingType - ignoring pattern: "' + reason + '".');
+          return;
+        }
+        throw reason;
       });
     },
+
     handleSetFont: function PartialEvaluator_handleSetFont(resources, fontArgs, fontRef, operatorList, task, state) {
-      var _this3 = this;
+      var _this4 = this;
 
       var fontName;
       if (fontArgs) {
@@ -15746,20 +15758,20 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         if (!translated.font.isType3Font) {
           return translated;
         }
-        return translated.loadType3Data(_this3, resources, operatorList, task).then(function () {
+        return translated.loadType3Data(_this4, resources, operatorList, task).then(function () {
           return translated;
         }).catch(function (reason) {
-          _this3.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.font });
+          _this4.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.font });
           return new TranslatedFont('g_font_error', new _fonts.ErrorFont('Type3 font load error: ' + reason), translated.font);
         });
       }).then(function (translated) {
         state.font = translated.font;
-        translated.send(_this3.handler);
+        translated.send(_this4.handler);
         return translated.loadedName;
       });
     },
     handleText: function PartialEvaluator_handleText(chars, state) {
-      var _this4 = this;
+      var _this5 = this;
 
       var font = state.font;
       var glyphs = font.charsToGlyphs(chars);
@@ -15768,7 +15780,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         var buildPath = function buildPath(fontChar) {
           if (!font.renderer.hasBuiltPath(fontChar)) {
             var path = font.renderer.getPathJs(fontChar);
-            _this4.handler.send('commonobj', [font.loadedName + '_path_' + fontChar, 'FontPath', path]);
+            _this5.handler.send('commonobj', [font.loadedName + '_path_' + fontChar, 'FontPath', path]);
           }
         };
         for (var i = 0, ii = glyphs.length; i < ii; i++) {
@@ -15783,7 +15795,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       return glyphs;
     },
     setGState: function PartialEvaluator_setGState(resources, gState, operatorList, task, stateManager) {
-      var _this5 = this;
+      var _this6 = this;
 
       var gStateObj = [];
       var gStateKeys = gState.getKeys();
@@ -15808,7 +15820,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
             break;
           case 'Font':
             promise = promise.then(function () {
-              return _this5.handleSetFont(resources, null, value[0], operatorList, task, stateManager.state).then(function (loadedName) {
+              return _this6.handleSetFont(resources, null, value[0], operatorList, task, stateManager.state).then(function (loadedName) {
                 operatorList.addDependency(loadedName);
                 gStateObj.push([key, [loadedName, value[1]]]);
               });
@@ -15824,7 +15836,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
             }
             if ((0, _primitives.isDict)(value)) {
               promise = promise.then(function () {
-                return _this5.handleSMask(value, resources, operatorList, task, stateManager);
+                return _this6.handleSMask(value, resources, operatorList, task, stateManager);
               });
               gStateObj.push([key, true]);
             } else {
@@ -15863,7 +15875,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       });
     },
     loadFont: function PartialEvaluator_loadFont(fontName, font, resources) {
-      var _this6 = this;
+      var _this7 = this;
 
       function errorFont() {
         return Promise.resolve(new TranslatedFont('g_font_error', new _fonts.ErrorFont('Font ' + fontName + ' is not available'), font));
@@ -15948,7 +15960,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         }
         fontCapability.resolve(new TranslatedFont(font.loadedName, translatedFont, font));
       }).catch(function (reason) {
-        _this6.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.font });
+        _this7.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.font });
         try {
           var descriptor = preEvaluatedFont.descriptor;
           var fontFile3 = descriptor && descriptor.get('FontFile3');
@@ -15996,7 +16008,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       return Promise.resolve();
     },
     getOperatorList: function getOperatorList(_ref2) {
-      var _this7 = this;
+      var _this8 = this;
 
       var stream = _ref2.stream,
           task = _ref2.task,
@@ -16259,8 +16271,8 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         closePendingRestoreOPS();
         resolve();
       }).catch(function (reason) {
-        if (_this7.options.ignoreErrors) {
-          _this7.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.unknown });
+        if (_this8.options.ignoreErrors) {
+          _this8.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.unknown });
           (0, _util.warn)('getOperatorList - ignoring errors during task: ' + task.name);
           closePendingRestoreOPS();
           return;
@@ -16269,7 +16281,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       });
     },
     getTextContent: function getTextContent(_ref3) {
-      var _this8 = this;
+      var _this9 = this;
 
       var stream = _ref3.stream,
           task = _ref3.task,
@@ -16699,7 +16711,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         flushTextContentItem();
         resolve(textContent);
       }).catch(function (reason) {
-        if (_this8.options.ignoreErrors) {
+        if (_this9.options.ignoreErrors) {
           (0, _util.warn)('getTextContent - ignoring errors during task: ' + task.name);
           flushTextContentItem();
           return textContent;
@@ -16709,7 +16721,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     },
 
     extractDataStructures: function PartialEvaluator_extractDataStructures(dict, baseDict, properties) {
-      var _this9 = this;
+      var _this10 = this;
 
       var xref = this.xref;
       var toUnicode = dict.get('ToUnicode') || baseDict.get('ToUnicode');
@@ -16786,7 +16798,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       properties.dict = dict;
       return toUnicodePromise.then(function (toUnicode) {
         properties.toUnicode = toUnicode;
-        return _this9.buildToUnicode(properties);
+        return _this10.buildToUnicode(properties);
       }).then(function (toUnicode) {
         properties.toUnicode = toUnicode;
         return properties;
@@ -17139,7 +17151,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       };
     },
     translateFont: function PartialEvaluator_translateFont(preEvaluatedFont) {
-      var _this10 = this;
+      var _this11 = this;
 
       var baseDict = preEvaluatedFont.baseDict;
       var dict = preEvaluatedFont.dict;
@@ -17170,7 +17182,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
             lastChar: maxCharIndex
           };
           return this.extractDataStructures(dict, dict, properties).then(function (properties) {
-            properties.widths = _this10.buildCharCodeToWidth(metrics.widths, properties);
+            properties.widths = _this11.buildCharCodeToWidth(metrics.widths, properties);
             return new _fonts.Font(baseFontName, null, properties);
           });
         }
@@ -17251,9 +17263,9 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         cMapPromise = Promise.resolve(undefined);
       }
       return cMapPromise.then(function () {
-        return _this10.extractDataStructures(dict, baseDict, properties);
+        return _this11.extractDataStructures(dict, baseDict, properties);
       }).then(function (properties) {
-        _this10.extractWidths(dict, descriptor, properties);
+        _this11.extractWidths(dict, descriptor, properties);
         if (type === 'Type3') {
           properties.isType3Font = true;
         }
@@ -39346,11 +39358,14 @@ Shadings.Dummy = function DummyClosure() {
 }();
 function getTilingPatternIR(operatorList, dict, args) {
   var matrix = dict.getArray('Matrix');
-  var bbox = dict.getArray('BBox');
+  var bbox = _util.Util.normalizeRect(dict.getArray('BBox'));
   var xstep = dict.get('XStep');
   var ystep = dict.get('YStep');
   var paintType = dict.get('PaintType');
   var tilingType = dict.get('TilingType');
+  if (bbox[2] - bbox[0] === 0 || bbox[3] - bbox[1] === 0) {
+    throw new Error('getTilingPatternIR - invalid /BBox array: [' + bbox + '].');
+  }
   return ['TilingPattern', args, operatorList, matrix, bbox, xstep, ystep, paintType, tilingType];
 }
 exports.Pattern = Pattern;
@@ -40304,8 +40319,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.432';
-var pdfjsBuild = '93420545';
+var pdfjsVersion = '1.8.434';
+var pdfjsBuild = 'f34d6927';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
