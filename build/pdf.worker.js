@@ -40319,8 +40319,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.446';
-var pdfjsBuild = 'e5ac64f8';
+var pdfjsVersion = '1.8.448';
+var pdfjsBuild = '82f3145a';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
@@ -41257,10 +41257,13 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     }
     WeakMap.prototype = {
       has: function has(obj) {
+        if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object' && typeof obj !== 'function' || obj === null) {
+          return false;
+        }
         return !!Object.getOwnPropertyDescriptor(obj, this.id);
       },
-      get: function get(obj, defaultValue) {
-        return this.has(obj) ? obj[this.id] : defaultValue;
+      get: function get(obj) {
+        return this.has(obj) ? obj[this.id] : undefined;
       },
       set: function set(obj, value) {
         Object.defineProperty(obj, this.id, {
