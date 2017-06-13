@@ -12168,7 +12168,7 @@ var PDFPageProxy = function PDFPageProxyClosure() {
         stats.time('Rendering');
         internalRenderTask.initializeGraphics(transparency);
         internalRenderTask.operatorListChanged();
-      }, complete);
+      }).catch(complete);
       return renderTask;
     },
     getOperatorList: function PDFPageProxy_getOperatorList() {
@@ -12945,6 +12945,7 @@ var RenderTask = function RenderTaskClosure() {
   return RenderTask;
 }();
 var InternalRenderTask = function InternalRenderTaskClosure() {
+  var canvasInRendering = new WeakMap();
   function InternalRenderTask(callback, params, objs, commonObjs, operatorList, pageNumber, canvasFactory) {
     this.callback = callback;
     this.params = params;
@@ -12964,9 +12965,16 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
     this._continueBound = this._continue.bind(this);
     this._scheduleNextBound = this._scheduleNext.bind(this);
     this._nextBound = this._next.bind(this);
+    this._canvas = params.canvasContext.canvas;
   }
   InternalRenderTask.prototype = {
     initializeGraphics: function InternalRenderTask_initializeGraphics(transparency) {
+      if (this._canvas) {
+        if (canvasInRendering.has(this._canvas)) {
+          throw new Error('Cannot use the same canvas during multiple render() operations. ' + 'Use different canvas or ensure previous operations were ' + 'cancelled or completed.');
+        }
+        canvasInRendering.set(this._canvas, this);
+      }
       if (this.cancelled) {
         return;
       }
@@ -12992,6 +13000,9 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
     cancel: function InternalRenderTask_cancel() {
       this.running = false;
       this.cancelled = true;
+      if (this._canvas) {
+        canvasInRendering.delete(this._canvas);
+      }
       if ((0, _dom_utils.getDefaultSetting)('pdfjsNext')) {
         this.callback(new _dom_utils.RenderingCancelledException('Rendering cancelled, page ' + this.pageNumber, 'canvas'));
       } else {
@@ -13040,6 +13051,9 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
         this.running = false;
         if (this.operatorList.lastChunk) {
           this.gfx.endDrawing();
+          if (this._canvas) {
+            canvasInRendering.delete(this._canvas);
+          }
           this.callback();
         }
       }
@@ -13063,8 +13077,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.444';
-  exports.build = build = 'c26e4972';
+  exports.version = version = '1.8.446';
+  exports.build = build = 'e5ac64f8';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -28413,8 +28427,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.444';
-  PDFJS.build = 'c26e4972';
+  PDFJS.version = '1.8.446';
+  PDFJS.build = 'e5ac64f8';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47031,8 +47045,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.444';
-var pdfjsBuild = 'c26e4972';
+var pdfjsVersion = '1.8.446';
+var pdfjsBuild = 'e5ac64f8';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
