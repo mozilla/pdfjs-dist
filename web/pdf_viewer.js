@@ -1325,13 +1325,6 @@ var PDFPageView = function () {
       }
     }
   }, {
-    key: 'updatePosition',
-    value: function updatePosition() {
-      if (this.textLayer) {
-        this.textLayer.render(TEXT_LAYER_RENDER_DELAY);
-      }
-    }
-  }, {
     key: 'cssTransform',
     value: function cssTransform(target) {
       var redrawAnnotations = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
@@ -3252,16 +3245,13 @@ var PDFViewer = function pdfViewer() {
       this._pageViewsReady = false;
       this.viewer.textContent = '';
     },
-
-    _scrollUpdate: function PDFViewer_scrollUpdate() {
+    _scrollUpdate: function _scrollUpdate() {
       if (this.pagesCount === 0) {
         return;
       }
       this.update();
-      for (var i = 0, ii = this._pages.length; i < ii; i++) {
-        this._pages[i].updatePosition();
-      }
     },
+
     _setScaleDispatchEvent: function pdfViewer_setScaleDispatchEvent(newScale, newValue, preset) {
       var arg = {
         source: this,
