@@ -40319,8 +40319,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.450';
-var pdfjsBuild = '20975134';
+var pdfjsVersion = '1.8.452';
+var pdfjsBuild = '0c93dee0';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
@@ -41803,6 +41803,11 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
           case 'file':
           case 'javascript':
           case 'mailto':
+            return 'null';
+          case 'blob':
+            try {
+              return new JURL(this._schemeData).origin || 'null';
+            } catch (_) {}
             return 'null';
         }
         host = this.host;
