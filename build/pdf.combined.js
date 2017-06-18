@@ -1482,7 +1482,7 @@ var Dict = function DictClosure() {
     return nonSerializable;
   };
   function Dict(xref) {
-    this.map = Object.create(null);
+    this._map = Object.create(null);
     this.xref = xref;
     this.objId = null;
     this.suppressEncryption = false;
@@ -1496,32 +1496,32 @@ var Dict = function DictClosure() {
       var value;
       var xref = this.xref,
           suppressEncryption = this.suppressEncryption;
-      if (typeof (value = this.map[key1]) !== 'undefined' || key1 in this.map || typeof key2 === 'undefined') {
+      if (typeof (value = this._map[key1]) !== 'undefined' || key1 in this._map || typeof key2 === 'undefined') {
         return xref ? xref.fetchIfRef(value, suppressEncryption) : value;
       }
-      if (typeof (value = this.map[key2]) !== 'undefined' || key2 in this.map || typeof key3 === 'undefined') {
+      if (typeof (value = this._map[key2]) !== 'undefined' || key2 in this._map || typeof key3 === 'undefined') {
         return xref ? xref.fetchIfRef(value, suppressEncryption) : value;
       }
-      value = this.map[key3] || null;
+      value = this._map[key3] || null;
       return xref ? xref.fetchIfRef(value, suppressEncryption) : value;
     },
     getAsync: function Dict_getAsync(key1, key2, key3) {
       var value;
       var xref = this.xref,
           suppressEncryption = this.suppressEncryption;
-      if (typeof (value = this.map[key1]) !== 'undefined' || key1 in this.map || typeof key2 === 'undefined') {
+      if (typeof (value = this._map[key1]) !== 'undefined' || key1 in this._map || typeof key2 === 'undefined') {
         if (xref) {
           return xref.fetchIfRefAsync(value, suppressEncryption);
         }
         return Promise.resolve(value);
       }
-      if (typeof (value = this.map[key2]) !== 'undefined' || key2 in this.map || typeof key3 === 'undefined') {
+      if (typeof (value = this._map[key2]) !== 'undefined' || key2 in this._map || typeof key3 === 'undefined') {
         if (xref) {
           return xref.fetchIfRefAsync(value, suppressEncryption);
         }
         return Promise.resolve(value);
       }
-      value = this.map[key3] || null;
+      value = this._map[key3] || null;
       if (xref) {
         return xref.fetchIfRefAsync(value, suppressEncryption);
       }
@@ -1544,36 +1544,36 @@ var Dict = function DictClosure() {
       return value;
     },
     getRaw: function Dict_getRaw(key) {
-      return this.map[key];
+      return this._map[key];
     },
     getKeys: function Dict_getKeys() {
-      return Object.keys(this.map);
+      return Object.keys(this._map);
     },
     set: function Dict_set(key, value) {
-      this.map[key] = value;
+      this._map[key] = value;
     },
     has: function Dict_has(key) {
-      return key in this.map;
+      return key in this._map;
     },
     forEach: function Dict_forEach(callback) {
-      for (var key in this.map) {
+      for (var key in this._map) {
         callback(key, this.get(key));
       }
     }
   };
   Dict.empty = new Dict(null);
-  Dict.merge = function Dict_merge(xref, dictArray) {
+  Dict.merge = function (xref, dictArray) {
     var mergedDict = new Dict(xref);
     for (var i = 0, ii = dictArray.length; i < ii; i++) {
       var dict = dictArray[i];
       if (!isDict(dict)) {
         continue;
       }
-      for (var keyName in dict.map) {
-        if (mergedDict.map[keyName]) {
+      for (var keyName in dict._map) {
+        if (mergedDict._map[keyName] !== undefined) {
           continue;
         }
-        mergedDict.map[keyName] = dict.map[keyName];
+        mergedDict._map[keyName] = dict._map[keyName];
       }
     }
     return mergedDict;
@@ -13077,8 +13077,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.458';
-  exports.build = build = 'a6311471';
+  exports.version = version = '1.8.462';
+  exports.build = build = 'db52e4fb';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -24642,53 +24642,53 @@ var ObjectLoader = function () {
     return (0, _primitives.isRef)(value) || (0, _primitives.isDict)(value) || (0, _util.isArray)(value) || (0, _primitives.isStream)(value);
   }
   function addChildren(node, nodesToVisit) {
-    var value;
     if ((0, _primitives.isDict)(node) || (0, _primitives.isStream)(node)) {
-      var map;
-      if ((0, _primitives.isDict)(node)) {
-        map = node.map;
-      } else {
-        map = node.dict.map;
-      }
-      for (var key in map) {
-        value = map[key];
-        if (mayHaveChildren(value)) {
-          nodesToVisit.push(value);
+      var dict = (0, _primitives.isDict)(node) ? node : node.dict;
+      var dictKeys = dict.getKeys();
+      for (var i = 0, ii = dictKeys.length; i < ii; i++) {
+        var rawValue = dict.getRaw(dictKeys[i]);
+        if (mayHaveChildren(rawValue)) {
+          nodesToVisit.push(rawValue);
         }
       }
     } else if ((0, _util.isArray)(node)) {
-      for (var i = 0, ii = node.length; i < ii; i++) {
-        value = node[i];
+      for (var _i = 0, _ii = node.length; _i < _ii; _i++) {
+        var value = node[_i];
         if (mayHaveChildren(value)) {
           nodesToVisit.push(value);
         }
       }
     }
   }
-  function ObjectLoader(obj, keys, xref) {
-    this.obj = obj;
+  function ObjectLoader(dict, keys, xref) {
+    this.dict = dict;
     this.keys = keys;
     this.xref = xref;
     this.refSet = null;
     this.capability = null;
   }
   ObjectLoader.prototype = {
-    load: function ObjectLoader_load() {
-      var keys = this.keys;
+    load: function load() {
       this.capability = (0, _util.createPromiseCapability)();
       if (!(this.xref.stream instanceof _chunked_stream.ChunkedStream) || this.xref.stream.getMissingChunks().length === 0) {
         this.capability.resolve();
         return this.capability.promise;
       }
+      var keys = this.keys,
+          dict = this.dict;
+
       this.refSet = new _primitives.RefSet();
       var nodesToVisit = [];
-      for (var i = 0; i < keys.length; i++) {
-        nodesToVisit.push(this.obj[keys[i]]);
+      for (var i = 0, ii = keys.length; i < ii; i++) {
+        var rawValue = dict.getRaw(keys[i]);
+        if (rawValue !== undefined) {
+          nodesToVisit.push(rawValue);
+        }
       }
       this._walk(nodesToVisit);
       return this.capability.promise;
     },
-    _walk: function ObjectLoader_walk(nodesToVisit) {
+    _walk: function _walk(nodesToVisit) {
       var _this3 = this;
 
       var nodesToRevisit = [];
@@ -24700,24 +24700,23 @@ var ObjectLoader = function () {
             continue;
           }
           try {
-            var ref = currentNode;
-            this.refSet.put(ref);
+            this.refSet.put(currentNode);
             currentNode = this.xref.fetch(currentNode);
-          } catch (e) {
-            if (!(e instanceof _util.MissingDataException)) {
-              throw e;
+          } catch (ex) {
+            if (!(ex instanceof _util.MissingDataException)) {
+              throw ex;
             }
             nodesToRevisit.push(currentNode);
             pendingRequests.push({
-              begin: e.begin,
-              end: e.end
+              begin: ex.begin,
+              end: ex.end
             });
           }
         }
         if (currentNode && currentNode.getBaseStreams) {
           var baseStreams = currentNode.getBaseStreams();
           var foundMissingData = false;
-          for (var i = 0; i < baseStreams.length; i++) {
+          for (var i = 0, ii = baseStreams.length; i < ii; i++) {
             var stream = baseStreams[i];
             if (stream.getMissingChunks && stream.getMissingChunks().length) {
               foundMissingData = true;
@@ -24735,14 +24734,13 @@ var ObjectLoader = function () {
       }
       if (pendingRequests.length) {
         this.xref.stream.manager.requestRanges(pendingRequests).then(function () {
-          nodesToVisit = nodesToRevisit;
-          for (var i = 0; i < nodesToRevisit.length; i++) {
-            var node = nodesToRevisit[i];
+          for (var _i2 = 0, _ii2 = nodesToRevisit.length; _i2 < _ii2; _i2++) {
+            var node = nodesToRevisit[_i2];
             if ((0, _primitives.isRef)(node)) {
               _this3.refSet.remove(node);
             }
           }
-          _this3._walk(nodesToVisit);
+          _this3._walk(nodesToRevisit);
         }, this.capability.reject);
         return;
       }
@@ -28427,8 +28425,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.458';
-  PDFJS.build = 'a6311471';
+  PDFJS.version = '1.8.462';
+  PDFJS.build = 'db52e4fb';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -31790,7 +31788,7 @@ var Annotation = function AnnotationClosure() {
         if (!resources) {
           return;
         }
-        var objectLoader = new _obj.ObjectLoader(resources.map, keys, resources.xref);
+        var objectLoader = new _obj.ObjectLoader(resources, keys, resources.xref);
         return objectLoader.load().then(function () {
           return resources;
         });
@@ -33335,7 +33333,7 @@ var Page = function PageClosure() {
         this.resourcesPromise = this.pdfManager.ensure(this, 'resources');
       }
       return this.resourcesPromise.then(function () {
-        var objectLoader = new _obj.ObjectLoader(_this.resources.map, keys, _this.xref);
+        var objectLoader = new _obj.ObjectLoader(_this.resources, keys, _this.xref);
         return objectLoader.load();
       });
     },
@@ -47045,8 +47043,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.458';
-var pdfjsBuild = 'a6311471';
+var pdfjsVersion = '1.8.462';
+var pdfjsBuild = 'db52e4fb';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
