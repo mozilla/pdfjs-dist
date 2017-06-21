@@ -253,6 +253,10 @@
   display: block;
 }
 
+.pdfViewer .page canvas[hidden] {
+  display: none;
+}
+
 .pdfViewer .page .loadingIcon {
   position: absolute;
   display: block;
