@@ -3806,8 +3806,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.476';
-  exports.build = build = '36fb3686';
+  exports.version = version = '1.8.478';
+  exports.build = build = 'c6ee05f7';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -4094,6 +4094,7 @@ var SVGGraphics = function SVGGraphics() {
       this.extraStack = [];
       this.commonObjs = commonObjs;
       this.objs = objs;
+      this.pendingClip = null;
       this.pendingEOFill = false;
       this.embedFonts = false;
       this.embeddedFonts = Object.create(null);
@@ -4117,6 +4118,7 @@ var SVGGraphics = function SVGGraphics() {
       restore: function SVGGraphics_restore() {
         this.transformMatrix = this.transformStack.pop();
         this.current = this.extraStack.pop();
+        this.pendingClip = null;
         this.tgrp = null;
       },
       group: function SVGGraphics_group(items) {
@@ -4555,8 +4557,10 @@ var SVGGraphics = function SVGGraphics() {
         current.element = current.path;
         current.setCurrentPoint(x, y);
       },
-      endPath: function SVGGraphics_endPath() {},
-      clip: function SVGGraphics_clip(type) {
+      endPath: function SVGGraphics_endPath() {
+        if (!this.pendingClip) {
+          return;
+        }
         var current = this.current;
         var clipId = 'clippath' + clipCount;
         clipCount++;
@@ -4564,11 +4568,12 @@ var SVGGraphics = function SVGGraphics() {
         clipPath.setAttributeNS(null, 'id', clipId);
         clipPath.setAttributeNS(null, 'transform', pm(this.transformMatrix));
         var clipElement = current.element.cloneNode();
-        if (type === 'evenodd') {
+        if (this.pendingClip === 'evenodd') {
           clipElement.setAttributeNS(null, 'clip-rule', 'evenodd');
         } else {
           clipElement.setAttributeNS(null, 'clip-rule', 'nonzero');
         }
+        this.pendingClip = null;
         clipPath.appendChild(clipElement);
         this.defs.appendChild(clipPath);
         if (current.activeClipUrl) {
@@ -4579,6 +4584,9 @@ var SVGGraphics = function SVGGraphics() {
         }
         current.activeClipUrl = 'url(#' + clipId + ')';
         this.tgrp = null;
+      },
+      clip: function SVGGraphics_clip(type) {
+        this.pendingClip = type;
       },
       closePath: function SVGGraphics_closePath() {
         var current = this.current;
@@ -5780,8 +5788,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.476';
-  PDFJS.build = '36fb3686';
+  PDFJS.version = '1.8.478';
+  PDFJS.build = 'c6ee05f7';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -11320,8 +11328,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.476';
-var pdfjsBuild = '36fb3686';
+var pdfjsVersion = '1.8.478';
+var pdfjsBuild = 'c6ee05f7';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
