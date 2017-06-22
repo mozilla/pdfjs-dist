@@ -1300,7 +1300,7 @@ var PDFPageView = function () {
           });
           return;
         }
-        if (!this.zoomLayer) {
+        if (!this.zoomLayer && !this.canvas.hasAttribute('hidden')) {
           this.zoomLayer = this.canvas.parentNode;
           this.zoomLayer.style.position = 'absolute';
         }
