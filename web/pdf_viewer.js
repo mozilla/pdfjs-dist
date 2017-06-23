@@ -1141,8 +1141,6 @@ var _pdf_rendering_queue = __w_pdfjs_require__(7);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var TEXT_LAYER_RENDER_DELAY = 200;
-
 var PDFPageView = function () {
   function PDFPageView(options) {
     _classCallCheck(this, PDFPageView);
@@ -1471,10 +1469,9 @@ var PDFPageView = function () {
       var resultPromise = paintTask.promise.then(function () {
         return finishPaintTask(null).then(function () {
           if (textLayer) {
-            pdfPage.getTextContent({ normalizeWhitespace: true }).then(function textContentResolved(textContent) {
-              textLayer.setTextContent(textContent);
-              textLayer.render(TEXT_LAYER_RENDER_DELAY);
-            });
+            var readableStream = pdfPage.streamTextContent({ normalizeWhitespace: true });
+            textLayer.setTextContentStream(readableStream);
+            textLayer.render();
           }
         });
       }, function (reason) {
@@ -1661,6 +1658,8 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
     this.textLayerDiv = options.textLayerDiv;
     this.eventBus = options.eventBus || (0, _dom_events.getGlobalEventBus)();
     this.textContent = null;
+    this.textContentItemsStr = [];
+    this.textContentStream = null;
     this.renderingDone = false;
     this.pageIdx = options.pageIndex;
     this.pageNumber = this.pageIdx + 1;
@@ -1689,7 +1688,7 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
     render: function TextLayerBuilder_render(timeout) {
       var _this = this;
 
-      if (!this.textContent || this.renderingDone) {
+      if (!(this.textContent || this.textContentStream) || this.renderingDone) {
         return;
       }
       this.cancel();
@@ -1697,9 +1696,11 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
       var textLayerFrag = document.createDocumentFragment();
       this.textLayerRenderTask = (0, _pdfjsLib.renderTextLayer)({
         textContent: this.textContent,
+        textContentStream: this.textContentStream,
         container: textLayerFrag,
         viewport: this.viewport,
         textDivs: this.textDivs,
+        textContentItemsStr: this.textContentItemsStr,
         timeout: timeout,
         enhanceTextSelection: this.enhanceTextSelection
       });
@@ -1715,6 +1716,11 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
         this.textLayerRenderTask = null;
       }
     },
+    setTextContentStream: function setTextContentStream(readableStream) {
+      this.cancel();
+      this.textContentStream = readableStream;
+    },
+
     setTextContent: function TextLayerBuilder_setTextContent(textContent) {
       this.cancel();
       this.textContent = textContent;
@@ -1722,8 +1728,8 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
     convertMatches: function TextLayerBuilder_convertMatches(matches, matchesLength) {
       var i = 0;
       var iIndex = 0;
-      var bidiTexts = this.textContent.items;
-      var end = bidiTexts.length - 1;
+      var textContentItemsStr = this.textContentItemsStr;
+      var end = textContentItemsStr.length - 1;
       var queryLen = this.findController === null ? 0 : this.findController.state.query.length;
       var ret = [];
       if (!matches) {
@@ -1731,11 +1737,11 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
       }
       for (var m = 0, len = matches.length; m < len; m++) {
         var matchIdx = matches[m];
-        while (i !== end && matchIdx >= iIndex + bidiTexts[i].str.length) {
-          iIndex += bidiTexts[i].str.length;
+        while (i !== end && matchIdx >= iIndex + textContentItemsStr[i].length) {
+          iIndex += textContentItemsStr[i].length;
           i++;
         }
-        if (i === bidiTexts.length) {
+        if (i === textContentItemsStr.length) {
           console.error('Could not find a matching mapping');
         }
         var match = {
@@ -1749,8 +1755,8 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
         } else {
           matchIdx += queryLen;
         }
-        while (i !== end && matchIdx > iIndex + bidiTexts[i].str.length) {
-          iIndex += bidiTexts[i].str.length;
+        while (i !== end && matchIdx > iIndex + textContentItemsStr[i].length) {
+          iIndex += textContentItemsStr[i].length;
           i++;
         }
         match.end = {
@@ -1765,7 +1771,7 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
       if (matches.length === 0) {
         return;
       }
-      var bidiTexts = this.textContent.items;
+      var textContentItemsStr = this.textContentItemsStr;
       var textDivs = this.textDivs;
       var prevEnd = null;
       var pageIdx = this.pageIdx;
@@ -1783,7 +1789,7 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
       }
       function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
         var div = textDivs[divIdx];
-        var content = bidiTexts[divIdx].str.substring(fromOffset, toOffset);
+        var content = textContentItemsStr[divIdx].substring(fromOffset, toOffset);
         var node = document.createTextNode(content);
         if (className) {
           var span = document.createElement('span');
@@ -1840,14 +1846,14 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
       }
       var matches = this.matches;
       var textDivs = this.textDivs;
-      var bidiTexts = this.textContent.items;
+      var textContentItemsStr = this.textContentItemsStr;
       var clearedUntilDivIdx = -1;
       for (var i = 0, len = matches.length; i < len; i++) {
         var match = matches[i];
         var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
         for (var n = begin, end = match.end.divIdx; n <= end; n++) {
           var div = textDivs[n];
-          div.textContent = bidiTexts[n].str;
+          div.textContent = textContentItemsStr[n];
           div.className = '';
         }
         clearedUntilDivIdx = match.end.divIdx + 1;

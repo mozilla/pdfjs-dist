@@ -1138,7 +1138,8 @@ MessageHandler.prototype = {
         var startCapability = createPromiseCapability();
         _this2.streamControllers[streamId] = {
           controller: controller,
-          startCall: startCapability
+          startCall: startCapability,
+          isClosed: false
         };
         _this2.postMessage({
           sourceName: sourceName,
@@ -1165,6 +1166,7 @@ MessageHandler.prototype = {
       cancel: function cancel(reason) {
         var cancelCapability = createPromiseCapability();
         _this2.streamControllers[streamId].cancelCall = cancelCapability;
+        _this2.streamControllers[streamId].isClosed = true;
         _this2.postMessage({
           sourceName: sourceName,
           targetName: targetName,
@@ -1310,9 +1312,15 @@ MessageHandler.prototype = {
         });
         break;
       case 'enqueue':
-        this.streamControllers[data.streamId].controller.enqueue(data.chunk);
+        if (!this.streamControllers[data.streamId].isClosed) {
+          this.streamControllers[data.streamId].controller.enqueue(data.chunk);
+        }
         break;
       case 'close':
+        if (this.streamControllers[data.streamId].isClosed) {
+          break;
+        }
+        this.streamControllers[data.streamId].isClosed = true;
         this.streamControllers[data.streamId].controller.close();
         deleteStreamController();
         break;
@@ -1325,6 +1333,9 @@ MessageHandler.prototype = {
         deleteStreamController();
         break;
       case 'cancel':
+        if (!this.streamSinks[data.streamId]) {
+          break;
+        }
         resolveCall(this.streamSinks[data.streamId].onCancel, [data.reason]).then(function () {
           sendStreamResponse({
             stream: 'cancel_complete',
@@ -12209,12 +12220,46 @@ var PDFPageProxy = function PDFPageProxyClosure() {
       }
       return intentState.opListReadCapability.promise;
     },
-    getTextContent: function PDFPageProxy_getTextContent(params) {
-      params = params || {};
-      return this.transport.messageHandler.sendWithPromise('GetTextContent', {
+    streamTextContent: function streamTextContent() {
+      var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      var TEXT_CONTENT_CHUNK_SIZE = 100;
+      return this.transport.messageHandler.sendWithStream('GetTextContent', {
         pageIndex: this.pageNumber - 1,
         normalizeWhitespace: params.normalizeWhitespace === true,
         combineTextItems: params.disableCombineTextItems !== true
+      }, {
+        highWaterMark: TEXT_CONTENT_CHUNK_SIZE,
+        size: function size(textContent) {
+          return textContent.items.length;
+        }
+      });
+    },
+
+    getTextContent: function PDFPageProxy_getTextContent(params) {
+      params = params || {};
+      var readableStream = this.streamTextContent(params);
+      return new Promise(function (resolve, reject) {
+        function pump() {
+          reader.read().then(function (_ref) {
+            var value = _ref.value,
+                done = _ref.done;
+
+            if (done) {
+              resolve(textContent);
+              return;
+            }
+            _util.Util.extendObj(textContent.styles, value.styles);
+            _util.Util.appendToArray(textContent.items, value.items);
+            pump();
+          }, reject);
+        }
+        var reader = readableStream.getReader();
+        var textContent = {
+          items: [],
+          styles: Object.create(null)
+        };
+        pump();
       });
     },
     _destroy: function PDFPageProxy_destroy() {
@@ -13080,8 +13125,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.482';
-  exports.build = build = 'd1567a94';
+  exports.version = version = '1.8.484';
+  exports.build = build = 'e2ca894f';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -14156,6 +14201,9 @@ var renderTextLayer = function renderTextLayerClosure() {
       }
     }
     task._textDivProperties.set(textDiv, textDivProperties);
+    if (task._textContentStream) {
+      task._layoutText(textDiv);
+    }
     if (task._enhanceTextSelection) {
       var angleCos = 1,
           angleSin = 0;
@@ -14187,7 +14235,6 @@ var renderTextLayer = function renderTextLayerClosure() {
     if (task._canceled) {
       return;
     }
-    var textLayerFrag = task._container;
     var textDivs = task._textDivs;
     var capability = task._capability;
     var textDivsLength = textDivs.length;
@@ -14196,38 +14243,10 @@ var renderTextLayer = function renderTextLayerClosure() {
       capability.resolve();
       return;
     }
-    var canvas = document.createElement('canvas');
-    var ctx = canvas.getContext('2d', { alpha: false });
-    var lastFontSize;
-    var lastFontFamily;
-    for (var i = 0; i < textDivsLength; i++) {
-      var textDiv = textDivs[i];
-      var textDivProperties = task._textDivProperties.get(textDiv);
-      if (textDivProperties.isWhitespace) {
-        continue;
+    if (!task._textContentStream) {
+      for (var i = 0; i < textDivsLength; i++) {
+        task._layoutText(textDivs[i]);
       }
-      var fontSize = textDiv.style.fontSize;
-      var fontFamily = textDiv.style.fontFamily;
-      if (fontSize !== lastFontSize || fontFamily !== lastFontFamily) {
-        ctx.font = fontSize + ' ' + fontFamily;
-        lastFontSize = fontSize;
-        lastFontFamily = fontFamily;
-      }
-      var width = ctx.measureText(textDiv.textContent).width;
-      textLayerFrag.appendChild(textDiv);
-      var transform = '';
-      if (textDivProperties.canvasWidth !== 0 && width > 0) {
-        textDivProperties.scale = textDivProperties.canvasWidth / width;
-        transform = 'scaleX(' + textDivProperties.scale + ')';
-      }
-      if (textDivProperties.angle !== 0) {
-        transform = 'rotate(' + textDivProperties.angle + 'deg) ' + transform;
-      }
-      if (transform !== '') {
-        textDivProperties.originalTransform = transform;
-        _dom_utils.CustomStyle.setProp('transform', textDiv, transform);
-      }
-      task._textDivProperties.set(textDiv, textDivProperties);
     }
     task._renderingDone = true;
     capability.resolve();
@@ -14457,24 +14476,42 @@ var renderTextLayer = function renderTextLayerClosure() {
       }
     });
   }
-  function TextLayerRenderTask(textContent, container, viewport, textDivs, enhanceTextSelection) {
+  function TextLayerRenderTask(_ref) {
+    var textContent = _ref.textContent,
+        textContentStream = _ref.textContentStream,
+        container = _ref.container,
+        viewport = _ref.viewport,
+        textDivs = _ref.textDivs,
+        textContentItemsStr = _ref.textContentItemsStr,
+        enhanceTextSelection = _ref.enhanceTextSelection;
+
     this._textContent = textContent;
+    this._textContentStream = textContentStream;
     this._container = container;
     this._viewport = viewport;
     this._textDivs = textDivs || [];
+    this._textContentItemsStr = textContentItemsStr || [];
+    this._enhanceTextSelection = !!enhanceTextSelection;
+    this._reader = null;
+    this._layoutTextLastFontSize = null;
+    this._layoutTextLastFontFamily = null;
+    this._layoutTextCtx = null;
     this._textDivProperties = new WeakMap();
     this._renderingDone = false;
     this._canceled = false;
     this._capability = (0, _util.createPromiseCapability)();
     this._renderTimer = null;
     this._bounds = [];
-    this._enhanceTextSelection = !!enhanceTextSelection;
   }
   TextLayerRenderTask.prototype = {
     get promise() {
       return this._capability.promise;
     },
     cancel: function TextLayer_cancel() {
+      if (this._reader) {
+        this._reader.cancel();
+        this._reader = null;
+      }
       this._canceled = true;
       if (this._renderTimer !== null) {
         clearTimeout(this._renderTimer);
@@ -14482,22 +14519,85 @@ var renderTextLayer = function renderTextLayerClosure() {
       }
       this._capability.reject('canceled');
     },
+    _processItems: function _processItems(items, styleCache) {
+      for (var i = 0, len = items.length; i < len; i++) {
+        this._textContentItemsStr.push(items[i].str);
+        appendText(this, items[i], styleCache);
+      }
+    },
+    _layoutText: function _layoutText(textDiv) {
+      var textLayerFrag = this._container;
+      var textDivProperties = this._textDivProperties.get(textDiv);
+      if (textDivProperties.isWhitespace) {
+        return;
+      }
+      var fontSize = textDiv.style.fontSize;
+      var fontFamily = textDiv.style.fontFamily;
+      if (fontSize !== this._layoutTextLastFontSize || fontFamily !== this._layoutTextLastFontFamily) {
+        this._layoutTextCtx.font = fontSize + ' ' + fontFamily;
+        this._lastFontSize = fontSize;
+        this._lastFontFamily = fontFamily;
+      }
+      var width = this._layoutTextCtx.measureText(textDiv.textContent).width;
+      var transform = '';
+      if (textDivProperties.canvasWidth !== 0 && width > 0) {
+        textDivProperties.scale = textDivProperties.canvasWidth / width;
+        transform = 'scaleX(' + textDivProperties.scale + ')';
+      }
+      if (textDivProperties.angle !== 0) {
+        transform = 'rotate(' + textDivProperties.angle + 'deg) ' + transform;
+      }
+      if (transform !== '') {
+        textDivProperties.originalTransform = transform;
+        _dom_utils.CustomStyle.setProp('transform', textDiv, transform);
+      }
+      this._textDivProperties.set(textDiv, textDivProperties);
+      textLayerFrag.appendChild(textDiv);
+    },
+
     _render: function TextLayer_render(timeout) {
       var _this = this;
 
-      var textItems = this._textContent.items;
-      var textStyles = this._textContent.styles;
-      for (var i = 0, len = textItems.length; i < len; i++) {
-        appendText(this, textItems[i], textStyles);
-      }
-      if (!timeout) {
-        render(this);
+      var capability = (0, _util.createPromiseCapability)();
+      var styleCache = Object.create(null);
+      var canvas = document.createElement('canvas');
+      this._layoutTextCtx = canvas.getContext('2d', { alpha: false });
+      if (this._textContent) {
+        var textItems = this._textContent.items;
+        var textStyles = this._textContent.styles;
+        this._processItems(textItems, textStyles);
+        capability.resolve();
+      } else if (this._textContentStream) {
+        var pump = function pump() {
+          _this._reader.read().then(function (_ref2) {
+            var value = _ref2.value,
+                done = _ref2.done;
+
+            if (done) {
+              capability.resolve();
+              return;
+            }
+            _util.Util.extendObj(styleCache, value.styles);
+            _this._processItems(value.items, styleCache);
+            pump();
+          }, capability.reject);
+        };
+        this._reader = this._textContentStream.getReader();
+        pump();
       } else {
-        this._renderTimer = setTimeout(function () {
-          render(_this);
-          _this._renderTimer = null;
-        }, timeout);
+        throw new Error('Neither "textContent" nor "textContentStream"' + ' parameters specified.');
       }
+      capability.promise.then(function () {
+        styleCache = null;
+        if (!timeout) {
+          render(_this);
+        } else {
+          _this._renderTimer = setTimeout(function () {
+            render(_this);
+            _this._renderTimer = null;
+          }, timeout);
+        }
+      }, this._capability.reject);
     },
     expandTextDivs: function TextLayer_expandTextDivs(expandDivs) {
       if (!this._enhanceTextSelection || !this._renderingDone) {
@@ -14550,7 +14650,15 @@ var renderTextLayer = function renderTextLayerClosure() {
     }
   };
   function renderTextLayer(renderParameters) {
-    var task = new TextLayerRenderTask(renderParameters.textContent, renderParameters.container, renderParameters.viewport, renderParameters.textDivs, renderParameters.enhanceTextSelection);
+    var task = new TextLayerRenderTask({
+      textContent: renderParameters.textContent,
+      textContentStream: renderParameters.textContentStream,
+      container: renderParameters.container,
+      viewport: renderParameters.viewport,
+      textDivs: renderParameters.textDivs,
+      textContentItemsStr: renderParameters.textContentItemsStr,
+      enhanceTextSelection: renderParameters.enhanceTextSelection
+    });
     task._render(renderParameters.timeout);
     return task;
   }
@@ -18392,6 +18500,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.PartialEvaluator = exports.OperatorList = undefined;
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _util = __w_pdfjs_require__(0);
 
 var _cmap = __w_pdfjs_require__(31);
@@ -19350,7 +19460,10 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           _ref3$normalizeWhites = _ref3.normalizeWhitespace,
           normalizeWhitespace = _ref3$normalizeWhites === undefined ? false : _ref3$normalizeWhites,
           _ref3$combineTextItem = _ref3.combineTextItems,
-          combineTextItems = _ref3$combineTextItem === undefined ? false : _ref3$combineTextItem;
+          combineTextItems = _ref3$combineTextItem === undefined ? false : _ref3$combineTextItem,
+          sink = _ref3.sink,
+          _ref3$seenStyles = _ref3.seenStyles,
+          seenStyles = _ref3$seenStyles === undefined ? Object.create(null) : _ref3$seenStyles;
 
       resources = resources || _primitives.Dict.empty;
       stateManager = stateManager || new StateManager(new TextState());
@@ -19382,7 +19495,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       var self = this;
       var xref = this.xref;
       var xobjs = null;
-      var xobjsCache = Object.create(null);
+      var skipEmptyXObjs = Object.create(null);
       var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
       var textState;
       function ensureTextContentItem() {
@@ -19390,7 +19503,8 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           return textContentItem;
         }
         var font = textState.font;
-        if (!(font.loadedName in textContent.styles)) {
+        if (!(font.loadedName in seenStyles)) {
+          seenStyles[font.loadedName] = true;
           textContent.styles[font.loadedName] = {
             fontFamily: font.fallbackName,
             ascent: font.ascent,
@@ -19545,10 +19659,19 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         textContentItem.initialized = false;
         textContentItem.str.length = 0;
       }
+      function enqueueChunk() {
+        var length = textContent.items.length;
+        if (length > 0) {
+          sink.enqueue(textContent, length);
+          textContent.items = [];
+          textContent.styles = Object.create(null);
+        }
+      }
       var timeSlotManager = new TimeSlotManager();
       return new Promise(function promiseBody(resolve, reject) {
         var next = function next(promise) {
-          promise.then(function () {
+          enqueueChunk();
+          Promise.all([promise, sink.ready]).then(function () {
             try {
               promiseBody(resolve, reject);
             } catch (ex) {
@@ -19571,196 +19694,248 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           var fn = operation.fn;
           args = operation.args;
           var advance, diff;
-          switch (fn | 0) {
-            case _util.OPS.setFont:
-              var fontNameArg = args[0].name,
-                  fontSizeArg = args[1];
-              if (textState.font && fontNameArg === textState.fontName && fontSizeArg === textState.fontSize) {
+          var fontNameArg, fontSizeArg;
+          var isSameTextLine;
+          var items;
+          var offset;
+          var j, jj;
+          var breakTextRun;
+          var name;
+          var xobj;
+          var type;
+          var currentState;
+          var xObjStateManager;
+          var matrix;
+          var dictName;
+          var extGState;
+          var gState;
+          var gStateFont;
+
+          var _ret2 = function () {
+            switch (fn | 0) {
+              case _util.OPS.setFont:
+                fontNameArg = args[0].name;
+                fontSizeArg = args[1];
+
+                if (textState.font && fontNameArg === textState.fontName && fontSizeArg === textState.fontSize) {
+                  break;
+                }
+                flushTextContentItem();
+                textState.fontName = fontNameArg;
+                textState.fontSize = fontSizeArg;
+                next(handleSetFont(fontNameArg, null));
+                return {
+                  v: void 0
+                };
+              case _util.OPS.setTextRise:
+                flushTextContentItem();
+                textState.textRise = args[0];
                 break;
-              }
-              flushTextContentItem();
-              textState.fontName = fontNameArg;
-              textState.fontSize = fontSizeArg;
-              next(handleSetFont(fontNameArg, null));
-              return;
-            case _util.OPS.setTextRise:
-              flushTextContentItem();
-              textState.textRise = args[0];
-              break;
-            case _util.OPS.setHScale:
-              flushTextContentItem();
-              textState.textHScale = args[0] / 100;
-              break;
-            case _util.OPS.setLeading:
-              flushTextContentItem();
-              textState.leading = args[0];
-              break;
-            case _util.OPS.moveText:
-              var isSameTextLine = !textState.font ? false : (textState.font.vertical ? args[0] : args[1]) === 0;
-              advance = args[0] - args[1];
-              if (combineTextItems && isSameTextLine && textContentItem.initialized && advance > 0 && advance <= textContentItem.fakeMultiSpaceMax) {
+              case _util.OPS.setHScale:
+                flushTextContentItem();
+                textState.textHScale = args[0] / 100;
+                break;
+              case _util.OPS.setLeading:
+                flushTextContentItem();
+                textState.leading = args[0];
+                break;
+              case _util.OPS.moveText:
+                isSameTextLine = !textState.font ? false : (textState.font.vertical ? args[0] : args[1]) === 0;
+
+                advance = args[0] - args[1];
+                if (combineTextItems && isSameTextLine && textContentItem.initialized && advance > 0 && advance <= textContentItem.fakeMultiSpaceMax) {
+                  textState.translateTextLineMatrix(args[0], args[1]);
+                  textContentItem.width += args[0] - textContentItem.lastAdvanceWidth;
+                  textContentItem.height += args[1] - textContentItem.lastAdvanceHeight;
+                  diff = args[0] - textContentItem.lastAdvanceWidth - (args[1] - textContentItem.lastAdvanceHeight);
+                  addFakeSpaces(diff, textContentItem.str);
+                  break;
+                }
+                flushTextContentItem();
                 textState.translateTextLineMatrix(args[0], args[1]);
-                textContentItem.width += args[0] - textContentItem.lastAdvanceWidth;
-                textContentItem.height += args[1] - textContentItem.lastAdvanceHeight;
-                diff = args[0] - textContentItem.lastAdvanceWidth - (args[1] - textContentItem.lastAdvanceHeight);
-                addFakeSpaces(diff, textContentItem.str);
+                textState.textMatrix = textState.textLineMatrix.slice();
                 break;
-              }
-              flushTextContentItem();
-              textState.translateTextLineMatrix(args[0], args[1]);
-              textState.textMatrix = textState.textLineMatrix.slice();
-              break;
-            case _util.OPS.setLeadingMoveText:
-              flushTextContentItem();
-              textState.leading = -args[1];
-              textState.translateTextLineMatrix(args[0], args[1]);
-              textState.textMatrix = textState.textLineMatrix.slice();
-              break;
-            case _util.OPS.nextLine:
-              flushTextContentItem();
-              textState.carriageReturn();
-              break;
-            case _util.OPS.setTextMatrix:
-              advance = textState.calcTextLineMatrixAdvance(args[0], args[1], args[2], args[3], args[4], args[5]);
-              if (combineTextItems && advance !== null && textContentItem.initialized && advance.value > 0 && advance.value <= textContentItem.fakeMultiSpaceMax) {
-                textState.translateTextLineMatrix(advance.width, advance.height);
-                textContentItem.width += advance.width - textContentItem.lastAdvanceWidth;
-                textContentItem.height += advance.height - textContentItem.lastAdvanceHeight;
-                diff = advance.width - textContentItem.lastAdvanceWidth - (advance.height - textContentItem.lastAdvanceHeight);
-                addFakeSpaces(diff, textContentItem.str);
+              case _util.OPS.setLeadingMoveText:
+                flushTextContentItem();
+                textState.leading = -args[1];
+                textState.translateTextLineMatrix(args[0], args[1]);
+                textState.textMatrix = textState.textLineMatrix.slice();
                 break;
-              }
-              flushTextContentItem();
-              textState.setTextMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
-              textState.setTextLineMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
-              break;
-            case _util.OPS.setCharSpacing:
-              textState.charSpacing = args[0];
-              break;
-            case _util.OPS.setWordSpacing:
-              textState.wordSpacing = args[0];
-              break;
-            case _util.OPS.beginText:
-              flushTextContentItem();
-              textState.textMatrix = _util.IDENTITY_MATRIX.slice();
-              textState.textLineMatrix = _util.IDENTITY_MATRIX.slice();
-              break;
-            case _util.OPS.showSpacedText:
-              var items = args[0];
-              var offset;
-              for (var j = 0, jj = items.length; j < jj; j++) {
-                if (typeof items[j] === 'string') {
-                  buildTextContentItem(items[j]);
-                } else if ((0, _util.isNum)(items[j])) {
-                  ensureTextContentItem();
-                  advance = items[j] * textState.fontSize / 1000;
-                  var breakTextRun = false;
-                  if (textState.font.vertical) {
-                    offset = advance;
-                    textState.translateTextMatrix(0, offset);
-                    breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
-                    if (!breakTextRun) {
-                      textContentItem.height += offset;
+              case _util.OPS.nextLine:
+                flushTextContentItem();
+                textState.carriageReturn();
+                break;
+              case _util.OPS.setTextMatrix:
+                advance = textState.calcTextLineMatrixAdvance(args[0], args[1], args[2], args[3], args[4], args[5]);
+                if (combineTextItems && advance !== null && textContentItem.initialized && advance.value > 0 && advance.value <= textContentItem.fakeMultiSpaceMax) {
+                  textState.translateTextLineMatrix(advance.width, advance.height);
+                  textContentItem.width += advance.width - textContentItem.lastAdvanceWidth;
+                  textContentItem.height += advance.height - textContentItem.lastAdvanceHeight;
+                  diff = advance.width - textContentItem.lastAdvanceWidth - (advance.height - textContentItem.lastAdvanceHeight);
+                  addFakeSpaces(diff, textContentItem.str);
+                  break;
+                }
+                flushTextContentItem();
+                textState.setTextMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
+                textState.setTextLineMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
+                break;
+              case _util.OPS.setCharSpacing:
+                textState.charSpacing = args[0];
+                break;
+              case _util.OPS.setWordSpacing:
+                textState.wordSpacing = args[0];
+                break;
+              case _util.OPS.beginText:
+                flushTextContentItem();
+                textState.textMatrix = _util.IDENTITY_MATRIX.slice();
+                textState.textLineMatrix = _util.IDENTITY_MATRIX.slice();
+                break;
+              case _util.OPS.showSpacedText:
+                items = args[0];
+
+                for (j = 0, jj = items.length; j < jj; j++) {
+                  if (typeof items[j] === 'string') {
+                    buildTextContentItem(items[j]);
+                  } else if ((0, _util.isNum)(items[j])) {
+                    ensureTextContentItem();
+                    advance = items[j] * textState.fontSize / 1000;
+                    breakTextRun = false;
+
+                    if (textState.font.vertical) {
+                      offset = advance;
+                      textState.translateTextMatrix(0, offset);
+                      breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
+                      if (!breakTextRun) {
+                        textContentItem.height += offset;
+                      }
+                    } else {
+                      advance = -advance;
+                      offset = advance * textState.textHScale;
+                      textState.translateTextMatrix(offset, 0);
+                      breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
+                      if (!breakTextRun) {
+                        textContentItem.width += offset;
+                      }
                     }
-                  } else {
-                    advance = -advance;
-                    offset = advance * textState.textHScale;
-                    textState.translateTextMatrix(offset, 0);
-                    breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
-                    if (!breakTextRun) {
-                      textContentItem.width += offset;
+                    if (breakTextRun) {
+                      flushTextContentItem();
+                    } else if (advance > 0) {
+                      addFakeSpaces(advance, textContentItem.str);
                     }
                   }
-                  if (breakTextRun) {
-                    flushTextContentItem();
-                  } else if (advance > 0) {
-                    addFakeSpaces(advance, textContentItem.str);
+                }
+                break;
+              case _util.OPS.showText:
+                buildTextContentItem(args[0]);
+                break;
+              case _util.OPS.nextLineShowText:
+                flushTextContentItem();
+                textState.carriageReturn();
+                buildTextContentItem(args[0]);
+                break;
+              case _util.OPS.nextLineSetSpacingShowText:
+                flushTextContentItem();
+                textState.wordSpacing = args[0];
+                textState.charSpacing = args[1];
+                textState.carriageReturn();
+                buildTextContentItem(args[2]);
+                break;
+              case _util.OPS.paintXObject:
+                flushTextContentItem();
+                if (args[0].code) {
+                  break;
+                }
+                if (!xobjs) {
+                  xobjs = resources.get('XObject') || _primitives.Dict.empty;
+                }
+                name = args[0].name;
+
+                if (name in skipEmptyXObjs) {
+                  break;
+                }
+                xobj = xobjs.get(name);
+
+                if (!xobj) {
+                  break;
+                }
+                (0, _util.assert)((0, _primitives.isStream)(xobj), 'XObject should be a stream');
+                type = xobj.dict.get('Subtype');
+
+                (0, _util.assert)((0, _primitives.isName)(type), 'XObject should have a Name subtype');
+                if (type.name !== 'Form') {
+                  skipEmptyXObjs[name] = true;
+                  break;
+                }
+                currentState = stateManager.state.clone();
+                xObjStateManager = new StateManager(currentState);
+                matrix = xobj.dict.getArray('Matrix');
+
+                if ((0, _util.isArray)(matrix) && matrix.length === 6) {
+                  xObjStateManager.transform(matrix);
+                }
+                enqueueChunk();
+                var sinkWrapper = {
+                  enqueueInvoked: false,
+                  enqueue: function enqueue(chunk, size) {
+                    this.enqueueInvoked = true;
+                    sink.enqueue(chunk, size);
+                  },
+
+                  get desiredSize() {
+                    return sink.desiredSize;
+                  },
+                  get ready() {
+                    return sink.ready;
                   }
+                };
+                next(self.getTextContent({
+                  stream: xobj,
+                  task: task,
+                  resources: xobj.dict.get('Resources') || resources,
+                  stateManager: xObjStateManager,
+                  normalizeWhitespace: normalizeWhitespace,
+                  combineTextItems: combineTextItems,
+                  sink: sinkWrapper,
+                  seenStyles: seenStyles
+                }).then(function () {
+                  if (!sinkWrapper.enqueueInvoked) {
+                    skipEmptyXObjs[name] = true;
+                  }
+                }));
+                return {
+                  v: void 0
+                };
+              case _util.OPS.setGState:
+                flushTextContentItem();
+                dictName = args[0];
+                extGState = resources.get('ExtGState');
+
+                if (!(0, _primitives.isDict)(extGState) || !(0, _primitives.isName)(dictName)) {
+                  break;
                 }
-              }
-              break;
-            case _util.OPS.showText:
-              buildTextContentItem(args[0]);
-              break;
-            case _util.OPS.nextLineShowText:
-              flushTextContentItem();
-              textState.carriageReturn();
-              buildTextContentItem(args[0]);
-              break;
-            case _util.OPS.nextLineSetSpacingShowText:
-              flushTextContentItem();
-              textState.wordSpacing = args[0];
-              textState.charSpacing = args[1];
-              textState.carriageReturn();
-              buildTextContentItem(args[2]);
-              break;
-            case _util.OPS.paintXObject:
-              flushTextContentItem();
-              if (args[0].code) {
-                break;
-              }
-              if (!xobjs) {
-                xobjs = resources.get('XObject') || _primitives.Dict.empty;
-              }
-              var name = args[0].name;
-              if (xobjsCache.key === name) {
-                if (xobjsCache.texts) {
-                  _util.Util.appendToArray(textContent.items, xobjsCache.texts.items);
-                  _util.Util.extendObj(textContent.styles, xobjsCache.texts.styles);
+                gState = extGState.get(dictName.name);
+
+                if (!(0, _primitives.isDict)(gState)) {
+                  break;
+                }
+                gStateFont = gState.get('Font');
+
+                if (gStateFont) {
+                  textState.fontName = null;
+                  textState.fontSize = gStateFont[1];
+                  next(handleSetFont(null, gStateFont[0]));
+                  return {
+                    v: void 0
+                  };
                 }
                 break;
-              }
-              var xobj = xobjs.get(name);
-              if (!xobj) {
-                break;
-              }
-              (0, _util.assert)((0, _primitives.isStream)(xobj), 'XObject should be a stream');
-              var type = xobj.dict.get('Subtype');
-              (0, _util.assert)((0, _primitives.isName)(type), 'XObject should have a Name subtype');
-              if (type.name !== 'Form') {
-                xobjsCache.key = name;
-                xobjsCache.texts = null;
-                break;
-              }
-              var currentState = stateManager.state.clone();
-              var xObjStateManager = new StateManager(currentState);
-              var matrix = xobj.dict.getArray('Matrix');
-              if ((0, _util.isArray)(matrix) && matrix.length === 6) {
-                xObjStateManager.transform(matrix);
-              }
-              next(self.getTextContent({
-                stream: xobj,
-                task: task,
-                resources: xobj.dict.get('Resources') || resources,
-                stateManager: xObjStateManager,
-                normalizeWhitespace: normalizeWhitespace,
-                combineTextItems: combineTextItems
-              }).then(function (formTextContent) {
-                _util.Util.appendToArray(textContent.items, formTextContent.items);
-                _util.Util.extendObj(textContent.styles, formTextContent.styles);
-                xobjsCache.key = name;
-                xobjsCache.texts = formTextContent;
-              }));
-              return;
-            case _util.OPS.setGState:
-              flushTextContentItem();
-              var dictName = args[0];
-              var extGState = resources.get('ExtGState');
-              if (!(0, _primitives.isDict)(extGState) || !(0, _primitives.isName)(dictName)) {
-                break;
-              }
-              var gState = extGState.get(dictName.name);
-              if (!(0, _primitives.isDict)(gState)) {
-                break;
-              }
-              var gStateFont = gState.get('Font');
-              if (gStateFont) {
-                textState.fontName = null;
-                textState.fontSize = gStateFont[1];
-                next(handleSetFont(null, gStateFont[0]));
-                return;
-              }
-              break;
+            }
+          }();
+
+          if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
+          if (textContent.items.length >= sink.desiredSize) {
+            stop = true;
+            break;
           }
         }
         if (stop) {
@@ -19768,12 +19943,14 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           return;
         }
         flushTextContentItem();
-        resolve(textContent);
+        enqueueChunk();
+        resolve();
       }).catch(function (reason) {
         if (_this9.options.ignoreErrors) {
           (0, _util.warn)('getTextContent - ignoring errors during task: ' + task.name);
           flushTextContentItem();
-          return textContent;
+          enqueueChunk();
+          return;
         }
         throw reason;
       });
@@ -27884,27 +28061,31 @@ var WorkerMessageHandler = {
         });
       });
     }, this);
-    handler.on('GetTextContent', function wphExtractText(data) {
+    handler.on('GetTextContent', function wphExtractText(data, sink) {
       var pageIndex = data.pageIndex;
-      return pdfManager.getPage(pageIndex).then(function (page) {
+      sink.onPull = function (desiredSize) {};
+      sink.onCancel = function (reason) {};
+      pdfManager.getPage(pageIndex).then(function (page) {
         var task = new WorkerTask('GetTextContent: page ' + pageIndex);
         startWorkerTask(task);
         var pageNum = pageIndex + 1;
         var start = Date.now();
-        return page.extractTextContent({
+        page.extractTextContent({
           handler: handler,
           task: task,
+          sink: sink,
           normalizeWhitespace: data.normalizeWhitespace,
           combineTextItems: data.combineTextItems
-        }).then(function (textContent) {
+        }).then(function () {
           finishWorkerTask(task);
           (0, _util.info)('text indexing: page=' + pageNum + ' - time=' + (Date.now() - start) + 'ms');
-          return textContent;
+          sink.close();
         }, function (reason) {
           finishWorkerTask(task);
           if (task.terminated) {
             return;
           }
+          sink.error(reason);
           throw reason;
         });
       });
@@ -28436,8 +28617,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.482';
-  PDFJS.build = 'd1567a94';
+  PDFJS.version = '1.8.484';
+  PDFJS.build = 'e2ca894f';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -33423,6 +33604,7 @@ var Page = function PageClosure() {
       var handler = _ref6.handler,
           task = _ref6.task,
           normalizeWhitespace = _ref6.normalizeWhitespace,
+          sink = _ref6.sink,
           combineTextItems = _ref6.combineTextItems;
 
       var contentStreamPromise = this.pdfManager.ensure(this, 'getContentStream');
@@ -33447,7 +33629,8 @@ var Page = function PageClosure() {
           task: task,
           resources: _this3.resources,
           normalizeWhitespace: normalizeWhitespace,
-          combineTextItems: combineTextItems
+          combineTextItems: combineTextItems,
+          sink: sink
         });
       });
     },
@@ -47054,8 +47237,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.482';
-var pdfjsBuild = 'd1567a94';
+var pdfjsVersion = '1.8.484';
+var pdfjsBuild = 'e2ca894f';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
