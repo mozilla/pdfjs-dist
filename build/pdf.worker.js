@@ -31134,23 +31134,23 @@ var Font = function FontClosure() {
           type = 'Type1';
         }
       } else if (isOpenTypeFile(file)) {
-        type = subtype = 'OpenType';
+        subtype = 'OpenType';
       }
     }
     if (subtype === 'CIDFontType0C' && type !== 'CIDFontType0') {
       type = 'CIDFontType0';
     }
-    if (subtype === 'OpenType') {
-      type = 'OpenType';
-    }
     if (type === 'CIDFontType0') {
       if (isType1File(file)) {
         subtype = 'CIDFontType0';
       } else if (isOpenTypeFile(file)) {
-        type = subtype = 'OpenType';
+        subtype = 'OpenType';
       } else {
         subtype = 'CIDFontType0C';
       }
+    }
+    if (subtype === 'OpenType' && type !== 'OpenType') {
+      type = 'OpenType';
     }
     var data;
     switch (type) {
@@ -32294,7 +32294,7 @@ var Font = function FontClosure() {
       }
       var isTrueType = !tables['CFF '];
       if (!isTrueType) {
-        if (header.version === 'OTTO' && !properties.composite || !tables['head'] || !tables['hhea'] || !tables['maxp'] || !tables['post']) {
+        if (header.version === 'OTTO' && !(properties.composite && properties.cidToGidMap) || !tables['head'] || !tables['hhea'] || !tables['maxp'] || !tables['post']) {
           cffFile = new _stream.Stream(tables['CFF '].data);
           cff = new CFFFont(cffFile, properties);
           adjustWidths(properties);
@@ -40403,8 +40403,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.484';
-var pdfjsBuild = 'e2ca894f';
+var pdfjsVersion = '1.8.487';
+var pdfjsBuild = 'f1f9d985';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);

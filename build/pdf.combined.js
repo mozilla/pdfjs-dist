@@ -13125,8 +13125,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.484';
-  exports.build = build = 'e2ca894f';
+  exports.version = version = '1.8.487';
+  exports.build = build = 'f1f9d985';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -28617,8 +28617,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.484';
-  PDFJS.build = 'e2ca894f';
+  PDFJS.version = '1.8.487';
+  PDFJS.build = 'f1f9d985';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35066,23 +35066,23 @@ var Font = function FontClosure() {
           type = 'Type1';
         }
       } else if (isOpenTypeFile(file)) {
-        type = subtype = 'OpenType';
+        subtype = 'OpenType';
       }
     }
     if (subtype === 'CIDFontType0C' && type !== 'CIDFontType0') {
       type = 'CIDFontType0';
     }
-    if (subtype === 'OpenType') {
-      type = 'OpenType';
-    }
     if (type === 'CIDFontType0') {
       if (isType1File(file)) {
         subtype = 'CIDFontType0';
       } else if (isOpenTypeFile(file)) {
-        type = subtype = 'OpenType';
+        subtype = 'OpenType';
       } else {
         subtype = 'CIDFontType0C';
       }
+    }
+    if (subtype === 'OpenType' && type !== 'OpenType') {
+      type = 'OpenType';
     }
     var data;
     switch (type) {
@@ -36226,7 +36226,7 @@ var Font = function FontClosure() {
       }
       var isTrueType = !tables['CFF '];
       if (!isTrueType) {
-        if (header.version === 'OTTO' && !properties.composite || !tables['head'] || !tables['hhea'] || !tables['maxp'] || !tables['post']) {
+        if (header.version === 'OTTO' && !(properties.composite && properties.cidToGidMap) || !tables['head'] || !tables['hhea'] || !tables['maxp'] || !tables['post']) {
           cffFile = new _stream.Stream(tables['CFF '].data);
           cff = new CFFFont(cffFile, properties);
           adjustWidths(properties);
@@ -47237,8 +47237,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.484';
-var pdfjsBuild = 'e2ca894f';
+var pdfjsVersion = '1.8.487';
+var pdfjsBuild = 'f1f9d985';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
