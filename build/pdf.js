@@ -3854,8 +3854,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.489';
-  exports.build = build = 'd3a3b1db';
+  exports.version = version = '1.8.492';
+  exports.build = build = '859e3d4d';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -4528,9 +4528,15 @@ var SVGGraphics = function SVGGraphics() {
       setMiterLimit: function SVGGraphics_setMiterLimit(limit) {
         this.current.miterLimit = limit;
       },
+      setStrokeAlpha: function SVGGraphics_setStrokeAlpha(strokeAlpha) {
+        this.current.strokeAlpha = strokeAlpha;
+      },
       setStrokeRGBColor: function SVGGraphics_setStrokeRGBColor(r, g, b) {
         var color = _util.Util.makeCssRgb(r, g, b);
         this.current.strokeColor = color;
+      },
+      setFillAlpha: function SVGGraphics_setFillAlpha(fillAlpha) {
+        this.current.fillAlpha = fillAlpha;
       },
       setFillRGBColor: function SVGGraphics_setFillRGBColor(r, g, b) {
         var color = _util.Util.makeCssRgb(r, g, b);
@@ -4675,6 +4681,12 @@ var SVGGraphics = function SVGGraphics() {
             case 'Font':
               this.setFont(value);
               break;
+            case 'CA':
+              this.setStrokeAlpha(value);
+              break;
+            case 'ca':
+              this.setFillAlpha(value);
+              break;
             default:
               (0, _util.warn)('Unimplemented graphic state ' + key);
               break;
@@ -4684,16 +4696,17 @@ var SVGGraphics = function SVGGraphics() {
       fill: function SVGGraphics_fill() {
         var current = this.current;
         current.element.setAttributeNS(null, 'fill', current.fillColor);
+        current.element.setAttributeNS(null, 'fill-opacity', current.fillAlpha);
       },
       stroke: function SVGGraphics_stroke() {
         var current = this.current;
         current.element.setAttributeNS(null, 'stroke', current.strokeColor);
+        current.element.setAttributeNS(null, 'stroke-opacity', current.strokeAlpha);
         current.element.setAttributeNS(null, 'fill', 'none');
       },
       eoFill: function SVGGraphics_eoFill() {
-        var current = this.current;
-        current.element.setAttributeNS(null, 'fill', current.fillColor);
-        current.element.setAttributeNS(null, 'fill-rule', 'evenodd');
+        this.current.element.setAttributeNS(null, 'fill-rule', 'evenodd');
+        this.fill();
       },
       fillStroke: function SVGGraphics_fillStroke() {
         this.stroke();
@@ -5899,8 +5912,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.489';
-  PDFJS.build = 'd3a3b1db';
+  PDFJS.version = '1.8.492';
+  PDFJS.build = '859e3d4d';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -11439,8 +11452,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.489';
-var pdfjsBuild = 'd3a3b1db';
+var pdfjsVersion = '1.8.492';
+var pdfjsBuild = '859e3d4d';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
