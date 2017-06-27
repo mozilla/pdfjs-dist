@@ -13125,8 +13125,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.495';
-  exports.build = build = 'f87f0d68';
+  exports.version = version = '1.8.497';
+  exports.build = build = 'f2fcf2a5';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -13871,12 +13871,6 @@ var SVGGraphics = function SVGGraphics() {
           }
         }
         current.path.setAttributeNS(null, 'd', d.join(' '));
-        current.path.setAttributeNS(null, 'stroke-miterlimit', pf(current.miterLimit));
-        current.path.setAttributeNS(null, 'stroke-linecap', current.lineCap);
-        current.path.setAttributeNS(null, 'stroke-linejoin', current.lineJoin);
-        current.path.setAttributeNS(null, 'stroke-width', pf(current.lineWidth) + 'px');
-        current.path.setAttributeNS(null, 'stroke-dasharray', current.dashArray.map(pf).join(' '));
-        current.path.setAttributeNS(null, 'stroke-dashoffset', pf(current.dashPhase) + 'px');
         current.path.setAttributeNS(null, 'fill', 'none');
         this._ensureTransformGroup().appendChild(current.path);
         current.element = current.path;
@@ -13973,6 +13967,12 @@ var SVGGraphics = function SVGGraphics() {
         var current = this.current;
         current.element.setAttributeNS(null, 'stroke', current.strokeColor);
         current.element.setAttributeNS(null, 'stroke-opacity', current.strokeAlpha);
+        current.element.setAttributeNS(null, 'stroke-miterlimit', pf(current.miterLimit));
+        current.element.setAttributeNS(null, 'stroke-linecap', current.lineCap);
+        current.element.setAttributeNS(null, 'stroke-linejoin', current.lineJoin);
+        current.element.setAttributeNS(null, 'stroke-width', pf(current.lineWidth) + 'px');
+        current.element.setAttributeNS(null, 'stroke-dasharray', current.dashArray.map(pf).join(' '));
+        current.element.setAttributeNS(null, 'stroke-dashoffset', pf(current.dashPhase) + 'px');
         current.element.setAttributeNS(null, 'fill', 'none');
       },
       eoFill: function SVGGraphics_eoFill() {
@@ -28630,8 +28630,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.495';
-  PDFJS.build = 'f87f0d68';
+  PDFJS.version = '1.8.497';
+  PDFJS.build = 'f2fcf2a5';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47250,8 +47250,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.495';
-var pdfjsBuild = 'f87f0d68';
+var pdfjsVersion = '1.8.497';
+var pdfjsBuild = 'f2fcf2a5';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(26);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
