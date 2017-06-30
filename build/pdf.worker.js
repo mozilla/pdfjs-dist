@@ -11282,6 +11282,7 @@ var WorkerMessageHandler = {
         handler.send('GetDoc', { pdfInfo: doc });
       }
       function onFailure(e) {
+        ensureNotTerminated();
         if (e instanceof _util.PasswordException) {
           var task = new WorkerTask('PasswordException: response ' + e.code);
           startWorkerTask(task);
@@ -40403,8 +40404,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.505';
-var pdfjsBuild = '82bd62ec';
+var pdfjsVersion = '1.8.507';
+var pdfjsBuild = '9e4dcf15';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
