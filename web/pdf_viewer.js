@@ -1691,31 +1691,49 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.DefaultTextLayerFactory = exports.TextLayerBuilder = undefined;
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _dom_events = __w_pdfjs_require__(2);
 
 var _pdfjsLib = __w_pdfjs_require__(0);
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 var EXPAND_DIVS_TIMEOUT = 300;
-var TextLayerBuilder = function TextLayerBuilderClosure() {
-  function TextLayerBuilder(options) {
-    this.textLayerDiv = options.textLayerDiv;
-    this.eventBus = options.eventBus || (0, _dom_events.getGlobalEventBus)();
+
+var TextLayerBuilder = function () {
+  function TextLayerBuilder(_ref) {
+    var textLayerDiv = _ref.textLayerDiv,
+        eventBus = _ref.eventBus,
+        pageIndex = _ref.pageIndex,
+        viewport = _ref.viewport,
+        _ref$findController = _ref.findController,
+        findController = _ref$findController === undefined ? null : _ref$findController,
+        _ref$enhanceTextSelec = _ref.enhanceTextSelection,
+        enhanceTextSelection = _ref$enhanceTextSelec === undefined ? false : _ref$enhanceTextSelec;
+
+    _classCallCheck(this, TextLayerBuilder);
+
+    this.textLayerDiv = textLayerDiv;
+    this.eventBus = eventBus || (0, _dom_events.getGlobalEventBus)();
     this.textContent = null;
     this.textContentItemsStr = [];
     this.textContentStream = null;
     this.renderingDone = false;
-    this.pageIdx = options.pageIndex;
+    this.pageIdx = pageIndex;
     this.pageNumber = this.pageIdx + 1;
     this.matches = [];
-    this.viewport = options.viewport;
+    this.viewport = viewport;
     this.textDivs = [];
-    this.findController = options.findController || null;
+    this.findController = findController;
     this.textLayerRenderTask = null;
-    this.enhanceTextSelection = options.enhanceTextSelection;
+    this.enhanceTextSelection = enhanceTextSelection;
     this._bindMouse();
   }
-  TextLayerBuilder.prototype = {
-    _finishRendering: function TextLayerBuilder_finishRendering() {
+
+  _createClass(TextLayerBuilder, [{
+    key: '_finishRendering',
+    value: function _finishRendering() {
       this.renderingDone = true;
       if (!this.enhanceTextSelection) {
         var endOfContent = document.createElement('div');
@@ -1727,9 +1745,13 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
         pageNumber: this.pageNumber,
         numTextDivs: this.textDivs.length
       });
-    },
-    render: function TextLayerBuilder_render(timeout) {
+    }
+  }, {
+    key: 'render',
+    value: function render() {
       var _this = this;
+
+      var timeout = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
 
       if (!(this.textContent || this.textContentStream) || this.renderingDone) {
         return;
@@ -1752,23 +1774,30 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
         _this._finishRendering();
         _this.updateMatches();
       }, function (reason) {});
-    },
-    cancel: function TextLayerBuilder_cancel() {
+    }
+  }, {
+    key: 'cancel',
+    value: function cancel() {
       if (this.textLayerRenderTask) {
         this.textLayerRenderTask.cancel();
         this.textLayerRenderTask = null;
       }
-    },
-    setTextContentStream: function setTextContentStream(readableStream) {
+    }
+  }, {
+    key: 'setTextContentStream',
+    value: function setTextContentStream(readableStream) {
       this.cancel();
       this.textContentStream = readableStream;
-    },
-
-    setTextContent: function TextLayerBuilder_setTextContent(textContent) {
+    }
+  }, {
+    key: 'setTextContent',
+    value: function setTextContent(textContent) {
       this.cancel();
       this.textContent = textContent;
-    },
-    convertMatches: function TextLayerBuilder_convertMatches(matches, matchesLength) {
+    }
+  }, {
+    key: 'convertMatches',
+    value: function convertMatches(matches, matchesLength) {
       var i = 0;
       var iIndex = 0;
       var textContentItemsStr = this.textContentItemsStr;
@@ -1809,8 +1838,10 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
         ret.push(match);
       }
       return ret;
-    },
-    renderMatches: function TextLayerBuilder_renderMatches(matches) {
+    }
+  }, {
+    key: 'renderMatches',
+    value: function renderMatches(matches) {
       if (matches.length === 0) {
         return;
       }
@@ -1882,8 +1913,10 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
       if (prevEnd) {
         appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
       }
-    },
-    updateMatches: function TextLayerBuilder_updateMatches() {
+    }
+  }, {
+    key: 'updateMatches',
+    value: function updateMatches() {
       if (!this.renderingDone) {
         return;
       }
@@ -1904,21 +1937,25 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
       if (this.findController === null || !this.findController.active) {
         return;
       }
-      var pageMatches, pageMatchesLength;
+      var pageMatches = void 0,
+          pageMatchesLength = void 0;
       if (this.findController !== null) {
         pageMatches = this.findController.pageMatches[this.pageIdx] || null;
         pageMatchesLength = this.findController.pageMatchesLength ? this.findController.pageMatchesLength[this.pageIdx] || null : null;
       }
       this.matches = this.convertMatches(pageMatches, pageMatchesLength);
       this.renderMatches(this.matches);
-    },
-    _bindMouse: function TextLayerBuilder_bindMouse() {
+    }
+  }, {
+    key: '_bindMouse',
+    value: function _bindMouse() {
+      var _this2 = this;
+
       var div = this.textLayerDiv;
-      var self = this;
       var expandDivsTimer = null;
-      div.addEventListener('mousedown', function (e) {
-        if (self.enhanceTextSelection && self.textLayerRenderTask) {
-          self.textLayerRenderTask.expandTextDivs(true);
+      div.addEventListener('mousedown', function (evt) {
+        if (_this2.enhanceTextSelection && _this2.textLayerRenderTask) {
+          _this2.textLayerRenderTask.expandTextDivs(true);
           if (expandDivsTimer) {
             clearTimeout(expandDivsTimer);
             expandDivsTimer = null;
@@ -1929,20 +1966,20 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
         if (!end) {
           return;
         }
-        var adjustTop = e.target !== div;
+        var adjustTop = evt.target !== div;
         adjustTop = adjustTop && window.getComputedStyle(end).getPropertyValue('-moz-user-select') !== 'none';
         if (adjustTop) {
           var divBounds = div.getBoundingClientRect();
-          var r = Math.max(0, (e.pageY - divBounds.top) / divBounds.height);
+          var r = Math.max(0, (evt.pageY - divBounds.top) / divBounds.height);
           end.style.top = (r * 100).toFixed(2) + '%';
         }
         end.classList.add('active');
       });
-      div.addEventListener('mouseup', function (e) {
-        if (self.enhanceTextSelection && self.textLayerRenderTask) {
+      div.addEventListener('mouseup', function () {
+        if (_this2.enhanceTextSelection && _this2.textLayerRenderTask) {
           expandDivsTimer = setTimeout(function () {
-            if (self.textLayerRenderTask) {
-              self.textLayerRenderTask.expandTextDivs(false);
+            if (_this2.textLayerRenderTask) {
+              _this2.textLayerRenderTask.expandTextDivs(false);
             }
             expandDivsTimer = null;
           }, EXPAND_DIVS_TIMEOUT);
@@ -1956,22 +1993,33 @@ var TextLayerBuilder = function TextLayerBuilderClosure() {
         end.classList.remove('active');
       });
     }
-  };
+  }]);
+
   return TextLayerBuilder;
 }();
-function DefaultTextLayerFactory() {}
-DefaultTextLayerFactory.prototype = {
-  createTextLayerBuilder: function createTextLayerBuilder(textLayerDiv, pageIndex, viewport) {
-    var enhanceTextSelection = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
-    return new TextLayerBuilder({
-      textLayerDiv: textLayerDiv,
-      pageIndex: pageIndex,
-      viewport: viewport,
-      enhanceTextSelection: enhanceTextSelection
-    });
+var DefaultTextLayerFactory = function () {
+  function DefaultTextLayerFactory() {
+    _classCallCheck(this, DefaultTextLayerFactory);
   }
-};
+
+  _createClass(DefaultTextLayerFactory, [{
+    key: 'createTextLayerBuilder',
+    value: function createTextLayerBuilder(textLayerDiv, pageIndex, viewport) {
+      var enhanceTextSelection = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+      return new TextLayerBuilder({
+        textLayerDiv: textLayerDiv,
+        pageIndex: pageIndex,
+        viewport: viewport,
+        enhanceTextSelection: enhanceTextSelection
+      });
+    }
+  }]);
+
+  return DefaultTextLayerFactory;
+}();
+
 exports.TextLayerBuilder = TextLayerBuilder;
 exports.DefaultTextLayerFactory = DefaultTextLayerFactory;
 
