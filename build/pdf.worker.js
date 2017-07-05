@@ -24679,7 +24679,10 @@ PDFNetworkStreamFullRequestReader.prototype = {
     }
     if (this._cachedChunks.length > 0) {
       var chunk = this._cachedChunks.shift();
-      return Promise.resolve(chunk);
+      return Promise.resolve({
+        value: chunk,
+        done: false
+      });
     }
     if (this._done) {
       return Promise.resolve({
@@ -40392,8 +40395,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.514';
-var pdfjsBuild = 'eff257b8';
+var pdfjsVersion = '1.8.516';
+var pdfjsBuild = 'b3bac510';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
