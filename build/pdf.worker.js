@@ -4684,7 +4684,7 @@ var Parser = function ParserClosure() {
           ii;
       if (filterName === 'DCTDecode' || filterName === 'DCT') {
         length = this.findDCTDecodeInlineStreamEnd(stream);
-      } else if (filterName === 'ASCII85Decide' || filterName === 'A85') {
+      } else if (filterName === 'ASCII85Decode' || filterName === 'A85') {
         length = this.findASCII85DecodeInlineStreamEnd(stream);
       } else if (filterName === 'ASCIIHexDecode' || filterName === 'AHx') {
         length = this.findASCIIHexDecodeInlineStreamEnd(stream);
@@ -40395,8 +40395,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.516';
-var pdfjsBuild = 'b3bac510';
+var pdfjsVersion = '1.8.518';
+var pdfjsBuild = '1788a6b0';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(19);
