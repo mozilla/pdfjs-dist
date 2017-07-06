@@ -3138,7 +3138,6 @@ var PDFViewer = function pdfViewer() {
         throw new Error('Invalid page number.');
       }
       if (!this.pdfDocument) {
-        this._currentPageNumber = val;
         return;
       }
       this._setCurrentPageNumber(val, true);
@@ -3187,8 +3186,6 @@ var PDFViewer = function pdfViewer() {
         throw new Error('Invalid numeric scale');
       }
       if (!this.pdfDocument) {
-        this._currentScale = val;
-        this._currentScaleValue = val !== _ui_utils.UNKNOWN_SCALE ? val.toString() : null;
         return;
       }
       this._setScale(val, false);
@@ -3198,8 +3195,6 @@ var PDFViewer = function pdfViewer() {
     },
     set currentScaleValue(val) {
       if (!this.pdfDocument) {
-        this._currentScale = isNaN(val) ? _ui_utils.UNKNOWN_SCALE : val;
-        this._currentScaleValue = val.toString();
         return;
       }
       this._setScale(val, false);
@@ -3211,11 +3206,11 @@ var PDFViewer = function pdfViewer() {
       if (!(typeof rotation === 'number' && rotation % 90 === 0)) {
         throw new Error('Invalid pages rotation angle.');
       }
-      this._pagesRotation = rotation;
       if (!this.pdfDocument) {
         return;
       }
-      for (var i = 0, l = this._pages.length; i < l; i++) {
+      this._pagesRotation = rotation;
+      for (var i = 0, ii = this._pages.length; i < ii; i++) {
         var pageView = this._pages[i];
         pageView.update(pageView.scale, rotation);
       }
