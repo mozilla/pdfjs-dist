@@ -101,7 +101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.loadJpegStream = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isNodeJS = exports.isSpace = exports.isString = exports.isNum = exports.isInt = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.isArray = exports.info = exports.globalScope = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.error = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.StatTimer = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VERBOSITY_LEVELS = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
+exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.loadJpegStream = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isNodeJS = exports.isSpace = exports.isString = exports.isNum = exports.isInt = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.isArray = exports.info = exports.globalScope = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.StatTimer = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VERBOSITY_LEVELS = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -349,23 +349,12 @@ function warn(msg) {
 function deprecated(details) {
   console.log('Deprecated API usage: ' + details);
 }
-function error(msg) {
-  if (verbosity >= VERBOSITY_LEVELS.errors) {
-    console.log('Error: ' + msg);
-    console.log(backtrace());
-  }
+function unreachable(msg) {
   throw new Error(msg);
-}
-function backtrace() {
-  try {
-    throw new Error();
-  } catch (e) {
-    return e.stack ? e.stack.split('\n').slice(2).join('\n') : '';
-  }
 }
 function assert(cond, msg) {
   if (!cond) {
-    error(msg);
+    unreachable(msg);
   }
 }
 var UNSUPPORTED_FEATURES = {
@@ -515,6 +504,15 @@ var XRefParseException = function XRefParseExceptionClosure() {
   XRefParseException.prototype.name = 'XRefParseException';
   XRefParseException.constructor = XRefParseException;
   return XRefParseException;
+}();
+var FormatError = function FormatErrorClosure() {
+  function FormatError(msg) {
+    this.message = msg;
+  }
+  FormatError.prototype = new Error();
+  FormatError.prototype.name = 'FormatError';
+  FormatError.constructor = FormatError;
+  return FormatError;
 }();
 var NullCharactersRegExp = /\x00/g;
 function removeNullCharacters(str) {
@@ -1052,7 +1050,7 @@ function MessageHandler(sourceName, targetName, comObj) {
           callback.resolve(data.data);
         }
       } else {
-        error('Cannot resolve callback ' + callbackId);
+        throw new Error('Cannot resolve callback ' + callbackId);
       }
     } else if (data.action in ah) {
       var action = ah[data.action];
@@ -1087,7 +1085,7 @@ function MessageHandler(sourceName, targetName, comObj) {
         action[0].call(action[1], data.data);
       }
     } else {
-      error('Unknown action from worker: ' + data.action);
+      throw new Error('Unknown action from worker: ' + data.action);
     }
   };
   comObj.addEventListener('message', this._onComObjOnMessage);
@@ -1096,7 +1094,7 @@ MessageHandler.prototype = {
   on: function on(actionName, handler, scope) {
     var ah = this.actionHandler;
     if (ah[actionName]) {
-      error('There is already an actionName called "' + actionName + '"');
+      throw new Error('There is already an actionName called "' + actionName + '"');
     }
     ah[actionName] = [handler, scope];
   },
@@ -1404,6 +1402,7 @@ exports.UnexpectedResponseException = UnexpectedResponseException;
 exports.UnknownErrorException = UnknownErrorException;
 exports.Util = Util;
 exports.XRefParseException = XRefParseException;
+exports.FormatError = FormatError;
 exports.arrayByteLength = arrayByteLength;
 exports.arraysToBytes = arraysToBytes;
 exports.assert = assert;
@@ -1412,7 +1411,6 @@ exports.createBlob = createBlob;
 exports.createPromiseCapability = createPromiseCapability;
 exports.createObjectURL = createObjectURL;
 exports.deprecated = deprecated;
-exports.error = error;
 exports.getLookupTableFactory = getLookupTableFactory;
 exports.getVerbosityLevel = getVerbosityLevel;
 exports.globalScope = globalScope;
@@ -1445,6 +1443,7 @@ exports.stringToPDFString = stringToPDFString;
 exports.stringToUTF8String = stringToUTF8String;
 exports.utf8StringToString = utf8StringToString;
 exports.warn = warn;
+exports.unreachable = unreachable;
 /* WEBPACK VAR INJECTION */}.call(exports, __w_pdfjs_require__(6)))
 
 /***/ }),
@@ -2470,10 +2469,10 @@ function getDocument(src, pdfDataRangeTransport, passwordCallback, progressCallb
     source = { range: src };
   } else {
     if ((typeof src === 'undefined' ? 'undefined' : _typeof(src)) !== 'object') {
-      (0, _util.error)('Invalid parameter in getDocument, need either Uint8Array, ' + 'string or a parameter object');
+      throw new Error('Invalid parameter in getDocument, ' + 'need either Uint8Array, string or a parameter object');
     }
     if (!src.url && !src.data && !src.range) {
-      (0, _util.error)('Invalid parameter object: need either .data, .range or .url');
+      throw new Error('Invalid parameter object: need either .data, .range or .url');
     }
     source = src;
   }
@@ -2500,7 +2499,7 @@ function getDocument(src, pdfDataRangeTransport, passwordCallback, progressCallb
       } else if ((0, _util.isArrayBuffer)(pdfBytes)) {
         params[key] = new Uint8Array(pdfBytes);
       } else {
-        (0, _util.error)('Invalid PDF binary data: either typed array, string or ' + 'array-like object is expected in the data property.');
+        throw new Error('Invalid PDF binary data: either typed array, ' + 'string or array-like object is expected in the ' + 'data property.');
       }
       continue;
     } else if (key === 'CMapReaderFactory') {
@@ -3072,7 +3071,7 @@ var PDFWorker = function PDFWorkerClosure() {
     if (pdfjsFilePath) {
       return pdfjsFilePath.replace(/(\.(?:min\.)?js)(\?.*)?$/i, '.worker$1$2');
     }
-    (0, _util.error)('No PDFJS.workerSrc specified');
+    throw new Error('No PDFJS.workerSrc specified');
   }
   var fakeWorkerFilesLoadedCapability = void 0;
   function setupFakeWorkerGlobal() {
@@ -3435,7 +3434,7 @@ var WorkerTransport = function WorkerTransportClosure() {
             this.commonObjs.resolve(id, data[2]);
             break;
           default:
-            (0, _util.error)('Got unknown common object type ' + type);
+            throw new Error('Got unknown common object type ' + type);
         }
       }, this);
       messageHandler.on('obj', function transportObj(data) {
@@ -3464,7 +3463,7 @@ var WorkerTransport = function WorkerTransportClosure() {
             }
             break;
           default:
-            (0, _util.error)('Got unknown object type ' + type);
+            throw new Error('Got unknown object type ' + type);
         }
       }, this);
       messageHandler.on('DocProgress', function transportDocProgress(data) {
@@ -3488,7 +3487,7 @@ var WorkerTransport = function WorkerTransportClosure() {
         if (intentState.displayReadyCapability) {
           intentState.displayReadyCapability.reject(data.error);
         } else {
-          (0, _util.error)(data.error);
+          throw new Error(data.error);
         }
         if (intentState.operatorList) {
           intentState.operatorList.lastChunk = true;
@@ -3670,7 +3669,7 @@ var PDFObjects = function PDFObjectsClosure() {
       }
       var obj = this.objs[objId];
       if (!obj || !obj.resolved) {
-        (0, _util.error)('Requesting object that isn\'t resolved yet ' + objId);
+        throw new Error('Requesting object that isn\'t resolved yet ' + objId);
       }
       return obj.data;
     },
@@ -3854,8 +3853,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.522';
-  exports.build = build = 'ac980280';
+  exports.version = version = '1.8.524';
+  exports.build = build = '7b4887dd';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -5439,10 +5438,6 @@ module.exports = g;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Metadata = undefined;
-
-var _util = __w_pdfjs_require__(0);
-
 function fixMetadata(meta) {
   return meta.replace(/>\\376\\377([^<]+)/g, function (all, codes) {
     var bytes = codes.replace(/\\([0-3])([0-7])([0-7])/g, function (code, d1, d2, d3) {
@@ -5462,7 +5457,7 @@ function Metadata(meta) {
     var parser = new DOMParser();
     meta = parser.parseFromString(meta, 'application/xml');
   } else if (!(meta instanceof Document)) {
-    (0, _util.error)('Metadata: Invalid metadata object');
+    throw new Error('Metadata: Invalid metadata object');
   }
   this.metaDocument = meta;
   this.metadata = Object.create(null);
@@ -5912,8 +5907,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.522';
-  PDFJS.build = 'ac980280';
+  PDFJS.version = '1.8.524';
+  PDFJS.build = '7b4887dd';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -9469,7 +9464,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
         ctx.putImageData(chunkImgData, 0, i * FULL_CHUNK_HEIGHT);
       }
     } else {
-      (0, _util.error)('bad image kind: ' + imgData.kind);
+      throw new Error('bad image kind: ' + imgData.kind);
     }
   }
   function putBinaryImageMask(ctx, imgData) {
@@ -10050,7 +10045,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       var fontObj = this.commonObjs.get(fontRefName);
       var current = this.current;
       if (!fontObj) {
-        (0, _util.error)('Can\'t find font for ' + fontRefName);
+        throw new Error('Can\'t find font for ' + fontRefName);
       }
       current.fontMatrix = fontObj.fontMatrix ? fontObj.fontMatrix : _util.FONT_IDENTITY_MATRIX;
       if (current.fontMatrix[0] === 0 || current.fontMatrix[3] === 0) {
@@ -10386,10 +10381,10 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       this.restore();
     },
     beginInlineImage: function CanvasGraphics_beginInlineImage() {
-      (0, _util.error)('Should not call beginInlineImage');
+      throw new Error('Should not call beginInlineImage');
     },
     beginImageData: function CanvasGraphics_beginImageData() {
-      (0, _util.error)('Should not call beginImageData');
+      throw new Error('Should not call beginImageData');
     },
     paintFormXObjectBegin: function CanvasGraphics_paintFormXObjectBegin(matrix, bbox) {
       this.save();
@@ -11224,8 +11219,7 @@ var createMeshCanvas = function createMeshCanvasClosure() {
         }
         break;
       default:
-        (0, _util.error)('illigal figure');
-        break;
+        throw new Error('illegal figure');
     }
   }
   function createMeshCanvas(bounds, combinesScale, coords, colors, figures, backgroundColor, cachedCanvases) {
@@ -11333,7 +11327,7 @@ ShadingIRs.Dummy = {
 function getShadingPatternFromIR(raw) {
   var shadingIR = ShadingIRs[raw[0]];
   if (!shadingIR) {
-    (0, _util.error)('Unknown IR type: ' + raw[0]);
+    throw new Error('Unknown IR type: ' + raw[0]);
   }
   return shadingIR.fromIR(raw);
 }
@@ -11428,7 +11422,7 @@ var TilingPattern = function TilingPatternClosure() {
           context.strokeStyle = cssColor;
           break;
         default:
-          (0, _util.error)('Unsupported paint type: ' + paintType);
+          throw new _util.FormatError('Unsupported paint type: ' + paintType);
       }
     },
     getPattern: function TilingPattern_getPattern(ctx, owner) {
@@ -11452,8 +11446,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.522';
-var pdfjsBuild = 'ac980280';
+var pdfjsVersion = '1.8.524';
+var pdfjsBuild = '7b4887dd';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(9);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
