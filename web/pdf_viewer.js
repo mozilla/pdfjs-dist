@@ -99,14 +99,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 var pdfjsLib;
-if (typeof __pdfjsdev_webpack__ === 'undefined') {
-  if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
-    pdfjsLib = window['pdfjs-dist/build/pdf'];
-  } else if (typeof require === 'function') {
-    pdfjsLib = require('../build/pdf.js');
-  } else {
-    throw new Error('Neither `require` nor `window` found');
-  }
+if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
+  pdfjsLib = window['pdfjs-dist/build/pdf'];
+} else if (false) {
+  pdfjsLib = __non_webpack_require__('../build/pdf.js');
+} else {
+  throw new Error('Neither `require` nor `window` found');
 }
 module.exports = pdfjsLib;
 
