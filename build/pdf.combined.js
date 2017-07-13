@@ -13116,8 +13116,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.527';
-  exports.build = build = '2cef24a2';
+  exports.version = version = '1.8.529';
+  exports.build = build = 'a63015a9';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -28605,8 +28605,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.527';
-  PDFJS.build = '2cef24a2';
+  PDFJS.version = '1.8.529';
+  PDFJS.build = 'a63015a9';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47232,8 +47232,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.527';
-var pdfjsBuild = '2cef24a2';
+var pdfjsVersion = '1.8.529';
+var pdfjsBuild = 'a63015a9';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
@@ -47927,6 +47927,22 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       if (this.parentNode) {
         this.parentNode.removeChild(this);
       }
+    };
+  })();
+  (function checkNumberIsNaN() {
+    if (Number.isNaN) {
+      return;
+    }
+    Number.isNaN = function (value) {
+      return typeof value === 'number' && isNaN(value);
+    };
+  })();
+  (function checkNumberIsInteger() {
+    if (Number.isInteger) {
+      return;
+    }
+    Number.isInteger = function (value) {
+      return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
     };
   })();
   (function checkPromise() {
