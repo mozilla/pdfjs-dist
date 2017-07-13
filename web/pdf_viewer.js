@@ -101,10 +101,8 @@ return /******/ (function(modules) { // webpackBootstrap
 var pdfjsLib;
 if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
   pdfjsLib = window['pdfjs-dist/build/pdf'];
-} else if (false) {
-  pdfjsLib = __non_webpack_require__('../build/pdf.js');
 } else {
-  throw new Error('Neither `require` nor `window` found');
+  pdfjsLib = require('../build/pdf.js');
 }
 module.exports = pdfjsLib;
 
