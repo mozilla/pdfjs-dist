@@ -20482,7 +20482,7 @@ var Catalog = function CatalogClosure() {
     get numPages() {
       var obj = this.toplevelPagesDict.get('Count');
       (0, _util.assert)((0, _util.isInt)(obj), 'page count in top level pages object is not an integer');
-      return (0, _util.shadow)(this, 'num', obj);
+      return (0, _util.shadow)(this, 'numPages', obj);
     },
     get destinations() {
       function fetchDestination(dest) {
@@ -40390,8 +40390,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.557';
-var pdfjsBuild = '4a74cc41';
+var pdfjsVersion = '1.8.559';
+var pdfjsBuild = '09f04ecc';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(18);

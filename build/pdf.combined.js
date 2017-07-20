@@ -13116,8 +13116,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.557';
-  exports.build = build = '4a74cc41';
+  exports.version = version = '1.8.559';
+  exports.build = build = '09f04ecc';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -23668,7 +23668,7 @@ var Catalog = function CatalogClosure() {
     get numPages() {
       var obj = this.toplevelPagesDict.get('Count');
       (0, _util.assert)((0, _util.isInt)(obj), 'page count in top level pages object is not an integer');
-      return (0, _util.shadow)(this, 'num', obj);
+      return (0, _util.shadow)(this, 'numPages', obj);
     },
     get destinations() {
       function fetchDestination(dest) {
@@ -28627,8 +28627,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.557';
-  PDFJS.build = '4a74cc41';
+  PDFJS.version = '1.8.559';
+  PDFJS.build = '09f04ecc';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47254,8 +47254,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.557';
-var pdfjsBuild = '4a74cc41';
+var pdfjsVersion = '1.8.559';
+var pdfjsBuild = '09f04ecc';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
