@@ -1470,7 +1470,9 @@ var DOMCanvasFactory = function () {
   _createClass(DOMCanvasFactory, [{
     key: 'create',
     value: function create(width, height) {
-      (0, _util.assert)(width > 0 && height > 0, 'invalid canvas size');
+      if (width <= 0 || height <= 0) {
+        throw new Error('invalid canvas size');
+      }
       var canvas = document.createElement('canvas');
       var context = canvas.getContext('2d');
       canvas.width = width;
@@ -1483,15 +1485,21 @@ var DOMCanvasFactory = function () {
   }, {
     key: 'reset',
     value: function reset(canvasAndContext, width, height) {
-      (0, _util.assert)(canvasAndContext.canvas, 'canvas is not specified');
-      (0, _util.assert)(width > 0 && height > 0, 'invalid canvas size');
+      if (!canvasAndContext.canvas) {
+        throw new Error('canvas is not specified');
+      }
+      if (width <= 0 || height <= 0) {
+        throw new Error('invalid canvas size');
+      }
       canvasAndContext.canvas.width = width;
       canvasAndContext.canvas.height = height;
     }
   }, {
     key: 'destroy',
     value: function destroy(canvasAndContext) {
-      (0, _util.assert)(canvasAndContext.canvas, 'canvas is not specified');
+      if (!canvasAndContext.canvas) {
+        throw new Error('canvas is not specified');
+      }
       canvasAndContext.canvas.width = 0;
       canvasAndContext.canvas.height = 0;
       canvasAndContext.canvas = null;
@@ -3849,8 +3857,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.562';
-  exports.build = build = '7ded895d';
+  exports.version = version = '1.8.564';
+  exports.build = build = 'e7cddcce';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -5905,8 +5913,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.562';
-  PDFJS.build = '7ded895d';
+  PDFJS.version = '1.8.564';
+  PDFJS.build = 'e7cddcce';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -10416,7 +10424,9 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       if (group.matrix) {
         currentCtx.transform.apply(currentCtx, group.matrix);
       }
-      (0, _util.assert)(group.bbox, 'Bounding box is required.');
+      if (!group.bbox) {
+        throw new Error('Bounding box is required.');
+      }
       var bounds = _util.Util.getAxialAlignedBoundingBox(group.bbox, currentCtx.mozCurrentTransform);
       var canvasBounds = [0, 0, currentCtx.canvas.width, currentCtx.canvas.height];
       bounds = _util.Util.intersect(bounds, canvasBounds) || [0, 0, 0, 0];
@@ -11444,8 +11454,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.562';
-var pdfjsBuild = '7ded895d';
+var pdfjsVersion = '1.8.564';
+var pdfjsBuild = 'e7cddcce';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(8);
 var pdfjsDisplayAPI = __w_pdfjs_require__(3);
