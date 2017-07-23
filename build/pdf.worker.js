@@ -11362,6 +11362,9 @@ var WorkerMessageHandler = {
     handler.on('GetPageLabels', function wphSetupGetPageLabels(data) {
       return pdfManager.ensureCatalog('pageLabels');
     });
+    handler.on('GetPageMode', function wphSetupGetPageMode(data) {
+      return pdfManager.ensureCatalog('pageMode');
+    });
     handler.on('GetAttachments', function wphSetupGetAttachments(data) {
       return pdfManager.ensureCatalog('attachments');
     });
@@ -20676,6 +20679,22 @@ var Catalog = function CatalogClosure() {
         currentIndex++;
       }
       return pageLabels;
+    },
+    get pageMode() {
+      var obj = this.catDict.get('PageMode');
+      var pageMode = 'UseNone';
+      if ((0, _primitives.isName)(obj)) {
+        switch (obj.name) {
+          case 'UseNone':
+          case 'UseOutlines':
+          case 'UseThumbs':
+          case 'FullScreen':
+          case 'UseOC':
+          case 'UseAttachments':
+            pageMode = obj.name;
+        }
+      }
+      return (0, _util.shadow)(this, 'pageMode', pageMode);
     },
     get attachments() {
       var xref = this.xref;
@@ -40492,8 +40511,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.564';
-var pdfjsBuild = 'e7cddcce';
+var pdfjsVersion = '1.8.568';
+var pdfjsBuild = 'af71ea7a';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(18);

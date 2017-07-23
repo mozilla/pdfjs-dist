@@ -12044,6 +12044,10 @@ var PDFDocumentProxy = function PDFDocumentProxyClosure() {
     getPageLabels: function PDFDocumentProxy_getPageLabels() {
       return this.transport.getPageLabels();
     },
+    getPageMode: function getPageMode() {
+      return this.transport.getPageMode();
+    },
+
     getAttachments: function PDFDocumentProxy_getAttachments() {
       return this.transport.getAttachments();
     },
@@ -12879,6 +12883,10 @@ var WorkerTransport = function WorkerTransportClosure() {
     getPageLabels: function WorkerTransport_getPageLabels() {
       return this.messageHandler.sendWithPromise('GetPageLabels', null);
     },
+    getPageMode: function getPageMode() {
+      return this.messageHandler.sendWithPromise('GetPageMode', null);
+    },
+
     getAttachments: function WorkerTransport_getAttachments() {
       return this.messageHandler.sendWithPromise('GetAttachments', null);
     },
@@ -13124,8 +13132,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.564';
-  exports.build = build = 'e7cddcce';
+  exports.version = version = '1.8.568';
+  exports.build = build = 'af71ea7a';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -23869,6 +23877,22 @@ var Catalog = function CatalogClosure() {
       }
       return pageLabels;
     },
+    get pageMode() {
+      var obj = this.catDict.get('PageMode');
+      var pageMode = 'UseNone';
+      if ((0, _primitives.isName)(obj)) {
+        switch (obj.name) {
+          case 'UseNone':
+          case 'UseOutlines':
+          case 'UseThumbs':
+          case 'FullScreen':
+          case 'UseOC':
+          case 'UseAttachments':
+            pageMode = obj.name;
+        }
+      }
+      return (0, _util.shadow)(this, 'pageMode', pageMode);
+    },
     get attachments() {
       var xref = this.xref;
       var attachments = null,
@@ -28090,6 +28114,9 @@ var WorkerMessageHandler = {
     handler.on('GetPageLabels', function wphSetupGetPageLabels(data) {
       return pdfManager.ensureCatalog('pageLabels');
     });
+    handler.on('GetPageMode', function wphSetupGetPageMode(data) {
+      return pdfManager.ensureCatalog('pageMode');
+    });
     handler.on('GetAttachments', function wphSetupGetAttachments(data) {
       return pdfManager.ensureCatalog('attachments');
     });
@@ -28715,8 +28742,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.564';
-  PDFJS.build = 'e7cddcce';
+  PDFJS.version = '1.8.568';
+  PDFJS.build = 'af71ea7a';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47366,8 +47393,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.564';
-var pdfjsBuild = 'e7cddcce';
+var pdfjsVersion = '1.8.568';
+var pdfjsBuild = 'af71ea7a';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
