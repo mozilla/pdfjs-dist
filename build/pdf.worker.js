@@ -1203,6 +1203,9 @@ MessageHandler.prototype = {
       enqueue: function enqueue(chunk) {
         var size = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 
+        if (this.isCancelled) {
+          return;
+        }
         var lastDesiredSize = this.desiredSize;
         this.desiredSize -= size;
         if (lastDesiredSize > 0 && this.desiredSize <= 0) {
@@ -1215,6 +1218,9 @@ MessageHandler.prototype = {
         });
       },
       close: function close() {
+        if (this.isCancelled) {
+          return;
+        }
         sendStreamRequest({ stream: 'close' });
         delete self.streamSinks[streamId];
       },
@@ -1228,6 +1234,7 @@ MessageHandler.prototype = {
       sinkCapability: capability,
       onPull: null,
       onCancel: null,
+      isCancelled: false,
       desiredSize: desiredSize,
       ready: null
     };
@@ -1343,6 +1350,8 @@ MessageHandler.prototype = {
             reason: reason
           });
         });
+        this.streamSinks[data.streamId].sinkCapability.reject(data.reason);
+        this.streamSinks[data.streamId].isCancelled = true;
         delete this.streamSinks[data.streamId];
         break;
       default:
@@ -40511,8 +40520,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.573';
-var pdfjsBuild = 'd1727b25';
+var pdfjsVersion = '1.8.575';
+var pdfjsBuild = 'bd8c1211';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(18);

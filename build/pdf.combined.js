@@ -1203,6 +1203,9 @@ MessageHandler.prototype = {
       enqueue: function enqueue(chunk) {
         var size = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 
+        if (this.isCancelled) {
+          return;
+        }
         var lastDesiredSize = this.desiredSize;
         this.desiredSize -= size;
         if (lastDesiredSize > 0 && this.desiredSize <= 0) {
@@ -1215,6 +1218,9 @@ MessageHandler.prototype = {
         });
       },
       close: function close() {
+        if (this.isCancelled) {
+          return;
+        }
         sendStreamRequest({ stream: 'close' });
         delete self.streamSinks[streamId];
       },
@@ -1228,6 +1234,7 @@ MessageHandler.prototype = {
       sinkCapability: capability,
       onPull: null,
       onCancel: null,
+      isCancelled: false,
       desiredSize: desiredSize,
       ready: null
     };
@@ -1343,6 +1350,8 @@ MessageHandler.prototype = {
             reason: reason
           });
         });
+        this.streamSinks[data.streamId].sinkCapability.reject(data.reason);
+        this.streamSinks[data.streamId].isCancelled = true;
         delete this.streamSinks[data.streamId];
         break;
       default:
@@ -13132,8 +13141,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.573';
-  exports.build = build = 'd1727b25';
+  exports.version = version = '1.8.575';
+  exports.build = build = 'bd8c1211';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -28742,8 +28751,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.573';
-  PDFJS.build = 'd1727b25';
+  PDFJS.version = '1.8.575';
+  PDFJS.build = 'bd8c1211';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47393,8 +47402,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.573';
-var pdfjsBuild = 'd1727b25';
+var pdfjsVersion = '1.8.575';
+var pdfjsBuild = 'bd8c1211';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
