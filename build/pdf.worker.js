@@ -3800,7 +3800,7 @@ var IndexedCS = function IndexedCSClosure() {
     getRgbItem: function IndexedCS_getRgbItem(src, srcOffset, dest, destOffset) {
       var numComps = this.base.numComps;
       var start = src[srcOffset] * numComps;
-      this.base.getRgbItem(this.lookup, start, dest, destOffset);
+      this.base.getRgbBuffer(this.lookup, start, 1, dest, destOffset, 8, 0);
     },
     getRgbBuffer: function IndexedCS_getRgbBuffer(src, srcOffset, count, dest, destOffset, bits, alpha01) {
       var base = this.base;
@@ -40520,8 +40520,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.575';
-var pdfjsBuild = 'bd8c1211';
+var pdfjsVersion = '1.8.577';
+var pdfjsBuild = '44a5cec2';
 var pdfjsCoreWorker = __w_pdfjs_require__(8);
 {
   __w_pdfjs_require__(18);
