@@ -13141,8 +13141,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.577';
-  exports.build = build = '44a5cec2';
+  exports.version = version = '1.8.579';
+  exports.build = build = '37ac8f86';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -25127,6 +25127,7 @@ var getStdFontMap = (0, _util.getLookupTableFactory)(function (t) {
   t['Helvetica-BoldOblique'] = 'Helvetica-BoldOblique';
   t['Helvetica-Italic'] = 'Helvetica-Oblique';
   t['Helvetica-Oblique'] = 'Helvetica-Oblique';
+  t['SegoeUISymbol'] = 'Helvetica';
   t['Symbol-Bold'] = 'Symbol';
   t['Symbol-BoldItalic'] = 'Symbol';
   t['Symbol-Italic'] = 'Symbol';
@@ -28751,8 +28752,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.577';
-  PDFJS.build = '44a5cec2';
+  PDFJS.version = '1.8.579';
+  PDFJS.build = '37ac8f86';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47402,8 +47403,8 @@ exports.TilingPattern = TilingPattern;
 "use strict";
 
 
-var pdfjsVersion = '1.8.577';
-var pdfjsBuild = '44a5cec2';
+var pdfjsVersion = '1.8.579';
+var pdfjsBuild = '37ac8f86';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(25);
 var pdfjsDisplayAPI = __w_pdfjs_require__(10);
