@@ -4206,11 +4206,7 @@ var CalRGBCS = function CalRGBCSClosure() {
     dest[destOffset + 2] = Math.round(sB * 255);
   }
   CalRGBCS.prototype = {
-    getRgb: function CalRGBCS_getRgb(src, srcOffset) {
-      var rgb = new Uint8Array(3);
-      this.getRgbItem(src, srcOffset, rgb, 0);
-      return rgb;
-    },
+    getRgb: ColorSpace.prototype.getRgb,
     getRgbItem: function CalRGBCS_getRgbItem(src, srcOffset, dest, destOffset) {
       convertToRgb(this, src, srcOffset, dest, destOffset, 1);
     },
@@ -39936,8 +39932,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.583';
-var pdfjsBuild = '27b49a34';
+var pdfjsVersion = '1.8.585';
+var pdfjsBuild = '783d42ec';
 var pdfjsCoreWorker = __w_pdfjs_require__(17);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 

@@ -4494,11 +4494,7 @@ var CalRGBCS = function CalRGBCSClosure() {
     dest[destOffset + 2] = Math.round(sB * 255);
   }
   CalRGBCS.prototype = {
-    getRgb: function CalRGBCS_getRgb(src, srcOffset) {
-      var rgb = new Uint8Array(3);
-      this.getRgbItem(src, srcOffset, rgb, 0);
-      return rgb;
-    },
+    getRgb: ColorSpace.prototype.getRgb,
     getRgbItem: function CalRGBCS_getRgbItem(src, srcOffset, dest, destOffset) {
       convertToRgb(this, src, srcOffset, dest, destOffset, 1);
     },
@@ -7075,8 +7071,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.583';
-  exports.build = build = '27b49a34';
+  exports.version = version = '1.8.585';
+  exports.build = build = '783d42ec';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -28161,8 +28157,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.583';
-  PDFJS.build = '27b49a34';
+  PDFJS.version = '1.8.585';
+  PDFJS.build = '783d42ec';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47633,8 +47629,8 @@ exports.PDFDataTransportStream = PDFDataTransportStream;
 "use strict";
 
 
-var pdfjsVersion = '1.8.583';
-var pdfjsBuild = '27b49a34';
+var pdfjsVersion = '1.8.585';
+var pdfjsBuild = '783d42ec';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(24);
 var pdfjsDisplayAPI = __w_pdfjs_require__(7);
