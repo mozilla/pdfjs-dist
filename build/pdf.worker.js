@@ -107,7 +107,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 __w_pdfjs_require__(36);
 
-var _streamsLib = __w_pdfjs_require__(18);
+var _streams_polyfill = __w_pdfjs_require__(37);
 
 var globalScope = typeof window !== 'undefined' && window.Math === Math ? window : typeof global !== 'undefined' && global.Math === Math ? global : typeof self !== 'undefined' && self.Math === Math ? self : undefined;
 var FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
@@ -1141,7 +1141,7 @@ MessageHandler.prototype = {
     var streamId = this.streamId++;
     var sourceName = this.sourceName;
     var targetName = this.targetName;
-    return new _streamsLib.ReadableStream({
+    return new _streams_polyfill.ReadableStream({
       start: function start(controller) {
         var startCapability = createPromiseCapability();
         _this2.streamControllers[streamId] = {
@@ -1463,7 +1463,7 @@ exports.readInt8 = readInt8;
 exports.readUint16 = readUint16;
 exports.readUint32 = readUint32;
 exports.removeNullCharacters = removeNullCharacters;
-exports.ReadableStream = _streamsLib.ReadableStream;
+exports.ReadableStream = _streams_polyfill.ReadableStream;
 exports.setVerbosityLevel = setVerbosityLevel;
 exports.shadow = shadow;
 exports.string32 = string32;
@@ -39936,8 +39936,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.581';
-var pdfjsBuild = '343b4dc2';
+var pdfjsVersion = '1.8.583';
+var pdfjsBuild = '27b49a34';
 var pdfjsCoreWorker = __w_pdfjs_require__(17);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -41458,6 +41458,19 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     }
     globalScope.URL = JURL;
   })();
+}
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+if (typeof ReadableStream !== 'undefined') {
+  exports.ReadableStream = ReadableStream;
+} else {
+  exports.ReadableStream = __w_pdfjs_require__(18).ReadableStream;
 }
 
 /***/ })

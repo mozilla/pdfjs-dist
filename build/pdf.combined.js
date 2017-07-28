@@ -107,7 +107,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 __w_pdfjs_require__(49);
 
-var _streamsLib = __w_pdfjs_require__(26);
+var _streams_polyfill = __w_pdfjs_require__(50);
 
 var globalScope = typeof window !== 'undefined' && window.Math === Math ? window : typeof global !== 'undefined' && global.Math === Math ? global : typeof self !== 'undefined' && self.Math === Math ? self : undefined;
 var FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
@@ -1141,7 +1141,7 @@ MessageHandler.prototype = {
     var streamId = this.streamId++;
     var sourceName = this.sourceName;
     var targetName = this.targetName;
-    return new _streamsLib.ReadableStream({
+    return new _streams_polyfill.ReadableStream({
       start: function start(controller) {
         var startCapability = createPromiseCapability();
         _this2.streamControllers[streamId] = {
@@ -1463,7 +1463,7 @@ exports.readInt8 = readInt8;
 exports.readUint16 = readUint16;
 exports.readUint32 = readUint32;
 exports.removeNullCharacters = removeNullCharacters;
-exports.ReadableStream = _streamsLib.ReadableStream;
+exports.ReadableStream = _streams_polyfill.ReadableStream;
 exports.setVerbosityLevel = setVerbosityLevel;
 exports.shadow = shadow;
 exports.string32 = string32;
@@ -7075,8 +7075,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.581';
-  exports.build = build = '343b4dc2';
+  exports.version = version = '1.8.583';
+  exports.build = build = '27b49a34';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -28161,8 +28161,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.581';
-  PDFJS.build = '343b4dc2';
+  PDFJS.version = '1.8.583';
+  PDFJS.build = '27b49a34';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47633,8 +47633,8 @@ exports.PDFDataTransportStream = PDFDataTransportStream;
 "use strict";
 
 
-var pdfjsVersion = '1.8.581';
-var pdfjsBuild = '343b4dc2';
+var pdfjsVersion = '1.8.583';
+var pdfjsBuild = '27b49a34';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(24);
 var pdfjsDisplayAPI = __w_pdfjs_require__(7);
@@ -49192,6 +49192,19 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     }
     globalScope.URL = JURL;
   })();
+}
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+if (typeof ReadableStream !== 'undefined') {
+  exports.ReadableStream = ReadableStream;
+} else {
+  exports.ReadableStream = __w_pdfjs_require__(26).ReadableStream;
 }
 
 /***/ })
