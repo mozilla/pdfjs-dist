@@ -11471,7 +11471,14 @@ var CFFParser = function CFFParserClosure() {
       }
       cff.charset = charset;
       cff.encoding = encoding;
-      var charStringsAndSeacs = this.parseCharStrings(charStringIndex, topDict.privateDict.subrsIndex, globalSubrIndex.obj, cff.fdSelect, cff.fdArray);
+      var charStringsAndSeacs = this.parseCharStrings({
+        charStrings: charStringIndex,
+        localSubrIndex: topDict.privateDict.subrsIndex,
+        globalSubrIndex: globalSubrIndex.obj,
+        fdSelect: cff.fdSelect,
+        fdArray: cff.fdArray,
+        privateDict: topDict.privateDict
+      });
       cff.charStrings = charStringsAndSeacs.charStrings;
       cff.seacs = charStringsAndSeacs.seacs;
       cff.widths = charStringsAndSeacs.widths;
@@ -11766,7 +11773,14 @@ var CFFParser = function CFFParserClosure() {
       state.stackSize = stackSize;
       return true;
     },
-    parseCharStrings: function CFFParser_parseCharStrings(charStrings, localSubrIndex, globalSubrIndex, fdSelect, fdArray) {
+    parseCharStrings: function parseCharStrings(_ref) {
+      var charStrings = _ref.charStrings,
+          localSubrIndex = _ref.localSubrIndex,
+          globalSubrIndex = _ref.globalSubrIndex,
+          fdSelect = _ref.fdSelect,
+          fdArray = _ref.fdArray,
+          privateDict = _ref.privateDict;
+
       var seacs = [];
       var widths = [];
       var count = charStrings.count;
@@ -11784,6 +11798,7 @@ var CFFParser = function CFFParserClosure() {
         };
         var valid = true;
         var localSubrToUse = null;
+        var privateDictToUse = privateDict;
         if (fdSelect && fdArray.length) {
           var fdIndex = fdSelect.getFDIndex(i);
           if (fdIndex === -1) {
@@ -11795,7 +11810,8 @@ var CFFParser = function CFFParserClosure() {
             valid = false;
           }
           if (valid) {
-            localSubrToUse = fdArray[fdIndex].privateDict.subrsIndex;
+            privateDictToUse = fdArray[fdIndex].privateDict;
+            localSubrToUse = privateDictToUse.subrsIndex;
           }
         } else if (localSubrIndex) {
           localSubrToUse = localSubrIndex;
@@ -11804,7 +11820,11 @@ var CFFParser = function CFFParserClosure() {
           valid = this.parseCharString(state, charstring, localSubrToUse, globalSubrIndex);
         }
         if (state.width !== null) {
-          widths[i] = state.width;
+          var nominalWidth = privateDictToUse.getByName('nominalWidthX');
+          widths[i] = nominalWidth + state.width;
+        } else {
+          var defaultWidth = privateDictToUse.getByName('defaultWidthX');
+          widths[i] = defaultWidth;
         }
         if (state.seac !== null) {
           seacs[i] = state.seac;
@@ -11819,6 +11839,7 @@ var CFFParser = function CFFParserClosure() {
         widths: widths
       };
     },
+
     emptyPrivateDictionary: function CFFParser_emptyPrivateDictionary(parentDict) {
       var privateDict = this.createDict(CFFPrivateDict, [], parentDict.strings);
       parentDict.setByKey(18, [0, 0]);
@@ -39932,8 +39953,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.593';
-var pdfjsBuild = 'f62d0a10';
+var pdfjsVersion = '1.8.595';
+var pdfjsBuild = '5b7f712c';
 var pdfjsCoreWorker = __w_pdfjs_require__(17);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
