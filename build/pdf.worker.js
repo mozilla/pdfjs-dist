@@ -39979,8 +39979,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.597';
-var pdfjsBuild = 'e20d4a9c';
+var pdfjsVersion = '1.8.599';
+var pdfjsBuild = '0c95bc7d';
 var pdfjsCoreWorker = __w_pdfjs_require__(17);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -41510,7 +41510,18 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 "use strict";
 
 
+var isReadableStreamSupported = false;
 if (typeof ReadableStream !== 'undefined') {
+  try {
+    new ReadableStream({
+      start: function start(controller) {
+        controller.close();
+      }
+    });
+    isReadableStreamSupported = true;
+  } catch (e) {}
+}
+if (isReadableStreamSupported) {
   exports.ReadableStream = ReadableStream;
 } else {
   exports.ReadableStream = __w_pdfjs_require__(18).ReadableStream;

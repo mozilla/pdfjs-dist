@@ -7078,8 +7078,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.8.597';
-  exports.build = build = 'e20d4a9c';
+  exports.version = version = '1.8.599';
+  exports.build = build = '0c95bc7d';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -28185,8 +28185,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.8.597';
-  PDFJS.build = 'e20d4a9c';
+  PDFJS.version = '1.8.599';
+  PDFJS.build = '0c95bc7d';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -47683,8 +47683,8 @@ exports.PDFDataTransportStream = PDFDataTransportStream;
 "use strict";
 
 
-var pdfjsVersion = '1.8.597';
-var pdfjsBuild = 'e20d4a9c';
+var pdfjsVersion = '1.8.599';
+var pdfjsBuild = '0c95bc7d';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(24);
 var pdfjsDisplayAPI = __w_pdfjs_require__(7);
@@ -49251,7 +49251,18 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 "use strict";
 
 
+var isReadableStreamSupported = false;
 if (typeof ReadableStream !== 'undefined') {
+  try {
+    new ReadableStream({
+      start: function start(controller) {
+        controller.close();
+      }
+    });
+    isReadableStreamSupported = true;
+  } catch (e) {}
+}
+if (isReadableStreamSupported) {
   exports.ReadableStream = ReadableStream;
 } else {
   exports.ReadableStream = __w_pdfjs_require__(26).ReadableStream;
