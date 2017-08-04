@@ -1259,6 +1259,7 @@ var PDFPageView = function () {
     var defaultViewport = options.defaultViewport;
     this.id = options.id;
     this.renderingId = 'page' + this.id;
+    this.pdfPage = null;
     this.pageLabel = null;
     this.rotation = 0;
     this.scale = options.scale || _ui_utils.DEFAULT_SCALE;
@@ -1308,6 +1309,7 @@ var PDFPageView = function () {
       this.reset();
       if (this.pdfPage) {
         this.pdfPage.cleanup();
+        this.pdfPage = null;
       }
     }
   }, {
@@ -1503,6 +1505,10 @@ var PDFPageView = function () {
       if (this.renderingState !== _pdf_rendering_queue.RenderingStates.INITIAL) {
         console.error('Must be in new state before drawing');
         this.reset();
+      }
+      if (!this.pdfPage) {
+        this.renderingState = _pdf_rendering_queue.RenderingStates.FINISHED;
+        return Promise.reject(new Error('Page is not loaded'));
       }
       this.renderingState = _pdf_rendering_queue.RenderingStates.RUNNING;
       var pdfPage = this.pdfPage;
@@ -2581,6 +2587,10 @@ var PDFFindController = function () {
             }
             _this2.pageContents[i] = strBuf.join('');
             extractTextCapability.resolve(i);
+          }, function (reason) {
+            console.error('Unable to get page ' + (i + 1) + ' text content', reason);
+            _this2.pageContents[i] = '';
+            extractTextCapability.resolve(i);
           });
         });
       };
@@ -3256,7 +3266,7 @@ var PDFViewer = function () {
       };
       var firstPagePromise = pdfDocument.getPage(1);
       this.firstPagePromise = firstPagePromise;
-      return firstPagePromise.then(function (pdfPage) {
+      firstPagePromise.then(function (pdfPage) {
         var scale = _this.currentScale;
         var viewport = pdfPage.getViewport(scale * _ui_utils.CSS_UNITS);
         for (var pageNum = 1; pageNum <= pagesCount; ++pageNum) {
@@ -3298,6 +3308,11 @@ var PDFViewer = function () {
               if (--getPagesLeft === 0) {
                 pagesCapability.resolve();
               }
+            }, function (reason) {
+              console.error('Unable to get page ' + _pageNum + ' to initialize viewer', reason);
+              if (--getPagesLeft === 0) {
+                pagesCapability.resolve();
+              }
             });
           };
 
@@ -3312,6 +3327,8 @@ var PDFViewer = function () {
         if (_this.findController) {
           _this.findController.resolveFirstPage();
         }
+      }).catch(function (reason) {
+        console.error('Unable to initialize viewer', reason);
       });
     }
   }, {
@@ -3682,6 +3699,9 @@ var PDFViewer = function () {
         }
         _this2._pagesRequests[pageNumber] = null;
         return pdfPage;
+      }).catch(function (reason) {
+        console.error('Unable to get page for page view', reason);
+        _this2._pagesRequests[pageNumber] = null;
       });
       this._pagesRequests[pageNumber] = promise;
       return promise;
