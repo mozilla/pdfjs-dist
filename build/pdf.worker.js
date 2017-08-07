@@ -15434,9 +15434,6 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           var fn = operation.fn;
           switch (fn | 0) {
             case _util.OPS.paintXObject:
-              if (args[0].code) {
-                break;
-              }
               var name = args[0].name;
               if (!name) {
                 (0, _util.warn)('XObject must be referred to by name.');
@@ -16056,9 +16053,6 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
                 break;
               case _util.OPS.paintXObject:
                 flushTextContentItem();
-                if (args[0].code) {
-                  break;
-                }
                 if (!xobjs) {
                   xobjs = resources.get('XObject') || _primitives.Dict.empty;
                 }
@@ -39995,8 +39989,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.610';
-var pdfjsBuild = '5cb83897';
+var pdfjsVersion = '1.8.612';
+var pdfjsBuild = 'a1d88d8e';
 var pdfjsCoreWorker = __w_pdfjs_require__(17);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
