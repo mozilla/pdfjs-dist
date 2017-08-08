@@ -16706,7 +16706,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         capHeight: descriptor.get('CapHeight'),
         flags: descriptor.get('Flags'),
         italicAngle: descriptor.get('ItalicAngle'),
-        coded: false
+        isType3Font: false
       };
       var cMapPromise;
       if (composite) {
@@ -39989,8 +39989,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.8.614';
-var pdfjsBuild = '11ea2126';
+var pdfjsVersion = '1.8.616';
+var pdfjsBuild = '903f372e';
 var pdfjsCoreWorker = __w_pdfjs_require__(17);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
