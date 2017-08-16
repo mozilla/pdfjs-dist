@@ -2513,7 +2513,7 @@ var JpxStream = function JpxStreamClosure() {
     if (tileCount === 1) {
       this.buffer = jpxImage.tiles[0].items;
     } else {
-      var data = new Uint8Array(width * height * componentsCount);
+      var data = new Uint8ClampedArray(width * height * componentsCount);
       for (var k = 0; k < tileCount; k++) {
         var tileComponents = jpxImage.tiles[k];
         var tileWidth = tileComponents.width;
@@ -19797,7 +19797,7 @@ var JpxImage = function JpxImageClosure() {
         transformedTiles[c] = transformTile(context, tile, c);
       }
       var tile0 = transformedTiles[0];
-      var out = new Uint8Array(tile0.items.length * componentsCount);
+      var out = new Uint8ClampedArray(tile0.items.length * componentsCount);
       var result = {
         left: tile0.left,
         top: tile0.top,
@@ -19805,18 +19805,13 @@ var JpxImage = function JpxImageClosure() {
         height: tile0.height,
         items: out
       };
-      var shift, offset, max, min, maxK;
+      var shift, offset;
       var pos = 0,
           j,
           jj,
           y0,
           y1,
-          y2,
-          r,
-          g,
-          b,
-          k,
-          val;
+          y2;
       if (tile.codingStyleDefaultParameters.multipleComponentTransform) {
         var fourComponents = componentsCount === 4;
         var y0items = transformedTiles[0].items;
@@ -19825,9 +19820,6 @@ var JpxImage = function JpxImageClosure() {
         var y3items = fourComponents ? transformedTiles[3].items : null;
         shift = components[0].precision - 8;
         offset = (128 << shift) + 0.5;
-        max = 255 * (1 << shift);
-        maxK = max * 0.5;
-        min = -maxK;
         var component0 = tile.components[0];
         var alpha01 = componentsCount - 3;
         jj = y0items.length;
@@ -19836,30 +19828,24 @@ var JpxImage = function JpxImageClosure() {
             y0 = y0items[j] + offset;
             y1 = y1items[j];
             y2 = y2items[j];
-            r = y0 + 1.402 * y2;
-            g = y0 - 0.34413 * y1 - 0.71414 * y2;
-            b = y0 + 1.772 * y1;
-            out[pos++] = r <= 0 ? 0 : r >= max ? 255 : r >> shift;
-            out[pos++] = g <= 0 ? 0 : g >= max ? 255 : g >> shift;
-            out[pos++] = b <= 0 ? 0 : b >= max ? 255 : b >> shift;
+            out[pos++] = y0 + 1.402 * y2 >> shift;
+            out[pos++] = y0 - 0.34413 * y1 - 0.71414 * y2 >> shift;
+            out[pos++] = y0 + 1.772 * y1 >> shift;
           }
         } else {
           for (j = 0; j < jj; j++, pos += alpha01) {
             y0 = y0items[j] + offset;
             y1 = y1items[j];
             y2 = y2items[j];
-            g = y0 - (y2 + y1 >> 2);
-            r = g + y2;
-            b = g + y1;
-            out[pos++] = r <= 0 ? 0 : r >= max ? 255 : r >> shift;
-            out[pos++] = g <= 0 ? 0 : g >= max ? 255 : g >> shift;
-            out[pos++] = b <= 0 ? 0 : b >= max ? 255 : b >> shift;
+            var g = y0 - (y2 + y1 >> 2);
+            out[pos++] = g + y2 >> shift;
+            out[pos++] = g >> shift;
+            out[pos++] = g + y1 >> shift;
           }
         }
         if (fourComponents) {
           for (j = 0, pos = 3; j < jj; j++, pos += 4) {
-            k = y3items[j];
-            out[pos] = k <= min ? 0 : k >= maxK ? 255 : k + offset >> shift;
+            out[pos] = y3items[j] + offset >> shift;
           }
         }
       } else {
@@ -19867,11 +19853,8 @@ var JpxImage = function JpxImageClosure() {
           var items = transformedTiles[c].items;
           shift = components[c].precision - 8;
           offset = (128 << shift) + 0.5;
-          max = 127.5 * (1 << shift);
-          min = -max;
           for (pos = c, j = 0, jj = items.length; j < jj; j++) {
-            val = items[j];
-            out[pos] = val <= min ? 0 : val >= max ? 255 : val + offset >> shift;
+            out[pos] = items[j] + offset >> shift;
             pos += componentsCount;
           }
         }
@@ -34859,7 +34842,7 @@ var PDFImage = function PDFImageClosure() {
     }
     if (inverseDecode) {
       for (i = 0; i < actualLength; i++) {
-        data[i] = ~data[i];
+        data[i] ^= 0xFF;
       }
     }
     return {
@@ -36108,7 +36091,7 @@ var Jbig2Image = function Jbig2ImageClosure() {
     onPageInformation: function SimpleSegmentVisitor_onPageInformation(info) {
       this.currentPageInfo = info;
       var rowSize = info.width + 7 >> 3;
-      var buffer = new Uint8Array(rowSize * info.height);
+      var buffer = new Uint8ClampedArray(rowSize * info.height);
       if (info.defaultPixelValue) {
         for (var i = 0, ii = buffer.length; i < ii; i++) {
           buffer[i] = 0xFF;
@@ -41947,8 +41930,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.9.432';
-var pdfjsBuild = 'ba5dbc96';
+var pdfjsVersion = '1.9.436';
+var pdfjsBuild = '3a017b43';
 var pdfjsCoreWorker = __w_pdfjs_require__(61);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
