@@ -7338,8 +7338,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.436';
-  exports.build = build = '3a017b43';
+  exports.version = version = '1.9.438';
+  exports.build = build = '50e10fda';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -14260,13 +14260,17 @@ var SVGGraphics = function SVGGraphics() {
             x += -glyph * fontSize * 0.001;
             continue;
           }
-          current.xcoords.push(current.x + x * textHScale);
           var width = glyph.width;
           var character = glyph.fontChar;
           var spacing = (glyph.isSpace ? wordSpacing : 0) + charSpacing;
           var charWidth = width * widthAdvanceScale + spacing * fontDirection;
-          x += charWidth;
+          if (!glyph.isInFont && !font.missingFile) {
+            x += charWidth;
+            continue;
+          }
+          current.xcoords.push(current.x + x * textHScale);
           current.tspan.textContent += character;
+          x += charWidth;
         }
         if (vertical) {
           current.y -= x * textHScale;
@@ -28938,8 +28942,8 @@ if (!_util.globalScope.PDFJS) {
 }
 var PDFJS = _util.globalScope.PDFJS;
 {
-  PDFJS.version = '1.9.436';
-  PDFJS.build = '3a017b43';
+  PDFJS.version = '1.9.438';
+  PDFJS.build = '50e10fda';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -49635,8 +49639,8 @@ exports.PDFDataTransportStream = PDFDataTransportStream;
 "use strict";
 
 
-var pdfjsVersion = '1.9.436';
-var pdfjsBuild = '3a017b43';
+var pdfjsVersion = '1.9.438';
+var pdfjsBuild = '50e10fda';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(68);
 var pdfjsDisplayAPI = __w_pdfjs_require__(25);
