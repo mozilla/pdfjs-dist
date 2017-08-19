@@ -4983,11 +4983,12 @@ var Parser = function ParserClosure() {
           b += a;
         }
         adler32 = b % 65521 << 16 | a % 65521;
-        if (this.imageCache.adler32 === adler32) {
+        var cacheEntry = this.imageCache[adler32];
+        if (cacheEntry !== undefined) {
           this.buf2 = _primitives.Cmd.get('EI');
           this.shift();
-          this.imageCache[adler32].reset();
-          return this.imageCache[adler32];
+          cacheEntry.reset();
+          return cacheEntry;
         }
       }
       if (cipherTransform) {
@@ -41930,8 +41931,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.9.441';
-var pdfjsBuild = '8c8d8fa2';
+var pdfjsVersion = '1.9.444';
+var pdfjsBuild = '9b26bec1';
 var pdfjsCoreWorker = __w_pdfjs_require__(61);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
