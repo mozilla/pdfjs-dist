@@ -4759,18 +4759,17 @@ var Parser = function ParserClosure() {
       }
       return buf1;
     },
-    findDefaultInlineStreamEnd: function Parser_findDefaultInlineStreamEnd(stream) {
+    findDefaultInlineStreamEnd: function findDefaultInlineStreamEnd(stream) {
       var E = 0x45,
           I = 0x49,
           SPACE = 0x20,
           LF = 0xA,
-          CR = 0xD;
+          CR = 0xD,
+          n = 5;
       var startPos = stream.pos,
           state = 0,
-          ch,
-          i,
-          n,
-          followingBytes;
+          ch = void 0,
+          maybeEIPos = void 0;
       while ((ch = stream.getByte()) !== -1) {
         if (state === 0) {
           state = ch === E ? 1 : 0;
@@ -4779,9 +4778,9 @@ var Parser = function ParserClosure() {
         } else {
           (0, _util.assert)(state === 2);
           if (ch === SPACE || ch === LF || ch === CR) {
-            n = 5;
-            followingBytes = stream.peekBytes(n);
-            for (i = 0; i < n; i++) {
+            maybeEIPos = stream.pos;
+            var followingBytes = stream.peekBytes(n);
+            for (var i = 0; i < n; i++) {
               ch = followingBytes[i];
               if (ch !== LF && ch !== CR && (ch < SPACE || ch > 0x7F)) {
                 state = 0;
@@ -4796,8 +4795,16 @@ var Parser = function ParserClosure() {
           }
         }
       }
+      if (ch === -1) {
+        (0, _util.warn)('findDefaultInlineStreamEnd: ' + 'Reached the end of the stream without finding a valid EI marker');
+        if (maybeEIPos) {
+          (0, _util.warn)('... trying to recover by using the last "EI" occurrence.');
+          stream.skip(-(stream.pos - maybeEIPos));
+        }
+      }
       return stream.pos - 4 - startPos;
     },
+
     findDCTDecodeInlineStreamEnd: function Parser_findDCTDecodeInlineStreamEnd(stream) {
       var startPos = stream.pos,
           foundEOI = false,
@@ -42122,8 +42129,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.9.460';
-var pdfjsBuild = '23a41741';
+var pdfjsVersion = '1.9.462';
+var pdfjsBuild = 'e9ba5494';
 var pdfjsCoreWorker = __w_pdfjs_require__(61);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
