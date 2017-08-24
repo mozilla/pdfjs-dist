@@ -21475,9 +21475,16 @@ var XRef = function XRefClosure() {
     },
     readXRef: function XRef_readXRef(recoveryMode) {
       var stream = this.stream;
+      var startXRefParsedCache = Object.create(null);
       try {
         while (this.startXRefQueue.length) {
           var startXRef = this.startXRefQueue[0];
+          if (startXRefParsedCache[startXRef]) {
+            (0, _util.warn)('readXRef - skipping XRef table since it was already parsed.');
+            this.startXRefQueue.shift();
+            continue;
+          }
+          startXRefParsedCache[startXRef] = true;
           stream.pos = startXRef + stream.start;
           var parser = new _parser.Parser(new _parser.Lexer(stream), true, this);
           var obj = parser.getObj();
@@ -42129,8 +42136,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.9.468';
-var pdfjsBuild = 'f1819f4d';
+var pdfjsVersion = '1.9.470';
+var pdfjsBuild = '88167b5e';
 var pdfjsCoreWorker = __w_pdfjs_require__(61);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
