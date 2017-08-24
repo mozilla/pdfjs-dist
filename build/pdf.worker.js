@@ -42136,8 +42136,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.9.470';
-var pdfjsBuild = '88167b5e';
+var pdfjsVersion = '1.9.472';
+var pdfjsBuild = '5f372cda';
 var pdfjsCoreWorker = __w_pdfjs_require__(61);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
