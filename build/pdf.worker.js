@@ -1247,6 +1247,7 @@ MessageHandler.prototype = {
         if (this.isCancelled) {
           return;
         }
+        this.isCancelled = true;
         sendStreamRequest({ stream: 'close' });
         delete self.streamSinks[streamId];
       },
@@ -42136,8 +42137,8 @@ exports.Type1Parser = Type1Parser;
 "use strict";
 
 
-var pdfjsVersion = '1.9.472';
-var pdfjsBuild = '5f372cda';
+var pdfjsVersion = '1.9.474';
+var pdfjsBuild = 'd368a5ba';
 var pdfjsCoreWorker = __w_pdfjs_require__(61);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
