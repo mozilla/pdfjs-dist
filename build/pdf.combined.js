@@ -13675,8 +13675,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.480';
-  exports.build = build = 'bd85bda0';
+  exports.version = version = '1.9.482';
+  exports.build = build = 'a0eed974';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -25054,21 +25054,29 @@ var Catalog = function CatalogClosure() {
     }
     var destDict = params.destDict;
     if (!(0, _primitives.isDict)(destDict)) {
-      (0, _util.warn)('Catalog_parseDestDictionary: "destDict" must be a dictionary.');
+      (0, _util.warn)('parseDestDictionary: "destDict" must be a dictionary.');
       return;
     }
     var resultObj = params.resultObj;
     if ((typeof resultObj === 'undefined' ? 'undefined' : _typeof(resultObj)) !== 'object') {
-      (0, _util.warn)('Catalog_parseDestDictionary: "resultObj" must be an object.');
+      (0, _util.warn)('parseDestDictionary: "resultObj" must be an object.');
       return;
     }
     var docBaseUrl = params.docBaseUrl || null;
     var action = destDict.get('A'),
         url,
         dest;
+    if (!(0, _primitives.isDict)(action) && destDict.has('Dest')) {
+      action = destDict.get('Dest');
+    }
     if ((0, _primitives.isDict)(action)) {
-      var linkType = action.get('S').name;
-      switch (linkType) {
+      var actionType = action.get('S');
+      if (!(0, _primitives.isName)(actionType)) {
+        (0, _util.warn)('parseDestDictionary: Invalid type in Action dictionary.');
+        return;
+      }
+      var actionName = actionType.name;
+      switch (actionName) {
         case 'URI':
           url = action.get('URI');
           if ((0, _primitives.isName)(url)) {
@@ -25134,7 +25142,7 @@ var Catalog = function CatalogClosure() {
             }
           }
         default:
-          (0, _util.warn)('Catalog_parseDestDictionary: Unrecognized link type "' + linkType + '".');
+          (0, _util.warn)('parseDestDictionary: Unsupported Action type "' + actionName + '".');
           break;
       }
     } else if (destDict.has('Dest')) {
@@ -29032,8 +29040,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.480';
-  PDFJS.build = 'bd85bda0';
+  PDFJS.version = '1.9.482';
+  PDFJS.build = 'a0eed974';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -50339,8 +50347,8 @@ exports.PDFDataTransportStream = PDFDataTransportStream;
 "use strict";
 
 
-var pdfjsVersion = '1.9.480';
-var pdfjsBuild = 'bd85bda0';
+var pdfjsVersion = '1.9.482';
+var pdfjsBuild = 'a0eed974';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(70);
 var pdfjsDisplayAPI = __w_pdfjs_require__(37);
