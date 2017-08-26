@@ -4406,8 +4406,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.482';
-  exports.build = build = 'a0eed974';
+  exports.version = version = '1.9.484';
+  exports.build = build = '7cc72606';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -4856,6 +4856,9 @@ var SVGGraphics = function SVGGraphics() {
             case _util.OPS.setTextMatrix:
               this.setTextMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
               break;
+            case _util.OPS.setTextRise:
+              this.setTextRise(args[0]);
+              break;
             case _util.OPS.setLineWidth:
               this.setLineWidth(args[0]);
               break;
@@ -5049,7 +5052,12 @@ var SVGGraphics = function SVGGraphics() {
         if (current.fillColor !== SVG_DEFAULTS.fillColor) {
           current.tspan.setAttributeNS(null, 'fill', current.fillColor);
         }
-        current.txtElement.setAttributeNS(null, 'transform', pm(current.textMatrix) + ' scale(1, -1)');
+        var textMatrix = current.textMatrix;
+        if (current.textRise !== 0) {
+          textMatrix = textMatrix.slice();
+          textMatrix[5] += current.textRise;
+        }
+        current.txtElement.setAttributeNS(null, 'transform', pm(textMatrix) + ' scale(1, -1)');
         current.txtElement.setAttributeNS(XML_NS, 'xml:space', 'preserve');
         current.txtElement.appendChild(current.tspan);
         current.txtgrp.appendChild(current.txtElement);
@@ -6892,8 +6900,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.482';
-  PDFJS.build = 'a0eed974';
+  PDFJS.version = '1.9.484';
+  PDFJS.build = '7cc72606';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -14795,8 +14803,8 @@ exports.PDFDataTransportStream = PDFDataTransportStream;
 "use strict";
 
 
-var pdfjsVersion = '1.9.482';
-var pdfjsBuild = 'a0eed974';
+var pdfjsVersion = '1.9.484';
+var pdfjsBuild = '7cc72606';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(54);
 var pdfjsDisplayAPI = __w_pdfjs_require__(30);
