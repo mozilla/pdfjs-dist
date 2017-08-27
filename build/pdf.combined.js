@@ -5068,8 +5068,9 @@ var Parser = function ParserClosure() {
           I = 0x49,
           SPACE = 0x20,
           LF = 0xA,
-          CR = 0xD,
-          n = 5;
+          CR = 0xD;
+      var n = 10,
+          NUL = 0x0;
       var startPos = stream.pos,
           state = 0,
           ch = void 0,
@@ -5084,8 +5085,11 @@ var Parser = function ParserClosure() {
           if (ch === SPACE || ch === LF || ch === CR) {
             maybeEIPos = stream.pos;
             var followingBytes = stream.peekBytes(n);
-            for (var i = 0; i < n; i++) {
+            for (var i = 0, ii = followingBytes.length; i < ii; i++) {
               ch = followingBytes[i];
+              if (ch === NUL && followingBytes[i + 1] !== NUL) {
+                continue;
+              }
               if (ch !== LF && ch !== CR && (ch < SPACE || ch > 0x7F)) {
                 state = 0;
                 break;
@@ -13675,8 +13679,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.484';
-  exports.build = build = '7cc72606';
+  exports.version = version = '1.9.486';
+  exports.build = build = '7c7ba9a2';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -29048,8 +29052,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.484';
-  PDFJS.build = '7cc72606';
+  PDFJS.version = '1.9.486';
+  PDFJS.build = '7c7ba9a2';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -50355,8 +50359,8 @@ exports.PDFDataTransportStream = PDFDataTransportStream;
 "use strict";
 
 
-var pdfjsVersion = '1.9.484';
-var pdfjsBuild = '7cc72606';
+var pdfjsVersion = '1.9.486';
+var pdfjsBuild = '7c7ba9a2';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(70);
 var pdfjsDisplayAPI = __w_pdfjs_require__(37);
