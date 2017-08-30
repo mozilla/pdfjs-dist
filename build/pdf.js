@@ -4472,8 +4472,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.493';
-  exports.build = build = 'bad3203f';
+  exports.version = version = '1.9.496';
+  exports.build = build = '26568254';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -6983,8 +6983,8 @@ var PDFFetchStreamReader = function () {
       if (!(0, _network_utils.validateResponseStatus)(response.status, _this._stream.isHttp)) {
         throw (0, _network_utils.createResponseStatusError)(response.status, url);
       }
-      _this._headersCapability.resolve();
       _this._reader = response.body.getReader();
+      _this._headersCapability.resolve();
 
       var _validateRangeRequest = (0, _network_utils.validateRangeRequestCapabilities)({
         getResponseHeader: function getResponseHeader(name) {
@@ -6999,6 +6999,9 @@ var PDFFetchStreamReader = function () {
 
       _this._contentLength = suggestedLength;
       _this._isRangeSupported = allowRangeRequests;
+      if (!_this._isStreamingSupported && _this._isRangeSupported) {
+        _this.cancel(new _util.AbortException('streaming is disabled'));
+      }
     }).catch(this._headersCapability.reject);
     this.onProgress = null;
   }
@@ -7184,8 +7187,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.493';
-  PDFJS.build = 'bad3203f';
+  PDFJS.version = '1.9.496';
+  PDFJS.build = '26568254';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -7939,6 +7942,9 @@ var BaseFullReader = function () {
       readableStream.on('error', function (reason) {
         _this2._error(reason);
       });
+      if (!this._isStreamingSupported && this._isRangeSupported) {
+        this._error(new _util.AbortException('streaming is disabled'));
+      }
       if (this._errored) {
         this._readableStream.destroy(this._reason);
       }
@@ -8165,7 +8171,6 @@ var PDFNodeStreamFsFullReader = function (_BaseFullReader2) {
 
     var _this7 = _possibleConstructorReturn(this, (PDFNodeStreamFsFullReader.__proto__ || Object.getPrototypeOf(PDFNodeStreamFsFullReader)).call(this, stream));
 
-    _this7._setReadableStream(fs.createReadStream(_this7._url.path));
     fs.lstat(_this7._url.path, function (error, stat) {
       if (error) {
         _this7._errored = true;
@@ -8174,6 +8179,7 @@ var PDFNodeStreamFsFullReader = function (_BaseFullReader2) {
         return;
       }
       _this7._contentLength = stat.size;
+      _this7._setReadableStream(fs.createReadStream(_this7._url.path));
       _this7._headersCapability.resolve();
     });
     return _this7;
@@ -15082,8 +15088,8 @@ exports.PDFDataTransportStream = PDFDataTransportStream;
 "use strict";
 
 
-var pdfjsVersion = '1.9.493';
-var pdfjsBuild = 'bad3203f';
+var pdfjsVersion = '1.9.496';
+var pdfjsBuild = '26568254';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(55);
 var pdfjsDisplayAPI = __w_pdfjs_require__(31);
@@ -15095,7 +15101,7 @@ var pdfjsDisplaySVG = __w_pdfjs_require__(32);
   if (pdfjsSharedUtil.isNodeJS()) {
     var PDFNodeStream = __w_pdfjs_require__(57).PDFNodeStream;
     pdfjsDisplayAPI.setPDFNetworkStreamClass(PDFNodeStream);
-  } else if (typeof Response !== 'undefined' && 'body' in Response.prototype) {
+  } else if (typeof Response !== 'undefined' && 'body' in Response.prototype && typeof ReadableStream !== 'undefined') {
     var PDFFetchStream = __w_pdfjs_require__(54).PDFFetchStream;
     pdfjsDisplayAPI.setPDFNetworkStreamClass(PDFFetchStream);
   } else {
