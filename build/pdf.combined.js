@@ -4881,7 +4881,7 @@ module.exports = function (exec) {
 "use strict";
 
 
-var core = module.exports = { version: '2.5.0' };
+var core = module.exports = { version: '2.5.1' };
 if (typeof __e == 'number') __e = core;
 
 /***/ }),
@@ -13458,8 +13458,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.506';
-  exports.build = build = '47789b51';
+  exports.version = version = '1.9.508';
+  exports.build = build = '51be2785';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -26879,7 +26879,7 @@ var AnnotationElementFactory = function () {
 
 var AnnotationElement = function () {
   function AnnotationElement(parameters) {
-    var isRenderable = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+    var isRenderable = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
     var ignoreBorder = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
     _classCallCheck(this, AnnotationElement);
@@ -26990,10 +26990,10 @@ var AnnotationElement = function () {
 var LinkAnnotationElement = function (_AnnotationElement) {
   _inherits(LinkAnnotationElement, _AnnotationElement);
 
-  function LinkAnnotationElement() {
+  function LinkAnnotationElement(parameters) {
     _classCallCheck(this, LinkAnnotationElement);
 
-    return _possibleConstructorReturn(this, (LinkAnnotationElement.__proto__ || Object.getPrototypeOf(LinkAnnotationElement)).apply(this, arguments));
+    return _possibleConstructorReturn(this, (LinkAnnotationElement.__proto__ || Object.getPrototypeOf(LinkAnnotationElement)).call(this, parameters, true));
   }
 
   _createClass(LinkAnnotationElement, [{
@@ -29216,8 +29216,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.506';
-var pdfjsBuild = '47789b51';
+var pdfjsVersion = '1.9.508';
+var pdfjsBuild = '51be2785';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(55);
@@ -35079,8 +35079,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.506';
-  PDFJS.build = '47789b51';
+  PDFJS.version = '1.9.508';
+  PDFJS.build = '51be2785';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {

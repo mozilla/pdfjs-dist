@@ -4578,7 +4578,7 @@ module.exports = function (exec) {
 "use strict";
 
 
-var core = module.exports = { version: '2.5.0' };
+var core = module.exports = { version: '2.5.1' };
 if (typeof __e == 'number') __e = core;
 
 /***/ }),
@@ -24517,8 +24517,8 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 "use strict";
 
 
-var pdfjsVersion = '1.9.506';
-var pdfjsBuild = '47789b51';
+var pdfjsVersion = '1.9.508';
+var pdfjsBuild = '51be2785';
 var pdfjsCoreWorker = __w_pdfjs_require__(62);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
