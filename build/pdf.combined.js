@@ -13458,8 +13458,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.508';
-  exports.build = build = '51be2785';
+  exports.version = version = '1.9.510';
+  exports.build = build = 'd332f62d';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -15499,13 +15499,19 @@ var XRef = function XRefClosure() {
       var obj1 = parser.getObj();
       var obj2 = parser.getObj();
       var obj3 = parser.getObj();
-      if (!(0, _util.isInt)(obj1) || parseInt(obj1, 10) !== num || !(0, _util.isInt)(obj2) || parseInt(obj2, 10) !== gen || !(0, _primitives.isCmd)(obj3)) {
+      if (!Number.isInteger(obj1)) {
+        obj1 = parseInt(obj1, 10);
+      }
+      if (!Number.isInteger(obj2)) {
+        obj2 = parseInt(obj2, 10);
+      }
+      if (obj1 !== num || obj2 !== gen || !(0, _primitives.isCmd)(obj3)) {
         throw new _util.FormatError('bad XRef entry');
       }
-      if (!(0, _primitives.isCmd)(obj3, 'obj')) {
+      if (obj3.cmd !== 'obj') {
         if (obj3.cmd.indexOf('obj') === 0) {
           num = parseInt(obj3.cmd.substring(3), 10);
-          if (!isNaN(num)) {
+          if (!Number.isNaN(num)) {
             return num;
           }
         }
@@ -29216,8 +29222,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.508';
-var pdfjsBuild = '51be2785';
+var pdfjsVersion = '1.9.510';
+var pdfjsBuild = 'd332f62d';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(55);
@@ -35079,8 +35085,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.508';
-  PDFJS.build = '51be2785';
+  PDFJS.version = '1.9.510';
+  PDFJS.build = 'd332f62d';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {

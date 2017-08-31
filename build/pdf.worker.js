@@ -13210,13 +13210,19 @@ var XRef = function XRefClosure() {
       var obj1 = parser.getObj();
       var obj2 = parser.getObj();
       var obj3 = parser.getObj();
-      if (!(0, _util.isInt)(obj1) || parseInt(obj1, 10) !== num || !(0, _util.isInt)(obj2) || parseInt(obj2, 10) !== gen || !(0, _primitives.isCmd)(obj3)) {
+      if (!Number.isInteger(obj1)) {
+        obj1 = parseInt(obj1, 10);
+      }
+      if (!Number.isInteger(obj2)) {
+        obj2 = parseInt(obj2, 10);
+      }
+      if (obj1 !== num || obj2 !== gen || !(0, _primitives.isCmd)(obj3)) {
         throw new _util.FormatError('bad XRef entry');
       }
-      if (!(0, _primitives.isCmd)(obj3, 'obj')) {
+      if (obj3.cmd !== 'obj') {
         if (obj3.cmd.indexOf('obj') === 0) {
           num = parseInt(obj3.cmd.substring(3), 10);
-          if (!isNaN(num)) {
+          if (!Number.isNaN(num)) {
             return num;
           }
         }
@@ -24517,8 +24523,8 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 "use strict";
 
 
-var pdfjsVersion = '1.9.508';
-var pdfjsBuild = '51be2785';
+var pdfjsVersion = '1.9.510';
+var pdfjsBuild = 'd332f62d';
 var pdfjsCoreWorker = __w_pdfjs_require__(62);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
