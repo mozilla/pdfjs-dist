@@ -98,7 +98,7 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.loadJpegStream = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isNodeJS = exports.isSpace = exports.isString = exports.isNum = exports.isInt = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.isArray = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.StatTimer = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VERBOSITY_LEVELS = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
+exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.loadJpegStream = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isNodeJS = exports.isSpace = exports.isString = exports.isNum = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.isArray = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.StatTimer = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VERBOSITY_LEVELS = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -713,7 +713,7 @@ var Util = function UtilClosure() {
   };
   var ROMAN_NUMBER_MAP = ['', 'C', 'CC', 'CCC', 'CD', 'D', 'DC', 'DCC', 'DCCC', 'CM', '', 'X', 'XX', 'XXX', 'XL', 'L', 'LX', 'LXX', 'LXXX', 'XC', '', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'];
   Util.toRoman = function Util_toRoman(number, lowerCase) {
-    assert(isInt(number) && number > 0, 'The number should be a positive integer.');
+    assert(Number.isInteger(number) && number > 0, 'The number should be a positive integer.');
     var pos,
         romanBuf = [];
     while (number >= 1000) {
@@ -885,9 +885,6 @@ function isEmptyObj(obj) {
 }
 function isBool(v) {
   return typeof v === 'boolean';
-}
-function isInt(v) {
-  return typeof v === 'number' && (v | 0) === v;
 }
 function isNum(v) {
   return typeof v === 'number';
@@ -1459,7 +1456,6 @@ exports.isArray = isArray;
 exports.isArrayBuffer = isArrayBuffer;
 exports.isBool = isBool;
 exports.isEmptyObj = isEmptyObj;
-exports.isInt = isInt;
 exports.isNum = isNum;
 exports.isString = isString;
 exports.isSpace = isSpace;
@@ -2465,7 +2461,7 @@ var JpegStream = function JpegStreamClosure() {
     }
     if ((0, _primitives.isDict)(this.params)) {
       var colorTransform = this.params.get('ColorTransform');
-      if ((0, _util.isInt)(colorTransform)) {
+      if (Number.isInteger(colorTransform)) {
         jpegImage.colorTransform = colorTransform;
       }
     }
@@ -5044,9 +5040,9 @@ var Parser = function ParserClosure() {
             return buf1;
         }
       }
-      if ((0, _util.isInt)(buf1)) {
+      if (Number.isInteger(buf1)) {
         var num = buf1;
-        if ((0, _util.isInt)(this.buf1) && (0, _primitives.isCmd)(this.buf2, 'R')) {
+        if (Number.isInteger(this.buf1) && (0, _primitives.isCmd)(this.buf2, 'R')) {
           var ref = new _primitives.Ref(num, this.buf1);
           this.shift();
           this.shift();
@@ -5323,7 +5319,7 @@ var Parser = function ParserClosure() {
       lexer.skipToNextLine();
       var pos = stream.pos - 1;
       var length = dict.get('Length');
-      if (!(0, _util.isInt)(length)) {
+      if (!Number.isInteger(length)) {
         (0, _util.info)('Bad ' + length + ' attribute in stream');
         length = 0;
       }
@@ -5863,7 +5859,7 @@ var Linearization = {
   create: function LinearizationCreate(stream) {
     function getInt(name, allowZeroValue) {
       var obj = linDict.get(name);
-      if ((0, _util.isInt)(obj) && (allowZeroValue ? obj >= 0 : obj > 0)) {
+      if (Number.isInteger(obj) && (allowZeroValue ? obj >= 0 : obj > 0)) {
         return obj;
       }
       throw new Error('The "' + name + '" parameter in the linearization ' + 'dictionary is invalid.');
@@ -5874,7 +5870,7 @@ var Linearization = {
           item;
       if ((0, _util.isArray)(hints) && ((hintsLength = hints.length) === 2 || hintsLength === 4)) {
         for (var index = 0; index < hintsLength; index++) {
-          if (!((0, _util.isInt)(item = hints[index]) && item > 0)) {
+          if (!(Number.isInteger(item = hints[index]) && item > 0)) {
             throw new Error('Hint (' + index + ') in the linearization dictionary is invalid.');
           }
         }
@@ -5888,7 +5884,7 @@ var Linearization = {
     var obj3 = parser.getObj();
     var linDict = parser.getObj();
     var obj, length;
-    if (!((0, _util.isInt)(obj1) && (0, _util.isInt)(obj2) && (0, _primitives.isCmd)(obj3, 'obj') && (0, _primitives.isDict)(linDict) && (0, _util.isNum)(obj = linDict.get('Linearized')) && obj > 0)) {
+    if (!(Number.isInteger(obj1) && Number.isInteger(obj2) && (0, _primitives.isCmd)(obj3, 'obj') && (0, _primitives.isDict)(linDict) && (0, _util.isNum)(obj = linDict.get('Linearized')) && obj > 0)) {
       return null;
     } else if ((length = getInt('L')) !== stream.length) {
       throw new Error('The "L" parameter in the linearization dictionary ' + 'does not equal the stream length.');
@@ -11598,9 +11594,8 @@ function validateRangeRequestCapabilities(_ref) {
   if (contentEncoding !== 'identity') {
     return returnValues;
   }
-  var length = getResponseHeader('Content-Length');
-  length = parseInt(length, 10);
-  if (!(0, _util.isInt)(length)) {
+  var length = parseInt(getResponseHeader('Content-Length'), 10);
+  if (!Number.isInteger(length)) {
     return returnValues;
   }
   returnValues.suggestedLength = length;
@@ -13171,7 +13166,7 @@ var WorkerTransport = function WorkerTransportClosure() {
     getPage: function WorkerTransport_getPage(pageNumber, capability) {
       var _this12 = this;
 
-      if (!(0, _util.isInt)(pageNumber) || pageNumber <= 0 || pageNumber > this.numPages) {
+      if (!Number.isInteger(pageNumber) || pageNumber <= 0 || pageNumber > this.numPages) {
         return Promise.reject(new Error('Invalid page request'));
       }
       var pageIndex = pageNumber - 1;
@@ -13458,8 +13453,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.512';
-  exports.build = build = '066fea9c';
+  exports.version = version = '1.9.514';
+  exports.build = build = '22ade754';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -14347,7 +14342,7 @@ var ChunkedStreamManager = function ChunkedStreamManagerClosure() {
         } else {
           nextEmptyChunk = this.stream.nextEmptyChunk(endChunk);
         }
-        if ((0, _util.isInt)(nextEmptyChunk)) {
+        if (Number.isInteger(nextEmptyChunk)) {
           this._requestChunks([nextEmptyChunk]);
         }
       }
@@ -14552,7 +14547,7 @@ var Catalog = function CatalogClosure() {
     },
     get numPages() {
       var obj = this.toplevelPagesDict.get('Count');
-      if (!(0, _util.isInt)(obj)) {
+      if (!Number.isInteger(obj)) {
         throw new _util.FormatError('page count in top level pages object is not an integer');
       }
       return (0, _util.shadow)(this, 'numPages', obj);
@@ -14660,7 +14655,7 @@ var Catalog = function CatalogClosure() {
           }
           prefix = p ? (0, _util.stringToPDFString)(p) : '';
           var st = labelDict.get('St');
-          if (st && !((0, _util.isInt)(st) && st >= 1)) {
+          if (st && !(Number.isInteger(st) && st >= 1)) {
             throw new _util.FormatError('Invalid start in PageLabel dictionary.');
           }
           currentIndex = st || 1;
@@ -15146,7 +15141,7 @@ var XRef = function XRefClosure() {
         }
         var first = tableState.firstEntryNum;
         var count = tableState.entryCount;
-        if (!(0, _util.isInt)(first) || !(0, _util.isInt)(count)) {
+        if (!Number.isInteger(first) || !Number.isInteger(count)) {
           throw new _util.FormatError('Invalid XRef table: wrong types in subsection header');
         }
         for (var i = tableState.entryNum; i < count; i++) {
@@ -15163,7 +15158,7 @@ var XRef = function XRefClosure() {
           } else if ((0, _primitives.isCmd)(type, 'n')) {
             entry.uncompressed = true;
           }
-          if (!(0, _util.isInt)(entry.offset) || !(0, _util.isInt)(entry.gen) || !(entry.free || entry.uncompressed)) {
+          if (!Number.isInteger(entry.offset) || !Number.isInteger(entry.gen) || !(entry.free || entry.uncompressed)) {
             throw new _util.FormatError('Invalid entry in XRef subsection: ' + first + ', ' + count);
           }
           if (i === 0 && entry.free && first === 1) {
@@ -15216,10 +15211,10 @@ var XRef = function XRefClosure() {
       while (entryRanges.length > 0) {
         var first = entryRanges[0];
         var n = entryRanges[1];
-        if (!(0, _util.isInt)(first) || !(0, _util.isInt)(n)) {
+        if (!Number.isInteger(first) || !Number.isInteger(n)) {
           throw new _util.FormatError('Invalid XRef range fields: ' + first + ', ' + n);
         }
-        if (!(0, _util.isInt)(typeFieldWidth) || !(0, _util.isInt)(offsetFieldWidth) || !(0, _util.isInt)(generationFieldWidth)) {
+        if (!Number.isInteger(typeFieldWidth) || !Number.isInteger(offsetFieldWidth) || !Number.isInteger(generationFieldWidth)) {
           throw new _util.FormatError('Invalid XRef entry fields length: ' + first + ', ' + n);
         }
         for (i = streamState.entryNum; i < n; ++i) {
@@ -15406,15 +15401,15 @@ var XRef = function XRefClosure() {
               this.topDict = dict;
             }
             obj = dict.get('XRefStm');
-            if ((0, _util.isInt)(obj)) {
+            if (Number.isInteger(obj)) {
               var pos = obj;
               if (!(pos in this.xrefstms)) {
                 this.xrefstms[pos] = 1;
                 this.startXRefQueue.push(pos);
               }
             }
-          } else if ((0, _util.isInt)(obj)) {
-            if (!(0, _util.isInt)(parser.getObj()) || !(0, _primitives.isCmd)(parser.getObj(), 'obj') || !(0, _primitives.isStream)(obj = parser.getObj())) {
+          } else if (Number.isInteger(obj)) {
+            if (!Number.isInteger(parser.getObj()) || !(0, _primitives.isCmd)(parser.getObj(), 'obj') || !(0, _primitives.isStream)(obj = parser.getObj())) {
               throw new _util.FormatError('Invalid XRef stream');
             }
             dict = this.processXRefStream(obj);
@@ -15428,7 +15423,7 @@ var XRef = function XRefClosure() {
             throw new _util.FormatError('Invalid XRef stream header');
           }
           obj = dict.get('Prev');
-          if ((0, _util.isInt)(obj)) {
+          if (Number.isInteger(obj)) {
             this.startXRefQueue.push(obj);
           } else if ((0, _primitives.isRef)(obj)) {
             this.startXRefQueue.push(obj.num);
@@ -15535,7 +15530,7 @@ var XRef = function XRefClosure() {
       }
       var first = stream.dict.get('First');
       var n = stream.dict.get('N');
-      if (!(0, _util.isInt)(first) || !(0, _util.isInt)(n)) {
+      if (!Number.isInteger(first) || !Number.isInteger(n)) {
         throw new _util.FormatError('invalid first and n parameters for ObjStm stream');
       }
       var parser = new _parser.Parser(new _parser.Lexer(stream), false, this);
@@ -15546,12 +15541,12 @@ var XRef = function XRefClosure() {
           nums = [];
       for (i = 0; i < n; ++i) {
         num = parser.getObj();
-        if (!(0, _util.isInt)(num)) {
+        if (!Number.isInteger(num)) {
           throw new _util.FormatError('invalid object number in the ObjStm stream: ' + num);
         }
         nums.push(num);
         var offset = parser.getObj();
-        if (!(0, _util.isInt)(offset)) {
+        if (!Number.isInteger(offset)) {
           throw new _util.FormatError('invalid object offset in the ObjStm stream: ' + offset);
         }
       }
@@ -19614,7 +19609,7 @@ var CipherTransformFactory = function CipherTransformFactoryClosure() {
     }
     this.dict = dict;
     var algorithm = dict.get('V');
-    if (!(0, _util.isInt)(algorithm) || algorithm !== 1 && algorithm !== 2 && algorithm !== 4 && algorithm !== 5) {
+    if (!Number.isInteger(algorithm) || algorithm !== 1 && algorithm !== 2 && algorithm !== 4 && algorithm !== 5) {
       throw new _util.FormatError('unsupported encryption algorithm');
     }
     this.algorithm = algorithm;
@@ -19635,7 +19630,7 @@ var CipherTransformFactory = function CipherTransformFactoryClosure() {
         }
       }
     }
-    if (!(0, _util.isInt)(keyLength) || keyLength < 40 || keyLength % 8 !== 0) {
+    if (!Number.isInteger(keyLength) || keyLength < 40 || keyLength % 8 !== 0) {
       throw new _util.FormatError('invalid key length');
     }
     var ownerPassword = (0, _util.stringToBytes)(dict.get('O')).subarray(0, 32);
@@ -29222,8 +29217,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.512';
-var pdfjsBuild = '066fea9c';
+var pdfjsVersion = '1.9.514';
+var pdfjsBuild = '22ade754';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(55);
@@ -35085,8 +35080,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.512';
-  PDFJS.build = '066fea9c';
+  PDFJS.version = '1.9.514';
+  PDFJS.build = '22ade754';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -41671,10 +41666,10 @@ var IdentityCMap = function IdentityCMapClosure() {
       throw new Error('should not call mapCidOne');
     },
     lookup: function lookup(code) {
-      return (0, _util.isInt)(code) && code <= 0xffff ? code : undefined;
+      return Number.isInteger(code) && code <= 0xffff ? code : undefined;
     },
     contains: function contains(code) {
-      return (0, _util.isInt)(code) && code <= 0xffff;
+      return Number.isInteger(code) && code <= 0xffff;
     },
     forEach: function forEach(callback) {
       for (var i = 0; i <= 0xffff; i++) {
@@ -41682,7 +41677,7 @@ var IdentityCMap = function IdentityCMapClosure() {
       }
     },
     charCodeOf: function charCodeOf(value) {
-      return (0, _util.isInt)(value) && value <= 0xffff ? value : -1;
+      return Number.isInteger(value) && value <= 0xffff ? value : -1;
     },
     getMap: function getMap() {
       var map = new Array(0x10000);
@@ -41978,7 +41973,7 @@ var CMapFactory = function CMapFactoryClosure() {
     }
   }
   function expectInt(obj) {
-    if (!(0, _util.isInt)(obj)) {
+    if (!Number.isInteger(obj)) {
       throw new _util.FormatError('Malformed CMap: expected int.');
     }
   }
@@ -42014,8 +42009,8 @@ var CMapFactory = function CMapFactoryClosure() {
       expectString(obj);
       var high = strToInt(obj);
       obj = lexer.getObj();
-      if ((0, _util.isInt)(obj) || (0, _util.isString)(obj)) {
-        var dstLow = (0, _util.isInt)(obj) ? String.fromCharCode(obj) : obj;
+      if (Number.isInteger(obj) || (0, _util.isString)(obj)) {
+        var dstLow = Number.isInteger(obj) ? String.fromCharCode(obj) : obj;
         cMap.mapBfRange(low, high, dstLow);
       } else if ((0, _primitives.isCmd)(obj, '[')) {
         obj = lexer.getObj();
@@ -42092,7 +42087,7 @@ var CMapFactory = function CMapFactoryClosure() {
   }
   function parseWMode(cMap, lexer) {
     var obj = lexer.getObj();
-    if ((0, _util.isInt)(obj)) {
+    if (Number.isInteger(obj)) {
       cMap.vertical = !!obj;
     }
   }
@@ -42429,7 +42424,7 @@ var IdentityToUnicodeMap = function IdentityToUnicodeMapClosure() {
       return undefined;
     },
     charCodeOf: function charCodeOf(v) {
-      return (0, _util.isInt)(v) && v >= this.firstChar && v <= this.lastChar ? v : -1;
+      return Number.isInteger(v) && v >= this.firstChar && v <= this.lastChar ? v : -1;
     },
     amend: function amend(map) {
       throw new Error('Should not call amend()');
@@ -50747,7 +50742,7 @@ var Annotation = function () {
   }, {
     key: 'setFlags',
     value: function setFlags(flags) {
-      this.flags = (0, _util.isInt)(flags) && flags > 0 ? flags : 0;
+      this.flags = Number.isInteger(flags) && flags > 0 ? flags : 0;
     }
   }, {
     key: 'hasFlag',
@@ -51023,7 +51018,7 @@ var WidgetAnnotation = function (_Annotation) {
     data.fieldType = (0, _primitives.isName)(fieldType) ? fieldType.name : null;
     _this2.fieldResources = _util.Util.getInheritableProperty(dict, 'DR') || _primitives.Dict.empty;
     data.fieldFlags = _util.Util.getInheritableProperty(dict, 'Ff');
-    if (!(0, _util.isInt)(data.fieldFlags) || data.fieldFlags < 0) {
+    if (!Number.isInteger(data.fieldFlags) || data.fieldFlags < 0) {
       data.fieldFlags = 0;
     }
     data.readOnly = _this2.hasFieldFlag(_util.AnnotationFieldFlag.READONLY);
@@ -51087,12 +51082,12 @@ var TextWidgetAnnotation = function (_WidgetAnnotation) {
 
     _this3.data.fieldValue = (0, _util.stringToPDFString)(_this3.data.fieldValue || '');
     var alignment = _util.Util.getInheritableProperty(params.dict, 'Q');
-    if (!(0, _util.isInt)(alignment) || alignment < 0 || alignment > 2) {
+    if (!Number.isInteger(alignment) || alignment < 0 || alignment > 2) {
       alignment = null;
     }
     _this3.data.textAlignment = alignment;
     var maximumLength = _util.Util.getInheritableProperty(params.dict, 'MaxLen');
-    if (!(0, _util.isInt)(maximumLength) || maximumLength < 0) {
+    if (!Number.isInteger(maximumLength) || maximumLength < 0) {
       maximumLength = null;
     }
     _this3.data.maxLen = maximumLength;
