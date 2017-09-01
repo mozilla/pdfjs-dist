@@ -98,7 +98,7 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.loadJpegStream = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isNodeJS = exports.isSpace = exports.isString = exports.isNum = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.isArray = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.StatTimer = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VERBOSITY_LEVELS = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
+exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.loadJpegStream = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isNodeJS = exports.isSpace = exports.isString = exports.isNum = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.StatTimer = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VERBOSITY_LEVELS = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -892,9 +892,6 @@ function isNum(v) {
 function isString(v) {
   return typeof v === 'string';
 }
-function isArray(v) {
-  return v instanceof Array;
-}
 function isArrayBuffer(v) {
   return (typeof v === 'undefined' ? 'undefined' : _typeof(v)) === 'object' && v !== null && v.byteLength !== undefined;
 }
@@ -1452,7 +1449,6 @@ exports.deprecated = deprecated;
 exports.getLookupTableFactory = getLookupTableFactory;
 exports.getVerbosityLevel = getVerbosityLevel;
 exports.info = info;
-exports.isArray = isArray;
 exports.isArrayBuffer = isArrayBuffer;
 exports.isBool = isBool;
 exports.isEmptyObj = isEmptyObj;
@@ -4180,8 +4176,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.514';
-  exports.build = build = '22ade754';
+  exports.version = version = '1.9.516';
+  exports.build = build = '336d26dd';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -6992,10 +6988,10 @@ var SVGGraphics = function SVGGraphics() {
         this.paintInlineImageXObject(imgData, mask);
       },
       paintFormXObjectBegin: function SVGGraphics_paintFormXObjectBegin(matrix, bbox) {
-        if ((0, _util.isArray)(matrix) && matrix.length === 6) {
+        if (Array.isArray(matrix) && matrix.length === 6) {
           this.transform(matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]);
         }
-        if ((0, _util.isArray)(bbox) && bbox.length === 4) {
+        if (Array.isArray(bbox) && bbox.length === 4) {
           var width = bbox[2] - bbox[0];
           var height = bbox[3] - bbox[1];
           var cliprect = document.createElementNS(NS, 'svg:rect');
@@ -7059,8 +7055,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.514';
-var pdfjsBuild = '22ade754';
+var pdfjsVersion = '1.9.516';
+var pdfjsBuild = '336d26dd';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(82);
 var pdfjsDisplayAPI = __w_pdfjs_require__(48);
@@ -12922,8 +12918,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.514';
-  PDFJS.build = '22ade754';
+  PDFJS.version = '1.9.516';
+  PDFJS.build = '336d26dd';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -14681,11 +14677,11 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
     paintFormXObjectBegin: function CanvasGraphics_paintFormXObjectBegin(matrix, bbox) {
       this.save();
       this.baseTransformStack.push(this.baseTransform);
-      if ((0, _util.isArray)(matrix) && matrix.length === 6) {
+      if (Array.isArray(matrix) && matrix.length === 6) {
         this.transform.apply(this, matrix);
       }
       this.baseTransform = this.ctx.mozCurrentTransform;
-      if ((0, _util.isArray)(bbox) && bbox.length === 4) {
+      if (Array.isArray(bbox) && bbox.length === 4) {
         var width = bbox[2] - bbox[0];
         var height = bbox[3] - bbox[1];
         this.ctx.rect(bbox[0], bbox[1], width, height);
@@ -14793,7 +14789,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       this.save();
       resetCtxToDefault(this.ctx);
       this.current = new CanvasExtraState();
-      if ((0, _util.isArray)(rect) && rect.length === 4) {
+      if (Array.isArray(rect) && rect.length === 4) {
         var width = rect[2] - rect[0];
         var height = rect[3] - rect[1];
         this.ctx.rect(rect[0], rect[1], width, height);
@@ -15398,7 +15394,7 @@ var TilingPattern = function TilingPatternClosure() {
       this.ctx.scale(1 / scale[0], 1 / scale[1]);
     },
     clipBbox: function clipBbox(graphics, bbox, x0, y0, x1, y1) {
-      if ((0, _util.isArray)(bbox) && bbox.length === 4) {
+      if (Array.isArray(bbox) && bbox.length === 4) {
         var bboxWidth = x1 - x0;
         var bboxHeight = y1 - y0;
         graphics.ctx.rect(x0, y0, bboxWidth, bboxHeight);
