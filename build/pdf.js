@@ -2222,10 +2222,7 @@ function createResponseStatusError(status, url) {
   }
   return new _util.UnexpectedResponseException('Unexpected server response (' + status + ') while retrieving PDF "' + url + '".', status);
 }
-function validateResponseStatus(status, isHttp) {
-  if (!isHttp) {
-    return status === 0;
-  }
+function validateResponseStatus(status) {
   return status === 200 || status === 206;
 }
 exports.createResponseStatusError = createResponseStatusError;
@@ -4176,8 +4173,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.526';
-  exports.build = build = '4edd4fba';
+  exports.version = version = '1.9.528';
+  exports.build = build = '9b14f8ea';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -7055,8 +7052,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.526';
-var pdfjsBuild = '4edd4fba';
+var pdfjsVersion = '1.9.528';
+var pdfjsBuild = '9b14f8ea';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(82);
 var pdfjsDisplayAPI = __w_pdfjs_require__(48);
@@ -12918,8 +12915,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.526';
-  PDFJS.build = '4edd4fba';
+  PDFJS.version = '1.9.528';
+  PDFJS.build = '9b14f8ea';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -16200,7 +16197,7 @@ var PDFFetchStreamReader = function () {
     }
     var url = this._stream.source.url;
     fetch(url, createFetchOptions(this._headers, this._withCredentials)).then(function (response) {
-      if (!(0, _network_utils.validateResponseStatus)(response.status, _this._stream.isHttp)) {
+      if (!(0, _network_utils.validateResponseStatus)(response.status)) {
         throw (0, _network_utils.createResponseStatusError)(response.status, url);
       }
       _this._reader = response.body.getReader();
@@ -16313,7 +16310,7 @@ var PDFFetchStreamRangeReader = function () {
     this._headers.append('Range', 'bytes=' + rangeStr);
     var url = this._stream.source.url;
     fetch(url, createFetchOptions(this._headers, this._withCredentials)).then(function (response) {
-      if (!(0, _network_utils.validateResponseStatus)(response.status, _this3._stream.isHttp)) {
+      if (!(0, _network_utils.validateResponseStatus)(response.status)) {
         throw (0, _network_utils.createResponseStatusError)(response.status, url);
       }
       _this3._readCapability.resolve();
