@@ -1525,7 +1525,7 @@ module.exports = !__w_pdfjs_require__(15)(function () {
 "use strict";
 
 
-var dP = __w_pdfjs_require__(7);
+var dP = __w_pdfjs_require__(8);
 var createDesc = __w_pdfjs_require__(18);
 module.exports = __w_pdfjs_require__(3) ? function (object, key, value) {
   return dP.f(object, key, createDesc(1, value));
@@ -1566,33 +1566,10 @@ module.exports = function (it) {
 "use strict";
 
 
-var anObject = __w_pdfjs_require__(17);
-var IE8_DOM_DEFINE = __w_pdfjs_require__(31);
-var toPrimitive = __w_pdfjs_require__(22);
-var dP = Object.defineProperty;
-exports.f = __w_pdfjs_require__(3) ? Object.defineProperty : function defineProperty(O, P, Attributes) {
-  anObject(O);
-  P = toPrimitive(P, true);
-  anObject(Attributes);
-  if (IE8_DOM_DEFINE) try {
-    return dP(O, P, Attributes);
-  } catch (e) {}
-  if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported!');
-  if ('value' in Attributes) O[P] = Attributes.value;
-  return O;
-};
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DOMCMapReaderFactory = exports.DOMCanvasFactory = exports.DEFAULT_LINK_REL = exports.getDefaultSetting = exports.LinkTarget = exports.getFilenameFromUrl = exports.isValidUrl = exports.isExternalLinkTargetSet = exports.addLinkAttributes = exports.RenderingCancelledException = exports.CustomStyle = undefined;
+exports.DOMSVGFactory = exports.DOMCMapReaderFactory = exports.DOMCanvasFactory = exports.DEFAULT_LINK_REL = exports.getDefaultSetting = exports.LinkTarget = exports.getFilenameFromUrl = exports.isValidUrl = exports.isExternalLinkTargetSet = exports.addLinkAttributes = exports.RenderingCancelledException = exports.CustomStyle = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -1607,6 +1584,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DEFAULT_LINK_REL = 'noopener noreferrer nofollow';
+var SVG_NS = 'http://www.w3.org/2000/svg';
 
 var DOMCanvasFactory = function () {
   function DOMCanvasFactory() {
@@ -1713,6 +1691,34 @@ var DOMCMapReaderFactory = function () {
   }]);
 
   return DOMCMapReaderFactory;
+}();
+
+var DOMSVGFactory = function () {
+  function DOMSVGFactory() {
+    _classCallCheck(this, DOMSVGFactory);
+  }
+
+  _createClass(DOMSVGFactory, [{
+    key: 'create',
+    value: function create(width, height) {
+      (0, _util.assert)(width > 0 && height > 0, 'Invalid SVG dimensions');
+      var svg = document.createElementNS(SVG_NS, 'svg:svg');
+      svg.setAttribute('version', '1.1');
+      svg.setAttribute('width', width + 'px');
+      svg.setAttribute('height', height + 'px');
+      svg.setAttribute('preserveAspectRatio', 'none');
+      svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+      return svg;
+    }
+  }, {
+    key: 'createElement',
+    value: function createElement(type) {
+      (0, _util.assert)(typeof type === 'string', 'Invalid SVG element type');
+      return document.createElementNS(SVG_NS, type);
+    }
+  }]);
+
+  return DOMSVGFactory;
 }();
 
 var CustomStyle = function CustomStyleClosure() {
@@ -1875,6 +1881,30 @@ exports.getDefaultSetting = getDefaultSetting;
 exports.DEFAULT_LINK_REL = DEFAULT_LINK_REL;
 exports.DOMCanvasFactory = DOMCanvasFactory;
 exports.DOMCMapReaderFactory = DOMCMapReaderFactory;
+exports.DOMSVGFactory = DOMSVGFactory;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var anObject = __w_pdfjs_require__(17);
+var IE8_DOM_DEFINE = __w_pdfjs_require__(31);
+var toPrimitive = __w_pdfjs_require__(22);
+var dP = Object.defineProperty;
+exports.f = __w_pdfjs_require__(3) ? Object.defineProperty : function defineProperty(O, P, Attributes) {
+  anObject(O);
+  P = toPrimitive(P, true);
+  anObject(Attributes);
+  if (IE8_DOM_DEFINE) try {
+    return dP(O, P, Attributes);
+  } catch (e) {}
+  if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported!');
+  if ('value' in Attributes) O[P] = Attributes.value;
+  return O;
+};
 
 /***/ }),
 /* 9 */
@@ -2160,7 +2190,7 @@ module.exports = 'constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,
 "use strict";
 
 
-var def = __w_pdfjs_require__(7).f;
+var def = __w_pdfjs_require__(8).f;
 var has = __w_pdfjs_require__(5);
 var TAG = __w_pdfjs_require__(1)('toStringTag');
 module.exports = function (it, tag, stat) {
@@ -2617,7 +2647,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(8);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var _font_loader = __w_pdfjs_require__(83);
 
@@ -4173,8 +4203,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.544';
-  exports.build = build = '437e9cb0';
+  exports.version = version = '1.9.549';
+  exports.build = build = '320779e6';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -4199,7 +4229,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.WebGLUtils = undefined;
 
-var _dom_utils = __w_pdfjs_require__(8);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -4648,7 +4678,7 @@ exports.AnnotationLayer = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _dom_utils = __w_pdfjs_require__(8);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -4693,6 +4723,10 @@ var AnnotationElementFactory = function () {
           return new PopupAnnotationElement(parameters);
         case _util.AnnotationType.LINE:
           return new LineAnnotationElement(parameters);
+        case _util.AnnotationType.SQUARE:
+          return new SquareAnnotationElement(parameters);
+        case _util.AnnotationType.CIRCLE:
+          return new CircleAnnotationElement(parameters);
         case _util.AnnotationType.HIGHLIGHT:
           return new HighlightAnnotationElement(parameters);
         case _util.AnnotationType.UNDERLINE:
@@ -4728,6 +4762,7 @@ var AnnotationElement = function () {
     this.downloadManager = parameters.downloadManager;
     this.imageResourcesPath = parameters.imageResourcesPath;
     this.renderInteractiveForms = parameters.renderInteractiveForms;
+    this.svgFactory = parameters.svgFactory;
     if (isRenderable) {
       this.container = this._createContainer(ignoreBorder);
     }
@@ -5114,7 +5149,7 @@ var PopupAnnotationElement = function (_AnnotationElement4) {
   _createClass(PopupAnnotationElement, [{
     key: 'render',
     value: function render() {
-      var IGNORE_TYPES = ['Line'];
+      var IGNORE_TYPES = ['Line', 'Square', 'Circle'];
       this.container.className = 'popupAnnotation';
       if (IGNORE_TYPES.indexOf(this.data.parentType) >= 0) {
         return this.container;
@@ -5252,27 +5287,21 @@ var LineAnnotationElement = function (_AnnotationElement5) {
   _createClass(LineAnnotationElement, [{
     key: 'render',
     value: function render() {
-      var SVG_NS = 'http://www.w3.org/2000/svg';
       this.container.className = 'lineAnnotation';
       var data = this.data;
       var width = data.rect[2] - data.rect[0];
       var height = data.rect[3] - data.rect[1];
-      var svg = document.createElementNS(SVG_NS, 'svg:svg');
-      svg.setAttributeNS(null, 'version', '1.1');
-      svg.setAttributeNS(null, 'width', width + 'px');
-      svg.setAttributeNS(null, 'height', height + 'px');
-      svg.setAttributeNS(null, 'preserveAspectRatio', 'none');
-      svg.setAttributeNS(null, 'viewBox', '0 0 ' + width + ' ' + height);
-      var line = document.createElementNS(SVG_NS, 'svg:line');
-      line.setAttributeNS(null, 'x1', data.rect[2] - data.lineCoordinates[0]);
-      line.setAttributeNS(null, 'y1', data.rect[3] - data.lineCoordinates[1]);
-      line.setAttributeNS(null, 'x2', data.rect[2] - data.lineCoordinates[2]);
-      line.setAttributeNS(null, 'y2', data.rect[3] - data.lineCoordinates[3]);
-      line.setAttributeNS(null, 'stroke-width', data.borderStyle.width);
-      line.setAttributeNS(null, 'stroke', 'transparent');
+      var svg = this.svgFactory.create(width, height);
+      var line = this.svgFactory.createElement('svg:line');
+      line.setAttribute('x1', data.rect[2] - data.lineCoordinates[0]);
+      line.setAttribute('y1', data.rect[3] - data.lineCoordinates[1]);
+      line.setAttribute('x2', data.rect[2] - data.lineCoordinates[2]);
+      line.setAttribute('y2', data.rect[3] - data.lineCoordinates[3]);
+      line.setAttribute('stroke-width', data.borderStyle.width);
+      line.setAttribute('stroke', 'transparent');
       svg.appendChild(line);
       this.container.append(svg);
-      this._createPopup(this.container, line, this.data);
+      this._createPopup(this.container, line, data);
       return this.container;
     }
   }]);
@@ -5280,8 +5309,82 @@ var LineAnnotationElement = function (_AnnotationElement5) {
   return LineAnnotationElement;
 }(AnnotationElement);
 
-var HighlightAnnotationElement = function (_AnnotationElement6) {
-  _inherits(HighlightAnnotationElement, _AnnotationElement6);
+var SquareAnnotationElement = function (_AnnotationElement6) {
+  _inherits(SquareAnnotationElement, _AnnotationElement6);
+
+  function SquareAnnotationElement(parameters) {
+    _classCallCheck(this, SquareAnnotationElement);
+
+    var isRenderable = !!(parameters.data.hasPopup || parameters.data.title || parameters.data.contents);
+    return _possibleConstructorReturn(this, (SquareAnnotationElement.__proto__ || Object.getPrototypeOf(SquareAnnotationElement)).call(this, parameters, isRenderable, true));
+  }
+
+  _createClass(SquareAnnotationElement, [{
+    key: 'render',
+    value: function render() {
+      this.container.className = 'squareAnnotation';
+      var data = this.data;
+      var width = data.rect[2] - data.rect[0];
+      var height = data.rect[3] - data.rect[1];
+      var svg = this.svgFactory.create(width, height);
+      var borderWidth = data.borderStyle.width;
+      var square = this.svgFactory.createElement('svg:rect');
+      square.setAttribute('x', borderWidth / 2);
+      square.setAttribute('y', borderWidth / 2);
+      square.setAttribute('width', width - borderWidth);
+      square.setAttribute('height', height - borderWidth);
+      square.setAttribute('stroke-width', borderWidth);
+      square.setAttribute('stroke', 'transparent');
+      square.setAttribute('fill', 'none');
+      svg.appendChild(square);
+      this.container.append(svg);
+      this._createPopup(this.container, square, data);
+      return this.container;
+    }
+  }]);
+
+  return SquareAnnotationElement;
+}(AnnotationElement);
+
+var CircleAnnotationElement = function (_AnnotationElement7) {
+  _inherits(CircleAnnotationElement, _AnnotationElement7);
+
+  function CircleAnnotationElement(parameters) {
+    _classCallCheck(this, CircleAnnotationElement);
+
+    var isRenderable = !!(parameters.data.hasPopup || parameters.data.title || parameters.data.contents);
+    return _possibleConstructorReturn(this, (CircleAnnotationElement.__proto__ || Object.getPrototypeOf(CircleAnnotationElement)).call(this, parameters, isRenderable, true));
+  }
+
+  _createClass(CircleAnnotationElement, [{
+    key: 'render',
+    value: function render() {
+      this.container.className = 'circleAnnotation';
+      var data = this.data;
+      var width = data.rect[2] - data.rect[0];
+      var height = data.rect[3] - data.rect[1];
+      var svg = this.svgFactory.create(width, height);
+      var borderWidth = data.borderStyle.width;
+      var circle = this.svgFactory.createElement('svg:ellipse');
+      circle.setAttribute('cx', width / 2);
+      circle.setAttribute('cy', height / 2);
+      circle.setAttribute('rx', width / 2 - borderWidth / 2);
+      circle.setAttribute('ry', height / 2 - borderWidth / 2);
+      circle.setAttribute('stroke-width', borderWidth);
+      circle.setAttribute('stroke', 'transparent');
+      circle.setAttribute('fill', 'none');
+      svg.appendChild(circle);
+      this.container.append(svg);
+      this._createPopup(this.container, circle, data);
+      return this.container;
+    }
+  }]);
+
+  return CircleAnnotationElement;
+}(AnnotationElement);
+
+var HighlightAnnotationElement = function (_AnnotationElement8) {
+  _inherits(HighlightAnnotationElement, _AnnotationElement8);
 
   function HighlightAnnotationElement(parameters) {
     _classCallCheck(this, HighlightAnnotationElement);
@@ -5304,8 +5407,8 @@ var HighlightAnnotationElement = function (_AnnotationElement6) {
   return HighlightAnnotationElement;
 }(AnnotationElement);
 
-var UnderlineAnnotationElement = function (_AnnotationElement7) {
-  _inherits(UnderlineAnnotationElement, _AnnotationElement7);
+var UnderlineAnnotationElement = function (_AnnotationElement9) {
+  _inherits(UnderlineAnnotationElement, _AnnotationElement9);
 
   function UnderlineAnnotationElement(parameters) {
     _classCallCheck(this, UnderlineAnnotationElement);
@@ -5328,8 +5431,8 @@ var UnderlineAnnotationElement = function (_AnnotationElement7) {
   return UnderlineAnnotationElement;
 }(AnnotationElement);
 
-var SquigglyAnnotationElement = function (_AnnotationElement8) {
-  _inherits(SquigglyAnnotationElement, _AnnotationElement8);
+var SquigglyAnnotationElement = function (_AnnotationElement10) {
+  _inherits(SquigglyAnnotationElement, _AnnotationElement10);
 
   function SquigglyAnnotationElement(parameters) {
     _classCallCheck(this, SquigglyAnnotationElement);
@@ -5352,8 +5455,8 @@ var SquigglyAnnotationElement = function (_AnnotationElement8) {
   return SquigglyAnnotationElement;
 }(AnnotationElement);
 
-var StrikeOutAnnotationElement = function (_AnnotationElement9) {
-  _inherits(StrikeOutAnnotationElement, _AnnotationElement9);
+var StrikeOutAnnotationElement = function (_AnnotationElement11) {
+  _inherits(StrikeOutAnnotationElement, _AnnotationElement11);
 
   function StrikeOutAnnotationElement(parameters) {
     _classCallCheck(this, StrikeOutAnnotationElement);
@@ -5376,23 +5479,23 @@ var StrikeOutAnnotationElement = function (_AnnotationElement9) {
   return StrikeOutAnnotationElement;
 }(AnnotationElement);
 
-var FileAttachmentAnnotationElement = function (_AnnotationElement10) {
-  _inherits(FileAttachmentAnnotationElement, _AnnotationElement10);
+var FileAttachmentAnnotationElement = function (_AnnotationElement12) {
+  _inherits(FileAttachmentAnnotationElement, _AnnotationElement12);
 
   function FileAttachmentAnnotationElement(parameters) {
     _classCallCheck(this, FileAttachmentAnnotationElement);
 
-    var _this16 = _possibleConstructorReturn(this, (FileAttachmentAnnotationElement.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotationElement)).call(this, parameters, true));
+    var _this18 = _possibleConstructorReturn(this, (FileAttachmentAnnotationElement.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotationElement)).call(this, parameters, true));
 
-    var file = _this16.data.file;
-    _this16.filename = (0, _dom_utils.getFilenameFromUrl)(file.filename);
-    _this16.content = file.content;
-    _this16.linkService.onFileAttachmentAnnotation({
+    var file = _this18.data.file;
+    _this18.filename = (0, _dom_utils.getFilenameFromUrl)(file.filename);
+    _this18.content = file.content;
+    _this18.linkService.onFileAttachmentAnnotation({
       id: (0, _util.stringToPDFString)(file.filename),
       filename: file.filename,
       content: file.content
     });
-    return _this16;
+    return _this18;
   }
 
   _createClass(FileAttachmentAnnotationElement, [{
@@ -5444,7 +5547,8 @@ var AnnotationLayer = function () {
           linkService: parameters.linkService,
           downloadManager: parameters.downloadManager,
           imageResourcesPath: parameters.imageResourcesPath || (0, _dom_utils.getDefaultSetting)('imageResourcesPath'),
-          renderInteractiveForms: parameters.renderInteractiveForms || false
+          renderInteractiveForms: parameters.renderInteractiveForms || false,
+          svgFactory: new _dom_utils.DOMSVGFactory()
         });
         if (element.isRenderable) {
           parameters.div.appendChild(element.render());
@@ -5484,7 +5588,7 @@ exports.renderTextLayer = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(8);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var renderTextLayer = function renderTextLayerClosure() {
   var MAX_TEXT_DIVS_TO_RENDER = 100000;
@@ -6036,6 +6140,8 @@ exports.SVGGraphics = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
+var _dom_utils = __w_pdfjs_require__(7);
+
 var SVGGraphics = function SVGGraphics() {
   throw new Error('Not implemented: SVGGraphics');
 };
@@ -6313,6 +6419,7 @@ var SVGGraphics = function SVGGraphics() {
       return 'matrix(' + pf(m[0]) + ' ' + pf(m[1]) + ' ' + pf(m[2]) + ' ' + pf(m[3]) + ' ' + pf(m[4]) + ' ' + pf(m[5]) + ')';
     }
     function SVGGraphics(commonObjs, objs, forceDataSchema) {
+      this.svgFactory = new _dom_utils.DOMSVGFactory();
       this.current = new SVGExtraState();
       this.transformMatrix = _util.IDENTITY_MATRIX;
       this.transformStack = [];
@@ -6326,7 +6433,6 @@ var SVGGraphics = function SVGGraphics() {
       this.cssStyle = null;
       this.forceDataSchema = !!forceDataSchema;
     }
-    var NS = 'http://www.w3.org/2000/svg';
     var XML_NS = 'http://www.w3.org/XML/1998/namespace';
     var XLINK_NS = 'http://www.w3.org/1999/xlink';
     var LINE_CAP_STYLES = ['butt', 'round', 'square'];
@@ -6572,11 +6678,11 @@ var SVGGraphics = function SVGGraphics() {
         this.current.x = this.current.lineX = 0;
         this.current.y = this.current.lineY = 0;
         current.xcoords = [];
-        current.tspan = document.createElementNS(NS, 'svg:tspan');
+        current.tspan = this.svgFactory.createElement('svg:tspan');
         current.tspan.setAttributeNS(null, 'font-family', current.fontFamily);
         current.tspan.setAttributeNS(null, 'font-size', pf(current.fontSize) + 'px');
         current.tspan.setAttributeNS(null, 'y', pf(-current.y));
-        current.txtElement = document.createElementNS(NS, 'svg:text');
+        current.txtElement = this.svgFactory.createElement('svg:text');
         current.txtElement.appendChild(current.tspan);
       },
       beginText: function SVGGraphics_beginText() {
@@ -6584,9 +6690,9 @@ var SVGGraphics = function SVGGraphics() {
         this.current.y = this.current.lineY = 0;
         this.current.textMatrix = _util.IDENTITY_MATRIX;
         this.current.lineMatrix = _util.IDENTITY_MATRIX;
-        this.current.tspan = document.createElementNS(NS, 'svg:tspan');
-        this.current.txtElement = document.createElementNS(NS, 'svg:text');
-        this.current.txtgrp = document.createElementNS(NS, 'svg:g');
+        this.current.tspan = this.svgFactory.createElement('svg:tspan');
+        this.current.txtElement = this.svgFactory.createElement('svg:text');
+        this.current.txtgrp = this.svgFactory.createElement('svg:g');
         this.current.xcoords = [];
       },
       moveText: function SVGGraphics_moveText(x, y) {
@@ -6594,7 +6700,7 @@ var SVGGraphics = function SVGGraphics() {
         this.current.x = this.current.lineX += x;
         this.current.y = this.current.lineY += y;
         current.xcoords = [];
-        current.tspan = document.createElementNS(NS, 'svg:tspan');
+        current.tspan = this.svgFactory.createElement('svg:tspan');
         current.tspan.setAttributeNS(null, 'font-family', current.fontFamily);
         current.tspan.setAttributeNS(null, 'font-size', pf(current.fontSize) + 'px');
         current.tspan.setAttributeNS(null, 'y', pf(-current.y));
@@ -6671,7 +6777,7 @@ var SVGGraphics = function SVGGraphics() {
       },
       addFontStyle: function SVGGraphics_addFontStyle(fontObj) {
         if (!this.cssStyle) {
-          this.cssStyle = document.createElementNS(NS, 'svg:style');
+          this.cssStyle = this.svgFactory.createElement('svg:style');
           this.cssStyle.setAttributeNS(null, 'type', 'text/css');
           this.defs.appendChild(this.cssStyle);
         }
@@ -6700,7 +6806,7 @@ var SVGGraphics = function SVGGraphics() {
         current.fontFamily = fontObj.loadedName;
         current.fontWeight = bold;
         current.fontStyle = italic;
-        current.tspan = document.createElementNS(NS, 'svg:tspan');
+        current.tspan = this.svgFactory.createElement('svg:tspan');
         current.tspan.setAttributeNS(null, 'y', pf(-current.y));
         current.xcoords = [];
       },
@@ -6730,7 +6836,7 @@ var SVGGraphics = function SVGGraphics() {
       setFillRGBColor: function SVGGraphics_setFillRGBColor(r, g, b) {
         var color = _util.Util.makeCssRgb(r, g, b);
         this.current.fillColor = color;
-        this.current.tspan = document.createElementNS(NS, 'svg:tspan');
+        this.current.tspan = this.svgFactory.createElement('svg:tspan');
         this.current.xcoords = [];
       },
       setDash: function SVGGraphics_setDash(dashArray, dashPhase) {
@@ -6741,7 +6847,7 @@ var SVGGraphics = function SVGGraphics() {
         var current = this.current;
         var x = current.x,
             y = current.y;
-        current.path = document.createElementNS(NS, 'svg:path');
+        current.path = this.svgFactory.createElement('svg:path');
         var d = [];
         var opLength = ops.length;
         for (var i = 0, j = 0; i < opLength; i++) {
@@ -6801,7 +6907,7 @@ var SVGGraphics = function SVGGraphics() {
         var current = this.current;
         var clipId = 'clippath' + clipCount;
         clipCount++;
-        var clipPath = document.createElementNS(NS, 'svg:clipPath');
+        var clipPath = this.svgFactory.createElement('svg:clipPath');
         clipPath.setAttributeNS(null, 'id', clipId);
         clipPath.setAttributeNS(null, 'transform', pm(this.transformMatrix));
         var clipElement = current.element.cloneNode();
@@ -6915,7 +7021,7 @@ var SVGGraphics = function SVGGraphics() {
       },
       paintSolidColorImageMask: function SVGGraphics_paintSolidColorImageMask() {
         var current = this.current;
-        var rect = document.createElementNS(NS, 'svg:rect');
+        var rect = this.svgFactory.createElement('svg:rect');
         rect.setAttributeNS(null, 'x', '0');
         rect.setAttributeNS(null, 'y', '0');
         rect.setAttributeNS(null, 'width', '1px');
@@ -6925,7 +7031,7 @@ var SVGGraphics = function SVGGraphics() {
       },
       paintJpegXObject: function SVGGraphics_paintJpegXObject(objId, w, h) {
         var imgObj = this.objs.get(objId);
-        var imgEl = document.createElementNS(NS, 'svg:image');
+        var imgEl = this.svgFactory.createElement('svg:image');
         imgEl.setAttributeNS(XLINK_NS, 'xlink:href', imgObj.src);
         imgEl.setAttributeNS(null, 'width', pf(w));
         imgEl.setAttributeNS(null, 'height', pf(h));
@@ -6946,14 +7052,14 @@ var SVGGraphics = function SVGGraphics() {
         var width = imgData.width;
         var height = imgData.height;
         var imgSrc = convertImgDataToPng(imgData, this.forceDataSchema);
-        var cliprect = document.createElementNS(NS, 'svg:rect');
+        var cliprect = this.svgFactory.createElement('svg:rect');
         cliprect.setAttributeNS(null, 'x', '0');
         cliprect.setAttributeNS(null, 'y', '0');
         cliprect.setAttributeNS(null, 'width', pf(width));
         cliprect.setAttributeNS(null, 'height', pf(height));
         this.current.element = cliprect;
         this.clip('nonzero');
-        var imgEl = document.createElementNS(NS, 'svg:image');
+        var imgEl = this.svgFactory.createElement('svg:image');
         imgEl.setAttributeNS(XLINK_NS, 'xlink:href', imgSrc);
         imgEl.setAttributeNS(null, 'x', '0');
         imgEl.setAttributeNS(null, 'y', pf(-height));
@@ -6972,9 +7078,9 @@ var SVGGraphics = function SVGGraphics() {
         var height = imgData.height;
         var fillColor = current.fillColor;
         current.maskId = 'mask' + maskCount++;
-        var mask = document.createElementNS(NS, 'svg:mask');
+        var mask = this.svgFactory.createElement('svg:mask');
         mask.setAttributeNS(null, 'id', current.maskId);
-        var rect = document.createElementNS(NS, 'svg:rect');
+        var rect = this.svgFactory.createElement('svg:rect');
         rect.setAttributeNS(null, 'x', '0');
         rect.setAttributeNS(null, 'y', '0');
         rect.setAttributeNS(null, 'width', pf(width));
@@ -6992,7 +7098,7 @@ var SVGGraphics = function SVGGraphics() {
         if (Array.isArray(bbox) && bbox.length === 4) {
           var width = bbox[2] - bbox[0];
           var height = bbox[3] - bbox[1];
-          var cliprect = document.createElementNS(NS, 'svg:rect');
+          var cliprect = this.svgFactory.createElement('svg:rect');
           cliprect.setAttributeNS(null, 'x', bbox[0]);
           cliprect.setAttributeNS(null, 'y', bbox[1]);
           cliprect.setAttributeNS(null, 'width', pf(width));
@@ -7003,25 +7109,21 @@ var SVGGraphics = function SVGGraphics() {
         }
       },
       paintFormXObjectEnd: function SVGGraphics_paintFormXObjectEnd() {},
-      _initialize: function SVGGraphics_initialize(viewport) {
-        var svg = document.createElementNS(NS, 'svg:svg');
-        svg.setAttributeNS(null, 'version', '1.1');
-        svg.setAttributeNS(null, 'width', viewport.width + 'px');
-        svg.setAttributeNS(null, 'height', viewport.height + 'px');
-        svg.setAttributeNS(null, 'preserveAspectRatio', 'none');
-        svg.setAttributeNS(null, 'viewBox', '0 0 ' + viewport.width + ' ' + viewport.height);
-        var definitions = document.createElementNS(NS, 'svg:defs');
+      _initialize: function _initialize(viewport) {
+        var svg = this.svgFactory.create(viewport.width, viewport.height);
+        var definitions = this.svgFactory.createElement('svg:defs');
         svg.appendChild(definitions);
         this.defs = definitions;
-        var rootGroup = document.createElementNS(NS, 'svg:g');
+        var rootGroup = this.svgFactory.createElement('svg:g');
         rootGroup.setAttributeNS(null, 'transform', pm(viewport.transform));
         svg.appendChild(rootGroup);
         this.svg = rootGroup;
         return svg;
       },
+
       _ensureClipGroup: function SVGGraphics_ensureClipGroup() {
         if (!this.current.clipGroup) {
-          var clipGroup = document.createElementNS(NS, 'svg:g');
+          var clipGroup = this.svgFactory.createElement('svg:g');
           clipGroup.setAttributeNS(null, 'clip-path', this.current.activeClipUrl);
           this.svg.appendChild(clipGroup);
           this.current.clipGroup = clipGroup;
@@ -7030,7 +7132,7 @@ var SVGGraphics = function SVGGraphics() {
       },
       _ensureTransformGroup: function SVGGraphics_ensureTransformGroup() {
         if (!this.tgrp) {
-          this.tgrp = document.createElementNS(NS, 'svg:g');
+          this.tgrp = this.svgFactory.createElement('svg:g');
           this.tgrp.setAttributeNS(null, 'transform', pm(this.transformMatrix));
           if (this.current.activeClipUrl) {
             this._ensureClipGroup().appendChild(this.tgrp);
@@ -7053,14 +7155,14 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.544';
-var pdfjsBuild = '437e9cb0';
+var pdfjsVersion = '1.9.549';
+var pdfjsBuild = '320779e6';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(82);
 var pdfjsDisplayAPI = __w_pdfjs_require__(48);
 var pdfjsDisplayTextLayer = __w_pdfjs_require__(52);
 var pdfjsDisplayAnnotationLayer = __w_pdfjs_require__(51);
-var pdfjsDisplayDOMUtils = __w_pdfjs_require__(8);
+var pdfjsDisplayDOMUtils = __w_pdfjs_require__(7);
 var pdfjsDisplaySVG = __w_pdfjs_require__(53);
 {
   if (pdfjsSharedUtil.isNodeJS()) {
@@ -8695,7 +8797,7 @@ if (__w_pdfjs_require__(3)) {
   var setSpecies = __w_pdfjs_require__(76);
   var arrayFill = __w_pdfjs_require__(44);
   var arrayCopyWithin = __w_pdfjs_require__(77);
-  var $DP = __w_pdfjs_require__(7);
+  var $DP = __w_pdfjs_require__(8);
   var $GOPD = __w_pdfjs_require__(78);
   var dP = $DP.f;
   var gOPD = $GOPD.f;
@@ -9112,7 +9214,7 @@ var toInteger = __w_pdfjs_require__(12);
 var toLength = __w_pdfjs_require__(6);
 var toIndex = __w_pdfjs_require__(37);
 var gOPN = __w_pdfjs_require__(38).f;
-var dP = __w_pdfjs_require__(7).f;
+var dP = __w_pdfjs_require__(8).f;
 var arrayFill = __w_pdfjs_require__(44);
 var setToStringTag = __w_pdfjs_require__(28);
 var ARRAY_BUFFER = 'ArrayBuffer';
@@ -9391,7 +9493,7 @@ module.exports = function (it) {
 "use strict";
 
 
-var dP = __w_pdfjs_require__(7);
+var dP = __w_pdfjs_require__(8);
 var anObject = __w_pdfjs_require__(17);
 var getKeys = __w_pdfjs_require__(62);
 module.exports = __w_pdfjs_require__(3) ? Object.defineProperties : function defineProperties(O, Properties) {
@@ -9758,7 +9860,7 @@ module.exports = function (exec, skipClosing) {
 
 
 var global = __w_pdfjs_require__(2);
-var dP = __w_pdfjs_require__(7);
+var dP = __w_pdfjs_require__(8);
 var DESCRIPTORS = __w_pdfjs_require__(3);
 var SPECIES = __w_pdfjs_require__(1)('species');
 module.exports = function (KEY) {
@@ -12892,7 +12994,7 @@ exports.PDFJS = exports.isWorker = exports.globalScope = undefined;
 
 var _api = __w_pdfjs_require__(48);
 
-var _dom_utils = __w_pdfjs_require__(8);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -12916,8 +13018,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.544';
-  PDFJS.build = '437e9cb0';
+  PDFJS.version = '1.9.549';
+  PDFJS.build = '320779e6';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
