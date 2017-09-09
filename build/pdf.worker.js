@@ -6616,7 +6616,7 @@ var PostScriptCompiler = function PostScriptCompilerClosure() {
               return null;
             }
             n = num1.number;
-            if (n < 0 || (n | 0) !== n || stack.length < n) {
+            if (n < 0 || !Number.isInteger(n) || stack.length < n) {
               return null;
             }
             ast1 = stack[stack.length - n - 1];
@@ -6660,7 +6660,7 @@ var PostScriptCompiler = function PostScriptCompilerClosure() {
             }
             j = num2.number;
             n = num1.number;
-            if (n <= 0 || (n | 0) !== n || (j | 0) !== j || stack.length < n) {
+            if (n <= 0 || !Number.isInteger(n) || !Number.isInteger(j) || stack.length < n) {
               return null;
             }
             j = (j % n + n) % n;
@@ -24512,8 +24512,8 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 "use strict";
 
 
-var pdfjsVersion = '1.9.534';
-var pdfjsBuild = 'c8b5ba27';
+var pdfjsVersion = '1.9.537';
+var pdfjsBuild = 'bd3f16bf';
 var pdfjsCoreWorker = __w_pdfjs_require__(62);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -38140,7 +38140,7 @@ var Type1CharString = function Type1CharStringClosure() {
       var start = stackLength - howManyArgs;
       for (var i = start; i < stackLength; i++) {
         var value = this.stack[i];
-        if (value === (value | 0)) {
+        if (Number.isInteger(value)) {
           this.output.push(28, value >> 8 & 0xff, value & 0xff);
         } else {
           value = 65536 * value | 0;
@@ -43393,7 +43393,7 @@ var AnnotationBorderStyle = function () {
   _createClass(AnnotationBorderStyle, [{
     key: 'setWidth',
     value: function setWidth(width) {
-      if (width === (width | 0)) {
+      if (Number.isInteger(width)) {
         this.width = width;
       }
     }
@@ -43451,14 +43451,14 @@ var AnnotationBorderStyle = function () {
   }, {
     key: 'setHorizontalCornerRadius',
     value: function setHorizontalCornerRadius(radius) {
-      if (radius === (radius | 0)) {
+      if (Number.isInteger(radius)) {
         this.horizontalCornerRadius = radius;
       }
     }
   }, {
     key: 'setVerticalCornerRadius',
     value: function setVerticalCornerRadius(radius) {
-      if (radius === (radius | 0)) {
+      if (Number.isInteger(radius)) {
         this.verticalCornerRadius = radius;
       }
     }
