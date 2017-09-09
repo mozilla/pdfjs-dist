@@ -113,7 +113,7 @@ module.exports = pdfjsLib;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.waitOnEventOrTimeout = exports.WaitOnType = exports.localized = exports.animationStarted = exports.normalizeWheelEventDelta = exports.binarySearchFirstItem = exports.watchScroll = exports.scrollIntoView = exports.getOutputScale = exports.approximateFraction = exports.roundToDivide = exports.getVisibleElements = exports.parseQueryString = exports.noContextMenuHandler = exports.getPDFFileNameFromURL = exports.ProgressBar = exports.EventBus = exports.NullL10n = exports.mozL10n = exports.RendererType = exports.cloneObj = exports.VERTICAL_PADDING = exports.SCROLLBAR_PADDING = exports.MAX_AUTO_SCALE = exports.UNKNOWN_SCALE = exports.MAX_SCALE = exports.MIN_SCALE = exports.DEFAULT_SCALE = exports.DEFAULT_SCALE_VALUE = exports.CSS_UNITS = undefined;
+exports.waitOnEventOrTimeout = exports.WaitOnType = exports.localized = exports.animationStarted = exports.normalizeWheelEventDelta = exports.binarySearchFirstItem = exports.watchScroll = exports.scrollIntoView = exports.getOutputScale = exports.approximateFraction = exports.roundToDivide = exports.getVisibleElements = exports.parseQueryString = exports.noContextMenuHandler = exports.getPDFFileNameFromURL = exports.ProgressBar = exports.EventBus = exports.NullL10n = exports.mozL10n = exports.RendererType = exports.cloneObj = exports.isValidRotation = exports.VERTICAL_PADDING = exports.SCROLLBAR_PADDING = exports.MAX_AUTO_SCALE = exports.UNKNOWN_SCALE = exports.MAX_SCALE = exports.MIN_SCALE = exports.DEFAULT_SCALE = exports.DEFAULT_SCALE_VALUE = exports.CSS_UNITS = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -413,6 +413,9 @@ function normalizeWheelEventDelta(evt) {
   }
   return delta;
 }
+function isValidRotation(angle) {
+  return Number.isInteger(angle) && angle % 90 === 0;
+}
 function cloneObj(obj) {
   var result = Object.create(null);
   for (var i in obj) {
@@ -598,6 +601,7 @@ exports.UNKNOWN_SCALE = UNKNOWN_SCALE;
 exports.MAX_AUTO_SCALE = MAX_AUTO_SCALE;
 exports.SCROLLBAR_PADDING = SCROLLBAR_PADDING;
 exports.VERTICAL_PADDING = VERTICAL_PADDING;
+exports.isValidRotation = isValidRotation;
 exports.cloneObj = cloneObj;
 exports.RendererType = RendererType;
 exports.mozL10n = mozL10n;
@@ -1037,6 +1041,14 @@ var PDFLinkService = function () {
     set: function set(value) {
       this.pdfViewer.currentPageNumber = value;
     }
+  }, {
+    key: 'rotation',
+    get: function get() {
+      return this.pdfViewer.pagesRotation;
+    },
+    set: function set(value) {
+      this.pdfViewer.pagesRotation = value;
+    }
   }]);
 
   return PDFLinkService;
@@ -1130,6 +1142,12 @@ var SimpleLinkService = function () {
     value: function cachePageRef(pageNum, pageRef) {}
   }, {
     key: 'page',
+    get: function get() {
+      return 0;
+    },
+    set: function set(value) {}
+  }, {
+    key: 'rotation',
     get: function get() {
       return 0;
     },
@@ -2794,6 +2812,7 @@ var PDFViewer = function () {
         scale: normalizedScaleValue,
         top: intTop,
         left: intLeft,
+        rotation: this._pagesRotation,
         pdfOpenParams: pdfOpenParams
       };
     }
@@ -3056,18 +3075,29 @@ var PDFViewer = function () {
       return this._pagesRotation;
     },
     set: function set(rotation) {
-      if (!(typeof rotation === 'number' && rotation % 90 === 0)) {
+      if (!(0, _ui_utils.isValidRotation)(rotation)) {
         throw new Error('Invalid pages rotation angle.');
       }
       if (!this.pdfDocument) {
         return;
       }
+      if (this._pagesRotation === rotation) {
+        return;
+      }
       this._pagesRotation = rotation;
+      var pageNumber = this._currentPageNumber;
       for (var i = 0, ii = this._pages.length; i < ii; i++) {
         var pageView = this._pages[i];
         pageView.update(pageView.scale, rotation);
       }
-      this._setScale(this._currentScaleValue, true);
+      if (this._currentScaleValue) {
+        this._setScale(this._currentScaleValue, true);
+      }
+      this.eventBus.dispatch('rotationchanging', {
+        source: this,
+        pagesRotation: rotation,
+        pageNumber: pageNumber
+      });
       if (this.defaultRenderingQueue) {
         this.update();
       }
@@ -3144,7 +3174,8 @@ function parseCurrentHash(linkService) {
   }
   return {
     hash: hash,
-    page: page
+    page: page,
+    rotation: linkService.rotation
   };
 }
 
@@ -3161,6 +3192,7 @@ var PDFHistory = function () {
     this.eventBus = eventBus || (0, _dom_events.getGlobalEventBus)();
     this.initialized = false;
     this.initialBookmark = null;
+    this.initialRotation = null;
     this._boundEvents = Object.create(null);
     this._isViewerInPresentationMode = false;
     this._isPagesLoaded = false;
@@ -3189,6 +3221,7 @@ var PDFHistory = function () {
       var state = window.history.state;
       this.initialized = true;
       this.initialBookmark = null;
+      this.initialRotation = null;
       this._popStateInProgress = false;
       this._blockHashChange = 0;
       this._currentHash = getCurrentHash();
@@ -3199,7 +3232,8 @@ var PDFHistory = function () {
       if (!this._isValidState(state) || resetHistory) {
         var _parseCurrentHash = parseCurrentHash(this.linkService),
             hash = _parseCurrentHash.hash,
-            page = _parseCurrentHash.page;
+            page = _parseCurrentHash.page,
+            rotation = _parseCurrentHash.rotation;
 
         if (!hash || reInitialized || resetHistory) {
           this._pushOrReplaceState(null, true);
@@ -3207,12 +3241,16 @@ var PDFHistory = function () {
         }
         this._pushOrReplaceState({
           hash: hash,
-          page: page
+          page: page,
+          rotation: rotation
         }, true);
         return;
       }
       var destination = state.destination;
       this._updateInternalState(destination, state.uid, true);
+      if (destination.rotation !== undefined) {
+        this.initialRotation = destination.rotation;
+      }
       if (destination.dest) {
         this.initialBookmark = JSON.stringify(destination.dest);
         this._destination.page = null;
@@ -3255,7 +3293,8 @@ var PDFHistory = function () {
       this._pushOrReplaceState({
         dest: explicitDest,
         hash: hash,
-        page: pageNumber
+        page: pageNumber,
+        rotation: this.linkService.rotation
       }, forceReplace);
       if (!this._popStateInProgress) {
         this._popStateInProgress = true;
@@ -3396,7 +3435,8 @@ var PDFHistory = function () {
       this._position = {
         hash: this._isViewerInPresentationMode ? 'page=' + location.pageNumber : location.pdfOpenParams.substring(1),
         page: this.linkService.page,
-        first: location.pageNumber
+        first: location.pageNumber,
+        rotation: location.rotation
       };
       if (this._popStateInProgress) {
         return;
@@ -3428,11 +3468,13 @@ var PDFHistory = function () {
 
         var _parseCurrentHash2 = parseCurrentHash(this.linkService),
             hash = _parseCurrentHash2.hash,
-            page = _parseCurrentHash2.page;
+            page = _parseCurrentHash2.page,
+            rotation = _parseCurrentHash2.rotation;
 
         this._pushOrReplaceState({
           hash: hash,
-          page: page
+          page: page,
+          rotation: rotation
         }, true);
         return;
       }
@@ -3452,6 +3494,9 @@ var PDFHistory = function () {
       }
       var destination = state.destination;
       this._updateInternalState(destination, state.uid, true);
+      if ((0, _ui_utils.isValidRotation)(destination.rotation)) {
+        this.linkService.rotation = destination.rotation;
+      }
       if (destination.dest) {
         this.linkService.navigateTo(destination.dest);
       } else if (destination.hash) {
