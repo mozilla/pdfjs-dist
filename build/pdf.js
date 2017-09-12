@@ -4203,8 +4203,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.556';
-  exports.build = build = '2916ed08';
+  exports.version = version = '1.9.558';
+  exports.build = build = 'f2618eb2';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -7155,8 +7155,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.556';
-var pdfjsBuild = '2916ed08';
+var pdfjsVersion = '1.9.558';
+var pdfjsBuild = 'f2618eb2';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(82);
 var pdfjsDisplayAPI = __w_pdfjs_require__(48);
@@ -13018,8 +13018,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.556';
-  PDFJS.build = '2916ed08';
+  PDFJS.version = '1.9.558';
+  PDFJS.build = 'f2618eb2';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -15472,7 +15472,7 @@ var TilingPattern = function TilingPatternClosure() {
       var tmpCtx = tmpCanvas.context;
       var graphics = canvasGraphicsFactory.createCanvasGraphics(tmpCtx);
       graphics.groupLevel = owner.groupLevel;
-      this.setFillAndStrokeStyleToContext(tmpCtx, paintType, color);
+      this.setFillAndStrokeStyleToContext(graphics, paintType, color);
       this.setScale(width, height, xstep, ystep);
       this.transformToScale(graphics);
       var tmpTranslate = [1, 0, 0, 1, -topLeft[0], -topLeft[1]];
@@ -15502,17 +15502,23 @@ var TilingPattern = function TilingPatternClosure() {
         graphics.endPath();
       }
     },
-    setFillAndStrokeStyleToContext: function setFillAndStrokeStyleToContext(context, paintType, color) {
+    setFillAndStrokeStyleToContext: function setFillAndStrokeStyleToContext(graphics, paintType, color) {
+      var context = graphics.ctx,
+          current = graphics.current;
       switch (paintType) {
         case PaintType.COLORED:
           var ctx = this.ctx;
           context.fillStyle = ctx.fillStyle;
           context.strokeStyle = ctx.strokeStyle;
+          current.fillColor = ctx.fillStyle;
+          current.strokeColor = ctx.strokeStyle;
           break;
         case PaintType.UNCOLORED:
           var cssColor = _util.Util.makeCssRgb(color[0], color[1], color[2]);
           context.fillStyle = cssColor;
           context.strokeStyle = cssColor;
+          current.fillColor = cssColor;
+          current.strokeColor = cssColor;
           break;
         default:
           throw new _util.FormatError('Unsupported paint type: ' + paintType);
