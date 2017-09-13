@@ -2304,6 +2304,7 @@ var PDFJS = pdfjsLib.PDFJS;
 PDFJS.PDFViewer = pdfjsWebPDFViewer.PDFViewer;
 PDFJS.PDFPageView = pdfjsWebPDFPageView.PDFPageView;
 PDFJS.PDFLinkService = pdfjsWebPDFLinkService.PDFLinkService;
+PDFJS.SimpleLinkService = pdfjsWebPDFLinkService.SimpleLinkService;
 PDFJS.TextLayerBuilder = pdfjsWebTextLayerBuilder.TextLayerBuilder;
 PDFJS.DefaultTextLayerFactory = pdfjsWebTextLayerBuilder.DefaultTextLayerFactory;
 PDFJS.AnnotationLayerBuilder = pdfjsWebAnnotationLayerBuilder.AnnotationLayerBuilder;
