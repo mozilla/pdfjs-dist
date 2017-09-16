@@ -2787,7 +2787,9 @@ var CCITTFaxStream = function CCITTFaxStreamClosure() {
   function CCITTFaxStream(str, maybeLength, params) {
     this.str = str;
     this.dict = str.dict;
-    params = params || _primitives.Dict.empty;
+    if (!(0, _primitives.isDict)(params)) {
+      params = _primitives.Dict.empty;
+    }
     this.encoding = params.get('K') || 0;
     this.eoline = params.get('EndOfLine') || false;
     this.byteAlign = params.get('EncodedByteAlign') || false;
@@ -5075,7 +5077,7 @@ var Parser = function ParserClosure() {
       var params = dict.get('DecodeParms', 'DP');
       if ((0, _primitives.isName)(filter)) {
         if (Array.isArray(params)) {
-          params = this.xref.fetchIfRef(params[0]);
+          (0, _util.warn)('/DecodeParms should not contain an Array, ' + 'when /Filter contains a Name.');
         }
         return this.makeFilter(stream, filter.name, length, params);
       }
@@ -24512,8 +24514,8 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 "use strict";
 
 
-var pdfjsVersion = '1.9.564';
-var pdfjsBuild = 'd0d70461';
+var pdfjsVersion = '1.9.566';
+var pdfjsBuild = '27773f14';
 var pdfjsCoreWorker = __w_pdfjs_require__(62);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
