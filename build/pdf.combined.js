@@ -13490,8 +13490,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.568';
-  exports.build = build = '3be941d9';
+  exports.version = version = '1.9.570';
+  exports.build = build = 'f01f0fda';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -26909,6 +26909,8 @@ var AnnotationElementFactory = function () {
           return new SquigglyAnnotationElement(parameters);
         case _util.AnnotationType.STRIKEOUT:
           return new StrikeOutAnnotationElement(parameters);
+        case _util.AnnotationType.STAMP:
+          return new StampAnnotationElement(parameters);
         case _util.AnnotationType.FILEATTACHMENT:
           return new FileAttachmentAnnotationElement(parameters);
         default:
@@ -27653,23 +27655,47 @@ var StrikeOutAnnotationElement = function (_AnnotationElement11) {
   return StrikeOutAnnotationElement;
 }(AnnotationElement);
 
-var FileAttachmentAnnotationElement = function (_AnnotationElement12) {
-  _inherits(FileAttachmentAnnotationElement, _AnnotationElement12);
+var StampAnnotationElement = function (_AnnotationElement12) {
+  _inherits(StampAnnotationElement, _AnnotationElement12);
+
+  function StampAnnotationElement(parameters) {
+    _classCallCheck(this, StampAnnotationElement);
+
+    var isRenderable = !!(parameters.data.hasPopup || parameters.data.title || parameters.data.contents);
+    return _possibleConstructorReturn(this, (StampAnnotationElement.__proto__ || Object.getPrototypeOf(StampAnnotationElement)).call(this, parameters, isRenderable, true));
+  }
+
+  _createClass(StampAnnotationElement, [{
+    key: 'render',
+    value: function render() {
+      this.container.className = 'stampAnnotation';
+      if (!this.data.hasPopup) {
+        this._createPopup(this.container, null, this.data);
+      }
+      return this.container;
+    }
+  }]);
+
+  return StampAnnotationElement;
+}(AnnotationElement);
+
+var FileAttachmentAnnotationElement = function (_AnnotationElement13) {
+  _inherits(FileAttachmentAnnotationElement, _AnnotationElement13);
 
   function FileAttachmentAnnotationElement(parameters) {
     _classCallCheck(this, FileAttachmentAnnotationElement);
 
-    var _this18 = _possibleConstructorReturn(this, (FileAttachmentAnnotationElement.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotationElement)).call(this, parameters, true));
+    var _this19 = _possibleConstructorReturn(this, (FileAttachmentAnnotationElement.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotationElement)).call(this, parameters, true));
 
-    var file = _this18.data.file;
-    _this18.filename = (0, _dom_utils.getFilenameFromUrl)(file.filename);
-    _this18.content = file.content;
-    _this18.linkService.onFileAttachmentAnnotation({
+    var file = _this19.data.file;
+    _this19.filename = (0, _dom_utils.getFilenameFromUrl)(file.filename);
+    _this19.content = file.content;
+    _this19.linkService.onFileAttachmentAnnotation({
       id: (0, _util.stringToPDFString)(file.filename),
       filename: file.filename,
       content: file.content
     });
-    return _this18;
+    return _this19;
   }
 
   _createClass(FileAttachmentAnnotationElement, [{
@@ -29328,8 +29354,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.568';
-var pdfjsBuild = '3be941d9';
+var pdfjsVersion = '1.9.570';
+var pdfjsBuild = 'f01f0fda';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(55);
@@ -35191,8 +35217,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.568';
-  PDFJS.build = '3be941d9';
+  PDFJS.version = '1.9.570';
+  PDFJS.build = 'f01f0fda';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -50799,6 +50825,8 @@ var AnnotationFactory = function () {
           return new SquigglyAnnotation(parameters);
         case 'StrikeOut':
           return new StrikeOutAnnotation(parameters);
+        case 'Stamp':
+          return new StampAnnotation(parameters);
         case 'FileAttachment':
           return new FileAttachmentAnnotation(parameters);
         default:
@@ -51523,19 +51551,35 @@ var StrikeOutAnnotation = function (_Annotation11) {
   return StrikeOutAnnotation;
 }(Annotation);
 
-var FileAttachmentAnnotation = function (_Annotation12) {
-  _inherits(FileAttachmentAnnotation, _Annotation12);
+var StampAnnotation = function (_Annotation12) {
+  _inherits(StampAnnotation, _Annotation12);
+
+  function StampAnnotation(parameters) {
+    _classCallCheck(this, StampAnnotation);
+
+    var _this16 = _possibleConstructorReturn(this, (StampAnnotation.__proto__ || Object.getPrototypeOf(StampAnnotation)).call(this, parameters));
+
+    _this16.data.annotationType = _util.AnnotationType.STAMP;
+    _this16._preparePopup(parameters.dict);
+    return _this16;
+  }
+
+  return StampAnnotation;
+}(Annotation);
+
+var FileAttachmentAnnotation = function (_Annotation13) {
+  _inherits(FileAttachmentAnnotation, _Annotation13);
 
   function FileAttachmentAnnotation(parameters) {
     _classCallCheck(this, FileAttachmentAnnotation);
 
-    var _this16 = _possibleConstructorReturn(this, (FileAttachmentAnnotation.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotation)).call(this, parameters));
+    var _this17 = _possibleConstructorReturn(this, (FileAttachmentAnnotation.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotation)).call(this, parameters));
 
     var file = new _obj.FileSpec(parameters.dict.get('FS'), parameters.xref);
-    _this16.data.annotationType = _util.AnnotationType.FILEATTACHMENT;
-    _this16.data.file = file.serializable;
-    _this16._preparePopup(parameters.dict);
-    return _this16;
+    _this17.data.annotationType = _util.AnnotationType.FILEATTACHMENT;
+    _this17.data.file = file.serializable;
+    _this17._preparePopup(parameters.dict);
+    return _this17;
   }
 
   return FileAttachmentAnnotation;
