@@ -2291,6 +2291,16 @@ var PredictorStream = function PredictorStreamClosure() {
         buffer[pos] = buffer[pos - colors] + rawBytes[i];
         pos++;
       }
+    } else if (bits === 16) {
+      var bytesPerPixel = colors * 2;
+      for (i = 0; i < bytesPerPixel; ++i) {
+        buffer[pos++] = rawBytes[i];
+      }
+      for (; i < rowBytes; i += 2) {
+        var sum = ((rawBytes[i] & 0xFF) << 8) + (rawBytes[i + 1] & 0xFF) + ((buffer[pos - bytesPerPixel] & 0xFF) << 8) + (buffer[pos - bytesPerPixel + 1] & 0xFF);
+        buffer[pos++] = sum >> 8 & 0xFF;
+        buffer[pos++] = sum & 0xFF;
+      }
     } else {
       var compArray = new Uint8Array(colors + 1);
       var bitMask = (1 << bits) - 1;
@@ -24529,8 +24539,8 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 "use strict";
 
 
-var pdfjsVersion = '1.9.573';
-var pdfjsBuild = '50bd4a5a';
+var pdfjsVersion = '1.9.575';
+var pdfjsBuild = '9c2e9dae';
 var pdfjsCoreWorker = __w_pdfjs_require__(62);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
