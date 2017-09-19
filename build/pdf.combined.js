@@ -2820,6 +2820,7 @@ var CCITTFaxStream = function CCITTFaxStreamClosure() {
     this.inputBits = 0;
     this.inputBuf = 0;
     this.outputBits = 0;
+    this.rowsDone = false;
     var code1;
     while ((code1 = this.lookBits(12)) === 0) {
       this.eatBits(1);
@@ -2889,6 +2890,9 @@ var CCITTFaxStream = function CCITTFaxStreamClosure() {
     var columns = this.columns;
     var refPos, blackPixels, bits, i;
     if (this.outputBits === 0) {
+      if (this.rowsDone) {
+        this.eof = true;
+      }
       if (this.eof) {
         return null;
       }
@@ -3054,7 +3058,7 @@ var CCITTFaxStream = function CCITTFaxStreamClosure() {
         this.inputBits &= ~7;
       }
       if (!this.eoblock && this.row === this.rows - 1) {
-        this.eof = true;
+        this.rowsDone = true;
       } else {
         code1 = this.lookBits(12);
         if (this.eoline) {
@@ -3075,7 +3079,7 @@ var CCITTFaxStream = function CCITTFaxStreamClosure() {
           this.eof = true;
         }
       }
-      if (!this.eof && this.encoding > 0) {
+      if (!this.eof && this.encoding > 0 && !this.rowsDone) {
         this.nextLine2D = !this.lookBits(1);
         this.eatBits(1);
       }
@@ -13500,8 +13504,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.575';
-  exports.build = build = '9c2e9dae';
+  exports.version = version = '1.9.577';
+  exports.build = build = 'fbd6e47a';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -29364,8 +29368,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.575';
-var pdfjsBuild = '9c2e9dae';
+var pdfjsVersion = '1.9.577';
+var pdfjsBuild = 'fbd6e47a';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(55);
@@ -35227,8 +35231,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.575';
-  PDFJS.build = '9c2e9dae';
+  PDFJS.version = '1.9.577';
+  PDFJS.build = 'fbd6e47a';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
