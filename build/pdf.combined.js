@@ -3487,35 +3487,10 @@ module.exports = __w_pdfjs_require__(5) ? function (object, key, value) {
 "use strict";
 
 
-var hasOwnProperty = {}.hasOwnProperty;
-module.exports = function (it, key) {
-  return hasOwnProperty.call(it, key);
-};
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-var toInteger = __w_pdfjs_require__(14);
-var min = Math.min;
-module.exports = function (it) {
-  return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0;
-};
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DOMSVGFactory = exports.DOMCMapReaderFactory = exports.DOMCanvasFactory = exports.DEFAULT_LINK_REL = exports.getDefaultSetting = exports.LinkTarget = exports.getFilenameFromUrl = exports.isValidUrl = exports.isExternalLinkTargetSet = exports.addLinkAttributes = exports.RenderingCancelledException = exports.CustomStyle = undefined;
+exports.SimpleXMLParser = exports.DOMSVGFactory = exports.DOMCMapReaderFactory = exports.DOMCanvasFactory = exports.DEFAULT_LINK_REL = exports.getDefaultSetting = exports.LinkTarget = exports.getFilenameFromUrl = exports.isValidUrl = exports.isExternalLinkTargetSet = exports.addLinkAttributes = exports.RenderingCancelledException = exports.CustomStyle = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -3665,6 +3640,136 @@ var DOMSVGFactory = function () {
   }]);
 
   return DOMSVGFactory;
+}();
+
+var SimpleDOMNode = function () {
+  function SimpleDOMNode(nodeName, nodeValue) {
+    _classCallCheck(this, SimpleDOMNode);
+
+    this.nodeName = nodeName;
+    this.nodeValue = nodeValue;
+    Object.defineProperty(this, 'parentNode', {
+      value: null,
+      writable: true
+    });
+  }
+
+  _createClass(SimpleDOMNode, [{
+    key: 'hasChildNodes',
+    value: function hasChildNodes() {
+      return this.childNodes && this.childNodes.length > 0;
+    }
+  }, {
+    key: 'firstChild',
+    get: function get() {
+      return this.childNodes[0];
+    }
+  }, {
+    key: 'nextSibling',
+    get: function get() {
+      var index = this.parentNode.childNodes.indexOf(this);
+      return this.parentNode.childNodes[index + 1];
+    }
+  }, {
+    key: 'textContent',
+    get: function get() {
+      if (!this.childNodes) {
+        return this.nodeValue || '';
+      }
+      return this.childNodes.map(function (child) {
+        return child.textContent;
+      }).join('');
+    }
+  }]);
+
+  return SimpleDOMNode;
+}();
+
+var SimpleXMLParser = function () {
+  function SimpleXMLParser() {
+    _classCallCheck(this, SimpleXMLParser);
+  }
+
+  _createClass(SimpleXMLParser, [{
+    key: 'parseFromString',
+    value: function parseFromString(data) {
+      var _this2 = this;
+
+      var nodes = [];
+      data = data.replace(/<\?[\s\S]*?\?>|<!--[\s\S]*?-->/g, '').trim();
+      data = data.replace(/<!DOCTYPE[^>\[]+(\[[^\]]+)?[^>]+>/g, '').trim();
+      data = data.replace(/>([^<][\s\S]*?)</g, function (all, text) {
+        var length = nodes.length;
+        var node = new SimpleDOMNode('#text', _this2._decodeXML(text));
+        nodes.push(node);
+        if (node.textContent.trim().length === 0) {
+          return '><';
+        }
+        return '>' + length + ',<';
+      });
+      data = data.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, function (all, text) {
+        var length = nodes.length;
+        var node = new SimpleDOMNode('#text', text);
+        nodes.push(node);
+        return length + ',';
+      });
+      var regex = /<([\w\:]+)((?:[\s\w:=]|'[^']*'|"[^"]*")*)(?:\/>|>([\d,]*)<\/[^>]+>)/g;
+      var lastLength = void 0;
+      do {
+        lastLength = nodes.length;
+        data = data.replace(regex, function (all, name, attrs, data) {
+          var length = nodes.length;
+          var node = new SimpleDOMNode(name);
+          var children = [];
+          if (data) {
+            data = data.split(',');
+            data.pop();
+            data.forEach(function (child) {
+              var childNode = nodes[+child];
+              childNode.parentNode = node;
+              children.push(childNode);
+            });
+          }
+          node.childNodes = children;
+          nodes.push(node);
+          return length + ',';
+        });
+      } while (lastLength < nodes.length);
+      return { documentElement: nodes.pop() };
+    }
+  }, {
+    key: '_decodeXML',
+    value: function _decodeXML(text) {
+      if (text.indexOf('&') < 0) {
+        return text;
+      }
+      return text.replace(/&(#(x[0-9a-f]+|\d+)|\w+);/gi, function (all, entityName, number) {
+        if (number) {
+          if (number[0] === 'x') {
+            number = parseInt(number.substring(1), 16);
+          } else {
+            number = +number;
+          }
+          return String.fromCharCode(number);
+        }
+        switch (entityName) {
+          case 'amp':
+            return '&';
+          case 'lt':
+            return '<';
+          case 'gt':
+            return '>';
+          case 'quot':
+            return '\"';
+          case 'apos':
+            return '\'';
+        }
+        return '&' + entityName + ';';
+      });
+    }
+  }]);
+
+  return SimpleXMLParser;
 }();
 
 var CustomStyle = function CustomStyleClosure() {
@@ -3828,6 +3933,32 @@ exports.DEFAULT_LINK_REL = DEFAULT_LINK_REL;
 exports.DOMCanvasFactory = DOMCanvasFactory;
 exports.DOMCMapReaderFactory = DOMCMapReaderFactory;
 exports.DOMSVGFactory = DOMSVGFactory;
+exports.SimpleXMLParser = SimpleXMLParser;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var hasOwnProperty = {}.hasOwnProperty;
+module.exports = function (it, key) {
+  return hasOwnProperty.call(it, key);
+};
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var toInteger = __w_pdfjs_require__(14);
+var min = Math.min;
+module.exports = function (it) {
+  return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0;
+};
 
 /***/ }),
 /* 10 */
@@ -6965,7 +7096,7 @@ module.exports = function (it, S) {
 
 var global = __w_pdfjs_require__(4);
 var hide = __w_pdfjs_require__(6);
-var has = __w_pdfjs_require__(7);
+var has = __w_pdfjs_require__(8);
 var SRC = __w_pdfjs_require__(13)('src');
 var TO_STRING = 'toString';
 var $toString = Function[TO_STRING];
@@ -7064,7 +7195,7 @@ module.exports = 'constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,
 
 
 var def = __w_pdfjs_require__(10).f;
-var has = __w_pdfjs_require__(7);
+var has = __w_pdfjs_require__(8);
 var TAG = __w_pdfjs_require__(2)('toStringTag');
 module.exports = function (it, tag, stat) {
   if (it && !has(it = stat ? it : it.prototype, TAG)) def(it, TAG, {
@@ -11823,7 +11954,7 @@ module.exports = function (it, Constructor, name, forbiddenField) {
 
 
 var toInteger = __w_pdfjs_require__(14);
-var toLength = __w_pdfjs_require__(8);
+var toLength = __w_pdfjs_require__(9);
 module.exports = function (it) {
   if (it === undefined) return 0;
   var number = toInteger(it);
@@ -11852,7 +11983,7 @@ exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
 "use strict";
 
 
-var has = __w_pdfjs_require__(7);
+var has = __w_pdfjs_require__(8);
 var toIObject = __w_pdfjs_require__(23);
 var arrayIndexOf = __w_pdfjs_require__(49)(false);
 var IE_PROTO = __w_pdfjs_require__(32)('IE_PROTO');
@@ -11902,7 +12033,7 @@ module.exports = function (it) {
 
 
 var toIObject = __w_pdfjs_require__(23);
-var toLength = __w_pdfjs_require__(8);
+var toLength = __w_pdfjs_require__(9);
 var toAbsoluteIndex = __w_pdfjs_require__(24);
 module.exports = function (IS_INCLUDES) {
   return function ($this, el, fromIndex) {
@@ -11944,7 +12075,7 @@ module.exports = function (key) {
 
 var toObject = __w_pdfjs_require__(15);
 var toAbsoluteIndex = __w_pdfjs_require__(24);
-var toLength = __w_pdfjs_require__(8);
+var toLength = __w_pdfjs_require__(9);
 module.exports = function fill(value) {
   var O = toObject(this);
   var length = toLength(O.length);
@@ -12028,7 +12159,7 @@ module.exports = Object.create || function create(O, Properties) {
 "use strict";
 
 
-var has = __w_pdfjs_require__(7);
+var has = __w_pdfjs_require__(8);
 var toObject = __w_pdfjs_require__(15);
 var IE_PROTO = __w_pdfjs_require__(32)('IE_PROTO');
 var ObjectProto = Object.prototype;
@@ -12059,7 +12190,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(9);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var _font_loader = __w_pdfjs_require__(99);
 
@@ -13504,8 +13635,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.579';
-  exports.build = build = 'abc864fc';
+  exports.version = version = '1.9.583';
+  exports.build = build = 'd7b37ae7';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -13530,7 +13661,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.WebGLUtils = undefined;
 
-var _dom_utils = __w_pdfjs_require__(9);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -13895,74 +14026,102 @@ exports.WebGLUtils = WebGLUtils;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-function fixMetadata(meta) {
-  return meta.replace(/>\\376\\377([^<]+)/g, function (all, codes) {
-    var bytes = codes.replace(/\\([0-3])([0-7])([0-7])/g, function (code, d1, d2, d3) {
-      return String.fromCharCode(d1 * 64 + d2 * 8 + d3 * 1);
-    });
-    var chars = '';
-    for (var i = 0; i < bytes.length; i += 2) {
-      var code = bytes.charCodeAt(i) * 256 + bytes.charCodeAt(i + 1);
-      chars += code >= 32 && code < 127 && code !== 60 && code !== 62 && code !== 38 ? String.fromCharCode(code) : '&#x' + (0x10000 + code).toString(16).substring(1) + ';';
-    }
-    return '>' + chars;
-  });
-}
-function Metadata(meta) {
-  if (typeof meta === 'string') {
-    meta = fixMetadata(meta);
-    var parser = new DOMParser();
-    meta = parser.parseFromString(meta, 'application/xml');
-  } else if (!(meta instanceof Document)) {
-    throw new Error('Metadata: Invalid metadata object');
+exports.Metadata = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _util = __w_pdfjs_require__(0);
+
+var _dom_utils = __w_pdfjs_require__(7);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Metadata = function () {
+  function Metadata(data) {
+    _classCallCheck(this, Metadata);
+
+    (0, _util.assert)(typeof data === 'string', 'Metadata: input is not a string');
+    data = this._repair(data);
+    var parser = new _dom_utils.SimpleXMLParser();
+    data = parser.parseFromString(data);
+    this._metadata = Object.create(null);
+    this._parse(data);
   }
-  this.metaDocument = meta;
-  this.metadata = Object.create(null);
-  this.parse();
-}
-Metadata.prototype = {
-  parse: function Metadata_parse() {
-    var doc = this.metaDocument;
-    var rdf = doc.documentElement;
-    if (rdf.nodeName.toLowerCase() !== 'rdf:rdf') {
-      rdf = rdf.firstChild;
-      while (rdf && rdf.nodeName.toLowerCase() !== 'rdf:rdf') {
-        rdf = rdf.nextSibling;
-      }
+
+  _createClass(Metadata, [{
+    key: '_repair',
+    value: function _repair(data) {
+      return data.replace(/>\\376\\377([^<]+)/g, function (all, codes) {
+        var bytes = codes.replace(/\\([0-3])([0-7])([0-7])/g, function (code, d1, d2, d3) {
+          return String.fromCharCode(d1 * 64 + d2 * 8 + d3 * 1);
+        });
+        var chars = '';
+        for (var i = 0, ii = bytes.length; i < ii; i += 2) {
+          var code = bytes.charCodeAt(i) * 256 + bytes.charCodeAt(i + 1);
+          if (code >= 32 && code < 127 && code !== 60 && code !== 62 && code !== 38) {
+            chars += String.fromCharCode(code);
+          } else {
+            chars += '&#x' + (0x10000 + code).toString(16).substring(1) + ';';
+          }
+        }
+        return '>' + chars;
+      });
     }
-    var nodeName = rdf ? rdf.nodeName.toLowerCase() : null;
-    if (!rdf || nodeName !== 'rdf:rdf' || !rdf.hasChildNodes()) {
-      return;
-    }
-    var children = rdf.childNodes,
-        desc,
-        entry,
-        name,
-        i,
-        ii,
-        length,
-        iLength;
-    for (i = 0, length = children.length; i < length; i++) {
-      desc = children[i];
-      if (desc.nodeName.toLowerCase() !== 'rdf:description') {
-        continue;
+  }, {
+    key: '_parse',
+    value: function _parse(domDocument) {
+      var rdf = domDocument.documentElement;
+      if (rdf.nodeName.toLowerCase() !== 'rdf:rdf') {
+        rdf = rdf.firstChild;
+        while (rdf && rdf.nodeName.toLowerCase() !== 'rdf:rdf') {
+          rdf = rdf.nextSibling;
+        }
       }
-      for (ii = 0, iLength = desc.childNodes.length; ii < iLength; ii++) {
-        if (desc.childNodes[ii].nodeName.toLowerCase() !== '#text') {
-          entry = desc.childNodes[ii];
-          name = entry.nodeName.toLowerCase();
-          this.metadata[name] = entry.textContent.trim();
+      var nodeName = rdf ? rdf.nodeName.toLowerCase() : null;
+      if (!rdf || nodeName !== 'rdf:rdf' || !rdf.hasChildNodes()) {
+        return;
+      }
+      var children = rdf.childNodes;
+      for (var i = 0, ii = children.length; i < ii; i++) {
+        var desc = children[i];
+        if (desc.nodeName.toLowerCase() !== 'rdf:description') {
+          continue;
+        }
+        for (var j = 0, jj = desc.childNodes.length; j < jj; j++) {
+          if (desc.childNodes[j].nodeName.toLowerCase() !== '#text') {
+            var entry = desc.childNodes[j];
+            var name = entry.nodeName.toLowerCase();
+            this._metadata[name] = entry.textContent.trim();
+          }
         }
       }
     }
-  },
-  get: function Metadata_get(name) {
-    return this.metadata[name] || null;
-  },
-  has: function Metadata_has(name) {
-    return typeof this.metadata[name] !== 'undefined';
-  }
-};
+  }, {
+    key: 'get',
+    value: function get(name) {
+      return this._metadata[name] || null;
+    }
+  }, {
+    key: 'getAll',
+    value: function getAll() {
+      return this._metadata;
+    }
+  }, {
+    key: 'has',
+    value: function has(name) {
+      return typeof this._metadata[name] !== 'undefined';
+    }
+  }, {
+    key: 'metadata',
+    get: function get() {
+      (0, _util.deprecated)('`metadata` getter; use `getAll()` instead.');
+      return this.getAll();
+    }
+  }]);
+
+  return Metadata;
+}();
+
 exports.Metadata = Metadata;
 
 /***/ }),
@@ -26866,7 +27025,7 @@ exports.AnnotationLayer = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _dom_utils = __w_pdfjs_require__(9);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -27802,7 +27961,7 @@ exports.renderTextLayer = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(9);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var renderTextLayer = function renderTextLayerClosure() {
   var MAX_TEXT_DIVS_TO_RENDER = 100000;
@@ -28353,7 +28512,7 @@ exports.SVGGraphics = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(9);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var SVGGraphics = function SVGGraphics() {
   throw new Error('Not implemented: SVGGraphics');
@@ -29368,14 +29527,14 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.579';
-var pdfjsBuild = 'abc864fc';
+var pdfjsVersion = '1.9.583';
+var pdfjsBuild = 'd7b37ae7';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(55);
 var pdfjsDisplayTextLayer = __w_pdfjs_require__(68);
 var pdfjsDisplayAnnotationLayer = __w_pdfjs_require__(67);
-var pdfjsDisplayDOMUtils = __w_pdfjs_require__(9);
+var pdfjsDisplayDOMUtils = __w_pdfjs_require__(7);
 var pdfjsDisplaySVG = __w_pdfjs_require__(69);
 {
   if (pdfjsSharedUtil.isNodeJS()) {
@@ -30986,11 +31145,11 @@ if (__w_pdfjs_require__(5)) {
   var hide = __w_pdfjs_require__(6);
   var redefineAll = __w_pdfjs_require__(42);
   var toInteger = __w_pdfjs_require__(14);
-  var toLength = __w_pdfjs_require__(8);
+  var toLength = __w_pdfjs_require__(9);
   var toIndex = __w_pdfjs_require__(44);
   var toAbsoluteIndex = __w_pdfjs_require__(24);
   var toPrimitive = __w_pdfjs_require__(28);
-  var has = __w_pdfjs_require__(7);
+  var has = __w_pdfjs_require__(8);
   var classof = __w_pdfjs_require__(52);
   var isObject = __w_pdfjs_require__(12);
   var toObject = __w_pdfjs_require__(15);
@@ -31424,7 +31583,7 @@ var redefineAll = __w_pdfjs_require__(42);
 var fails = __w_pdfjs_require__(19);
 var anInstance = __w_pdfjs_require__(43);
 var toInteger = __w_pdfjs_require__(14);
-var toLength = __w_pdfjs_require__(8);
+var toLength = __w_pdfjs_require__(9);
 var toIndex = __w_pdfjs_require__(44);
 var gOPN = __w_pdfjs_require__(45).f;
 var dP = __w_pdfjs_require__(10).f;
@@ -31767,7 +31926,7 @@ module.exports = __w_pdfjs_require__(20).getIteratorMethod = function (it) {
 var ctx = __w_pdfjs_require__(30);
 var IObject = __w_pdfjs_require__(47);
 var toObject = __w_pdfjs_require__(15);
-var toLength = __w_pdfjs_require__(8);
+var toLength = __w_pdfjs_require__(9);
 var asc = __w_pdfjs_require__(82);
 module.exports = function (TYPE, $create) {
   var IS_MAP = TYPE == 1;
@@ -31940,7 +32099,7 @@ var LIBRARY = __w_pdfjs_require__(27);
 var $export = __w_pdfjs_require__(37);
 var redefine = __w_pdfjs_require__(29);
 var hide = __w_pdfjs_require__(6);
-var has = __w_pdfjs_require__(7);
+var has = __w_pdfjs_require__(8);
 var Iterators = __w_pdfjs_require__(16);
 var $iterCreate = __w_pdfjs_require__(90);
 var setToStringTag = __w_pdfjs_require__(34);
@@ -32095,7 +32254,7 @@ module.exports = function (KEY) {
 
 var toObject = __w_pdfjs_require__(15);
 var toAbsoluteIndex = __w_pdfjs_require__(24);
-var toLength = __w_pdfjs_require__(8);
+var toLength = __w_pdfjs_require__(9);
 module.exports = [].copyWithin || function copyWithin(target, start) {
   var O = toObject(this);
   var len = toLength(O.length);
@@ -32128,7 +32287,7 @@ var pIE = __w_pdfjs_require__(95);
 var createDesc = __w_pdfjs_require__(22);
 var toIObject = __w_pdfjs_require__(23);
 var toPrimitive = __w_pdfjs_require__(28);
-var has = __w_pdfjs_require__(7);
+var has = __w_pdfjs_require__(8);
 var IE8_DOM_DEFINE = __w_pdfjs_require__(38);
 var gOPD = Object.getOwnPropertyDescriptor;
 exports.f = __w_pdfjs_require__(5) ? gOPD : function getOwnPropertyDescriptor(O, P) {
@@ -35207,7 +35366,7 @@ exports.PDFJS = exports.isWorker = exports.globalScope = undefined;
 
 var _api = __w_pdfjs_require__(55);
 
-var _dom_utils = __w_pdfjs_require__(9);
+var _dom_utils = __w_pdfjs_require__(7);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -35231,8 +35390,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.579';
-  PDFJS.build = 'abc864fc';
+  PDFJS.version = '1.9.583';
+  PDFJS.build = 'd7b37ae7';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
