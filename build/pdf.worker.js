@@ -24540,8 +24540,8 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 "use strict";
 
 
-var pdfjsVersion = '1.9.587';
-var pdfjsBuild = '40b89e9b';
+var pdfjsVersion = '1.9.589';
+var pdfjsBuild = 'c69a7a83';
 var pdfjsCoreWorker = __w_pdfjs_require__(62);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -32214,8 +32214,8 @@ var Jbig2Image = function Jbig2ImageClosure() {
           symbolHeight += rdh;
           symbolBitmap = decodeRefinement(symbolWidth, symbolHeight, refinementTemplateIndex, symbolBitmap, (rdw >> 1) + rdx, (rdh >> 1) + rdy, false, refinementAt, decodingContext);
         }
-        var offsetT = t - (referenceCorner & 1 ? 0 : symbolHeight);
-        var offsetS = currentS - (referenceCorner & 2 ? symbolWidth : 0);
+        var offsetT = t - (referenceCorner & 1 ? 0 : symbolHeight - 1);
+        var offsetS = currentS - (referenceCorner & 2 ? symbolWidth - 1 : 0);
         var s2, t2, symbolRow;
         if (transposed) {
           for (s2 = 0; s2 < symbolHeight; s2++) {
