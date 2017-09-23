@@ -13635,8 +13635,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.583';
-  exports.build = build = 'd7b37ae7';
+  exports.version = version = '1.9.585';
+  exports.build = build = '2aac9941';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -29527,8 +29527,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.583';
-var pdfjsBuild = 'd7b37ae7';
+var pdfjsVersion = '1.9.585';
+var pdfjsBuild = '2aac9941';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(55);
@@ -35390,8 +35390,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.583';
-  PDFJS.build = 'd7b37ae7';
+  PDFJS.version = '1.9.585';
+  PDFJS.build = '2aac9941';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -52154,7 +52154,8 @@ var PDFNodeStreamFsFullReader = function (_BaseFullReader2) {
 
     var _this7 = _possibleConstructorReturn(this, (PDFNodeStreamFsFullReader.__proto__ || Object.getPrototypeOf(PDFNodeStreamFsFullReader)).call(this, stream));
 
-    fs.lstat(_this7._url.path, function (error, stat) {
+    var path = decodeURI(_this7._url.path);
+    fs.lstat(path, function (error, stat) {
       if (error) {
         _this7._errored = true;
         _this7._reason = error;
@@ -52162,7 +52163,7 @@ var PDFNodeStreamFsFullReader = function (_BaseFullReader2) {
         return;
       }
       _this7._contentLength = stat.size;
-      _this7._setReadableStream(fs.createReadStream(_this7._url.path));
+      _this7._setReadableStream(fs.createReadStream(path));
       _this7._headersCapability.resolve();
     });
     return _this7;
@@ -52179,7 +52180,7 @@ var PDFNodeStreamFsRangeReader = function (_BaseRangeReader2) {
 
     var _this8 = _possibleConstructorReturn(this, (PDFNodeStreamFsRangeReader.__proto__ || Object.getPrototypeOf(PDFNodeStreamFsRangeReader)).call(this, stream));
 
-    _this8._setReadableStream(fs.createReadStream(_this8._url.path, {
+    _this8._setReadableStream(fs.createReadStream(decodeURI(_this8._url.path), {
       start: start,
       end: end - 1
     }));
