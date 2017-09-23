@@ -4181,9 +4181,6 @@ var ColorSpace = function ColorSpaceClosure() {
   };
   ColorSpace.parse = function ColorSpace_parse(cs, xref, res) {
     var IR = ColorSpace.parseToIR(cs, xref, res);
-    if (IR instanceof AlternateCS) {
-      return IR;
-    }
     return ColorSpace.fromIR(IR);
   };
   ColorSpace.fromIR = function ColorSpace_fromIR(IR) {
@@ -13635,8 +13632,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.585';
-  exports.build = build = '2aac9941';
+  exports.version = version = '1.9.587';
+  exports.build = build = '40b89e9b';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -29527,8 +29524,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.585';
-var pdfjsBuild = '2aac9941';
+var pdfjsVersion = '1.9.587';
+var pdfjsBuild = '40b89e9b';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(55);
@@ -35390,8 +35387,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.585';
-  PDFJS.build = '2aac9941';
+  PDFJS.version = '1.9.587';
+  PDFJS.build = '40b89e9b';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
