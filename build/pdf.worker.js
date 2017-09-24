@@ -24540,8 +24540,8 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 "use strict";
 
 
-var pdfjsVersion = '1.9.593';
-var pdfjsBuild = '10727572';
+var pdfjsVersion = '1.9.597';
+var pdfjsBuild = 'f3987bba';
 var pdfjsCoreWorker = __w_pdfjs_require__(62);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
