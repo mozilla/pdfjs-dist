@@ -13632,8 +13632,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.589';
-  exports.build = build = 'c69a7a83';
+  exports.version = version = '1.9.593';
+  exports.build = build = '10727572';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -27071,6 +27071,10 @@ var AnnotationElementFactory = function () {
           return new SquareAnnotationElement(parameters);
         case _util.AnnotationType.CIRCLE:
           return new CircleAnnotationElement(parameters);
+        case _util.AnnotationType.POLYLINE:
+          return new PolylineAnnotationElement(parameters);
+        case _util.AnnotationType.POLYGON:
+          return new PolygonAnnotationElement(parameters);
         case _util.AnnotationType.HIGHLIGHT:
           return new HighlightAnnotationElement(parameters);
         case _util.AnnotationType.UNDERLINE:
@@ -27495,7 +27499,7 @@ var PopupAnnotationElement = function (_AnnotationElement4) {
   _createClass(PopupAnnotationElement, [{
     key: 'render',
     value: function render() {
-      var IGNORE_TYPES = ['Line', 'Square', 'Circle'];
+      var IGNORE_TYPES = ['Line', 'Square', 'Circle', 'PolyLine', 'Polygon'];
       this.container.className = 'popupAnnotation';
       if (IGNORE_TYPES.indexOf(this.data.parentType) >= 0) {
         return this.container;
@@ -27729,8 +27733,71 @@ var CircleAnnotationElement = function (_AnnotationElement7) {
   return CircleAnnotationElement;
 }(AnnotationElement);
 
-var HighlightAnnotationElement = function (_AnnotationElement8) {
-  _inherits(HighlightAnnotationElement, _AnnotationElement8);
+var PolylineAnnotationElement = function (_AnnotationElement8) {
+  _inherits(PolylineAnnotationElement, _AnnotationElement8);
+
+  function PolylineAnnotationElement(parameters) {
+    _classCallCheck(this, PolylineAnnotationElement);
+
+    var isRenderable = !!(parameters.data.hasPopup || parameters.data.title || parameters.data.contents);
+
+    var _this14 = _possibleConstructorReturn(this, (PolylineAnnotationElement.__proto__ || Object.getPrototypeOf(PolylineAnnotationElement)).call(this, parameters, isRenderable, true));
+
+    _this14.containerClassName = 'polylineAnnotation';
+    _this14.svgElementName = 'svg:polyline';
+    return _this14;
+  }
+
+  _createClass(PolylineAnnotationElement, [{
+    key: 'render',
+    value: function render() {
+      this.container.className = this.containerClassName;
+      var data = this.data;
+      var width = data.rect[2] - data.rect[0];
+      var height = data.rect[3] - data.rect[1];
+      var svg = this.svgFactory.create(width, height);
+      var vertices = data.vertices;
+      var points = [];
+      for (var i = 0, ii = vertices.length; i < ii; i++) {
+        var x = vertices[i].x - data.rect[0];
+        var y = data.rect[3] - vertices[i].y;
+        points.push(x + ',' + y);
+      }
+      points = points.join(' ');
+      var borderWidth = data.borderStyle.width;
+      var polyline = this.svgFactory.createElement(this.svgElementName);
+      polyline.setAttribute('points', points);
+      polyline.setAttribute('stroke-width', borderWidth);
+      polyline.setAttribute('stroke', 'transparent');
+      polyline.setAttribute('fill', 'none');
+      svg.appendChild(polyline);
+      this.container.append(svg);
+      this._createPopup(this.container, polyline, data);
+      return this.container;
+    }
+  }]);
+
+  return PolylineAnnotationElement;
+}(AnnotationElement);
+
+var PolygonAnnotationElement = function (_PolylineAnnotationEl) {
+  _inherits(PolygonAnnotationElement, _PolylineAnnotationEl);
+
+  function PolygonAnnotationElement(parameters) {
+    _classCallCheck(this, PolygonAnnotationElement);
+
+    var _this15 = _possibleConstructorReturn(this, (PolygonAnnotationElement.__proto__ || Object.getPrototypeOf(PolygonAnnotationElement)).call(this, parameters));
+
+    _this15.containerClassName = 'polygonAnnotation';
+    _this15.svgElementName = 'svg:polygon';
+    return _this15;
+  }
+
+  return PolygonAnnotationElement;
+}(PolylineAnnotationElement);
+
+var HighlightAnnotationElement = function (_AnnotationElement9) {
+  _inherits(HighlightAnnotationElement, _AnnotationElement9);
 
   function HighlightAnnotationElement(parameters) {
     _classCallCheck(this, HighlightAnnotationElement);
@@ -27753,8 +27820,8 @@ var HighlightAnnotationElement = function (_AnnotationElement8) {
   return HighlightAnnotationElement;
 }(AnnotationElement);
 
-var UnderlineAnnotationElement = function (_AnnotationElement9) {
-  _inherits(UnderlineAnnotationElement, _AnnotationElement9);
+var UnderlineAnnotationElement = function (_AnnotationElement10) {
+  _inherits(UnderlineAnnotationElement, _AnnotationElement10);
 
   function UnderlineAnnotationElement(parameters) {
     _classCallCheck(this, UnderlineAnnotationElement);
@@ -27777,8 +27844,8 @@ var UnderlineAnnotationElement = function (_AnnotationElement9) {
   return UnderlineAnnotationElement;
 }(AnnotationElement);
 
-var SquigglyAnnotationElement = function (_AnnotationElement10) {
-  _inherits(SquigglyAnnotationElement, _AnnotationElement10);
+var SquigglyAnnotationElement = function (_AnnotationElement11) {
+  _inherits(SquigglyAnnotationElement, _AnnotationElement11);
 
   function SquigglyAnnotationElement(parameters) {
     _classCallCheck(this, SquigglyAnnotationElement);
@@ -27801,8 +27868,8 @@ var SquigglyAnnotationElement = function (_AnnotationElement10) {
   return SquigglyAnnotationElement;
 }(AnnotationElement);
 
-var StrikeOutAnnotationElement = function (_AnnotationElement11) {
-  _inherits(StrikeOutAnnotationElement, _AnnotationElement11);
+var StrikeOutAnnotationElement = function (_AnnotationElement12) {
+  _inherits(StrikeOutAnnotationElement, _AnnotationElement12);
 
   function StrikeOutAnnotationElement(parameters) {
     _classCallCheck(this, StrikeOutAnnotationElement);
@@ -27825,8 +27892,8 @@ var StrikeOutAnnotationElement = function (_AnnotationElement11) {
   return StrikeOutAnnotationElement;
 }(AnnotationElement);
 
-var StampAnnotationElement = function (_AnnotationElement12) {
-  _inherits(StampAnnotationElement, _AnnotationElement12);
+var StampAnnotationElement = function (_AnnotationElement13) {
+  _inherits(StampAnnotationElement, _AnnotationElement13);
 
   function StampAnnotationElement(parameters) {
     _classCallCheck(this, StampAnnotationElement);
@@ -27849,23 +27916,23 @@ var StampAnnotationElement = function (_AnnotationElement12) {
   return StampAnnotationElement;
 }(AnnotationElement);
 
-var FileAttachmentAnnotationElement = function (_AnnotationElement13) {
-  _inherits(FileAttachmentAnnotationElement, _AnnotationElement13);
+var FileAttachmentAnnotationElement = function (_AnnotationElement14) {
+  _inherits(FileAttachmentAnnotationElement, _AnnotationElement14);
 
   function FileAttachmentAnnotationElement(parameters) {
     _classCallCheck(this, FileAttachmentAnnotationElement);
 
-    var _this19 = _possibleConstructorReturn(this, (FileAttachmentAnnotationElement.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotationElement)).call(this, parameters, true));
+    var _this21 = _possibleConstructorReturn(this, (FileAttachmentAnnotationElement.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotationElement)).call(this, parameters, true));
 
-    var file = _this19.data.file;
-    _this19.filename = (0, _dom_utils.getFilenameFromUrl)(file.filename);
-    _this19.content = file.content;
-    _this19.linkService.onFileAttachmentAnnotation({
+    var file = _this21.data.file;
+    _this21.filename = (0, _dom_utils.getFilenameFromUrl)(file.filename);
+    _this21.content = file.content;
+    _this21.linkService.onFileAttachmentAnnotation({
       id: (0, _util.stringToPDFString)(file.filename),
       filename: file.filename,
       content: file.content
     });
-    return _this19;
+    return _this21;
   }
 
   _createClass(FileAttachmentAnnotationElement, [{
@@ -29524,8 +29591,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.589';
-var pdfjsBuild = 'c69a7a83';
+var pdfjsVersion = '1.9.593';
+var pdfjsBuild = '10727572';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(55);
@@ -35387,8 +35454,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.589';
-  PDFJS.build = 'c69a7a83';
+  PDFJS.version = '1.9.593';
+  PDFJS.build = '10727572';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -50987,6 +51054,10 @@ var AnnotationFactory = function () {
           return new SquareAnnotation(parameters);
         case 'Circle':
           return new CircleAnnotation(parameters);
+        case 'PolyLine':
+          return new PolylineAnnotation(parameters);
+        case 'Polygon':
+          return new PolygonAnnotation(parameters);
         case 'Highlight':
           return new HighlightAnnotation(parameters);
         case 'Underline':
@@ -51657,99 +51728,139 @@ var CircleAnnotation = function (_Annotation7) {
   return CircleAnnotation;
 }(Annotation);
 
-var HighlightAnnotation = function (_Annotation8) {
-  _inherits(HighlightAnnotation, _Annotation8);
+var PolylineAnnotation = function (_Annotation8) {
+  _inherits(PolylineAnnotation, _Annotation8);
+
+  function PolylineAnnotation(parameters) {
+    _classCallCheck(this, PolylineAnnotation);
+
+    var _this12 = _possibleConstructorReturn(this, (PolylineAnnotation.__proto__ || Object.getPrototypeOf(PolylineAnnotation)).call(this, parameters));
+
+    _this12.data.annotationType = _util.AnnotationType.POLYLINE;
+    var dict = parameters.dict;
+    var rawVertices = dict.getArray('Vertices');
+    _this12.data.vertices = [];
+    for (var i = 0, ii = rawVertices.length; i < ii; i += 2) {
+      _this12.data.vertices.push({
+        x: rawVertices[i],
+        y: rawVertices[i + 1]
+      });
+    }
+    _this12._preparePopup(dict);
+    return _this12;
+  }
+
+  return PolylineAnnotation;
+}(Annotation);
+
+var PolygonAnnotation = function (_PolylineAnnotation) {
+  _inherits(PolygonAnnotation, _PolylineAnnotation);
+
+  function PolygonAnnotation(parameters) {
+    _classCallCheck(this, PolygonAnnotation);
+
+    var _this13 = _possibleConstructorReturn(this, (PolygonAnnotation.__proto__ || Object.getPrototypeOf(PolygonAnnotation)).call(this, parameters));
+
+    _this13.data.annotationType = _util.AnnotationType.POLYGON;
+    return _this13;
+  }
+
+  return PolygonAnnotation;
+}(PolylineAnnotation);
+
+var HighlightAnnotation = function (_Annotation9) {
+  _inherits(HighlightAnnotation, _Annotation9);
 
   function HighlightAnnotation(parameters) {
     _classCallCheck(this, HighlightAnnotation);
 
-    var _this12 = _possibleConstructorReturn(this, (HighlightAnnotation.__proto__ || Object.getPrototypeOf(HighlightAnnotation)).call(this, parameters));
+    var _this14 = _possibleConstructorReturn(this, (HighlightAnnotation.__proto__ || Object.getPrototypeOf(HighlightAnnotation)).call(this, parameters));
 
-    _this12.data.annotationType = _util.AnnotationType.HIGHLIGHT;
-    _this12._preparePopup(parameters.dict);
-    return _this12;
+    _this14.data.annotationType = _util.AnnotationType.HIGHLIGHT;
+    _this14._preparePopup(parameters.dict);
+    return _this14;
   }
 
   return HighlightAnnotation;
 }(Annotation);
 
-var UnderlineAnnotation = function (_Annotation9) {
-  _inherits(UnderlineAnnotation, _Annotation9);
+var UnderlineAnnotation = function (_Annotation10) {
+  _inherits(UnderlineAnnotation, _Annotation10);
 
   function UnderlineAnnotation(parameters) {
     _classCallCheck(this, UnderlineAnnotation);
 
-    var _this13 = _possibleConstructorReturn(this, (UnderlineAnnotation.__proto__ || Object.getPrototypeOf(UnderlineAnnotation)).call(this, parameters));
+    var _this15 = _possibleConstructorReturn(this, (UnderlineAnnotation.__proto__ || Object.getPrototypeOf(UnderlineAnnotation)).call(this, parameters));
 
-    _this13.data.annotationType = _util.AnnotationType.UNDERLINE;
-    _this13._preparePopup(parameters.dict);
-    return _this13;
+    _this15.data.annotationType = _util.AnnotationType.UNDERLINE;
+    _this15._preparePopup(parameters.dict);
+    return _this15;
   }
 
   return UnderlineAnnotation;
 }(Annotation);
 
-var SquigglyAnnotation = function (_Annotation10) {
-  _inherits(SquigglyAnnotation, _Annotation10);
+var SquigglyAnnotation = function (_Annotation11) {
+  _inherits(SquigglyAnnotation, _Annotation11);
 
   function SquigglyAnnotation(parameters) {
     _classCallCheck(this, SquigglyAnnotation);
 
-    var _this14 = _possibleConstructorReturn(this, (SquigglyAnnotation.__proto__ || Object.getPrototypeOf(SquigglyAnnotation)).call(this, parameters));
+    var _this16 = _possibleConstructorReturn(this, (SquigglyAnnotation.__proto__ || Object.getPrototypeOf(SquigglyAnnotation)).call(this, parameters));
 
-    _this14.data.annotationType = _util.AnnotationType.SQUIGGLY;
-    _this14._preparePopup(parameters.dict);
-    return _this14;
+    _this16.data.annotationType = _util.AnnotationType.SQUIGGLY;
+    _this16._preparePopup(parameters.dict);
+    return _this16;
   }
 
   return SquigglyAnnotation;
 }(Annotation);
 
-var StrikeOutAnnotation = function (_Annotation11) {
-  _inherits(StrikeOutAnnotation, _Annotation11);
+var StrikeOutAnnotation = function (_Annotation12) {
+  _inherits(StrikeOutAnnotation, _Annotation12);
 
   function StrikeOutAnnotation(parameters) {
     _classCallCheck(this, StrikeOutAnnotation);
 
-    var _this15 = _possibleConstructorReturn(this, (StrikeOutAnnotation.__proto__ || Object.getPrototypeOf(StrikeOutAnnotation)).call(this, parameters));
+    var _this17 = _possibleConstructorReturn(this, (StrikeOutAnnotation.__proto__ || Object.getPrototypeOf(StrikeOutAnnotation)).call(this, parameters));
 
-    _this15.data.annotationType = _util.AnnotationType.STRIKEOUT;
-    _this15._preparePopup(parameters.dict);
-    return _this15;
+    _this17.data.annotationType = _util.AnnotationType.STRIKEOUT;
+    _this17._preparePopup(parameters.dict);
+    return _this17;
   }
 
   return StrikeOutAnnotation;
 }(Annotation);
 
-var StampAnnotation = function (_Annotation12) {
-  _inherits(StampAnnotation, _Annotation12);
+var StampAnnotation = function (_Annotation13) {
+  _inherits(StampAnnotation, _Annotation13);
 
   function StampAnnotation(parameters) {
     _classCallCheck(this, StampAnnotation);
 
-    var _this16 = _possibleConstructorReturn(this, (StampAnnotation.__proto__ || Object.getPrototypeOf(StampAnnotation)).call(this, parameters));
+    var _this18 = _possibleConstructorReturn(this, (StampAnnotation.__proto__ || Object.getPrototypeOf(StampAnnotation)).call(this, parameters));
 
-    _this16.data.annotationType = _util.AnnotationType.STAMP;
-    _this16._preparePopup(parameters.dict);
-    return _this16;
+    _this18.data.annotationType = _util.AnnotationType.STAMP;
+    _this18._preparePopup(parameters.dict);
+    return _this18;
   }
 
   return StampAnnotation;
 }(Annotation);
 
-var FileAttachmentAnnotation = function (_Annotation13) {
-  _inherits(FileAttachmentAnnotation, _Annotation13);
+var FileAttachmentAnnotation = function (_Annotation14) {
+  _inherits(FileAttachmentAnnotation, _Annotation14);
 
   function FileAttachmentAnnotation(parameters) {
     _classCallCheck(this, FileAttachmentAnnotation);
 
-    var _this17 = _possibleConstructorReturn(this, (FileAttachmentAnnotation.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotation)).call(this, parameters));
+    var _this19 = _possibleConstructorReturn(this, (FileAttachmentAnnotation.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotation)).call(this, parameters));
 
     var file = new _obj.FileSpec(parameters.dict.get('FS'), parameters.xref);
-    _this17.data.annotationType = _util.AnnotationType.FILEATTACHMENT;
-    _this17.data.file = file.serializable;
-    _this17._preparePopup(parameters.dict);
-    return _this17;
+    _this19.data.annotationType = _util.AnnotationType.FILEATTACHMENT;
+    _this19.data.file = file.serializable;
+    _this19._preparePopup(parameters.dict);
+    return _this19;
   }
 
   return FileAttachmentAnnotation;
