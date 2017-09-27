@@ -24540,8 +24540,8 @@ exports.getUnicodeForGlyph = getUnicodeForGlyph;
 "use strict";
 
 
-var pdfjsVersion = '1.9.600';
-var pdfjsBuild = 'b8371870';
+var pdfjsVersion = '1.9.602';
+var pdfjsBuild = '25806d17';
 var pdfjsCoreWorker = __w_pdfjs_require__(62);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -24745,6 +24745,11 @@ var WorkerMessageHandler = {
     var terminated = false;
     var cancelXHRs = null;
     var WorkerTasks = [];
+    var apiVersion = docParams.apiVersion;
+    var workerVersion = '1.9.602';
+    if (apiVersion !== null && apiVersion !== workerVersion) {
+      throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
+    }
     var docId = docParams.docId;
     var docBaseUrl = docParams.docBaseUrl;
     var workerHandlerName = docParams.docId + '_worker';
