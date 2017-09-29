@@ -1393,8 +1393,31 @@ MessageHandler.prototype = {
       this.comObj.postMessage(message);
     }
   },
-  destroy: function destroy() {
+  close: function close(reason) {
     this.comObj.removeEventListener('message', this._onComObjOnMessage);
+    for (var i in this.callbacksCapabilities) {
+      var callbackCapability = this.callbacksCapabilities[i];
+      callbackCapability.reject(reason);
+    }
+    for (var _i in this.streamSinks) {
+      var sink = this.streamSinks[_i];
+      sink.sinkCapability.reject(reason);
+    }
+    for (var _i2 in this.streamControllers) {
+      var controller = this.streamControllers[_i2];
+      if (!controller.isClosed) {
+        controller.controller.error(reason);
+      }
+      if (controller.startCall) {
+        controller.startCall.reject(reason);
+      }
+      if (controller.pullCall) {
+        controller.pullCall.reject(reason);
+      }
+      if (controller.cancelCall) {
+        controller.cancelCall.reject(reason);
+      }
+    }
   }
 };
 function loadJpegStream(id, imageUrl, objs) {
@@ -24720,8 +24743,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '1.9.609';
-var pdfjsBuild = '3717757b';
+var pdfjsVersion = '1.9.611';
+var pdfjsBuild = 'd03e1274';
 var pdfjsCoreWorker = __w_pdfjs_require__(62);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -24926,7 +24949,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '1.9.609';
+    var workerVersion = '1.9.611';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -25289,7 +25312,7 @@ var WorkerMessageHandler = {
         task.terminate();
       });
       return Promise.all(waitOn).then(function () {
-        handler.destroy();
+        handler.close(new _util.AbortException('Worker was terminated'));
         handler = null;
       });
     });

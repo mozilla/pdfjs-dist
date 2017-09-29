@@ -1393,8 +1393,31 @@ MessageHandler.prototype = {
       this.comObj.postMessage(message);
     }
   },
-  destroy: function destroy() {
+  close: function close(reason) {
     this.comObj.removeEventListener('message', this._onComObjOnMessage);
+    for (var i in this.callbacksCapabilities) {
+      var callbackCapability = this.callbacksCapabilities[i];
+      callbackCapability.reject(reason);
+    }
+    for (var _i in this.streamSinks) {
+      var sink = this.streamSinks[_i];
+      sink.sinkCapability.reject(reason);
+    }
+    for (var _i2 in this.streamControllers) {
+      var controller = this.streamControllers[_i2];
+      if (!controller.isClosed) {
+        controller.controller.error(reason);
+      }
+      if (controller.startCall) {
+        controller.startCall.reject(reason);
+      }
+      if (controller.pullCall) {
+        controller.pullCall.reject(reason);
+      }
+      if (controller.cancelCall) {
+        controller.cancelCall.reject(reason);
+      }
+    }
   }
 };
 function loadJpegStream(id, imageUrl, objs) {
@@ -11344,7 +11367,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '1.9.609';
+  var apiVersion = '1.9.611';
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
   source.chunkedViewerLoading = !!pdfDataRangeTransport;
@@ -11972,7 +11995,7 @@ var PDFWorker = function PDFWorkerClosure() {
       pdfWorkerPorts.delete(this._port);
       this._port = null;
       if (this._messageHandler) {
-        this._messageHandler.destroy();
+        this._messageHandler.close(new _util.AbortException('Worker was destroyed'));
         this._messageHandler = null;
       }
     }
@@ -12034,7 +12057,7 @@ var WorkerTransport = function WorkerTransportClosure() {
           _this7._networkStream.cancelAllRequests();
         }
         if (_this7.messageHandler) {
-          _this7.messageHandler.destroy();
+          _this7.messageHandler.close(new _util.AbortException('Worker was destroyed'));
           _this7.messageHandler = null;
         }
         _this7.destroyCapability.resolve();
@@ -12648,8 +12671,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.9.609';
-  exports.build = build = '3717757b';
+  exports.version = version = '1.9.611';
+  exports.build = build = 'd03e1274';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -29776,8 +29799,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.9.609';
-var pdfjsBuild = '3717757b';
+var pdfjsVersion = '1.9.611';
+var pdfjsBuild = 'd03e1274';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(98);
 var pdfjsDisplayAPI = __w_pdfjs_require__(54);
@@ -35639,8 +35662,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.9.609';
-  PDFJS.build = '3717757b';
+  PDFJS.version = '1.9.611';
+  PDFJS.build = 'd03e1274';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -38598,7 +38621,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '1.9.609';
+    var workerVersion = '1.9.611';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -38961,7 +38984,7 @@ var WorkerMessageHandler = {
         task.terminate();
       });
       return Promise.all(waitOn).then(function () {
-        handler.destroy();
+        handler.close(new _util.AbortException('Worker was terminated'));
         handler = null;
       });
     });
