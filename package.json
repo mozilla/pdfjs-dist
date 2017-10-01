@@ -1,6 +1,6 @@
 {
   "name": "pdfjs-dist",
-  "version": "1.9.613",
+  "version": "1.9.615",
   "main": "build/pdf.js",
   "description": "Generic build of Mozilla's PDF.js library.",
   "keywords": [
@@ -13,7 +13,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "node-ensure": "^0.0.0",
-    "worker-loader": "^0.8.0"
+    "worker-loader": "^1.0.0"
   },
   "browser": {
     "fs": false,
