@@ -3489,7 +3489,7 @@ var PDFHistory = function () {
       this._blockHashChange = 0;
       this._currentHash = getCurrentHash();
       this._numPositionUpdates = 0;
-      this._currentUid = this._uid = 0;
+      this._uid = this._maxUid = 0;
       this._destination = null;
       this._position = null;
       if (!this._isValidState(state) || resetHistory) {
@@ -3592,7 +3592,7 @@ var PDFHistory = function () {
         return;
       }
       var state = window.history.state;
-      if (this._isValidState(state) && state.uid < this._uid - 1) {
+      if (this._isValidState(state) && state.uid < this._maxUid) {
         window.history.forward();
       }
     }
@@ -3604,13 +3604,14 @@ var PDFHistory = function () {
       var shouldReplace = forceReplace || !this._destination;
       var newState = {
         fingerprint: this.fingerprint,
-        uid: shouldReplace ? this._currentUid : this._uid,
+        uid: shouldReplace ? this._uid : this._uid + 1,
         destination: destination
       };
       this._updateInternalState(destination, newState.uid);
       if (shouldReplace) {
         window.history.replaceState(newState, '', document.URL);
       } else {
+        this._maxUid = this._uid;
         window.history.pushState(newState, '', document.URL);
       }
     }
@@ -3680,8 +3681,7 @@ var PDFHistory = function () {
         delete destination.temporary;
       }
       this._destination = destination;
-      this._currentUid = uid;
-      this._uid = this._currentUid + 1;
+      this._uid = uid;
       this._numPositionUpdates = 0;
     }
   }, {
@@ -3727,7 +3727,7 @@ var PDFHistory = function () {
           hashChanged = this._currentHash !== newHash;
       this._currentHash = newHash;
       if (!state || false) {
-        this._currentUid = this._uid;
+        this._uid++;
 
         var _parseCurrentHash2 = parseCurrentHash(this.linkService),
             hash = _parseCurrentHash2.hash,
