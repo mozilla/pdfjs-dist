@@ -2149,6 +2149,7 @@ var AnnotationLayerBuilder = function () {
     this.renderInteractiveForms = renderInteractiveForms;
     this.l10n = l10n;
     this.div = null;
+    this._cancelled = false;
   }
 
   _createClass(AnnotationLayerBuilder, [{
@@ -2159,6 +2160,9 @@ var AnnotationLayerBuilder = function () {
       var intent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'display';
 
       this.pdfPage.getAnnotations({ intent: intent }).then(function (annotations) {
+        if (_this._cancelled) {
+          return;
+        }
         var parameters = {
           viewport: viewport.clone({ dontFlip: true }),
           div: _this.div,
@@ -2182,6 +2186,11 @@ var AnnotationLayerBuilder = function () {
           _this.l10n.translate(_this.div);
         }
       });
+    }
+  }, {
+    key: 'cancel',
+    value: function cancel() {
+      this._cancelled = true;
     }
   }, {
     key: 'hide',
@@ -2330,7 +2339,7 @@ var PDFPageView = function () {
       var keepZoomLayer = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       var keepAnnotations = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
-      this.cancelRendering();
+      this.cancelRendering(keepAnnotations);
       var div = this.div;
       div.style.width = Math.floor(this.viewport.width) + 'px';
       div.style.height = Math.floor(this.viewport.height) + 'px';
@@ -2347,7 +2356,8 @@ var PDFPageView = function () {
       div.removeAttribute('data-loaded');
       if (currentAnnotationNode) {
         this.annotationLayer.hide();
-      } else {
+      } else if (this.annotationLayer) {
+        this.annotationLayer.cancel();
         this.annotationLayer = null;
       }
       if (!currentZoomLayerNode) {
@@ -2418,6 +2428,8 @@ var PDFPageView = function () {
   }, {
     key: 'cancelRendering',
     value: function cancelRendering() {
+      var keepAnnotations = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
       if (this.paintTask) {
         this.paintTask.cancel();
         this.paintTask = null;
@@ -2427,6 +2439,10 @@ var PDFPageView = function () {
       if (this.textLayer) {
         this.textLayer.cancel();
         this.textLayer = null;
+      }
+      if (!keepAnnotations && this.annotationLayer) {
+        this.annotationLayer.cancel();
+        this.annotationLayer = null;
       }
     }
   }, {
