@@ -3595,7 +3595,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '1.10.92';
+  var apiVersion = '1.10.93';
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
   source.chunkedViewerLoading = !!pdfDataRangeTransport;
@@ -4986,8 +4986,8 @@ var _UnsupportedManager = function UnsupportedManagerClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '1.10.92';
-  exports.build = build = '1294247d';
+  exports.version = version = '1.10.93';
+  exports.build = build = '4e66c69d';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -8059,8 +8059,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '1.10.92';
-var pdfjsBuild = '1294247d';
+var pdfjsVersion = '1.10.93';
+var pdfjsBuild = '4e66c69d';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(117);
 var pdfjsDisplayAPI = __w_pdfjs_require__(69);
@@ -14290,8 +14290,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '1.10.92';
-  PDFJS.build = '1294247d';
+  PDFJS.version = '1.10.93';
+  PDFJS.build = '4e66c69d';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
