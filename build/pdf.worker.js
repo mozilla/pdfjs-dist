@@ -24779,8 +24779,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '1.10.93';
-var pdfjsBuild = '4e66c69d';
+var pdfjsVersion = '1.10.95';
+var pdfjsBuild = '92fcfce6';
 var pdfjsCoreWorker = __w_pdfjs_require__(83);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -24985,7 +24985,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '1.10.93';
+    var workerVersion = '1.10.95';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -36272,6 +36272,10 @@ var Font = function FontClosure() {
   function int16(b0, b1) {
     return (b0 << 8) + b1;
   }
+  function writeSignedInt16(bytes, index, value) {
+    bytes[index + 1] = value;
+    bytes[index] = value >>> 8;
+  }
   function signedInt16(b0, b1) {
     var value = (b0 << 8) + b1;
     return value & 1 << 15 ? value - 0x10000 : value;
@@ -36923,8 +36927,10 @@ var Font = function FontClosure() {
           return glyphProfile;
         }
         var glyf = source.subarray(sourceStart, sourceEnd);
-        var contoursCount = glyf[0] << 8 | glyf[1];
-        if (contoursCount & 0x8000) {
+        var contoursCount = signedInt16(glyf[0], glyf[1]);
+        if (contoursCount < 0) {
+          contoursCount = -1;
+          writeSignedInt16(glyf, 0, contoursCount);
           dest.set(glyf, destStart);
           glyphProfile.length = glyf.length;
           return glyphProfile;
