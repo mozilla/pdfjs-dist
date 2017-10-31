@@ -953,10 +953,6 @@ var PDFLinkService = function () {
           });
         }
       } else {
-        if (/^\d+$/.test(hash) && hash <= this.pagesCount) {
-          console.warn('PDFLinkService_setHash: specifying a page number ' + 'directly after the hash symbol (#) is deprecated, ' + ('please use the "#page=' + hash + '" form instead.'));
-          this.page = hash | 0;
-        }
         dest = unescape(hash);
         try {
           dest = JSON.parse(dest);
@@ -1558,10 +1554,6 @@ var BaseViewer = function () {
   }, {
     key: 'scrollPageIntoView',
     value: function scrollPageIntoView(params) {
-      if (arguments.length > 1 || typeof params === 'number') {
-        console.error('Call of scrollPageIntoView() with obsolete signature.');
-        return;
-      }
       if (!this.pdfDocument) {
         return;
       }
@@ -2565,7 +2557,7 @@ var PDFPageView = function () {
         if (paintTask === _this.paintTask) {
           _this.paintTask = null;
         }
-        if (error === 'cancelled' || error instanceof _pdfjsLib.RenderingCancelledException) {
+        if (error instanceof _pdfjsLib.RenderingCancelledException) {
           _this.error = null;
           return Promise.resolve(undefined);
         }
@@ -2704,11 +2696,7 @@ var PDFPageView = function () {
       var cancelled = false;
       var ensureNotCancelled = function ensureNotCancelled() {
         if (cancelled) {
-          if (_pdfjsLib.PDFJS.pdfjsNext) {
-            throw new _pdfjsLib.RenderingCancelledException('Rendering cancelled, page ' + _this2.id, 'svg');
-          } else {
-            throw 'cancelled';
-          }
+          throw new _pdfjsLib.RenderingCancelledException('Rendering cancelled, page ' + _this2.id, 'svg');
         }
       };
       var pdfPage = this.pdfPage;
