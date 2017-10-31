@@ -21822,6 +21822,8 @@ function mapSpecialUnicodeValues(code) {
     return 0;
   } else if (code >= 0xF600 && code <= 0xF8FF) {
     return getSpecialPUASymbols()[code] || code;
+  } else if (code === 0x00AD) {
+    return 0x002D;
   }
   return code;
 }
@@ -24779,8 +24781,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '1.10.95';
-var pdfjsBuild = '92fcfce6';
+var pdfjsVersion = '1.10.97';
+var pdfjsBuild = '7d0fce73';
 var pdfjsCoreWorker = __w_pdfjs_require__(83);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -24985,7 +24987,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '1.10.95';
+    var workerVersion = '1.10.97';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
