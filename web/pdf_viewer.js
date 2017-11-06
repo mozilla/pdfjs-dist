@@ -95,7 +95,7 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
-var pdfjsLib;
+var pdfjsLib = void 0;
 if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
   pdfjsLib = window['pdfjs-dist/build/pdf'];
 } else {
@@ -1176,6 +1176,1140 @@ exports.SimpleLinkService = SimpleLinkService;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.DefaultAnnotationLayerFactory = exports.AnnotationLayerBuilder = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _pdfjsLib = __w_pdfjs_require__(0);
+
+var _ui_utils = __w_pdfjs_require__(1);
+
+var _pdf_link_service = __w_pdfjs_require__(3);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var AnnotationLayerBuilder = function () {
+  function AnnotationLayerBuilder(_ref) {
+    var pageDiv = _ref.pageDiv,
+        pdfPage = _ref.pdfPage,
+        linkService = _ref.linkService,
+        downloadManager = _ref.downloadManager,
+        _ref$renderInteractiv = _ref.renderInteractiveForms,
+        renderInteractiveForms = _ref$renderInteractiv === undefined ? false : _ref$renderInteractiv,
+        _ref$l10n = _ref.l10n,
+        l10n = _ref$l10n === undefined ? _ui_utils.NullL10n : _ref$l10n;
+
+    _classCallCheck(this, AnnotationLayerBuilder);
+
+    this.pageDiv = pageDiv;
+    this.pdfPage = pdfPage;
+    this.linkService = linkService;
+    this.downloadManager = downloadManager;
+    this.renderInteractiveForms = renderInteractiveForms;
+    this.l10n = l10n;
+    this.div = null;
+    this._cancelled = false;
+  }
+
+  _createClass(AnnotationLayerBuilder, [{
+    key: 'render',
+    value: function render(viewport) {
+      var _this = this;
+
+      var intent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'display';
+
+      this.pdfPage.getAnnotations({ intent: intent }).then(function (annotations) {
+        if (_this._cancelled) {
+          return;
+        }
+        var parameters = {
+          viewport: viewport.clone({ dontFlip: true }),
+          div: _this.div,
+          annotations: annotations,
+          page: _this.pdfPage,
+          renderInteractiveForms: _this.renderInteractiveForms,
+          linkService: _this.linkService,
+          downloadManager: _this.downloadManager
+        };
+        if (_this.div) {
+          _pdfjsLib.AnnotationLayer.update(parameters);
+        } else {
+          if (annotations.length === 0) {
+            return;
+          }
+          _this.div = document.createElement('div');
+          _this.div.className = 'annotationLayer';
+          _this.pageDiv.appendChild(_this.div);
+          parameters.div = _this.div;
+          _pdfjsLib.AnnotationLayer.render(parameters);
+          _this.l10n.translate(_this.div);
+        }
+      });
+    }
+  }, {
+    key: 'cancel',
+    value: function cancel() {
+      this._cancelled = true;
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      if (!this.div) {
+        return;
+      }
+      this.div.setAttribute('hidden', 'true');
+    }
+  }]);
+
+  return AnnotationLayerBuilder;
+}();
+
+var DefaultAnnotationLayerFactory = function () {
+  function DefaultAnnotationLayerFactory() {
+    _classCallCheck(this, DefaultAnnotationLayerFactory);
+  }
+
+  _createClass(DefaultAnnotationLayerFactory, [{
+    key: 'createAnnotationLayerBuilder',
+    value: function createAnnotationLayerBuilder(pageDiv, pdfPage) {
+      var renderInteractiveForms = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+      var l10n = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : _ui_utils.NullL10n;
+
+      return new AnnotationLayerBuilder({
+        pageDiv: pageDiv,
+        pdfPage: pdfPage,
+        renderInteractiveForms: renderInteractiveForms,
+        linkService: new _pdf_link_service.SimpleLinkService(),
+        l10n: l10n
+      });
+    }
+  }]);
+
+  return DefaultAnnotationLayerFactory;
+}();
+
+exports.AnnotationLayerBuilder = AnnotationLayerBuilder;
+exports.DefaultAnnotationLayerFactory = DefaultAnnotationLayerFactory;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.DefaultTextLayerFactory = exports.TextLayerBuilder = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _dom_events = __w_pdfjs_require__(2);
+
+var _pdfjsLib = __w_pdfjs_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var EXPAND_DIVS_TIMEOUT = 300;
+
+var TextLayerBuilder = function () {
+  function TextLayerBuilder(_ref) {
+    var textLayerDiv = _ref.textLayerDiv,
+        eventBus = _ref.eventBus,
+        pageIndex = _ref.pageIndex,
+        viewport = _ref.viewport,
+        _ref$findController = _ref.findController,
+        findController = _ref$findController === undefined ? null : _ref$findController,
+        _ref$enhanceTextSelec = _ref.enhanceTextSelection,
+        enhanceTextSelection = _ref$enhanceTextSelec === undefined ? false : _ref$enhanceTextSelec;
+
+    _classCallCheck(this, TextLayerBuilder);
+
+    this.textLayerDiv = textLayerDiv;
+    this.eventBus = eventBus || (0, _dom_events.getGlobalEventBus)();
+    this.textContent = null;
+    this.textContentItemsStr = [];
+    this.textContentStream = null;
+    this.renderingDone = false;
+    this.pageIdx = pageIndex;
+    this.pageNumber = this.pageIdx + 1;
+    this.matches = [];
+    this.viewport = viewport;
+    this.textDivs = [];
+    this.findController = findController;
+    this.textLayerRenderTask = null;
+    this.enhanceTextSelection = enhanceTextSelection;
+    this._bindMouse();
+  }
+
+  _createClass(TextLayerBuilder, [{
+    key: '_finishRendering',
+    value: function _finishRendering() {
+      this.renderingDone = true;
+      if (!this.enhanceTextSelection) {
+        var endOfContent = document.createElement('div');
+        endOfContent.className = 'endOfContent';
+        this.textLayerDiv.appendChild(endOfContent);
+      }
+      this.eventBus.dispatch('textlayerrendered', {
+        source: this,
+        pageNumber: this.pageNumber,
+        numTextDivs: this.textDivs.length
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this = this;
+
+      var timeout = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+
+      if (!(this.textContent || this.textContentStream) || this.renderingDone) {
+        return;
+      }
+      this.cancel();
+      this.textDivs = [];
+      var textLayerFrag = document.createDocumentFragment();
+      this.textLayerRenderTask = (0, _pdfjsLib.renderTextLayer)({
+        textContent: this.textContent,
+        textContentStream: this.textContentStream,
+        container: textLayerFrag,
+        viewport: this.viewport,
+        textDivs: this.textDivs,
+        textContentItemsStr: this.textContentItemsStr,
+        timeout: timeout,
+        enhanceTextSelection: this.enhanceTextSelection
+      });
+      this.textLayerRenderTask.promise.then(function () {
+        _this.textLayerDiv.appendChild(textLayerFrag);
+        _this._finishRendering();
+        _this.updateMatches();
+      }, function (reason) {});
+    }
+  }, {
+    key: 'cancel',
+    value: function cancel() {
+      if (this.textLayerRenderTask) {
+        this.textLayerRenderTask.cancel();
+        this.textLayerRenderTask = null;
+      }
+    }
+  }, {
+    key: 'setTextContentStream',
+    value: function setTextContentStream(readableStream) {
+      this.cancel();
+      this.textContentStream = readableStream;
+    }
+  }, {
+    key: 'setTextContent',
+    value: function setTextContent(textContent) {
+      this.cancel();
+      this.textContent = textContent;
+    }
+  }, {
+    key: 'convertMatches',
+    value: function convertMatches(matches, matchesLength) {
+      var i = 0;
+      var iIndex = 0;
+      var textContentItemsStr = this.textContentItemsStr;
+      var end = textContentItemsStr.length - 1;
+      var queryLen = this.findController === null ? 0 : this.findController.state.query.length;
+      var ret = [];
+      if (!matches) {
+        return ret;
+      }
+      for (var m = 0, len = matches.length; m < len; m++) {
+        var matchIdx = matches[m];
+        while (i !== end && matchIdx >= iIndex + textContentItemsStr[i].length) {
+          iIndex += textContentItemsStr[i].length;
+          i++;
+        }
+        if (i === textContentItemsStr.length) {
+          console.error('Could not find a matching mapping');
+        }
+        var match = {
+          begin: {
+            divIdx: i,
+            offset: matchIdx - iIndex
+          }
+        };
+        if (matchesLength) {
+          matchIdx += matchesLength[m];
+        } else {
+          matchIdx += queryLen;
+        }
+        while (i !== end && matchIdx > iIndex + textContentItemsStr[i].length) {
+          iIndex += textContentItemsStr[i].length;
+          i++;
+        }
+        match.end = {
+          divIdx: i,
+          offset: matchIdx - iIndex
+        };
+        ret.push(match);
+      }
+      return ret;
+    }
+  }, {
+    key: 'renderMatches',
+    value: function renderMatches(matches) {
+      if (matches.length === 0) {
+        return;
+      }
+      var textContentItemsStr = this.textContentItemsStr;
+      var textDivs = this.textDivs;
+      var prevEnd = null;
+      var pageIdx = this.pageIdx;
+      var isSelectedPage = this.findController === null ? false : pageIdx === this.findController.selected.pageIdx;
+      var selectedMatchIdx = this.findController === null ? -1 : this.findController.selected.matchIdx;
+      var highlightAll = this.findController === null ? false : this.findController.state.highlightAll;
+      var infinity = {
+        divIdx: -1,
+        offset: undefined
+      };
+      function beginText(begin, className) {
+        var divIdx = begin.divIdx;
+        textDivs[divIdx].textContent = '';
+        appendTextToDiv(divIdx, 0, begin.offset, className);
+      }
+      function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
+        var div = textDivs[divIdx];
+        var content = textContentItemsStr[divIdx].substring(fromOffset, toOffset);
+        var node = document.createTextNode(content);
+        if (className) {
+          var span = document.createElement('span');
+          span.className = className;
+          span.appendChild(node);
+          div.appendChild(span);
+          return;
+        }
+        div.appendChild(node);
+      }
+      var i0 = selectedMatchIdx,
+          i1 = i0 + 1;
+      if (highlightAll) {
+        i0 = 0;
+        i1 = matches.length;
+      } else if (!isSelectedPage) {
+        return;
+      }
+      for (var i = i0; i < i1; i++) {
+        var match = matches[i];
+        var begin = match.begin;
+        var end = match.end;
+        var isSelected = isSelectedPage && i === selectedMatchIdx;
+        var highlightSuffix = isSelected ? ' selected' : '';
+        if (this.findController) {
+          this.findController.updateMatchPosition(pageIdx, i, textDivs, begin.divIdx);
+        }
+        if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
+          if (prevEnd !== null) {
+            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+          }
+          beginText(begin);
+        } else {
+          appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
+        }
+        if (begin.divIdx === end.divIdx) {
+          appendTextToDiv(begin.divIdx, begin.offset, end.offset, 'highlight' + highlightSuffix);
+        } else {
+          appendTextToDiv(begin.divIdx, begin.offset, infinity.offset, 'highlight begin' + highlightSuffix);
+          for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
+            textDivs[n0].className = 'highlight middle' + highlightSuffix;
+          }
+          beginText(end, 'highlight end' + highlightSuffix);
+        }
+        prevEnd = end;
+      }
+      if (prevEnd) {
+        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
+      }
+    }
+  }, {
+    key: 'updateMatches',
+    value: function updateMatches() {
+      if (!this.renderingDone) {
+        return;
+      }
+      var matches = this.matches;
+      var textDivs = this.textDivs;
+      var textContentItemsStr = this.textContentItemsStr;
+      var clearedUntilDivIdx = -1;
+      for (var i = 0, len = matches.length; i < len; i++) {
+        var match = matches[i];
+        var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
+        for (var n = begin, end = match.end.divIdx; n <= end; n++) {
+          var div = textDivs[n];
+          div.textContent = textContentItemsStr[n];
+          div.className = '';
+        }
+        clearedUntilDivIdx = match.end.divIdx + 1;
+      }
+      if (this.findController === null || !this.findController.active) {
+        return;
+      }
+      var pageMatches = void 0,
+          pageMatchesLength = void 0;
+      if (this.findController !== null) {
+        pageMatches = this.findController.pageMatches[this.pageIdx] || null;
+        pageMatchesLength = this.findController.pageMatchesLength ? this.findController.pageMatchesLength[this.pageIdx] || null : null;
+      }
+      this.matches = this.convertMatches(pageMatches, pageMatchesLength);
+      this.renderMatches(this.matches);
+    }
+  }, {
+    key: '_bindMouse',
+    value: function _bindMouse() {
+      var _this2 = this;
+
+      var div = this.textLayerDiv;
+      var expandDivsTimer = null;
+      div.addEventListener('mousedown', function (evt) {
+        if (_this2.enhanceTextSelection && _this2.textLayerRenderTask) {
+          _this2.textLayerRenderTask.expandTextDivs(true);
+          if (expandDivsTimer) {
+            clearTimeout(expandDivsTimer);
+            expandDivsTimer = null;
+          }
+          return;
+        }
+        var end = div.querySelector('.endOfContent');
+        if (!end) {
+          return;
+        }
+        var adjustTop = evt.target !== div;
+        adjustTop = adjustTop && window.getComputedStyle(end).getPropertyValue('-moz-user-select') !== 'none';
+        if (adjustTop) {
+          var divBounds = div.getBoundingClientRect();
+          var r = Math.max(0, (evt.pageY - divBounds.top) / divBounds.height);
+          end.style.top = (r * 100).toFixed(2) + '%';
+        }
+        end.classList.add('active');
+      });
+      div.addEventListener('mouseup', function () {
+        if (_this2.enhanceTextSelection && _this2.textLayerRenderTask) {
+          expandDivsTimer = setTimeout(function () {
+            if (_this2.textLayerRenderTask) {
+              _this2.textLayerRenderTask.expandTextDivs(false);
+            }
+            expandDivsTimer = null;
+          }, EXPAND_DIVS_TIMEOUT);
+          return;
+        }
+        var end = div.querySelector('.endOfContent');
+        if (!end) {
+          return;
+        }
+        end.style.top = '';
+        end.classList.remove('active');
+      });
+    }
+  }]);
+
+  return TextLayerBuilder;
+}();
+
+var DefaultTextLayerFactory = function () {
+  function DefaultTextLayerFactory() {
+    _classCallCheck(this, DefaultTextLayerFactory);
+  }
+
+  _createClass(DefaultTextLayerFactory, [{
+    key: 'createTextLayerBuilder',
+    value: function createTextLayerBuilder(textLayerDiv, pageIndex, viewport) {
+      var enhanceTextSelection = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+      return new TextLayerBuilder({
+        textLayerDiv: textLayerDiv,
+        pageIndex: pageIndex,
+        viewport: viewport,
+        enhanceTextSelection: enhanceTextSelection
+      });
+    }
+  }]);
+
+  return DefaultTextLayerFactory;
+}();
+
+exports.TextLayerBuilder = TextLayerBuilder;
+exports.DefaultTextLayerFactory = DefaultTextLayerFactory;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PDFPageView = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ui_utils = __w_pdfjs_require__(1);
+
+var _pdfjsLib = __w_pdfjs_require__(0);
+
+var _dom_events = __w_pdfjs_require__(2);
+
+var _pdf_rendering_queue = __w_pdfjs_require__(7);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PDFPageView = function () {
+  function PDFPageView(options) {
+    _classCallCheck(this, PDFPageView);
+
+    var container = options.container;
+    var defaultViewport = options.defaultViewport;
+    this.id = options.id;
+    this.renderingId = 'page' + this.id;
+    this.pdfPage = null;
+    this.pageLabel = null;
+    this.rotation = 0;
+    this.scale = options.scale || _ui_utils.DEFAULT_SCALE;
+    this.viewport = defaultViewport;
+    this.pdfPageRotate = defaultViewport.rotation;
+    this.hasRestrictedScaling = false;
+    this.enhanceTextSelection = options.enhanceTextSelection || false;
+    this.renderInteractiveForms = options.renderInteractiveForms || false;
+    this.eventBus = options.eventBus || (0, _dom_events.getGlobalEventBus)();
+    this.renderingQueue = options.renderingQueue;
+    this.textLayerFactory = options.textLayerFactory;
+    this.annotationLayerFactory = options.annotationLayerFactory;
+    this.renderer = options.renderer || _ui_utils.RendererType.CANVAS;
+    this.l10n = options.l10n || _ui_utils.NullL10n;
+    this.paintTask = null;
+    this.paintedViewportMap = new WeakMap();
+    this.renderingState = _pdf_rendering_queue.RenderingStates.INITIAL;
+    this.resume = null;
+    this.error = null;
+    this.onBeforeDraw = null;
+    this.onAfterDraw = null;
+    this.annotationLayer = null;
+    this.textLayer = null;
+    this.zoomLayer = null;
+    var div = document.createElement('div');
+    div.className = 'page';
+    div.style.width = Math.floor(this.viewport.width) + 'px';
+    div.style.height = Math.floor(this.viewport.height) + 'px';
+    div.setAttribute('data-page-number', this.id);
+    this.div = div;
+    container.appendChild(div);
+  }
+
+  _createClass(PDFPageView, [{
+    key: 'setPdfPage',
+    value: function setPdfPage(pdfPage) {
+      this.pdfPage = pdfPage;
+      this.pdfPageRotate = pdfPage.rotate;
+      var totalRotation = (this.rotation + this.pdfPageRotate) % 360;
+      this.viewport = pdfPage.getViewport(this.scale * _ui_utils.CSS_UNITS, totalRotation);
+      this.stats = pdfPage.stats;
+      this.reset();
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      this.reset();
+      if (this.pdfPage) {
+        this.pdfPage.cleanup();
+      }
+    }
+  }, {
+    key: '_resetZoomLayer',
+    value: function _resetZoomLayer() {
+      var removeFromDOM = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+      if (!this.zoomLayer) {
+        return;
+      }
+      var zoomLayerCanvas = this.zoomLayer.firstChild;
+      this.paintedViewportMap.delete(zoomLayerCanvas);
+      zoomLayerCanvas.width = 0;
+      zoomLayerCanvas.height = 0;
+      if (removeFromDOM) {
+        this.zoomLayer.remove();
+      }
+      this.zoomLayer = null;
+    }
+  }, {
+    key: 'reset',
+    value: function reset() {
+      var keepZoomLayer = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      var keepAnnotations = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      this.cancelRendering(keepAnnotations);
+      var div = this.div;
+      div.style.width = Math.floor(this.viewport.width) + 'px';
+      div.style.height = Math.floor(this.viewport.height) + 'px';
+      var childNodes = div.childNodes;
+      var currentZoomLayerNode = keepZoomLayer && this.zoomLayer || null;
+      var currentAnnotationNode = keepAnnotations && this.annotationLayer && this.annotationLayer.div || null;
+      for (var i = childNodes.length - 1; i >= 0; i--) {
+        var node = childNodes[i];
+        if (currentZoomLayerNode === node || currentAnnotationNode === node) {
+          continue;
+        }
+        div.removeChild(node);
+      }
+      div.removeAttribute('data-loaded');
+      if (currentAnnotationNode) {
+        this.annotationLayer.hide();
+      } else if (this.annotationLayer) {
+        this.annotationLayer.cancel();
+        this.annotationLayer = null;
+      }
+      if (!currentZoomLayerNode) {
+        if (this.canvas) {
+          this.paintedViewportMap.delete(this.canvas);
+          this.canvas.width = 0;
+          this.canvas.height = 0;
+          delete this.canvas;
+        }
+        this._resetZoomLayer();
+      }
+      if (this.svg) {
+        this.paintedViewportMap.delete(this.svg);
+        delete this.svg;
+      }
+      this.loadingIconDiv = document.createElement('div');
+      this.loadingIconDiv.className = 'loadingIcon';
+      div.appendChild(this.loadingIconDiv);
+    }
+  }, {
+    key: 'update',
+    value: function update(scale, rotation) {
+      this.scale = scale || this.scale;
+      if (typeof rotation !== 'undefined') {
+        this.rotation = rotation;
+      }
+      var totalRotation = (this.rotation + this.pdfPageRotate) % 360;
+      this.viewport = this.viewport.clone({
+        scale: this.scale * _ui_utils.CSS_UNITS,
+        rotation: totalRotation
+      });
+      if (this.svg) {
+        this.cssTransform(this.svg, true);
+        this.eventBus.dispatch('pagerendered', {
+          source: this,
+          pageNumber: this.id,
+          cssTransform: true
+        });
+        return;
+      }
+      var isScalingRestricted = false;
+      if (this.canvas && _pdfjsLib.PDFJS.maxCanvasPixels > 0) {
+        var outputScale = this.outputScale;
+        if ((Math.floor(this.viewport.width) * outputScale.sx | 0) * (Math.floor(this.viewport.height) * outputScale.sy | 0) > _pdfjsLib.PDFJS.maxCanvasPixels) {
+          isScalingRestricted = true;
+        }
+      }
+      if (this.canvas) {
+        if (_pdfjsLib.PDFJS.useOnlyCssZoom || this.hasRestrictedScaling && isScalingRestricted) {
+          this.cssTransform(this.canvas, true);
+          this.eventBus.dispatch('pagerendered', {
+            source: this,
+            pageNumber: this.id,
+            cssTransform: true
+          });
+          return;
+        }
+        if (!this.zoomLayer && !this.canvas.hasAttribute('hidden')) {
+          this.zoomLayer = this.canvas.parentNode;
+          this.zoomLayer.style.position = 'absolute';
+        }
+      }
+      if (this.zoomLayer) {
+        this.cssTransform(this.zoomLayer.firstChild);
+      }
+      this.reset(true, true);
+    }
+  }, {
+    key: 'cancelRendering',
+    value: function cancelRendering() {
+      var keepAnnotations = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+      if (this.paintTask) {
+        this.paintTask.cancel();
+        this.paintTask = null;
+      }
+      this.renderingState = _pdf_rendering_queue.RenderingStates.INITIAL;
+      this.resume = null;
+      if (this.textLayer) {
+        this.textLayer.cancel();
+        this.textLayer = null;
+      }
+      if (!keepAnnotations && this.annotationLayer) {
+        this.annotationLayer.cancel();
+        this.annotationLayer = null;
+      }
+    }
+  }, {
+    key: 'cssTransform',
+    value: function cssTransform(target) {
+      var redrawAnnotations = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      var width = this.viewport.width;
+      var height = this.viewport.height;
+      var div = this.div;
+      target.style.width = target.parentNode.style.width = div.style.width = Math.floor(width) + 'px';
+      target.style.height = target.parentNode.style.height = div.style.height = Math.floor(height) + 'px';
+      var relativeRotation = this.viewport.rotation - this.paintedViewportMap.get(target).rotation;
+      var absRotation = Math.abs(relativeRotation);
+      var scaleX = 1,
+          scaleY = 1;
+      if (absRotation === 90 || absRotation === 270) {
+        scaleX = height / width;
+        scaleY = width / height;
+      }
+      var cssTransform = 'rotate(' + relativeRotation + 'deg) ' + 'scale(' + scaleX + ',' + scaleY + ')';
+      _pdfjsLib.CustomStyle.setProp('transform', target, cssTransform);
+      if (this.textLayer) {
+        var textLayerViewport = this.textLayer.viewport;
+        var textRelativeRotation = this.viewport.rotation - textLayerViewport.rotation;
+        var textAbsRotation = Math.abs(textRelativeRotation);
+        var scale = width / textLayerViewport.width;
+        if (textAbsRotation === 90 || textAbsRotation === 270) {
+          scale = width / textLayerViewport.height;
+        }
+        var textLayerDiv = this.textLayer.textLayerDiv;
+        var transX = void 0,
+            transY = void 0;
+        switch (textAbsRotation) {
+          case 0:
+            transX = transY = 0;
+            break;
+          case 90:
+            transX = 0;
+            transY = '-' + textLayerDiv.style.height;
+            break;
+          case 180:
+            transX = '-' + textLayerDiv.style.width;
+            transY = '-' + textLayerDiv.style.height;
+            break;
+          case 270:
+            transX = '-' + textLayerDiv.style.width;
+            transY = 0;
+            break;
+          default:
+            console.error('Bad rotation value.');
+            break;
+        }
+        _pdfjsLib.CustomStyle.setProp('transform', textLayerDiv, 'rotate(' + textAbsRotation + 'deg) ' + 'scale(' + scale + ', ' + scale + ') ' + 'translate(' + transX + ', ' + transY + ')');
+        _pdfjsLib.CustomStyle.setProp('transformOrigin', textLayerDiv, '0% 0%');
+      }
+      if (redrawAnnotations && this.annotationLayer) {
+        this.annotationLayer.render(this.viewport, 'display');
+      }
+    }
+  }, {
+    key: 'getPagePoint',
+    value: function getPagePoint(x, y) {
+      return this.viewport.convertToPdfPoint(x, y);
+    }
+  }, {
+    key: 'draw',
+    value: function draw() {
+      var _this = this;
+
+      if (this.renderingState !== _pdf_rendering_queue.RenderingStates.INITIAL) {
+        console.error('Must be in new state before drawing');
+        this.reset();
+      }
+      if (!this.pdfPage) {
+        this.renderingState = _pdf_rendering_queue.RenderingStates.FINISHED;
+        return Promise.reject(new Error('Page is not loaded'));
+      }
+      this.renderingState = _pdf_rendering_queue.RenderingStates.RUNNING;
+      var pdfPage = this.pdfPage;
+      var div = this.div;
+      var canvasWrapper = document.createElement('div');
+      canvasWrapper.style.width = div.style.width;
+      canvasWrapper.style.height = div.style.height;
+      canvasWrapper.classList.add('canvasWrapper');
+      if (this.annotationLayer && this.annotationLayer.div) {
+        div.insertBefore(canvasWrapper, this.annotationLayer.div);
+      } else {
+        div.appendChild(canvasWrapper);
+      }
+      var textLayer = null;
+      if (this.textLayerFactory) {
+        var textLayerDiv = document.createElement('div');
+        textLayerDiv.className = 'textLayer';
+        textLayerDiv.style.width = canvasWrapper.style.width;
+        textLayerDiv.style.height = canvasWrapper.style.height;
+        if (this.annotationLayer && this.annotationLayer.div) {
+          div.insertBefore(textLayerDiv, this.annotationLayer.div);
+        } else {
+          div.appendChild(textLayerDiv);
+        }
+        textLayer = this.textLayerFactory.createTextLayerBuilder(textLayerDiv, this.id - 1, this.viewport, this.enhanceTextSelection);
+      }
+      this.textLayer = textLayer;
+      var renderContinueCallback = null;
+      if (this.renderingQueue) {
+        renderContinueCallback = function renderContinueCallback(cont) {
+          if (!_this.renderingQueue.isHighestPriority(_this)) {
+            _this.renderingState = _pdf_rendering_queue.RenderingStates.PAUSED;
+            _this.resume = function () {
+              _this.renderingState = _pdf_rendering_queue.RenderingStates.RUNNING;
+              cont();
+            };
+            return;
+          }
+          cont();
+        };
+      }
+      var finishPaintTask = function finishPaintTask(error) {
+        if (paintTask === _this.paintTask) {
+          _this.paintTask = null;
+        }
+        if (error instanceof _pdfjsLib.RenderingCancelledException) {
+          _this.error = null;
+          return Promise.resolve(undefined);
+        }
+        _this.renderingState = _pdf_rendering_queue.RenderingStates.FINISHED;
+        if (_this.loadingIconDiv) {
+          div.removeChild(_this.loadingIconDiv);
+          delete _this.loadingIconDiv;
+        }
+        _this._resetZoomLayer(true);
+        _this.error = error;
+        _this.stats = pdfPage.stats;
+        if (_this.onAfterDraw) {
+          _this.onAfterDraw();
+        }
+        _this.eventBus.dispatch('pagerendered', {
+          source: _this,
+          pageNumber: _this.id,
+          cssTransform: false
+        });
+        if (error) {
+          return Promise.reject(error);
+        }
+        return Promise.resolve(undefined);
+      };
+      var paintTask = this.renderer === _ui_utils.RendererType.SVG ? this.paintOnSvg(canvasWrapper) : this.paintOnCanvas(canvasWrapper);
+      paintTask.onRenderContinue = renderContinueCallback;
+      this.paintTask = paintTask;
+      var resultPromise = paintTask.promise.then(function () {
+        return finishPaintTask(null).then(function () {
+          if (textLayer) {
+            var readableStream = pdfPage.streamTextContent({ normalizeWhitespace: true });
+            textLayer.setTextContentStream(readableStream);
+            textLayer.render();
+          }
+        });
+      }, function (reason) {
+        return finishPaintTask(reason);
+      });
+      if (this.annotationLayerFactory) {
+        if (!this.annotationLayer) {
+          this.annotationLayer = this.annotationLayerFactory.createAnnotationLayerBuilder(div, pdfPage, this.renderInteractiveForms, this.l10n);
+        }
+        this.annotationLayer.render(this.viewport, 'display');
+      }
+      div.setAttribute('data-loaded', true);
+      if (this.onBeforeDraw) {
+        this.onBeforeDraw();
+      }
+      return resultPromise;
+    }
+  }, {
+    key: 'paintOnCanvas',
+    value: function paintOnCanvas(canvasWrapper) {
+      var renderCapability = (0, _pdfjsLib.createPromiseCapability)();
+      var result = {
+        promise: renderCapability.promise,
+        onRenderContinue: function onRenderContinue(cont) {
+          cont();
+        },
+        cancel: function cancel() {
+          renderTask.cancel();
+        }
+      };
+      var viewport = this.viewport;
+      var canvas = document.createElement('canvas');
+      canvas.id = this.renderingId;
+      canvas.setAttribute('hidden', 'hidden');
+      var isCanvasHidden = true;
+      var showCanvas = function showCanvas() {
+        if (isCanvasHidden) {
+          canvas.removeAttribute('hidden');
+          isCanvasHidden = false;
+        }
+      };
+      canvasWrapper.appendChild(canvas);
+      this.canvas = canvas;
+      canvas.mozOpaque = true;
+      var ctx = canvas.getContext('2d', { alpha: false });
+      var outputScale = (0, _ui_utils.getOutputScale)(ctx);
+      this.outputScale = outputScale;
+      if (_pdfjsLib.PDFJS.useOnlyCssZoom) {
+        var actualSizeViewport = viewport.clone({ scale: _ui_utils.CSS_UNITS });
+        outputScale.sx *= actualSizeViewport.width / viewport.width;
+        outputScale.sy *= actualSizeViewport.height / viewport.height;
+        outputScale.scaled = true;
+      }
+      if (_pdfjsLib.PDFJS.maxCanvasPixels > 0) {
+        var pixelsInViewport = viewport.width * viewport.height;
+        var maxScale = Math.sqrt(_pdfjsLib.PDFJS.maxCanvasPixels / pixelsInViewport);
+        if (outputScale.sx > maxScale || outputScale.sy > maxScale) {
+          outputScale.sx = maxScale;
+          outputScale.sy = maxScale;
+          outputScale.scaled = true;
+          this.hasRestrictedScaling = true;
+        } else {
+          this.hasRestrictedScaling = false;
+        }
+      }
+      var sfx = (0, _ui_utils.approximateFraction)(outputScale.sx);
+      var sfy = (0, _ui_utils.approximateFraction)(outputScale.sy);
+      canvas.width = (0, _ui_utils.roundToDivide)(viewport.width * outputScale.sx, sfx[0]);
+      canvas.height = (0, _ui_utils.roundToDivide)(viewport.height * outputScale.sy, sfy[0]);
+      canvas.style.width = (0, _ui_utils.roundToDivide)(viewport.width, sfx[1]) + 'px';
+      canvas.style.height = (0, _ui_utils.roundToDivide)(viewport.height, sfy[1]) + 'px';
+      this.paintedViewportMap.set(canvas, viewport);
+      var transform = !outputScale.scaled ? null : [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
+      var renderContext = {
+        canvasContext: ctx,
+        transform: transform,
+        viewport: this.viewport,
+        renderInteractiveForms: this.renderInteractiveForms
+      };
+      var renderTask = this.pdfPage.render(renderContext);
+      renderTask.onContinue = function (cont) {
+        showCanvas();
+        if (result.onRenderContinue) {
+          result.onRenderContinue(cont);
+        } else {
+          cont();
+        }
+      };
+      renderTask.promise.then(function () {
+        showCanvas();
+        renderCapability.resolve(undefined);
+      }, function (error) {
+        showCanvas();
+        renderCapability.reject(error);
+      });
+      return result;
+    }
+  }, {
+    key: 'paintOnSvg',
+    value: function paintOnSvg(wrapper) {
+      var _this2 = this;
+
+      var cancelled = false;
+      var ensureNotCancelled = function ensureNotCancelled() {
+        if (cancelled) {
+          throw new _pdfjsLib.RenderingCancelledException('Rendering cancelled, page ' + _this2.id, 'svg');
+        }
+      };
+      var pdfPage = this.pdfPage;
+      var actualSizeViewport = this.viewport.clone({ scale: _ui_utils.CSS_UNITS });
+      var promise = pdfPage.getOperatorList().then(function (opList) {
+        ensureNotCancelled();
+        var svgGfx = new _pdfjsLib.SVGGraphics(pdfPage.commonObjs, pdfPage.objs);
+        return svgGfx.getSVG(opList, actualSizeViewport).then(function (svg) {
+          ensureNotCancelled();
+          _this2.svg = svg;
+          _this2.paintedViewportMap.set(svg, actualSizeViewport);
+          svg.style.width = wrapper.style.width;
+          svg.style.height = wrapper.style.height;
+          _this2.renderingState = _pdf_rendering_queue.RenderingStates.FINISHED;
+          wrapper.appendChild(svg);
+        });
+      });
+      return {
+        promise: promise,
+        onRenderContinue: function onRenderContinue(cont) {
+          cont();
+        },
+        cancel: function cancel() {
+          cancelled = true;
+        }
+      };
+    }
+  }, {
+    key: 'setPageLabel',
+    value: function setPageLabel(label) {
+      this.pageLabel = typeof label === 'string' ? label : null;
+      if (this.pageLabel !== null) {
+        this.div.setAttribute('data-page-label', this.pageLabel);
+      } else {
+        this.div.removeAttribute('data-page-label');
+      }
+    }
+  }, {
+    key: 'width',
+    get: function get() {
+      return this.viewport.width;
+    }
+  }, {
+    key: 'height',
+    get: function get() {
+      return this.viewport.height;
+    }
+  }]);
+
+  return PDFPageView;
+}();
+
+exports.PDFPageView = PDFPageView;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var CLEANUP_TIMEOUT = 30000;
+var RenderingStates = {
+  INITIAL: 0,
+  RUNNING: 1,
+  PAUSED: 2,
+  FINISHED: 3
+};
+
+var PDFRenderingQueue = function () {
+  function PDFRenderingQueue() {
+    _classCallCheck(this, PDFRenderingQueue);
+
+    this.pdfViewer = null;
+    this.pdfThumbnailViewer = null;
+    this.onIdle = null;
+    this.highestPriorityPage = null;
+    this.idleTimeout = null;
+    this.printing = false;
+    this.isThumbnailViewEnabled = false;
+  }
+
+  _createClass(PDFRenderingQueue, [{
+    key: "setViewer",
+    value: function setViewer(pdfViewer) {
+      this.pdfViewer = pdfViewer;
+    }
+  }, {
+    key: "setThumbnailViewer",
+    value: function setThumbnailViewer(pdfThumbnailViewer) {
+      this.pdfThumbnailViewer = pdfThumbnailViewer;
+    }
+  }, {
+    key: "isHighestPriority",
+    value: function isHighestPriority(view) {
+      return this.highestPriorityPage === view.renderingId;
+    }
+  }, {
+    key: "renderHighestPriority",
+    value: function renderHighestPriority(currentlyVisiblePages) {
+      if (this.idleTimeout) {
+        clearTimeout(this.idleTimeout);
+        this.idleTimeout = null;
+      }
+      if (this.pdfViewer.forceRendering(currentlyVisiblePages)) {
+        return;
+      }
+      if (this.pdfThumbnailViewer && this.isThumbnailViewEnabled) {
+        if (this.pdfThumbnailViewer.forceRendering()) {
+          return;
+        }
+      }
+      if (this.printing) {
+        return;
+      }
+      if (this.onIdle) {
+        this.idleTimeout = setTimeout(this.onIdle.bind(this), CLEANUP_TIMEOUT);
+      }
+    }
+  }, {
+    key: "getHighestPriority",
+    value: function getHighestPriority(visible, views, scrolledDown) {
+      var visibleViews = visible.views;
+      var numVisible = visibleViews.length;
+      if (numVisible === 0) {
+        return false;
+      }
+      for (var i = 0; i < numVisible; ++i) {
+        var view = visibleViews[i].view;
+        if (!this.isViewFinished(view)) {
+          return view;
+        }
+      }
+      if (scrolledDown) {
+        var nextPageIndex = visible.last.id;
+        if (views[nextPageIndex] && !this.isViewFinished(views[nextPageIndex])) {
+          return views[nextPageIndex];
+        }
+      } else {
+        var previousPageIndex = visible.first.id - 2;
+        if (views[previousPageIndex] && !this.isViewFinished(views[previousPageIndex])) {
+          return views[previousPageIndex];
+        }
+      }
+      return null;
+    }
+  }, {
+    key: "isViewFinished",
+    value: function isViewFinished(view) {
+      return view.renderingState === RenderingStates.FINISHED;
+    }
+  }, {
+    key: "renderView",
+    value: function renderView(view) {
+      var _this = this;
+
+      switch (view.renderingState) {
+        case RenderingStates.FINISHED:
+          return false;
+        case RenderingStates.PAUSED:
+          this.highestPriorityPage = view.renderingId;
+          view.resume();
+          break;
+        case RenderingStates.RUNNING:
+          this.highestPriorityPage = view.renderingId;
+          break;
+        case RenderingStates.INITIAL:
+          this.highestPriorityPage = view.renderingId;
+          var continueRendering = function continueRendering() {
+            _this.renderHighestPriority();
+          };
+          view.draw().then(continueRendering, continueRendering);
+          break;
+      }
+      return true;
+    }
+  }]);
+
+  return PDFRenderingQueue;
+}();
+
+exports.RenderingStates = RenderingStates;
+exports.PDFRenderingQueue = PDFRenderingQueue;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.BaseViewer = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1184,17 +2318,17 @@ var _pdfjsLib = __w_pdfjs_require__(0);
 
 var _ui_utils = __w_pdfjs_require__(1);
 
-var _pdf_rendering_queue = __w_pdfjs_require__(5);
+var _pdf_rendering_queue = __w_pdfjs_require__(7);
 
-var _annotation_layer_builder = __w_pdfjs_require__(6);
+var _annotation_layer_builder = __w_pdfjs_require__(4);
 
 var _dom_events = __w_pdfjs_require__(2);
 
-var _pdf_page_view = __w_pdfjs_require__(7);
+var _pdf_page_view = __w_pdfjs_require__(6);
 
 var _pdf_link_service = __w_pdfjs_require__(3);
 
-var _text_layer_builder = __w_pdfjs_require__(8);
+var _text_layer_builder = __w_pdfjs_require__(5);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1965,2331 +3099,67 @@ var BaseViewer = function () {
 exports.BaseViewer = BaseViewer;
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var CLEANUP_TIMEOUT = 30000;
-var RenderingStates = {
-  INITIAL: 0,
-  RUNNING: 1,
-  PAUSED: 2,
-  FINISHED: 3
-};
-
-var PDFRenderingQueue = function () {
-  function PDFRenderingQueue() {
-    _classCallCheck(this, PDFRenderingQueue);
-
-    this.pdfViewer = null;
-    this.pdfThumbnailViewer = null;
-    this.onIdle = null;
-    this.highestPriorityPage = null;
-    this.idleTimeout = null;
-    this.printing = false;
-    this.isThumbnailViewEnabled = false;
-  }
-
-  _createClass(PDFRenderingQueue, [{
-    key: "setViewer",
-    value: function setViewer(pdfViewer) {
-      this.pdfViewer = pdfViewer;
-    }
-  }, {
-    key: "setThumbnailViewer",
-    value: function setThumbnailViewer(pdfThumbnailViewer) {
-      this.pdfThumbnailViewer = pdfThumbnailViewer;
-    }
-  }, {
-    key: "isHighestPriority",
-    value: function isHighestPriority(view) {
-      return this.highestPriorityPage === view.renderingId;
-    }
-  }, {
-    key: "renderHighestPriority",
-    value: function renderHighestPriority(currentlyVisiblePages) {
-      if (this.idleTimeout) {
-        clearTimeout(this.idleTimeout);
-        this.idleTimeout = null;
-      }
-      if (this.pdfViewer.forceRendering(currentlyVisiblePages)) {
-        return;
-      }
-      if (this.pdfThumbnailViewer && this.isThumbnailViewEnabled) {
-        if (this.pdfThumbnailViewer.forceRendering()) {
-          return;
-        }
-      }
-      if (this.printing) {
-        return;
-      }
-      if (this.onIdle) {
-        this.idleTimeout = setTimeout(this.onIdle.bind(this), CLEANUP_TIMEOUT);
-      }
-    }
-  }, {
-    key: "getHighestPriority",
-    value: function getHighestPriority(visible, views, scrolledDown) {
-      var visibleViews = visible.views;
-      var numVisible = visibleViews.length;
-      if (numVisible === 0) {
-        return false;
-      }
-      for (var i = 0; i < numVisible; ++i) {
-        var view = visibleViews[i].view;
-        if (!this.isViewFinished(view)) {
-          return view;
-        }
-      }
-      if (scrolledDown) {
-        var nextPageIndex = visible.last.id;
-        if (views[nextPageIndex] && !this.isViewFinished(views[nextPageIndex])) {
-          return views[nextPageIndex];
-        }
-      } else {
-        var previousPageIndex = visible.first.id - 2;
-        if (views[previousPageIndex] && !this.isViewFinished(views[previousPageIndex])) {
-          return views[previousPageIndex];
-        }
-      }
-      return null;
-    }
-  }, {
-    key: "isViewFinished",
-    value: function isViewFinished(view) {
-      return view.renderingState === RenderingStates.FINISHED;
-    }
-  }, {
-    key: "renderView",
-    value: function renderView(view) {
-      var _this = this;
-
-      switch (view.renderingState) {
-        case RenderingStates.FINISHED:
-          return false;
-        case RenderingStates.PAUSED:
-          this.highestPriorityPage = view.renderingId;
-          view.resume();
-          break;
-        case RenderingStates.RUNNING:
-          this.highestPriorityPage = view.renderingId;
-          break;
-        case RenderingStates.INITIAL:
-          this.highestPriorityPage = view.renderingId;
-          var continueRendering = function continueRendering() {
-            _this.renderHighestPriority();
-          };
-          view.draw().then(continueRendering, continueRendering);
-          break;
-      }
-      return true;
-    }
-  }]);
-
-  return PDFRenderingQueue;
-}();
-
-exports.RenderingStates = RenderingStates;
-exports.PDFRenderingQueue = PDFRenderingQueue;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.DefaultAnnotationLayerFactory = exports.AnnotationLayerBuilder = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _pdfjsLib = __w_pdfjs_require__(0);
-
-var _ui_utils = __w_pdfjs_require__(1);
-
-var _pdf_link_service = __w_pdfjs_require__(3);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var AnnotationLayerBuilder = function () {
-  function AnnotationLayerBuilder(_ref) {
-    var pageDiv = _ref.pageDiv,
-        pdfPage = _ref.pdfPage,
-        linkService = _ref.linkService,
-        downloadManager = _ref.downloadManager,
-        _ref$renderInteractiv = _ref.renderInteractiveForms,
-        renderInteractiveForms = _ref$renderInteractiv === undefined ? false : _ref$renderInteractiv,
-        _ref$l10n = _ref.l10n,
-        l10n = _ref$l10n === undefined ? _ui_utils.NullL10n : _ref$l10n;
-
-    _classCallCheck(this, AnnotationLayerBuilder);
-
-    this.pageDiv = pageDiv;
-    this.pdfPage = pdfPage;
-    this.linkService = linkService;
-    this.downloadManager = downloadManager;
-    this.renderInteractiveForms = renderInteractiveForms;
-    this.l10n = l10n;
-    this.div = null;
-    this._cancelled = false;
-  }
-
-  _createClass(AnnotationLayerBuilder, [{
-    key: 'render',
-    value: function render(viewport) {
-      var _this = this;
-
-      var intent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'display';
-
-      this.pdfPage.getAnnotations({ intent: intent }).then(function (annotations) {
-        if (_this._cancelled) {
-          return;
-        }
-        var parameters = {
-          viewport: viewport.clone({ dontFlip: true }),
-          div: _this.div,
-          annotations: annotations,
-          page: _this.pdfPage,
-          renderInteractiveForms: _this.renderInteractiveForms,
-          linkService: _this.linkService,
-          downloadManager: _this.downloadManager
-        };
-        if (_this.div) {
-          _pdfjsLib.AnnotationLayer.update(parameters);
-        } else {
-          if (annotations.length === 0) {
-            return;
-          }
-          _this.div = document.createElement('div');
-          _this.div.className = 'annotationLayer';
-          _this.pageDiv.appendChild(_this.div);
-          parameters.div = _this.div;
-          _pdfjsLib.AnnotationLayer.render(parameters);
-          _this.l10n.translate(_this.div);
-        }
-      });
-    }
-  }, {
-    key: 'cancel',
-    value: function cancel() {
-      this._cancelled = true;
-    }
-  }, {
-    key: 'hide',
-    value: function hide() {
-      if (!this.div) {
-        return;
-      }
-      this.div.setAttribute('hidden', 'true');
-    }
-  }]);
-
-  return AnnotationLayerBuilder;
-}();
-
-var DefaultAnnotationLayerFactory = function () {
-  function DefaultAnnotationLayerFactory() {
-    _classCallCheck(this, DefaultAnnotationLayerFactory);
-  }
-
-  _createClass(DefaultAnnotationLayerFactory, [{
-    key: 'createAnnotationLayerBuilder',
-    value: function createAnnotationLayerBuilder(pageDiv, pdfPage) {
-      var renderInteractiveForms = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      var l10n = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : _ui_utils.NullL10n;
-
-      return new AnnotationLayerBuilder({
-        pageDiv: pageDiv,
-        pdfPage: pdfPage,
-        renderInteractiveForms: renderInteractiveForms,
-        linkService: new _pdf_link_service.SimpleLinkService(),
-        l10n: l10n
-      });
-    }
-  }]);
-
-  return DefaultAnnotationLayerFactory;
-}();
-
-exports.AnnotationLayerBuilder = AnnotationLayerBuilder;
-exports.DefaultAnnotationLayerFactory = DefaultAnnotationLayerFactory;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.PDFPageView = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _ui_utils = __w_pdfjs_require__(1);
-
-var _pdfjsLib = __w_pdfjs_require__(0);
-
-var _dom_events = __w_pdfjs_require__(2);
-
-var _pdf_rendering_queue = __w_pdfjs_require__(5);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var PDFPageView = function () {
-  function PDFPageView(options) {
-    _classCallCheck(this, PDFPageView);
-
-    var container = options.container;
-    var defaultViewport = options.defaultViewport;
-    this.id = options.id;
-    this.renderingId = 'page' + this.id;
-    this.pdfPage = null;
-    this.pageLabel = null;
-    this.rotation = 0;
-    this.scale = options.scale || _ui_utils.DEFAULT_SCALE;
-    this.viewport = defaultViewport;
-    this.pdfPageRotate = defaultViewport.rotation;
-    this.hasRestrictedScaling = false;
-    this.enhanceTextSelection = options.enhanceTextSelection || false;
-    this.renderInteractiveForms = options.renderInteractiveForms || false;
-    this.eventBus = options.eventBus || (0, _dom_events.getGlobalEventBus)();
-    this.renderingQueue = options.renderingQueue;
-    this.textLayerFactory = options.textLayerFactory;
-    this.annotationLayerFactory = options.annotationLayerFactory;
-    this.renderer = options.renderer || _ui_utils.RendererType.CANVAS;
-    this.l10n = options.l10n || _ui_utils.NullL10n;
-    this.paintTask = null;
-    this.paintedViewportMap = new WeakMap();
-    this.renderingState = _pdf_rendering_queue.RenderingStates.INITIAL;
-    this.resume = null;
-    this.error = null;
-    this.onBeforeDraw = null;
-    this.onAfterDraw = null;
-    this.annotationLayer = null;
-    this.textLayer = null;
-    this.zoomLayer = null;
-    var div = document.createElement('div');
-    div.className = 'page';
-    div.style.width = Math.floor(this.viewport.width) + 'px';
-    div.style.height = Math.floor(this.viewport.height) + 'px';
-    div.setAttribute('data-page-number', this.id);
-    this.div = div;
-    container.appendChild(div);
-  }
-
-  _createClass(PDFPageView, [{
-    key: 'setPdfPage',
-    value: function setPdfPage(pdfPage) {
-      this.pdfPage = pdfPage;
-      this.pdfPageRotate = pdfPage.rotate;
-      var totalRotation = (this.rotation + this.pdfPageRotate) % 360;
-      this.viewport = pdfPage.getViewport(this.scale * _ui_utils.CSS_UNITS, totalRotation);
-      this.stats = pdfPage.stats;
-      this.reset();
-    }
-  }, {
-    key: 'destroy',
-    value: function destroy() {
-      this.reset();
-      if (this.pdfPage) {
-        this.pdfPage.cleanup();
-      }
-    }
-  }, {
-    key: '_resetZoomLayer',
-    value: function _resetZoomLayer() {
-      var removeFromDOM = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
-      if (!this.zoomLayer) {
-        return;
-      }
-      var zoomLayerCanvas = this.zoomLayer.firstChild;
-      this.paintedViewportMap.delete(zoomLayerCanvas);
-      zoomLayerCanvas.width = 0;
-      zoomLayerCanvas.height = 0;
-      if (removeFromDOM) {
-        this.zoomLayer.remove();
-      }
-      this.zoomLayer = null;
-    }
-  }, {
-    key: 'reset',
-    value: function reset() {
-      var keepZoomLayer = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      var keepAnnotations = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-      this.cancelRendering(keepAnnotations);
-      var div = this.div;
-      div.style.width = Math.floor(this.viewport.width) + 'px';
-      div.style.height = Math.floor(this.viewport.height) + 'px';
-      var childNodes = div.childNodes;
-      var currentZoomLayerNode = keepZoomLayer && this.zoomLayer || null;
-      var currentAnnotationNode = keepAnnotations && this.annotationLayer && this.annotationLayer.div || null;
-      for (var i = childNodes.length - 1; i >= 0; i--) {
-        var node = childNodes[i];
-        if (currentZoomLayerNode === node || currentAnnotationNode === node) {
-          continue;
-        }
-        div.removeChild(node);
-      }
-      div.removeAttribute('data-loaded');
-      if (currentAnnotationNode) {
-        this.annotationLayer.hide();
-      } else if (this.annotationLayer) {
-        this.annotationLayer.cancel();
-        this.annotationLayer = null;
-      }
-      if (!currentZoomLayerNode) {
-        if (this.canvas) {
-          this.paintedViewportMap.delete(this.canvas);
-          this.canvas.width = 0;
-          this.canvas.height = 0;
-          delete this.canvas;
-        }
-        this._resetZoomLayer();
-      }
-      if (this.svg) {
-        this.paintedViewportMap.delete(this.svg);
-        delete this.svg;
-      }
-      this.loadingIconDiv = document.createElement('div');
-      this.loadingIconDiv.className = 'loadingIcon';
-      div.appendChild(this.loadingIconDiv);
-    }
-  }, {
-    key: 'update',
-    value: function update(scale, rotation) {
-      this.scale = scale || this.scale;
-      if (typeof rotation !== 'undefined') {
-        this.rotation = rotation;
-      }
-      var totalRotation = (this.rotation + this.pdfPageRotate) % 360;
-      this.viewport = this.viewport.clone({
-        scale: this.scale * _ui_utils.CSS_UNITS,
-        rotation: totalRotation
-      });
-      if (this.svg) {
-        this.cssTransform(this.svg, true);
-        this.eventBus.dispatch('pagerendered', {
-          source: this,
-          pageNumber: this.id,
-          cssTransform: true
-        });
-        return;
-      }
-      var isScalingRestricted = false;
-      if (this.canvas && _pdfjsLib.PDFJS.maxCanvasPixels > 0) {
-        var outputScale = this.outputScale;
-        if ((Math.floor(this.viewport.width) * outputScale.sx | 0) * (Math.floor(this.viewport.height) * outputScale.sy | 0) > _pdfjsLib.PDFJS.maxCanvasPixels) {
-          isScalingRestricted = true;
-        }
-      }
-      if (this.canvas) {
-        if (_pdfjsLib.PDFJS.useOnlyCssZoom || this.hasRestrictedScaling && isScalingRestricted) {
-          this.cssTransform(this.canvas, true);
-          this.eventBus.dispatch('pagerendered', {
-            source: this,
-            pageNumber: this.id,
-            cssTransform: true
-          });
-          return;
-        }
-        if (!this.zoomLayer && !this.canvas.hasAttribute('hidden')) {
-          this.zoomLayer = this.canvas.parentNode;
-          this.zoomLayer.style.position = 'absolute';
-        }
-      }
-      if (this.zoomLayer) {
-        this.cssTransform(this.zoomLayer.firstChild);
-      }
-      this.reset(true, true);
-    }
-  }, {
-    key: 'cancelRendering',
-    value: function cancelRendering() {
-      var keepAnnotations = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
-      if (this.paintTask) {
-        this.paintTask.cancel();
-        this.paintTask = null;
-      }
-      this.renderingState = _pdf_rendering_queue.RenderingStates.INITIAL;
-      this.resume = null;
-      if (this.textLayer) {
-        this.textLayer.cancel();
-        this.textLayer = null;
-      }
-      if (!keepAnnotations && this.annotationLayer) {
-        this.annotationLayer.cancel();
-        this.annotationLayer = null;
-      }
-    }
-  }, {
-    key: 'cssTransform',
-    value: function cssTransform(target) {
-      var redrawAnnotations = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-      var width = this.viewport.width;
-      var height = this.viewport.height;
-      var div = this.div;
-      target.style.width = target.parentNode.style.width = div.style.width = Math.floor(width) + 'px';
-      target.style.height = target.parentNode.style.height = div.style.height = Math.floor(height) + 'px';
-      var relativeRotation = this.viewport.rotation - this.paintedViewportMap.get(target).rotation;
-      var absRotation = Math.abs(relativeRotation);
-      var scaleX = 1,
-          scaleY = 1;
-      if (absRotation === 90 || absRotation === 270) {
-        scaleX = height / width;
-        scaleY = width / height;
-      }
-      var cssTransform = 'rotate(' + relativeRotation + 'deg) ' + 'scale(' + scaleX + ',' + scaleY + ')';
-      _pdfjsLib.CustomStyle.setProp('transform', target, cssTransform);
-      if (this.textLayer) {
-        var textLayerViewport = this.textLayer.viewport;
-        var textRelativeRotation = this.viewport.rotation - textLayerViewport.rotation;
-        var textAbsRotation = Math.abs(textRelativeRotation);
-        var scale = width / textLayerViewport.width;
-        if (textAbsRotation === 90 || textAbsRotation === 270) {
-          scale = width / textLayerViewport.height;
-        }
-        var textLayerDiv = this.textLayer.textLayerDiv;
-        var transX = void 0,
-            transY = void 0;
-        switch (textAbsRotation) {
-          case 0:
-            transX = transY = 0;
-            break;
-          case 90:
-            transX = 0;
-            transY = '-' + textLayerDiv.style.height;
-            break;
-          case 180:
-            transX = '-' + textLayerDiv.style.width;
-            transY = '-' + textLayerDiv.style.height;
-            break;
-          case 270:
-            transX = '-' + textLayerDiv.style.width;
-            transY = 0;
-            break;
-          default:
-            console.error('Bad rotation value.');
-            break;
-        }
-        _pdfjsLib.CustomStyle.setProp('transform', textLayerDiv, 'rotate(' + textAbsRotation + 'deg) ' + 'scale(' + scale + ', ' + scale + ') ' + 'translate(' + transX + ', ' + transY + ')');
-        _pdfjsLib.CustomStyle.setProp('transformOrigin', textLayerDiv, '0% 0%');
-      }
-      if (redrawAnnotations && this.annotationLayer) {
-        this.annotationLayer.render(this.viewport, 'display');
-      }
-    }
-  }, {
-    key: 'getPagePoint',
-    value: function getPagePoint(x, y) {
-      return this.viewport.convertToPdfPoint(x, y);
-    }
-  }, {
-    key: 'draw',
-    value: function draw() {
-      var _this = this;
-
-      if (this.renderingState !== _pdf_rendering_queue.RenderingStates.INITIAL) {
-        console.error('Must be in new state before drawing');
-        this.reset();
-      }
-      if (!this.pdfPage) {
-        this.renderingState = _pdf_rendering_queue.RenderingStates.FINISHED;
-        return Promise.reject(new Error('Page is not loaded'));
-      }
-      this.renderingState = _pdf_rendering_queue.RenderingStates.RUNNING;
-      var pdfPage = this.pdfPage;
-      var div = this.div;
-      var canvasWrapper = document.createElement('div');
-      canvasWrapper.style.width = div.style.width;
-      canvasWrapper.style.height = div.style.height;
-      canvasWrapper.classList.add('canvasWrapper');
-      if (this.annotationLayer && this.annotationLayer.div) {
-        div.insertBefore(canvasWrapper, this.annotationLayer.div);
-      } else {
-        div.appendChild(canvasWrapper);
-      }
-      var textLayer = null;
-      if (this.textLayerFactory) {
-        var textLayerDiv = document.createElement('div');
-        textLayerDiv.className = 'textLayer';
-        textLayerDiv.style.width = canvasWrapper.style.width;
-        textLayerDiv.style.height = canvasWrapper.style.height;
-        if (this.annotationLayer && this.annotationLayer.div) {
-          div.insertBefore(textLayerDiv, this.annotationLayer.div);
-        } else {
-          div.appendChild(textLayerDiv);
-        }
-        textLayer = this.textLayerFactory.createTextLayerBuilder(textLayerDiv, this.id - 1, this.viewport, this.enhanceTextSelection);
-      }
-      this.textLayer = textLayer;
-      var renderContinueCallback = null;
-      if (this.renderingQueue) {
-        renderContinueCallback = function renderContinueCallback(cont) {
-          if (!_this.renderingQueue.isHighestPriority(_this)) {
-            _this.renderingState = _pdf_rendering_queue.RenderingStates.PAUSED;
-            _this.resume = function () {
-              _this.renderingState = _pdf_rendering_queue.RenderingStates.RUNNING;
-              cont();
-            };
-            return;
-          }
-          cont();
-        };
-      }
-      var finishPaintTask = function finishPaintTask(error) {
-        if (paintTask === _this.paintTask) {
-          _this.paintTask = null;
-        }
-        if (error instanceof _pdfjsLib.RenderingCancelledException) {
-          _this.error = null;
-          return Promise.resolve(undefined);
-        }
-        _this.renderingState = _pdf_rendering_queue.RenderingStates.FINISHED;
-        if (_this.loadingIconDiv) {
-          div.removeChild(_this.loadingIconDiv);
-          delete _this.loadingIconDiv;
-        }
-        _this._resetZoomLayer(true);
-        _this.error = error;
-        _this.stats = pdfPage.stats;
-        if (_this.onAfterDraw) {
-          _this.onAfterDraw();
-        }
-        _this.eventBus.dispatch('pagerendered', {
-          source: _this,
-          pageNumber: _this.id,
-          cssTransform: false
-        });
-        if (error) {
-          return Promise.reject(error);
-        }
-        return Promise.resolve(undefined);
-      };
-      var paintTask = this.renderer === _ui_utils.RendererType.SVG ? this.paintOnSvg(canvasWrapper) : this.paintOnCanvas(canvasWrapper);
-      paintTask.onRenderContinue = renderContinueCallback;
-      this.paintTask = paintTask;
-      var resultPromise = paintTask.promise.then(function () {
-        return finishPaintTask(null).then(function () {
-          if (textLayer) {
-            var readableStream = pdfPage.streamTextContent({ normalizeWhitespace: true });
-            textLayer.setTextContentStream(readableStream);
-            textLayer.render();
-          }
-        });
-      }, function (reason) {
-        return finishPaintTask(reason);
-      });
-      if (this.annotationLayerFactory) {
-        if (!this.annotationLayer) {
-          this.annotationLayer = this.annotationLayerFactory.createAnnotationLayerBuilder(div, pdfPage, this.renderInteractiveForms, this.l10n);
-        }
-        this.annotationLayer.render(this.viewport, 'display');
-      }
-      div.setAttribute('data-loaded', true);
-      if (this.onBeforeDraw) {
-        this.onBeforeDraw();
-      }
-      return resultPromise;
-    }
-  }, {
-    key: 'paintOnCanvas',
-    value: function paintOnCanvas(canvasWrapper) {
-      var renderCapability = (0, _pdfjsLib.createPromiseCapability)();
-      var result = {
-        promise: renderCapability.promise,
-        onRenderContinue: function onRenderContinue(cont) {
-          cont();
-        },
-        cancel: function cancel() {
-          renderTask.cancel();
-        }
-      };
-      var viewport = this.viewport;
-      var canvas = document.createElement('canvas');
-      canvas.id = this.renderingId;
-      canvas.setAttribute('hidden', 'hidden');
-      var isCanvasHidden = true;
-      var showCanvas = function showCanvas() {
-        if (isCanvasHidden) {
-          canvas.removeAttribute('hidden');
-          isCanvasHidden = false;
-        }
-      };
-      canvasWrapper.appendChild(canvas);
-      this.canvas = canvas;
-      canvas.mozOpaque = true;
-      var ctx = canvas.getContext('2d', { alpha: false });
-      var outputScale = (0, _ui_utils.getOutputScale)(ctx);
-      this.outputScale = outputScale;
-      if (_pdfjsLib.PDFJS.useOnlyCssZoom) {
-        var actualSizeViewport = viewport.clone({ scale: _ui_utils.CSS_UNITS });
-        outputScale.sx *= actualSizeViewport.width / viewport.width;
-        outputScale.sy *= actualSizeViewport.height / viewport.height;
-        outputScale.scaled = true;
-      }
-      if (_pdfjsLib.PDFJS.maxCanvasPixels > 0) {
-        var pixelsInViewport = viewport.width * viewport.height;
-        var maxScale = Math.sqrt(_pdfjsLib.PDFJS.maxCanvasPixels / pixelsInViewport);
-        if (outputScale.sx > maxScale || outputScale.sy > maxScale) {
-          outputScale.sx = maxScale;
-          outputScale.sy = maxScale;
-          outputScale.scaled = true;
-          this.hasRestrictedScaling = true;
-        } else {
-          this.hasRestrictedScaling = false;
-        }
-      }
-      var sfx = (0, _ui_utils.approximateFraction)(outputScale.sx);
-      var sfy = (0, _ui_utils.approximateFraction)(outputScale.sy);
-      canvas.width = (0, _ui_utils.roundToDivide)(viewport.width * outputScale.sx, sfx[0]);
-      canvas.height = (0, _ui_utils.roundToDivide)(viewport.height * outputScale.sy, sfy[0]);
-      canvas.style.width = (0, _ui_utils.roundToDivide)(viewport.width, sfx[1]) + 'px';
-      canvas.style.height = (0, _ui_utils.roundToDivide)(viewport.height, sfy[1]) + 'px';
-      this.paintedViewportMap.set(canvas, viewport);
-      var transform = !outputScale.scaled ? null : [outputScale.sx, 0, 0, outputScale.sy, 0, 0];
-      var renderContext = {
-        canvasContext: ctx,
-        transform: transform,
-        viewport: this.viewport,
-        renderInteractiveForms: this.renderInteractiveForms
-      };
-      var renderTask = this.pdfPage.render(renderContext);
-      renderTask.onContinue = function (cont) {
-        showCanvas();
-        if (result.onRenderContinue) {
-          result.onRenderContinue(cont);
-        } else {
-          cont();
-        }
-      };
-      renderTask.promise.then(function () {
-        showCanvas();
-        renderCapability.resolve(undefined);
-      }, function (error) {
-        showCanvas();
-        renderCapability.reject(error);
-      });
-      return result;
-    }
-  }, {
-    key: 'paintOnSvg',
-    value: function paintOnSvg(wrapper) {
-      var _this2 = this;
-
-      var cancelled = false;
-      var ensureNotCancelled = function ensureNotCancelled() {
-        if (cancelled) {
-          throw new _pdfjsLib.RenderingCancelledException('Rendering cancelled, page ' + _this2.id, 'svg');
-        }
-      };
-      var pdfPage = this.pdfPage;
-      var actualSizeViewport = this.viewport.clone({ scale: _ui_utils.CSS_UNITS });
-      var promise = pdfPage.getOperatorList().then(function (opList) {
-        ensureNotCancelled();
-        var svgGfx = new _pdfjsLib.SVGGraphics(pdfPage.commonObjs, pdfPage.objs);
-        return svgGfx.getSVG(opList, actualSizeViewport).then(function (svg) {
-          ensureNotCancelled();
-          _this2.svg = svg;
-          _this2.paintedViewportMap.set(svg, actualSizeViewport);
-          svg.style.width = wrapper.style.width;
-          svg.style.height = wrapper.style.height;
-          _this2.renderingState = _pdf_rendering_queue.RenderingStates.FINISHED;
-          wrapper.appendChild(svg);
-        });
-      });
-      return {
-        promise: promise,
-        onRenderContinue: function onRenderContinue(cont) {
-          cont();
-        },
-        cancel: function cancel() {
-          cancelled = true;
-        }
-      };
-    }
-  }, {
-    key: 'setPageLabel',
-    value: function setPageLabel(label) {
-      this.pageLabel = typeof label === 'string' ? label : null;
-      if (this.pageLabel !== null) {
-        this.div.setAttribute('data-page-label', this.pageLabel);
-      } else {
-        this.div.removeAttribute('data-page-label');
-      }
-    }
-  }, {
-    key: 'width',
-    get: function get() {
-      return this.viewport.width;
-    }
-  }, {
-    key: 'height',
-    get: function get() {
-      return this.viewport.height;
-    }
-  }]);
-
-  return PDFPageView;
-}();
-
-exports.PDFPageView = PDFPageView;
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.DefaultTextLayerFactory = exports.TextLayerBuilder = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _dom_events = __w_pdfjs_require__(2);
-
-var _pdfjsLib = __w_pdfjs_require__(0);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var EXPAND_DIVS_TIMEOUT = 300;
-
-var TextLayerBuilder = function () {
-  function TextLayerBuilder(_ref) {
-    var textLayerDiv = _ref.textLayerDiv,
-        eventBus = _ref.eventBus,
-        pageIndex = _ref.pageIndex,
-        viewport = _ref.viewport,
-        _ref$findController = _ref.findController,
-        findController = _ref$findController === undefined ? null : _ref$findController,
-        _ref$enhanceTextSelec = _ref.enhanceTextSelection,
-        enhanceTextSelection = _ref$enhanceTextSelec === undefined ? false : _ref$enhanceTextSelec;
-
-    _classCallCheck(this, TextLayerBuilder);
-
-    this.textLayerDiv = textLayerDiv;
-    this.eventBus = eventBus || (0, _dom_events.getGlobalEventBus)();
-    this.textContent = null;
-    this.textContentItemsStr = [];
-    this.textContentStream = null;
-    this.renderingDone = false;
-    this.pageIdx = pageIndex;
-    this.pageNumber = this.pageIdx + 1;
-    this.matches = [];
-    this.viewport = viewport;
-    this.textDivs = [];
-    this.findController = findController;
-    this.textLayerRenderTask = null;
-    this.enhanceTextSelection = enhanceTextSelection;
-    this._bindMouse();
-  }
-
-  _createClass(TextLayerBuilder, [{
-    key: '_finishRendering',
-    value: function _finishRendering() {
-      this.renderingDone = true;
-      if (!this.enhanceTextSelection) {
-        var endOfContent = document.createElement('div');
-        endOfContent.className = 'endOfContent';
-        this.textLayerDiv.appendChild(endOfContent);
-      }
-      this.eventBus.dispatch('textlayerrendered', {
-        source: this,
-        pageNumber: this.pageNumber,
-        numTextDivs: this.textDivs.length
-      });
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var _this = this;
-
-      var timeout = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-      if (!(this.textContent || this.textContentStream) || this.renderingDone) {
-        return;
-      }
-      this.cancel();
-      this.textDivs = [];
-      var textLayerFrag = document.createDocumentFragment();
-      this.textLayerRenderTask = (0, _pdfjsLib.renderTextLayer)({
-        textContent: this.textContent,
-        textContentStream: this.textContentStream,
-        container: textLayerFrag,
-        viewport: this.viewport,
-        textDivs: this.textDivs,
-        textContentItemsStr: this.textContentItemsStr,
-        timeout: timeout,
-        enhanceTextSelection: this.enhanceTextSelection
-      });
-      this.textLayerRenderTask.promise.then(function () {
-        _this.textLayerDiv.appendChild(textLayerFrag);
-        _this._finishRendering();
-        _this.updateMatches();
-      }, function (reason) {});
-    }
-  }, {
-    key: 'cancel',
-    value: function cancel() {
-      if (this.textLayerRenderTask) {
-        this.textLayerRenderTask.cancel();
-        this.textLayerRenderTask = null;
-      }
-    }
-  }, {
-    key: 'setTextContentStream',
-    value: function setTextContentStream(readableStream) {
-      this.cancel();
-      this.textContentStream = readableStream;
-    }
-  }, {
-    key: 'setTextContent',
-    value: function setTextContent(textContent) {
-      this.cancel();
-      this.textContent = textContent;
-    }
-  }, {
-    key: 'convertMatches',
-    value: function convertMatches(matches, matchesLength) {
-      var i = 0;
-      var iIndex = 0;
-      var textContentItemsStr = this.textContentItemsStr;
-      var end = textContentItemsStr.length - 1;
-      var queryLen = this.findController === null ? 0 : this.findController.state.query.length;
-      var ret = [];
-      if (!matches) {
-        return ret;
-      }
-      for (var m = 0, len = matches.length; m < len; m++) {
-        var matchIdx = matches[m];
-        while (i !== end && matchIdx >= iIndex + textContentItemsStr[i].length) {
-          iIndex += textContentItemsStr[i].length;
-          i++;
-        }
-        if (i === textContentItemsStr.length) {
-          console.error('Could not find a matching mapping');
-        }
-        var match = {
-          begin: {
-            divIdx: i,
-            offset: matchIdx - iIndex
-          }
-        };
-        if (matchesLength) {
-          matchIdx += matchesLength[m];
-        } else {
-          matchIdx += queryLen;
-        }
-        while (i !== end && matchIdx > iIndex + textContentItemsStr[i].length) {
-          iIndex += textContentItemsStr[i].length;
-          i++;
-        }
-        match.end = {
-          divIdx: i,
-          offset: matchIdx - iIndex
-        };
-        ret.push(match);
-      }
-      return ret;
-    }
-  }, {
-    key: 'renderMatches',
-    value: function renderMatches(matches) {
-      if (matches.length === 0) {
-        return;
-      }
-      var textContentItemsStr = this.textContentItemsStr;
-      var textDivs = this.textDivs;
-      var prevEnd = null;
-      var pageIdx = this.pageIdx;
-      var isSelectedPage = this.findController === null ? false : pageIdx === this.findController.selected.pageIdx;
-      var selectedMatchIdx = this.findController === null ? -1 : this.findController.selected.matchIdx;
-      var highlightAll = this.findController === null ? false : this.findController.state.highlightAll;
-      var infinity = {
-        divIdx: -1,
-        offset: undefined
-      };
-      function beginText(begin, className) {
-        var divIdx = begin.divIdx;
-        textDivs[divIdx].textContent = '';
-        appendTextToDiv(divIdx, 0, begin.offset, className);
-      }
-      function appendTextToDiv(divIdx, fromOffset, toOffset, className) {
-        var div = textDivs[divIdx];
-        var content = textContentItemsStr[divIdx].substring(fromOffset, toOffset);
-        var node = document.createTextNode(content);
-        if (className) {
-          var span = document.createElement('span');
-          span.className = className;
-          span.appendChild(node);
-          div.appendChild(span);
-          return;
-        }
-        div.appendChild(node);
-      }
-      var i0 = selectedMatchIdx,
-          i1 = i0 + 1;
-      if (highlightAll) {
-        i0 = 0;
-        i1 = matches.length;
-      } else if (!isSelectedPage) {
-        return;
-      }
-      for (var i = i0; i < i1; i++) {
-        var match = matches[i];
-        var begin = match.begin;
-        var end = match.end;
-        var isSelected = isSelectedPage && i === selectedMatchIdx;
-        var highlightSuffix = isSelected ? ' selected' : '';
-        if (this.findController) {
-          this.findController.updateMatchPosition(pageIdx, i, textDivs, begin.divIdx);
-        }
-        if (!prevEnd || begin.divIdx !== prevEnd.divIdx) {
-          if (prevEnd !== null) {
-            appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-          }
-          beginText(begin);
-        } else {
-          appendTextToDiv(prevEnd.divIdx, prevEnd.offset, begin.offset);
-        }
-        if (begin.divIdx === end.divIdx) {
-          appendTextToDiv(begin.divIdx, begin.offset, end.offset, 'highlight' + highlightSuffix);
-        } else {
-          appendTextToDiv(begin.divIdx, begin.offset, infinity.offset, 'highlight begin' + highlightSuffix);
-          for (var n0 = begin.divIdx + 1, n1 = end.divIdx; n0 < n1; n0++) {
-            textDivs[n0].className = 'highlight middle' + highlightSuffix;
-          }
-          beginText(end, 'highlight end' + highlightSuffix);
-        }
-        prevEnd = end;
-      }
-      if (prevEnd) {
-        appendTextToDiv(prevEnd.divIdx, prevEnd.offset, infinity.offset);
-      }
-    }
-  }, {
-    key: 'updateMatches',
-    value: function updateMatches() {
-      if (!this.renderingDone) {
-        return;
-      }
-      var matches = this.matches;
-      var textDivs = this.textDivs;
-      var textContentItemsStr = this.textContentItemsStr;
-      var clearedUntilDivIdx = -1;
-      for (var i = 0, len = matches.length; i < len; i++) {
-        var match = matches[i];
-        var begin = Math.max(clearedUntilDivIdx, match.begin.divIdx);
-        for (var n = begin, end = match.end.divIdx; n <= end; n++) {
-          var div = textDivs[n];
-          div.textContent = textContentItemsStr[n];
-          div.className = '';
-        }
-        clearedUntilDivIdx = match.end.divIdx + 1;
-      }
-      if (this.findController === null || !this.findController.active) {
-        return;
-      }
-      var pageMatches = void 0,
-          pageMatchesLength = void 0;
-      if (this.findController !== null) {
-        pageMatches = this.findController.pageMatches[this.pageIdx] || null;
-        pageMatchesLength = this.findController.pageMatchesLength ? this.findController.pageMatchesLength[this.pageIdx] || null : null;
-      }
-      this.matches = this.convertMatches(pageMatches, pageMatchesLength);
-      this.renderMatches(this.matches);
-    }
-  }, {
-    key: '_bindMouse',
-    value: function _bindMouse() {
-      var _this2 = this;
-
-      var div = this.textLayerDiv;
-      var expandDivsTimer = null;
-      div.addEventListener('mousedown', function (evt) {
-        if (_this2.enhanceTextSelection && _this2.textLayerRenderTask) {
-          _this2.textLayerRenderTask.expandTextDivs(true);
-          if (expandDivsTimer) {
-            clearTimeout(expandDivsTimer);
-            expandDivsTimer = null;
-          }
-          return;
-        }
-        var end = div.querySelector('.endOfContent');
-        if (!end) {
-          return;
-        }
-        var adjustTop = evt.target !== div;
-        adjustTop = adjustTop && window.getComputedStyle(end).getPropertyValue('-moz-user-select') !== 'none';
-        if (adjustTop) {
-          var divBounds = div.getBoundingClientRect();
-          var r = Math.max(0, (evt.pageY - divBounds.top) / divBounds.height);
-          end.style.top = (r * 100).toFixed(2) + '%';
-        }
-        end.classList.add('active');
-      });
-      div.addEventListener('mouseup', function () {
-        if (_this2.enhanceTextSelection && _this2.textLayerRenderTask) {
-          expandDivsTimer = setTimeout(function () {
-            if (_this2.textLayerRenderTask) {
-              _this2.textLayerRenderTask.expandTextDivs(false);
-            }
-            expandDivsTimer = null;
-          }, EXPAND_DIVS_TIMEOUT);
-          return;
-        }
-        var end = div.querySelector('.endOfContent');
-        if (!end) {
-          return;
-        }
-        end.style.top = '';
-        end.classList.remove('active');
-      });
-    }
-  }]);
-
-  return TextLayerBuilder;
-}();
-
-var DefaultTextLayerFactory = function () {
-  function DefaultTextLayerFactory() {
-    _classCallCheck(this, DefaultTextLayerFactory);
-  }
-
-  _createClass(DefaultTextLayerFactory, [{
-    key: 'createTextLayerBuilder',
-    value: function createTextLayerBuilder(textLayerDiv, pageIndex, viewport) {
-      var enhanceTextSelection = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
-      return new TextLayerBuilder({
-        textLayerDiv: textLayerDiv,
-        pageIndex: pageIndex,
-        viewport: viewport,
-        enhanceTextSelection: enhanceTextSelection
-      });
-    }
-  }]);
-
-  return DefaultTextLayerFactory;
-}();
-
-exports.TextLayerBuilder = TextLayerBuilder;
-exports.DefaultTextLayerFactory = DefaultTextLayerFactory;
-
-/***/ }),
 /* 9 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-var pdfjsLib = __w_pdfjs_require__(0);
-var pdfjsWebPDFViewer = __w_pdfjs_require__(10);
-var pdfjsWebPDFSinglePageViewer = __w_pdfjs_require__(11);
-var pdfjsWebPDFPageView = __w_pdfjs_require__(7);
-var pdfjsWebPDFLinkService = __w_pdfjs_require__(3);
-var pdfjsWebTextLayerBuilder = __w_pdfjs_require__(8);
-var pdfjsWebAnnotationLayerBuilder = __w_pdfjs_require__(6);
-var pdfjsWebPDFHistory = __w_pdfjs_require__(12);
-var pdfjsWebPDFFindController = __w_pdfjs_require__(13);
-var pdfjsWebUIUtils = __w_pdfjs_require__(1);
-var pdfjsWebDownloadManager = __w_pdfjs_require__(14);
-var pdfjsWebGenericL10n = __w_pdfjs_require__(15);
-var PDFJS = pdfjsLib.PDFJS;
-PDFJS.PDFViewer = pdfjsWebPDFViewer.PDFViewer;
-PDFJS.PDFSinglePageViewer = pdfjsWebPDFSinglePageViewer.PDFSinglePageViewer;
-PDFJS.PDFPageView = pdfjsWebPDFPageView.PDFPageView;
-PDFJS.PDFLinkService = pdfjsWebPDFLinkService.PDFLinkService;
-PDFJS.SimpleLinkService = pdfjsWebPDFLinkService.SimpleLinkService;
-PDFJS.TextLayerBuilder = pdfjsWebTextLayerBuilder.TextLayerBuilder;
-PDFJS.DefaultTextLayerFactory = pdfjsWebTextLayerBuilder.DefaultTextLayerFactory;
-PDFJS.AnnotationLayerBuilder = pdfjsWebAnnotationLayerBuilder.AnnotationLayerBuilder;
-PDFJS.DefaultAnnotationLayerFactory = pdfjsWebAnnotationLayerBuilder.DefaultAnnotationLayerFactory;
-PDFJS.PDFHistory = pdfjsWebPDFHistory.PDFHistory;
-PDFJS.PDFFindController = pdfjsWebPDFFindController.PDFFindController;
-PDFJS.EventBus = pdfjsWebUIUtils.EventBus;
-PDFJS.DownloadManager = pdfjsWebDownloadManager.DownloadManager;
-PDFJS.ProgressBar = pdfjsWebUIUtils.ProgressBar;
-PDFJS.GenericL10n = pdfjsWebGenericL10n.GenericL10n;
-PDFJS.NullL10n = pdfjsWebUIUtils.NullL10n;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PDFJS = undefined;
+
+var _annotation_layer_builder = __w_pdfjs_require__(4);
+
+var _text_layer_builder = __w_pdfjs_require__(5);
+
+var _ui_utils = __w_pdfjs_require__(1);
+
+var _pdf_link_service = __w_pdfjs_require__(3);
+
+var _download_manager = __w_pdfjs_require__(10);
+
+var _genericl10n = __w_pdfjs_require__(11);
+
+var _pdf_find_controller = __w_pdfjs_require__(13);
+
+var _pdf_history = __w_pdfjs_require__(14);
+
+var _pdfjs = __w_pdfjs_require__(0);
+
+var _pdfjs2 = _interopRequireDefault(_pdfjs);
+
+var _pdf_page_view = __w_pdfjs_require__(6);
+
+var _pdf_single_page_viewer = __w_pdfjs_require__(15);
+
+var _pdf_viewer = __w_pdfjs_require__(16);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var PDFJS = _pdfjs2.default.PDFJS;
+
+PDFJS.PDFViewer = _pdf_viewer.PDFViewer;
+PDFJS.PDFSinglePageViewer = _pdf_single_page_viewer.PDFSinglePageViewer;
+PDFJS.PDFPageView = _pdf_page_view.PDFPageView;
+PDFJS.PDFLinkService = _pdf_link_service.PDFLinkService;
+PDFJS.SimpleLinkService = _pdf_link_service.SimpleLinkService;
+PDFJS.TextLayerBuilder = _text_layer_builder.TextLayerBuilder;
+PDFJS.DefaultTextLayerFactory = _text_layer_builder.DefaultTextLayerFactory;
+PDFJS.AnnotationLayerBuilder = _annotation_layer_builder.AnnotationLayerBuilder;
+PDFJS.DefaultAnnotationLayerFactory = _annotation_layer_builder.DefaultAnnotationLayerFactory;
+PDFJS.PDFHistory = _pdf_history.PDFHistory;
+PDFJS.PDFFindController = _pdf_find_controller.PDFFindController;
+PDFJS.EventBus = _ui_utils.EventBus;
+PDFJS.DownloadManager = _download_manager.DownloadManager;
+PDFJS.ProgressBar = _ui_utils.ProgressBar;
+PDFJS.GenericL10n = _genericl10n.GenericL10n;
+PDFJS.NullL10n = _ui_utils.NullL10n;
 exports.PDFJS = PDFJS;
 
 /***/ }),
 /* 10 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.PDFViewer = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _ui_utils = __w_pdfjs_require__(1);
-
-var _base_viewer = __w_pdfjs_require__(4);
-
-var _pdfjsLib = __w_pdfjs_require__(0);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var PDFViewer = function (_BaseViewer) {
-  _inherits(PDFViewer, _BaseViewer);
-
-  function PDFViewer() {
-    _classCallCheck(this, PDFViewer);
-
-    return _possibleConstructorReturn(this, (PDFViewer.__proto__ || Object.getPrototypeOf(PDFViewer)).apply(this, arguments));
-  }
-
-  _createClass(PDFViewer, [{
-    key: '_scrollIntoView',
-    value: function _scrollIntoView(_ref) {
-      var pageDiv = _ref.pageDiv,
-          _ref$pageSpot = _ref.pageSpot,
-          pageSpot = _ref$pageSpot === undefined ? null : _ref$pageSpot;
-
-      (0, _ui_utils.scrollIntoView)(pageDiv, pageSpot);
-    }
-  }, {
-    key: '_getVisiblePages',
-    value: function _getVisiblePages() {
-      if (!this.isInPresentationMode) {
-        return (0, _ui_utils.getVisibleElements)(this.container, this._pages, true);
-      }
-      var currentPage = this._pages[this._currentPageNumber - 1];
-      var visible = [{
-        id: currentPage.id,
-        view: currentPage
-      }];
-      return {
-        first: currentPage,
-        last: currentPage,
-        views: visible
-      };
-    }
-  }, {
-    key: 'update',
-    value: function update() {
-      var visible = this._getVisiblePages();
-      var visiblePages = visible.views,
-          numVisiblePages = visiblePages.length;
-      if (numVisiblePages === 0) {
-        return;
-      }
-      this._resizeBuffer(numVisiblePages);
-      this.renderingQueue.renderHighestPriority(visible);
-      var currentId = this._currentPageNumber;
-      var stillFullyVisible = false;
-      for (var i = 0; i < numVisiblePages; ++i) {
-        var page = visiblePages[i];
-        if (page.percent < 100) {
-          break;
-        }
-        if (page.id === currentId) {
-          stillFullyVisible = true;
-          break;
-        }
-      }
-      if (!stillFullyVisible) {
-        currentId = visiblePages[0].id;
-      }
-      if (!this.isInPresentationMode) {
-        this._setCurrentPageNumber(currentId);
-      }
-      this._updateLocation(visible.first);
-      this.eventBus.dispatch('updateviewarea', {
-        source: this,
-        location: this._location
-      });
-    }
-  }, {
-    key: '_setDocumentViewerElement',
-    get: function get() {
-      return (0, _pdfjsLib.shadow)(this, '_setDocumentViewerElement', this.viewer);
-    }
-  }]);
-
-  return PDFViewer;
-}(_base_viewer.BaseViewer);
-
-exports.PDFViewer = PDFViewer;
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.PDFSinglePageViewer = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-var _base_viewer = __w_pdfjs_require__(4);
-
-var _ui_utils = __w_pdfjs_require__(1);
-
-var _pdfjsLib = __w_pdfjs_require__(0);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var PDFSinglePageViewer = function (_BaseViewer) {
-  _inherits(PDFSinglePageViewer, _BaseViewer);
-
-  function PDFSinglePageViewer(options) {
-    _classCallCheck(this, PDFSinglePageViewer);
-
-    var _this = _possibleConstructorReturn(this, (PDFSinglePageViewer.__proto__ || Object.getPrototypeOf(PDFSinglePageViewer)).call(this, options));
-
-    _this.eventBus.on('pagesinit', function (evt) {
-      _this._ensurePageViewVisible();
-    });
-    return _this;
-  }
-
-  _createClass(PDFSinglePageViewer, [{
-    key: '_resetView',
-    value: function _resetView() {
-      _get(PDFSinglePageViewer.prototype.__proto__ || Object.getPrototypeOf(PDFSinglePageViewer.prototype), '_resetView', this).call(this);
-      this._previousPageNumber = 1;
-      this._shadowViewer = document.createDocumentFragment();
-    }
-  }, {
-    key: '_ensurePageViewVisible',
-    value: function _ensurePageViewVisible() {
-      var pageView = this._pages[this._currentPageNumber - 1];
-      var previousPageView = this._pages[this._previousPageNumber - 1];
-      var viewerNodes = this.viewer.childNodes;
-      switch (viewerNodes.length) {
-        case 0:
-          this.viewer.appendChild(pageView.div);
-          break;
-        case 1:
-          if (viewerNodes[0] !== previousPageView.div) {
-            throw new Error('_ensurePageViewVisible: Unexpected previously visible page.');
-          }
-          if (pageView === previousPageView) {
-            break;
-          }
-          this._shadowViewer.appendChild(previousPageView.div);
-          this.viewer.appendChild(pageView.div);
-          this.container.scrollTop = 0;
-          break;
-        default:
-          throw new Error('_ensurePageViewVisible: Only one page should be visible at a time.');
-      }
-      this._previousPageNumber = this._currentPageNumber;
-    }
-  }, {
-    key: '_scrollUpdate',
-    value: function _scrollUpdate() {
-      if (this._updateScrollDown) {
-        this._updateScrollDown();
-      }
-      _get(PDFSinglePageViewer.prototype.__proto__ || Object.getPrototypeOf(PDFSinglePageViewer.prototype), '_scrollUpdate', this).call(this);
-    }
-  }, {
-    key: '_scrollIntoView',
-    value: function _scrollIntoView(_ref) {
-      var _this2 = this;
-
-      var pageDiv = _ref.pageDiv,
-          _ref$pageSpot = _ref.pageSpot,
-          pageSpot = _ref$pageSpot === undefined ? null : _ref$pageSpot,
-          _ref$pageNumber = _ref.pageNumber,
-          pageNumber = _ref$pageNumber === undefined ? null : _ref$pageNumber;
-
-      if (pageNumber) {
-        this._setCurrentPageNumber(pageNumber);
-      }
-      var scrolledDown = this._currentPageNumber >= this._previousPageNumber;
-      var previousLocation = this._location;
-      this._ensurePageViewVisible();
-      (0, _ui_utils.scrollIntoView)(pageDiv, pageSpot);
-      this._updateScrollDown = function () {
-        _this2.scroll.down = scrolledDown;
-        delete _this2._updateScrollDown;
-      };
-      setTimeout(function () {
-        if (_this2._location === previousLocation) {
-          if (_this2._updateScrollDown) {
-            _this2._updateScrollDown();
-          }
-          _this2.update();
-        }
-      }, 0);
-    }
-  }, {
-    key: '_getVisiblePages',
-    value: function _getVisiblePages() {
-      if (!this.pagesCount) {
-        return { views: [] };
-      }
-      var pageView = this._pages[this._currentPageNumber - 1];
-      var element = pageView.div;
-      var view = {
-        id: pageView.id,
-        x: element.offsetLeft + element.clientLeft,
-        y: element.offsetTop + element.clientTop,
-        view: pageView
-      };
-      return {
-        first: view,
-        last: view,
-        views: [view]
-      };
-    }
-  }, {
-    key: 'update',
-    value: function update() {
-      var visible = this._getVisiblePages();
-      var visiblePages = visible.views,
-          numVisiblePages = visiblePages.length;
-      if (numVisiblePages === 0) {
-        return;
-      }
-      this._resizeBuffer(numVisiblePages);
-      this.renderingQueue.renderHighestPriority(visible);
-      this._updateLocation(visible.first);
-      this.eventBus.dispatch('updateviewarea', {
-        source: this,
-        location: this._location
-      });
-    }
-  }, {
-    key: '_setDocumentViewerElement',
-    get: function get() {
-      return (0, _pdfjsLib.shadow)(this, '_setDocumentViewerElement', this._shadowViewer);
-    }
-  }]);
-
-  return PDFSinglePageViewer;
-}(_base_viewer.BaseViewer);
-
-exports.PDFSinglePageViewer = PDFSinglePageViewer;
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.isDestArraysEqual = exports.isDestHashesEqual = exports.PDFHistory = undefined;
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _ui_utils = __w_pdfjs_require__(1);
-
-var _dom_events = __w_pdfjs_require__(2);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var HASH_CHANGE_TIMEOUT = 1000;
-var POSITION_UPDATED_THRESHOLD = 50;
-var UPDATE_VIEWAREA_TIMEOUT = 1000;
-function getCurrentHash() {
-  return document.location.hash;
-}
-function parseCurrentHash(linkService) {
-  var hash = unescape(getCurrentHash()).substring(1);
-  var params = (0, _ui_utils.parseQueryString)(hash);
-  var page = params.page | 0;
-  if (!(Number.isInteger(page) && page > 0 && page <= linkService.pagesCount)) {
-    page = null;
-  }
-  return {
-    hash: hash,
-    page: page,
-    rotation: linkService.rotation
-  };
-}
-
-var PDFHistory = function () {
-  function PDFHistory(_ref) {
-    var _this = this;
-
-    var linkService = _ref.linkService,
-        eventBus = _ref.eventBus;
-
-    _classCallCheck(this, PDFHistory);
-
-    this.linkService = linkService;
-    this.eventBus = eventBus || (0, _dom_events.getGlobalEventBus)();
-    this.initialized = false;
-    this.initialBookmark = null;
-    this.initialRotation = null;
-    this._boundEvents = Object.create(null);
-    this._isViewerInPresentationMode = false;
-    this._isPagesLoaded = false;
-    this.eventBus.on('presentationmodechanged', function (evt) {
-      _this._isViewerInPresentationMode = evt.active || evt.switchInProgress;
-    });
-    this.eventBus.on('pagesloaded', function (evt) {
-      _this._isPagesLoaded = !!evt.pagesCount;
-    });
-  }
-
-  _createClass(PDFHistory, [{
-    key: 'initialize',
-    value: function initialize(fingerprint) {
-      var resetHistory = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-      if (!fingerprint || typeof fingerprint !== 'string') {
-        console.error('PDFHistory.initialize: The "fingerprint" must be a non-empty string.');
-        return;
-      }
-      var reInitialized = this.initialized && this.fingerprint !== fingerprint;
-      this.fingerprint = fingerprint;
-      if (!this.initialized) {
-        this._bindEvents();
-      }
-      var state = window.history.state;
-      this.initialized = true;
-      this.initialBookmark = null;
-      this.initialRotation = null;
-      this._popStateInProgress = false;
-      this._blockHashChange = 0;
-      this._currentHash = getCurrentHash();
-      this._numPositionUpdates = 0;
-      this._uid = this._maxUid = 0;
-      this._destination = null;
-      this._position = null;
-      if (!this._isValidState(state) || resetHistory) {
-        var _parseCurrentHash = parseCurrentHash(this.linkService),
-            hash = _parseCurrentHash.hash,
-            page = _parseCurrentHash.page,
-            rotation = _parseCurrentHash.rotation;
-
-        if (!hash || reInitialized || resetHistory) {
-          this._pushOrReplaceState(null, true);
-          return;
-        }
-        this._pushOrReplaceState({
-          hash: hash,
-          page: page,
-          rotation: rotation
-        }, true);
-        return;
-      }
-      var destination = state.destination;
-      this._updateInternalState(destination, state.uid, true);
-      if (destination.rotation !== undefined) {
-        this.initialRotation = destination.rotation;
-      }
-      if (destination.dest) {
-        this.initialBookmark = JSON.stringify(destination.dest);
-        this._destination.page = null;
-      } else if (destination.hash) {
-        this.initialBookmark = destination.hash;
-      } else if (destination.page) {
-        this.initialBookmark = 'page=' + destination.page;
-      }
-    }
-  }, {
-    key: 'push',
-    value: function push(_ref2) {
-      var _this2 = this;
-
-      var namedDest = _ref2.namedDest,
-          explicitDest = _ref2.explicitDest,
-          pageNumber = _ref2.pageNumber;
-
-      if (!this.initialized) {
-        return;
-      }
-      if (namedDest && typeof namedDest !== 'string' || !(explicitDest instanceof Array) || !(Number.isInteger(pageNumber) && pageNumber > 0 && pageNumber <= this.linkService.pagesCount)) {
-        console.error('PDFHistory.push: Invalid parameters.');
-        return;
-      }
-      var hash = namedDest || JSON.stringify(explicitDest);
-      if (!hash) {
-        return;
-      }
-      var forceReplace = false;
-      if (this._destination && (isDestHashesEqual(this._destination.hash, hash) || isDestArraysEqual(this._destination.dest, explicitDest))) {
-        if (this._destination.page) {
-          return;
-        }
-        forceReplace = true;
-      }
-      if (this._popStateInProgress && !forceReplace) {
-        return;
-      }
-      this._pushOrReplaceState({
-        dest: explicitDest,
-        hash: hash,
-        page: pageNumber,
-        rotation: this.linkService.rotation
-      }, forceReplace);
-      if (!this._popStateInProgress) {
-        this._popStateInProgress = true;
-        Promise.resolve().then(function () {
-          _this2._popStateInProgress = false;
-        });
-      }
-    }
-  }, {
-    key: 'pushCurrentPosition',
-    value: function pushCurrentPosition() {
-      if (!this.initialized || this._popStateInProgress) {
-        return;
-      }
-      this._tryPushCurrentPosition();
-    }
-  }, {
-    key: 'back',
-    value: function back() {
-      if (!this.initialized || this._popStateInProgress) {
-        return;
-      }
-      var state = window.history.state;
-      if (this._isValidState(state) && state.uid > 0) {
-        window.history.back();
-      }
-    }
-  }, {
-    key: 'forward',
-    value: function forward() {
-      if (!this.initialized || this._popStateInProgress) {
-        return;
-      }
-      var state = window.history.state;
-      if (this._isValidState(state) && state.uid < this._maxUid) {
-        window.history.forward();
-      }
-    }
-  }, {
-    key: '_pushOrReplaceState',
-    value: function _pushOrReplaceState(destination) {
-      var forceReplace = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-      var shouldReplace = forceReplace || !this._destination;
-      var newState = {
-        fingerprint: this.fingerprint,
-        uid: shouldReplace ? this._uid : this._uid + 1,
-        destination: destination
-      };
-      this._updateInternalState(destination, newState.uid);
-      if (shouldReplace) {
-        window.history.replaceState(newState, '', document.URL);
-      } else {
-        this._maxUid = this._uid;
-        window.history.pushState(newState, '', document.URL);
-      }
-    }
-  }, {
-    key: '_tryPushCurrentPosition',
-    value: function _tryPushCurrentPosition() {
-      var temporary = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
-      if (!this._position) {
-        return;
-      }
-      var position = this._position;
-      if (temporary) {
-        position = (0, _ui_utils.cloneObj)(this._position);
-        position.temporary = true;
-      }
-      if (!this._destination) {
-        this._pushOrReplaceState(position);
-        return;
-      }
-      if (this._destination.temporary) {
-        this._pushOrReplaceState(position, true);
-        return;
-      }
-      if (this._destination.hash === position.hash) {
-        return;
-      }
-      if (!this._destination.page && (POSITION_UPDATED_THRESHOLD <= 0 || this._numPositionUpdates <= POSITION_UPDATED_THRESHOLD)) {
-        return;
-      }
-      var forceReplace = false;
-      if (this._destination.page === position.first || this._destination.page === position.page) {
-        if (this._destination.dest || !this._destination.first) {
-          return;
-        }
-        forceReplace = true;
-      }
-      this._pushOrReplaceState(position, forceReplace);
-    }
-  }, {
-    key: '_isValidState',
-    value: function _isValidState(state) {
-      if (!state) {
-        return false;
-      }
-      if (state.fingerprint !== this.fingerprint) {
-        return false;
-      }
-      if (!Number.isInteger(state.uid) || state.uid < 0) {
-        return false;
-      }
-      if (state.destination === null || _typeof(state.destination) !== 'object') {
-        return false;
-      }
-      return true;
-    }
-  }, {
-    key: '_updateInternalState',
-    value: function _updateInternalState(destination, uid) {
-      var removeTemporary = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-      if (this._updateViewareaTimeout) {
-        clearTimeout(this._updateViewareaTimeout);
-        this._updateViewareaTimeout = null;
-      }
-      if (removeTemporary && destination && destination.temporary) {
-        delete destination.temporary;
-      }
-      this._destination = destination;
-      this._uid = uid;
-      this._numPositionUpdates = 0;
-    }
-  }, {
-    key: '_updateViewarea',
-    value: function _updateViewarea(_ref3) {
-      var _this3 = this;
-
-      var location = _ref3.location;
-
-      if (this._updateViewareaTimeout) {
-        clearTimeout(this._updateViewareaTimeout);
-        this._updateViewareaTimeout = null;
-      }
-      this._position = {
-        hash: this._isViewerInPresentationMode ? 'page=' + location.pageNumber : location.pdfOpenParams.substring(1),
-        page: this.linkService.page,
-        first: location.pageNumber,
-        rotation: location.rotation
-      };
-      if (this._popStateInProgress) {
-        return;
-      }
-      if (POSITION_UPDATED_THRESHOLD > 0 && this._isPagesLoaded && this._destination && !this._destination.page) {
-        this._numPositionUpdates++;
-      }
-      if (UPDATE_VIEWAREA_TIMEOUT > 0) {
-        this._updateViewareaTimeout = setTimeout(function () {
-          if (!_this3._popStateInProgress) {
-            _this3._tryPushCurrentPosition(true);
-          }
-          _this3._updateViewareaTimeout = null;
-        }, UPDATE_VIEWAREA_TIMEOUT);
-      }
-    }
-  }, {
-    key: '_popState',
-    value: function _popState(_ref4) {
-      var _this4 = this;
-
-      var state = _ref4.state;
-
-      var newHash = getCurrentHash(),
-          hashChanged = this._currentHash !== newHash;
-      this._currentHash = newHash;
-      if (!state || false) {
-        this._uid++;
-
-        var _parseCurrentHash2 = parseCurrentHash(this.linkService),
-            hash = _parseCurrentHash2.hash,
-            page = _parseCurrentHash2.page,
-            rotation = _parseCurrentHash2.rotation;
-
-        this._pushOrReplaceState({
-          hash: hash,
-          page: page,
-          rotation: rotation
-        }, true);
-        return;
-      }
-      if (!this._isValidState(state)) {
-        return;
-      }
-      this._popStateInProgress = true;
-      if (hashChanged) {
-        this._blockHashChange++;
-        (0, _ui_utils.waitOnEventOrTimeout)({
-          target: window,
-          name: 'hashchange',
-          delay: HASH_CHANGE_TIMEOUT
-        }).then(function () {
-          _this4._blockHashChange--;
-        });
-      }
-      var destination = state.destination;
-      this._updateInternalState(destination, state.uid, true);
-      if ((0, _ui_utils.isValidRotation)(destination.rotation)) {
-        this.linkService.rotation = destination.rotation;
-      }
-      if (destination.dest) {
-        this.linkService.navigateTo(destination.dest);
-      } else if (destination.hash) {
-        this.linkService.setHash(destination.hash);
-      } else if (destination.page) {
-        this.linkService.page = destination.page;
-      }
-      Promise.resolve().then(function () {
-        _this4._popStateInProgress = false;
-      });
-    }
-  }, {
-    key: '_bindEvents',
-    value: function _bindEvents() {
-      var _this5 = this;
-
-      var _boundEvents = this._boundEvents,
-          eventBus = this.eventBus;
-
-      _boundEvents.updateViewarea = this._updateViewarea.bind(this);
-      _boundEvents.popState = this._popState.bind(this);
-      _boundEvents.pageHide = function (evt) {
-        if (!_this5._destination) {
-          _this5._tryPushCurrentPosition();
-        }
-      };
-      eventBus.on('updateviewarea', _boundEvents.updateViewarea);
-      window.addEventListener('popstate', _boundEvents.popState);
-      window.addEventListener('pagehide', _boundEvents.pageHide);
-    }
-  }, {
-    key: 'popStateInProgress',
-    get: function get() {
-      return this.initialized && (this._popStateInProgress || this._blockHashChange > 0);
-    }
-  }]);
-
-  return PDFHistory;
-}();
-
-function isDestHashesEqual(destHash, pushHash) {
-  if (typeof destHash !== 'string' || typeof pushHash !== 'string') {
-    return false;
-  }
-  if (destHash === pushHash) {
-    return true;
-  }
-
-  var _parseQueryString = (0, _ui_utils.parseQueryString)(destHash),
-      nameddest = _parseQueryString.nameddest;
-
-  if (nameddest === pushHash) {
-    return true;
-  }
-  return false;
-}
-function isDestArraysEqual(firstDest, secondDest) {
-  function isEntryEqual(first, second) {
-    if ((typeof first === 'undefined' ? 'undefined' : _typeof(first)) !== (typeof second === 'undefined' ? 'undefined' : _typeof(second))) {
-      return false;
-    }
-    if (first instanceof Array || second instanceof Array) {
-      return false;
-    }
-    if (first !== null && (typeof first === 'undefined' ? 'undefined' : _typeof(first)) === 'object' && second !== null) {
-      if (Object.keys(first).length !== Object.keys(second).length) {
-        return false;
-      }
-      for (var key in first) {
-        if (!isEntryEqual(first[key], second[key])) {
-          return false;
-        }
-      }
-      return true;
-    }
-    return first === second || Number.isNaN(first) && Number.isNaN(second);
-  }
-  if (!(firstDest instanceof Array && secondDest instanceof Array)) {
-    return false;
-  }
-  if (firstDest.length !== secondDest.length) {
-    return false;
-  }
-  for (var i = 0, ii = firstDest.length; i < ii; i++) {
-    if (!isEntryEqual(firstDest[i], secondDest[i])) {
-      return false;
-    }
-  }
-  return true;
-}
-exports.PDFHistory = PDFHistory;
-exports.isDestHashesEqual = isDestHashesEqual;
-exports.isDestArraysEqual = isDestArraysEqual;
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.PDFFindController = exports.FindState = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _pdfjsLib = __w_pdfjs_require__(0);
-
-var _ui_utils = __w_pdfjs_require__(1);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var FindState = {
-  FOUND: 0,
-  NOT_FOUND: 1,
-  WRAPPED: 2,
-  PENDING: 3
-};
-var FIND_SCROLL_OFFSET_TOP = -50;
-var FIND_SCROLL_OFFSET_LEFT = -400;
-var FIND_TIMEOUT = 250;
-var CHARACTERS_TO_NORMALIZE = {
-  '\u2018': '\'',
-  '\u2019': '\'',
-  '\u201A': '\'',
-  '\u201B': '\'',
-  '\u201C': '"',
-  '\u201D': '"',
-  '\u201E': '"',
-  '\u201F': '"',
-  '\xBC': '1/4',
-  '\xBD': '1/2',
-  '\xBE': '3/4'
-};
-
-var PDFFindController = function () {
-  function PDFFindController(_ref) {
-    var pdfViewer = _ref.pdfViewer;
-
-    _classCallCheck(this, PDFFindController);
-
-    this.pdfViewer = pdfViewer;
-    this.onUpdateResultsCount = null;
-    this.onUpdateState = null;
-    this.reset();
-    var replace = Object.keys(CHARACTERS_TO_NORMALIZE).join('');
-    this.normalizationRegex = new RegExp('[' + replace + ']', 'g');
-  }
-
-  _createClass(PDFFindController, [{
-    key: 'reset',
-    value: function reset() {
-      var _this = this;
-
-      this.startedTextExtraction = false;
-      this.extractTextPromises = [];
-      this.pendingFindMatches = Object.create(null);
-      this.active = false;
-      this.pageContents = [];
-      this.pageMatches = [];
-      this.pageMatchesLength = null;
-      this.matchCount = 0;
-      this.selected = {
-        pageIdx: -1,
-        matchIdx: -1
-      };
-      this.offset = {
-        pageIdx: null,
-        matchIdx: null
-      };
-      this.pagesToSearch = null;
-      this.resumePageIdx = null;
-      this.state = null;
-      this.dirtyMatch = false;
-      this.findTimeout = null;
-      this._firstPagePromise = new Promise(function (resolve) {
-        _this.resolveFirstPage = resolve;
-      });
-    }
-  }, {
-    key: 'normalize',
-    value: function normalize(text) {
-      return text.replace(this.normalizationRegex, function (ch) {
-        return CHARACTERS_TO_NORMALIZE[ch];
-      });
-    }
-  }, {
-    key: '_prepareMatches',
-    value: function _prepareMatches(matchesWithLength, matches, matchesLength) {
-      function isSubTerm(matchesWithLength, currentIndex) {
-        var currentElem = matchesWithLength[currentIndex];
-        var nextElem = matchesWithLength[currentIndex + 1];
-        if (currentIndex < matchesWithLength.length - 1 && currentElem.match === nextElem.match) {
-          currentElem.skipped = true;
-          return true;
-        }
-        for (var i = currentIndex - 1; i >= 0; i--) {
-          var prevElem = matchesWithLength[i];
-          if (prevElem.skipped) {
-            continue;
-          }
-          if (prevElem.match + prevElem.matchLength < currentElem.match) {
-            break;
-          }
-          if (prevElem.match + prevElem.matchLength >= currentElem.match + currentElem.matchLength) {
-            currentElem.skipped = true;
-            return true;
-          }
-        }
-        return false;
-      }
-      matchesWithLength.sort(function (a, b) {
-        return a.match === b.match ? a.matchLength - b.matchLength : a.match - b.match;
-      });
-      for (var i = 0, len = matchesWithLength.length; i < len; i++) {
-        if (isSubTerm(matchesWithLength, i)) {
-          continue;
-        }
-        matches.push(matchesWithLength[i].match);
-        matchesLength.push(matchesWithLength[i].matchLength);
-      }
-    }
-  }, {
-    key: 'calcFindPhraseMatch',
-    value: function calcFindPhraseMatch(query, pageIndex, pageContent) {
-      var matches = [];
-      var queryLen = query.length;
-      var matchIdx = -queryLen;
-      while (true) {
-        matchIdx = pageContent.indexOf(query, matchIdx + queryLen);
-        if (matchIdx === -1) {
-          break;
-        }
-        matches.push(matchIdx);
-      }
-      this.pageMatches[pageIndex] = matches;
-    }
-  }, {
-    key: 'calcFindWordMatch',
-    value: function calcFindWordMatch(query, pageIndex, pageContent) {
-      var matchesWithLength = [];
-      var queryArray = query.match(/\S+/g);
-      for (var i = 0, len = queryArray.length; i < len; i++) {
-        var subquery = queryArray[i];
-        var subqueryLen = subquery.length;
-        var matchIdx = -subqueryLen;
-        while (true) {
-          matchIdx = pageContent.indexOf(subquery, matchIdx + subqueryLen);
-          if (matchIdx === -1) {
-            break;
-          }
-          matchesWithLength.push({
-            match: matchIdx,
-            matchLength: subqueryLen,
-            skipped: false
-          });
-        }
-      }
-      if (!this.pageMatchesLength) {
-        this.pageMatchesLength = [];
-      }
-      this.pageMatchesLength[pageIndex] = [];
-      this.pageMatches[pageIndex] = [];
-      this._prepareMatches(matchesWithLength, this.pageMatches[pageIndex], this.pageMatchesLength[pageIndex]);
-    }
-  }, {
-    key: 'calcFindMatch',
-    value: function calcFindMatch(pageIndex) {
-      var pageContent = this.normalize(this.pageContents[pageIndex]);
-      var query = this.normalize(this.state.query);
-      var caseSensitive = this.state.caseSensitive;
-      var phraseSearch = this.state.phraseSearch;
-      var queryLen = query.length;
-      if (queryLen === 0) {
-        return;
-      }
-      if (!caseSensitive) {
-        pageContent = pageContent.toLowerCase();
-        query = query.toLowerCase();
-      }
-      if (phraseSearch) {
-        this.calcFindPhraseMatch(query, pageIndex, pageContent);
-      } else {
-        this.calcFindWordMatch(query, pageIndex, pageContent);
-      }
-      this.updatePage(pageIndex);
-      if (this.resumePageIdx === pageIndex) {
-        this.resumePageIdx = null;
-        this.nextPageMatch();
-      }
-      if (this.pageMatches[pageIndex].length > 0) {
-        this.matchCount += this.pageMatches[pageIndex].length;
-        this.updateUIResultsCount();
-      }
-    }
-  }, {
-    key: 'extractText',
-    value: function extractText() {
-      var _this2 = this;
-
-      if (this.startedTextExtraction) {
-        return;
-      }
-      this.startedTextExtraction = true;
-      this.pageContents.length = 0;
-      var promise = Promise.resolve();
-
-      var _loop = function _loop(i, ii) {
-        var extractTextCapability = (0, _pdfjsLib.createPromiseCapability)();
-        _this2.extractTextPromises[i] = extractTextCapability.promise;
-        promise = promise.then(function () {
-          return _this2.pdfViewer.getPageTextContent(i).then(function (textContent) {
-            var textItems = textContent.items;
-            var strBuf = [];
-            for (var j = 0, jj = textItems.length; j < jj; j++) {
-              strBuf.push(textItems[j].str);
-            }
-            _this2.pageContents[i] = strBuf.join('');
-            extractTextCapability.resolve(i);
-          }, function (reason) {
-            console.error('Unable to get page ' + (i + 1) + ' text content', reason);
-            _this2.pageContents[i] = '';
-            extractTextCapability.resolve(i);
-          });
-        });
-      };
-
-      for (var i = 0, ii = this.pdfViewer.pagesCount; i < ii; i++) {
-        _loop(i, ii);
-      }
-    }
-  }, {
-    key: 'executeCommand',
-    value: function executeCommand(cmd, state) {
-      var _this3 = this;
-
-      if (this.state === null || cmd !== 'findagain') {
-        this.dirtyMatch = true;
-      }
-      this.state = state;
-      this.updateUIState(FindState.PENDING);
-      this._firstPagePromise.then(function () {
-        _this3.extractText();
-        clearTimeout(_this3.findTimeout);
-        if (cmd === 'find') {
-          _this3.findTimeout = setTimeout(_this3.nextMatch.bind(_this3), FIND_TIMEOUT);
-        } else {
-          _this3.nextMatch();
-        }
-      });
-    }
-  }, {
-    key: 'updatePage',
-    value: function updatePage(index) {
-      if (this.selected.pageIdx === index) {
-        this.pdfViewer.currentPageNumber = index + 1;
-      }
-      var page = this.pdfViewer.getPageView(index);
-      if (page.textLayer) {
-        page.textLayer.updateMatches();
-      }
-    }
-  }, {
-    key: 'nextMatch',
-    value: function nextMatch() {
-      var _this4 = this;
-
-      var previous = this.state.findPrevious;
-      var currentPageIndex = this.pdfViewer.currentPageNumber - 1;
-      var numPages = this.pdfViewer.pagesCount;
-      this.active = true;
-      if (this.dirtyMatch) {
-        this.dirtyMatch = false;
-        this.selected.pageIdx = this.selected.matchIdx = -1;
-        this.offset.pageIdx = currentPageIndex;
-        this.offset.matchIdx = null;
-        this.hadMatch = false;
-        this.resumePageIdx = null;
-        this.pageMatches = [];
-        this.matchCount = 0;
-        this.pageMatchesLength = null;
-        for (var i = 0; i < numPages; i++) {
-          this.updatePage(i);
-          if (!(i in this.pendingFindMatches)) {
-            this.pendingFindMatches[i] = true;
-            this.extractTextPromises[i].then(function (pageIdx) {
-              delete _this4.pendingFindMatches[pageIdx];
-              _this4.calcFindMatch(pageIdx);
-            });
-          }
-        }
-      }
-      if (this.state.query === '') {
-        this.updateUIState(FindState.FOUND);
-        return;
-      }
-      if (this.resumePageIdx) {
-        return;
-      }
-      var offset = this.offset;
-      this.pagesToSearch = numPages;
-      if (offset.matchIdx !== null) {
-        var numPageMatches = this.pageMatches[offset.pageIdx].length;
-        if (!previous && offset.matchIdx + 1 < numPageMatches || previous && offset.matchIdx > 0) {
-          this.hadMatch = true;
-          offset.matchIdx = previous ? offset.matchIdx - 1 : offset.matchIdx + 1;
-          this.updateMatch(true);
-          return;
-        }
-        this.advanceOffsetPage(previous);
-      }
-      this.nextPageMatch();
-    }
-  }, {
-    key: 'matchesReady',
-    value: function matchesReady(matches) {
-      var offset = this.offset;
-      var numMatches = matches.length;
-      var previous = this.state.findPrevious;
-      if (numMatches) {
-        this.hadMatch = true;
-        offset.matchIdx = previous ? numMatches - 1 : 0;
-        this.updateMatch(true);
-        return true;
-      }
-      this.advanceOffsetPage(previous);
-      if (offset.wrapped) {
-        offset.matchIdx = null;
-        if (this.pagesToSearch < 0) {
-          this.updateMatch(false);
-          return true;
-        }
-      }
-      return false;
-    }
-  }, {
-    key: 'updateMatchPosition',
-    value: function updateMatchPosition(pageIndex, matchIndex, elements, beginIdx) {
-      if (this.selected.matchIdx === matchIndex && this.selected.pageIdx === pageIndex) {
-        var spot = {
-          top: FIND_SCROLL_OFFSET_TOP,
-          left: FIND_SCROLL_OFFSET_LEFT
-        };
-        (0, _ui_utils.scrollIntoView)(elements[beginIdx], spot, true);
-      }
-    }
-  }, {
-    key: 'nextPageMatch',
-    value: function nextPageMatch() {
-      if (this.resumePageIdx !== null) {
-        console.error('There can only be one pending page.');
-      }
-      var matches = null;
-      do {
-        var pageIdx = this.offset.pageIdx;
-        matches = this.pageMatches[pageIdx];
-        if (!matches) {
-          this.resumePageIdx = pageIdx;
-          break;
-        }
-      } while (!this.matchesReady(matches));
-    }
-  }, {
-    key: 'advanceOffsetPage',
-    value: function advanceOffsetPage(previous) {
-      var offset = this.offset;
-      var numPages = this.extractTextPromises.length;
-      offset.pageIdx = previous ? offset.pageIdx - 1 : offset.pageIdx + 1;
-      offset.matchIdx = null;
-      this.pagesToSearch--;
-      if (offset.pageIdx >= numPages || offset.pageIdx < 0) {
-        offset.pageIdx = previous ? numPages - 1 : 0;
-        offset.wrapped = true;
-      }
-    }
-  }, {
-    key: 'updateMatch',
-    value: function updateMatch() {
-      var found = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
-      var state = FindState.NOT_FOUND;
-      var wrapped = this.offset.wrapped;
-      this.offset.wrapped = false;
-      if (found) {
-        var previousPage = this.selected.pageIdx;
-        this.selected.pageIdx = this.offset.pageIdx;
-        this.selected.matchIdx = this.offset.matchIdx;
-        state = wrapped ? FindState.WRAPPED : FindState.FOUND;
-        if (previousPage !== -1 && previousPage !== this.selected.pageIdx) {
-          this.updatePage(previousPage);
-        }
-      }
-      this.updateUIState(state, this.state.findPrevious);
-      if (this.selected.pageIdx !== -1) {
-        this.updatePage(this.selected.pageIdx);
-      }
-    }
-  }, {
-    key: 'updateUIResultsCount',
-    value: function updateUIResultsCount() {
-      if (this.onUpdateResultsCount) {
-        this.onUpdateResultsCount(this.matchCount);
-      }
-    }
-  }, {
-    key: 'updateUIState',
-    value: function updateUIState(state, previous) {
-      if (this.onUpdateState) {
-        this.onUpdateState(state, previous, this.matchCount);
-      }
-    }
-  }]);
-
-  return PDFFindController;
-}();
-
-exports.FindState = FindState;
-exports.PDFFindController = PDFFindController;
-
-/***/ }),
-/* 14 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -4373,7 +3243,7 @@ var DownloadManager = function () {
 exports.DownloadManager = DownloadManager;
 
 /***/ }),
-/* 15 */
+/* 11 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -4386,7 +3256,7 @@ exports.GenericL10n = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-__w_pdfjs_require__(16);
+__w_pdfjs_require__(12);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -4433,7 +3303,7 @@ var GenericL10n = function () {
 exports.GenericL10n = GenericL10n;
 
 /***/ }),
-/* 16 */
+/* 12 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -5165,6 +4035,1158 @@ document.webL10n = function (window, document, undefined) {
     }
   };
 }(window, document);
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PDFFindController = exports.FindState = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _pdfjsLib = __w_pdfjs_require__(0);
+
+var _ui_utils = __w_pdfjs_require__(1);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var FindState = {
+  FOUND: 0,
+  NOT_FOUND: 1,
+  WRAPPED: 2,
+  PENDING: 3
+};
+var FIND_SCROLL_OFFSET_TOP = -50;
+var FIND_SCROLL_OFFSET_LEFT = -400;
+var FIND_TIMEOUT = 250;
+var CHARACTERS_TO_NORMALIZE = {
+  '\u2018': '\'',
+  '\u2019': '\'',
+  '\u201A': '\'',
+  '\u201B': '\'',
+  '\u201C': '"',
+  '\u201D': '"',
+  '\u201E': '"',
+  '\u201F': '"',
+  '\xBC': '1/4',
+  '\xBD': '1/2',
+  '\xBE': '3/4'
+};
+
+var PDFFindController = function () {
+  function PDFFindController(_ref) {
+    var pdfViewer = _ref.pdfViewer;
+
+    _classCallCheck(this, PDFFindController);
+
+    this.pdfViewer = pdfViewer;
+    this.onUpdateResultsCount = null;
+    this.onUpdateState = null;
+    this.reset();
+    var replace = Object.keys(CHARACTERS_TO_NORMALIZE).join('');
+    this.normalizationRegex = new RegExp('[' + replace + ']', 'g');
+  }
+
+  _createClass(PDFFindController, [{
+    key: 'reset',
+    value: function reset() {
+      var _this = this;
+
+      this.startedTextExtraction = false;
+      this.extractTextPromises = [];
+      this.pendingFindMatches = Object.create(null);
+      this.active = false;
+      this.pageContents = [];
+      this.pageMatches = [];
+      this.pageMatchesLength = null;
+      this.matchCount = 0;
+      this.selected = {
+        pageIdx: -1,
+        matchIdx: -1
+      };
+      this.offset = {
+        pageIdx: null,
+        matchIdx: null
+      };
+      this.pagesToSearch = null;
+      this.resumePageIdx = null;
+      this.state = null;
+      this.dirtyMatch = false;
+      this.findTimeout = null;
+      this._firstPagePromise = new Promise(function (resolve) {
+        _this.resolveFirstPage = resolve;
+      });
+    }
+  }, {
+    key: 'normalize',
+    value: function normalize(text) {
+      return text.replace(this.normalizationRegex, function (ch) {
+        return CHARACTERS_TO_NORMALIZE[ch];
+      });
+    }
+  }, {
+    key: '_prepareMatches',
+    value: function _prepareMatches(matchesWithLength, matches, matchesLength) {
+      function isSubTerm(matchesWithLength, currentIndex) {
+        var currentElem = matchesWithLength[currentIndex];
+        var nextElem = matchesWithLength[currentIndex + 1];
+        if (currentIndex < matchesWithLength.length - 1 && currentElem.match === nextElem.match) {
+          currentElem.skipped = true;
+          return true;
+        }
+        for (var i = currentIndex - 1; i >= 0; i--) {
+          var prevElem = matchesWithLength[i];
+          if (prevElem.skipped) {
+            continue;
+          }
+          if (prevElem.match + prevElem.matchLength < currentElem.match) {
+            break;
+          }
+          if (prevElem.match + prevElem.matchLength >= currentElem.match + currentElem.matchLength) {
+            currentElem.skipped = true;
+            return true;
+          }
+        }
+        return false;
+      }
+      matchesWithLength.sort(function (a, b) {
+        return a.match === b.match ? a.matchLength - b.matchLength : a.match - b.match;
+      });
+      for (var i = 0, len = matchesWithLength.length; i < len; i++) {
+        if (isSubTerm(matchesWithLength, i)) {
+          continue;
+        }
+        matches.push(matchesWithLength[i].match);
+        matchesLength.push(matchesWithLength[i].matchLength);
+      }
+    }
+  }, {
+    key: 'calcFindPhraseMatch',
+    value: function calcFindPhraseMatch(query, pageIndex, pageContent) {
+      var matches = [];
+      var queryLen = query.length;
+      var matchIdx = -queryLen;
+      while (true) {
+        matchIdx = pageContent.indexOf(query, matchIdx + queryLen);
+        if (matchIdx === -1) {
+          break;
+        }
+        matches.push(matchIdx);
+      }
+      this.pageMatches[pageIndex] = matches;
+    }
+  }, {
+    key: 'calcFindWordMatch',
+    value: function calcFindWordMatch(query, pageIndex, pageContent) {
+      var matchesWithLength = [];
+      var queryArray = query.match(/\S+/g);
+      for (var i = 0, len = queryArray.length; i < len; i++) {
+        var subquery = queryArray[i];
+        var subqueryLen = subquery.length;
+        var matchIdx = -subqueryLen;
+        while (true) {
+          matchIdx = pageContent.indexOf(subquery, matchIdx + subqueryLen);
+          if (matchIdx === -1) {
+            break;
+          }
+          matchesWithLength.push({
+            match: matchIdx,
+            matchLength: subqueryLen,
+            skipped: false
+          });
+        }
+      }
+      if (!this.pageMatchesLength) {
+        this.pageMatchesLength = [];
+      }
+      this.pageMatchesLength[pageIndex] = [];
+      this.pageMatches[pageIndex] = [];
+      this._prepareMatches(matchesWithLength, this.pageMatches[pageIndex], this.pageMatchesLength[pageIndex]);
+    }
+  }, {
+    key: 'calcFindMatch',
+    value: function calcFindMatch(pageIndex) {
+      var pageContent = this.normalize(this.pageContents[pageIndex]);
+      var query = this.normalize(this.state.query);
+      var caseSensitive = this.state.caseSensitive;
+      var phraseSearch = this.state.phraseSearch;
+      var queryLen = query.length;
+      if (queryLen === 0) {
+        return;
+      }
+      if (!caseSensitive) {
+        pageContent = pageContent.toLowerCase();
+        query = query.toLowerCase();
+      }
+      if (phraseSearch) {
+        this.calcFindPhraseMatch(query, pageIndex, pageContent);
+      } else {
+        this.calcFindWordMatch(query, pageIndex, pageContent);
+      }
+      this.updatePage(pageIndex);
+      if (this.resumePageIdx === pageIndex) {
+        this.resumePageIdx = null;
+        this.nextPageMatch();
+      }
+      if (this.pageMatches[pageIndex].length > 0) {
+        this.matchCount += this.pageMatches[pageIndex].length;
+        this.updateUIResultsCount();
+      }
+    }
+  }, {
+    key: 'extractText',
+    value: function extractText() {
+      var _this2 = this;
+
+      if (this.startedTextExtraction) {
+        return;
+      }
+      this.startedTextExtraction = true;
+      this.pageContents.length = 0;
+      var promise = Promise.resolve();
+
+      var _loop = function _loop(i, ii) {
+        var extractTextCapability = (0, _pdfjsLib.createPromiseCapability)();
+        _this2.extractTextPromises[i] = extractTextCapability.promise;
+        promise = promise.then(function () {
+          return _this2.pdfViewer.getPageTextContent(i).then(function (textContent) {
+            var textItems = textContent.items;
+            var strBuf = [];
+            for (var j = 0, jj = textItems.length; j < jj; j++) {
+              strBuf.push(textItems[j].str);
+            }
+            _this2.pageContents[i] = strBuf.join('');
+            extractTextCapability.resolve(i);
+          }, function (reason) {
+            console.error('Unable to get page ' + (i + 1) + ' text content', reason);
+            _this2.pageContents[i] = '';
+            extractTextCapability.resolve(i);
+          });
+        });
+      };
+
+      for (var i = 0, ii = this.pdfViewer.pagesCount; i < ii; i++) {
+        _loop(i, ii);
+      }
+    }
+  }, {
+    key: 'executeCommand',
+    value: function executeCommand(cmd, state) {
+      var _this3 = this;
+
+      if (this.state === null || cmd !== 'findagain') {
+        this.dirtyMatch = true;
+      }
+      this.state = state;
+      this.updateUIState(FindState.PENDING);
+      this._firstPagePromise.then(function () {
+        _this3.extractText();
+        clearTimeout(_this3.findTimeout);
+        if (cmd === 'find') {
+          _this3.findTimeout = setTimeout(_this3.nextMatch.bind(_this3), FIND_TIMEOUT);
+        } else {
+          _this3.nextMatch();
+        }
+      });
+    }
+  }, {
+    key: 'updatePage',
+    value: function updatePage(index) {
+      if (this.selected.pageIdx === index) {
+        this.pdfViewer.currentPageNumber = index + 1;
+      }
+      var page = this.pdfViewer.getPageView(index);
+      if (page.textLayer) {
+        page.textLayer.updateMatches();
+      }
+    }
+  }, {
+    key: 'nextMatch',
+    value: function nextMatch() {
+      var _this4 = this;
+
+      var previous = this.state.findPrevious;
+      var currentPageIndex = this.pdfViewer.currentPageNumber - 1;
+      var numPages = this.pdfViewer.pagesCount;
+      this.active = true;
+      if (this.dirtyMatch) {
+        this.dirtyMatch = false;
+        this.selected.pageIdx = this.selected.matchIdx = -1;
+        this.offset.pageIdx = currentPageIndex;
+        this.offset.matchIdx = null;
+        this.hadMatch = false;
+        this.resumePageIdx = null;
+        this.pageMatches = [];
+        this.matchCount = 0;
+        this.pageMatchesLength = null;
+        for (var i = 0; i < numPages; i++) {
+          this.updatePage(i);
+          if (!(i in this.pendingFindMatches)) {
+            this.pendingFindMatches[i] = true;
+            this.extractTextPromises[i].then(function (pageIdx) {
+              delete _this4.pendingFindMatches[pageIdx];
+              _this4.calcFindMatch(pageIdx);
+            });
+          }
+        }
+      }
+      if (this.state.query === '') {
+        this.updateUIState(FindState.FOUND);
+        return;
+      }
+      if (this.resumePageIdx) {
+        return;
+      }
+      var offset = this.offset;
+      this.pagesToSearch = numPages;
+      if (offset.matchIdx !== null) {
+        var numPageMatches = this.pageMatches[offset.pageIdx].length;
+        if (!previous && offset.matchIdx + 1 < numPageMatches || previous && offset.matchIdx > 0) {
+          this.hadMatch = true;
+          offset.matchIdx = previous ? offset.matchIdx - 1 : offset.matchIdx + 1;
+          this.updateMatch(true);
+          return;
+        }
+        this.advanceOffsetPage(previous);
+      }
+      this.nextPageMatch();
+    }
+  }, {
+    key: 'matchesReady',
+    value: function matchesReady(matches) {
+      var offset = this.offset;
+      var numMatches = matches.length;
+      var previous = this.state.findPrevious;
+      if (numMatches) {
+        this.hadMatch = true;
+        offset.matchIdx = previous ? numMatches - 1 : 0;
+        this.updateMatch(true);
+        return true;
+      }
+      this.advanceOffsetPage(previous);
+      if (offset.wrapped) {
+        offset.matchIdx = null;
+        if (this.pagesToSearch < 0) {
+          this.updateMatch(false);
+          return true;
+        }
+      }
+      return false;
+    }
+  }, {
+    key: 'updateMatchPosition',
+    value: function updateMatchPosition(pageIndex, matchIndex, elements, beginIdx) {
+      if (this.selected.matchIdx === matchIndex && this.selected.pageIdx === pageIndex) {
+        var spot = {
+          top: FIND_SCROLL_OFFSET_TOP,
+          left: FIND_SCROLL_OFFSET_LEFT
+        };
+        (0, _ui_utils.scrollIntoView)(elements[beginIdx], spot, true);
+      }
+    }
+  }, {
+    key: 'nextPageMatch',
+    value: function nextPageMatch() {
+      if (this.resumePageIdx !== null) {
+        console.error('There can only be one pending page.');
+      }
+      var matches = null;
+      do {
+        var pageIdx = this.offset.pageIdx;
+        matches = this.pageMatches[pageIdx];
+        if (!matches) {
+          this.resumePageIdx = pageIdx;
+          break;
+        }
+      } while (!this.matchesReady(matches));
+    }
+  }, {
+    key: 'advanceOffsetPage',
+    value: function advanceOffsetPage(previous) {
+      var offset = this.offset;
+      var numPages = this.extractTextPromises.length;
+      offset.pageIdx = previous ? offset.pageIdx - 1 : offset.pageIdx + 1;
+      offset.matchIdx = null;
+      this.pagesToSearch--;
+      if (offset.pageIdx >= numPages || offset.pageIdx < 0) {
+        offset.pageIdx = previous ? numPages - 1 : 0;
+        offset.wrapped = true;
+      }
+    }
+  }, {
+    key: 'updateMatch',
+    value: function updateMatch() {
+      var found = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+      var state = FindState.NOT_FOUND;
+      var wrapped = this.offset.wrapped;
+      this.offset.wrapped = false;
+      if (found) {
+        var previousPage = this.selected.pageIdx;
+        this.selected.pageIdx = this.offset.pageIdx;
+        this.selected.matchIdx = this.offset.matchIdx;
+        state = wrapped ? FindState.WRAPPED : FindState.FOUND;
+        if (previousPage !== -1 && previousPage !== this.selected.pageIdx) {
+          this.updatePage(previousPage);
+        }
+      }
+      this.updateUIState(state, this.state.findPrevious);
+      if (this.selected.pageIdx !== -1) {
+        this.updatePage(this.selected.pageIdx);
+      }
+    }
+  }, {
+    key: 'updateUIResultsCount',
+    value: function updateUIResultsCount() {
+      if (this.onUpdateResultsCount) {
+        this.onUpdateResultsCount(this.matchCount);
+      }
+    }
+  }, {
+    key: 'updateUIState',
+    value: function updateUIState(state, previous) {
+      if (this.onUpdateState) {
+        this.onUpdateState(state, previous, this.matchCount);
+      }
+    }
+  }]);
+
+  return PDFFindController;
+}();
+
+exports.FindState = FindState;
+exports.PDFFindController = PDFFindController;
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.isDestArraysEqual = exports.isDestHashesEqual = exports.PDFHistory = undefined;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ui_utils = __w_pdfjs_require__(1);
+
+var _dom_events = __w_pdfjs_require__(2);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var HASH_CHANGE_TIMEOUT = 1000;
+var POSITION_UPDATED_THRESHOLD = 50;
+var UPDATE_VIEWAREA_TIMEOUT = 1000;
+function getCurrentHash() {
+  return document.location.hash;
+}
+function parseCurrentHash(linkService) {
+  var hash = unescape(getCurrentHash()).substring(1);
+  var params = (0, _ui_utils.parseQueryString)(hash);
+  var page = params.page | 0;
+  if (!(Number.isInteger(page) && page > 0 && page <= linkService.pagesCount)) {
+    page = null;
+  }
+  return {
+    hash: hash,
+    page: page,
+    rotation: linkService.rotation
+  };
+}
+
+var PDFHistory = function () {
+  function PDFHistory(_ref) {
+    var _this = this;
+
+    var linkService = _ref.linkService,
+        eventBus = _ref.eventBus;
+
+    _classCallCheck(this, PDFHistory);
+
+    this.linkService = linkService;
+    this.eventBus = eventBus || (0, _dom_events.getGlobalEventBus)();
+    this.initialized = false;
+    this.initialBookmark = null;
+    this.initialRotation = null;
+    this._boundEvents = Object.create(null);
+    this._isViewerInPresentationMode = false;
+    this._isPagesLoaded = false;
+    this.eventBus.on('presentationmodechanged', function (evt) {
+      _this._isViewerInPresentationMode = evt.active || evt.switchInProgress;
+    });
+    this.eventBus.on('pagesloaded', function (evt) {
+      _this._isPagesLoaded = !!evt.pagesCount;
+    });
+  }
+
+  _createClass(PDFHistory, [{
+    key: 'initialize',
+    value: function initialize(fingerprint) {
+      var resetHistory = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (!fingerprint || typeof fingerprint !== 'string') {
+        console.error('PDFHistory.initialize: The "fingerprint" must be a non-empty string.');
+        return;
+      }
+      var reInitialized = this.initialized && this.fingerprint !== fingerprint;
+      this.fingerprint = fingerprint;
+      if (!this.initialized) {
+        this._bindEvents();
+      }
+      var state = window.history.state;
+      this.initialized = true;
+      this.initialBookmark = null;
+      this.initialRotation = null;
+      this._popStateInProgress = false;
+      this._blockHashChange = 0;
+      this._currentHash = getCurrentHash();
+      this._numPositionUpdates = 0;
+      this._uid = this._maxUid = 0;
+      this._destination = null;
+      this._position = null;
+      if (!this._isValidState(state) || resetHistory) {
+        var _parseCurrentHash = parseCurrentHash(this.linkService),
+            hash = _parseCurrentHash.hash,
+            page = _parseCurrentHash.page,
+            rotation = _parseCurrentHash.rotation;
+
+        if (!hash || reInitialized || resetHistory) {
+          this._pushOrReplaceState(null, true);
+          return;
+        }
+        this._pushOrReplaceState({
+          hash: hash,
+          page: page,
+          rotation: rotation
+        }, true);
+        return;
+      }
+      var destination = state.destination;
+      this._updateInternalState(destination, state.uid, true);
+      if (destination.rotation !== undefined) {
+        this.initialRotation = destination.rotation;
+      }
+      if (destination.dest) {
+        this.initialBookmark = JSON.stringify(destination.dest);
+        this._destination.page = null;
+      } else if (destination.hash) {
+        this.initialBookmark = destination.hash;
+      } else if (destination.page) {
+        this.initialBookmark = 'page=' + destination.page;
+      }
+    }
+  }, {
+    key: 'push',
+    value: function push(_ref2) {
+      var _this2 = this;
+
+      var namedDest = _ref2.namedDest,
+          explicitDest = _ref2.explicitDest,
+          pageNumber = _ref2.pageNumber;
+
+      if (!this.initialized) {
+        return;
+      }
+      if (namedDest && typeof namedDest !== 'string' || !(explicitDest instanceof Array) || !(Number.isInteger(pageNumber) && pageNumber > 0 && pageNumber <= this.linkService.pagesCount)) {
+        console.error('PDFHistory.push: Invalid parameters.');
+        return;
+      }
+      var hash = namedDest || JSON.stringify(explicitDest);
+      if (!hash) {
+        return;
+      }
+      var forceReplace = false;
+      if (this._destination && (isDestHashesEqual(this._destination.hash, hash) || isDestArraysEqual(this._destination.dest, explicitDest))) {
+        if (this._destination.page) {
+          return;
+        }
+        forceReplace = true;
+      }
+      if (this._popStateInProgress && !forceReplace) {
+        return;
+      }
+      this._pushOrReplaceState({
+        dest: explicitDest,
+        hash: hash,
+        page: pageNumber,
+        rotation: this.linkService.rotation
+      }, forceReplace);
+      if (!this._popStateInProgress) {
+        this._popStateInProgress = true;
+        Promise.resolve().then(function () {
+          _this2._popStateInProgress = false;
+        });
+      }
+    }
+  }, {
+    key: 'pushCurrentPosition',
+    value: function pushCurrentPosition() {
+      if (!this.initialized || this._popStateInProgress) {
+        return;
+      }
+      this._tryPushCurrentPosition();
+    }
+  }, {
+    key: 'back',
+    value: function back() {
+      if (!this.initialized || this._popStateInProgress) {
+        return;
+      }
+      var state = window.history.state;
+      if (this._isValidState(state) && state.uid > 0) {
+        window.history.back();
+      }
+    }
+  }, {
+    key: 'forward',
+    value: function forward() {
+      if (!this.initialized || this._popStateInProgress) {
+        return;
+      }
+      var state = window.history.state;
+      if (this._isValidState(state) && state.uid < this._maxUid) {
+        window.history.forward();
+      }
+    }
+  }, {
+    key: '_pushOrReplaceState',
+    value: function _pushOrReplaceState(destination) {
+      var forceReplace = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      var shouldReplace = forceReplace || !this._destination;
+      var newState = {
+        fingerprint: this.fingerprint,
+        uid: shouldReplace ? this._uid : this._uid + 1,
+        destination: destination
+      };
+      this._updateInternalState(destination, newState.uid);
+      if (shouldReplace) {
+        window.history.replaceState(newState, '', document.URL);
+      } else {
+        this._maxUid = this._uid;
+        window.history.pushState(newState, '', document.URL);
+      }
+    }
+  }, {
+    key: '_tryPushCurrentPosition',
+    value: function _tryPushCurrentPosition() {
+      var temporary = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
+      if (!this._position) {
+        return;
+      }
+      var position = this._position;
+      if (temporary) {
+        position = (0, _ui_utils.cloneObj)(this._position);
+        position.temporary = true;
+      }
+      if (!this._destination) {
+        this._pushOrReplaceState(position);
+        return;
+      }
+      if (this._destination.temporary) {
+        this._pushOrReplaceState(position, true);
+        return;
+      }
+      if (this._destination.hash === position.hash) {
+        return;
+      }
+      if (!this._destination.page && (POSITION_UPDATED_THRESHOLD <= 0 || this._numPositionUpdates <= POSITION_UPDATED_THRESHOLD)) {
+        return;
+      }
+      var forceReplace = false;
+      if (this._destination.page === position.first || this._destination.page === position.page) {
+        if (this._destination.dest || !this._destination.first) {
+          return;
+        }
+        forceReplace = true;
+      }
+      this._pushOrReplaceState(position, forceReplace);
+    }
+  }, {
+    key: '_isValidState',
+    value: function _isValidState(state) {
+      if (!state) {
+        return false;
+      }
+      if (state.fingerprint !== this.fingerprint) {
+        return false;
+      }
+      if (!Number.isInteger(state.uid) || state.uid < 0) {
+        return false;
+      }
+      if (state.destination === null || _typeof(state.destination) !== 'object') {
+        return false;
+      }
+      return true;
+    }
+  }, {
+    key: '_updateInternalState',
+    value: function _updateInternalState(destination, uid) {
+      var removeTemporary = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      if (this._updateViewareaTimeout) {
+        clearTimeout(this._updateViewareaTimeout);
+        this._updateViewareaTimeout = null;
+      }
+      if (removeTemporary && destination && destination.temporary) {
+        delete destination.temporary;
+      }
+      this._destination = destination;
+      this._uid = uid;
+      this._numPositionUpdates = 0;
+    }
+  }, {
+    key: '_updateViewarea',
+    value: function _updateViewarea(_ref3) {
+      var _this3 = this;
+
+      var location = _ref3.location;
+
+      if (this._updateViewareaTimeout) {
+        clearTimeout(this._updateViewareaTimeout);
+        this._updateViewareaTimeout = null;
+      }
+      this._position = {
+        hash: this._isViewerInPresentationMode ? 'page=' + location.pageNumber : location.pdfOpenParams.substring(1),
+        page: this.linkService.page,
+        first: location.pageNumber,
+        rotation: location.rotation
+      };
+      if (this._popStateInProgress) {
+        return;
+      }
+      if (POSITION_UPDATED_THRESHOLD > 0 && this._isPagesLoaded && this._destination && !this._destination.page) {
+        this._numPositionUpdates++;
+      }
+      if (UPDATE_VIEWAREA_TIMEOUT > 0) {
+        this._updateViewareaTimeout = setTimeout(function () {
+          if (!_this3._popStateInProgress) {
+            _this3._tryPushCurrentPosition(true);
+          }
+          _this3._updateViewareaTimeout = null;
+        }, UPDATE_VIEWAREA_TIMEOUT);
+      }
+    }
+  }, {
+    key: '_popState',
+    value: function _popState(_ref4) {
+      var _this4 = this;
+
+      var state = _ref4.state;
+
+      var newHash = getCurrentHash(),
+          hashChanged = this._currentHash !== newHash;
+      this._currentHash = newHash;
+      if (!state || false) {
+        this._uid++;
+
+        var _parseCurrentHash2 = parseCurrentHash(this.linkService),
+            hash = _parseCurrentHash2.hash,
+            page = _parseCurrentHash2.page,
+            rotation = _parseCurrentHash2.rotation;
+
+        this._pushOrReplaceState({
+          hash: hash,
+          page: page,
+          rotation: rotation
+        }, true);
+        return;
+      }
+      if (!this._isValidState(state)) {
+        return;
+      }
+      this._popStateInProgress = true;
+      if (hashChanged) {
+        this._blockHashChange++;
+        (0, _ui_utils.waitOnEventOrTimeout)({
+          target: window,
+          name: 'hashchange',
+          delay: HASH_CHANGE_TIMEOUT
+        }).then(function () {
+          _this4._blockHashChange--;
+        });
+      }
+      var destination = state.destination;
+      this._updateInternalState(destination, state.uid, true);
+      if ((0, _ui_utils.isValidRotation)(destination.rotation)) {
+        this.linkService.rotation = destination.rotation;
+      }
+      if (destination.dest) {
+        this.linkService.navigateTo(destination.dest);
+      } else if (destination.hash) {
+        this.linkService.setHash(destination.hash);
+      } else if (destination.page) {
+        this.linkService.page = destination.page;
+      }
+      Promise.resolve().then(function () {
+        _this4._popStateInProgress = false;
+      });
+    }
+  }, {
+    key: '_bindEvents',
+    value: function _bindEvents() {
+      var _this5 = this;
+
+      var _boundEvents = this._boundEvents,
+          eventBus = this.eventBus;
+
+      _boundEvents.updateViewarea = this._updateViewarea.bind(this);
+      _boundEvents.popState = this._popState.bind(this);
+      _boundEvents.pageHide = function (evt) {
+        if (!_this5._destination) {
+          _this5._tryPushCurrentPosition();
+        }
+      };
+      eventBus.on('updateviewarea', _boundEvents.updateViewarea);
+      window.addEventListener('popstate', _boundEvents.popState);
+      window.addEventListener('pagehide', _boundEvents.pageHide);
+    }
+  }, {
+    key: 'popStateInProgress',
+    get: function get() {
+      return this.initialized && (this._popStateInProgress || this._blockHashChange > 0);
+    }
+  }]);
+
+  return PDFHistory;
+}();
+
+function isDestHashesEqual(destHash, pushHash) {
+  if (typeof destHash !== 'string' || typeof pushHash !== 'string') {
+    return false;
+  }
+  if (destHash === pushHash) {
+    return true;
+  }
+
+  var _parseQueryString = (0, _ui_utils.parseQueryString)(destHash),
+      nameddest = _parseQueryString.nameddest;
+
+  if (nameddest === pushHash) {
+    return true;
+  }
+  return false;
+}
+function isDestArraysEqual(firstDest, secondDest) {
+  function isEntryEqual(first, second) {
+    if ((typeof first === 'undefined' ? 'undefined' : _typeof(first)) !== (typeof second === 'undefined' ? 'undefined' : _typeof(second))) {
+      return false;
+    }
+    if (first instanceof Array || second instanceof Array) {
+      return false;
+    }
+    if (first !== null && (typeof first === 'undefined' ? 'undefined' : _typeof(first)) === 'object' && second !== null) {
+      if (Object.keys(first).length !== Object.keys(second).length) {
+        return false;
+      }
+      for (var key in first) {
+        if (!isEntryEqual(first[key], second[key])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return first === second || Number.isNaN(first) && Number.isNaN(second);
+  }
+  if (!(firstDest instanceof Array && secondDest instanceof Array)) {
+    return false;
+  }
+  if (firstDest.length !== secondDest.length) {
+    return false;
+  }
+  for (var i = 0, ii = firstDest.length; i < ii; i++) {
+    if (!isEntryEqual(firstDest[i], secondDest[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+exports.PDFHistory = PDFHistory;
+exports.isDestHashesEqual = isDestHashesEqual;
+exports.isDestArraysEqual = isDestArraysEqual;
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PDFSinglePageViewer = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _base_viewer = __w_pdfjs_require__(8);
+
+var _ui_utils = __w_pdfjs_require__(1);
+
+var _pdfjsLib = __w_pdfjs_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var PDFSinglePageViewer = function (_BaseViewer) {
+  _inherits(PDFSinglePageViewer, _BaseViewer);
+
+  function PDFSinglePageViewer(options) {
+    _classCallCheck(this, PDFSinglePageViewer);
+
+    var _this = _possibleConstructorReturn(this, (PDFSinglePageViewer.__proto__ || Object.getPrototypeOf(PDFSinglePageViewer)).call(this, options));
+
+    _this.eventBus.on('pagesinit', function (evt) {
+      _this._ensurePageViewVisible();
+    });
+    return _this;
+  }
+
+  _createClass(PDFSinglePageViewer, [{
+    key: '_resetView',
+    value: function _resetView() {
+      _get(PDFSinglePageViewer.prototype.__proto__ || Object.getPrototypeOf(PDFSinglePageViewer.prototype), '_resetView', this).call(this);
+      this._previousPageNumber = 1;
+      this._shadowViewer = document.createDocumentFragment();
+    }
+  }, {
+    key: '_ensurePageViewVisible',
+    value: function _ensurePageViewVisible() {
+      var pageView = this._pages[this._currentPageNumber - 1];
+      var previousPageView = this._pages[this._previousPageNumber - 1];
+      var viewerNodes = this.viewer.childNodes;
+      switch (viewerNodes.length) {
+        case 0:
+          this.viewer.appendChild(pageView.div);
+          break;
+        case 1:
+          if (viewerNodes[0] !== previousPageView.div) {
+            throw new Error('_ensurePageViewVisible: Unexpected previously visible page.');
+          }
+          if (pageView === previousPageView) {
+            break;
+          }
+          this._shadowViewer.appendChild(previousPageView.div);
+          this.viewer.appendChild(pageView.div);
+          this.container.scrollTop = 0;
+          break;
+        default:
+          throw new Error('_ensurePageViewVisible: Only one page should be visible at a time.');
+      }
+      this._previousPageNumber = this._currentPageNumber;
+    }
+  }, {
+    key: '_scrollUpdate',
+    value: function _scrollUpdate() {
+      if (this._updateScrollDown) {
+        this._updateScrollDown();
+      }
+      _get(PDFSinglePageViewer.prototype.__proto__ || Object.getPrototypeOf(PDFSinglePageViewer.prototype), '_scrollUpdate', this).call(this);
+    }
+  }, {
+    key: '_scrollIntoView',
+    value: function _scrollIntoView(_ref) {
+      var _this2 = this;
+
+      var pageDiv = _ref.pageDiv,
+          _ref$pageSpot = _ref.pageSpot,
+          pageSpot = _ref$pageSpot === undefined ? null : _ref$pageSpot,
+          _ref$pageNumber = _ref.pageNumber,
+          pageNumber = _ref$pageNumber === undefined ? null : _ref$pageNumber;
+
+      if (pageNumber) {
+        this._setCurrentPageNumber(pageNumber);
+      }
+      var scrolledDown = this._currentPageNumber >= this._previousPageNumber;
+      var previousLocation = this._location;
+      this._ensurePageViewVisible();
+      (0, _ui_utils.scrollIntoView)(pageDiv, pageSpot);
+      this._updateScrollDown = function () {
+        _this2.scroll.down = scrolledDown;
+        delete _this2._updateScrollDown;
+      };
+      setTimeout(function () {
+        if (_this2._location === previousLocation) {
+          if (_this2._updateScrollDown) {
+            _this2._updateScrollDown();
+          }
+          _this2.update();
+        }
+      }, 0);
+    }
+  }, {
+    key: '_getVisiblePages',
+    value: function _getVisiblePages() {
+      if (!this.pagesCount) {
+        return { views: [] };
+      }
+      var pageView = this._pages[this._currentPageNumber - 1];
+      var element = pageView.div;
+      var view = {
+        id: pageView.id,
+        x: element.offsetLeft + element.clientLeft,
+        y: element.offsetTop + element.clientTop,
+        view: pageView
+      };
+      return {
+        first: view,
+        last: view,
+        views: [view]
+      };
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      var visible = this._getVisiblePages();
+      var visiblePages = visible.views,
+          numVisiblePages = visiblePages.length;
+      if (numVisiblePages === 0) {
+        return;
+      }
+      this._resizeBuffer(numVisiblePages);
+      this.renderingQueue.renderHighestPriority(visible);
+      this._updateLocation(visible.first);
+      this.eventBus.dispatch('updateviewarea', {
+        source: this,
+        location: this._location
+      });
+    }
+  }, {
+    key: '_setDocumentViewerElement',
+    get: function get() {
+      return (0, _pdfjsLib.shadow)(this, '_setDocumentViewerElement', this._shadowViewer);
+    }
+  }]);
+
+  return PDFSinglePageViewer;
+}(_base_viewer.BaseViewer);
+
+exports.PDFSinglePageViewer = PDFSinglePageViewer;
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PDFViewer = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ui_utils = __w_pdfjs_require__(1);
+
+var _base_viewer = __w_pdfjs_require__(8);
+
+var _pdfjsLib = __w_pdfjs_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var PDFViewer = function (_BaseViewer) {
+  _inherits(PDFViewer, _BaseViewer);
+
+  function PDFViewer() {
+    _classCallCheck(this, PDFViewer);
+
+    return _possibleConstructorReturn(this, (PDFViewer.__proto__ || Object.getPrototypeOf(PDFViewer)).apply(this, arguments));
+  }
+
+  _createClass(PDFViewer, [{
+    key: '_scrollIntoView',
+    value: function _scrollIntoView(_ref) {
+      var pageDiv = _ref.pageDiv,
+          _ref$pageSpot = _ref.pageSpot,
+          pageSpot = _ref$pageSpot === undefined ? null : _ref$pageSpot;
+
+      (0, _ui_utils.scrollIntoView)(pageDiv, pageSpot);
+    }
+  }, {
+    key: '_getVisiblePages',
+    value: function _getVisiblePages() {
+      if (!this.isInPresentationMode) {
+        return (0, _ui_utils.getVisibleElements)(this.container, this._pages, true);
+      }
+      var currentPage = this._pages[this._currentPageNumber - 1];
+      var visible = [{
+        id: currentPage.id,
+        view: currentPage
+      }];
+      return {
+        first: currentPage,
+        last: currentPage,
+        views: visible
+      };
+    }
+  }, {
+    key: 'update',
+    value: function update() {
+      var visible = this._getVisiblePages();
+      var visiblePages = visible.views,
+          numVisiblePages = visiblePages.length;
+      if (numVisiblePages === 0) {
+        return;
+      }
+      this._resizeBuffer(numVisiblePages);
+      this.renderingQueue.renderHighestPriority(visible);
+      var currentId = this._currentPageNumber;
+      var stillFullyVisible = false;
+      for (var i = 0; i < numVisiblePages; ++i) {
+        var page = visiblePages[i];
+        if (page.percent < 100) {
+          break;
+        }
+        if (page.id === currentId) {
+          stillFullyVisible = true;
+          break;
+        }
+      }
+      if (!stillFullyVisible) {
+        currentId = visiblePages[0].id;
+      }
+      if (!this.isInPresentationMode) {
+        this._setCurrentPageNumber(currentId);
+      }
+      this._updateLocation(visible.first);
+      this.eventBus.dispatch('updateviewarea', {
+        source: this,
+        location: this._location
+      });
+    }
+  }, {
+    key: '_setDocumentViewerElement',
+    get: function get() {
+      return (0, _pdfjsLib.shadow)(this, '_setDocumentViewerElement', this.viewer);
+    }
+  }]);
+
+  return PDFViewer;
+}(_base_viewer.BaseViewer);
+
+exports.PDFViewer = PDFViewer;
 
 /***/ })
 /******/ ]);
