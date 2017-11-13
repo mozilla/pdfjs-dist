@@ -1732,7 +1732,7 @@ module.exports = function (it) {
 "use strict";
 
 
-var store = __w_pdfjs_require__(45)('wks');
+var store = __w_pdfjs_require__(46)('wks');
 var uid = __w_pdfjs_require__(22);
 var _Symbol = __w_pdfjs_require__(4).Symbol;
 var USE_SYMBOL = typeof _Symbol == 'function';
@@ -1769,7 +1769,7 @@ var _primitives = __w_pdfjs_require__(1);
 
 var _jpg = __w_pdfjs_require__(124);
 
-var _jpx = __w_pdfjs_require__(62);
+var _jpx = __w_pdfjs_require__(63);
 
 var Stream = function StreamClosure() {
   function Stream(arrayBuffer, start, length, dict) {
@@ -3079,8 +3079,8 @@ module.exports = function (exec) {
 
 
 var anObject = __w_pdfjs_require__(8);
-var IE8_DOM_DEFINE = __w_pdfjs_require__(42);
-var toPrimitive = __w_pdfjs_require__(43);
+var IE8_DOM_DEFINE = __w_pdfjs_require__(43);
+var toPrimitive = __w_pdfjs_require__(44);
 var dP = Object.defineProperty;
 exports.f = __w_pdfjs_require__(13) ? Object.defineProperty : function defineProperty(O, P, Attributes) {
   anObject(O);
@@ -4129,7 +4129,7 @@ module.exports = function (key) {
 
 
 var $keys = __w_pdfjs_require__(77);
-var enumBugKeys = __w_pdfjs_require__(46);
+var enumBugKeys = __w_pdfjs_require__(47);
 module.exports = Object.keys || function keys(O) {
   return $keys(O, enumBugKeys);
 };
@@ -5243,7 +5243,7 @@ module.exports = function (it) {
 "use strict";
 
 
-var shared = __w_pdfjs_require__(45)('keys');
+var shared = __w_pdfjs_require__(46)('keys');
 var uid = __w_pdfjs_require__(22);
 module.exports = function (key) {
   return shared[key] || (shared[key] = uid(key));
@@ -5401,6 +5401,534 @@ var meta = module.exports = {
 
 /***/ }),
 /* 41 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.OperatorList = undefined;
+
+var _util = __w_pdfjs_require__(0);
+
+var QueueOptimizer = function QueueOptimizerClosure() {
+  function addState(parentState, pattern, checkFn, iterateFn, processFn) {
+    var state = parentState;
+    for (var i = 0, ii = pattern.length - 1; i < ii; i++) {
+      var item = pattern[i];
+      state = state[item] || (state[item] = []);
+    }
+    state[pattern[pattern.length - 1]] = {
+      checkFn: checkFn,
+      iterateFn: iterateFn,
+      processFn: processFn
+    };
+  }
+  function handlePaintSolidColorImageMask(iFirstSave, count, fnArray, argsArray) {
+    var iFirstPIMXO = iFirstSave + 2;
+    for (var i = 0; i < count; i++) {
+      var arg = argsArray[iFirstPIMXO + 4 * i];
+      var imageMask = arg.length === 1 && arg[0];
+      if (imageMask && imageMask.width === 1 && imageMask.height === 1 && (!imageMask.data.length || imageMask.data.length === 1 && imageMask.data[0] === 0)) {
+        fnArray[iFirstPIMXO + 4 * i] = _util.OPS.paintSolidColorImageMask;
+        continue;
+      }
+      break;
+    }
+    return count - i;
+  }
+  var InitialState = [];
+  addState(InitialState, [_util.OPS.save, _util.OPS.transform, _util.OPS.paintInlineImageXObject, _util.OPS.restore], null, function iterateInlineImageGroup(context, i) {
+    var fnArray = context.fnArray;
+    var iFirstSave = context.iCurr - 3;
+    var pos = (i - iFirstSave) % 4;
+    switch (pos) {
+      case 0:
+        return fnArray[i] === _util.OPS.save;
+      case 1:
+        return fnArray[i] === _util.OPS.transform;
+      case 2:
+        return fnArray[i] === _util.OPS.paintInlineImageXObject;
+      case 3:
+        return fnArray[i] === _util.OPS.restore;
+    }
+  }, function foundInlineImageGroup(context, i) {
+    var MIN_IMAGES_IN_INLINE_IMAGES_BLOCK = 10;
+    var MAX_IMAGES_IN_INLINE_IMAGES_BLOCK = 200;
+    var MAX_WIDTH = 1000;
+    var IMAGE_PADDING = 1;
+    var fnArray = context.fnArray,
+        argsArray = context.argsArray;
+    var curr = context.iCurr;
+    var iFirstSave = curr - 3;
+    var iFirstTransform = curr - 2;
+    var iFirstPIIXO = curr - 1;
+    var count = Math.min(Math.floor((i - iFirstSave) / 4), MAX_IMAGES_IN_INLINE_IMAGES_BLOCK);
+    if (count < MIN_IMAGES_IN_INLINE_IMAGES_BLOCK) {
+      return i - (i - iFirstSave) % 4;
+    }
+    var maxX = 0;
+    var map = [],
+        maxLineHeight = 0;
+    var currentX = IMAGE_PADDING,
+        currentY = IMAGE_PADDING;
+    var q;
+    for (q = 0; q < count; q++) {
+      var transform = argsArray[iFirstTransform + (q << 2)];
+      var img = argsArray[iFirstPIIXO + (q << 2)][0];
+      if (currentX + img.width > MAX_WIDTH) {
+        maxX = Math.max(maxX, currentX);
+        currentY += maxLineHeight + 2 * IMAGE_PADDING;
+        currentX = 0;
+        maxLineHeight = 0;
+      }
+      map.push({
+        transform: transform,
+        x: currentX,
+        y: currentY,
+        w: img.width,
+        h: img.height
+      });
+      currentX += img.width + 2 * IMAGE_PADDING;
+      maxLineHeight = Math.max(maxLineHeight, img.height);
+    }
+    var imgWidth = Math.max(maxX, currentX) + IMAGE_PADDING;
+    var imgHeight = currentY + maxLineHeight + IMAGE_PADDING;
+    var imgData = new Uint8Array(imgWidth * imgHeight * 4);
+    var imgRowSize = imgWidth << 2;
+    for (q = 0; q < count; q++) {
+      var data = argsArray[iFirstPIIXO + (q << 2)][0].data;
+      var rowSize = map[q].w << 2;
+      var dataOffset = 0;
+      var offset = map[q].x + map[q].y * imgWidth << 2;
+      imgData.set(data.subarray(0, rowSize), offset - imgRowSize);
+      for (var k = 0, kk = map[q].h; k < kk; k++) {
+        imgData.set(data.subarray(dataOffset, dataOffset + rowSize), offset);
+        dataOffset += rowSize;
+        offset += imgRowSize;
+      }
+      imgData.set(data.subarray(dataOffset - rowSize, dataOffset), offset);
+      while (offset >= 0) {
+        data[offset - 4] = data[offset];
+        data[offset - 3] = data[offset + 1];
+        data[offset - 2] = data[offset + 2];
+        data[offset - 1] = data[offset + 3];
+        data[offset + rowSize] = data[offset + rowSize - 4];
+        data[offset + rowSize + 1] = data[offset + rowSize - 3];
+        data[offset + rowSize + 2] = data[offset + rowSize - 2];
+        data[offset + rowSize + 3] = data[offset + rowSize - 1];
+        offset -= imgRowSize;
+      }
+    }
+    fnArray.splice(iFirstSave, count * 4, _util.OPS.paintInlineImageXObjectGroup);
+    argsArray.splice(iFirstSave, count * 4, [{
+      width: imgWidth,
+      height: imgHeight,
+      kind: _util.ImageKind.RGBA_32BPP,
+      data: imgData
+    }, map]);
+    return iFirstSave + 1;
+  });
+  addState(InitialState, [_util.OPS.save, _util.OPS.transform, _util.OPS.paintImageMaskXObject, _util.OPS.restore], null, function iterateImageMaskGroup(context, i) {
+    var fnArray = context.fnArray;
+    var iFirstSave = context.iCurr - 3;
+    var pos = (i - iFirstSave) % 4;
+    switch (pos) {
+      case 0:
+        return fnArray[i] === _util.OPS.save;
+      case 1:
+        return fnArray[i] === _util.OPS.transform;
+      case 2:
+        return fnArray[i] === _util.OPS.paintImageMaskXObject;
+      case 3:
+        return fnArray[i] === _util.OPS.restore;
+    }
+  }, function foundImageMaskGroup(context, i) {
+    var MIN_IMAGES_IN_MASKS_BLOCK = 10;
+    var MAX_IMAGES_IN_MASKS_BLOCK = 100;
+    var MAX_SAME_IMAGES_IN_MASKS_BLOCK = 1000;
+    var fnArray = context.fnArray,
+        argsArray = context.argsArray;
+    var curr = context.iCurr;
+    var iFirstSave = curr - 3;
+    var iFirstTransform = curr - 2;
+    var iFirstPIMXO = curr - 1;
+    var count = Math.floor((i - iFirstSave) / 4);
+    count = handlePaintSolidColorImageMask(iFirstSave, count, fnArray, argsArray);
+    if (count < MIN_IMAGES_IN_MASKS_BLOCK) {
+      return i - (i - iFirstSave) % 4;
+    }
+    var q;
+    var isSameImage = false;
+    var iTransform, transformArgs;
+    var firstPIMXOArg0 = argsArray[iFirstPIMXO][0];
+    if (argsArray[iFirstTransform][1] === 0 && argsArray[iFirstTransform][2] === 0) {
+      isSameImage = true;
+      var firstTransformArg0 = argsArray[iFirstTransform][0];
+      var firstTransformArg3 = argsArray[iFirstTransform][3];
+      iTransform = iFirstTransform + 4;
+      var iPIMXO = iFirstPIMXO + 4;
+      for (q = 1; q < count; q++, iTransform += 4, iPIMXO += 4) {
+        transformArgs = argsArray[iTransform];
+        if (argsArray[iPIMXO][0] !== firstPIMXOArg0 || transformArgs[0] !== firstTransformArg0 || transformArgs[1] !== 0 || transformArgs[2] !== 0 || transformArgs[3] !== firstTransformArg3) {
+          if (q < MIN_IMAGES_IN_MASKS_BLOCK) {
+            isSameImage = false;
+          } else {
+            count = q;
+          }
+          break;
+        }
+      }
+    }
+    if (isSameImage) {
+      count = Math.min(count, MAX_SAME_IMAGES_IN_MASKS_BLOCK);
+      var positions = new Float32Array(count * 2);
+      iTransform = iFirstTransform;
+      for (q = 0; q < count; q++, iTransform += 4) {
+        transformArgs = argsArray[iTransform];
+        positions[q << 1] = transformArgs[4];
+        positions[(q << 1) + 1] = transformArgs[5];
+      }
+      fnArray.splice(iFirstSave, count * 4, _util.OPS.paintImageMaskXObjectRepeat);
+      argsArray.splice(iFirstSave, count * 4, [firstPIMXOArg0, firstTransformArg0, firstTransformArg3, positions]);
+    } else {
+      count = Math.min(count, MAX_IMAGES_IN_MASKS_BLOCK);
+      var images = [];
+      for (q = 0; q < count; q++) {
+        transformArgs = argsArray[iFirstTransform + (q << 2)];
+        var maskParams = argsArray[iFirstPIMXO + (q << 2)][0];
+        images.push({
+          data: maskParams.data,
+          width: maskParams.width,
+          height: maskParams.height,
+          transform: transformArgs
+        });
+      }
+      fnArray.splice(iFirstSave, count * 4, _util.OPS.paintImageMaskXObjectGroup);
+      argsArray.splice(iFirstSave, count * 4, [images]);
+    }
+    return iFirstSave + 1;
+  });
+  addState(InitialState, [_util.OPS.save, _util.OPS.transform, _util.OPS.paintImageXObject, _util.OPS.restore], function (context) {
+    var argsArray = context.argsArray;
+    var iFirstTransform = context.iCurr - 2;
+    return argsArray[iFirstTransform][1] === 0 && argsArray[iFirstTransform][2] === 0;
+  }, function (context, i) {
+    var fnArray = context.fnArray,
+        argsArray = context.argsArray;
+    var iFirstSave = context.iCurr - 3;
+    var pos = (i - iFirstSave) % 4;
+    switch (pos) {
+      case 0:
+        return fnArray[i] === _util.OPS.save;
+      case 1:
+        if (fnArray[i] !== _util.OPS.transform) {
+          return false;
+        }
+        var iFirstTransform = context.iCurr - 2;
+        var firstTransformArg0 = argsArray[iFirstTransform][0];
+        var firstTransformArg3 = argsArray[iFirstTransform][3];
+        if (argsArray[i][0] !== firstTransformArg0 || argsArray[i][1] !== 0 || argsArray[i][2] !== 0 || argsArray[i][3] !== firstTransformArg3) {
+          return false;
+        }
+        return true;
+      case 2:
+        if (fnArray[i] !== _util.OPS.paintImageXObject) {
+          return false;
+        }
+        var iFirstPIXO = context.iCurr - 1;
+        var firstPIXOArg0 = argsArray[iFirstPIXO][0];
+        if (argsArray[i][0] !== firstPIXOArg0) {
+          return false;
+        }
+        return true;
+      case 3:
+        return fnArray[i] === _util.OPS.restore;
+    }
+  }, function (context, i) {
+    var MIN_IMAGES_IN_BLOCK = 3;
+    var MAX_IMAGES_IN_BLOCK = 1000;
+    var fnArray = context.fnArray,
+        argsArray = context.argsArray;
+    var curr = context.iCurr;
+    var iFirstSave = curr - 3;
+    var iFirstTransform = curr - 2;
+    var iFirstPIXO = curr - 1;
+    var firstPIXOArg0 = argsArray[iFirstPIXO][0];
+    var firstTransformArg0 = argsArray[iFirstTransform][0];
+    var firstTransformArg3 = argsArray[iFirstTransform][3];
+    var count = Math.min(Math.floor((i - iFirstSave) / 4), MAX_IMAGES_IN_BLOCK);
+    if (count < MIN_IMAGES_IN_BLOCK) {
+      return i - (i - iFirstSave) % 4;
+    }
+    var positions = new Float32Array(count * 2);
+    var iTransform = iFirstTransform;
+    for (var q = 0; q < count; q++, iTransform += 4) {
+      var transformArgs = argsArray[iTransform];
+      positions[q << 1] = transformArgs[4];
+      positions[(q << 1) + 1] = transformArgs[5];
+    }
+    var args = [firstPIXOArg0, firstTransformArg0, firstTransformArg3, positions];
+    fnArray.splice(iFirstSave, count * 4, _util.OPS.paintImageXObjectRepeat);
+    argsArray.splice(iFirstSave, count * 4, args);
+    return iFirstSave + 1;
+  });
+  addState(InitialState, [_util.OPS.beginText, _util.OPS.setFont, _util.OPS.setTextMatrix, _util.OPS.showText, _util.OPS.endText], null, function (context, i) {
+    var fnArray = context.fnArray,
+        argsArray = context.argsArray;
+    var iFirstSave = context.iCurr - 4;
+    var pos = (i - iFirstSave) % 5;
+    switch (pos) {
+      case 0:
+        return fnArray[i] === _util.OPS.beginText;
+      case 1:
+        return fnArray[i] === _util.OPS.setFont;
+      case 2:
+        return fnArray[i] === _util.OPS.setTextMatrix;
+      case 3:
+        if (fnArray[i] !== _util.OPS.showText) {
+          return false;
+        }
+        var iFirstSetFont = context.iCurr - 3;
+        var firstSetFontArg0 = argsArray[iFirstSetFont][0];
+        var firstSetFontArg1 = argsArray[iFirstSetFont][1];
+        if (argsArray[i][0] !== firstSetFontArg0 || argsArray[i][1] !== firstSetFontArg1) {
+          return false;
+        }
+        return true;
+      case 4:
+        return fnArray[i] === _util.OPS.endText;
+    }
+  }, function (context, i) {
+    var MIN_CHARS_IN_BLOCK = 3;
+    var MAX_CHARS_IN_BLOCK = 1000;
+    var fnArray = context.fnArray,
+        argsArray = context.argsArray;
+    var curr = context.iCurr;
+    var iFirstBeginText = curr - 4;
+    var iFirstSetFont = curr - 3;
+    var iFirstSetTextMatrix = curr - 2;
+    var iFirstShowText = curr - 1;
+    var iFirstEndText = curr;
+    var firstSetFontArg0 = argsArray[iFirstSetFont][0];
+    var firstSetFontArg1 = argsArray[iFirstSetFont][1];
+    var count = Math.min(Math.floor((i - iFirstBeginText) / 5), MAX_CHARS_IN_BLOCK);
+    if (count < MIN_CHARS_IN_BLOCK) {
+      return i - (i - iFirstBeginText) % 5;
+    }
+    var iFirst = iFirstBeginText;
+    if (iFirstBeginText >= 4 && fnArray[iFirstBeginText - 4] === fnArray[iFirstSetFont] && fnArray[iFirstBeginText - 3] === fnArray[iFirstSetTextMatrix] && fnArray[iFirstBeginText - 2] === fnArray[iFirstShowText] && fnArray[iFirstBeginText - 1] === fnArray[iFirstEndText] && argsArray[iFirstBeginText - 4][0] === firstSetFontArg0 && argsArray[iFirstBeginText - 4][1] === firstSetFontArg1) {
+      count++;
+      iFirst -= 5;
+    }
+    var iEndText = iFirst + 4;
+    for (var q = 1; q < count; q++) {
+      fnArray.splice(iEndText, 3);
+      argsArray.splice(iEndText, 3);
+      iEndText += 2;
+    }
+    return iEndText + 1;
+  });
+  function QueueOptimizer(queue) {
+    this.queue = queue;
+    this.state = null;
+    this.context = {
+      iCurr: 0,
+      fnArray: queue.fnArray,
+      argsArray: queue.argsArray
+    };
+    this.match = null;
+    this.lastProcessed = 0;
+  }
+  QueueOptimizer.prototype = {
+    _optimize: function _optimize() {
+      var fnArray = this.queue.fnArray;
+      var i = this.lastProcessed,
+          ii = fnArray.length;
+      var state = this.state;
+      var match = this.match;
+      if (!state && !match && i + 1 === ii && !InitialState[fnArray[i]]) {
+        this.lastProcessed = ii;
+        return;
+      }
+      var context = this.context;
+      while (i < ii) {
+        if (match) {
+          var iterate = (0, match.iterateFn)(context, i);
+          if (iterate) {
+            i++;
+            continue;
+          }
+          i = (0, match.processFn)(context, i + 1);
+          ii = fnArray.length;
+          match = null;
+          state = null;
+          if (i >= ii) {
+            break;
+          }
+        }
+        state = (state || InitialState)[fnArray[i]];
+        if (!state || Array.isArray(state)) {
+          i++;
+          continue;
+        }
+        context.iCurr = i;
+        i++;
+        if (state.checkFn && !(0, state.checkFn)(context)) {
+          state = null;
+          continue;
+        }
+        match = state;
+        state = null;
+      }
+      this.state = state;
+      this.match = match;
+      this.lastProcessed = i;
+    },
+    push: function push(fn, args) {
+      this.queue.fnArray.push(fn);
+      this.queue.argsArray.push(args);
+      this._optimize();
+    },
+    flush: function flush() {
+      while (this.match) {
+        var length = this.queue.fnArray.length;
+        this.lastProcessed = (0, this.match.processFn)(this.context, length);
+        this.match = null;
+        this.state = null;
+        this._optimize();
+      }
+    },
+    reset: function reset() {
+      this.state = null;
+      this.match = null;
+      this.lastProcessed = 0;
+    }
+  };
+  return QueueOptimizer;
+}();
+var NullOptimizer = function NullOptimizerClosure() {
+  function NullOptimizer(queue) {
+    this.queue = queue;
+  }
+  NullOptimizer.prototype = {
+    push: function push(fn, args) {
+      this.queue.fnArray.push(fn);
+      this.queue.argsArray.push(args);
+    },
+    flush: function flush() {}
+  };
+  return NullOptimizer;
+}();
+var OperatorList = function OperatorListClosure() {
+  var CHUNK_SIZE = 1000;
+  var CHUNK_SIZE_ABOUT = CHUNK_SIZE - 5;
+  function getTransfers(queue) {
+    var transfers = [];
+    var fnArray = queue.fnArray,
+        argsArray = queue.argsArray;
+    for (var i = 0, ii = queue.length; i < ii; i++) {
+      switch (fnArray[i]) {
+        case _util.OPS.paintInlineImageXObject:
+        case _util.OPS.paintInlineImageXObjectGroup:
+        case _util.OPS.paintImageMaskXObject:
+          var arg = argsArray[i][0];
+          if (!arg.cached) {
+            transfers.push(arg.data.buffer);
+          }
+          break;
+      }
+    }
+    return transfers;
+  }
+  function OperatorList(intent, messageHandler, pageIndex) {
+    this.messageHandler = messageHandler;
+    this.fnArray = [];
+    this.argsArray = [];
+    if (messageHandler && this.intent !== 'oplist') {
+      this.optimizer = new QueueOptimizer(this);
+    } else {
+      this.optimizer = new NullOptimizer(this);
+    }
+    this.dependencies = Object.create(null);
+    this._totalLength = 0;
+    this.pageIndex = pageIndex;
+    this.intent = intent;
+    this.weight = 0;
+  }
+  OperatorList.prototype = {
+    get length() {
+      return this.argsArray.length;
+    },
+    get totalLength() {
+      return this._totalLength + this.length;
+    },
+    addOp: function addOp(fn, args) {
+      this.optimizer.push(fn, args);
+      this.weight++;
+      if (this.messageHandler) {
+        if (this.weight >= CHUNK_SIZE) {
+          this.flush();
+        } else if (this.weight >= CHUNK_SIZE_ABOUT && (fn === _util.OPS.restore || fn === _util.OPS.endText)) {
+          this.flush();
+        }
+      }
+    },
+    addDependency: function addDependency(dependency) {
+      if (dependency in this.dependencies) {
+        return;
+      }
+      this.dependencies[dependency] = true;
+      this.addOp(_util.OPS.dependency, [dependency]);
+    },
+    addDependencies: function addDependencies(dependencies) {
+      for (var key in dependencies) {
+        this.addDependency(key);
+      }
+    },
+    addOpList: function addOpList(opList) {
+      _util.Util.extendObj(this.dependencies, opList.dependencies);
+      for (var i = 0, ii = opList.length; i < ii; i++) {
+        this.addOp(opList.fnArray[i], opList.argsArray[i]);
+      }
+    },
+    getIR: function getIR() {
+      return {
+        fnArray: this.fnArray,
+        argsArray: this.argsArray,
+        length: this.length
+      };
+    },
+    flush: function flush(lastChunk) {
+      this.optimizer.flush();
+      var transfers = getTransfers(this);
+      var length = this.length;
+      this._totalLength += length;
+      this.messageHandler.send('RenderPageChunk', {
+        operatorList: {
+          fnArray: this.fnArray,
+          argsArray: this.argsArray,
+          lastChunk: lastChunk,
+          length: length
+        },
+        pageIndex: this.pageIndex,
+        intent: this.intent
+      }, transfers);
+      this.dependencies = Object.create(null);
+      this.fnArray.length = 0;
+      this.argsArray.length = 0;
+      this.weight = 0;
+      this.optimizer.reset();
+    }
+  };
+  return OperatorList;
+}();
+exports.OperatorList = OperatorList;
+
+/***/ }),
+/* 42 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -9939,7 +10467,7 @@ exports.getGlyphsUnicode = getGlyphsUnicode;
 exports.getDingbatsGlyphsUnicode = getDingbatsGlyphsUnicode;
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -9954,7 +10482,7 @@ module.exports = !__w_pdfjs_require__(13) && !__w_pdfjs_require__(14)(function (
 });
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -9971,7 +10499,7 @@ module.exports = function (it, S) {
 };
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -9998,7 +10526,7 @@ module.exports = function (IS_INCLUDES) {
 };
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10012,7 +10540,7 @@ module.exports = function (key) {
 };
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10021,7 +10549,7 @@ module.exports = function (key) {
 module.exports = 'constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,toLocaleString,toString,valueOf'.split(',');
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10035,7 +10563,7 @@ module.exports = function (key) {
 };
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10051,13 +10579,13 @@ if (test + '' != '[object z]') {
 }
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-var LIBRARY = __w_pdfjs_require__(50);
+var LIBRARY = __w_pdfjs_require__(51);
 var $export = __w_pdfjs_require__(6);
 var redefine = __w_pdfjs_require__(10);
 var hide = __w_pdfjs_require__(12);
@@ -10133,7 +10661,7 @@ module.exports = function (Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCE
 };
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10142,7 +10670,7 @@ module.exports = function (Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCE
 module.exports = false;
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10152,7 +10680,7 @@ var document = __w_pdfjs_require__(4).document;
 module.exports = document && document.documentElement;
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10218,7 +10746,7 @@ for (var collections = getKeys(DOMIterables), i = 0; i < collections.length; i++
 }
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10234,7 +10762,7 @@ module.exports = function (O, D) {
 };
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10242,7 +10770,7 @@ module.exports = function (O, D) {
 
 var ctx = __w_pdfjs_require__(11);
 var invoke = __w_pdfjs_require__(99);
-var html = __w_pdfjs_require__(51);
+var html = __w_pdfjs_require__(52);
 var cel = __w_pdfjs_require__(27);
 var global = __w_pdfjs_require__(4);
 var process = global.process;
@@ -10317,7 +10845,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10338,7 +10866,7 @@ module.exports = function (exec) {
 };
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10357,7 +10885,7 @@ module.exports = function (C, x) {
 };
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10392,7 +10920,7 @@ module.exports = function (exec, skipClosing) {
 };
 
 /***/ }),
-/* 58 */
+/* 59 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10441,7 +10969,7 @@ module.exports = function (TYPE, $create) {
 };
 
 /***/ }),
-/* 59 */
+/* 60 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10454,7 +10982,7 @@ module.exports = function (it, TYPE) {
 };
 
 /***/ }),
-/* 60 */
+/* 61 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10924,7 +11452,7 @@ exports.ChunkedStream = ChunkedStream;
 exports.ChunkedStreamManager = ChunkedStreamManager;
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -10945,9 +11473,9 @@ var _primitives = __w_pdfjs_require__(1);
 
 var _parser = __w_pdfjs_require__(26);
 
-var _chunked_stream = __w_pdfjs_require__(60);
+var _chunked_stream = __w_pdfjs_require__(61);
 
-var _crypto = __w_pdfjs_require__(64);
+var _crypto = __w_pdfjs_require__(65);
 
 var _colorspace = __w_pdfjs_require__(20);
 
@@ -12449,7 +12977,7 @@ exports.XRef = XRef;
 exports.FileSpec = FileSpec;
 
 /***/ }),
-/* 62 */
+/* 63 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -12462,7 +12990,7 @@ exports.JpxImage = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _arithmetic_decoder = __w_pdfjs_require__(63);
+var _arithmetic_decoder = __w_pdfjs_require__(64);
 
 var JpxError = function JpxErrorClosure() {
   function JpxError(msg) {
@@ -14376,7 +14904,7 @@ var JpxImage = function JpxImageClosure() {
 exports.JpxImage = JpxImage;
 
 /***/ }),
-/* 63 */
+/* 64 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -14716,7 +15244,7 @@ var ArithmeticDecoder = function ArithmeticDecoderClosure() {
 exports.ArithmeticDecoder = ArithmeticDecoder;
 
 /***/ }),
-/* 64 */
+/* 65 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -16310,3133 +16838,6 @@ exports.calculateSHA384 = calculateSHA384;
 exports.calculateSHA512 = calculateSHA512;
 
 /***/ }),
-/* 65 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.PartialEvaluator = exports.OperatorList = undefined;
-
-var _util = __w_pdfjs_require__(0);
-
-var _cmap = __w_pdfjs_require__(129);
-
-var _stream = __w_pdfjs_require__(5);
-
-var _primitives = __w_pdfjs_require__(1);
-
-var _fonts = __w_pdfjs_require__(130);
-
-var _encodings = __w_pdfjs_require__(21);
-
-var _unicode = __w_pdfjs_require__(68);
-
-var _standard_fonts = __w_pdfjs_require__(67);
-
-var _pattern = __w_pdfjs_require__(134);
-
-var _parser = __w_pdfjs_require__(26);
-
-var _bidi = __w_pdfjs_require__(135);
-
-var _colorspace = __w_pdfjs_require__(20);
-
-var _glyphlist = __w_pdfjs_require__(41);
-
-var _metrics = __w_pdfjs_require__(136);
-
-var _function = __w_pdfjs_require__(69);
-
-var _murmurhash = __w_pdfjs_require__(138);
-
-var _image = __w_pdfjs_require__(139);
-
-var PartialEvaluator = function PartialEvaluatorClosure() {
-  var DefaultPartialEvaluatorOptions = {
-    forceDataSchema: false,
-    maxImageSize: -1,
-    disableFontFace: false,
-    nativeImageDecoderSupport: _util.NativeImageDecoding.DECODE,
-    ignoreErrors: false,
-    isEvalSupported: true
-  };
-  function NativeImageDecoder(_ref) {
-    var xref = _ref.xref,
-        resources = _ref.resources,
-        handler = _ref.handler,
-        _ref$forceDataSchema = _ref.forceDataSchema,
-        forceDataSchema = _ref$forceDataSchema === undefined ? false : _ref$forceDataSchema,
-        pdfFunctionFactory = _ref.pdfFunctionFactory;
-
-    this.xref = xref;
-    this.resources = resources;
-    this.handler = handler;
-    this.forceDataSchema = forceDataSchema;
-    this.pdfFunctionFactory = pdfFunctionFactory;
-  }
-  NativeImageDecoder.prototype = {
-    canDecode: function canDecode(image) {
-      return image instanceof _stream.JpegStream && NativeImageDecoder.isDecodable(image, this.xref, this.resources, this.pdfFunctionFactory);
-    },
-    decode: function decode(image) {
-      var dict = image.dict;
-      var colorSpace = dict.get('ColorSpace', 'CS');
-      colorSpace = _colorspace.ColorSpace.parse(colorSpace, this.xref, this.resources, this.pdfFunctionFactory);
-      var numComps = colorSpace.numComps;
-      var decodePromise = this.handler.sendWithPromise('JpegDecode', [image.getIR(this.forceDataSchema), numComps]);
-      return decodePromise.then(function (message) {
-        var data = message.data;
-        return new _stream.Stream(data, 0, data.length, image.dict);
-      });
-    }
-  };
-  NativeImageDecoder.isSupported = function (image, xref, res, pdfFunctionFactory) {
-    var dict = image.dict;
-    if (dict.has('DecodeParms') || dict.has('DP')) {
-      return false;
-    }
-    var cs = _colorspace.ColorSpace.parse(dict.get('ColorSpace', 'CS'), xref, res, pdfFunctionFactory);
-    return (cs.name === 'DeviceGray' || cs.name === 'DeviceRGB') && cs.isDefaultDecode(dict.getArray('Decode', 'D'));
-  };
-  NativeImageDecoder.isDecodable = function (image, xref, res, pdfFunctionFactory) {
-    var dict = image.dict;
-    if (dict.has('DecodeParms') || dict.has('DP')) {
-      return false;
-    }
-    var cs = _colorspace.ColorSpace.parse(dict.get('ColorSpace', 'CS'), xref, res, pdfFunctionFactory);
-    return (cs.numComps === 1 || cs.numComps === 3) && cs.isDefaultDecode(dict.getArray('Decode', 'D'));
-  };
-  function PartialEvaluator(_ref2) {
-    var _this = this;
-
-    var pdfManager = _ref2.pdfManager,
-        xref = _ref2.xref,
-        handler = _ref2.handler,
-        pageIndex = _ref2.pageIndex,
-        idFactory = _ref2.idFactory,
-        fontCache = _ref2.fontCache,
-        builtInCMapCache = _ref2.builtInCMapCache,
-        _ref2$options = _ref2.options,
-        options = _ref2$options === undefined ? null : _ref2$options,
-        pdfFunctionFactory = _ref2.pdfFunctionFactory;
-
-    this.pdfManager = pdfManager;
-    this.xref = xref;
-    this.handler = handler;
-    this.pageIndex = pageIndex;
-    this.idFactory = idFactory;
-    this.fontCache = fontCache;
-    this.builtInCMapCache = builtInCMapCache;
-    this.options = options || DefaultPartialEvaluatorOptions;
-    this.pdfFunctionFactory = pdfFunctionFactory;
-    this.fetchBuiltInCMap = function (name) {
-      var cachedCMap = _this.builtInCMapCache[name];
-      if (cachedCMap) {
-        return Promise.resolve(cachedCMap);
-      }
-      return _this.handler.sendWithPromise('FetchBuiltInCMap', { name: name }).then(function (data) {
-        if (data.compressionType !== _util.CMapCompressionType.NONE) {
-          _this.builtInCMapCache[name] = data;
-        }
-        return data;
-      });
-    };
-  }
-  var TIME_SLOT_DURATION_MS = 20;
-  var CHECK_TIME_EVERY = 100;
-  function TimeSlotManager() {
-    this.reset();
-  }
-  TimeSlotManager.prototype = {
-    check: function TimeSlotManager_check() {
-      if (++this.checked < CHECK_TIME_EVERY) {
-        return false;
-      }
-      this.checked = 0;
-      return this.endTime <= Date.now();
-    },
-    reset: function TimeSlotManager_reset() {
-      this.endTime = Date.now() + TIME_SLOT_DURATION_MS;
-      this.checked = 0;
-    }
-  };
-  function normalizeBlendMode(value) {
-    if (!(0, _primitives.isName)(value)) {
-      return 'source-over';
-    }
-    switch (value.name) {
-      case 'Normal':
-      case 'Compatible':
-        return 'source-over';
-      case 'Multiply':
-        return 'multiply';
-      case 'Screen':
-        return 'screen';
-      case 'Overlay':
-        return 'overlay';
-      case 'Darken':
-        return 'darken';
-      case 'Lighten':
-        return 'lighten';
-      case 'ColorDodge':
-        return 'color-dodge';
-      case 'ColorBurn':
-        return 'color-burn';
-      case 'HardLight':
-        return 'hard-light';
-      case 'SoftLight':
-        return 'soft-light';
-      case 'Difference':
-        return 'difference';
-      case 'Exclusion':
-        return 'exclusion';
-      case 'Hue':
-        return 'hue';
-      case 'Saturation':
-        return 'saturation';
-      case 'Color':
-        return 'color';
-      case 'Luminosity':
-        return 'luminosity';
-    }
-    (0, _util.warn)('Unsupported blend mode: ' + value.name);
-    return 'source-over';
-  }
-  var deferred = Promise.resolve();
-  var TILING_PATTERN = 1,
-      SHADING_PATTERN = 2;
-  PartialEvaluator.prototype = {
-    clone: function clone() {
-      var newOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DefaultPartialEvaluatorOptions;
-
-      var newEvaluator = Object.create(this);
-      newEvaluator.options = newOptions;
-      return newEvaluator;
-    },
-
-    hasBlendModes: function PartialEvaluator_hasBlendModes(resources) {
-      if (!(0, _primitives.isDict)(resources)) {
-        return false;
-      }
-      var processed = Object.create(null);
-      if (resources.objId) {
-        processed[resources.objId] = true;
-      }
-      var nodes = [resources],
-          xref = this.xref;
-      while (nodes.length) {
-        var key, i, ii;
-        var node = nodes.shift();
-        var graphicStates = node.get('ExtGState');
-        if ((0, _primitives.isDict)(graphicStates)) {
-          var graphicStatesKeys = graphicStates.getKeys();
-          for (i = 0, ii = graphicStatesKeys.length; i < ii; i++) {
-            key = graphicStatesKeys[i];
-            var graphicState = graphicStates.get(key);
-            var bm = graphicState.get('BM');
-            if ((0, _primitives.isName)(bm) && bm.name !== 'Normal') {
-              return true;
-            }
-          }
-        }
-        var xObjects = node.get('XObject');
-        if (!(0, _primitives.isDict)(xObjects)) {
-          continue;
-        }
-        var xObjectsKeys = xObjects.getKeys();
-        for (i = 0, ii = xObjectsKeys.length; i < ii; i++) {
-          key = xObjectsKeys[i];
-          var xObject = xObjects.getRaw(key);
-          if ((0, _primitives.isRef)(xObject)) {
-            if (processed[xObject.toString()]) {
-              continue;
-            }
-            xObject = xref.fetch(xObject);
-          }
-          if (!(0, _primitives.isStream)(xObject)) {
-            continue;
-          }
-          if (xObject.dict.objId) {
-            if (processed[xObject.dict.objId]) {
-              continue;
-            }
-            processed[xObject.dict.objId] = true;
-          }
-          var xResources = xObject.dict.get('Resources');
-          if ((0, _primitives.isDict)(xResources) && (!xResources.objId || !processed[xResources.objId])) {
-            nodes.push(xResources);
-            if (xResources.objId) {
-              processed[xResources.objId] = true;
-            }
-          }
-        }
-      }
-      return false;
-    },
-    buildFormXObject: function PartialEvaluator_buildFormXObject(resources, xobj, smask, operatorList, task, initialState) {
-      var dict = xobj.dict;
-      var matrix = dict.getArray('Matrix');
-      var bbox = dict.getArray('BBox');
-      var group = dict.get('Group');
-      if (group) {
-        var groupOptions = {
-          matrix: matrix,
-          bbox: bbox,
-          smask: smask,
-          isolated: false,
-          knockout: false
-        };
-        var groupSubtype = group.get('S');
-        var colorSpace = null;
-        if ((0, _primitives.isName)(groupSubtype, 'Transparency')) {
-          groupOptions.isolated = group.get('I') || false;
-          groupOptions.knockout = group.get('K') || false;
-          if (group.has('CS')) {
-            colorSpace = _colorspace.ColorSpace.parse(group.get('CS'), this.xref, resources, this.pdfFunctionFactory);
-          }
-        }
-        if (smask && smask.backdrop) {
-          colorSpace = colorSpace || _colorspace.ColorSpace.singletons.rgb;
-          smask.backdrop = colorSpace.getRgb(smask.backdrop, 0);
-        }
-        operatorList.addOp(_util.OPS.beginGroup, [groupOptions]);
-      }
-      operatorList.addOp(_util.OPS.paintFormXObjectBegin, [matrix, bbox]);
-      return this.getOperatorList({
-        stream: xobj,
-        task: task,
-        resources: dict.get('Resources') || resources,
-        operatorList: operatorList,
-        initialState: initialState
-      }).then(function () {
-        operatorList.addOp(_util.OPS.paintFormXObjectEnd, []);
-        if (group) {
-          operatorList.addOp(_util.OPS.endGroup, [groupOptions]);
-        }
-      });
-    },
-    buildPaintImageXObject: function PartialEvaluator_buildPaintImageXObject(resources, image, inline, operatorList, cacheKey, imageCache) {
-      var _this2 = this;
-
-      var dict = image.dict;
-      var w = dict.get('Width', 'W');
-      var h = dict.get('Height', 'H');
-      if (!(w && (0, _util.isNum)(w)) || !(h && (0, _util.isNum)(h))) {
-        (0, _util.warn)('Image dimensions are missing, or not numbers.');
-        return;
-      }
-      var maxImageSize = this.options.maxImageSize;
-      if (maxImageSize !== -1 && w * h > maxImageSize) {
-        (0, _util.warn)('Image exceeded maximum allowed size and was removed.');
-        return;
-      }
-      var imageMask = dict.get('ImageMask', 'IM') || false;
-      var imgData, args;
-      if (imageMask) {
-        var width = dict.get('Width', 'W');
-        var height = dict.get('Height', 'H');
-        var bitStrideLength = width + 7 >> 3;
-        var imgArray = image.getBytes(bitStrideLength * height);
-        var decode = dict.getArray('Decode', 'D');
-        imgData = _image.PDFImage.createMask({
-          imgArray: imgArray,
-          width: width,
-          height: height,
-          imageIsFromDecodeStream: image instanceof _stream.DecodeStream,
-          inverseDecode: !!decode && decode[0] > 0
-        });
-        imgData.cached = true;
-        args = [imgData];
-        operatorList.addOp(_util.OPS.paintImageMaskXObject, args);
-        if (cacheKey) {
-          imageCache[cacheKey] = {
-            fn: _util.OPS.paintImageMaskXObject,
-            args: args
-          };
-        }
-        return;
-      }
-      var softMask = dict.get('SMask', 'SM') || false;
-      var mask = dict.get('Mask') || false;
-      var SMALL_IMAGE_DIMENSIONS = 200;
-      if (inline && !softMask && !mask && !(image instanceof _stream.JpegStream) && w + h < SMALL_IMAGE_DIMENSIONS) {
-        var imageObj = new _image.PDFImage({
-          xref: this.xref,
-          res: resources,
-          image: image,
-          pdfFunctionFactory: this.pdfFunctionFactory
-        });
-        imgData = imageObj.createImageData(true);
-        operatorList.addOp(_util.OPS.paintInlineImageXObject, [imgData]);
-        return;
-      }
-      var nativeImageDecoderSupport = this.options.nativeImageDecoderSupport;
-      var objId = 'img_' + this.idFactory.createObjId();
-      operatorList.addDependency(objId);
-      args = [objId, w, h];
-      if (nativeImageDecoderSupport !== _util.NativeImageDecoding.NONE && !softMask && !mask && image instanceof _stream.JpegStream && NativeImageDecoder.isSupported(image, this.xref, resources, this.pdfFunctionFactory)) {
-        operatorList.addOp(_util.OPS.paintJpegXObject, args);
-        this.handler.send('obj', [objId, this.pageIndex, 'JpegStream', image.getIR(this.options.forceDataSchema)]);
-        if (cacheKey) {
-          imageCache[cacheKey] = {
-            fn: _util.OPS.paintJpegXObject,
-            args: args
-          };
-        }
-        return;
-      }
-      var nativeImageDecoder = null;
-      if (nativeImageDecoderSupport === _util.NativeImageDecoding.DECODE && (image instanceof _stream.JpegStream || mask instanceof _stream.JpegStream || softMask instanceof _stream.JpegStream)) {
-        nativeImageDecoder = new NativeImageDecoder({
-          xref: this.xref,
-          resources: resources,
-          handler: this.handler,
-          forceDataSchema: this.options.forceDataSchema,
-          pdfFunctionFactory: this.pdfFunctionFactory
-        });
-      }
-      _image.PDFImage.buildImage({
-        handler: this.handler,
-        xref: this.xref,
-        res: resources,
-        image: image,
-        nativeDecoder: nativeImageDecoder,
-        pdfFunctionFactory: this.pdfFunctionFactory
-      }).then(function (imageObj) {
-        var imgData = imageObj.createImageData(false);
-        _this2.handler.send('obj', [objId, _this2.pageIndex, 'Image', imgData], [imgData.data.buffer]);
-      }).catch(function (reason) {
-        (0, _util.warn)('Unable to decode image: ' + reason);
-        _this2.handler.send('obj', [objId, _this2.pageIndex, 'Image', null]);
-      });
-      operatorList.addOp(_util.OPS.paintImageXObject, args);
-      if (cacheKey) {
-        imageCache[cacheKey] = {
-          fn: _util.OPS.paintImageXObject,
-          args: args
-        };
-      }
-    },
-    handleSMask: function PartialEvaluator_handleSmask(smask, resources, operatorList, task, stateManager) {
-      var smaskContent = smask.get('G');
-      var smaskOptions = {
-        subtype: smask.get('S').name,
-        backdrop: smask.get('BC')
-      };
-      var transferObj = smask.get('TR');
-      if ((0, _function.isPDFFunction)(transferObj)) {
-        var transferFn = this.pdfFunctionFactory.create(transferObj);
-        var transferMap = new Uint8Array(256);
-        var tmp = new Float32Array(1);
-        for (var i = 0; i < 256; i++) {
-          tmp[0] = i / 255;
-          transferFn(tmp, 0, tmp, 0);
-          transferMap[i] = tmp[0] * 255 | 0;
-        }
-        smaskOptions.transferMap = transferMap;
-      }
-      return this.buildFormXObject(resources, smaskContent, smaskOptions, operatorList, task, stateManager.state.clone());
-    },
-    handleTilingType: function handleTilingType(fn, args, resources, pattern, patternDict, operatorList, task) {
-      var _this3 = this;
-
-      var tilingOpList = new OperatorList();
-      var resourcesArray = [patternDict.get('Resources'), resources];
-      var patternResources = _primitives.Dict.merge(this.xref, resourcesArray);
-      return this.getOperatorList({
-        stream: pattern,
-        task: task,
-        resources: patternResources,
-        operatorList: tilingOpList
-      }).then(function () {
-        return (0, _pattern.getTilingPatternIR)({
-          fnArray: tilingOpList.fnArray,
-          argsArray: tilingOpList.argsArray
-        }, patternDict, args);
-      }).then(function (tilingPatternIR) {
-        operatorList.addDependencies(tilingOpList.dependencies);
-        operatorList.addOp(fn, tilingPatternIR);
-      }, function (reason) {
-        if (_this3.options.ignoreErrors) {
-          _this3.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.unknown });
-          (0, _util.warn)('handleTilingType - ignoring pattern: "' + reason + '".');
-          return;
-        }
-        throw reason;
-      });
-    },
-
-    handleSetFont: function PartialEvaluator_handleSetFont(resources, fontArgs, fontRef, operatorList, task, state) {
-      var _this4 = this;
-
-      var fontName;
-      if (fontArgs) {
-        fontArgs = fontArgs.slice();
-        fontName = fontArgs[0].name;
-      }
-      return this.loadFont(fontName, fontRef, resources).then(function (translated) {
-        if (!translated.font.isType3Font) {
-          return translated;
-        }
-        return translated.loadType3Data(_this4, resources, operatorList, task).then(function () {
-          return translated;
-        }).catch(function (reason) {
-          _this4.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.font });
-          return new TranslatedFont('g_font_error', new _fonts.ErrorFont('Type3 font load error: ' + reason), translated.font);
-        });
-      }).then(function (translated) {
-        state.font = translated.font;
-        translated.send(_this4.handler);
-        return translated.loadedName;
-      });
-    },
-    handleText: function PartialEvaluator_handleText(chars, state) {
-      var _this5 = this;
-
-      var font = state.font;
-      var glyphs = font.charsToGlyphs(chars);
-      var isAddToPathSet = !!(state.textRenderingMode & _util.TextRenderingMode.ADD_TO_PATH_FLAG);
-      if (font.data && (isAddToPathSet || this.options.disableFontFace)) {
-        var buildPath = function buildPath(fontChar) {
-          if (!font.renderer.hasBuiltPath(fontChar)) {
-            var path = font.renderer.getPathJs(fontChar);
-            _this5.handler.send('commonobj', [font.loadedName + '_path_' + fontChar, 'FontPath', path]);
-          }
-        };
-        for (var i = 0, ii = glyphs.length; i < ii; i++) {
-          var glyph = glyphs[i];
-          buildPath(glyph.fontChar);
-          var accent = glyph.accent;
-          if (accent && accent.fontChar) {
-            buildPath(accent.fontChar);
-          }
-        }
-      }
-      return glyphs;
-    },
-    setGState: function PartialEvaluator_setGState(resources, gState, operatorList, task, stateManager) {
-      var _this6 = this;
-
-      var gStateObj = [];
-      var gStateKeys = gState.getKeys();
-      var promise = Promise.resolve();
-
-      var _loop = function _loop() {
-        var key = gStateKeys[i];
-        var value = gState.get(key);
-        switch (key) {
-          case 'Type':
-            break;
-          case 'LW':
-          case 'LC':
-          case 'LJ':
-          case 'ML':
-          case 'D':
-          case 'RI':
-          case 'FL':
-          case 'CA':
-          case 'ca':
-            gStateObj.push([key, value]);
-            break;
-          case 'Font':
-            promise = promise.then(function () {
-              return _this6.handleSetFont(resources, null, value[0], operatorList, task, stateManager.state).then(function (loadedName) {
-                operatorList.addDependency(loadedName);
-                gStateObj.push([key, [loadedName, value[1]]]);
-              });
-            });
-            break;
-          case 'BM':
-            gStateObj.push([key, normalizeBlendMode(value)]);
-            break;
-          case 'SMask':
-            if ((0, _primitives.isName)(value, 'None')) {
-              gStateObj.push([key, false]);
-              break;
-            }
-            if ((0, _primitives.isDict)(value)) {
-              promise = promise.then(function () {
-                return _this6.handleSMask(value, resources, operatorList, task, stateManager);
-              });
-              gStateObj.push([key, true]);
-            } else {
-              (0, _util.warn)('Unsupported SMask type');
-            }
-            break;
-          case 'OP':
-          case 'op':
-          case 'OPM':
-          case 'BG':
-          case 'BG2':
-          case 'UCR':
-          case 'UCR2':
-          case 'TR':
-          case 'TR2':
-          case 'HT':
-          case 'SM':
-          case 'SA':
-          case 'AIS':
-          case 'TK':
-            (0, _util.info)('graphic state operator ' + key);
-            break;
-          default:
-            (0, _util.info)('Unknown graphic state operator ' + key);
-            break;
-        }
-      };
-
-      for (var i = 0, ii = gStateKeys.length; i < ii; i++) {
-        _loop();
-      }
-      return promise.then(function () {
-        if (gStateObj.length > 0) {
-          operatorList.addOp(_util.OPS.setGState, [gStateObj]);
-        }
-      });
-    },
-    loadFont: function PartialEvaluator_loadFont(fontName, font, resources) {
-      var _this7 = this;
-
-      function errorFont() {
-        return Promise.resolve(new TranslatedFont('g_font_error', new _fonts.ErrorFont('Font ' + fontName + ' is not available'), font));
-      }
-      var fontRef,
-          xref = this.xref;
-      if (font) {
-        if (!(0, _primitives.isRef)(font)) {
-          throw new Error('The "font" object should be a reference.');
-        }
-        fontRef = font;
-      } else {
-        var fontRes = resources.get('Font');
-        if (fontRes) {
-          fontRef = fontRes.getRaw(fontName);
-        } else {
-          (0, _util.warn)('fontRes not available');
-          return errorFont();
-        }
-      }
-      if (!fontRef) {
-        (0, _util.warn)('fontRef not available');
-        return errorFont();
-      }
-      if (this.fontCache.has(fontRef)) {
-        return this.fontCache.get(fontRef);
-      }
-      font = xref.fetchIfRef(fontRef);
-      if (!(0, _primitives.isDict)(font)) {
-        return errorFont();
-      }
-      if (font.translated) {
-        return font.translated;
-      }
-      var fontCapability = (0, _util.createPromiseCapability)();
-      var preEvaluatedFont = this.preEvaluateFont(font);
-      var descriptor = preEvaluatedFont.descriptor;
-      var fontRefIsRef = (0, _primitives.isRef)(fontRef),
-          fontID;
-      if (fontRefIsRef) {
-        fontID = fontRef.toString();
-      }
-      if ((0, _primitives.isDict)(descriptor)) {
-        if (!descriptor.fontAliases) {
-          descriptor.fontAliases = Object.create(null);
-        }
-        var fontAliases = descriptor.fontAliases;
-        var hash = preEvaluatedFont.hash;
-        if (fontAliases[hash]) {
-          var aliasFontRef = fontAliases[hash].aliasRef;
-          if (fontRefIsRef && aliasFontRef && this.fontCache.has(aliasFontRef)) {
-            this.fontCache.putAlias(fontRef, aliasFontRef);
-            return this.fontCache.get(fontRef);
-          }
-        } else {
-          fontAliases[hash] = { fontID: _fonts.Font.getFontID() };
-        }
-        if (fontRefIsRef) {
-          fontAliases[hash].aliasRef = fontRef;
-        }
-        fontID = fontAliases[hash].fontID;
-      }
-      if (fontRefIsRef) {
-        this.fontCache.put(fontRef, fontCapability.promise);
-      } else {
-        if (!fontID) {
-          fontID = this.idFactory.createObjId();
-        }
-        this.fontCache.put('id_' + fontID, fontCapability.promise);
-      }
-      (0, _util.assert)(fontID, 'The "fontID" must be defined.');
-      font.loadedName = 'g_' + this.pdfManager.docId + '_f' + fontID;
-      font.translated = fontCapability.promise;
-      var translatedPromise;
-      try {
-        translatedPromise = this.translateFont(preEvaluatedFont);
-      } catch (e) {
-        translatedPromise = Promise.reject(e);
-      }
-      translatedPromise.then(function (translatedFont) {
-        if (translatedFont.fontType !== undefined) {
-          var xrefFontStats = xref.stats.fontTypes;
-          xrefFontStats[translatedFont.fontType] = true;
-        }
-        fontCapability.resolve(new TranslatedFont(font.loadedName, translatedFont, font));
-      }).catch(function (reason) {
-        _this7.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.font });
-        try {
-          var descriptor = preEvaluatedFont.descriptor;
-          var fontFile3 = descriptor && descriptor.get('FontFile3');
-          var subtype = fontFile3 && fontFile3.get('Subtype');
-          var fontType = (0, _fonts.getFontType)(preEvaluatedFont.type, subtype && subtype.name);
-          var xrefFontStats = xref.stats.fontTypes;
-          xrefFontStats[fontType] = true;
-        } catch (ex) {}
-        fontCapability.resolve(new TranslatedFont(font.loadedName, new _fonts.ErrorFont(reason instanceof Error ? reason.message : reason), font));
-      });
-      return fontCapability.promise;
-    },
-    buildPath: function PartialEvaluator_buildPath(operatorList, fn, args) {
-      var lastIndex = operatorList.length - 1;
-      if (!args) {
-        args = [];
-      }
-      if (lastIndex < 0 || operatorList.fnArray[lastIndex] !== _util.OPS.constructPath) {
-        operatorList.addOp(_util.OPS.constructPath, [[fn], args]);
-      } else {
-        var opArgs = operatorList.argsArray[lastIndex];
-        opArgs[0].push(fn);
-        Array.prototype.push.apply(opArgs[1], args);
-      }
-    },
-    handleColorN: function PartialEvaluator_handleColorN(operatorList, fn, args, cs, patterns, resources, task) {
-      var patternName = args[args.length - 1];
-      var pattern;
-      if ((0, _primitives.isName)(patternName) && (pattern = patterns.get(patternName.name))) {
-        var dict = (0, _primitives.isStream)(pattern) ? pattern.dict : pattern;
-        var typeNum = dict.get('PatternType');
-        if (typeNum === TILING_PATTERN) {
-          var color = cs.base ? cs.base.getRgb(args, 0) : null;
-          return this.handleTilingType(fn, color, resources, pattern, dict, operatorList, task);
-        } else if (typeNum === SHADING_PATTERN) {
-          var shading = dict.get('Shading');
-          var matrix = dict.getArray('Matrix');
-          pattern = _pattern.Pattern.parseShading(shading, matrix, this.xref, resources, this.handler, this.pdfFunctionFactory);
-          operatorList.addOp(fn, pattern.getIR());
-          return Promise.resolve();
-        }
-        return Promise.reject(new Error('Unknown PatternType: ' + typeNum));
-      }
-      operatorList.addOp(fn, args);
-      return Promise.resolve();
-    },
-    getOperatorList: function getOperatorList(_ref3) {
-      var _this8 = this;
-
-      var stream = _ref3.stream,
-          task = _ref3.task,
-          resources = _ref3.resources,
-          operatorList = _ref3.operatorList,
-          _ref3$initialState = _ref3.initialState,
-          initialState = _ref3$initialState === undefined ? null : _ref3$initialState;
-
-      resources = resources || _primitives.Dict.empty;
-      initialState = initialState || new EvalState();
-      if (!operatorList) {
-        throw new Error('getOperatorList: missing "operatorList" parameter');
-      }
-      var self = this;
-      var xref = this.xref;
-      var imageCache = Object.create(null);
-      var xobjs = resources.get('XObject') || _primitives.Dict.empty;
-      var patterns = resources.get('Pattern') || _primitives.Dict.empty;
-      var stateManager = new StateManager(initialState);
-      var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
-      var timeSlotManager = new TimeSlotManager();
-      function closePendingRestoreOPS(argument) {
-        for (var i = 0, ii = preprocessor.savedStatesDepth; i < ii; i++) {
-          operatorList.addOp(_util.OPS.restore, []);
-        }
-      }
-      return new Promise(function promiseBody(resolve, reject) {
-        var next = function next(promise) {
-          promise.then(function () {
-            try {
-              promiseBody(resolve, reject);
-            } catch (ex) {
-              reject(ex);
-            }
-          }, reject);
-        };
-        task.ensureNotTerminated();
-        timeSlotManager.reset();
-        var stop,
-            operation = {},
-            i,
-            ii,
-            cs;
-        while (!(stop = timeSlotManager.check())) {
-          operation.args = null;
-          if (!preprocessor.read(operation)) {
-            break;
-          }
-          var args = operation.args;
-          var fn = operation.fn;
-          switch (fn | 0) {
-            case _util.OPS.paintXObject:
-              var name = args[0].name;
-              if (name && imageCache[name] !== undefined) {
-                operatorList.addOp(imageCache[name].fn, imageCache[name].args);
-                args = null;
-                continue;
-              }
-              next(new Promise(function (resolveXObject, rejectXObject) {
-                if (!name) {
-                  throw new _util.FormatError('XObject must be referred to by name.');
-                }
-                var xobj = xobjs.get(name);
-                if (!xobj) {
-                  operatorList.addOp(fn, args);
-                  resolveXObject();
-                  return;
-                }
-                if (!(0, _primitives.isStream)(xobj)) {
-                  throw new _util.FormatError('XObject should be a stream');
-                }
-                var type = xobj.dict.get('Subtype');
-                if (!(0, _primitives.isName)(type)) {
-                  throw new _util.FormatError('XObject should have a Name subtype');
-                }
-                if (type.name === 'Form') {
-                  stateManager.save();
-                  self.buildFormXObject(resources, xobj, null, operatorList, task, stateManager.state.clone()).then(function () {
-                    stateManager.restore();
-                    resolveXObject();
-                  }, rejectXObject);
-                  return;
-                } else if (type.name === 'Image') {
-                  self.buildPaintImageXObject(resources, xobj, false, operatorList, name, imageCache);
-                } else if (type.name === 'PS') {
-                  (0, _util.info)('Ignored XObject subtype PS');
-                } else {
-                  throw new _util.FormatError('Unhandled XObject subtype ' + type.name);
-                }
-                resolveXObject();
-              }).catch(function (reason) {
-                if (self.options.ignoreErrors) {
-                  self.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.unknown });
-                  (0, _util.warn)('getOperatorList - ignoring XObject: "' + reason + '".');
-                  return;
-                }
-                throw reason;
-              }));
-              return;
-            case _util.OPS.setFont:
-              var fontSize = args[1];
-              next(self.handleSetFont(resources, args, null, operatorList, task, stateManager.state).then(function (loadedName) {
-                operatorList.addDependency(loadedName);
-                operatorList.addOp(_util.OPS.setFont, [loadedName, fontSize]);
-              }));
-              return;
-            case _util.OPS.endInlineImage:
-              var cacheKey = args[0].cacheKey;
-              if (cacheKey) {
-                var cacheEntry = imageCache[cacheKey];
-                if (cacheEntry !== undefined) {
-                  operatorList.addOp(cacheEntry.fn, cacheEntry.args);
-                  args = null;
-                  continue;
-                }
-              }
-              self.buildPaintImageXObject(resources, args[0], true, operatorList, cacheKey, imageCache);
-              args = null;
-              continue;
-            case _util.OPS.showText:
-              args[0] = self.handleText(args[0], stateManager.state);
-              break;
-            case _util.OPS.showSpacedText:
-              var arr = args[0];
-              var combinedGlyphs = [];
-              var arrLength = arr.length;
-              var state = stateManager.state;
-              for (i = 0; i < arrLength; ++i) {
-                var arrItem = arr[i];
-                if ((0, _util.isString)(arrItem)) {
-                  Array.prototype.push.apply(combinedGlyphs, self.handleText(arrItem, state));
-                } else if ((0, _util.isNum)(arrItem)) {
-                  combinedGlyphs.push(arrItem);
-                }
-              }
-              args[0] = combinedGlyphs;
-              fn = _util.OPS.showText;
-              break;
-            case _util.OPS.nextLineShowText:
-              operatorList.addOp(_util.OPS.nextLine);
-              args[0] = self.handleText(args[0], stateManager.state);
-              fn = _util.OPS.showText;
-              break;
-            case _util.OPS.nextLineSetSpacingShowText:
-              operatorList.addOp(_util.OPS.nextLine);
-              operatorList.addOp(_util.OPS.setWordSpacing, [args.shift()]);
-              operatorList.addOp(_util.OPS.setCharSpacing, [args.shift()]);
-              args[0] = self.handleText(args[0], stateManager.state);
-              fn = _util.OPS.showText;
-              break;
-            case _util.OPS.setTextRenderingMode:
-              stateManager.state.textRenderingMode = args[0];
-              break;
-            case _util.OPS.setFillColorSpace:
-              stateManager.state.fillColorSpace = _colorspace.ColorSpace.parse(args[0], xref, resources, self.pdfFunctionFactory);
-              continue;
-            case _util.OPS.setStrokeColorSpace:
-              stateManager.state.strokeColorSpace = _colorspace.ColorSpace.parse(args[0], xref, resources, self.pdfFunctionFactory);
-              continue;
-            case _util.OPS.setFillColor:
-              cs = stateManager.state.fillColorSpace;
-              args = cs.getRgb(args, 0);
-              fn = _util.OPS.setFillRGBColor;
-              break;
-            case _util.OPS.setStrokeColor:
-              cs = stateManager.state.strokeColorSpace;
-              args = cs.getRgb(args, 0);
-              fn = _util.OPS.setStrokeRGBColor;
-              break;
-            case _util.OPS.setFillGray:
-              stateManager.state.fillColorSpace = _colorspace.ColorSpace.singletons.gray;
-              args = _colorspace.ColorSpace.singletons.gray.getRgb(args, 0);
-              fn = _util.OPS.setFillRGBColor;
-              break;
-            case _util.OPS.setStrokeGray:
-              stateManager.state.strokeColorSpace = _colorspace.ColorSpace.singletons.gray;
-              args = _colorspace.ColorSpace.singletons.gray.getRgb(args, 0);
-              fn = _util.OPS.setStrokeRGBColor;
-              break;
-            case _util.OPS.setFillCMYKColor:
-              stateManager.state.fillColorSpace = _colorspace.ColorSpace.singletons.cmyk;
-              args = _colorspace.ColorSpace.singletons.cmyk.getRgb(args, 0);
-              fn = _util.OPS.setFillRGBColor;
-              break;
-            case _util.OPS.setStrokeCMYKColor:
-              stateManager.state.strokeColorSpace = _colorspace.ColorSpace.singletons.cmyk;
-              args = _colorspace.ColorSpace.singletons.cmyk.getRgb(args, 0);
-              fn = _util.OPS.setStrokeRGBColor;
-              break;
-            case _util.OPS.setFillRGBColor:
-              stateManager.state.fillColorSpace = _colorspace.ColorSpace.singletons.rgb;
-              args = _colorspace.ColorSpace.singletons.rgb.getRgb(args, 0);
-              break;
-            case _util.OPS.setStrokeRGBColor:
-              stateManager.state.strokeColorSpace = _colorspace.ColorSpace.singletons.rgb;
-              args = _colorspace.ColorSpace.singletons.rgb.getRgb(args, 0);
-              break;
-            case _util.OPS.setFillColorN:
-              cs = stateManager.state.fillColorSpace;
-              if (cs.name === 'Pattern') {
-                next(self.handleColorN(operatorList, _util.OPS.setFillColorN, args, cs, patterns, resources, task));
-                return;
-              }
-              args = cs.getRgb(args, 0);
-              fn = _util.OPS.setFillRGBColor;
-              break;
-            case _util.OPS.setStrokeColorN:
-              cs = stateManager.state.strokeColorSpace;
-              if (cs.name === 'Pattern') {
-                next(self.handleColorN(operatorList, _util.OPS.setStrokeColorN, args, cs, patterns, resources, task));
-                return;
-              }
-              args = cs.getRgb(args, 0);
-              fn = _util.OPS.setStrokeRGBColor;
-              break;
-            case _util.OPS.shadingFill:
-              var shadingRes = resources.get('Shading');
-              if (!shadingRes) {
-                throw new _util.FormatError('No shading resource found');
-              }
-              var shading = shadingRes.get(args[0].name);
-              if (!shading) {
-                throw new _util.FormatError('No shading object found');
-              }
-              var shadingFill = _pattern.Pattern.parseShading(shading, null, xref, resources, self.handler, self.pdfFunctionFactory);
-              var patternIR = shadingFill.getIR();
-              args = [patternIR];
-              fn = _util.OPS.shadingFill;
-              break;
-            case _util.OPS.setGState:
-              var dictName = args[0];
-              var extGState = resources.get('ExtGState');
-              if (!(0, _primitives.isDict)(extGState) || !extGState.has(dictName.name)) {
-                break;
-              }
-              var gState = extGState.get(dictName.name);
-              next(self.setGState(resources, gState, operatorList, task, stateManager));
-              return;
-            case _util.OPS.moveTo:
-            case _util.OPS.lineTo:
-            case _util.OPS.curveTo:
-            case _util.OPS.curveTo2:
-            case _util.OPS.curveTo3:
-            case _util.OPS.closePath:
-              self.buildPath(operatorList, fn, args);
-              continue;
-            case _util.OPS.rectangle:
-              self.buildPath(operatorList, fn, args);
-              continue;
-            case _util.OPS.markPoint:
-            case _util.OPS.markPointProps:
-            case _util.OPS.beginMarkedContent:
-            case _util.OPS.beginMarkedContentProps:
-            case _util.OPS.endMarkedContent:
-            case _util.OPS.beginCompat:
-            case _util.OPS.endCompat:
-              continue;
-            default:
-              if (args !== null) {
-                for (i = 0, ii = args.length; i < ii; i++) {
-                  if (args[i] instanceof _primitives.Dict) {
-                    break;
-                  }
-                }
-                if (i < ii) {
-                  (0, _util.warn)('getOperatorList - ignoring operator: ' + fn);
-                  continue;
-                }
-              }
-          }
-          operatorList.addOp(fn, args);
-        }
-        if (stop) {
-          next(deferred);
-          return;
-        }
-        closePendingRestoreOPS();
-        resolve();
-      }).catch(function (reason) {
-        if (_this8.options.ignoreErrors) {
-          _this8.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.unknown });
-          (0, _util.warn)('getOperatorList - ignoring errors during task: ' + task.name);
-          closePendingRestoreOPS();
-          return;
-        }
-        throw reason;
-      });
-    },
-    getTextContent: function getTextContent(_ref4) {
-      var _this9 = this;
-
-      var stream = _ref4.stream,
-          task = _ref4.task,
-          resources = _ref4.resources,
-          _ref4$stateManager = _ref4.stateManager,
-          stateManager = _ref4$stateManager === undefined ? null : _ref4$stateManager,
-          _ref4$normalizeWhites = _ref4.normalizeWhitespace,
-          normalizeWhitespace = _ref4$normalizeWhites === undefined ? false : _ref4$normalizeWhites,
-          _ref4$combineTextItem = _ref4.combineTextItems,
-          combineTextItems = _ref4$combineTextItem === undefined ? false : _ref4$combineTextItem,
-          sink = _ref4.sink,
-          _ref4$seenStyles = _ref4.seenStyles,
-          seenStyles = _ref4$seenStyles === undefined ? Object.create(null) : _ref4$seenStyles;
-
-      resources = resources || _primitives.Dict.empty;
-      stateManager = stateManager || new StateManager(new TextState());
-      var WhitespaceRegexp = /\s/g;
-      var textContent = {
-        items: [],
-        styles: Object.create(null)
-      };
-      var textContentItem = {
-        initialized: false,
-        str: [],
-        width: 0,
-        height: 0,
-        vertical: false,
-        lastAdvanceWidth: 0,
-        lastAdvanceHeight: 0,
-        textAdvanceScale: 0,
-        spaceWidth: 0,
-        fakeSpaceMin: Infinity,
-        fakeMultiSpaceMin: Infinity,
-        fakeMultiSpaceMax: -0,
-        textRunBreakAllowed: false,
-        transform: null,
-        fontName: null
-      };
-      var SPACE_FACTOR = 0.3;
-      var MULTI_SPACE_FACTOR = 1.5;
-      var MULTI_SPACE_FACTOR_MAX = 4;
-      var self = this;
-      var xref = this.xref;
-      var xobjs = null;
-      var skipEmptyXObjs = Object.create(null);
-      var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
-      var textState;
-      function ensureTextContentItem() {
-        if (textContentItem.initialized) {
-          return textContentItem;
-        }
-        var font = textState.font;
-        if (!(font.loadedName in seenStyles)) {
-          seenStyles[font.loadedName] = true;
-          textContent.styles[font.loadedName] = {
-            fontFamily: font.fallbackName,
-            ascent: font.ascent,
-            descent: font.descent,
-            vertical: font.vertical
-          };
-        }
-        textContentItem.fontName = font.loadedName;
-        var tsm = [textState.fontSize * textState.textHScale, 0, 0, textState.fontSize, 0, textState.textRise];
-        if (font.isType3Font && textState.fontMatrix !== _util.FONT_IDENTITY_MATRIX && textState.fontSize === 1) {
-          var glyphHeight = font.bbox[3] - font.bbox[1];
-          if (glyphHeight > 0) {
-            glyphHeight = glyphHeight * textState.fontMatrix[3];
-            tsm[3] *= glyphHeight;
-          }
-        }
-        var trm = _util.Util.transform(textState.ctm, _util.Util.transform(textState.textMatrix, tsm));
-        textContentItem.transform = trm;
-        if (!font.vertical) {
-          textContentItem.width = 0;
-          textContentItem.height = Math.sqrt(trm[2] * trm[2] + trm[3] * trm[3]);
-          textContentItem.vertical = false;
-        } else {
-          textContentItem.width = Math.sqrt(trm[0] * trm[0] + trm[1] * trm[1]);
-          textContentItem.height = 0;
-          textContentItem.vertical = true;
-        }
-        var a = textState.textLineMatrix[0];
-        var b = textState.textLineMatrix[1];
-        var scaleLineX = Math.sqrt(a * a + b * b);
-        a = textState.ctm[0];
-        b = textState.ctm[1];
-        var scaleCtmX = Math.sqrt(a * a + b * b);
-        textContentItem.textAdvanceScale = scaleCtmX * scaleLineX;
-        textContentItem.lastAdvanceWidth = 0;
-        textContentItem.lastAdvanceHeight = 0;
-        var spaceWidth = font.spaceWidth / 1000 * textState.fontSize;
-        if (spaceWidth) {
-          textContentItem.spaceWidth = spaceWidth;
-          textContentItem.fakeSpaceMin = spaceWidth * SPACE_FACTOR;
-          textContentItem.fakeMultiSpaceMin = spaceWidth * MULTI_SPACE_FACTOR;
-          textContentItem.fakeMultiSpaceMax = spaceWidth * MULTI_SPACE_FACTOR_MAX;
-          textContentItem.textRunBreakAllowed = !font.isMonospace;
-        } else {
-          textContentItem.spaceWidth = 0;
-          textContentItem.fakeSpaceMin = Infinity;
-          textContentItem.fakeMultiSpaceMin = Infinity;
-          textContentItem.fakeMultiSpaceMax = 0;
-          textContentItem.textRunBreakAllowed = false;
-        }
-        textContentItem.initialized = true;
-        return textContentItem;
-      }
-      function replaceWhitespace(str) {
-        var i = 0,
-            ii = str.length,
-            code;
-        while (i < ii && (code = str.charCodeAt(i)) >= 0x20 && code <= 0x7F) {
-          i++;
-        }
-        return i < ii ? str.replace(WhitespaceRegexp, ' ') : str;
-      }
-      function runBidiTransform(textChunk) {
-        var str = textChunk.str.join('');
-        var bidiResult = (0, _bidi.bidi)(str, -1, textChunk.vertical);
-        return {
-          str: normalizeWhitespace ? replaceWhitespace(bidiResult.str) : bidiResult.str,
-          dir: bidiResult.dir,
-          width: textChunk.width,
-          height: textChunk.height,
-          transform: textChunk.transform,
-          fontName: textChunk.fontName
-        };
-      }
-      function handleSetFont(fontName, fontRef) {
-        return self.loadFont(fontName, fontRef, resources).then(function (translated) {
-          textState.font = translated.font;
-          textState.fontMatrix = translated.font.fontMatrix || _util.FONT_IDENTITY_MATRIX;
-        });
-      }
-      function buildTextContentItem(chars) {
-        var font = textState.font;
-        var textChunk = ensureTextContentItem();
-        var width = 0;
-        var height = 0;
-        var glyphs = font.charsToGlyphs(chars);
-        for (var i = 0; i < glyphs.length; i++) {
-          var glyph = glyphs[i];
-          var glyphWidth = null;
-          if (font.vertical && glyph.vmetric) {
-            glyphWidth = glyph.vmetric[0];
-          } else {
-            glyphWidth = glyph.width;
-          }
-          var glyphUnicode = glyph.unicode;
-          var NormalizedUnicodes = (0, _unicode.getNormalizedUnicodes)();
-          if (NormalizedUnicodes[glyphUnicode] !== undefined) {
-            glyphUnicode = NormalizedUnicodes[glyphUnicode];
-          }
-          glyphUnicode = (0, _unicode.reverseIfRtl)(glyphUnicode);
-          var charSpacing = textState.charSpacing;
-          if (glyph.isSpace) {
-            var wordSpacing = textState.wordSpacing;
-            charSpacing += wordSpacing;
-            if (wordSpacing > 0) {
-              addFakeSpaces(wordSpacing, textChunk.str);
-            }
-          }
-          var tx = 0;
-          var ty = 0;
-          if (!font.vertical) {
-            var w0 = glyphWidth * textState.fontMatrix[0];
-            tx = (w0 * textState.fontSize + charSpacing) * textState.textHScale;
-            width += tx;
-          } else {
-            var w1 = glyphWidth * textState.fontMatrix[0];
-            ty = w1 * textState.fontSize + charSpacing;
-            height += ty;
-          }
-          textState.translateTextMatrix(tx, ty);
-          textChunk.str.push(glyphUnicode);
-        }
-        if (!font.vertical) {
-          textChunk.lastAdvanceWidth = width;
-          textChunk.width += width;
-        } else {
-          textChunk.lastAdvanceHeight = height;
-          textChunk.height += Math.abs(height);
-        }
-        return textChunk;
-      }
-      function addFakeSpaces(width, strBuf) {
-        if (width < textContentItem.fakeSpaceMin) {
-          return;
-        }
-        if (width < textContentItem.fakeMultiSpaceMin) {
-          strBuf.push(' ');
-          return;
-        }
-        var fakeSpaces = Math.round(width / textContentItem.spaceWidth);
-        while (fakeSpaces-- > 0) {
-          strBuf.push(' ');
-        }
-      }
-      function flushTextContentItem() {
-        if (!textContentItem.initialized) {
-          return;
-        }
-        textContentItem.width *= textContentItem.textAdvanceScale;
-        textContentItem.height *= textContentItem.textAdvanceScale;
-        textContent.items.push(runBidiTransform(textContentItem));
-        textContentItem.initialized = false;
-        textContentItem.str.length = 0;
-      }
-      function enqueueChunk() {
-        var length = textContent.items.length;
-        if (length > 0) {
-          sink.enqueue(textContent, length);
-          textContent.items = [];
-          textContent.styles = Object.create(null);
-        }
-      }
-      var timeSlotManager = new TimeSlotManager();
-      return new Promise(function promiseBody(resolve, reject) {
-        var next = function next(promise) {
-          enqueueChunk();
-          Promise.all([promise, sink.ready]).then(function () {
-            try {
-              promiseBody(resolve, reject);
-            } catch (ex) {
-              reject(ex);
-            }
-          }, reject);
-        };
-        task.ensureNotTerminated();
-        timeSlotManager.reset();
-        var stop,
-            operation = {},
-            args = [];
-        while (!(stop = timeSlotManager.check())) {
-          args.length = 0;
-          operation.args = args;
-          if (!preprocessor.read(operation)) {
-            break;
-          }
-          textState = stateManager.state;
-          var fn = operation.fn;
-          args = operation.args;
-          var advance, diff;
-          switch (fn | 0) {
-            case _util.OPS.setFont:
-              var fontNameArg = args[0].name,
-                  fontSizeArg = args[1];
-              if (textState.font && fontNameArg === textState.fontName && fontSizeArg === textState.fontSize) {
-                break;
-              }
-              flushTextContentItem();
-              textState.fontName = fontNameArg;
-              textState.fontSize = fontSizeArg;
-              next(handleSetFont(fontNameArg, null));
-              return;
-            case _util.OPS.setTextRise:
-              flushTextContentItem();
-              textState.textRise = args[0];
-              break;
-            case _util.OPS.setHScale:
-              flushTextContentItem();
-              textState.textHScale = args[0] / 100;
-              break;
-            case _util.OPS.setLeading:
-              flushTextContentItem();
-              textState.leading = args[0];
-              break;
-            case _util.OPS.moveText:
-              var isSameTextLine = !textState.font ? false : (textState.font.vertical ? args[0] : args[1]) === 0;
-              advance = args[0] - args[1];
-              if (combineTextItems && isSameTextLine && textContentItem.initialized && advance > 0 && advance <= textContentItem.fakeMultiSpaceMax) {
-                textState.translateTextLineMatrix(args[0], args[1]);
-                textContentItem.width += args[0] - textContentItem.lastAdvanceWidth;
-                textContentItem.height += args[1] - textContentItem.lastAdvanceHeight;
-                diff = args[0] - textContentItem.lastAdvanceWidth - (args[1] - textContentItem.lastAdvanceHeight);
-                addFakeSpaces(diff, textContentItem.str);
-                break;
-              }
-              flushTextContentItem();
-              textState.translateTextLineMatrix(args[0], args[1]);
-              textState.textMatrix = textState.textLineMatrix.slice();
-              break;
-            case _util.OPS.setLeadingMoveText:
-              flushTextContentItem();
-              textState.leading = -args[1];
-              textState.translateTextLineMatrix(args[0], args[1]);
-              textState.textMatrix = textState.textLineMatrix.slice();
-              break;
-            case _util.OPS.nextLine:
-              flushTextContentItem();
-              textState.carriageReturn();
-              break;
-            case _util.OPS.setTextMatrix:
-              advance = textState.calcTextLineMatrixAdvance(args[0], args[1], args[2], args[3], args[4], args[5]);
-              if (combineTextItems && advance !== null && textContentItem.initialized && advance.value > 0 && advance.value <= textContentItem.fakeMultiSpaceMax) {
-                textState.translateTextLineMatrix(advance.width, advance.height);
-                textContentItem.width += advance.width - textContentItem.lastAdvanceWidth;
-                textContentItem.height += advance.height - textContentItem.lastAdvanceHeight;
-                diff = advance.width - textContentItem.lastAdvanceWidth - (advance.height - textContentItem.lastAdvanceHeight);
-                addFakeSpaces(diff, textContentItem.str);
-                break;
-              }
-              flushTextContentItem();
-              textState.setTextMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
-              textState.setTextLineMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
-              break;
-            case _util.OPS.setCharSpacing:
-              textState.charSpacing = args[0];
-              break;
-            case _util.OPS.setWordSpacing:
-              textState.wordSpacing = args[0];
-              break;
-            case _util.OPS.beginText:
-              flushTextContentItem();
-              textState.textMatrix = _util.IDENTITY_MATRIX.slice();
-              textState.textLineMatrix = _util.IDENTITY_MATRIX.slice();
-              break;
-            case _util.OPS.showSpacedText:
-              var items = args[0];
-              var offset;
-              for (var j = 0, jj = items.length; j < jj; j++) {
-                if (typeof items[j] === 'string') {
-                  buildTextContentItem(items[j]);
-                } else if ((0, _util.isNum)(items[j])) {
-                  ensureTextContentItem();
-                  advance = items[j] * textState.fontSize / 1000;
-                  var breakTextRun = false;
-                  if (textState.font.vertical) {
-                    offset = advance;
-                    textState.translateTextMatrix(0, offset);
-                    breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
-                    if (!breakTextRun) {
-                      textContentItem.height += offset;
-                    }
-                  } else {
-                    advance = -advance;
-                    offset = advance * textState.textHScale;
-                    textState.translateTextMatrix(offset, 0);
-                    breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
-                    if (!breakTextRun) {
-                      textContentItem.width += offset;
-                    }
-                  }
-                  if (breakTextRun) {
-                    flushTextContentItem();
-                  } else if (advance > 0) {
-                    addFakeSpaces(advance, textContentItem.str);
-                  }
-                }
-              }
-              break;
-            case _util.OPS.showText:
-              buildTextContentItem(args[0]);
-              break;
-            case _util.OPS.nextLineShowText:
-              flushTextContentItem();
-              textState.carriageReturn();
-              buildTextContentItem(args[0]);
-              break;
-            case _util.OPS.nextLineSetSpacingShowText:
-              flushTextContentItem();
-              textState.wordSpacing = args[0];
-              textState.charSpacing = args[1];
-              textState.carriageReturn();
-              buildTextContentItem(args[2]);
-              break;
-            case _util.OPS.paintXObject:
-              flushTextContentItem();
-              if (!xobjs) {
-                xobjs = resources.get('XObject') || _primitives.Dict.empty;
-              }
-              var name = args[0].name;
-              if (name && skipEmptyXObjs[name] !== undefined) {
-                break;
-              }
-              next(new Promise(function (resolveXObject, rejectXObject) {
-                if (!name) {
-                  throw new _util.FormatError('XObject must be referred to by name.');
-                }
-                var xobj = xobjs.get(name);
-                if (!xobj) {
-                  resolveXObject();
-                  return;
-                }
-                if (!(0, _primitives.isStream)(xobj)) {
-                  throw new _util.FormatError('XObject should be a stream');
-                }
-                var type = xobj.dict.get('Subtype');
-                if (!(0, _primitives.isName)(type)) {
-                  throw new _util.FormatError('XObject should have a Name subtype');
-                }
-                if (type.name !== 'Form') {
-                  skipEmptyXObjs[name] = true;
-                  resolveXObject();
-                  return;
-                }
-                var currentState = stateManager.state.clone();
-                var xObjStateManager = new StateManager(currentState);
-                var matrix = xobj.dict.getArray('Matrix');
-                if (Array.isArray(matrix) && matrix.length === 6) {
-                  xObjStateManager.transform(matrix);
-                }
-                enqueueChunk();
-                var sinkWrapper = {
-                  enqueueInvoked: false,
-                  enqueue: function enqueue(chunk, size) {
-                    this.enqueueInvoked = true;
-                    sink.enqueue(chunk, size);
-                  },
-
-                  get desiredSize() {
-                    return sink.desiredSize;
-                  },
-                  get ready() {
-                    return sink.ready;
-                  }
-                };
-                self.getTextContent({
-                  stream: xobj,
-                  task: task,
-                  resources: xobj.dict.get('Resources') || resources,
-                  stateManager: xObjStateManager,
-                  normalizeWhitespace: normalizeWhitespace,
-                  combineTextItems: combineTextItems,
-                  sink: sinkWrapper,
-                  seenStyles: seenStyles
-                }).then(function () {
-                  if (!sinkWrapper.enqueueInvoked) {
-                    skipEmptyXObjs[name] = true;
-                  }
-                  resolveXObject();
-                }, rejectXObject);
-              }).catch(function (reason) {
-                if (reason instanceof _util.AbortException) {
-                  return;
-                }
-                if (self.options.ignoreErrors) {
-                  (0, _util.warn)('getTextContent - ignoring XObject: "' + reason + '".');
-                  return;
-                }
-                throw reason;
-              }));
-              return;
-            case _util.OPS.setGState:
-              flushTextContentItem();
-              var dictName = args[0];
-              var extGState = resources.get('ExtGState');
-              if (!(0, _primitives.isDict)(extGState) || !(0, _primitives.isName)(dictName)) {
-                break;
-              }
-              var gState = extGState.get(dictName.name);
-              if (!(0, _primitives.isDict)(gState)) {
-                break;
-              }
-              var gStateFont = gState.get('Font');
-              if (gStateFont) {
-                textState.fontName = null;
-                textState.fontSize = gStateFont[1];
-                next(handleSetFont(null, gStateFont[0]));
-                return;
-              }
-              break;
-          }
-          if (textContent.items.length >= sink.desiredSize) {
-            stop = true;
-            break;
-          }
-        }
-        if (stop) {
-          next(deferred);
-          return;
-        }
-        flushTextContentItem();
-        enqueueChunk();
-        resolve();
-      }).catch(function (reason) {
-        if (reason instanceof _util.AbortException) {
-          return;
-        }
-        if (_this9.options.ignoreErrors) {
-          (0, _util.warn)('getTextContent - ignoring errors during task: ' + task.name);
-          flushTextContentItem();
-          enqueueChunk();
-          return;
-        }
-        throw reason;
-      });
-    },
-
-    extractDataStructures: function PartialEvaluator_extractDataStructures(dict, baseDict, properties) {
-      var _this10 = this;
-
-      var xref = this.xref;
-      var toUnicode = dict.get('ToUnicode') || baseDict.get('ToUnicode');
-      var toUnicodePromise = toUnicode ? this.readToUnicode(toUnicode) : Promise.resolve(undefined);
-      if (properties.composite) {
-        var cidSystemInfo = dict.get('CIDSystemInfo');
-        if ((0, _primitives.isDict)(cidSystemInfo)) {
-          properties.cidSystemInfo = {
-            registry: cidSystemInfo.get('Registry'),
-            ordering: cidSystemInfo.get('Ordering'),
-            supplement: cidSystemInfo.get('Supplement')
-          };
-        }
-        var cidToGidMap = dict.get('CIDToGIDMap');
-        if ((0, _primitives.isStream)(cidToGidMap)) {
-          properties.cidToGidMap = this.readCidToGidMap(cidToGidMap);
-        }
-      }
-      var differences = [];
-      var baseEncodingName = null;
-      var encoding;
-      if (dict.has('Encoding')) {
-        encoding = dict.get('Encoding');
-        if ((0, _primitives.isDict)(encoding)) {
-          baseEncodingName = encoding.get('BaseEncoding');
-          baseEncodingName = (0, _primitives.isName)(baseEncodingName) ? baseEncodingName.name : null;
-          if (encoding.has('Differences')) {
-            var diffEncoding = encoding.get('Differences');
-            var index = 0;
-            for (var j = 0, jj = diffEncoding.length; j < jj; j++) {
-              var data = xref.fetchIfRef(diffEncoding[j]);
-              if ((0, _util.isNum)(data)) {
-                index = data;
-              } else if ((0, _primitives.isName)(data)) {
-                differences[index++] = data.name;
-              } else {
-                throw new _util.FormatError('Invalid entry in \'Differences\' array: ' + data);
-              }
-            }
-          }
-        } else if ((0, _primitives.isName)(encoding)) {
-          baseEncodingName = encoding.name;
-        } else {
-          throw new _util.FormatError('Encoding is not a Name nor a Dict');
-        }
-        if (baseEncodingName !== 'MacRomanEncoding' && baseEncodingName !== 'MacExpertEncoding' && baseEncodingName !== 'WinAnsiEncoding') {
-          baseEncodingName = null;
-        }
-      }
-      if (baseEncodingName) {
-        properties.defaultEncoding = (0, _encodings.getEncoding)(baseEncodingName).slice();
-      } else {
-        var isSymbolicFont = !!(properties.flags & _fonts.FontFlags.Symbolic);
-        var isNonsymbolicFont = !!(properties.flags & _fonts.FontFlags.Nonsymbolic);
-        encoding = _encodings.StandardEncoding;
-        if (properties.type === 'TrueType' && !isNonsymbolicFont) {
-          encoding = _encodings.WinAnsiEncoding;
-        }
-        if (isSymbolicFont) {
-          encoding = _encodings.MacRomanEncoding;
-          if (!properties.file) {
-            if (/Symbol/i.test(properties.name)) {
-              encoding = _encodings.SymbolSetEncoding;
-            } else if (/Dingbats/i.test(properties.name)) {
-              encoding = _encodings.ZapfDingbatsEncoding;
-            }
-          }
-        }
-        properties.defaultEncoding = encoding;
-      }
-      properties.differences = differences;
-      properties.baseEncodingName = baseEncodingName;
-      properties.hasEncoding = !!baseEncodingName || differences.length > 0;
-      properties.dict = dict;
-      return toUnicodePromise.then(function (toUnicode) {
-        properties.toUnicode = toUnicode;
-        return _this10.buildToUnicode(properties);
-      }).then(function (toUnicode) {
-        properties.toUnicode = toUnicode;
-        return properties;
-      });
-    },
-    buildToUnicode: function PartialEvaluator_buildToUnicode(properties) {
-      properties.hasIncludedToUnicodeMap = !!properties.toUnicode && properties.toUnicode.length > 0;
-      if (properties.hasIncludedToUnicodeMap) {
-        return Promise.resolve(properties.toUnicode);
-      }
-      var toUnicode, charcode, glyphName;
-      if (!properties.composite) {
-        toUnicode = [];
-        var encoding = properties.defaultEncoding.slice();
-        var baseEncodingName = properties.baseEncodingName;
-        var differences = properties.differences;
-        for (charcode in differences) {
-          glyphName = differences[charcode];
-          if (glyphName === '.notdef') {
-            continue;
-          }
-          encoding[charcode] = glyphName;
-        }
-        var glyphsUnicodeMap = (0, _glyphlist.getGlyphsUnicode)();
-        for (charcode in encoding) {
-          glyphName = encoding[charcode];
-          if (glyphName === '') {
-            continue;
-          } else if (glyphsUnicodeMap[glyphName] === undefined) {
-            var code = 0;
-            switch (glyphName[0]) {
-              case 'G':
-                if (glyphName.length === 3) {
-                  code = parseInt(glyphName.substr(1), 16);
-                }
-                break;
-              case 'g':
-                if (glyphName.length === 5) {
-                  code = parseInt(glyphName.substr(1), 16);
-                }
-                break;
-              case 'C':
-              case 'c':
-                if (glyphName.length >= 3) {
-                  code = +glyphName.substr(1);
-                }
-                break;
-              default:
-                var unicode = (0, _unicode.getUnicodeForGlyph)(glyphName, glyphsUnicodeMap);
-                if (unicode !== -1) {
-                  code = unicode;
-                }
-            }
-            if (code) {
-              if (baseEncodingName && code === +charcode) {
-                var baseEncoding = (0, _encodings.getEncoding)(baseEncodingName);
-                if (baseEncoding && (glyphName = baseEncoding[charcode])) {
-                  toUnicode[charcode] = String.fromCharCode(glyphsUnicodeMap[glyphName]);
-                  continue;
-                }
-              }
-              toUnicode[charcode] = String.fromCharCode(code);
-            }
-            continue;
-          }
-          toUnicode[charcode] = String.fromCharCode(glyphsUnicodeMap[glyphName]);
-        }
-        return Promise.resolve(new _fonts.ToUnicodeMap(toUnicode));
-      }
-      if (properties.composite && (properties.cMap.builtInCMap && !(properties.cMap instanceof _cmap.IdentityCMap) || properties.cidSystemInfo.registry === 'Adobe' && (properties.cidSystemInfo.ordering === 'GB1' || properties.cidSystemInfo.ordering === 'CNS1' || properties.cidSystemInfo.ordering === 'Japan1' || properties.cidSystemInfo.ordering === 'Korea1'))) {
-        var registry = properties.cidSystemInfo.registry;
-        var ordering = properties.cidSystemInfo.ordering;
-        var ucs2CMapName = _primitives.Name.get(registry + '-' + ordering + '-UCS2');
-        return _cmap.CMapFactory.create({
-          encoding: ucs2CMapName,
-          fetchBuiltInCMap: this.fetchBuiltInCMap,
-          useCMap: null
-        }).then(function (ucs2CMap) {
-          var cMap = properties.cMap;
-          toUnicode = [];
-          cMap.forEach(function (charcode, cid) {
-            if (cid > 0xffff) {
-              throw new _util.FormatError('Max size of CID is 65,535');
-            }
-            var ucs2 = ucs2CMap.lookup(cid);
-            if (ucs2) {
-              toUnicode[charcode] = String.fromCharCode((ucs2.charCodeAt(0) << 8) + ucs2.charCodeAt(1));
-            }
-          });
-          return new _fonts.ToUnicodeMap(toUnicode);
-        });
-      }
-      return Promise.resolve(new _fonts.IdentityToUnicodeMap(properties.firstChar, properties.lastChar));
-    },
-    readToUnicode: function PartialEvaluator_readToUnicode(toUnicode) {
-      var cmapObj = toUnicode;
-      if ((0, _primitives.isName)(cmapObj)) {
-        return _cmap.CMapFactory.create({
-          encoding: cmapObj,
-          fetchBuiltInCMap: this.fetchBuiltInCMap,
-          useCMap: null
-        }).then(function (cmap) {
-          if (cmap instanceof _cmap.IdentityCMap) {
-            return new _fonts.IdentityToUnicodeMap(0, 0xFFFF);
-          }
-          return new _fonts.ToUnicodeMap(cmap.getMap());
-        });
-      } else if ((0, _primitives.isStream)(cmapObj)) {
-        return _cmap.CMapFactory.create({
-          encoding: cmapObj,
-          fetchBuiltInCMap: this.fetchBuiltInCMap,
-          useCMap: null
-        }).then(function (cmap) {
-          if (cmap instanceof _cmap.IdentityCMap) {
-            return new _fonts.IdentityToUnicodeMap(0, 0xFFFF);
-          }
-          var map = new Array(cmap.length);
-          cmap.forEach(function (charCode, token) {
-            var str = [];
-            for (var k = 0; k < token.length; k += 2) {
-              var w1 = token.charCodeAt(k) << 8 | token.charCodeAt(k + 1);
-              if ((w1 & 0xF800) !== 0xD800) {
-                str.push(w1);
-                continue;
-              }
-              k += 2;
-              var w2 = token.charCodeAt(k) << 8 | token.charCodeAt(k + 1);
-              str.push(((w1 & 0x3ff) << 10) + (w2 & 0x3ff) + 0x10000);
-            }
-            map[charCode] = String.fromCharCode.apply(String, str);
-          });
-          return new _fonts.ToUnicodeMap(map);
-        });
-      }
-      return Promise.resolve(null);
-    },
-    readCidToGidMap: function PartialEvaluator_readCidToGidMap(cidToGidStream) {
-      var glyphsData = cidToGidStream.getBytes();
-      var result = [];
-      for (var j = 0, jj = glyphsData.length; j < jj; j++) {
-        var glyphID = glyphsData[j++] << 8 | glyphsData[j];
-        if (glyphID === 0) {
-          continue;
-        }
-        var code = j >> 1;
-        result[code] = glyphID;
-      }
-      return result;
-    },
-    extractWidths: function PartialEvaluator_extractWidths(dict, descriptor, properties) {
-      var xref = this.xref;
-      var glyphsWidths = [];
-      var defaultWidth = 0;
-      var glyphsVMetrics = [];
-      var defaultVMetrics;
-      var i, ii, j, jj, start, code, widths;
-      if (properties.composite) {
-        defaultWidth = dict.has('DW') ? dict.get('DW') : 1000;
-        widths = dict.get('W');
-        if (widths) {
-          for (i = 0, ii = widths.length; i < ii; i++) {
-            start = xref.fetchIfRef(widths[i++]);
-            code = xref.fetchIfRef(widths[i]);
-            if (Array.isArray(code)) {
-              for (j = 0, jj = code.length; j < jj; j++) {
-                glyphsWidths[start++] = xref.fetchIfRef(code[j]);
-              }
-            } else {
-              var width = xref.fetchIfRef(widths[++i]);
-              for (j = start; j <= code; j++) {
-                glyphsWidths[j] = width;
-              }
-            }
-          }
-        }
-        if (properties.vertical) {
-          var vmetrics = dict.getArray('DW2') || [880, -1000];
-          defaultVMetrics = [vmetrics[1], defaultWidth * 0.5, vmetrics[0]];
-          vmetrics = dict.get('W2');
-          if (vmetrics) {
-            for (i = 0, ii = vmetrics.length; i < ii; i++) {
-              start = xref.fetchIfRef(vmetrics[i++]);
-              code = xref.fetchIfRef(vmetrics[i]);
-              if (Array.isArray(code)) {
-                for (j = 0, jj = code.length; j < jj; j++) {
-                  glyphsVMetrics[start++] = [xref.fetchIfRef(code[j++]), xref.fetchIfRef(code[j++]), xref.fetchIfRef(code[j])];
-                }
-              } else {
-                var vmetric = [xref.fetchIfRef(vmetrics[++i]), xref.fetchIfRef(vmetrics[++i]), xref.fetchIfRef(vmetrics[++i])];
-                for (j = start; j <= code; j++) {
-                  glyphsVMetrics[j] = vmetric;
-                }
-              }
-            }
-          }
-        }
-      } else {
-        var firstChar = properties.firstChar;
-        widths = dict.get('Widths');
-        if (widths) {
-          j = firstChar;
-          for (i = 0, ii = widths.length; i < ii; i++) {
-            glyphsWidths[j++] = xref.fetchIfRef(widths[i]);
-          }
-          defaultWidth = parseFloat(descriptor.get('MissingWidth')) || 0;
-        } else {
-          var baseFontName = dict.get('BaseFont');
-          if ((0, _primitives.isName)(baseFontName)) {
-            var metrics = this.getBaseFontMetrics(baseFontName.name);
-            glyphsWidths = this.buildCharCodeToWidth(metrics.widths, properties);
-            defaultWidth = metrics.defaultWidth;
-          }
-        }
-      }
-      var isMonospace = true;
-      var firstWidth = defaultWidth;
-      for (var glyph in glyphsWidths) {
-        var glyphWidth = glyphsWidths[glyph];
-        if (!glyphWidth) {
-          continue;
-        }
-        if (!firstWidth) {
-          firstWidth = glyphWidth;
-          continue;
-        }
-        if (firstWidth !== glyphWidth) {
-          isMonospace = false;
-          break;
-        }
-      }
-      if (isMonospace) {
-        properties.flags |= _fonts.FontFlags.FixedPitch;
-      }
-      properties.defaultWidth = defaultWidth;
-      properties.widths = glyphsWidths;
-      properties.defaultVMetrics = defaultVMetrics;
-      properties.vmetrics = glyphsVMetrics;
-    },
-    isSerifFont: function PartialEvaluator_isSerifFont(baseFontName) {
-      var fontNameWoStyle = baseFontName.split('-')[0];
-      return fontNameWoStyle in (0, _standard_fonts.getSerifFonts)() || fontNameWoStyle.search(/serif/gi) !== -1;
-    },
-    getBaseFontMetrics: function PartialEvaluator_getBaseFontMetrics(name) {
-      var defaultWidth = 0;
-      var widths = [];
-      var monospace = false;
-      var stdFontMap = (0, _standard_fonts.getStdFontMap)();
-      var lookupName = stdFontMap[name] || name;
-      var Metrics = (0, _metrics.getMetrics)();
-      if (!(lookupName in Metrics)) {
-        if (this.isSerifFont(name)) {
-          lookupName = 'Times-Roman';
-        } else {
-          lookupName = 'Helvetica';
-        }
-      }
-      var glyphWidths = Metrics[lookupName];
-      if ((0, _util.isNum)(glyphWidths)) {
-        defaultWidth = glyphWidths;
-        monospace = true;
-      } else {
-        widths = glyphWidths();
-      }
-      return {
-        defaultWidth: defaultWidth,
-        monospace: monospace,
-        widths: widths
-      };
-    },
-    buildCharCodeToWidth: function PartialEvaluator_bulildCharCodeToWidth(widthsByGlyphName, properties) {
-      var widths = Object.create(null);
-      var differences = properties.differences;
-      var encoding = properties.defaultEncoding;
-      for (var charCode = 0; charCode < 256; charCode++) {
-        if (charCode in differences && widthsByGlyphName[differences[charCode]]) {
-          widths[charCode] = widthsByGlyphName[differences[charCode]];
-          continue;
-        }
-        if (charCode in encoding && widthsByGlyphName[encoding[charCode]]) {
-          widths[charCode] = widthsByGlyphName[encoding[charCode]];
-          continue;
-        }
-      }
-      return widths;
-    },
-    preEvaluateFont: function PartialEvaluator_preEvaluateFont(dict) {
-      var baseDict = dict;
-      var type = dict.get('Subtype');
-      if (!(0, _primitives.isName)(type)) {
-        throw new _util.FormatError('invalid font Subtype');
-      }
-      var composite = false;
-      var uint8array;
-      if (type.name === 'Type0') {
-        var df = dict.get('DescendantFonts');
-        if (!df) {
-          throw new _util.FormatError('Descendant fonts are not specified');
-        }
-        dict = Array.isArray(df) ? this.xref.fetchIfRef(df[0]) : df;
-        type = dict.get('Subtype');
-        if (!(0, _primitives.isName)(type)) {
-          throw new _util.FormatError('invalid font Subtype');
-        }
-        composite = true;
-      }
-      var descriptor = dict.get('FontDescriptor');
-      if (descriptor) {
-        var hash = new _murmurhash.MurmurHash3_64();
-        var encoding = baseDict.getRaw('Encoding');
-        if ((0, _primitives.isName)(encoding)) {
-          hash.update(encoding.name);
-        } else if ((0, _primitives.isRef)(encoding)) {
-          hash.update(encoding.toString());
-        } else if ((0, _primitives.isDict)(encoding)) {
-          var keys = encoding.getKeys();
-          for (var i = 0, ii = keys.length; i < ii; i++) {
-            var entry = encoding.getRaw(keys[i]);
-            if ((0, _primitives.isName)(entry)) {
-              hash.update(entry.name);
-            } else if ((0, _primitives.isRef)(entry)) {
-              hash.update(entry.toString());
-            } else if (Array.isArray(entry)) {
-              var diffLength = entry.length,
-                  diffBuf = new Array(diffLength);
-              for (var j = 0; j < diffLength; j++) {
-                var diffEntry = entry[j];
-                if ((0, _primitives.isName)(diffEntry)) {
-                  diffBuf[j] = diffEntry.name;
-                } else if ((0, _util.isNum)(diffEntry) || (0, _primitives.isRef)(diffEntry)) {
-                  diffBuf[j] = diffEntry.toString();
-                }
-              }
-              hash.update(diffBuf.join());
-            }
-          }
-        }
-        var toUnicode = dict.get('ToUnicode') || baseDict.get('ToUnicode');
-        if ((0, _primitives.isStream)(toUnicode)) {
-          var stream = toUnicode.str || toUnicode;
-          uint8array = stream.buffer ? new Uint8Array(stream.buffer.buffer, 0, stream.bufferLength) : new Uint8Array(stream.bytes.buffer, stream.start, stream.end - stream.start);
-          hash.update(uint8array);
-        } else if ((0, _primitives.isName)(toUnicode)) {
-          hash.update(toUnicode.name);
-        }
-        var widths = dict.get('Widths') || baseDict.get('Widths');
-        if (widths) {
-          uint8array = new Uint8Array(new Uint32Array(widths).buffer);
-          hash.update(uint8array);
-        }
-      }
-      return {
-        descriptor: descriptor,
-        dict: dict,
-        baseDict: baseDict,
-        composite: composite,
-        type: type.name,
-        hash: hash ? hash.hexdigest() : ''
-      };
-    },
-    translateFont: function PartialEvaluator_translateFont(preEvaluatedFont) {
-      var _this11 = this;
-
-      var baseDict = preEvaluatedFont.baseDict;
-      var dict = preEvaluatedFont.dict;
-      var composite = preEvaluatedFont.composite;
-      var descriptor = preEvaluatedFont.descriptor;
-      var type = preEvaluatedFont.type;
-      var maxCharIndex = composite ? 0xFFFF : 0xFF;
-      var properties;
-      if (!descriptor) {
-        if (type === 'Type3') {
-          descriptor = new _primitives.Dict(null);
-          descriptor.set('FontName', _primitives.Name.get(type));
-          descriptor.set('FontBBox', dict.getArray('FontBBox'));
-        } else {
-          var baseFontName = dict.get('BaseFont');
-          if (!(0, _primitives.isName)(baseFontName)) {
-            throw new _util.FormatError('Base font is not specified');
-          }
-          baseFontName = baseFontName.name.replace(/[,_]/g, '-');
-          var metrics = this.getBaseFontMetrics(baseFontName);
-          var fontNameWoStyle = baseFontName.split('-')[0];
-          var flags = (this.isSerifFont(fontNameWoStyle) ? _fonts.FontFlags.Serif : 0) | (metrics.monospace ? _fonts.FontFlags.FixedPitch : 0) | ((0, _standard_fonts.getSymbolsFonts)()[fontNameWoStyle] ? _fonts.FontFlags.Symbolic : _fonts.FontFlags.Nonsymbolic);
-          properties = {
-            type: type,
-            name: baseFontName,
-            widths: metrics.widths,
-            defaultWidth: metrics.defaultWidth,
-            flags: flags,
-            firstChar: 0,
-            lastChar: maxCharIndex
-          };
-          return this.extractDataStructures(dict, dict, properties).then(function (properties) {
-            properties.widths = _this11.buildCharCodeToWidth(metrics.widths, properties);
-            return new _fonts.Font(baseFontName, null, properties);
-          });
-        }
-      }
-      var firstChar = dict.get('FirstChar') || 0;
-      var lastChar = dict.get('LastChar') || maxCharIndex;
-      var fontName = descriptor.get('FontName');
-      var baseFont = dict.get('BaseFont');
-      if ((0, _util.isString)(fontName)) {
-        fontName = _primitives.Name.get(fontName);
-      }
-      if ((0, _util.isString)(baseFont)) {
-        baseFont = _primitives.Name.get(baseFont);
-      }
-      if (type !== 'Type3') {
-        var fontNameStr = fontName && fontName.name;
-        var baseFontStr = baseFont && baseFont.name;
-        if (fontNameStr !== baseFontStr) {
-          (0, _util.info)('The FontDescriptor\'s FontName is "' + fontNameStr + '" but should be the same as the Font\'s BaseFont "' + baseFontStr + '"');
-          if (fontNameStr && baseFontStr && baseFontStr.indexOf(fontNameStr) === 0) {
-            fontName = baseFont;
-          }
-        }
-      }
-      fontName = fontName || baseFont;
-      if (!(0, _primitives.isName)(fontName)) {
-        throw new _util.FormatError('invalid font name');
-      }
-      var fontFile = descriptor.get('FontFile', 'FontFile2', 'FontFile3');
-      if (fontFile) {
-        if (fontFile.dict) {
-          var subtype = fontFile.dict.get('Subtype');
-          if (subtype) {
-            subtype = subtype.name;
-          }
-          var length1 = fontFile.dict.get('Length1');
-          var length2 = fontFile.dict.get('Length2');
-          var length3 = fontFile.dict.get('Length3');
-        }
-      }
-      properties = {
-        type: type,
-        name: fontName.name,
-        subtype: subtype,
-        file: fontFile,
-        length1: length1,
-        length2: length2,
-        length3: length3,
-        loadedName: baseDict.loadedName,
-        composite: composite,
-        wideChars: composite,
-        fixedPitch: false,
-        fontMatrix: dict.getArray('FontMatrix') || _util.FONT_IDENTITY_MATRIX,
-        firstChar: firstChar || 0,
-        lastChar: lastChar || maxCharIndex,
-        bbox: descriptor.getArray('FontBBox'),
-        ascent: descriptor.get('Ascent'),
-        descent: descriptor.get('Descent'),
-        xHeight: descriptor.get('XHeight'),
-        capHeight: descriptor.get('CapHeight'),
-        flags: descriptor.get('Flags'),
-        italicAngle: descriptor.get('ItalicAngle'),
-        isType3Font: false
-      };
-      var cMapPromise;
-      if (composite) {
-        var cidEncoding = baseDict.get('Encoding');
-        if ((0, _primitives.isName)(cidEncoding)) {
-          properties.cidEncoding = cidEncoding.name;
-        }
-        cMapPromise = _cmap.CMapFactory.create({
-          encoding: cidEncoding,
-          fetchBuiltInCMap: this.fetchBuiltInCMap,
-          useCMap: null
-        }).then(function (cMap) {
-          properties.cMap = cMap;
-          properties.vertical = properties.cMap.vertical;
-        });
-      } else {
-        cMapPromise = Promise.resolve(undefined);
-      }
-      return cMapPromise.then(function () {
-        return _this11.extractDataStructures(dict, baseDict, properties);
-      }).then(function (properties) {
-        _this11.extractWidths(dict, descriptor, properties);
-        if (type === 'Type3') {
-          properties.isType3Font = true;
-        }
-        return new _fonts.Font(fontName.name, fontFile, properties);
-      });
-    }
-  };
-  return PartialEvaluator;
-}();
-var TranslatedFont = function TranslatedFontClosure() {
-  function TranslatedFont(loadedName, font, dict) {
-    this.loadedName = loadedName;
-    this.font = font;
-    this.dict = dict;
-    this.type3Loaded = null;
-    this.sent = false;
-  }
-  TranslatedFont.prototype = {
-    send: function send(handler) {
-      if (this.sent) {
-        return;
-      }
-      var fontData = this.font.exportData();
-      handler.send('commonobj', [this.loadedName, 'Font', fontData]);
-      this.sent = true;
-    },
-    loadType3Data: function loadType3Data(evaluator, resources, parentOperatorList, task) {
-      if (!this.font.isType3Font) {
-        throw new Error('Must be a Type3 font.');
-      }
-      if (this.type3Loaded) {
-        return this.type3Loaded;
-      }
-      var type3Options = Object.create(evaluator.options);
-      type3Options.ignoreErrors = false;
-      var type3Evaluator = evaluator.clone(type3Options);
-      var translatedFont = this.font;
-      var loadCharProcsPromise = Promise.resolve();
-      var charProcs = this.dict.get('CharProcs');
-      var fontResources = this.dict.get('Resources') || resources;
-      var charProcKeys = charProcs.getKeys();
-      var charProcOperatorList = Object.create(null);
-
-      var _loop2 = function _loop2() {
-        var key = charProcKeys[i];
-        loadCharProcsPromise = loadCharProcsPromise.then(function () {
-          var glyphStream = charProcs.get(key);
-          var operatorList = new OperatorList();
-          return type3Evaluator.getOperatorList({
-            stream: glyphStream,
-            task: task,
-            resources: fontResources,
-            operatorList: operatorList
-          }).then(function () {
-            charProcOperatorList[key] = operatorList.getIR();
-            parentOperatorList.addDependencies(operatorList.dependencies);
-          }).catch(function (reason) {
-            (0, _util.warn)('Type3 font resource "' + key + '" is not available.');
-            var operatorList = new OperatorList();
-            charProcOperatorList[key] = operatorList.getIR();
-          });
-        });
-      };
-
-      for (var i = 0, n = charProcKeys.length; i < n; ++i) {
-        _loop2();
-      }
-      this.type3Loaded = loadCharProcsPromise.then(function () {
-        translatedFont.charProcOperatorList = charProcOperatorList;
-      });
-      return this.type3Loaded;
-    }
-  };
-  return TranslatedFont;
-}();
-var OperatorList = function OperatorListClosure() {
-  var CHUNK_SIZE = 1000;
-  var CHUNK_SIZE_ABOUT = CHUNK_SIZE - 5;
-  function getTransfers(queue) {
-    var transfers = [];
-    var fnArray = queue.fnArray,
-        argsArray = queue.argsArray;
-    for (var i = 0, ii = queue.length; i < ii; i++) {
-      switch (fnArray[i]) {
-        case _util.OPS.paintInlineImageXObject:
-        case _util.OPS.paintInlineImageXObjectGroup:
-        case _util.OPS.paintImageMaskXObject:
-          var arg = argsArray[i][0];
-          if (!arg.cached) {
-            transfers.push(arg.data.buffer);
-          }
-          break;
-      }
-    }
-    return transfers;
-  }
-  function OperatorList(intent, messageHandler, pageIndex) {
-    this.messageHandler = messageHandler;
-    this.fnArray = [];
-    this.argsArray = [];
-    this.dependencies = Object.create(null);
-    this._totalLength = 0;
-    this.pageIndex = pageIndex;
-    this.intent = intent;
-  }
-  OperatorList.prototype = {
-    get length() {
-      return this.argsArray.length;
-    },
-    get totalLength() {
-      return this._totalLength + this.length;
-    },
-    addOp: function addOp(fn, args) {
-      this.fnArray.push(fn);
-      this.argsArray.push(args);
-      if (this.messageHandler) {
-        if (this.fnArray.length >= CHUNK_SIZE) {
-          this.flush();
-        } else if (this.fnArray.length >= CHUNK_SIZE_ABOUT && (fn === _util.OPS.restore || fn === _util.OPS.endText)) {
-          this.flush();
-        }
-      }
-    },
-    addDependency: function addDependency(dependency) {
-      if (dependency in this.dependencies) {
-        return;
-      }
-      this.dependencies[dependency] = true;
-      this.addOp(_util.OPS.dependency, [dependency]);
-    },
-    addDependencies: function addDependencies(dependencies) {
-      for (var key in dependencies) {
-        this.addDependency(key);
-      }
-    },
-    addOpList: function addOpList(opList) {
-      _util.Util.extendObj(this.dependencies, opList.dependencies);
-      for (var i = 0, ii = opList.length; i < ii; i++) {
-        this.addOp(opList.fnArray[i], opList.argsArray[i]);
-      }
-    },
-    getIR: function getIR() {
-      return {
-        fnArray: this.fnArray,
-        argsArray: this.argsArray,
-        length: this.length
-      };
-    },
-    flush: function flush(lastChunk) {
-      if (this.intent !== 'oplist') {
-        new QueueOptimizer().optimize(this);
-      }
-      var transfers = getTransfers(this);
-      var length = this.length;
-      this._totalLength += length;
-      this.messageHandler.send('RenderPageChunk', {
-        operatorList: {
-          fnArray: this.fnArray,
-          argsArray: this.argsArray,
-          lastChunk: lastChunk,
-          length: length
-        },
-        pageIndex: this.pageIndex,
-        intent: this.intent
-      }, transfers);
-      this.dependencies = Object.create(null);
-      this.fnArray.length = 0;
-      this.argsArray.length = 0;
-    }
-  };
-  return OperatorList;
-}();
-var StateManager = function StateManagerClosure() {
-  function StateManager(initialState) {
-    this.state = initialState;
-    this.stateStack = [];
-  }
-  StateManager.prototype = {
-    save: function save() {
-      var old = this.state;
-      this.stateStack.push(this.state);
-      this.state = old.clone();
-    },
-    restore: function restore() {
-      var prev = this.stateStack.pop();
-      if (prev) {
-        this.state = prev;
-      }
-    },
-    transform: function transform(args) {
-      this.state.ctm = _util.Util.transform(this.state.ctm, args);
-    }
-  };
-  return StateManager;
-}();
-var TextState = function TextStateClosure() {
-  function TextState() {
-    this.ctm = new Float32Array(_util.IDENTITY_MATRIX);
-    this.fontName = null;
-    this.fontSize = 0;
-    this.font = null;
-    this.fontMatrix = _util.FONT_IDENTITY_MATRIX;
-    this.textMatrix = _util.IDENTITY_MATRIX.slice();
-    this.textLineMatrix = _util.IDENTITY_MATRIX.slice();
-    this.charSpacing = 0;
-    this.wordSpacing = 0;
-    this.leading = 0;
-    this.textHScale = 1;
-    this.textRise = 0;
-  }
-  TextState.prototype = {
-    setTextMatrix: function TextState_setTextMatrix(a, b, c, d, e, f) {
-      var m = this.textMatrix;
-      m[0] = a;
-      m[1] = b;
-      m[2] = c;
-      m[3] = d;
-      m[4] = e;
-      m[5] = f;
-    },
-    setTextLineMatrix: function TextState_setTextMatrix(a, b, c, d, e, f) {
-      var m = this.textLineMatrix;
-      m[0] = a;
-      m[1] = b;
-      m[2] = c;
-      m[3] = d;
-      m[4] = e;
-      m[5] = f;
-    },
-    translateTextMatrix: function TextState_translateTextMatrix(x, y) {
-      var m = this.textMatrix;
-      m[4] = m[0] * x + m[2] * y + m[4];
-      m[5] = m[1] * x + m[3] * y + m[5];
-    },
-    translateTextLineMatrix: function TextState_translateTextMatrix(x, y) {
-      var m = this.textLineMatrix;
-      m[4] = m[0] * x + m[2] * y + m[4];
-      m[5] = m[1] * x + m[3] * y + m[5];
-    },
-    calcTextLineMatrixAdvance: function TextState_calcTextLineMatrixAdvance(a, b, c, d, e, f) {
-      var font = this.font;
-      if (!font) {
-        return null;
-      }
-      var m = this.textLineMatrix;
-      if (!(a === m[0] && b === m[1] && c === m[2] && d === m[3])) {
-        return null;
-      }
-      var txDiff = e - m[4],
-          tyDiff = f - m[5];
-      if (font.vertical && txDiff !== 0 || !font.vertical && tyDiff !== 0) {
-        return null;
-      }
-      var tx,
-          ty,
-          denominator = a * d - b * c;
-      if (font.vertical) {
-        tx = -tyDiff * c / denominator;
-        ty = tyDiff * a / denominator;
-      } else {
-        tx = txDiff * d / denominator;
-        ty = -txDiff * b / denominator;
-      }
-      return {
-        width: tx,
-        height: ty,
-        value: font.vertical ? ty : tx
-      };
-    },
-    calcRenderMatrix: function TextState_calcRendeMatrix(ctm) {
-      var tsm = [this.fontSize * this.textHScale, 0, 0, this.fontSize, 0, this.textRise];
-      return _util.Util.transform(ctm, _util.Util.transform(this.textMatrix, tsm));
-    },
-    carriageReturn: function TextState_carriageReturn() {
-      this.translateTextLineMatrix(0, -this.leading);
-      this.textMatrix = this.textLineMatrix.slice();
-    },
-    clone: function TextState_clone() {
-      var clone = Object.create(this);
-      clone.textMatrix = this.textMatrix.slice();
-      clone.textLineMatrix = this.textLineMatrix.slice();
-      clone.fontMatrix = this.fontMatrix.slice();
-      return clone;
-    }
-  };
-  return TextState;
-}();
-var EvalState = function EvalStateClosure() {
-  function EvalState() {
-    this.ctm = new Float32Array(_util.IDENTITY_MATRIX);
-    this.font = null;
-    this.textRenderingMode = _util.TextRenderingMode.FILL;
-    this.fillColorSpace = _colorspace.ColorSpace.singletons.gray;
-    this.strokeColorSpace = _colorspace.ColorSpace.singletons.gray;
-  }
-  EvalState.prototype = {
-    clone: function CanvasExtraState_clone() {
-      return Object.create(this);
-    }
-  };
-  return EvalState;
-}();
-var EvaluatorPreprocessor = function EvaluatorPreprocessorClosure() {
-  var getOPMap = (0, _util.getLookupTableFactory)(function (t) {
-    t['w'] = {
-      id: _util.OPS.setLineWidth,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['J'] = {
-      id: _util.OPS.setLineCap,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['j'] = {
-      id: _util.OPS.setLineJoin,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['M'] = {
-      id: _util.OPS.setMiterLimit,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['d'] = {
-      id: _util.OPS.setDash,
-      numArgs: 2,
-      variableArgs: false
-    };
-    t['ri'] = {
-      id: _util.OPS.setRenderingIntent,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['i'] = {
-      id: _util.OPS.setFlatness,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['gs'] = {
-      id: _util.OPS.setGState,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['q'] = {
-      id: _util.OPS.save,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['Q'] = {
-      id: _util.OPS.restore,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['cm'] = {
-      id: _util.OPS.transform,
-      numArgs: 6,
-      variableArgs: false
-    };
-    t['m'] = {
-      id: _util.OPS.moveTo,
-      numArgs: 2,
-      variableArgs: false
-    };
-    t['l'] = {
-      id: _util.OPS.lineTo,
-      numArgs: 2,
-      variableArgs: false
-    };
-    t['c'] = {
-      id: _util.OPS.curveTo,
-      numArgs: 6,
-      variableArgs: false
-    };
-    t['v'] = {
-      id: _util.OPS.curveTo2,
-      numArgs: 4,
-      variableArgs: false
-    };
-    t['y'] = {
-      id: _util.OPS.curveTo3,
-      numArgs: 4,
-      variableArgs: false
-    };
-    t['h'] = {
-      id: _util.OPS.closePath,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['re'] = {
-      id: _util.OPS.rectangle,
-      numArgs: 4,
-      variableArgs: false
-    };
-    t['S'] = {
-      id: _util.OPS.stroke,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['s'] = {
-      id: _util.OPS.closeStroke,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['f'] = {
-      id: _util.OPS.fill,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['F'] = {
-      id: _util.OPS.fill,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['f*'] = {
-      id: _util.OPS.eoFill,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['B'] = {
-      id: _util.OPS.fillStroke,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['B*'] = {
-      id: _util.OPS.eoFillStroke,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['b'] = {
-      id: _util.OPS.closeFillStroke,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['b*'] = {
-      id: _util.OPS.closeEOFillStroke,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['n'] = {
-      id: _util.OPS.endPath,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['W'] = {
-      id: _util.OPS.clip,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['W*'] = {
-      id: _util.OPS.eoClip,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['BT'] = {
-      id: _util.OPS.beginText,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['ET'] = {
-      id: _util.OPS.endText,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['Tc'] = {
-      id: _util.OPS.setCharSpacing,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['Tw'] = {
-      id: _util.OPS.setWordSpacing,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['Tz'] = {
-      id: _util.OPS.setHScale,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['TL'] = {
-      id: _util.OPS.setLeading,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['Tf'] = {
-      id: _util.OPS.setFont,
-      numArgs: 2,
-      variableArgs: false
-    };
-    t['Tr'] = {
-      id: _util.OPS.setTextRenderingMode,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['Ts'] = {
-      id: _util.OPS.setTextRise,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['Td'] = {
-      id: _util.OPS.moveText,
-      numArgs: 2,
-      variableArgs: false
-    };
-    t['TD'] = {
-      id: _util.OPS.setLeadingMoveText,
-      numArgs: 2,
-      variableArgs: false
-    };
-    t['Tm'] = {
-      id: _util.OPS.setTextMatrix,
-      numArgs: 6,
-      variableArgs: false
-    };
-    t['T*'] = {
-      id: _util.OPS.nextLine,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['Tj'] = {
-      id: _util.OPS.showText,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['TJ'] = {
-      id: _util.OPS.showSpacedText,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['\''] = {
-      id: _util.OPS.nextLineShowText,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['"'] = {
-      id: _util.OPS.nextLineSetSpacingShowText,
-      numArgs: 3,
-      variableArgs: false
-    };
-    t['d0'] = {
-      id: _util.OPS.setCharWidth,
-      numArgs: 2,
-      variableArgs: false
-    };
-    t['d1'] = {
-      id: _util.OPS.setCharWidthAndBounds,
-      numArgs: 6,
-      variableArgs: false
-    };
-    t['CS'] = {
-      id: _util.OPS.setStrokeColorSpace,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['cs'] = {
-      id: _util.OPS.setFillColorSpace,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['SC'] = {
-      id: _util.OPS.setStrokeColor,
-      numArgs: 4,
-      variableArgs: true
-    };
-    t['SCN'] = {
-      id: _util.OPS.setStrokeColorN,
-      numArgs: 33,
-      variableArgs: true
-    };
-    t['sc'] = {
-      id: _util.OPS.setFillColor,
-      numArgs: 4,
-      variableArgs: true
-    };
-    t['scn'] = {
-      id: _util.OPS.setFillColorN,
-      numArgs: 33,
-      variableArgs: true
-    };
-    t['G'] = {
-      id: _util.OPS.setStrokeGray,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['g'] = {
-      id: _util.OPS.setFillGray,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['RG'] = {
-      id: _util.OPS.setStrokeRGBColor,
-      numArgs: 3,
-      variableArgs: false
-    };
-    t['rg'] = {
-      id: _util.OPS.setFillRGBColor,
-      numArgs: 3,
-      variableArgs: false
-    };
-    t['K'] = {
-      id: _util.OPS.setStrokeCMYKColor,
-      numArgs: 4,
-      variableArgs: false
-    };
-    t['k'] = {
-      id: _util.OPS.setFillCMYKColor,
-      numArgs: 4,
-      variableArgs: false
-    };
-    t['sh'] = {
-      id: _util.OPS.shadingFill,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['BI'] = {
-      id: _util.OPS.beginInlineImage,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['ID'] = {
-      id: _util.OPS.beginImageData,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['EI'] = {
-      id: _util.OPS.endInlineImage,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['Do'] = {
-      id: _util.OPS.paintXObject,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['MP'] = {
-      id: _util.OPS.markPoint,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['DP'] = {
-      id: _util.OPS.markPointProps,
-      numArgs: 2,
-      variableArgs: false
-    };
-    t['BMC'] = {
-      id: _util.OPS.beginMarkedContent,
-      numArgs: 1,
-      variableArgs: false
-    };
-    t['BDC'] = {
-      id: _util.OPS.beginMarkedContentProps,
-      numArgs: 2,
-      variableArgs: false
-    };
-    t['EMC'] = {
-      id: _util.OPS.endMarkedContent,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['BX'] = {
-      id: _util.OPS.beginCompat,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['EX'] = {
-      id: _util.OPS.endCompat,
-      numArgs: 0,
-      variableArgs: false
-    };
-    t['BM'] = null;
-    t['BD'] = null;
-    t['true'] = null;
-    t['fa'] = null;
-    t['fal'] = null;
-    t['fals'] = null;
-    t['false'] = null;
-    t['nu'] = null;
-    t['nul'] = null;
-    t['null'] = null;
-  });
-  function EvaluatorPreprocessor(stream, xref, stateManager) {
-    this.opMap = getOPMap();
-    this.parser = new _parser.Parser(new _parser.Lexer(stream, this.opMap), false, xref);
-    this.stateManager = stateManager;
-    this.nonProcessedArgs = [];
-  }
-  EvaluatorPreprocessor.prototype = {
-    get savedStatesDepth() {
-      return this.stateManager.stateStack.length;
-    },
-    read: function EvaluatorPreprocessor_read(operation) {
-      var args = operation.args;
-      while (true) {
-        var obj = this.parser.getObj();
-        if ((0, _primitives.isCmd)(obj)) {
-          var cmd = obj.cmd;
-          var opSpec = this.opMap[cmd];
-          if (!opSpec) {
-            (0, _util.warn)('Unknown command "' + cmd + '"');
-            continue;
-          }
-          var fn = opSpec.id;
-          var numArgs = opSpec.numArgs;
-          var argsLength = args !== null ? args.length : 0;
-          if (!opSpec.variableArgs) {
-            if (argsLength !== numArgs) {
-              var nonProcessedArgs = this.nonProcessedArgs;
-              while (argsLength > numArgs) {
-                nonProcessedArgs.push(args.shift());
-                argsLength--;
-              }
-              while (argsLength < numArgs && nonProcessedArgs.length !== 0) {
-                if (args === null) {
-                  args = [];
-                }
-                args.unshift(nonProcessedArgs.pop());
-                argsLength++;
-              }
-            }
-            if (argsLength < numArgs) {
-              (0, _util.warn)('Skipping command ' + fn + ': expected ' + numArgs + ' args, but received ' + argsLength + ' args.');
-              if (args !== null) {
-                args.length = 0;
-              }
-              continue;
-            }
-          } else if (argsLength > numArgs) {
-            (0, _util.info)('Command ' + fn + ': expected [0,' + numArgs + '] args, but received ' + argsLength + ' args.');
-          }
-          this.preprocessCommand(fn, args);
-          operation.fn = fn;
-          operation.args = args;
-          return true;
-        }
-        if ((0, _primitives.isEOF)(obj)) {
-          return false;
-        }
-        if (obj !== null) {
-          if (args === null) {
-            args = [];
-          }
-          args.push(obj);
-          if (args.length > 33) {
-            throw new _util.FormatError('Too many arguments');
-          }
-        }
-      }
-    },
-    preprocessCommand: function EvaluatorPreprocessor_preprocessCommand(fn, args) {
-      switch (fn | 0) {
-        case _util.OPS.save:
-          this.stateManager.save();
-          break;
-        case _util.OPS.restore:
-          this.stateManager.restore();
-          break;
-        case _util.OPS.transform:
-          this.stateManager.transform(args);
-          break;
-      }
-    }
-  };
-  return EvaluatorPreprocessor;
-}();
-var QueueOptimizer = function QueueOptimizerClosure() {
-  function addState(parentState, pattern, fn) {
-    var state = parentState;
-    for (var i = 0, ii = pattern.length - 1; i < ii; i++) {
-      var item = pattern[i];
-      state = state[item] || (state[item] = []);
-    }
-    state[pattern[pattern.length - 1]] = fn;
-  }
-  function handlePaintSolidColorImageMask(iFirstSave, count, fnArray, argsArray) {
-    var iFirstPIMXO = iFirstSave + 2;
-    for (var i = 0; i < count; i++) {
-      var arg = argsArray[iFirstPIMXO + 4 * i];
-      var imageMask = arg.length === 1 && arg[0];
-      if (imageMask && imageMask.width === 1 && imageMask.height === 1 && (!imageMask.data.length || imageMask.data.length === 1 && imageMask.data[0] === 0)) {
-        fnArray[iFirstPIMXO + 4 * i] = _util.OPS.paintSolidColorImageMask;
-        continue;
-      }
-      break;
-    }
-    return count - i;
-  }
-  var InitialState = [];
-  addState(InitialState, [_util.OPS.save, _util.OPS.transform, _util.OPS.paintInlineImageXObject, _util.OPS.restore], function foundInlineImageGroup(context) {
-    var MIN_IMAGES_IN_INLINE_IMAGES_BLOCK = 10;
-    var MAX_IMAGES_IN_INLINE_IMAGES_BLOCK = 200;
-    var MAX_WIDTH = 1000;
-    var IMAGE_PADDING = 1;
-    var fnArray = context.fnArray,
-        argsArray = context.argsArray;
-    var curr = context.iCurr;
-    var iFirstSave = curr - 3;
-    var iFirstTransform = curr - 2;
-    var iFirstPIIXO = curr - 1;
-    var i = iFirstSave + 4;
-    var ii = fnArray.length;
-    while (i + 3 < ii) {
-      if (fnArray[i] !== _util.OPS.save || fnArray[i + 1] !== _util.OPS.transform || fnArray[i + 2] !== _util.OPS.paintInlineImageXObject || fnArray[i + 3] !== _util.OPS.restore) {
-        break;
-      }
-      i += 4;
-    }
-    var count = Math.min((i - iFirstSave) / 4, MAX_IMAGES_IN_INLINE_IMAGES_BLOCK);
-    if (count < MIN_IMAGES_IN_INLINE_IMAGES_BLOCK) {
-      return i;
-    }
-    var maxX = 0;
-    var map = [],
-        maxLineHeight = 0;
-    var currentX = IMAGE_PADDING,
-        currentY = IMAGE_PADDING;
-    var q;
-    for (q = 0; q < count; q++) {
-      var transform = argsArray[iFirstTransform + (q << 2)];
-      var img = argsArray[iFirstPIIXO + (q << 2)][0];
-      if (currentX + img.width > MAX_WIDTH) {
-        maxX = Math.max(maxX, currentX);
-        currentY += maxLineHeight + 2 * IMAGE_PADDING;
-        currentX = 0;
-        maxLineHeight = 0;
-      }
-      map.push({
-        transform: transform,
-        x: currentX,
-        y: currentY,
-        w: img.width,
-        h: img.height
-      });
-      currentX += img.width + 2 * IMAGE_PADDING;
-      maxLineHeight = Math.max(maxLineHeight, img.height);
-    }
-    var imgWidth = Math.max(maxX, currentX) + IMAGE_PADDING;
-    var imgHeight = currentY + maxLineHeight + IMAGE_PADDING;
-    var imgData = new Uint8Array(imgWidth * imgHeight * 4);
-    var imgRowSize = imgWidth << 2;
-    for (q = 0; q < count; q++) {
-      var data = argsArray[iFirstPIIXO + (q << 2)][0].data;
-      var rowSize = map[q].w << 2;
-      var dataOffset = 0;
-      var offset = map[q].x + map[q].y * imgWidth << 2;
-      imgData.set(data.subarray(0, rowSize), offset - imgRowSize);
-      for (var k = 0, kk = map[q].h; k < kk; k++) {
-        imgData.set(data.subarray(dataOffset, dataOffset + rowSize), offset);
-        dataOffset += rowSize;
-        offset += imgRowSize;
-      }
-      imgData.set(data.subarray(dataOffset - rowSize, dataOffset), offset);
-      while (offset >= 0) {
-        data[offset - 4] = data[offset];
-        data[offset - 3] = data[offset + 1];
-        data[offset - 2] = data[offset + 2];
-        data[offset - 1] = data[offset + 3];
-        data[offset + rowSize] = data[offset + rowSize - 4];
-        data[offset + rowSize + 1] = data[offset + rowSize - 3];
-        data[offset + rowSize + 2] = data[offset + rowSize - 2];
-        data[offset + rowSize + 3] = data[offset + rowSize - 1];
-        offset -= imgRowSize;
-      }
-    }
-    fnArray.splice(iFirstSave, count * 4, _util.OPS.paintInlineImageXObjectGroup);
-    argsArray.splice(iFirstSave, count * 4, [{
-      width: imgWidth,
-      height: imgHeight,
-      kind: _util.ImageKind.RGBA_32BPP,
-      data: imgData
-    }, map]);
-    return iFirstSave + 1;
-  });
-  addState(InitialState, [_util.OPS.save, _util.OPS.transform, _util.OPS.paintImageMaskXObject, _util.OPS.restore], function foundImageMaskGroup(context) {
-    var MIN_IMAGES_IN_MASKS_BLOCK = 10;
-    var MAX_IMAGES_IN_MASKS_BLOCK = 100;
-    var MAX_SAME_IMAGES_IN_MASKS_BLOCK = 1000;
-    var fnArray = context.fnArray,
-        argsArray = context.argsArray;
-    var curr = context.iCurr;
-    var iFirstSave = curr - 3;
-    var iFirstTransform = curr - 2;
-    var iFirstPIMXO = curr - 1;
-    var i = iFirstSave + 4;
-    var ii = fnArray.length;
-    while (i + 3 < ii) {
-      if (fnArray[i] !== _util.OPS.save || fnArray[i + 1] !== _util.OPS.transform || fnArray[i + 2] !== _util.OPS.paintImageMaskXObject || fnArray[i + 3] !== _util.OPS.restore) {
-        break;
-      }
-      i += 4;
-    }
-    var count = (i - iFirstSave) / 4;
-    count = handlePaintSolidColorImageMask(iFirstSave, count, fnArray, argsArray);
-    if (count < MIN_IMAGES_IN_MASKS_BLOCK) {
-      return i;
-    }
-    var q;
-    var isSameImage = false;
-    var iTransform, transformArgs;
-    var firstPIMXOArg0 = argsArray[iFirstPIMXO][0];
-    if (argsArray[iFirstTransform][1] === 0 && argsArray[iFirstTransform][2] === 0) {
-      isSameImage = true;
-      var firstTransformArg0 = argsArray[iFirstTransform][0];
-      var firstTransformArg3 = argsArray[iFirstTransform][3];
-      iTransform = iFirstTransform + 4;
-      var iPIMXO = iFirstPIMXO + 4;
-      for (q = 1; q < count; q++, iTransform += 4, iPIMXO += 4) {
-        transformArgs = argsArray[iTransform];
-        if (argsArray[iPIMXO][0] !== firstPIMXOArg0 || transformArgs[0] !== firstTransformArg0 || transformArgs[1] !== 0 || transformArgs[2] !== 0 || transformArgs[3] !== firstTransformArg3) {
-          if (q < MIN_IMAGES_IN_MASKS_BLOCK) {
-            isSameImage = false;
-          } else {
-            count = q;
-          }
-          break;
-        }
-      }
-    }
-    if (isSameImage) {
-      count = Math.min(count, MAX_SAME_IMAGES_IN_MASKS_BLOCK);
-      var positions = new Float32Array(count * 2);
-      iTransform = iFirstTransform;
-      for (q = 0; q < count; q++, iTransform += 4) {
-        transformArgs = argsArray[iTransform];
-        positions[q << 1] = transformArgs[4];
-        positions[(q << 1) + 1] = transformArgs[5];
-      }
-      fnArray.splice(iFirstSave, count * 4, _util.OPS.paintImageMaskXObjectRepeat);
-      argsArray.splice(iFirstSave, count * 4, [firstPIMXOArg0, firstTransformArg0, firstTransformArg3, positions]);
-    } else {
-      count = Math.min(count, MAX_IMAGES_IN_MASKS_BLOCK);
-      var images = [];
-      for (q = 0; q < count; q++) {
-        transformArgs = argsArray[iFirstTransform + (q << 2)];
-        var maskParams = argsArray[iFirstPIMXO + (q << 2)][0];
-        images.push({
-          data: maskParams.data,
-          width: maskParams.width,
-          height: maskParams.height,
-          transform: transformArgs
-        });
-      }
-      fnArray.splice(iFirstSave, count * 4, _util.OPS.paintImageMaskXObjectGroup);
-      argsArray.splice(iFirstSave, count * 4, [images]);
-    }
-    return iFirstSave + 1;
-  });
-  addState(InitialState, [_util.OPS.save, _util.OPS.transform, _util.OPS.paintImageXObject, _util.OPS.restore], function (context) {
-    var MIN_IMAGES_IN_BLOCK = 3;
-    var MAX_IMAGES_IN_BLOCK = 1000;
-    var fnArray = context.fnArray,
-        argsArray = context.argsArray;
-    var curr = context.iCurr;
-    var iFirstSave = curr - 3;
-    var iFirstTransform = curr - 2;
-    var iFirstPIXO = curr - 1;
-    var iFirstRestore = curr;
-    if (argsArray[iFirstTransform][1] !== 0 || argsArray[iFirstTransform][2] !== 0) {
-      return iFirstRestore + 1;
-    }
-    var firstPIXOArg0 = argsArray[iFirstPIXO][0];
-    var firstTransformArg0 = argsArray[iFirstTransform][0];
-    var firstTransformArg3 = argsArray[iFirstTransform][3];
-    var i = iFirstSave + 4;
-    var ii = fnArray.length;
-    while (i + 3 < ii) {
-      if (fnArray[i] !== _util.OPS.save || fnArray[i + 1] !== _util.OPS.transform || fnArray[i + 2] !== _util.OPS.paintImageXObject || fnArray[i + 3] !== _util.OPS.restore) {
-        break;
-      }
-      if (argsArray[i + 1][0] !== firstTransformArg0 || argsArray[i + 1][1] !== 0 || argsArray[i + 1][2] !== 0 || argsArray[i + 1][3] !== firstTransformArg3) {
-        break;
-      }
-      if (argsArray[i + 2][0] !== firstPIXOArg0) {
-        break;
-      }
-      i += 4;
-    }
-    var count = Math.min((i - iFirstSave) / 4, MAX_IMAGES_IN_BLOCK);
-    if (count < MIN_IMAGES_IN_BLOCK) {
-      return i;
-    }
-    var positions = new Float32Array(count * 2);
-    var iTransform = iFirstTransform;
-    for (var q = 0; q < count; q++, iTransform += 4) {
-      var transformArgs = argsArray[iTransform];
-      positions[q << 1] = transformArgs[4];
-      positions[(q << 1) + 1] = transformArgs[5];
-    }
-    var args = [firstPIXOArg0, firstTransformArg0, firstTransformArg3, positions];
-    fnArray.splice(iFirstSave, count * 4, _util.OPS.paintImageXObjectRepeat);
-    argsArray.splice(iFirstSave, count * 4, args);
-    return iFirstSave + 1;
-  });
-  addState(InitialState, [_util.OPS.beginText, _util.OPS.setFont, _util.OPS.setTextMatrix, _util.OPS.showText, _util.OPS.endText], function (context) {
-    var MIN_CHARS_IN_BLOCK = 3;
-    var MAX_CHARS_IN_BLOCK = 1000;
-    var fnArray = context.fnArray,
-        argsArray = context.argsArray;
-    var curr = context.iCurr;
-    var iFirstBeginText = curr - 4;
-    var iFirstSetFont = curr - 3;
-    var iFirstSetTextMatrix = curr - 2;
-    var iFirstShowText = curr - 1;
-    var iFirstEndText = curr;
-    var firstSetFontArg0 = argsArray[iFirstSetFont][0];
-    var firstSetFontArg1 = argsArray[iFirstSetFont][1];
-    var i = iFirstBeginText + 5;
-    var ii = fnArray.length;
-    while (i + 4 < ii) {
-      if (fnArray[i] !== _util.OPS.beginText || fnArray[i + 1] !== _util.OPS.setFont || fnArray[i + 2] !== _util.OPS.setTextMatrix || fnArray[i + 3] !== _util.OPS.showText || fnArray[i + 4] !== _util.OPS.endText) {
-        break;
-      }
-      if (argsArray[i + 1][0] !== firstSetFontArg0 || argsArray[i + 1][1] !== firstSetFontArg1) {
-        break;
-      }
-      i += 5;
-    }
-    var count = Math.min((i - iFirstBeginText) / 5, MAX_CHARS_IN_BLOCK);
-    if (count < MIN_CHARS_IN_BLOCK) {
-      return i;
-    }
-    var iFirst = iFirstBeginText;
-    if (iFirstBeginText >= 4 && fnArray[iFirstBeginText - 4] === fnArray[iFirstSetFont] && fnArray[iFirstBeginText - 3] === fnArray[iFirstSetTextMatrix] && fnArray[iFirstBeginText - 2] === fnArray[iFirstShowText] && fnArray[iFirstBeginText - 1] === fnArray[iFirstEndText] && argsArray[iFirstBeginText - 4][0] === firstSetFontArg0 && argsArray[iFirstBeginText - 4][1] === firstSetFontArg1) {
-      count++;
-      iFirst -= 5;
-    }
-    var iEndText = iFirst + 4;
-    for (var q = 1; q < count; q++) {
-      fnArray.splice(iEndText, 3);
-      argsArray.splice(iEndText, 3);
-      iEndText += 2;
-    }
-    return iEndText + 1;
-  });
-  function QueueOptimizer() {}
-  QueueOptimizer.prototype = {
-    optimize: function QueueOptimizer_optimize(queue) {
-      var fnArray = queue.fnArray,
-          argsArray = queue.argsArray;
-      var context = {
-        iCurr: 0,
-        fnArray: fnArray,
-        argsArray: argsArray
-      };
-      var state;
-      var i = 0,
-          ii = fnArray.length;
-      while (i < ii) {
-        state = (state || InitialState)[fnArray[i]];
-        if (typeof state === 'function') {
-          context.iCurr = i;
-          i = state(context);
-          state = undefined;
-          ii = context.fnArray.length;
-        } else {
-          i++;
-        }
-      }
-    }
-  };
-  return QueueOptimizer;
-}();
-exports.OperatorList = OperatorList;
-exports.PartialEvaluator = PartialEvaluator;
-
-/***/ }),
 /* 66 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
@@ -19450,7 +16851,7 @@ exports.CFFCompiler = exports.CFFPrivateDict = exports.CFFTopDict = exports.CFFC
 
 var _util = __w_pdfjs_require__(0);
 
-var _charsets = __w_pdfjs_require__(131);
+var _charsets = __w_pdfjs_require__(133);
 
 var _encodings = __w_pdfjs_require__(21);
 
@@ -23392,7 +20793,7 @@ var _util = __w_pdfjs_require__(0);
 
 var _primitives = __w_pdfjs_require__(1);
 
-var _ps_parser = __w_pdfjs_require__(137);
+var _ps_parser = __w_pdfjs_require__(139);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -24513,8 +21914,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.108';
-var pdfjsBuild = '36b83c14';
+var pdfjsVersion = '2.0.112';
+var pdfjsBuild = '9686f665';
 var pdfjsCoreWorker = __w_pdfjs_require__(71);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -24719,7 +22120,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.108';
+    var workerVersion = '2.0.112';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -26300,7 +23701,7 @@ module.exports = function (isEntries) {
 
 var has = __w_pdfjs_require__(9);
 var toIObject = __w_pdfjs_require__(17);
-var arrayIndexOf = __w_pdfjs_require__(44)(false);
+var arrayIndexOf = __w_pdfjs_require__(45)(false);
 var IE_PROTO = __w_pdfjs_require__(33)('IE_PROTO');
 module.exports = function (object, names) {
   var O = toIObject(object);
@@ -26349,13 +23750,13 @@ module.exports = __w_pdfjs_require__(7).Array.includes;
 
 
 var $export = __w_pdfjs_require__(6);
-var $includes = __w_pdfjs_require__(44)(true);
+var $includes = __w_pdfjs_require__(45)(true);
 $export($export.P, 'Array', {
   includes: function includes(el) {
     return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
   }
 });
-__w_pdfjs_require__(47)('includes');
+__w_pdfjs_require__(48)('includes');
 
 /***/ }),
 /* 81 */
@@ -26421,9 +23822,9 @@ module.exports = function isInteger(it) {
 "use strict";
 
 
-__w_pdfjs_require__(48);
+__w_pdfjs_require__(49);
 __w_pdfjs_require__(87);
-__w_pdfjs_require__(52);
+__w_pdfjs_require__(53);
 __w_pdfjs_require__(95);
 __w_pdfjs_require__(102);
 __w_pdfjs_require__(103);
@@ -26437,7 +23838,7 @@ module.exports = __w_pdfjs_require__(7).Promise;
 
 
 var $at = __w_pdfjs_require__(88)(true);
-__w_pdfjs_require__(49)(String, 'String', function (iterated) {
+__w_pdfjs_require__(50)(String, 'String', function (iterated) {
   this._t = String(iterated);
   this._i = 0;
 }, function () {
@@ -26505,7 +23906,7 @@ module.exports = function (Constructor, NAME, next) {
 
 var anObject = __w_pdfjs_require__(8);
 var dPs = __w_pdfjs_require__(91);
-var enumBugKeys = __w_pdfjs_require__(46);
+var enumBugKeys = __w_pdfjs_require__(47);
 var IE_PROTO = __w_pdfjs_require__(33)('IE_PROTO');
 var Empty = function Empty() {};
 var PROTOTYPE = 'prototype';
@@ -26516,7 +23917,7 @@ var _createDict = function createDict() {
   var gt = '>';
   var iframeDocument;
   iframe.style.display = 'none';
-  __w_pdfjs_require__(51).appendChild(iframe);
+  __w_pdfjs_require__(52).appendChild(iframe);
   iframe.src = 'javascript:';
   iframeDocument = iframe.contentWindow.document;
   iframeDocument.open();
@@ -26586,11 +23987,11 @@ module.exports = Object.getPrototypeOf || function (O) {
 "use strict";
 
 
-var addToUnscopables = __w_pdfjs_require__(47);
+var addToUnscopables = __w_pdfjs_require__(48);
 var step = __w_pdfjs_require__(94);
 var Iterators = __w_pdfjs_require__(19);
 var toIObject = __w_pdfjs_require__(17);
-module.exports = __w_pdfjs_require__(49)(Array, 'Array', function (iterated, kind) {
+module.exports = __w_pdfjs_require__(50)(Array, 'Array', function (iterated, kind) {
   this._t = toIObject(iterated);
   this._i = 0;
   this._k = kind;
@@ -26632,7 +24033,7 @@ module.exports = function (done, value) {
 "use strict";
 
 
-var LIBRARY = __w_pdfjs_require__(50);
+var LIBRARY = __w_pdfjs_require__(51);
 var global = __w_pdfjs_require__(4);
 var ctx = __w_pdfjs_require__(11);
 var classof = __w_pdfjs_require__(35);
@@ -26641,12 +24042,12 @@ var isObject = __w_pdfjs_require__(2);
 var aFunction = __w_pdfjs_require__(16);
 var anInstance = __w_pdfjs_require__(37);
 var forOf = __w_pdfjs_require__(25);
-var speciesConstructor = __w_pdfjs_require__(53);
-var task = __w_pdfjs_require__(54).set;
+var speciesConstructor = __w_pdfjs_require__(54);
+var task = __w_pdfjs_require__(55).set;
 var microtask = __w_pdfjs_require__(100)();
 var newPromiseCapabilityModule = __w_pdfjs_require__(38);
-var perform = __w_pdfjs_require__(55);
-var promiseResolve = __w_pdfjs_require__(56);
+var perform = __w_pdfjs_require__(56);
+var promiseResolve = __w_pdfjs_require__(57);
 var PROMISE = 'Promise';
 var TypeError = global.TypeError;
 var process = global.process;
@@ -26862,7 +24263,7 @@ $export($export.S + $export.F * (LIBRARY || !USE_NATIVE), PROMISE, {
     return promiseResolve(LIBRARY && this === Wrapper ? $Promise : this, x);
   }
 });
-$export($export.S + $export.F * !(USE_NATIVE && __w_pdfjs_require__(57)(function (iter) {
+$export($export.S + $export.F * !(USE_NATIVE && __w_pdfjs_require__(58)(function (iter) {
   $Promise.all(iter)['catch'](empty);
 })), PROMISE, {
   all: function all(iterable) {
@@ -26983,7 +24384,7 @@ module.exports = function (fn, args, that) {
 
 
 var global = __w_pdfjs_require__(4);
-var macrotask = __w_pdfjs_require__(54).set;
+var macrotask = __w_pdfjs_require__(55).set;
 var Observer = global.MutationObserver || global.WebKitMutationObserver;
 var process = global.process;
 var Promise = global.Promise;
@@ -27072,8 +24473,8 @@ module.exports = function (KEY) {
 var $export = __w_pdfjs_require__(6);
 var core = __w_pdfjs_require__(7);
 var global = __w_pdfjs_require__(4);
-var speciesConstructor = __w_pdfjs_require__(53);
-var promiseResolve = __w_pdfjs_require__(56);
+var speciesConstructor = __w_pdfjs_require__(54);
+var promiseResolve = __w_pdfjs_require__(57);
 $export($export.P + $export.R, 'Promise', {
   'finally': function _finally(onFinally) {
     var C = speciesConstructor(this, core.Promise || global.Promise);
@@ -27099,7 +24500,7 @@ $export($export.P + $export.R, 'Promise', {
 
 var $export = __w_pdfjs_require__(6);
 var newPromiseCapability = __w_pdfjs_require__(38);
-var perform = __w_pdfjs_require__(55);
+var perform = __w_pdfjs_require__(56);
 $export($export.S, 'Promise', {
   'try': function _try(callbackfn) {
     var promiseCapability = newPromiseCapability.f(this);
@@ -27116,8 +24517,8 @@ $export($export.S, 'Promise', {
 "use strict";
 
 
-__w_pdfjs_require__(48);
-__w_pdfjs_require__(52);
+__w_pdfjs_require__(49);
+__w_pdfjs_require__(53);
 __w_pdfjs_require__(105);
 __w_pdfjs_require__(116);
 __w_pdfjs_require__(118);
@@ -27130,14 +24531,14 @@ module.exports = __w_pdfjs_require__(7).WeakMap;
 "use strict";
 
 
-var each = __w_pdfjs_require__(58)(0);
+var each = __w_pdfjs_require__(59)(0);
 var redefine = __w_pdfjs_require__(10);
 var meta = __w_pdfjs_require__(40);
 var assign = __w_pdfjs_require__(109);
 var weak = __w_pdfjs_require__(111);
 var isObject = __w_pdfjs_require__(2);
 var fails = __w_pdfjs_require__(14);
-var validate = __w_pdfjs_require__(59);
+var validate = __w_pdfjs_require__(60);
 var WEAK_MAP = 'WeakMap';
 var getWeak = meta.getWeak;
 var isExtensible = Object.isExtensible;
@@ -27293,9 +24694,9 @@ var anObject = __w_pdfjs_require__(8);
 var isObject = __w_pdfjs_require__(2);
 var anInstance = __w_pdfjs_require__(37);
 var forOf = __w_pdfjs_require__(25);
-var createArrayMethod = __w_pdfjs_require__(58);
+var createArrayMethod = __w_pdfjs_require__(59);
 var $has = __w_pdfjs_require__(9);
-var validate = __w_pdfjs_require__(59);
+var validate = __w_pdfjs_require__(60);
 var arrayFind = createArrayMethod(5);
 var arrayFindIndex = createArrayMethod(6);
 var id = 0;
@@ -27379,7 +24780,7 @@ var forOf = __w_pdfjs_require__(25);
 var anInstance = __w_pdfjs_require__(37);
 var isObject = __w_pdfjs_require__(2);
 var fails = __w_pdfjs_require__(14);
-var $iterDetect = __w_pdfjs_require__(57);
+var $iterDetect = __w_pdfjs_require__(58);
 var setToStringTag = __w_pdfjs_require__(24);
 var inheritIfRequired = __w_pdfjs_require__(113);
 module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
@@ -27510,9 +24911,9 @@ module.exports = {
 var pIE = __w_pdfjs_require__(34);
 var createDesc = __w_pdfjs_require__(28);
 var toIObject = __w_pdfjs_require__(17);
-var toPrimitive = __w_pdfjs_require__(43);
+var toPrimitive = __w_pdfjs_require__(44);
 var has = __w_pdfjs_require__(9);
-var IE8_DOM_DEFINE = __w_pdfjs_require__(42);
+var IE8_DOM_DEFINE = __w_pdfjs_require__(43);
 var gOPD = Object.getOwnPropertyDescriptor;
 exports.f = __w_pdfjs_require__(13) ? gOPD : function getOwnPropertyDescriptor(O, P) {
   O = toIObject(O);
@@ -30654,7 +28055,7 @@ exports.NetworkPdfManager = exports.LocalPdfManager = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _chunked_stream = __w_pdfjs_require__(60);
+var _chunked_stream = __w_pdfjs_require__(61);
 
 var _document = __w_pdfjs_require__(123);
 
@@ -30838,7 +28239,7 @@ exports.PDFDocument = exports.Page = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-var _obj = __w_pdfjs_require__(61);
+var _obj = __w_pdfjs_require__(62);
 
 var _primitives = __w_pdfjs_require__(1);
 
@@ -30846,13 +28247,15 @@ var _util = __w_pdfjs_require__(0);
 
 var _stream = __w_pdfjs_require__(5);
 
-var _evaluator = __w_pdfjs_require__(65);
+var _annotation = __w_pdfjs_require__(129);
 
-var _annotation = __w_pdfjs_require__(140);
-
-var _crypto = __w_pdfjs_require__(64);
+var _crypto = __w_pdfjs_require__(65);
 
 var _parser = __w_pdfjs_require__(26);
+
+var _operator_list = __w_pdfjs_require__(41);
+
+var _evaluator = __w_pdfjs_require__(130);
 
 var _function = __w_pdfjs_require__(69);
 
@@ -31025,7 +28428,7 @@ var Page = function PageClosure() {
         var _ref4 = _slicedToArray(_ref3, 1),
             contentStream = _ref4[0];
 
-        var opList = new _evaluator.OperatorList(intent, handler, _this2.pageIndex);
+        var opList = new _operator_list.OperatorList(intent, handler, _this2.pageIndex);
         handler.send('StartRenderPage', {
           transparency: partialEvaluator.hasBlendModes(_this2.resources),
           pageIndex: _this2.pageIndex,
@@ -32990,7 +30393,7 @@ exports.Jbig2Image = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _arithmetic_decoder = __w_pdfjs_require__(63);
+var _arithmetic_decoder = __w_pdfjs_require__(64);
 
 var Jbig2Error = function Jbig2ErrorClosure() {
   function Jbig2Error(msg) {
@@ -34238,6 +31641,3639 @@ exports.Jbig2Image = Jbig2Image;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.AnnotationFactory = exports.AnnotationBorderStyle = exports.Annotation = undefined;
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _util = __w_pdfjs_require__(0);
+
+var _obj = __w_pdfjs_require__(62);
+
+var _primitives = __w_pdfjs_require__(1);
+
+var _colorspace = __w_pdfjs_require__(20);
+
+var _operator_list = __w_pdfjs_require__(41);
+
+var _stream = __w_pdfjs_require__(5);
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var AnnotationFactory = function () {
+  function AnnotationFactory() {
+    _classCallCheck(this, AnnotationFactory);
+  }
+
+  _createClass(AnnotationFactory, null, [{
+    key: 'create',
+    value: function create(xref, ref, pdfManager, idFactory) {
+      var dict = xref.fetchIfRef(ref);
+      if (!(0, _primitives.isDict)(dict)) {
+        return;
+      }
+      var id = (0, _primitives.isRef)(ref) ? ref.toString() : 'annot_' + idFactory.createObjId();
+      var subtype = dict.get('Subtype');
+      subtype = (0, _primitives.isName)(subtype) ? subtype.name : null;
+      var parameters = {
+        xref: xref,
+        dict: dict,
+        ref: (0, _primitives.isRef)(ref) ? ref : null,
+        subtype: subtype,
+        id: id,
+        pdfManager: pdfManager
+      };
+      switch (subtype) {
+        case 'Link':
+          return new LinkAnnotation(parameters);
+        case 'Text':
+          return new TextAnnotation(parameters);
+        case 'Widget':
+          var fieldType = _util.Util.getInheritableProperty(dict, 'FT');
+          fieldType = (0, _primitives.isName)(fieldType) ? fieldType.name : null;
+          switch (fieldType) {
+            case 'Tx':
+              return new TextWidgetAnnotation(parameters);
+            case 'Btn':
+              return new ButtonWidgetAnnotation(parameters);
+            case 'Ch':
+              return new ChoiceWidgetAnnotation(parameters);
+          }
+          (0, _util.warn)('Unimplemented widget field type "' + fieldType + '", ' + 'falling back to base field type.');
+          return new WidgetAnnotation(parameters);
+        case 'Popup':
+          return new PopupAnnotation(parameters);
+        case 'Line':
+          return new LineAnnotation(parameters);
+        case 'Square':
+          return new SquareAnnotation(parameters);
+        case 'Circle':
+          return new CircleAnnotation(parameters);
+        case 'PolyLine':
+          return new PolylineAnnotation(parameters);
+        case 'Polygon':
+          return new PolygonAnnotation(parameters);
+        case 'Highlight':
+          return new HighlightAnnotation(parameters);
+        case 'Underline':
+          return new UnderlineAnnotation(parameters);
+        case 'Squiggly':
+          return new SquigglyAnnotation(parameters);
+        case 'StrikeOut':
+          return new StrikeOutAnnotation(parameters);
+        case 'Stamp':
+          return new StampAnnotation(parameters);
+        case 'FileAttachment':
+          return new FileAttachmentAnnotation(parameters);
+        default:
+          if (!subtype) {
+            (0, _util.warn)('Annotation is missing the required /Subtype.');
+          } else {
+            (0, _util.warn)('Unimplemented annotation type "' + subtype + '", ' + 'falling back to base annotation.');
+          }
+          return new Annotation(parameters);
+      }
+    }
+  }]);
+
+  return AnnotationFactory;
+}();
+
+function getTransformMatrix(rect, bbox, matrix) {
+  var bounds = _util.Util.getAxialAlignedBoundingBox(bbox, matrix);
+  var minX = bounds[0];
+  var minY = bounds[1];
+  var maxX = bounds[2];
+  var maxY = bounds[3];
+  if (minX === maxX || minY === maxY) {
+    return [1, 0, 0, 1, rect[0], rect[1]];
+  }
+  var xRatio = (rect[2] - rect[0]) / (maxX - minX);
+  var yRatio = (rect[3] - rect[1]) / (maxY - minY);
+  return [xRatio, 0, 0, yRatio, rect[0] - minX * xRatio, rect[1] - minY * yRatio];
+}
+
+var Annotation = function () {
+  function Annotation(params) {
+    _classCallCheck(this, Annotation);
+
+    var dict = params.dict;
+    this.setFlags(dict.get('F'));
+    this.setRectangle(dict.getArray('Rect'));
+    this.setColor(dict.getArray('C'));
+    this.setBorderStyle(dict);
+    this.setAppearance(dict);
+    this.data = {
+      annotationFlags: this.flags,
+      borderStyle: this.borderStyle,
+      color: this.color,
+      hasAppearance: !!this.appearance,
+      id: params.id,
+      rect: this.rectangle,
+      subtype: params.subtype
+    };
+  }
+
+  _createClass(Annotation, [{
+    key: '_hasFlag',
+    value: function _hasFlag(flags, flag) {
+      return !!(flags & flag);
+    }
+  }, {
+    key: '_isViewable',
+    value: function _isViewable(flags) {
+      return !this._hasFlag(flags, _util.AnnotationFlag.INVISIBLE) && !this._hasFlag(flags, _util.AnnotationFlag.HIDDEN) && !this._hasFlag(flags, _util.AnnotationFlag.NOVIEW);
+    }
+  }, {
+    key: '_isPrintable',
+    value: function _isPrintable(flags) {
+      return this._hasFlag(flags, _util.AnnotationFlag.PRINT) && !this._hasFlag(flags, _util.AnnotationFlag.INVISIBLE) && !this._hasFlag(flags, _util.AnnotationFlag.HIDDEN);
+    }
+  }, {
+    key: 'setFlags',
+    value: function setFlags(flags) {
+      this.flags = Number.isInteger(flags) && flags > 0 ? flags : 0;
+    }
+  }, {
+    key: 'hasFlag',
+    value: function hasFlag(flag) {
+      return this._hasFlag(this.flags, flag);
+    }
+  }, {
+    key: 'setRectangle',
+    value: function setRectangle(rectangle) {
+      if (Array.isArray(rectangle) && rectangle.length === 4) {
+        this.rectangle = _util.Util.normalizeRect(rectangle);
+      } else {
+        this.rectangle = [0, 0, 0, 0];
+      }
+    }
+  }, {
+    key: 'setColor',
+    value: function setColor(color) {
+      var rgbColor = new Uint8Array(3);
+      if (!Array.isArray(color)) {
+        this.color = rgbColor;
+        return;
+      }
+      switch (color.length) {
+        case 0:
+          this.color = null;
+          break;
+        case 1:
+          _colorspace.ColorSpace.singletons.gray.getRgbItem(color, 0, rgbColor, 0);
+          this.color = rgbColor;
+          break;
+        case 3:
+          _colorspace.ColorSpace.singletons.rgb.getRgbItem(color, 0, rgbColor, 0);
+          this.color = rgbColor;
+          break;
+        case 4:
+          _colorspace.ColorSpace.singletons.cmyk.getRgbItem(color, 0, rgbColor, 0);
+          this.color = rgbColor;
+          break;
+        default:
+          this.color = rgbColor;
+          break;
+      }
+    }
+  }, {
+    key: 'setBorderStyle',
+    value: function setBorderStyle(borderStyle) {
+      this.borderStyle = new AnnotationBorderStyle();
+      if (!(0, _primitives.isDict)(borderStyle)) {
+        return;
+      }
+      if (borderStyle.has('BS')) {
+        var dict = borderStyle.get('BS');
+        var dictType = dict.get('Type');
+        if (!dictType || (0, _primitives.isName)(dictType, 'Border')) {
+          this.borderStyle.setWidth(dict.get('W'));
+          this.borderStyle.setStyle(dict.get('S'));
+          this.borderStyle.setDashArray(dict.getArray('D'));
+        }
+      } else if (borderStyle.has('Border')) {
+        var array = borderStyle.getArray('Border');
+        if (Array.isArray(array) && array.length >= 3) {
+          this.borderStyle.setHorizontalCornerRadius(array[0]);
+          this.borderStyle.setVerticalCornerRadius(array[1]);
+          this.borderStyle.setWidth(array[2]);
+          if (array.length === 4) {
+            this.borderStyle.setDashArray(array[3]);
+          }
+        }
+      } else {
+        this.borderStyle.setWidth(0);
+      }
+    }
+  }, {
+    key: 'setAppearance',
+    value: function setAppearance(dict) {
+      this.appearance = null;
+      var appearanceStates = dict.get('AP');
+      if (!(0, _primitives.isDict)(appearanceStates)) {
+        return;
+      }
+      var normalAppearanceState = appearanceStates.get('N');
+      if ((0, _primitives.isStream)(normalAppearanceState)) {
+        this.appearance = normalAppearanceState;
+        return;
+      }
+      if (!(0, _primitives.isDict)(normalAppearanceState)) {
+        return;
+      }
+      var as = dict.get('AS');
+      if (!(0, _primitives.isName)(as) || !normalAppearanceState.has(as.name)) {
+        return;
+      }
+      this.appearance = normalAppearanceState.get(as.name);
+    }
+  }, {
+    key: '_preparePopup',
+    value: function _preparePopup(dict) {
+      if (!dict.has('C')) {
+        this.data.color = null;
+      }
+      this.data.hasPopup = dict.has('Popup');
+      this.data.title = (0, _util.stringToPDFString)(dict.get('T') || '');
+      this.data.contents = (0, _util.stringToPDFString)(dict.get('Contents') || '');
+    }
+  }, {
+    key: 'loadResources',
+    value: function loadResources(keys) {
+      return this.appearance.dict.getAsync('Resources').then(function (resources) {
+        if (!resources) {
+          return;
+        }
+        var objectLoader = new _obj.ObjectLoader(resources, keys, resources.xref);
+        return objectLoader.load().then(function () {
+          return resources;
+        });
+      });
+    }
+  }, {
+    key: 'getOperatorList',
+    value: function getOperatorList(evaluator, task, renderForms) {
+      var _this = this;
+
+      if (!this.appearance) {
+        return Promise.resolve(new _operator_list.OperatorList());
+      }
+      var data = this.data;
+      var appearanceDict = this.appearance.dict;
+      var resourcesPromise = this.loadResources(['ExtGState', 'ColorSpace', 'Pattern', 'Shading', 'XObject', 'Font']);
+      var bbox = appearanceDict.getArray('BBox') || [0, 0, 1, 1];
+      var matrix = appearanceDict.getArray('Matrix') || [1, 0, 0, 1, 0, 0];
+      var transform = getTransformMatrix(data.rect, bbox, matrix);
+      return resourcesPromise.then(function (resources) {
+        var opList = new _operator_list.OperatorList();
+        opList.addOp(_util.OPS.beginAnnotation, [data.rect, transform, matrix]);
+        return evaluator.getOperatorList({
+          stream: _this.appearance,
+          task: task,
+          resources: resources,
+          operatorList: opList
+        }).then(function () {
+          opList.addOp(_util.OPS.endAnnotation, []);
+          _this.appearance.reset();
+          return opList;
+        });
+      });
+    }
+  }, {
+    key: 'viewable',
+    get: function get() {
+      if (this.flags === 0) {
+        return true;
+      }
+      return this._isViewable(this.flags);
+    }
+  }, {
+    key: 'printable',
+    get: function get() {
+      if (this.flags === 0) {
+        return false;
+      }
+      return this._isPrintable(this.flags);
+    }
+  }]);
+
+  return Annotation;
+}();
+
+var AnnotationBorderStyle = function () {
+  function AnnotationBorderStyle() {
+    _classCallCheck(this, AnnotationBorderStyle);
+
+    this.width = 1;
+    this.style = _util.AnnotationBorderStyleType.SOLID;
+    this.dashArray = [3];
+    this.horizontalCornerRadius = 0;
+    this.verticalCornerRadius = 0;
+  }
+
+  _createClass(AnnotationBorderStyle, [{
+    key: 'setWidth',
+    value: function setWidth(width) {
+      if (Number.isInteger(width)) {
+        this.width = width;
+      }
+    }
+  }, {
+    key: 'setStyle',
+    value: function setStyle(style) {
+      if (!style) {
+        return;
+      }
+      switch (style.name) {
+        case 'S':
+          this.style = _util.AnnotationBorderStyleType.SOLID;
+          break;
+        case 'D':
+          this.style = _util.AnnotationBorderStyleType.DASHED;
+          break;
+        case 'B':
+          this.style = _util.AnnotationBorderStyleType.BEVELED;
+          break;
+        case 'I':
+          this.style = _util.AnnotationBorderStyleType.INSET;
+          break;
+        case 'U':
+          this.style = _util.AnnotationBorderStyleType.UNDERLINE;
+          break;
+        default:
+          break;
+      }
+    }
+  }, {
+    key: 'setDashArray',
+    value: function setDashArray(dashArray) {
+      if (Array.isArray(dashArray) && dashArray.length > 0) {
+        var isValid = true;
+        var allZeros = true;
+        for (var i = 0, len = dashArray.length; i < len; i++) {
+          var element = dashArray[i];
+          var validNumber = +element >= 0;
+          if (!validNumber) {
+            isValid = false;
+            break;
+          } else if (element > 0) {
+            allZeros = false;
+          }
+        }
+        if (isValid && !allZeros) {
+          this.dashArray = dashArray;
+        } else {
+          this.width = 0;
+        }
+      } else if (dashArray) {
+        this.width = 0;
+      }
+    }
+  }, {
+    key: 'setHorizontalCornerRadius',
+    value: function setHorizontalCornerRadius(radius) {
+      if (Number.isInteger(radius)) {
+        this.horizontalCornerRadius = radius;
+      }
+    }
+  }, {
+    key: 'setVerticalCornerRadius',
+    value: function setVerticalCornerRadius(radius) {
+      if (Number.isInteger(radius)) {
+        this.verticalCornerRadius = radius;
+      }
+    }
+  }]);
+
+  return AnnotationBorderStyle;
+}();
+
+var WidgetAnnotation = function (_Annotation) {
+  _inherits(WidgetAnnotation, _Annotation);
+
+  function WidgetAnnotation(params) {
+    _classCallCheck(this, WidgetAnnotation);
+
+    var _this2 = _possibleConstructorReturn(this, (WidgetAnnotation.__proto__ || Object.getPrototypeOf(WidgetAnnotation)).call(this, params));
+
+    var dict = params.dict;
+    var data = _this2.data;
+    data.annotationType = _util.AnnotationType.WIDGET;
+    data.fieldName = _this2._constructFieldName(dict);
+    data.fieldValue = _util.Util.getInheritableProperty(dict, 'V', true);
+    data.alternativeText = (0, _util.stringToPDFString)(dict.get('TU') || '');
+    data.defaultAppearance = _util.Util.getInheritableProperty(dict, 'DA') || '';
+    var fieldType = _util.Util.getInheritableProperty(dict, 'FT');
+    data.fieldType = (0, _primitives.isName)(fieldType) ? fieldType.name : null;
+    _this2.fieldResources = _util.Util.getInheritableProperty(dict, 'DR') || _primitives.Dict.empty;
+    data.fieldFlags = _util.Util.getInheritableProperty(dict, 'Ff');
+    if (!Number.isInteger(data.fieldFlags) || data.fieldFlags < 0) {
+      data.fieldFlags = 0;
+    }
+    data.readOnly = _this2.hasFieldFlag(_util.AnnotationFieldFlag.READONLY);
+    if (data.fieldType === 'Sig') {
+      _this2.setFlags(_util.AnnotationFlag.HIDDEN);
+    }
+    return _this2;
+  }
+
+  _createClass(WidgetAnnotation, [{
+    key: '_constructFieldName',
+    value: function _constructFieldName(dict) {
+      if (!dict.has('T') && !dict.has('Parent')) {
+        (0, _util.warn)('Unknown field name, falling back to empty field name.');
+        return '';
+      }
+      if (!dict.has('Parent')) {
+        return (0, _util.stringToPDFString)(dict.get('T'));
+      }
+      var fieldName = [];
+      if (dict.has('T')) {
+        fieldName.unshift((0, _util.stringToPDFString)(dict.get('T')));
+      }
+      var loopDict = dict;
+      while (loopDict.has('Parent')) {
+        loopDict = loopDict.get('Parent');
+        if (!(0, _primitives.isDict)(loopDict)) {
+          break;
+        }
+        if (loopDict.has('T')) {
+          fieldName.unshift((0, _util.stringToPDFString)(loopDict.get('T')));
+        }
+      }
+      return fieldName.join('.');
+    }
+  }, {
+    key: 'hasFieldFlag',
+    value: function hasFieldFlag(flag) {
+      return !!(this.data.fieldFlags & flag);
+    }
+  }, {
+    key: 'getOperatorList',
+    value: function getOperatorList(evaluator, task, renderForms) {
+      if (renderForms) {
+        return Promise.resolve(new _operator_list.OperatorList());
+      }
+      return _get(WidgetAnnotation.prototype.__proto__ || Object.getPrototypeOf(WidgetAnnotation.prototype), 'getOperatorList', this).call(this, evaluator, task, renderForms);
+    }
+  }]);
+
+  return WidgetAnnotation;
+}(Annotation);
+
+var TextWidgetAnnotation = function (_WidgetAnnotation) {
+  _inherits(TextWidgetAnnotation, _WidgetAnnotation);
+
+  function TextWidgetAnnotation(params) {
+    _classCallCheck(this, TextWidgetAnnotation);
+
+    var _this3 = _possibleConstructorReturn(this, (TextWidgetAnnotation.__proto__ || Object.getPrototypeOf(TextWidgetAnnotation)).call(this, params));
+
+    _this3.data.fieldValue = (0, _util.stringToPDFString)(_this3.data.fieldValue || '');
+    var alignment = _util.Util.getInheritableProperty(params.dict, 'Q');
+    if (!Number.isInteger(alignment) || alignment < 0 || alignment > 2) {
+      alignment = null;
+    }
+    _this3.data.textAlignment = alignment;
+    var maximumLength = _util.Util.getInheritableProperty(params.dict, 'MaxLen');
+    if (!Number.isInteger(maximumLength) || maximumLength < 0) {
+      maximumLength = null;
+    }
+    _this3.data.maxLen = maximumLength;
+    _this3.data.multiLine = _this3.hasFieldFlag(_util.AnnotationFieldFlag.MULTILINE);
+    _this3.data.comb = _this3.hasFieldFlag(_util.AnnotationFieldFlag.COMB) && !_this3.hasFieldFlag(_util.AnnotationFieldFlag.MULTILINE) && !_this3.hasFieldFlag(_util.AnnotationFieldFlag.PASSWORD) && !_this3.hasFieldFlag(_util.AnnotationFieldFlag.FILESELECT) && _this3.data.maxLen !== null;
+    return _this3;
+  }
+
+  _createClass(TextWidgetAnnotation, [{
+    key: 'getOperatorList',
+    value: function getOperatorList(evaluator, task, renderForms) {
+      if (renderForms || this.appearance) {
+        return _get(TextWidgetAnnotation.prototype.__proto__ || Object.getPrototypeOf(TextWidgetAnnotation.prototype), 'getOperatorList', this).call(this, evaluator, task, renderForms);
+      }
+      var operatorList = new _operator_list.OperatorList();
+      if (!this.data.defaultAppearance) {
+        return Promise.resolve(operatorList);
+      }
+      var stream = new _stream.Stream((0, _util.stringToBytes)(this.data.defaultAppearance));
+      return evaluator.getOperatorList({
+        stream: stream,
+        task: task,
+        resources: this.fieldResources,
+        operatorList: operatorList
+      }).then(function () {
+        return operatorList;
+      });
+    }
+  }]);
+
+  return TextWidgetAnnotation;
+}(WidgetAnnotation);
+
+var ButtonWidgetAnnotation = function (_WidgetAnnotation2) {
+  _inherits(ButtonWidgetAnnotation, _WidgetAnnotation2);
+
+  function ButtonWidgetAnnotation(params) {
+    _classCallCheck(this, ButtonWidgetAnnotation);
+
+    var _this4 = _possibleConstructorReturn(this, (ButtonWidgetAnnotation.__proto__ || Object.getPrototypeOf(ButtonWidgetAnnotation)).call(this, params));
+
+    _this4.data.checkBox = !_this4.hasFieldFlag(_util.AnnotationFieldFlag.RADIO) && !_this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
+    if (_this4.data.checkBox) {
+      if (!(0, _primitives.isName)(_this4.data.fieldValue)) {
+        return _possibleConstructorReturn(_this4);
+      }
+      _this4.data.fieldValue = _this4.data.fieldValue.name;
+    }
+    _this4.data.radioButton = _this4.hasFieldFlag(_util.AnnotationFieldFlag.RADIO) && !_this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
+    if (_this4.data.radioButton) {
+      _this4.data.fieldValue = _this4.data.buttonValue = null;
+      var fieldParent = params.dict.get('Parent');
+      if ((0, _primitives.isDict)(fieldParent) && fieldParent.has('V')) {
+        var fieldParentValue = fieldParent.get('V');
+        if ((0, _primitives.isName)(fieldParentValue)) {
+          _this4.data.fieldValue = fieldParentValue.name;
+        }
+      }
+      var appearanceStates = params.dict.get('AP');
+      if (!(0, _primitives.isDict)(appearanceStates)) {
+        return _possibleConstructorReturn(_this4);
+      }
+      var normalAppearanceState = appearanceStates.get('N');
+      if (!(0, _primitives.isDict)(normalAppearanceState)) {
+        return _possibleConstructorReturn(_this4);
+      }
+      var keys = normalAppearanceState.getKeys();
+      for (var i = 0, ii = keys.length; i < ii; i++) {
+        if (keys[i] !== 'Off') {
+          _this4.data.buttonValue = keys[i];
+          break;
+        }
+      }
+    }
+    return _this4;
+  }
+
+  return ButtonWidgetAnnotation;
+}(WidgetAnnotation);
+
+var ChoiceWidgetAnnotation = function (_WidgetAnnotation3) {
+  _inherits(ChoiceWidgetAnnotation, _WidgetAnnotation3);
+
+  function ChoiceWidgetAnnotation(params) {
+    _classCallCheck(this, ChoiceWidgetAnnotation);
+
+    var _this5 = _possibleConstructorReturn(this, (ChoiceWidgetAnnotation.__proto__ || Object.getPrototypeOf(ChoiceWidgetAnnotation)).call(this, params));
+
+    _this5.data.options = [];
+    var options = _util.Util.getInheritableProperty(params.dict, 'Opt');
+    if (Array.isArray(options)) {
+      var xref = params.xref;
+      for (var i = 0, ii = options.length; i < ii; i++) {
+        var option = xref.fetchIfRef(options[i]);
+        var isOptionArray = Array.isArray(option);
+        _this5.data.options[i] = {
+          exportValue: isOptionArray ? xref.fetchIfRef(option[0]) : option,
+          displayValue: isOptionArray ? xref.fetchIfRef(option[1]) : option
+        };
+      }
+    }
+    if (!Array.isArray(_this5.data.fieldValue)) {
+      _this5.data.fieldValue = [_this5.data.fieldValue];
+    }
+    _this5.data.combo = _this5.hasFieldFlag(_util.AnnotationFieldFlag.COMBO);
+    _this5.data.multiSelect = _this5.hasFieldFlag(_util.AnnotationFieldFlag.MULTISELECT);
+    return _this5;
+  }
+
+  return ChoiceWidgetAnnotation;
+}(WidgetAnnotation);
+
+var TextAnnotation = function (_Annotation2) {
+  _inherits(TextAnnotation, _Annotation2);
+
+  function TextAnnotation(parameters) {
+    _classCallCheck(this, TextAnnotation);
+
+    var DEFAULT_ICON_SIZE = 22;
+
+    var _this6 = _possibleConstructorReturn(this, (TextAnnotation.__proto__ || Object.getPrototypeOf(TextAnnotation)).call(this, parameters));
+
+    _this6.data.annotationType = _util.AnnotationType.TEXT;
+    if (_this6.data.hasAppearance) {
+      _this6.data.name = 'NoIcon';
+    } else {
+      _this6.data.rect[1] = _this6.data.rect[3] - DEFAULT_ICON_SIZE;
+      _this6.data.rect[2] = _this6.data.rect[0] + DEFAULT_ICON_SIZE;
+      _this6.data.name = parameters.dict.has('Name') ? parameters.dict.get('Name').name : 'Note';
+    }
+    _this6._preparePopup(parameters.dict);
+    return _this6;
+  }
+
+  return TextAnnotation;
+}(Annotation);
+
+var LinkAnnotation = function (_Annotation3) {
+  _inherits(LinkAnnotation, _Annotation3);
+
+  function LinkAnnotation(params) {
+    _classCallCheck(this, LinkAnnotation);
+
+    var _this7 = _possibleConstructorReturn(this, (LinkAnnotation.__proto__ || Object.getPrototypeOf(LinkAnnotation)).call(this, params));
+
+    _this7.data.annotationType = _util.AnnotationType.LINK;
+    _obj.Catalog.parseDestDictionary({
+      destDict: params.dict,
+      resultObj: _this7.data,
+      docBaseUrl: params.pdfManager.docBaseUrl
+    });
+    return _this7;
+  }
+
+  return LinkAnnotation;
+}(Annotation);
+
+var PopupAnnotation = function (_Annotation4) {
+  _inherits(PopupAnnotation, _Annotation4);
+
+  function PopupAnnotation(parameters) {
+    _classCallCheck(this, PopupAnnotation);
+
+    var _this8 = _possibleConstructorReturn(this, (PopupAnnotation.__proto__ || Object.getPrototypeOf(PopupAnnotation)).call(this, parameters));
+
+    _this8.data.annotationType = _util.AnnotationType.POPUP;
+    var dict = parameters.dict;
+    var parentItem = dict.get('Parent');
+    if (!parentItem) {
+      (0, _util.warn)('Popup annotation has a missing or invalid parent annotation.');
+      return _possibleConstructorReturn(_this8);
+    }
+    var parentSubtype = parentItem.get('Subtype');
+    _this8.data.parentType = (0, _primitives.isName)(parentSubtype) ? parentSubtype.name : null;
+    _this8.data.parentId = dict.getRaw('Parent').toString();
+    _this8.data.title = (0, _util.stringToPDFString)(parentItem.get('T') || '');
+    _this8.data.contents = (0, _util.stringToPDFString)(parentItem.get('Contents') || '');
+    if (!parentItem.has('C')) {
+      _this8.data.color = null;
+    } else {
+      _this8.setColor(parentItem.getArray('C'));
+      _this8.data.color = _this8.color;
+    }
+    if (!_this8.viewable) {
+      var parentFlags = parentItem.get('F');
+      if (_this8._isViewable(parentFlags)) {
+        _this8.setFlags(parentFlags);
+      }
+    }
+    return _this8;
+  }
+
+  return PopupAnnotation;
+}(Annotation);
+
+var LineAnnotation = function (_Annotation5) {
+  _inherits(LineAnnotation, _Annotation5);
+
+  function LineAnnotation(parameters) {
+    _classCallCheck(this, LineAnnotation);
+
+    var _this9 = _possibleConstructorReturn(this, (LineAnnotation.__proto__ || Object.getPrototypeOf(LineAnnotation)).call(this, parameters));
+
+    _this9.data.annotationType = _util.AnnotationType.LINE;
+    var dict = parameters.dict;
+    _this9.data.lineCoordinates = _util.Util.normalizeRect(dict.getArray('L'));
+    _this9._preparePopup(dict);
+    return _this9;
+  }
+
+  return LineAnnotation;
+}(Annotation);
+
+var SquareAnnotation = function (_Annotation6) {
+  _inherits(SquareAnnotation, _Annotation6);
+
+  function SquareAnnotation(parameters) {
+    _classCallCheck(this, SquareAnnotation);
+
+    var _this10 = _possibleConstructorReturn(this, (SquareAnnotation.__proto__ || Object.getPrototypeOf(SquareAnnotation)).call(this, parameters));
+
+    _this10.data.annotationType = _util.AnnotationType.SQUARE;
+    _this10._preparePopup(parameters.dict);
+    return _this10;
+  }
+
+  return SquareAnnotation;
+}(Annotation);
+
+var CircleAnnotation = function (_Annotation7) {
+  _inherits(CircleAnnotation, _Annotation7);
+
+  function CircleAnnotation(parameters) {
+    _classCallCheck(this, CircleAnnotation);
+
+    var _this11 = _possibleConstructorReturn(this, (CircleAnnotation.__proto__ || Object.getPrototypeOf(CircleAnnotation)).call(this, parameters));
+
+    _this11.data.annotationType = _util.AnnotationType.CIRCLE;
+    _this11._preparePopup(parameters.dict);
+    return _this11;
+  }
+
+  return CircleAnnotation;
+}(Annotation);
+
+var PolylineAnnotation = function (_Annotation8) {
+  _inherits(PolylineAnnotation, _Annotation8);
+
+  function PolylineAnnotation(parameters) {
+    _classCallCheck(this, PolylineAnnotation);
+
+    var _this12 = _possibleConstructorReturn(this, (PolylineAnnotation.__proto__ || Object.getPrototypeOf(PolylineAnnotation)).call(this, parameters));
+
+    _this12.data.annotationType = _util.AnnotationType.POLYLINE;
+    var dict = parameters.dict;
+    var rawVertices = dict.getArray('Vertices');
+    _this12.data.vertices = [];
+    for (var i = 0, ii = rawVertices.length; i < ii; i += 2) {
+      _this12.data.vertices.push({
+        x: rawVertices[i],
+        y: rawVertices[i + 1]
+      });
+    }
+    _this12._preparePopup(dict);
+    return _this12;
+  }
+
+  return PolylineAnnotation;
+}(Annotation);
+
+var PolygonAnnotation = function (_PolylineAnnotation) {
+  _inherits(PolygonAnnotation, _PolylineAnnotation);
+
+  function PolygonAnnotation(parameters) {
+    _classCallCheck(this, PolygonAnnotation);
+
+    var _this13 = _possibleConstructorReturn(this, (PolygonAnnotation.__proto__ || Object.getPrototypeOf(PolygonAnnotation)).call(this, parameters));
+
+    _this13.data.annotationType = _util.AnnotationType.POLYGON;
+    return _this13;
+  }
+
+  return PolygonAnnotation;
+}(PolylineAnnotation);
+
+var HighlightAnnotation = function (_Annotation9) {
+  _inherits(HighlightAnnotation, _Annotation9);
+
+  function HighlightAnnotation(parameters) {
+    _classCallCheck(this, HighlightAnnotation);
+
+    var _this14 = _possibleConstructorReturn(this, (HighlightAnnotation.__proto__ || Object.getPrototypeOf(HighlightAnnotation)).call(this, parameters));
+
+    _this14.data.annotationType = _util.AnnotationType.HIGHLIGHT;
+    _this14._preparePopup(parameters.dict);
+    return _this14;
+  }
+
+  return HighlightAnnotation;
+}(Annotation);
+
+var UnderlineAnnotation = function (_Annotation10) {
+  _inherits(UnderlineAnnotation, _Annotation10);
+
+  function UnderlineAnnotation(parameters) {
+    _classCallCheck(this, UnderlineAnnotation);
+
+    var _this15 = _possibleConstructorReturn(this, (UnderlineAnnotation.__proto__ || Object.getPrototypeOf(UnderlineAnnotation)).call(this, parameters));
+
+    _this15.data.annotationType = _util.AnnotationType.UNDERLINE;
+    _this15._preparePopup(parameters.dict);
+    return _this15;
+  }
+
+  return UnderlineAnnotation;
+}(Annotation);
+
+var SquigglyAnnotation = function (_Annotation11) {
+  _inherits(SquigglyAnnotation, _Annotation11);
+
+  function SquigglyAnnotation(parameters) {
+    _classCallCheck(this, SquigglyAnnotation);
+
+    var _this16 = _possibleConstructorReturn(this, (SquigglyAnnotation.__proto__ || Object.getPrototypeOf(SquigglyAnnotation)).call(this, parameters));
+
+    _this16.data.annotationType = _util.AnnotationType.SQUIGGLY;
+    _this16._preparePopup(parameters.dict);
+    return _this16;
+  }
+
+  return SquigglyAnnotation;
+}(Annotation);
+
+var StrikeOutAnnotation = function (_Annotation12) {
+  _inherits(StrikeOutAnnotation, _Annotation12);
+
+  function StrikeOutAnnotation(parameters) {
+    _classCallCheck(this, StrikeOutAnnotation);
+
+    var _this17 = _possibleConstructorReturn(this, (StrikeOutAnnotation.__proto__ || Object.getPrototypeOf(StrikeOutAnnotation)).call(this, parameters));
+
+    _this17.data.annotationType = _util.AnnotationType.STRIKEOUT;
+    _this17._preparePopup(parameters.dict);
+    return _this17;
+  }
+
+  return StrikeOutAnnotation;
+}(Annotation);
+
+var StampAnnotation = function (_Annotation13) {
+  _inherits(StampAnnotation, _Annotation13);
+
+  function StampAnnotation(parameters) {
+    _classCallCheck(this, StampAnnotation);
+
+    var _this18 = _possibleConstructorReturn(this, (StampAnnotation.__proto__ || Object.getPrototypeOf(StampAnnotation)).call(this, parameters));
+
+    _this18.data.annotationType = _util.AnnotationType.STAMP;
+    _this18._preparePopup(parameters.dict);
+    return _this18;
+  }
+
+  return StampAnnotation;
+}(Annotation);
+
+var FileAttachmentAnnotation = function (_Annotation14) {
+  _inherits(FileAttachmentAnnotation, _Annotation14);
+
+  function FileAttachmentAnnotation(parameters) {
+    _classCallCheck(this, FileAttachmentAnnotation);
+
+    var _this19 = _possibleConstructorReturn(this, (FileAttachmentAnnotation.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotation)).call(this, parameters));
+
+    var file = new _obj.FileSpec(parameters.dict.get('FS'), parameters.xref);
+    _this19.data.annotationType = _util.AnnotationType.FILEATTACHMENT;
+    _this19.data.file = file.serializable;
+    _this19._preparePopup(parameters.dict);
+    return _this19;
+  }
+
+  return FileAttachmentAnnotation;
+}(Annotation);
+
+exports.Annotation = Annotation;
+exports.AnnotationBorderStyle = AnnotationBorderStyle;
+exports.AnnotationFactory = AnnotationFactory;
+
+/***/ }),
+/* 130 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.PartialEvaluator = undefined;
+
+var _util = __w_pdfjs_require__(0);
+
+var _cmap = __w_pdfjs_require__(131);
+
+var _stream = __w_pdfjs_require__(5);
+
+var _primitives = __w_pdfjs_require__(1);
+
+var _fonts = __w_pdfjs_require__(132);
+
+var _encodings = __w_pdfjs_require__(21);
+
+var _unicode = __w_pdfjs_require__(68);
+
+var _standard_fonts = __w_pdfjs_require__(67);
+
+var _pattern = __w_pdfjs_require__(136);
+
+var _parser = __w_pdfjs_require__(26);
+
+var _bidi = __w_pdfjs_require__(137);
+
+var _colorspace = __w_pdfjs_require__(20);
+
+var _glyphlist = __w_pdfjs_require__(42);
+
+var _metrics = __w_pdfjs_require__(138);
+
+var _function = __w_pdfjs_require__(69);
+
+var _murmurhash = __w_pdfjs_require__(140);
+
+var _operator_list = __w_pdfjs_require__(41);
+
+var _image = __w_pdfjs_require__(141);
+
+var PartialEvaluator = function PartialEvaluatorClosure() {
+  var DefaultPartialEvaluatorOptions = {
+    forceDataSchema: false,
+    maxImageSize: -1,
+    disableFontFace: false,
+    nativeImageDecoderSupport: _util.NativeImageDecoding.DECODE,
+    ignoreErrors: false,
+    isEvalSupported: true
+  };
+  function NativeImageDecoder(_ref) {
+    var xref = _ref.xref,
+        resources = _ref.resources,
+        handler = _ref.handler,
+        _ref$forceDataSchema = _ref.forceDataSchema,
+        forceDataSchema = _ref$forceDataSchema === undefined ? false : _ref$forceDataSchema,
+        pdfFunctionFactory = _ref.pdfFunctionFactory;
+
+    this.xref = xref;
+    this.resources = resources;
+    this.handler = handler;
+    this.forceDataSchema = forceDataSchema;
+    this.pdfFunctionFactory = pdfFunctionFactory;
+  }
+  NativeImageDecoder.prototype = {
+    canDecode: function canDecode(image) {
+      return image instanceof _stream.JpegStream && NativeImageDecoder.isDecodable(image, this.xref, this.resources, this.pdfFunctionFactory);
+    },
+    decode: function decode(image) {
+      var dict = image.dict;
+      var colorSpace = dict.get('ColorSpace', 'CS');
+      colorSpace = _colorspace.ColorSpace.parse(colorSpace, this.xref, this.resources, this.pdfFunctionFactory);
+      var numComps = colorSpace.numComps;
+      var decodePromise = this.handler.sendWithPromise('JpegDecode', [image.getIR(this.forceDataSchema), numComps]);
+      return decodePromise.then(function (message) {
+        var data = message.data;
+        return new _stream.Stream(data, 0, data.length, image.dict);
+      });
+    }
+  };
+  NativeImageDecoder.isSupported = function (image, xref, res, pdfFunctionFactory) {
+    var dict = image.dict;
+    if (dict.has('DecodeParms') || dict.has('DP')) {
+      return false;
+    }
+    var cs = _colorspace.ColorSpace.parse(dict.get('ColorSpace', 'CS'), xref, res, pdfFunctionFactory);
+    return (cs.name === 'DeviceGray' || cs.name === 'DeviceRGB') && cs.isDefaultDecode(dict.getArray('Decode', 'D'));
+  };
+  NativeImageDecoder.isDecodable = function (image, xref, res, pdfFunctionFactory) {
+    var dict = image.dict;
+    if (dict.has('DecodeParms') || dict.has('DP')) {
+      return false;
+    }
+    var cs = _colorspace.ColorSpace.parse(dict.get('ColorSpace', 'CS'), xref, res, pdfFunctionFactory);
+    return (cs.numComps === 1 || cs.numComps === 3) && cs.isDefaultDecode(dict.getArray('Decode', 'D'));
+  };
+  function PartialEvaluator(_ref2) {
+    var _this = this;
+
+    var pdfManager = _ref2.pdfManager,
+        xref = _ref2.xref,
+        handler = _ref2.handler,
+        pageIndex = _ref2.pageIndex,
+        idFactory = _ref2.idFactory,
+        fontCache = _ref2.fontCache,
+        builtInCMapCache = _ref2.builtInCMapCache,
+        _ref2$options = _ref2.options,
+        options = _ref2$options === undefined ? null : _ref2$options,
+        pdfFunctionFactory = _ref2.pdfFunctionFactory;
+
+    this.pdfManager = pdfManager;
+    this.xref = xref;
+    this.handler = handler;
+    this.pageIndex = pageIndex;
+    this.idFactory = idFactory;
+    this.fontCache = fontCache;
+    this.builtInCMapCache = builtInCMapCache;
+    this.options = options || DefaultPartialEvaluatorOptions;
+    this.pdfFunctionFactory = pdfFunctionFactory;
+    this.fetchBuiltInCMap = function (name) {
+      var cachedCMap = _this.builtInCMapCache[name];
+      if (cachedCMap) {
+        return Promise.resolve(cachedCMap);
+      }
+      return _this.handler.sendWithPromise('FetchBuiltInCMap', { name: name }).then(function (data) {
+        if (data.compressionType !== _util.CMapCompressionType.NONE) {
+          _this.builtInCMapCache[name] = data;
+        }
+        return data;
+      });
+    };
+  }
+  var TIME_SLOT_DURATION_MS = 20;
+  var CHECK_TIME_EVERY = 100;
+  function TimeSlotManager() {
+    this.reset();
+  }
+  TimeSlotManager.prototype = {
+    check: function TimeSlotManager_check() {
+      if (++this.checked < CHECK_TIME_EVERY) {
+        return false;
+      }
+      this.checked = 0;
+      return this.endTime <= Date.now();
+    },
+    reset: function TimeSlotManager_reset() {
+      this.endTime = Date.now() + TIME_SLOT_DURATION_MS;
+      this.checked = 0;
+    }
+  };
+  function normalizeBlendMode(value) {
+    if (!(0, _primitives.isName)(value)) {
+      return 'source-over';
+    }
+    switch (value.name) {
+      case 'Normal':
+      case 'Compatible':
+        return 'source-over';
+      case 'Multiply':
+        return 'multiply';
+      case 'Screen':
+        return 'screen';
+      case 'Overlay':
+        return 'overlay';
+      case 'Darken':
+        return 'darken';
+      case 'Lighten':
+        return 'lighten';
+      case 'ColorDodge':
+        return 'color-dodge';
+      case 'ColorBurn':
+        return 'color-burn';
+      case 'HardLight':
+        return 'hard-light';
+      case 'SoftLight':
+        return 'soft-light';
+      case 'Difference':
+        return 'difference';
+      case 'Exclusion':
+        return 'exclusion';
+      case 'Hue':
+        return 'hue';
+      case 'Saturation':
+        return 'saturation';
+      case 'Color':
+        return 'color';
+      case 'Luminosity':
+        return 'luminosity';
+    }
+    (0, _util.warn)('Unsupported blend mode: ' + value.name);
+    return 'source-over';
+  }
+  var deferred = Promise.resolve();
+  var TILING_PATTERN = 1,
+      SHADING_PATTERN = 2;
+  PartialEvaluator.prototype = {
+    clone: function clone() {
+      var newOptions = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DefaultPartialEvaluatorOptions;
+
+      var newEvaluator = Object.create(this);
+      newEvaluator.options = newOptions;
+      return newEvaluator;
+    },
+
+    hasBlendModes: function PartialEvaluator_hasBlendModes(resources) {
+      if (!(0, _primitives.isDict)(resources)) {
+        return false;
+      }
+      var processed = Object.create(null);
+      if (resources.objId) {
+        processed[resources.objId] = true;
+      }
+      var nodes = [resources],
+          xref = this.xref;
+      while (nodes.length) {
+        var key, i, ii;
+        var node = nodes.shift();
+        var graphicStates = node.get('ExtGState');
+        if ((0, _primitives.isDict)(graphicStates)) {
+          var graphicStatesKeys = graphicStates.getKeys();
+          for (i = 0, ii = graphicStatesKeys.length; i < ii; i++) {
+            key = graphicStatesKeys[i];
+            var graphicState = graphicStates.get(key);
+            var bm = graphicState.get('BM');
+            if ((0, _primitives.isName)(bm) && bm.name !== 'Normal') {
+              return true;
+            }
+          }
+        }
+        var xObjects = node.get('XObject');
+        if (!(0, _primitives.isDict)(xObjects)) {
+          continue;
+        }
+        var xObjectsKeys = xObjects.getKeys();
+        for (i = 0, ii = xObjectsKeys.length; i < ii; i++) {
+          key = xObjectsKeys[i];
+          var xObject = xObjects.getRaw(key);
+          if ((0, _primitives.isRef)(xObject)) {
+            if (processed[xObject.toString()]) {
+              continue;
+            }
+            xObject = xref.fetch(xObject);
+          }
+          if (!(0, _primitives.isStream)(xObject)) {
+            continue;
+          }
+          if (xObject.dict.objId) {
+            if (processed[xObject.dict.objId]) {
+              continue;
+            }
+            processed[xObject.dict.objId] = true;
+          }
+          var xResources = xObject.dict.get('Resources');
+          if ((0, _primitives.isDict)(xResources) && (!xResources.objId || !processed[xResources.objId])) {
+            nodes.push(xResources);
+            if (xResources.objId) {
+              processed[xResources.objId] = true;
+            }
+          }
+        }
+      }
+      return false;
+    },
+    buildFormXObject: function PartialEvaluator_buildFormXObject(resources, xobj, smask, operatorList, task, initialState) {
+      var dict = xobj.dict;
+      var matrix = dict.getArray('Matrix');
+      var bbox = dict.getArray('BBox');
+      var group = dict.get('Group');
+      if (group) {
+        var groupOptions = {
+          matrix: matrix,
+          bbox: bbox,
+          smask: smask,
+          isolated: false,
+          knockout: false
+        };
+        var groupSubtype = group.get('S');
+        var colorSpace = null;
+        if ((0, _primitives.isName)(groupSubtype, 'Transparency')) {
+          groupOptions.isolated = group.get('I') || false;
+          groupOptions.knockout = group.get('K') || false;
+          if (group.has('CS')) {
+            colorSpace = _colorspace.ColorSpace.parse(group.get('CS'), this.xref, resources, this.pdfFunctionFactory);
+          }
+        }
+        if (smask && smask.backdrop) {
+          colorSpace = colorSpace || _colorspace.ColorSpace.singletons.rgb;
+          smask.backdrop = colorSpace.getRgb(smask.backdrop, 0);
+        }
+        operatorList.addOp(_util.OPS.beginGroup, [groupOptions]);
+      }
+      operatorList.addOp(_util.OPS.paintFormXObjectBegin, [matrix, bbox]);
+      return this.getOperatorList({
+        stream: xobj,
+        task: task,
+        resources: dict.get('Resources') || resources,
+        operatorList: operatorList,
+        initialState: initialState
+      }).then(function () {
+        operatorList.addOp(_util.OPS.paintFormXObjectEnd, []);
+        if (group) {
+          operatorList.addOp(_util.OPS.endGroup, [groupOptions]);
+        }
+      });
+    },
+    buildPaintImageXObject: function PartialEvaluator_buildPaintImageXObject(resources, image, inline, operatorList, cacheKey, imageCache) {
+      var _this2 = this;
+
+      var dict = image.dict;
+      var w = dict.get('Width', 'W');
+      var h = dict.get('Height', 'H');
+      if (!(w && (0, _util.isNum)(w)) || !(h && (0, _util.isNum)(h))) {
+        (0, _util.warn)('Image dimensions are missing, or not numbers.');
+        return;
+      }
+      var maxImageSize = this.options.maxImageSize;
+      if (maxImageSize !== -1 && w * h > maxImageSize) {
+        (0, _util.warn)('Image exceeded maximum allowed size and was removed.');
+        return;
+      }
+      var imageMask = dict.get('ImageMask', 'IM') || false;
+      var imgData, args;
+      if (imageMask) {
+        var width = dict.get('Width', 'W');
+        var height = dict.get('Height', 'H');
+        var bitStrideLength = width + 7 >> 3;
+        var imgArray = image.getBytes(bitStrideLength * height);
+        var decode = dict.getArray('Decode', 'D');
+        imgData = _image.PDFImage.createMask({
+          imgArray: imgArray,
+          width: width,
+          height: height,
+          imageIsFromDecodeStream: image instanceof _stream.DecodeStream,
+          inverseDecode: !!decode && decode[0] > 0
+        });
+        imgData.cached = true;
+        args = [imgData];
+        operatorList.addOp(_util.OPS.paintImageMaskXObject, args);
+        if (cacheKey) {
+          imageCache[cacheKey] = {
+            fn: _util.OPS.paintImageMaskXObject,
+            args: args
+          };
+        }
+        return;
+      }
+      var softMask = dict.get('SMask', 'SM') || false;
+      var mask = dict.get('Mask') || false;
+      var SMALL_IMAGE_DIMENSIONS = 200;
+      if (inline && !softMask && !mask && !(image instanceof _stream.JpegStream) && w + h < SMALL_IMAGE_DIMENSIONS) {
+        var imageObj = new _image.PDFImage({
+          xref: this.xref,
+          res: resources,
+          image: image,
+          pdfFunctionFactory: this.pdfFunctionFactory
+        });
+        imgData = imageObj.createImageData(true);
+        operatorList.addOp(_util.OPS.paintInlineImageXObject, [imgData]);
+        return;
+      }
+      var nativeImageDecoderSupport = this.options.nativeImageDecoderSupport;
+      var objId = 'img_' + this.idFactory.createObjId();
+      operatorList.addDependency(objId);
+      args = [objId, w, h];
+      if (nativeImageDecoderSupport !== _util.NativeImageDecoding.NONE && !softMask && !mask && image instanceof _stream.JpegStream && NativeImageDecoder.isSupported(image, this.xref, resources, this.pdfFunctionFactory)) {
+        operatorList.addOp(_util.OPS.paintJpegXObject, args);
+        this.handler.send('obj', [objId, this.pageIndex, 'JpegStream', image.getIR(this.options.forceDataSchema)]);
+        if (cacheKey) {
+          imageCache[cacheKey] = {
+            fn: _util.OPS.paintJpegXObject,
+            args: args
+          };
+        }
+        return;
+      }
+      var nativeImageDecoder = null;
+      if (nativeImageDecoderSupport === _util.NativeImageDecoding.DECODE && (image instanceof _stream.JpegStream || mask instanceof _stream.JpegStream || softMask instanceof _stream.JpegStream)) {
+        nativeImageDecoder = new NativeImageDecoder({
+          xref: this.xref,
+          resources: resources,
+          handler: this.handler,
+          forceDataSchema: this.options.forceDataSchema,
+          pdfFunctionFactory: this.pdfFunctionFactory
+        });
+      }
+      _image.PDFImage.buildImage({
+        handler: this.handler,
+        xref: this.xref,
+        res: resources,
+        image: image,
+        nativeDecoder: nativeImageDecoder,
+        pdfFunctionFactory: this.pdfFunctionFactory
+      }).then(function (imageObj) {
+        var imgData = imageObj.createImageData(false);
+        _this2.handler.send('obj', [objId, _this2.pageIndex, 'Image', imgData], [imgData.data.buffer]);
+      }).catch(function (reason) {
+        (0, _util.warn)('Unable to decode image: ' + reason);
+        _this2.handler.send('obj', [objId, _this2.pageIndex, 'Image', null]);
+      });
+      operatorList.addOp(_util.OPS.paintImageXObject, args);
+      if (cacheKey) {
+        imageCache[cacheKey] = {
+          fn: _util.OPS.paintImageXObject,
+          args: args
+        };
+      }
+    },
+    handleSMask: function PartialEvaluator_handleSmask(smask, resources, operatorList, task, stateManager) {
+      var smaskContent = smask.get('G');
+      var smaskOptions = {
+        subtype: smask.get('S').name,
+        backdrop: smask.get('BC')
+      };
+      var transferObj = smask.get('TR');
+      if ((0, _function.isPDFFunction)(transferObj)) {
+        var transferFn = this.pdfFunctionFactory.create(transferObj);
+        var transferMap = new Uint8Array(256);
+        var tmp = new Float32Array(1);
+        for (var i = 0; i < 256; i++) {
+          tmp[0] = i / 255;
+          transferFn(tmp, 0, tmp, 0);
+          transferMap[i] = tmp[0] * 255 | 0;
+        }
+        smaskOptions.transferMap = transferMap;
+      }
+      return this.buildFormXObject(resources, smaskContent, smaskOptions, operatorList, task, stateManager.state.clone());
+    },
+    handleTilingType: function handleTilingType(fn, args, resources, pattern, patternDict, operatorList, task) {
+      var _this3 = this;
+
+      var tilingOpList = new _operator_list.OperatorList();
+      var resourcesArray = [patternDict.get('Resources'), resources];
+      var patternResources = _primitives.Dict.merge(this.xref, resourcesArray);
+      return this.getOperatorList({
+        stream: pattern,
+        task: task,
+        resources: patternResources,
+        operatorList: tilingOpList
+      }).then(function () {
+        return (0, _pattern.getTilingPatternIR)({
+          fnArray: tilingOpList.fnArray,
+          argsArray: tilingOpList.argsArray
+        }, patternDict, args);
+      }).then(function (tilingPatternIR) {
+        operatorList.addDependencies(tilingOpList.dependencies);
+        operatorList.addOp(fn, tilingPatternIR);
+      }, function (reason) {
+        if (_this3.options.ignoreErrors) {
+          _this3.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.unknown });
+          (0, _util.warn)('handleTilingType - ignoring pattern: "' + reason + '".');
+          return;
+        }
+        throw reason;
+      });
+    },
+
+    handleSetFont: function PartialEvaluator_handleSetFont(resources, fontArgs, fontRef, operatorList, task, state) {
+      var _this4 = this;
+
+      var fontName;
+      if (fontArgs) {
+        fontArgs = fontArgs.slice();
+        fontName = fontArgs[0].name;
+      }
+      return this.loadFont(fontName, fontRef, resources).then(function (translated) {
+        if (!translated.font.isType3Font) {
+          return translated;
+        }
+        return translated.loadType3Data(_this4, resources, operatorList, task).then(function () {
+          return translated;
+        }).catch(function (reason) {
+          _this4.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.font });
+          return new TranslatedFont('g_font_error', new _fonts.ErrorFont('Type3 font load error: ' + reason), translated.font);
+        });
+      }).then(function (translated) {
+        state.font = translated.font;
+        translated.send(_this4.handler);
+        return translated.loadedName;
+      });
+    },
+    handleText: function PartialEvaluator_handleText(chars, state) {
+      var _this5 = this;
+
+      var font = state.font;
+      var glyphs = font.charsToGlyphs(chars);
+      var isAddToPathSet = !!(state.textRenderingMode & _util.TextRenderingMode.ADD_TO_PATH_FLAG);
+      if (font.data && (isAddToPathSet || this.options.disableFontFace)) {
+        var buildPath = function buildPath(fontChar) {
+          if (!font.renderer.hasBuiltPath(fontChar)) {
+            var path = font.renderer.getPathJs(fontChar);
+            _this5.handler.send('commonobj', [font.loadedName + '_path_' + fontChar, 'FontPath', path]);
+          }
+        };
+        for (var i = 0, ii = glyphs.length; i < ii; i++) {
+          var glyph = glyphs[i];
+          buildPath(glyph.fontChar);
+          var accent = glyph.accent;
+          if (accent && accent.fontChar) {
+            buildPath(accent.fontChar);
+          }
+        }
+      }
+      return glyphs;
+    },
+    setGState: function PartialEvaluator_setGState(resources, gState, operatorList, task, stateManager) {
+      var _this6 = this;
+
+      var gStateObj = [];
+      var gStateKeys = gState.getKeys();
+      var promise = Promise.resolve();
+
+      var _loop = function _loop() {
+        var key = gStateKeys[i];
+        var value = gState.get(key);
+        switch (key) {
+          case 'Type':
+            break;
+          case 'LW':
+          case 'LC':
+          case 'LJ':
+          case 'ML':
+          case 'D':
+          case 'RI':
+          case 'FL':
+          case 'CA':
+          case 'ca':
+            gStateObj.push([key, value]);
+            break;
+          case 'Font':
+            promise = promise.then(function () {
+              return _this6.handleSetFont(resources, null, value[0], operatorList, task, stateManager.state).then(function (loadedName) {
+                operatorList.addDependency(loadedName);
+                gStateObj.push([key, [loadedName, value[1]]]);
+              });
+            });
+            break;
+          case 'BM':
+            gStateObj.push([key, normalizeBlendMode(value)]);
+            break;
+          case 'SMask':
+            if ((0, _primitives.isName)(value, 'None')) {
+              gStateObj.push([key, false]);
+              break;
+            }
+            if ((0, _primitives.isDict)(value)) {
+              promise = promise.then(function () {
+                return _this6.handleSMask(value, resources, operatorList, task, stateManager);
+              });
+              gStateObj.push([key, true]);
+            } else {
+              (0, _util.warn)('Unsupported SMask type');
+            }
+            break;
+          case 'OP':
+          case 'op':
+          case 'OPM':
+          case 'BG':
+          case 'BG2':
+          case 'UCR':
+          case 'UCR2':
+          case 'TR':
+          case 'TR2':
+          case 'HT':
+          case 'SM':
+          case 'SA':
+          case 'AIS':
+          case 'TK':
+            (0, _util.info)('graphic state operator ' + key);
+            break;
+          default:
+            (0, _util.info)('Unknown graphic state operator ' + key);
+            break;
+        }
+      };
+
+      for (var i = 0, ii = gStateKeys.length; i < ii; i++) {
+        _loop();
+      }
+      return promise.then(function () {
+        if (gStateObj.length > 0) {
+          operatorList.addOp(_util.OPS.setGState, [gStateObj]);
+        }
+      });
+    },
+    loadFont: function PartialEvaluator_loadFont(fontName, font, resources) {
+      var _this7 = this;
+
+      function errorFont() {
+        return Promise.resolve(new TranslatedFont('g_font_error', new _fonts.ErrorFont('Font ' + fontName + ' is not available'), font));
+      }
+      var fontRef,
+          xref = this.xref;
+      if (font) {
+        if (!(0, _primitives.isRef)(font)) {
+          throw new Error('The "font" object should be a reference.');
+        }
+        fontRef = font;
+      } else {
+        var fontRes = resources.get('Font');
+        if (fontRes) {
+          fontRef = fontRes.getRaw(fontName);
+        } else {
+          (0, _util.warn)('fontRes not available');
+          return errorFont();
+        }
+      }
+      if (!fontRef) {
+        (0, _util.warn)('fontRef not available');
+        return errorFont();
+      }
+      if (this.fontCache.has(fontRef)) {
+        return this.fontCache.get(fontRef);
+      }
+      font = xref.fetchIfRef(fontRef);
+      if (!(0, _primitives.isDict)(font)) {
+        return errorFont();
+      }
+      if (font.translated) {
+        return font.translated;
+      }
+      var fontCapability = (0, _util.createPromiseCapability)();
+      var preEvaluatedFont = this.preEvaluateFont(font);
+      var descriptor = preEvaluatedFont.descriptor;
+      var fontRefIsRef = (0, _primitives.isRef)(fontRef),
+          fontID;
+      if (fontRefIsRef) {
+        fontID = fontRef.toString();
+      }
+      if ((0, _primitives.isDict)(descriptor)) {
+        if (!descriptor.fontAliases) {
+          descriptor.fontAliases = Object.create(null);
+        }
+        var fontAliases = descriptor.fontAliases;
+        var hash = preEvaluatedFont.hash;
+        if (fontAliases[hash]) {
+          var aliasFontRef = fontAliases[hash].aliasRef;
+          if (fontRefIsRef && aliasFontRef && this.fontCache.has(aliasFontRef)) {
+            this.fontCache.putAlias(fontRef, aliasFontRef);
+            return this.fontCache.get(fontRef);
+          }
+        } else {
+          fontAliases[hash] = { fontID: _fonts.Font.getFontID() };
+        }
+        if (fontRefIsRef) {
+          fontAliases[hash].aliasRef = fontRef;
+        }
+        fontID = fontAliases[hash].fontID;
+      }
+      if (fontRefIsRef) {
+        this.fontCache.put(fontRef, fontCapability.promise);
+      } else {
+        if (!fontID) {
+          fontID = this.idFactory.createObjId();
+        }
+        this.fontCache.put('id_' + fontID, fontCapability.promise);
+      }
+      (0, _util.assert)(fontID, 'The "fontID" must be defined.');
+      font.loadedName = 'g_' + this.pdfManager.docId + '_f' + fontID;
+      font.translated = fontCapability.promise;
+      var translatedPromise;
+      try {
+        translatedPromise = this.translateFont(preEvaluatedFont);
+      } catch (e) {
+        translatedPromise = Promise.reject(e);
+      }
+      translatedPromise.then(function (translatedFont) {
+        if (translatedFont.fontType !== undefined) {
+          var xrefFontStats = xref.stats.fontTypes;
+          xrefFontStats[translatedFont.fontType] = true;
+        }
+        fontCapability.resolve(new TranslatedFont(font.loadedName, translatedFont, font));
+      }).catch(function (reason) {
+        _this7.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.font });
+        try {
+          var descriptor = preEvaluatedFont.descriptor;
+          var fontFile3 = descriptor && descriptor.get('FontFile3');
+          var subtype = fontFile3 && fontFile3.get('Subtype');
+          var fontType = (0, _fonts.getFontType)(preEvaluatedFont.type, subtype && subtype.name);
+          var xrefFontStats = xref.stats.fontTypes;
+          xrefFontStats[fontType] = true;
+        } catch (ex) {}
+        fontCapability.resolve(new TranslatedFont(font.loadedName, new _fonts.ErrorFont(reason instanceof Error ? reason.message : reason), font));
+      });
+      return fontCapability.promise;
+    },
+    buildPath: function PartialEvaluator_buildPath(operatorList, fn, args) {
+      var lastIndex = operatorList.length - 1;
+      if (!args) {
+        args = [];
+      }
+      if (lastIndex < 0 || operatorList.fnArray[lastIndex] !== _util.OPS.constructPath) {
+        operatorList.addOp(_util.OPS.constructPath, [[fn], args]);
+      } else {
+        var opArgs = operatorList.argsArray[lastIndex];
+        opArgs[0].push(fn);
+        Array.prototype.push.apply(opArgs[1], args);
+      }
+    },
+    handleColorN: function PartialEvaluator_handleColorN(operatorList, fn, args, cs, patterns, resources, task) {
+      var patternName = args[args.length - 1];
+      var pattern;
+      if ((0, _primitives.isName)(patternName) && (pattern = patterns.get(patternName.name))) {
+        var dict = (0, _primitives.isStream)(pattern) ? pattern.dict : pattern;
+        var typeNum = dict.get('PatternType');
+        if (typeNum === TILING_PATTERN) {
+          var color = cs.base ? cs.base.getRgb(args, 0) : null;
+          return this.handleTilingType(fn, color, resources, pattern, dict, operatorList, task);
+        } else if (typeNum === SHADING_PATTERN) {
+          var shading = dict.get('Shading');
+          var matrix = dict.getArray('Matrix');
+          pattern = _pattern.Pattern.parseShading(shading, matrix, this.xref, resources, this.handler, this.pdfFunctionFactory);
+          operatorList.addOp(fn, pattern.getIR());
+          return Promise.resolve();
+        }
+        return Promise.reject(new Error('Unknown PatternType: ' + typeNum));
+      }
+      operatorList.addOp(fn, args);
+      return Promise.resolve();
+    },
+    getOperatorList: function getOperatorList(_ref3) {
+      var _this8 = this;
+
+      var stream = _ref3.stream,
+          task = _ref3.task,
+          resources = _ref3.resources,
+          operatorList = _ref3.operatorList,
+          _ref3$initialState = _ref3.initialState,
+          initialState = _ref3$initialState === undefined ? null : _ref3$initialState;
+
+      resources = resources || _primitives.Dict.empty;
+      initialState = initialState || new EvalState();
+      if (!operatorList) {
+        throw new Error('getOperatorList: missing "operatorList" parameter');
+      }
+      var self = this;
+      var xref = this.xref;
+      var imageCache = Object.create(null);
+      var xobjs = resources.get('XObject') || _primitives.Dict.empty;
+      var patterns = resources.get('Pattern') || _primitives.Dict.empty;
+      var stateManager = new StateManager(initialState);
+      var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
+      var timeSlotManager = new TimeSlotManager();
+      function closePendingRestoreOPS(argument) {
+        for (var i = 0, ii = preprocessor.savedStatesDepth; i < ii; i++) {
+          operatorList.addOp(_util.OPS.restore, []);
+        }
+      }
+      return new Promise(function promiseBody(resolve, reject) {
+        var next = function next(promise) {
+          promise.then(function () {
+            try {
+              promiseBody(resolve, reject);
+            } catch (ex) {
+              reject(ex);
+            }
+          }, reject);
+        };
+        task.ensureNotTerminated();
+        timeSlotManager.reset();
+        var stop,
+            operation = {},
+            i,
+            ii,
+            cs;
+        while (!(stop = timeSlotManager.check())) {
+          operation.args = null;
+          if (!preprocessor.read(operation)) {
+            break;
+          }
+          var args = operation.args;
+          var fn = operation.fn;
+          switch (fn | 0) {
+            case _util.OPS.paintXObject:
+              var name = args[0].name;
+              if (name && imageCache[name] !== undefined) {
+                operatorList.addOp(imageCache[name].fn, imageCache[name].args);
+                args = null;
+                continue;
+              }
+              next(new Promise(function (resolveXObject, rejectXObject) {
+                if (!name) {
+                  throw new _util.FormatError('XObject must be referred to by name.');
+                }
+                var xobj = xobjs.get(name);
+                if (!xobj) {
+                  operatorList.addOp(fn, args);
+                  resolveXObject();
+                  return;
+                }
+                if (!(0, _primitives.isStream)(xobj)) {
+                  throw new _util.FormatError('XObject should be a stream');
+                }
+                var type = xobj.dict.get('Subtype');
+                if (!(0, _primitives.isName)(type)) {
+                  throw new _util.FormatError('XObject should have a Name subtype');
+                }
+                if (type.name === 'Form') {
+                  stateManager.save();
+                  self.buildFormXObject(resources, xobj, null, operatorList, task, stateManager.state.clone()).then(function () {
+                    stateManager.restore();
+                    resolveXObject();
+                  }, rejectXObject);
+                  return;
+                } else if (type.name === 'Image') {
+                  self.buildPaintImageXObject(resources, xobj, false, operatorList, name, imageCache);
+                } else if (type.name === 'PS') {
+                  (0, _util.info)('Ignored XObject subtype PS');
+                } else {
+                  throw new _util.FormatError('Unhandled XObject subtype ' + type.name);
+                }
+                resolveXObject();
+              }).catch(function (reason) {
+                if (self.options.ignoreErrors) {
+                  self.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.unknown });
+                  (0, _util.warn)('getOperatorList - ignoring XObject: "' + reason + '".');
+                  return;
+                }
+                throw reason;
+              }));
+              return;
+            case _util.OPS.setFont:
+              var fontSize = args[1];
+              next(self.handleSetFont(resources, args, null, operatorList, task, stateManager.state).then(function (loadedName) {
+                operatorList.addDependency(loadedName);
+                operatorList.addOp(_util.OPS.setFont, [loadedName, fontSize]);
+              }));
+              return;
+            case _util.OPS.endInlineImage:
+              var cacheKey = args[0].cacheKey;
+              if (cacheKey) {
+                var cacheEntry = imageCache[cacheKey];
+                if (cacheEntry !== undefined) {
+                  operatorList.addOp(cacheEntry.fn, cacheEntry.args);
+                  args = null;
+                  continue;
+                }
+              }
+              self.buildPaintImageXObject(resources, args[0], true, operatorList, cacheKey, imageCache);
+              args = null;
+              continue;
+            case _util.OPS.showText:
+              args[0] = self.handleText(args[0], stateManager.state);
+              break;
+            case _util.OPS.showSpacedText:
+              var arr = args[0];
+              var combinedGlyphs = [];
+              var arrLength = arr.length;
+              var state = stateManager.state;
+              for (i = 0; i < arrLength; ++i) {
+                var arrItem = arr[i];
+                if ((0, _util.isString)(arrItem)) {
+                  Array.prototype.push.apply(combinedGlyphs, self.handleText(arrItem, state));
+                } else if ((0, _util.isNum)(arrItem)) {
+                  combinedGlyphs.push(arrItem);
+                }
+              }
+              args[0] = combinedGlyphs;
+              fn = _util.OPS.showText;
+              break;
+            case _util.OPS.nextLineShowText:
+              operatorList.addOp(_util.OPS.nextLine);
+              args[0] = self.handleText(args[0], stateManager.state);
+              fn = _util.OPS.showText;
+              break;
+            case _util.OPS.nextLineSetSpacingShowText:
+              operatorList.addOp(_util.OPS.nextLine);
+              operatorList.addOp(_util.OPS.setWordSpacing, [args.shift()]);
+              operatorList.addOp(_util.OPS.setCharSpacing, [args.shift()]);
+              args[0] = self.handleText(args[0], stateManager.state);
+              fn = _util.OPS.showText;
+              break;
+            case _util.OPS.setTextRenderingMode:
+              stateManager.state.textRenderingMode = args[0];
+              break;
+            case _util.OPS.setFillColorSpace:
+              stateManager.state.fillColorSpace = _colorspace.ColorSpace.parse(args[0], xref, resources, self.pdfFunctionFactory);
+              continue;
+            case _util.OPS.setStrokeColorSpace:
+              stateManager.state.strokeColorSpace = _colorspace.ColorSpace.parse(args[0], xref, resources, self.pdfFunctionFactory);
+              continue;
+            case _util.OPS.setFillColor:
+              cs = stateManager.state.fillColorSpace;
+              args = cs.getRgb(args, 0);
+              fn = _util.OPS.setFillRGBColor;
+              break;
+            case _util.OPS.setStrokeColor:
+              cs = stateManager.state.strokeColorSpace;
+              args = cs.getRgb(args, 0);
+              fn = _util.OPS.setStrokeRGBColor;
+              break;
+            case _util.OPS.setFillGray:
+              stateManager.state.fillColorSpace = _colorspace.ColorSpace.singletons.gray;
+              args = _colorspace.ColorSpace.singletons.gray.getRgb(args, 0);
+              fn = _util.OPS.setFillRGBColor;
+              break;
+            case _util.OPS.setStrokeGray:
+              stateManager.state.strokeColorSpace = _colorspace.ColorSpace.singletons.gray;
+              args = _colorspace.ColorSpace.singletons.gray.getRgb(args, 0);
+              fn = _util.OPS.setStrokeRGBColor;
+              break;
+            case _util.OPS.setFillCMYKColor:
+              stateManager.state.fillColorSpace = _colorspace.ColorSpace.singletons.cmyk;
+              args = _colorspace.ColorSpace.singletons.cmyk.getRgb(args, 0);
+              fn = _util.OPS.setFillRGBColor;
+              break;
+            case _util.OPS.setStrokeCMYKColor:
+              stateManager.state.strokeColorSpace = _colorspace.ColorSpace.singletons.cmyk;
+              args = _colorspace.ColorSpace.singletons.cmyk.getRgb(args, 0);
+              fn = _util.OPS.setStrokeRGBColor;
+              break;
+            case _util.OPS.setFillRGBColor:
+              stateManager.state.fillColorSpace = _colorspace.ColorSpace.singletons.rgb;
+              args = _colorspace.ColorSpace.singletons.rgb.getRgb(args, 0);
+              break;
+            case _util.OPS.setStrokeRGBColor:
+              stateManager.state.strokeColorSpace = _colorspace.ColorSpace.singletons.rgb;
+              args = _colorspace.ColorSpace.singletons.rgb.getRgb(args, 0);
+              break;
+            case _util.OPS.setFillColorN:
+              cs = stateManager.state.fillColorSpace;
+              if (cs.name === 'Pattern') {
+                next(self.handleColorN(operatorList, _util.OPS.setFillColorN, args, cs, patterns, resources, task));
+                return;
+              }
+              args = cs.getRgb(args, 0);
+              fn = _util.OPS.setFillRGBColor;
+              break;
+            case _util.OPS.setStrokeColorN:
+              cs = stateManager.state.strokeColorSpace;
+              if (cs.name === 'Pattern') {
+                next(self.handleColorN(operatorList, _util.OPS.setStrokeColorN, args, cs, patterns, resources, task));
+                return;
+              }
+              args = cs.getRgb(args, 0);
+              fn = _util.OPS.setStrokeRGBColor;
+              break;
+            case _util.OPS.shadingFill:
+              var shadingRes = resources.get('Shading');
+              if (!shadingRes) {
+                throw new _util.FormatError('No shading resource found');
+              }
+              var shading = shadingRes.get(args[0].name);
+              if (!shading) {
+                throw new _util.FormatError('No shading object found');
+              }
+              var shadingFill = _pattern.Pattern.parseShading(shading, null, xref, resources, self.handler, self.pdfFunctionFactory);
+              var patternIR = shadingFill.getIR();
+              args = [patternIR];
+              fn = _util.OPS.shadingFill;
+              break;
+            case _util.OPS.setGState:
+              var dictName = args[0];
+              var extGState = resources.get('ExtGState');
+              if (!(0, _primitives.isDict)(extGState) || !extGState.has(dictName.name)) {
+                break;
+              }
+              var gState = extGState.get(dictName.name);
+              next(self.setGState(resources, gState, operatorList, task, stateManager));
+              return;
+            case _util.OPS.moveTo:
+            case _util.OPS.lineTo:
+            case _util.OPS.curveTo:
+            case _util.OPS.curveTo2:
+            case _util.OPS.curveTo3:
+            case _util.OPS.closePath:
+              self.buildPath(operatorList, fn, args);
+              continue;
+            case _util.OPS.rectangle:
+              self.buildPath(operatorList, fn, args);
+              continue;
+            case _util.OPS.markPoint:
+            case _util.OPS.markPointProps:
+            case _util.OPS.beginMarkedContent:
+            case _util.OPS.beginMarkedContentProps:
+            case _util.OPS.endMarkedContent:
+            case _util.OPS.beginCompat:
+            case _util.OPS.endCompat:
+              continue;
+            default:
+              if (args !== null) {
+                for (i = 0, ii = args.length; i < ii; i++) {
+                  if (args[i] instanceof _primitives.Dict) {
+                    break;
+                  }
+                }
+                if (i < ii) {
+                  (0, _util.warn)('getOperatorList - ignoring operator: ' + fn);
+                  continue;
+                }
+              }
+          }
+          operatorList.addOp(fn, args);
+        }
+        if (stop) {
+          next(deferred);
+          return;
+        }
+        closePendingRestoreOPS();
+        resolve();
+      }).catch(function (reason) {
+        if (_this8.options.ignoreErrors) {
+          _this8.handler.send('UnsupportedFeature', { featureId: _util.UNSUPPORTED_FEATURES.unknown });
+          (0, _util.warn)('getOperatorList - ignoring errors during task: ' + task.name);
+          closePendingRestoreOPS();
+          return;
+        }
+        throw reason;
+      });
+    },
+    getTextContent: function getTextContent(_ref4) {
+      var _this9 = this;
+
+      var stream = _ref4.stream,
+          task = _ref4.task,
+          resources = _ref4.resources,
+          _ref4$stateManager = _ref4.stateManager,
+          stateManager = _ref4$stateManager === undefined ? null : _ref4$stateManager,
+          _ref4$normalizeWhites = _ref4.normalizeWhitespace,
+          normalizeWhitespace = _ref4$normalizeWhites === undefined ? false : _ref4$normalizeWhites,
+          _ref4$combineTextItem = _ref4.combineTextItems,
+          combineTextItems = _ref4$combineTextItem === undefined ? false : _ref4$combineTextItem,
+          sink = _ref4.sink,
+          _ref4$seenStyles = _ref4.seenStyles,
+          seenStyles = _ref4$seenStyles === undefined ? Object.create(null) : _ref4$seenStyles;
+
+      resources = resources || _primitives.Dict.empty;
+      stateManager = stateManager || new StateManager(new TextState());
+      var WhitespaceRegexp = /\s/g;
+      var textContent = {
+        items: [],
+        styles: Object.create(null)
+      };
+      var textContentItem = {
+        initialized: false,
+        str: [],
+        width: 0,
+        height: 0,
+        vertical: false,
+        lastAdvanceWidth: 0,
+        lastAdvanceHeight: 0,
+        textAdvanceScale: 0,
+        spaceWidth: 0,
+        fakeSpaceMin: Infinity,
+        fakeMultiSpaceMin: Infinity,
+        fakeMultiSpaceMax: -0,
+        textRunBreakAllowed: false,
+        transform: null,
+        fontName: null
+      };
+      var SPACE_FACTOR = 0.3;
+      var MULTI_SPACE_FACTOR = 1.5;
+      var MULTI_SPACE_FACTOR_MAX = 4;
+      var self = this;
+      var xref = this.xref;
+      var xobjs = null;
+      var skipEmptyXObjs = Object.create(null);
+      var preprocessor = new EvaluatorPreprocessor(stream, xref, stateManager);
+      var textState;
+      function ensureTextContentItem() {
+        if (textContentItem.initialized) {
+          return textContentItem;
+        }
+        var font = textState.font;
+        if (!(font.loadedName in seenStyles)) {
+          seenStyles[font.loadedName] = true;
+          textContent.styles[font.loadedName] = {
+            fontFamily: font.fallbackName,
+            ascent: font.ascent,
+            descent: font.descent,
+            vertical: font.vertical
+          };
+        }
+        textContentItem.fontName = font.loadedName;
+        var tsm = [textState.fontSize * textState.textHScale, 0, 0, textState.fontSize, 0, textState.textRise];
+        if (font.isType3Font && textState.fontMatrix !== _util.FONT_IDENTITY_MATRIX && textState.fontSize === 1) {
+          var glyphHeight = font.bbox[3] - font.bbox[1];
+          if (glyphHeight > 0) {
+            glyphHeight = glyphHeight * textState.fontMatrix[3];
+            tsm[3] *= glyphHeight;
+          }
+        }
+        var trm = _util.Util.transform(textState.ctm, _util.Util.transform(textState.textMatrix, tsm));
+        textContentItem.transform = trm;
+        if (!font.vertical) {
+          textContentItem.width = 0;
+          textContentItem.height = Math.sqrt(trm[2] * trm[2] + trm[3] * trm[3]);
+          textContentItem.vertical = false;
+        } else {
+          textContentItem.width = Math.sqrt(trm[0] * trm[0] + trm[1] * trm[1]);
+          textContentItem.height = 0;
+          textContentItem.vertical = true;
+        }
+        var a = textState.textLineMatrix[0];
+        var b = textState.textLineMatrix[1];
+        var scaleLineX = Math.sqrt(a * a + b * b);
+        a = textState.ctm[0];
+        b = textState.ctm[1];
+        var scaleCtmX = Math.sqrt(a * a + b * b);
+        textContentItem.textAdvanceScale = scaleCtmX * scaleLineX;
+        textContentItem.lastAdvanceWidth = 0;
+        textContentItem.lastAdvanceHeight = 0;
+        var spaceWidth = font.spaceWidth / 1000 * textState.fontSize;
+        if (spaceWidth) {
+          textContentItem.spaceWidth = spaceWidth;
+          textContentItem.fakeSpaceMin = spaceWidth * SPACE_FACTOR;
+          textContentItem.fakeMultiSpaceMin = spaceWidth * MULTI_SPACE_FACTOR;
+          textContentItem.fakeMultiSpaceMax = spaceWidth * MULTI_SPACE_FACTOR_MAX;
+          textContentItem.textRunBreakAllowed = !font.isMonospace;
+        } else {
+          textContentItem.spaceWidth = 0;
+          textContentItem.fakeSpaceMin = Infinity;
+          textContentItem.fakeMultiSpaceMin = Infinity;
+          textContentItem.fakeMultiSpaceMax = 0;
+          textContentItem.textRunBreakAllowed = false;
+        }
+        textContentItem.initialized = true;
+        return textContentItem;
+      }
+      function replaceWhitespace(str) {
+        var i = 0,
+            ii = str.length,
+            code;
+        while (i < ii && (code = str.charCodeAt(i)) >= 0x20 && code <= 0x7F) {
+          i++;
+        }
+        return i < ii ? str.replace(WhitespaceRegexp, ' ') : str;
+      }
+      function runBidiTransform(textChunk) {
+        var str = textChunk.str.join('');
+        var bidiResult = (0, _bidi.bidi)(str, -1, textChunk.vertical);
+        return {
+          str: normalizeWhitespace ? replaceWhitespace(bidiResult.str) : bidiResult.str,
+          dir: bidiResult.dir,
+          width: textChunk.width,
+          height: textChunk.height,
+          transform: textChunk.transform,
+          fontName: textChunk.fontName
+        };
+      }
+      function handleSetFont(fontName, fontRef) {
+        return self.loadFont(fontName, fontRef, resources).then(function (translated) {
+          textState.font = translated.font;
+          textState.fontMatrix = translated.font.fontMatrix || _util.FONT_IDENTITY_MATRIX;
+        });
+      }
+      function buildTextContentItem(chars) {
+        var font = textState.font;
+        var textChunk = ensureTextContentItem();
+        var width = 0;
+        var height = 0;
+        var glyphs = font.charsToGlyphs(chars);
+        for (var i = 0; i < glyphs.length; i++) {
+          var glyph = glyphs[i];
+          var glyphWidth = null;
+          if (font.vertical && glyph.vmetric) {
+            glyphWidth = glyph.vmetric[0];
+          } else {
+            glyphWidth = glyph.width;
+          }
+          var glyphUnicode = glyph.unicode;
+          var NormalizedUnicodes = (0, _unicode.getNormalizedUnicodes)();
+          if (NormalizedUnicodes[glyphUnicode] !== undefined) {
+            glyphUnicode = NormalizedUnicodes[glyphUnicode];
+          }
+          glyphUnicode = (0, _unicode.reverseIfRtl)(glyphUnicode);
+          var charSpacing = textState.charSpacing;
+          if (glyph.isSpace) {
+            var wordSpacing = textState.wordSpacing;
+            charSpacing += wordSpacing;
+            if (wordSpacing > 0) {
+              addFakeSpaces(wordSpacing, textChunk.str);
+            }
+          }
+          var tx = 0;
+          var ty = 0;
+          if (!font.vertical) {
+            var w0 = glyphWidth * textState.fontMatrix[0];
+            tx = (w0 * textState.fontSize + charSpacing) * textState.textHScale;
+            width += tx;
+          } else {
+            var w1 = glyphWidth * textState.fontMatrix[0];
+            ty = w1 * textState.fontSize + charSpacing;
+            height += ty;
+          }
+          textState.translateTextMatrix(tx, ty);
+          textChunk.str.push(glyphUnicode);
+        }
+        if (!font.vertical) {
+          textChunk.lastAdvanceWidth = width;
+          textChunk.width += width;
+        } else {
+          textChunk.lastAdvanceHeight = height;
+          textChunk.height += Math.abs(height);
+        }
+        return textChunk;
+      }
+      function addFakeSpaces(width, strBuf) {
+        if (width < textContentItem.fakeSpaceMin) {
+          return;
+        }
+        if (width < textContentItem.fakeMultiSpaceMin) {
+          strBuf.push(' ');
+          return;
+        }
+        var fakeSpaces = Math.round(width / textContentItem.spaceWidth);
+        while (fakeSpaces-- > 0) {
+          strBuf.push(' ');
+        }
+      }
+      function flushTextContentItem() {
+        if (!textContentItem.initialized) {
+          return;
+        }
+        textContentItem.width *= textContentItem.textAdvanceScale;
+        textContentItem.height *= textContentItem.textAdvanceScale;
+        textContent.items.push(runBidiTransform(textContentItem));
+        textContentItem.initialized = false;
+        textContentItem.str.length = 0;
+      }
+      function enqueueChunk() {
+        var length = textContent.items.length;
+        if (length > 0) {
+          sink.enqueue(textContent, length);
+          textContent.items = [];
+          textContent.styles = Object.create(null);
+        }
+      }
+      var timeSlotManager = new TimeSlotManager();
+      return new Promise(function promiseBody(resolve, reject) {
+        var next = function next(promise) {
+          enqueueChunk();
+          Promise.all([promise, sink.ready]).then(function () {
+            try {
+              promiseBody(resolve, reject);
+            } catch (ex) {
+              reject(ex);
+            }
+          }, reject);
+        };
+        task.ensureNotTerminated();
+        timeSlotManager.reset();
+        var stop,
+            operation = {},
+            args = [];
+        while (!(stop = timeSlotManager.check())) {
+          args.length = 0;
+          operation.args = args;
+          if (!preprocessor.read(operation)) {
+            break;
+          }
+          textState = stateManager.state;
+          var fn = operation.fn;
+          args = operation.args;
+          var advance, diff;
+          switch (fn | 0) {
+            case _util.OPS.setFont:
+              var fontNameArg = args[0].name,
+                  fontSizeArg = args[1];
+              if (textState.font && fontNameArg === textState.fontName && fontSizeArg === textState.fontSize) {
+                break;
+              }
+              flushTextContentItem();
+              textState.fontName = fontNameArg;
+              textState.fontSize = fontSizeArg;
+              next(handleSetFont(fontNameArg, null));
+              return;
+            case _util.OPS.setTextRise:
+              flushTextContentItem();
+              textState.textRise = args[0];
+              break;
+            case _util.OPS.setHScale:
+              flushTextContentItem();
+              textState.textHScale = args[0] / 100;
+              break;
+            case _util.OPS.setLeading:
+              flushTextContentItem();
+              textState.leading = args[0];
+              break;
+            case _util.OPS.moveText:
+              var isSameTextLine = !textState.font ? false : (textState.font.vertical ? args[0] : args[1]) === 0;
+              advance = args[0] - args[1];
+              if (combineTextItems && isSameTextLine && textContentItem.initialized && advance > 0 && advance <= textContentItem.fakeMultiSpaceMax) {
+                textState.translateTextLineMatrix(args[0], args[1]);
+                textContentItem.width += args[0] - textContentItem.lastAdvanceWidth;
+                textContentItem.height += args[1] - textContentItem.lastAdvanceHeight;
+                diff = args[0] - textContentItem.lastAdvanceWidth - (args[1] - textContentItem.lastAdvanceHeight);
+                addFakeSpaces(diff, textContentItem.str);
+                break;
+              }
+              flushTextContentItem();
+              textState.translateTextLineMatrix(args[0], args[1]);
+              textState.textMatrix = textState.textLineMatrix.slice();
+              break;
+            case _util.OPS.setLeadingMoveText:
+              flushTextContentItem();
+              textState.leading = -args[1];
+              textState.translateTextLineMatrix(args[0], args[1]);
+              textState.textMatrix = textState.textLineMatrix.slice();
+              break;
+            case _util.OPS.nextLine:
+              flushTextContentItem();
+              textState.carriageReturn();
+              break;
+            case _util.OPS.setTextMatrix:
+              advance = textState.calcTextLineMatrixAdvance(args[0], args[1], args[2], args[3], args[4], args[5]);
+              if (combineTextItems && advance !== null && textContentItem.initialized && advance.value > 0 && advance.value <= textContentItem.fakeMultiSpaceMax) {
+                textState.translateTextLineMatrix(advance.width, advance.height);
+                textContentItem.width += advance.width - textContentItem.lastAdvanceWidth;
+                textContentItem.height += advance.height - textContentItem.lastAdvanceHeight;
+                diff = advance.width - textContentItem.lastAdvanceWidth - (advance.height - textContentItem.lastAdvanceHeight);
+                addFakeSpaces(diff, textContentItem.str);
+                break;
+              }
+              flushTextContentItem();
+              textState.setTextMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
+              textState.setTextLineMatrix(args[0], args[1], args[2], args[3], args[4], args[5]);
+              break;
+            case _util.OPS.setCharSpacing:
+              textState.charSpacing = args[0];
+              break;
+            case _util.OPS.setWordSpacing:
+              textState.wordSpacing = args[0];
+              break;
+            case _util.OPS.beginText:
+              flushTextContentItem();
+              textState.textMatrix = _util.IDENTITY_MATRIX.slice();
+              textState.textLineMatrix = _util.IDENTITY_MATRIX.slice();
+              break;
+            case _util.OPS.showSpacedText:
+              var items = args[0];
+              var offset;
+              for (var j = 0, jj = items.length; j < jj; j++) {
+                if (typeof items[j] === 'string') {
+                  buildTextContentItem(items[j]);
+                } else if ((0, _util.isNum)(items[j])) {
+                  ensureTextContentItem();
+                  advance = items[j] * textState.fontSize / 1000;
+                  var breakTextRun = false;
+                  if (textState.font.vertical) {
+                    offset = advance;
+                    textState.translateTextMatrix(0, offset);
+                    breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
+                    if (!breakTextRun) {
+                      textContentItem.height += offset;
+                    }
+                  } else {
+                    advance = -advance;
+                    offset = advance * textState.textHScale;
+                    textState.translateTextMatrix(offset, 0);
+                    breakTextRun = textContentItem.textRunBreakAllowed && advance > textContentItem.fakeMultiSpaceMax;
+                    if (!breakTextRun) {
+                      textContentItem.width += offset;
+                    }
+                  }
+                  if (breakTextRun) {
+                    flushTextContentItem();
+                  } else if (advance > 0) {
+                    addFakeSpaces(advance, textContentItem.str);
+                  }
+                }
+              }
+              break;
+            case _util.OPS.showText:
+              buildTextContentItem(args[0]);
+              break;
+            case _util.OPS.nextLineShowText:
+              flushTextContentItem();
+              textState.carriageReturn();
+              buildTextContentItem(args[0]);
+              break;
+            case _util.OPS.nextLineSetSpacingShowText:
+              flushTextContentItem();
+              textState.wordSpacing = args[0];
+              textState.charSpacing = args[1];
+              textState.carriageReturn();
+              buildTextContentItem(args[2]);
+              break;
+            case _util.OPS.paintXObject:
+              flushTextContentItem();
+              if (!xobjs) {
+                xobjs = resources.get('XObject') || _primitives.Dict.empty;
+              }
+              var name = args[0].name;
+              if (name && skipEmptyXObjs[name] !== undefined) {
+                break;
+              }
+              next(new Promise(function (resolveXObject, rejectXObject) {
+                if (!name) {
+                  throw new _util.FormatError('XObject must be referred to by name.');
+                }
+                var xobj = xobjs.get(name);
+                if (!xobj) {
+                  resolveXObject();
+                  return;
+                }
+                if (!(0, _primitives.isStream)(xobj)) {
+                  throw new _util.FormatError('XObject should be a stream');
+                }
+                var type = xobj.dict.get('Subtype');
+                if (!(0, _primitives.isName)(type)) {
+                  throw new _util.FormatError('XObject should have a Name subtype');
+                }
+                if (type.name !== 'Form') {
+                  skipEmptyXObjs[name] = true;
+                  resolveXObject();
+                  return;
+                }
+                var currentState = stateManager.state.clone();
+                var xObjStateManager = new StateManager(currentState);
+                var matrix = xobj.dict.getArray('Matrix');
+                if (Array.isArray(matrix) && matrix.length === 6) {
+                  xObjStateManager.transform(matrix);
+                }
+                enqueueChunk();
+                var sinkWrapper = {
+                  enqueueInvoked: false,
+                  enqueue: function enqueue(chunk, size) {
+                    this.enqueueInvoked = true;
+                    sink.enqueue(chunk, size);
+                  },
+
+                  get desiredSize() {
+                    return sink.desiredSize;
+                  },
+                  get ready() {
+                    return sink.ready;
+                  }
+                };
+                self.getTextContent({
+                  stream: xobj,
+                  task: task,
+                  resources: xobj.dict.get('Resources') || resources,
+                  stateManager: xObjStateManager,
+                  normalizeWhitespace: normalizeWhitespace,
+                  combineTextItems: combineTextItems,
+                  sink: sinkWrapper,
+                  seenStyles: seenStyles
+                }).then(function () {
+                  if (!sinkWrapper.enqueueInvoked) {
+                    skipEmptyXObjs[name] = true;
+                  }
+                  resolveXObject();
+                }, rejectXObject);
+              }).catch(function (reason) {
+                if (reason instanceof _util.AbortException) {
+                  return;
+                }
+                if (self.options.ignoreErrors) {
+                  (0, _util.warn)('getTextContent - ignoring XObject: "' + reason + '".');
+                  return;
+                }
+                throw reason;
+              }));
+              return;
+            case _util.OPS.setGState:
+              flushTextContentItem();
+              var dictName = args[0];
+              var extGState = resources.get('ExtGState');
+              if (!(0, _primitives.isDict)(extGState) || !(0, _primitives.isName)(dictName)) {
+                break;
+              }
+              var gState = extGState.get(dictName.name);
+              if (!(0, _primitives.isDict)(gState)) {
+                break;
+              }
+              var gStateFont = gState.get('Font');
+              if (gStateFont) {
+                textState.fontName = null;
+                textState.fontSize = gStateFont[1];
+                next(handleSetFont(null, gStateFont[0]));
+                return;
+              }
+              break;
+          }
+          if (textContent.items.length >= sink.desiredSize) {
+            stop = true;
+            break;
+          }
+        }
+        if (stop) {
+          next(deferred);
+          return;
+        }
+        flushTextContentItem();
+        enqueueChunk();
+        resolve();
+      }).catch(function (reason) {
+        if (reason instanceof _util.AbortException) {
+          return;
+        }
+        if (_this9.options.ignoreErrors) {
+          (0, _util.warn)('getTextContent - ignoring errors during task: ' + task.name);
+          flushTextContentItem();
+          enqueueChunk();
+          return;
+        }
+        throw reason;
+      });
+    },
+
+    extractDataStructures: function PartialEvaluator_extractDataStructures(dict, baseDict, properties) {
+      var _this10 = this;
+
+      var xref = this.xref;
+      var toUnicode = dict.get('ToUnicode') || baseDict.get('ToUnicode');
+      var toUnicodePromise = toUnicode ? this.readToUnicode(toUnicode) : Promise.resolve(undefined);
+      if (properties.composite) {
+        var cidSystemInfo = dict.get('CIDSystemInfo');
+        if ((0, _primitives.isDict)(cidSystemInfo)) {
+          properties.cidSystemInfo = {
+            registry: cidSystemInfo.get('Registry'),
+            ordering: cidSystemInfo.get('Ordering'),
+            supplement: cidSystemInfo.get('Supplement')
+          };
+        }
+        var cidToGidMap = dict.get('CIDToGIDMap');
+        if ((0, _primitives.isStream)(cidToGidMap)) {
+          properties.cidToGidMap = this.readCidToGidMap(cidToGidMap);
+        }
+      }
+      var differences = [];
+      var baseEncodingName = null;
+      var encoding;
+      if (dict.has('Encoding')) {
+        encoding = dict.get('Encoding');
+        if ((0, _primitives.isDict)(encoding)) {
+          baseEncodingName = encoding.get('BaseEncoding');
+          baseEncodingName = (0, _primitives.isName)(baseEncodingName) ? baseEncodingName.name : null;
+          if (encoding.has('Differences')) {
+            var diffEncoding = encoding.get('Differences');
+            var index = 0;
+            for (var j = 0, jj = diffEncoding.length; j < jj; j++) {
+              var data = xref.fetchIfRef(diffEncoding[j]);
+              if ((0, _util.isNum)(data)) {
+                index = data;
+              } else if ((0, _primitives.isName)(data)) {
+                differences[index++] = data.name;
+              } else {
+                throw new _util.FormatError('Invalid entry in \'Differences\' array: ' + data);
+              }
+            }
+          }
+        } else if ((0, _primitives.isName)(encoding)) {
+          baseEncodingName = encoding.name;
+        } else {
+          throw new _util.FormatError('Encoding is not a Name nor a Dict');
+        }
+        if (baseEncodingName !== 'MacRomanEncoding' && baseEncodingName !== 'MacExpertEncoding' && baseEncodingName !== 'WinAnsiEncoding') {
+          baseEncodingName = null;
+        }
+      }
+      if (baseEncodingName) {
+        properties.defaultEncoding = (0, _encodings.getEncoding)(baseEncodingName).slice();
+      } else {
+        var isSymbolicFont = !!(properties.flags & _fonts.FontFlags.Symbolic);
+        var isNonsymbolicFont = !!(properties.flags & _fonts.FontFlags.Nonsymbolic);
+        encoding = _encodings.StandardEncoding;
+        if (properties.type === 'TrueType' && !isNonsymbolicFont) {
+          encoding = _encodings.WinAnsiEncoding;
+        }
+        if (isSymbolicFont) {
+          encoding = _encodings.MacRomanEncoding;
+          if (!properties.file) {
+            if (/Symbol/i.test(properties.name)) {
+              encoding = _encodings.SymbolSetEncoding;
+            } else if (/Dingbats/i.test(properties.name)) {
+              encoding = _encodings.ZapfDingbatsEncoding;
+            }
+          }
+        }
+        properties.defaultEncoding = encoding;
+      }
+      properties.differences = differences;
+      properties.baseEncodingName = baseEncodingName;
+      properties.hasEncoding = !!baseEncodingName || differences.length > 0;
+      properties.dict = dict;
+      return toUnicodePromise.then(function (toUnicode) {
+        properties.toUnicode = toUnicode;
+        return _this10.buildToUnicode(properties);
+      }).then(function (toUnicode) {
+        properties.toUnicode = toUnicode;
+        return properties;
+      });
+    },
+    buildToUnicode: function PartialEvaluator_buildToUnicode(properties) {
+      properties.hasIncludedToUnicodeMap = !!properties.toUnicode && properties.toUnicode.length > 0;
+      if (properties.hasIncludedToUnicodeMap) {
+        return Promise.resolve(properties.toUnicode);
+      }
+      var toUnicode, charcode, glyphName;
+      if (!properties.composite) {
+        toUnicode = [];
+        var encoding = properties.defaultEncoding.slice();
+        var baseEncodingName = properties.baseEncodingName;
+        var differences = properties.differences;
+        for (charcode in differences) {
+          glyphName = differences[charcode];
+          if (glyphName === '.notdef') {
+            continue;
+          }
+          encoding[charcode] = glyphName;
+        }
+        var glyphsUnicodeMap = (0, _glyphlist.getGlyphsUnicode)();
+        for (charcode in encoding) {
+          glyphName = encoding[charcode];
+          if (glyphName === '') {
+            continue;
+          } else if (glyphsUnicodeMap[glyphName] === undefined) {
+            var code = 0;
+            switch (glyphName[0]) {
+              case 'G':
+                if (glyphName.length === 3) {
+                  code = parseInt(glyphName.substr(1), 16);
+                }
+                break;
+              case 'g':
+                if (glyphName.length === 5) {
+                  code = parseInt(glyphName.substr(1), 16);
+                }
+                break;
+              case 'C':
+              case 'c':
+                if (glyphName.length >= 3) {
+                  code = +glyphName.substr(1);
+                }
+                break;
+              default:
+                var unicode = (0, _unicode.getUnicodeForGlyph)(glyphName, glyphsUnicodeMap);
+                if (unicode !== -1) {
+                  code = unicode;
+                }
+            }
+            if (code) {
+              if (baseEncodingName && code === +charcode) {
+                var baseEncoding = (0, _encodings.getEncoding)(baseEncodingName);
+                if (baseEncoding && (glyphName = baseEncoding[charcode])) {
+                  toUnicode[charcode] = String.fromCharCode(glyphsUnicodeMap[glyphName]);
+                  continue;
+                }
+              }
+              toUnicode[charcode] = String.fromCharCode(code);
+            }
+            continue;
+          }
+          toUnicode[charcode] = String.fromCharCode(glyphsUnicodeMap[glyphName]);
+        }
+        return Promise.resolve(new _fonts.ToUnicodeMap(toUnicode));
+      }
+      if (properties.composite && (properties.cMap.builtInCMap && !(properties.cMap instanceof _cmap.IdentityCMap) || properties.cidSystemInfo.registry === 'Adobe' && (properties.cidSystemInfo.ordering === 'GB1' || properties.cidSystemInfo.ordering === 'CNS1' || properties.cidSystemInfo.ordering === 'Japan1' || properties.cidSystemInfo.ordering === 'Korea1'))) {
+        var registry = properties.cidSystemInfo.registry;
+        var ordering = properties.cidSystemInfo.ordering;
+        var ucs2CMapName = _primitives.Name.get(registry + '-' + ordering + '-UCS2');
+        return _cmap.CMapFactory.create({
+          encoding: ucs2CMapName,
+          fetchBuiltInCMap: this.fetchBuiltInCMap,
+          useCMap: null
+        }).then(function (ucs2CMap) {
+          var cMap = properties.cMap;
+          toUnicode = [];
+          cMap.forEach(function (charcode, cid) {
+            if (cid > 0xffff) {
+              throw new _util.FormatError('Max size of CID is 65,535');
+            }
+            var ucs2 = ucs2CMap.lookup(cid);
+            if (ucs2) {
+              toUnicode[charcode] = String.fromCharCode((ucs2.charCodeAt(0) << 8) + ucs2.charCodeAt(1));
+            }
+          });
+          return new _fonts.ToUnicodeMap(toUnicode);
+        });
+      }
+      return Promise.resolve(new _fonts.IdentityToUnicodeMap(properties.firstChar, properties.lastChar));
+    },
+    readToUnicode: function PartialEvaluator_readToUnicode(toUnicode) {
+      var cmapObj = toUnicode;
+      if ((0, _primitives.isName)(cmapObj)) {
+        return _cmap.CMapFactory.create({
+          encoding: cmapObj,
+          fetchBuiltInCMap: this.fetchBuiltInCMap,
+          useCMap: null
+        }).then(function (cmap) {
+          if (cmap instanceof _cmap.IdentityCMap) {
+            return new _fonts.IdentityToUnicodeMap(0, 0xFFFF);
+          }
+          return new _fonts.ToUnicodeMap(cmap.getMap());
+        });
+      } else if ((0, _primitives.isStream)(cmapObj)) {
+        return _cmap.CMapFactory.create({
+          encoding: cmapObj,
+          fetchBuiltInCMap: this.fetchBuiltInCMap,
+          useCMap: null
+        }).then(function (cmap) {
+          if (cmap instanceof _cmap.IdentityCMap) {
+            return new _fonts.IdentityToUnicodeMap(0, 0xFFFF);
+          }
+          var map = new Array(cmap.length);
+          cmap.forEach(function (charCode, token) {
+            var str = [];
+            for (var k = 0; k < token.length; k += 2) {
+              var w1 = token.charCodeAt(k) << 8 | token.charCodeAt(k + 1);
+              if ((w1 & 0xF800) !== 0xD800) {
+                str.push(w1);
+                continue;
+              }
+              k += 2;
+              var w2 = token.charCodeAt(k) << 8 | token.charCodeAt(k + 1);
+              str.push(((w1 & 0x3ff) << 10) + (w2 & 0x3ff) + 0x10000);
+            }
+            map[charCode] = String.fromCharCode.apply(String, str);
+          });
+          return new _fonts.ToUnicodeMap(map);
+        });
+      }
+      return Promise.resolve(null);
+    },
+    readCidToGidMap: function PartialEvaluator_readCidToGidMap(cidToGidStream) {
+      var glyphsData = cidToGidStream.getBytes();
+      var result = [];
+      for (var j = 0, jj = glyphsData.length; j < jj; j++) {
+        var glyphID = glyphsData[j++] << 8 | glyphsData[j];
+        if (glyphID === 0) {
+          continue;
+        }
+        var code = j >> 1;
+        result[code] = glyphID;
+      }
+      return result;
+    },
+    extractWidths: function PartialEvaluator_extractWidths(dict, descriptor, properties) {
+      var xref = this.xref;
+      var glyphsWidths = [];
+      var defaultWidth = 0;
+      var glyphsVMetrics = [];
+      var defaultVMetrics;
+      var i, ii, j, jj, start, code, widths;
+      if (properties.composite) {
+        defaultWidth = dict.has('DW') ? dict.get('DW') : 1000;
+        widths = dict.get('W');
+        if (widths) {
+          for (i = 0, ii = widths.length; i < ii; i++) {
+            start = xref.fetchIfRef(widths[i++]);
+            code = xref.fetchIfRef(widths[i]);
+            if (Array.isArray(code)) {
+              for (j = 0, jj = code.length; j < jj; j++) {
+                glyphsWidths[start++] = xref.fetchIfRef(code[j]);
+              }
+            } else {
+              var width = xref.fetchIfRef(widths[++i]);
+              for (j = start; j <= code; j++) {
+                glyphsWidths[j] = width;
+              }
+            }
+          }
+        }
+        if (properties.vertical) {
+          var vmetrics = dict.getArray('DW2') || [880, -1000];
+          defaultVMetrics = [vmetrics[1], defaultWidth * 0.5, vmetrics[0]];
+          vmetrics = dict.get('W2');
+          if (vmetrics) {
+            for (i = 0, ii = vmetrics.length; i < ii; i++) {
+              start = xref.fetchIfRef(vmetrics[i++]);
+              code = xref.fetchIfRef(vmetrics[i]);
+              if (Array.isArray(code)) {
+                for (j = 0, jj = code.length; j < jj; j++) {
+                  glyphsVMetrics[start++] = [xref.fetchIfRef(code[j++]), xref.fetchIfRef(code[j++]), xref.fetchIfRef(code[j])];
+                }
+              } else {
+                var vmetric = [xref.fetchIfRef(vmetrics[++i]), xref.fetchIfRef(vmetrics[++i]), xref.fetchIfRef(vmetrics[++i])];
+                for (j = start; j <= code; j++) {
+                  glyphsVMetrics[j] = vmetric;
+                }
+              }
+            }
+          }
+        }
+      } else {
+        var firstChar = properties.firstChar;
+        widths = dict.get('Widths');
+        if (widths) {
+          j = firstChar;
+          for (i = 0, ii = widths.length; i < ii; i++) {
+            glyphsWidths[j++] = xref.fetchIfRef(widths[i]);
+          }
+          defaultWidth = parseFloat(descriptor.get('MissingWidth')) || 0;
+        } else {
+          var baseFontName = dict.get('BaseFont');
+          if ((0, _primitives.isName)(baseFontName)) {
+            var metrics = this.getBaseFontMetrics(baseFontName.name);
+            glyphsWidths = this.buildCharCodeToWidth(metrics.widths, properties);
+            defaultWidth = metrics.defaultWidth;
+          }
+        }
+      }
+      var isMonospace = true;
+      var firstWidth = defaultWidth;
+      for (var glyph in glyphsWidths) {
+        var glyphWidth = glyphsWidths[glyph];
+        if (!glyphWidth) {
+          continue;
+        }
+        if (!firstWidth) {
+          firstWidth = glyphWidth;
+          continue;
+        }
+        if (firstWidth !== glyphWidth) {
+          isMonospace = false;
+          break;
+        }
+      }
+      if (isMonospace) {
+        properties.flags |= _fonts.FontFlags.FixedPitch;
+      }
+      properties.defaultWidth = defaultWidth;
+      properties.widths = glyphsWidths;
+      properties.defaultVMetrics = defaultVMetrics;
+      properties.vmetrics = glyphsVMetrics;
+    },
+    isSerifFont: function PartialEvaluator_isSerifFont(baseFontName) {
+      var fontNameWoStyle = baseFontName.split('-')[0];
+      return fontNameWoStyle in (0, _standard_fonts.getSerifFonts)() || fontNameWoStyle.search(/serif/gi) !== -1;
+    },
+    getBaseFontMetrics: function PartialEvaluator_getBaseFontMetrics(name) {
+      var defaultWidth = 0;
+      var widths = [];
+      var monospace = false;
+      var stdFontMap = (0, _standard_fonts.getStdFontMap)();
+      var lookupName = stdFontMap[name] || name;
+      var Metrics = (0, _metrics.getMetrics)();
+      if (!(lookupName in Metrics)) {
+        if (this.isSerifFont(name)) {
+          lookupName = 'Times-Roman';
+        } else {
+          lookupName = 'Helvetica';
+        }
+      }
+      var glyphWidths = Metrics[lookupName];
+      if ((0, _util.isNum)(glyphWidths)) {
+        defaultWidth = glyphWidths;
+        monospace = true;
+      } else {
+        widths = glyphWidths();
+      }
+      return {
+        defaultWidth: defaultWidth,
+        monospace: monospace,
+        widths: widths
+      };
+    },
+    buildCharCodeToWidth: function PartialEvaluator_bulildCharCodeToWidth(widthsByGlyphName, properties) {
+      var widths = Object.create(null);
+      var differences = properties.differences;
+      var encoding = properties.defaultEncoding;
+      for (var charCode = 0; charCode < 256; charCode++) {
+        if (charCode in differences && widthsByGlyphName[differences[charCode]]) {
+          widths[charCode] = widthsByGlyphName[differences[charCode]];
+          continue;
+        }
+        if (charCode in encoding && widthsByGlyphName[encoding[charCode]]) {
+          widths[charCode] = widthsByGlyphName[encoding[charCode]];
+          continue;
+        }
+      }
+      return widths;
+    },
+    preEvaluateFont: function PartialEvaluator_preEvaluateFont(dict) {
+      var baseDict = dict;
+      var type = dict.get('Subtype');
+      if (!(0, _primitives.isName)(type)) {
+        throw new _util.FormatError('invalid font Subtype');
+      }
+      var composite = false;
+      var uint8array;
+      if (type.name === 'Type0') {
+        var df = dict.get('DescendantFonts');
+        if (!df) {
+          throw new _util.FormatError('Descendant fonts are not specified');
+        }
+        dict = Array.isArray(df) ? this.xref.fetchIfRef(df[0]) : df;
+        type = dict.get('Subtype');
+        if (!(0, _primitives.isName)(type)) {
+          throw new _util.FormatError('invalid font Subtype');
+        }
+        composite = true;
+      }
+      var descriptor = dict.get('FontDescriptor');
+      if (descriptor) {
+        var hash = new _murmurhash.MurmurHash3_64();
+        var encoding = baseDict.getRaw('Encoding');
+        if ((0, _primitives.isName)(encoding)) {
+          hash.update(encoding.name);
+        } else if ((0, _primitives.isRef)(encoding)) {
+          hash.update(encoding.toString());
+        } else if ((0, _primitives.isDict)(encoding)) {
+          var keys = encoding.getKeys();
+          for (var i = 0, ii = keys.length; i < ii; i++) {
+            var entry = encoding.getRaw(keys[i]);
+            if ((0, _primitives.isName)(entry)) {
+              hash.update(entry.name);
+            } else if ((0, _primitives.isRef)(entry)) {
+              hash.update(entry.toString());
+            } else if (Array.isArray(entry)) {
+              var diffLength = entry.length,
+                  diffBuf = new Array(diffLength);
+              for (var j = 0; j < diffLength; j++) {
+                var diffEntry = entry[j];
+                if ((0, _primitives.isName)(diffEntry)) {
+                  diffBuf[j] = diffEntry.name;
+                } else if ((0, _util.isNum)(diffEntry) || (0, _primitives.isRef)(diffEntry)) {
+                  diffBuf[j] = diffEntry.toString();
+                }
+              }
+              hash.update(diffBuf.join());
+            }
+          }
+        }
+        var toUnicode = dict.get('ToUnicode') || baseDict.get('ToUnicode');
+        if ((0, _primitives.isStream)(toUnicode)) {
+          var stream = toUnicode.str || toUnicode;
+          uint8array = stream.buffer ? new Uint8Array(stream.buffer.buffer, 0, stream.bufferLength) : new Uint8Array(stream.bytes.buffer, stream.start, stream.end - stream.start);
+          hash.update(uint8array);
+        } else if ((0, _primitives.isName)(toUnicode)) {
+          hash.update(toUnicode.name);
+        }
+        var widths = dict.get('Widths') || baseDict.get('Widths');
+        if (widths) {
+          uint8array = new Uint8Array(new Uint32Array(widths).buffer);
+          hash.update(uint8array);
+        }
+      }
+      return {
+        descriptor: descriptor,
+        dict: dict,
+        baseDict: baseDict,
+        composite: composite,
+        type: type.name,
+        hash: hash ? hash.hexdigest() : ''
+      };
+    },
+    translateFont: function PartialEvaluator_translateFont(preEvaluatedFont) {
+      var _this11 = this;
+
+      var baseDict = preEvaluatedFont.baseDict;
+      var dict = preEvaluatedFont.dict;
+      var composite = preEvaluatedFont.composite;
+      var descriptor = preEvaluatedFont.descriptor;
+      var type = preEvaluatedFont.type;
+      var maxCharIndex = composite ? 0xFFFF : 0xFF;
+      var properties;
+      if (!descriptor) {
+        if (type === 'Type3') {
+          descriptor = new _primitives.Dict(null);
+          descriptor.set('FontName', _primitives.Name.get(type));
+          descriptor.set('FontBBox', dict.getArray('FontBBox'));
+        } else {
+          var baseFontName = dict.get('BaseFont');
+          if (!(0, _primitives.isName)(baseFontName)) {
+            throw new _util.FormatError('Base font is not specified');
+          }
+          baseFontName = baseFontName.name.replace(/[,_]/g, '-');
+          var metrics = this.getBaseFontMetrics(baseFontName);
+          var fontNameWoStyle = baseFontName.split('-')[0];
+          var flags = (this.isSerifFont(fontNameWoStyle) ? _fonts.FontFlags.Serif : 0) | (metrics.monospace ? _fonts.FontFlags.FixedPitch : 0) | ((0, _standard_fonts.getSymbolsFonts)()[fontNameWoStyle] ? _fonts.FontFlags.Symbolic : _fonts.FontFlags.Nonsymbolic);
+          properties = {
+            type: type,
+            name: baseFontName,
+            widths: metrics.widths,
+            defaultWidth: metrics.defaultWidth,
+            flags: flags,
+            firstChar: 0,
+            lastChar: maxCharIndex
+          };
+          return this.extractDataStructures(dict, dict, properties).then(function (properties) {
+            properties.widths = _this11.buildCharCodeToWidth(metrics.widths, properties);
+            return new _fonts.Font(baseFontName, null, properties);
+          });
+        }
+      }
+      var firstChar = dict.get('FirstChar') || 0;
+      var lastChar = dict.get('LastChar') || maxCharIndex;
+      var fontName = descriptor.get('FontName');
+      var baseFont = dict.get('BaseFont');
+      if ((0, _util.isString)(fontName)) {
+        fontName = _primitives.Name.get(fontName);
+      }
+      if ((0, _util.isString)(baseFont)) {
+        baseFont = _primitives.Name.get(baseFont);
+      }
+      if (type !== 'Type3') {
+        var fontNameStr = fontName && fontName.name;
+        var baseFontStr = baseFont && baseFont.name;
+        if (fontNameStr !== baseFontStr) {
+          (0, _util.info)('The FontDescriptor\'s FontName is "' + fontNameStr + '" but should be the same as the Font\'s BaseFont "' + baseFontStr + '"');
+          if (fontNameStr && baseFontStr && baseFontStr.indexOf(fontNameStr) === 0) {
+            fontName = baseFont;
+          }
+        }
+      }
+      fontName = fontName || baseFont;
+      if (!(0, _primitives.isName)(fontName)) {
+        throw new _util.FormatError('invalid font name');
+      }
+      var fontFile = descriptor.get('FontFile', 'FontFile2', 'FontFile3');
+      if (fontFile) {
+        if (fontFile.dict) {
+          var subtype = fontFile.dict.get('Subtype');
+          if (subtype) {
+            subtype = subtype.name;
+          }
+          var length1 = fontFile.dict.get('Length1');
+          var length2 = fontFile.dict.get('Length2');
+          var length3 = fontFile.dict.get('Length3');
+        }
+      }
+      properties = {
+        type: type,
+        name: fontName.name,
+        subtype: subtype,
+        file: fontFile,
+        length1: length1,
+        length2: length2,
+        length3: length3,
+        loadedName: baseDict.loadedName,
+        composite: composite,
+        wideChars: composite,
+        fixedPitch: false,
+        fontMatrix: dict.getArray('FontMatrix') || _util.FONT_IDENTITY_MATRIX,
+        firstChar: firstChar || 0,
+        lastChar: lastChar || maxCharIndex,
+        bbox: descriptor.getArray('FontBBox'),
+        ascent: descriptor.get('Ascent'),
+        descent: descriptor.get('Descent'),
+        xHeight: descriptor.get('XHeight'),
+        capHeight: descriptor.get('CapHeight'),
+        flags: descriptor.get('Flags'),
+        italicAngle: descriptor.get('ItalicAngle'),
+        isType3Font: false
+      };
+      var cMapPromise;
+      if (composite) {
+        var cidEncoding = baseDict.get('Encoding');
+        if ((0, _primitives.isName)(cidEncoding)) {
+          properties.cidEncoding = cidEncoding.name;
+        }
+        cMapPromise = _cmap.CMapFactory.create({
+          encoding: cidEncoding,
+          fetchBuiltInCMap: this.fetchBuiltInCMap,
+          useCMap: null
+        }).then(function (cMap) {
+          properties.cMap = cMap;
+          properties.vertical = properties.cMap.vertical;
+        });
+      } else {
+        cMapPromise = Promise.resolve(undefined);
+      }
+      return cMapPromise.then(function () {
+        return _this11.extractDataStructures(dict, baseDict, properties);
+      }).then(function (properties) {
+        _this11.extractWidths(dict, descriptor, properties);
+        if (type === 'Type3') {
+          properties.isType3Font = true;
+        }
+        return new _fonts.Font(fontName.name, fontFile, properties);
+      });
+    }
+  };
+  return PartialEvaluator;
+}();
+var TranslatedFont = function TranslatedFontClosure() {
+  function TranslatedFont(loadedName, font, dict) {
+    this.loadedName = loadedName;
+    this.font = font;
+    this.dict = dict;
+    this.type3Loaded = null;
+    this.sent = false;
+  }
+  TranslatedFont.prototype = {
+    send: function send(handler) {
+      if (this.sent) {
+        return;
+      }
+      var fontData = this.font.exportData();
+      handler.send('commonobj', [this.loadedName, 'Font', fontData]);
+      this.sent = true;
+    },
+    loadType3Data: function loadType3Data(evaluator, resources, parentOperatorList, task) {
+      if (!this.font.isType3Font) {
+        throw new Error('Must be a Type3 font.');
+      }
+      if (this.type3Loaded) {
+        return this.type3Loaded;
+      }
+      var type3Options = Object.create(evaluator.options);
+      type3Options.ignoreErrors = false;
+      var type3Evaluator = evaluator.clone(type3Options);
+      var translatedFont = this.font;
+      var loadCharProcsPromise = Promise.resolve();
+      var charProcs = this.dict.get('CharProcs');
+      var fontResources = this.dict.get('Resources') || resources;
+      var charProcKeys = charProcs.getKeys();
+      var charProcOperatorList = Object.create(null);
+
+      var _loop2 = function _loop2() {
+        var key = charProcKeys[i];
+        loadCharProcsPromise = loadCharProcsPromise.then(function () {
+          var glyphStream = charProcs.get(key);
+          var operatorList = new _operator_list.OperatorList();
+          return type3Evaluator.getOperatorList({
+            stream: glyphStream,
+            task: task,
+            resources: fontResources,
+            operatorList: operatorList
+          }).then(function () {
+            charProcOperatorList[key] = operatorList.getIR();
+            parentOperatorList.addDependencies(operatorList.dependencies);
+          }).catch(function (reason) {
+            (0, _util.warn)('Type3 font resource "' + key + '" is not available.');
+            var operatorList = new _operator_list.OperatorList();
+            charProcOperatorList[key] = operatorList.getIR();
+          });
+        });
+      };
+
+      for (var i = 0, n = charProcKeys.length; i < n; ++i) {
+        _loop2();
+      }
+      this.type3Loaded = loadCharProcsPromise.then(function () {
+        translatedFont.charProcOperatorList = charProcOperatorList;
+      });
+      return this.type3Loaded;
+    }
+  };
+  return TranslatedFont;
+}();
+var StateManager = function StateManagerClosure() {
+  function StateManager(initialState) {
+    this.state = initialState;
+    this.stateStack = [];
+  }
+  StateManager.prototype = {
+    save: function save() {
+      var old = this.state;
+      this.stateStack.push(this.state);
+      this.state = old.clone();
+    },
+    restore: function restore() {
+      var prev = this.stateStack.pop();
+      if (prev) {
+        this.state = prev;
+      }
+    },
+    transform: function transform(args) {
+      this.state.ctm = _util.Util.transform(this.state.ctm, args);
+    }
+  };
+  return StateManager;
+}();
+var TextState = function TextStateClosure() {
+  function TextState() {
+    this.ctm = new Float32Array(_util.IDENTITY_MATRIX);
+    this.fontName = null;
+    this.fontSize = 0;
+    this.font = null;
+    this.fontMatrix = _util.FONT_IDENTITY_MATRIX;
+    this.textMatrix = _util.IDENTITY_MATRIX.slice();
+    this.textLineMatrix = _util.IDENTITY_MATRIX.slice();
+    this.charSpacing = 0;
+    this.wordSpacing = 0;
+    this.leading = 0;
+    this.textHScale = 1;
+    this.textRise = 0;
+  }
+  TextState.prototype = {
+    setTextMatrix: function TextState_setTextMatrix(a, b, c, d, e, f) {
+      var m = this.textMatrix;
+      m[0] = a;
+      m[1] = b;
+      m[2] = c;
+      m[3] = d;
+      m[4] = e;
+      m[5] = f;
+    },
+    setTextLineMatrix: function TextState_setTextMatrix(a, b, c, d, e, f) {
+      var m = this.textLineMatrix;
+      m[0] = a;
+      m[1] = b;
+      m[2] = c;
+      m[3] = d;
+      m[4] = e;
+      m[5] = f;
+    },
+    translateTextMatrix: function TextState_translateTextMatrix(x, y) {
+      var m = this.textMatrix;
+      m[4] = m[0] * x + m[2] * y + m[4];
+      m[5] = m[1] * x + m[3] * y + m[5];
+    },
+    translateTextLineMatrix: function TextState_translateTextMatrix(x, y) {
+      var m = this.textLineMatrix;
+      m[4] = m[0] * x + m[2] * y + m[4];
+      m[5] = m[1] * x + m[3] * y + m[5];
+    },
+    calcTextLineMatrixAdvance: function TextState_calcTextLineMatrixAdvance(a, b, c, d, e, f) {
+      var font = this.font;
+      if (!font) {
+        return null;
+      }
+      var m = this.textLineMatrix;
+      if (!(a === m[0] && b === m[1] && c === m[2] && d === m[3])) {
+        return null;
+      }
+      var txDiff = e - m[4],
+          tyDiff = f - m[5];
+      if (font.vertical && txDiff !== 0 || !font.vertical && tyDiff !== 0) {
+        return null;
+      }
+      var tx,
+          ty,
+          denominator = a * d - b * c;
+      if (font.vertical) {
+        tx = -tyDiff * c / denominator;
+        ty = tyDiff * a / denominator;
+      } else {
+        tx = txDiff * d / denominator;
+        ty = -txDiff * b / denominator;
+      }
+      return {
+        width: tx,
+        height: ty,
+        value: font.vertical ? ty : tx
+      };
+    },
+    calcRenderMatrix: function TextState_calcRendeMatrix(ctm) {
+      var tsm = [this.fontSize * this.textHScale, 0, 0, this.fontSize, 0, this.textRise];
+      return _util.Util.transform(ctm, _util.Util.transform(this.textMatrix, tsm));
+    },
+    carriageReturn: function TextState_carriageReturn() {
+      this.translateTextLineMatrix(0, -this.leading);
+      this.textMatrix = this.textLineMatrix.slice();
+    },
+    clone: function TextState_clone() {
+      var clone = Object.create(this);
+      clone.textMatrix = this.textMatrix.slice();
+      clone.textLineMatrix = this.textLineMatrix.slice();
+      clone.fontMatrix = this.fontMatrix.slice();
+      return clone;
+    }
+  };
+  return TextState;
+}();
+var EvalState = function EvalStateClosure() {
+  function EvalState() {
+    this.ctm = new Float32Array(_util.IDENTITY_MATRIX);
+    this.font = null;
+    this.textRenderingMode = _util.TextRenderingMode.FILL;
+    this.fillColorSpace = _colorspace.ColorSpace.singletons.gray;
+    this.strokeColorSpace = _colorspace.ColorSpace.singletons.gray;
+  }
+  EvalState.prototype = {
+    clone: function CanvasExtraState_clone() {
+      return Object.create(this);
+    }
+  };
+  return EvalState;
+}();
+var EvaluatorPreprocessor = function EvaluatorPreprocessorClosure() {
+  var getOPMap = (0, _util.getLookupTableFactory)(function (t) {
+    t['w'] = {
+      id: _util.OPS.setLineWidth,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['J'] = {
+      id: _util.OPS.setLineCap,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['j'] = {
+      id: _util.OPS.setLineJoin,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['M'] = {
+      id: _util.OPS.setMiterLimit,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['d'] = {
+      id: _util.OPS.setDash,
+      numArgs: 2,
+      variableArgs: false
+    };
+    t['ri'] = {
+      id: _util.OPS.setRenderingIntent,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['i'] = {
+      id: _util.OPS.setFlatness,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['gs'] = {
+      id: _util.OPS.setGState,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['q'] = {
+      id: _util.OPS.save,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['Q'] = {
+      id: _util.OPS.restore,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['cm'] = {
+      id: _util.OPS.transform,
+      numArgs: 6,
+      variableArgs: false
+    };
+    t['m'] = {
+      id: _util.OPS.moveTo,
+      numArgs: 2,
+      variableArgs: false
+    };
+    t['l'] = {
+      id: _util.OPS.lineTo,
+      numArgs: 2,
+      variableArgs: false
+    };
+    t['c'] = {
+      id: _util.OPS.curveTo,
+      numArgs: 6,
+      variableArgs: false
+    };
+    t['v'] = {
+      id: _util.OPS.curveTo2,
+      numArgs: 4,
+      variableArgs: false
+    };
+    t['y'] = {
+      id: _util.OPS.curveTo3,
+      numArgs: 4,
+      variableArgs: false
+    };
+    t['h'] = {
+      id: _util.OPS.closePath,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['re'] = {
+      id: _util.OPS.rectangle,
+      numArgs: 4,
+      variableArgs: false
+    };
+    t['S'] = {
+      id: _util.OPS.stroke,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['s'] = {
+      id: _util.OPS.closeStroke,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['f'] = {
+      id: _util.OPS.fill,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['F'] = {
+      id: _util.OPS.fill,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['f*'] = {
+      id: _util.OPS.eoFill,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['B'] = {
+      id: _util.OPS.fillStroke,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['B*'] = {
+      id: _util.OPS.eoFillStroke,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['b'] = {
+      id: _util.OPS.closeFillStroke,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['b*'] = {
+      id: _util.OPS.closeEOFillStroke,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['n'] = {
+      id: _util.OPS.endPath,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['W'] = {
+      id: _util.OPS.clip,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['W*'] = {
+      id: _util.OPS.eoClip,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['BT'] = {
+      id: _util.OPS.beginText,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['ET'] = {
+      id: _util.OPS.endText,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['Tc'] = {
+      id: _util.OPS.setCharSpacing,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['Tw'] = {
+      id: _util.OPS.setWordSpacing,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['Tz'] = {
+      id: _util.OPS.setHScale,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['TL'] = {
+      id: _util.OPS.setLeading,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['Tf'] = {
+      id: _util.OPS.setFont,
+      numArgs: 2,
+      variableArgs: false
+    };
+    t['Tr'] = {
+      id: _util.OPS.setTextRenderingMode,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['Ts'] = {
+      id: _util.OPS.setTextRise,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['Td'] = {
+      id: _util.OPS.moveText,
+      numArgs: 2,
+      variableArgs: false
+    };
+    t['TD'] = {
+      id: _util.OPS.setLeadingMoveText,
+      numArgs: 2,
+      variableArgs: false
+    };
+    t['Tm'] = {
+      id: _util.OPS.setTextMatrix,
+      numArgs: 6,
+      variableArgs: false
+    };
+    t['T*'] = {
+      id: _util.OPS.nextLine,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['Tj'] = {
+      id: _util.OPS.showText,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['TJ'] = {
+      id: _util.OPS.showSpacedText,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['\''] = {
+      id: _util.OPS.nextLineShowText,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['"'] = {
+      id: _util.OPS.nextLineSetSpacingShowText,
+      numArgs: 3,
+      variableArgs: false
+    };
+    t['d0'] = {
+      id: _util.OPS.setCharWidth,
+      numArgs: 2,
+      variableArgs: false
+    };
+    t['d1'] = {
+      id: _util.OPS.setCharWidthAndBounds,
+      numArgs: 6,
+      variableArgs: false
+    };
+    t['CS'] = {
+      id: _util.OPS.setStrokeColorSpace,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['cs'] = {
+      id: _util.OPS.setFillColorSpace,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['SC'] = {
+      id: _util.OPS.setStrokeColor,
+      numArgs: 4,
+      variableArgs: true
+    };
+    t['SCN'] = {
+      id: _util.OPS.setStrokeColorN,
+      numArgs: 33,
+      variableArgs: true
+    };
+    t['sc'] = {
+      id: _util.OPS.setFillColor,
+      numArgs: 4,
+      variableArgs: true
+    };
+    t['scn'] = {
+      id: _util.OPS.setFillColorN,
+      numArgs: 33,
+      variableArgs: true
+    };
+    t['G'] = {
+      id: _util.OPS.setStrokeGray,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['g'] = {
+      id: _util.OPS.setFillGray,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['RG'] = {
+      id: _util.OPS.setStrokeRGBColor,
+      numArgs: 3,
+      variableArgs: false
+    };
+    t['rg'] = {
+      id: _util.OPS.setFillRGBColor,
+      numArgs: 3,
+      variableArgs: false
+    };
+    t['K'] = {
+      id: _util.OPS.setStrokeCMYKColor,
+      numArgs: 4,
+      variableArgs: false
+    };
+    t['k'] = {
+      id: _util.OPS.setFillCMYKColor,
+      numArgs: 4,
+      variableArgs: false
+    };
+    t['sh'] = {
+      id: _util.OPS.shadingFill,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['BI'] = {
+      id: _util.OPS.beginInlineImage,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['ID'] = {
+      id: _util.OPS.beginImageData,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['EI'] = {
+      id: _util.OPS.endInlineImage,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['Do'] = {
+      id: _util.OPS.paintXObject,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['MP'] = {
+      id: _util.OPS.markPoint,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['DP'] = {
+      id: _util.OPS.markPointProps,
+      numArgs: 2,
+      variableArgs: false
+    };
+    t['BMC'] = {
+      id: _util.OPS.beginMarkedContent,
+      numArgs: 1,
+      variableArgs: false
+    };
+    t['BDC'] = {
+      id: _util.OPS.beginMarkedContentProps,
+      numArgs: 2,
+      variableArgs: false
+    };
+    t['EMC'] = {
+      id: _util.OPS.endMarkedContent,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['BX'] = {
+      id: _util.OPS.beginCompat,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['EX'] = {
+      id: _util.OPS.endCompat,
+      numArgs: 0,
+      variableArgs: false
+    };
+    t['BM'] = null;
+    t['BD'] = null;
+    t['true'] = null;
+    t['fa'] = null;
+    t['fal'] = null;
+    t['fals'] = null;
+    t['false'] = null;
+    t['nu'] = null;
+    t['nul'] = null;
+    t['null'] = null;
+  });
+  function EvaluatorPreprocessor(stream, xref, stateManager) {
+    this.opMap = getOPMap();
+    this.parser = new _parser.Parser(new _parser.Lexer(stream, this.opMap), false, xref);
+    this.stateManager = stateManager;
+    this.nonProcessedArgs = [];
+  }
+  EvaluatorPreprocessor.prototype = {
+    get savedStatesDepth() {
+      return this.stateManager.stateStack.length;
+    },
+    read: function EvaluatorPreprocessor_read(operation) {
+      var args = operation.args;
+      while (true) {
+        var obj = this.parser.getObj();
+        if ((0, _primitives.isCmd)(obj)) {
+          var cmd = obj.cmd;
+          var opSpec = this.opMap[cmd];
+          if (!opSpec) {
+            (0, _util.warn)('Unknown command "' + cmd + '"');
+            continue;
+          }
+          var fn = opSpec.id;
+          var numArgs = opSpec.numArgs;
+          var argsLength = args !== null ? args.length : 0;
+          if (!opSpec.variableArgs) {
+            if (argsLength !== numArgs) {
+              var nonProcessedArgs = this.nonProcessedArgs;
+              while (argsLength > numArgs) {
+                nonProcessedArgs.push(args.shift());
+                argsLength--;
+              }
+              while (argsLength < numArgs && nonProcessedArgs.length !== 0) {
+                if (args === null) {
+                  args = [];
+                }
+                args.unshift(nonProcessedArgs.pop());
+                argsLength++;
+              }
+            }
+            if (argsLength < numArgs) {
+              (0, _util.warn)('Skipping command ' + fn + ': expected ' + numArgs + ' args, but received ' + argsLength + ' args.');
+              if (args !== null) {
+                args.length = 0;
+              }
+              continue;
+            }
+          } else if (argsLength > numArgs) {
+            (0, _util.info)('Command ' + fn + ': expected [0,' + numArgs + '] args, but received ' + argsLength + ' args.');
+          }
+          this.preprocessCommand(fn, args);
+          operation.fn = fn;
+          operation.args = args;
+          return true;
+        }
+        if ((0, _primitives.isEOF)(obj)) {
+          return false;
+        }
+        if (obj !== null) {
+          if (args === null) {
+            args = [];
+          }
+          args.push(obj);
+          if (args.length > 33) {
+            throw new _util.FormatError('Too many arguments');
+          }
+        }
+      }
+    },
+    preprocessCommand: function EvaluatorPreprocessor_preprocessCommand(fn, args) {
+      switch (fn | 0) {
+        case _util.OPS.save:
+          this.stateManager.save();
+          break;
+        case _util.OPS.restore:
+          this.stateManager.restore();
+          break;
+        case _util.OPS.transform:
+          this.stateManager.transform(args);
+          break;
+      }
+    }
+  };
+  return EvaluatorPreprocessor;
+}();
+exports.PartialEvaluator = PartialEvaluator;
+
+/***/ }),
+/* 131 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.CMapFactory = exports.IdentityCMap = exports.CMap = undefined;
 
 var _util = __w_pdfjs_require__(0);
@@ -34946,7 +35982,7 @@ exports.IdentityCMap = IdentityCMap;
 exports.CMapFactory = CMapFactory;
 
 /***/ }),
-/* 130 */
+/* 132 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -34961,7 +35997,7 @@ var _util = __w_pdfjs_require__(0);
 
 var _cff_parser = __w_pdfjs_require__(66);
 
-var _glyphlist = __w_pdfjs_require__(41);
+var _glyphlist = __w_pdfjs_require__(42);
 
 var _encodings = __w_pdfjs_require__(21);
 
@@ -34969,11 +36005,11 @@ var _standard_fonts = __w_pdfjs_require__(67);
 
 var _unicode = __w_pdfjs_require__(68);
 
-var _font_renderer = __w_pdfjs_require__(132);
+var _font_renderer = __w_pdfjs_require__(134);
 
 var _stream = __w_pdfjs_require__(5);
 
-var _type1_parser = __w_pdfjs_require__(133);
+var _type1_parser = __w_pdfjs_require__(135);
 
 var PRIVATE_USE_OFFSET_START = 0xE000;
 var PRIVATE_USE_OFFSET_END = 0xF8FF;
@@ -37421,7 +38457,7 @@ exports.ProblematicCharRanges = ProblematicCharRanges;
 exports.getFontType = getFontType;
 
 /***/ }),
-/* 131 */
+/* 133 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -37438,7 +38474,7 @@ exports.ExpertCharset = ExpertCharset;
 exports.ExpertSubsetCharset = ExpertSubsetCharset;
 
 /***/ }),
-/* 132 */
+/* 134 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -37453,7 +38489,7 @@ var _util = __w_pdfjs_require__(0);
 
 var _cff_parser = __w_pdfjs_require__(66);
 
-var _glyphlist = __w_pdfjs_require__(41);
+var _glyphlist = __w_pdfjs_require__(42);
 
 var _encodings = __w_pdfjs_require__(21);
 
@@ -38178,7 +39214,7 @@ var FontRendererFactory = function FontRendererFactoryClosure() {
 exports.FontRendererFactory = FontRendererFactory;
 
 /***/ }),
-/* 133 */
+/* 135 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -38741,7 +39777,7 @@ var Type1Parser = function Type1ParserClosure() {
 exports.Type1Parser = Type1Parser;
 
 /***/ }),
-/* 134 */
+/* 136 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -39531,7 +40567,7 @@ exports.Pattern = Pattern;
 exports.getTilingPatternIR = getTilingPatternIR;
 
 /***/ }),
-/* 135 */
+/* 137 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -39776,7 +40812,7 @@ function bidi(str, startLevel, vertical) {
 exports.bidi = bidi;
 
 /***/ }),
-/* 136 */
+/* 138 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -42730,7 +43766,7 @@ var getMetrics = (0, _util.getLookupTableFactory)(function (t) {
 exports.getMetrics = getMetrics;
 
 /***/ }),
-/* 137 */
+/* 139 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -42934,7 +43970,7 @@ exports.PostScriptLexer = PostScriptLexer;
 exports.PostScriptParser = PostScriptParser;
 
 /***/ }),
-/* 138 */
+/* 140 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -43053,7 +44089,7 @@ var MurmurHash3_64 = function MurmurHash3_64Closure(seed) {
 exports.MurmurHash3_64 = MurmurHash3_64;
 
 /***/ }),
-/* 139 */
+/* 141 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -43074,7 +44110,7 @@ var _primitives = __w_pdfjs_require__(1);
 
 var _colorspace = __w_pdfjs_require__(20);
 
-var _jpx = __w_pdfjs_require__(62);
+var _jpx = __w_pdfjs_require__(63);
 
 var PDFImage = function PDFImageClosure() {
   function handleImageData(image, nativeDecoder) {
@@ -43595,905 +44631,6 @@ var PDFImage = function PDFImageClosure() {
   return PDFImage;
 }();
 exports.PDFImage = PDFImage;
-
-/***/ }),
-/* 140 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.AnnotationFactory = exports.AnnotationBorderStyle = exports.Annotation = undefined;
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _util = __w_pdfjs_require__(0);
-
-var _obj = __w_pdfjs_require__(61);
-
-var _primitives = __w_pdfjs_require__(1);
-
-var _colorspace = __w_pdfjs_require__(20);
-
-var _evaluator = __w_pdfjs_require__(65);
-
-var _stream = __w_pdfjs_require__(5);
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var AnnotationFactory = function () {
-  function AnnotationFactory() {
-    _classCallCheck(this, AnnotationFactory);
-  }
-
-  _createClass(AnnotationFactory, null, [{
-    key: 'create',
-    value: function create(xref, ref, pdfManager, idFactory) {
-      var dict = xref.fetchIfRef(ref);
-      if (!(0, _primitives.isDict)(dict)) {
-        return;
-      }
-      var id = (0, _primitives.isRef)(ref) ? ref.toString() : 'annot_' + idFactory.createObjId();
-      var subtype = dict.get('Subtype');
-      subtype = (0, _primitives.isName)(subtype) ? subtype.name : null;
-      var parameters = {
-        xref: xref,
-        dict: dict,
-        ref: (0, _primitives.isRef)(ref) ? ref : null,
-        subtype: subtype,
-        id: id,
-        pdfManager: pdfManager
-      };
-      switch (subtype) {
-        case 'Link':
-          return new LinkAnnotation(parameters);
-        case 'Text':
-          return new TextAnnotation(parameters);
-        case 'Widget':
-          var fieldType = _util.Util.getInheritableProperty(dict, 'FT');
-          fieldType = (0, _primitives.isName)(fieldType) ? fieldType.name : null;
-          switch (fieldType) {
-            case 'Tx':
-              return new TextWidgetAnnotation(parameters);
-            case 'Btn':
-              return new ButtonWidgetAnnotation(parameters);
-            case 'Ch':
-              return new ChoiceWidgetAnnotation(parameters);
-          }
-          (0, _util.warn)('Unimplemented widget field type "' + fieldType + '", ' + 'falling back to base field type.');
-          return new WidgetAnnotation(parameters);
-        case 'Popup':
-          return new PopupAnnotation(parameters);
-        case 'Line':
-          return new LineAnnotation(parameters);
-        case 'Square':
-          return new SquareAnnotation(parameters);
-        case 'Circle':
-          return new CircleAnnotation(parameters);
-        case 'PolyLine':
-          return new PolylineAnnotation(parameters);
-        case 'Polygon':
-          return new PolygonAnnotation(parameters);
-        case 'Highlight':
-          return new HighlightAnnotation(parameters);
-        case 'Underline':
-          return new UnderlineAnnotation(parameters);
-        case 'Squiggly':
-          return new SquigglyAnnotation(parameters);
-        case 'StrikeOut':
-          return new StrikeOutAnnotation(parameters);
-        case 'Stamp':
-          return new StampAnnotation(parameters);
-        case 'FileAttachment':
-          return new FileAttachmentAnnotation(parameters);
-        default:
-          if (!subtype) {
-            (0, _util.warn)('Annotation is missing the required /Subtype.');
-          } else {
-            (0, _util.warn)('Unimplemented annotation type "' + subtype + '", ' + 'falling back to base annotation.');
-          }
-          return new Annotation(parameters);
-      }
-    }
-  }]);
-
-  return AnnotationFactory;
-}();
-
-function getTransformMatrix(rect, bbox, matrix) {
-  var bounds = _util.Util.getAxialAlignedBoundingBox(bbox, matrix);
-  var minX = bounds[0];
-  var minY = bounds[1];
-  var maxX = bounds[2];
-  var maxY = bounds[3];
-  if (minX === maxX || minY === maxY) {
-    return [1, 0, 0, 1, rect[0], rect[1]];
-  }
-  var xRatio = (rect[2] - rect[0]) / (maxX - minX);
-  var yRatio = (rect[3] - rect[1]) / (maxY - minY);
-  return [xRatio, 0, 0, yRatio, rect[0] - minX * xRatio, rect[1] - minY * yRatio];
-}
-
-var Annotation = function () {
-  function Annotation(params) {
-    _classCallCheck(this, Annotation);
-
-    var dict = params.dict;
-    this.setFlags(dict.get('F'));
-    this.setRectangle(dict.getArray('Rect'));
-    this.setColor(dict.getArray('C'));
-    this.setBorderStyle(dict);
-    this.setAppearance(dict);
-    this.data = {
-      annotationFlags: this.flags,
-      borderStyle: this.borderStyle,
-      color: this.color,
-      hasAppearance: !!this.appearance,
-      id: params.id,
-      rect: this.rectangle,
-      subtype: params.subtype
-    };
-  }
-
-  _createClass(Annotation, [{
-    key: '_hasFlag',
-    value: function _hasFlag(flags, flag) {
-      return !!(flags & flag);
-    }
-  }, {
-    key: '_isViewable',
-    value: function _isViewable(flags) {
-      return !this._hasFlag(flags, _util.AnnotationFlag.INVISIBLE) && !this._hasFlag(flags, _util.AnnotationFlag.HIDDEN) && !this._hasFlag(flags, _util.AnnotationFlag.NOVIEW);
-    }
-  }, {
-    key: '_isPrintable',
-    value: function _isPrintable(flags) {
-      return this._hasFlag(flags, _util.AnnotationFlag.PRINT) && !this._hasFlag(flags, _util.AnnotationFlag.INVISIBLE) && !this._hasFlag(flags, _util.AnnotationFlag.HIDDEN);
-    }
-  }, {
-    key: 'setFlags',
-    value: function setFlags(flags) {
-      this.flags = Number.isInteger(flags) && flags > 0 ? flags : 0;
-    }
-  }, {
-    key: 'hasFlag',
-    value: function hasFlag(flag) {
-      return this._hasFlag(this.flags, flag);
-    }
-  }, {
-    key: 'setRectangle',
-    value: function setRectangle(rectangle) {
-      if (Array.isArray(rectangle) && rectangle.length === 4) {
-        this.rectangle = _util.Util.normalizeRect(rectangle);
-      } else {
-        this.rectangle = [0, 0, 0, 0];
-      }
-    }
-  }, {
-    key: 'setColor',
-    value: function setColor(color) {
-      var rgbColor = new Uint8Array(3);
-      if (!Array.isArray(color)) {
-        this.color = rgbColor;
-        return;
-      }
-      switch (color.length) {
-        case 0:
-          this.color = null;
-          break;
-        case 1:
-          _colorspace.ColorSpace.singletons.gray.getRgbItem(color, 0, rgbColor, 0);
-          this.color = rgbColor;
-          break;
-        case 3:
-          _colorspace.ColorSpace.singletons.rgb.getRgbItem(color, 0, rgbColor, 0);
-          this.color = rgbColor;
-          break;
-        case 4:
-          _colorspace.ColorSpace.singletons.cmyk.getRgbItem(color, 0, rgbColor, 0);
-          this.color = rgbColor;
-          break;
-        default:
-          this.color = rgbColor;
-          break;
-      }
-    }
-  }, {
-    key: 'setBorderStyle',
-    value: function setBorderStyle(borderStyle) {
-      this.borderStyle = new AnnotationBorderStyle();
-      if (!(0, _primitives.isDict)(borderStyle)) {
-        return;
-      }
-      if (borderStyle.has('BS')) {
-        var dict = borderStyle.get('BS');
-        var dictType = dict.get('Type');
-        if (!dictType || (0, _primitives.isName)(dictType, 'Border')) {
-          this.borderStyle.setWidth(dict.get('W'));
-          this.borderStyle.setStyle(dict.get('S'));
-          this.borderStyle.setDashArray(dict.getArray('D'));
-        }
-      } else if (borderStyle.has('Border')) {
-        var array = borderStyle.getArray('Border');
-        if (Array.isArray(array) && array.length >= 3) {
-          this.borderStyle.setHorizontalCornerRadius(array[0]);
-          this.borderStyle.setVerticalCornerRadius(array[1]);
-          this.borderStyle.setWidth(array[2]);
-          if (array.length === 4) {
-            this.borderStyle.setDashArray(array[3]);
-          }
-        }
-      } else {
-        this.borderStyle.setWidth(0);
-      }
-    }
-  }, {
-    key: 'setAppearance',
-    value: function setAppearance(dict) {
-      this.appearance = null;
-      var appearanceStates = dict.get('AP');
-      if (!(0, _primitives.isDict)(appearanceStates)) {
-        return;
-      }
-      var normalAppearanceState = appearanceStates.get('N');
-      if ((0, _primitives.isStream)(normalAppearanceState)) {
-        this.appearance = normalAppearanceState;
-        return;
-      }
-      if (!(0, _primitives.isDict)(normalAppearanceState)) {
-        return;
-      }
-      var as = dict.get('AS');
-      if (!(0, _primitives.isName)(as) || !normalAppearanceState.has(as.name)) {
-        return;
-      }
-      this.appearance = normalAppearanceState.get(as.name);
-    }
-  }, {
-    key: '_preparePopup',
-    value: function _preparePopup(dict) {
-      if (!dict.has('C')) {
-        this.data.color = null;
-      }
-      this.data.hasPopup = dict.has('Popup');
-      this.data.title = (0, _util.stringToPDFString)(dict.get('T') || '');
-      this.data.contents = (0, _util.stringToPDFString)(dict.get('Contents') || '');
-    }
-  }, {
-    key: 'loadResources',
-    value: function loadResources(keys) {
-      return this.appearance.dict.getAsync('Resources').then(function (resources) {
-        if (!resources) {
-          return;
-        }
-        var objectLoader = new _obj.ObjectLoader(resources, keys, resources.xref);
-        return objectLoader.load().then(function () {
-          return resources;
-        });
-      });
-    }
-  }, {
-    key: 'getOperatorList',
-    value: function getOperatorList(evaluator, task, renderForms) {
-      var _this = this;
-
-      if (!this.appearance) {
-        return Promise.resolve(new _evaluator.OperatorList());
-      }
-      var data = this.data;
-      var appearanceDict = this.appearance.dict;
-      var resourcesPromise = this.loadResources(['ExtGState', 'ColorSpace', 'Pattern', 'Shading', 'XObject', 'Font']);
-      var bbox = appearanceDict.getArray('BBox') || [0, 0, 1, 1];
-      var matrix = appearanceDict.getArray('Matrix') || [1, 0, 0, 1, 0, 0];
-      var transform = getTransformMatrix(data.rect, bbox, matrix);
-      return resourcesPromise.then(function (resources) {
-        var opList = new _evaluator.OperatorList();
-        opList.addOp(_util.OPS.beginAnnotation, [data.rect, transform, matrix]);
-        return evaluator.getOperatorList({
-          stream: _this.appearance,
-          task: task,
-          resources: resources,
-          operatorList: opList
-        }).then(function () {
-          opList.addOp(_util.OPS.endAnnotation, []);
-          _this.appearance.reset();
-          return opList;
-        });
-      });
-    }
-  }, {
-    key: 'viewable',
-    get: function get() {
-      if (this.flags === 0) {
-        return true;
-      }
-      return this._isViewable(this.flags);
-    }
-  }, {
-    key: 'printable',
-    get: function get() {
-      if (this.flags === 0) {
-        return false;
-      }
-      return this._isPrintable(this.flags);
-    }
-  }]);
-
-  return Annotation;
-}();
-
-var AnnotationBorderStyle = function () {
-  function AnnotationBorderStyle() {
-    _classCallCheck(this, AnnotationBorderStyle);
-
-    this.width = 1;
-    this.style = _util.AnnotationBorderStyleType.SOLID;
-    this.dashArray = [3];
-    this.horizontalCornerRadius = 0;
-    this.verticalCornerRadius = 0;
-  }
-
-  _createClass(AnnotationBorderStyle, [{
-    key: 'setWidth',
-    value: function setWidth(width) {
-      if (Number.isInteger(width)) {
-        this.width = width;
-      }
-    }
-  }, {
-    key: 'setStyle',
-    value: function setStyle(style) {
-      if (!style) {
-        return;
-      }
-      switch (style.name) {
-        case 'S':
-          this.style = _util.AnnotationBorderStyleType.SOLID;
-          break;
-        case 'D':
-          this.style = _util.AnnotationBorderStyleType.DASHED;
-          break;
-        case 'B':
-          this.style = _util.AnnotationBorderStyleType.BEVELED;
-          break;
-        case 'I':
-          this.style = _util.AnnotationBorderStyleType.INSET;
-          break;
-        case 'U':
-          this.style = _util.AnnotationBorderStyleType.UNDERLINE;
-          break;
-        default:
-          break;
-      }
-    }
-  }, {
-    key: 'setDashArray',
-    value: function setDashArray(dashArray) {
-      if (Array.isArray(dashArray) && dashArray.length > 0) {
-        var isValid = true;
-        var allZeros = true;
-        for (var i = 0, len = dashArray.length; i < len; i++) {
-          var element = dashArray[i];
-          var validNumber = +element >= 0;
-          if (!validNumber) {
-            isValid = false;
-            break;
-          } else if (element > 0) {
-            allZeros = false;
-          }
-        }
-        if (isValid && !allZeros) {
-          this.dashArray = dashArray;
-        } else {
-          this.width = 0;
-        }
-      } else if (dashArray) {
-        this.width = 0;
-      }
-    }
-  }, {
-    key: 'setHorizontalCornerRadius',
-    value: function setHorizontalCornerRadius(radius) {
-      if (Number.isInteger(radius)) {
-        this.horizontalCornerRadius = radius;
-      }
-    }
-  }, {
-    key: 'setVerticalCornerRadius',
-    value: function setVerticalCornerRadius(radius) {
-      if (Number.isInteger(radius)) {
-        this.verticalCornerRadius = radius;
-      }
-    }
-  }]);
-
-  return AnnotationBorderStyle;
-}();
-
-var WidgetAnnotation = function (_Annotation) {
-  _inherits(WidgetAnnotation, _Annotation);
-
-  function WidgetAnnotation(params) {
-    _classCallCheck(this, WidgetAnnotation);
-
-    var _this2 = _possibleConstructorReturn(this, (WidgetAnnotation.__proto__ || Object.getPrototypeOf(WidgetAnnotation)).call(this, params));
-
-    var dict = params.dict;
-    var data = _this2.data;
-    data.annotationType = _util.AnnotationType.WIDGET;
-    data.fieldName = _this2._constructFieldName(dict);
-    data.fieldValue = _util.Util.getInheritableProperty(dict, 'V', true);
-    data.alternativeText = (0, _util.stringToPDFString)(dict.get('TU') || '');
-    data.defaultAppearance = _util.Util.getInheritableProperty(dict, 'DA') || '';
-    var fieldType = _util.Util.getInheritableProperty(dict, 'FT');
-    data.fieldType = (0, _primitives.isName)(fieldType) ? fieldType.name : null;
-    _this2.fieldResources = _util.Util.getInheritableProperty(dict, 'DR') || _primitives.Dict.empty;
-    data.fieldFlags = _util.Util.getInheritableProperty(dict, 'Ff');
-    if (!Number.isInteger(data.fieldFlags) || data.fieldFlags < 0) {
-      data.fieldFlags = 0;
-    }
-    data.readOnly = _this2.hasFieldFlag(_util.AnnotationFieldFlag.READONLY);
-    if (data.fieldType === 'Sig') {
-      _this2.setFlags(_util.AnnotationFlag.HIDDEN);
-    }
-    return _this2;
-  }
-
-  _createClass(WidgetAnnotation, [{
-    key: '_constructFieldName',
-    value: function _constructFieldName(dict) {
-      if (!dict.has('T') && !dict.has('Parent')) {
-        (0, _util.warn)('Unknown field name, falling back to empty field name.');
-        return '';
-      }
-      if (!dict.has('Parent')) {
-        return (0, _util.stringToPDFString)(dict.get('T'));
-      }
-      var fieldName = [];
-      if (dict.has('T')) {
-        fieldName.unshift((0, _util.stringToPDFString)(dict.get('T')));
-      }
-      var loopDict = dict;
-      while (loopDict.has('Parent')) {
-        loopDict = loopDict.get('Parent');
-        if (!(0, _primitives.isDict)(loopDict)) {
-          break;
-        }
-        if (loopDict.has('T')) {
-          fieldName.unshift((0, _util.stringToPDFString)(loopDict.get('T')));
-        }
-      }
-      return fieldName.join('.');
-    }
-  }, {
-    key: 'hasFieldFlag',
-    value: function hasFieldFlag(flag) {
-      return !!(this.data.fieldFlags & flag);
-    }
-  }, {
-    key: 'getOperatorList',
-    value: function getOperatorList(evaluator, task, renderForms) {
-      if (renderForms) {
-        return Promise.resolve(new _evaluator.OperatorList());
-      }
-      return _get(WidgetAnnotation.prototype.__proto__ || Object.getPrototypeOf(WidgetAnnotation.prototype), 'getOperatorList', this).call(this, evaluator, task, renderForms);
-    }
-  }]);
-
-  return WidgetAnnotation;
-}(Annotation);
-
-var TextWidgetAnnotation = function (_WidgetAnnotation) {
-  _inherits(TextWidgetAnnotation, _WidgetAnnotation);
-
-  function TextWidgetAnnotation(params) {
-    _classCallCheck(this, TextWidgetAnnotation);
-
-    var _this3 = _possibleConstructorReturn(this, (TextWidgetAnnotation.__proto__ || Object.getPrototypeOf(TextWidgetAnnotation)).call(this, params));
-
-    _this3.data.fieldValue = (0, _util.stringToPDFString)(_this3.data.fieldValue || '');
-    var alignment = _util.Util.getInheritableProperty(params.dict, 'Q');
-    if (!Number.isInteger(alignment) || alignment < 0 || alignment > 2) {
-      alignment = null;
-    }
-    _this3.data.textAlignment = alignment;
-    var maximumLength = _util.Util.getInheritableProperty(params.dict, 'MaxLen');
-    if (!Number.isInteger(maximumLength) || maximumLength < 0) {
-      maximumLength = null;
-    }
-    _this3.data.maxLen = maximumLength;
-    _this3.data.multiLine = _this3.hasFieldFlag(_util.AnnotationFieldFlag.MULTILINE);
-    _this3.data.comb = _this3.hasFieldFlag(_util.AnnotationFieldFlag.COMB) && !_this3.hasFieldFlag(_util.AnnotationFieldFlag.MULTILINE) && !_this3.hasFieldFlag(_util.AnnotationFieldFlag.PASSWORD) && !_this3.hasFieldFlag(_util.AnnotationFieldFlag.FILESELECT) && _this3.data.maxLen !== null;
-    return _this3;
-  }
-
-  _createClass(TextWidgetAnnotation, [{
-    key: 'getOperatorList',
-    value: function getOperatorList(evaluator, task, renderForms) {
-      if (renderForms || this.appearance) {
-        return _get(TextWidgetAnnotation.prototype.__proto__ || Object.getPrototypeOf(TextWidgetAnnotation.prototype), 'getOperatorList', this).call(this, evaluator, task, renderForms);
-      }
-      var operatorList = new _evaluator.OperatorList();
-      if (!this.data.defaultAppearance) {
-        return Promise.resolve(operatorList);
-      }
-      var stream = new _stream.Stream((0, _util.stringToBytes)(this.data.defaultAppearance));
-      return evaluator.getOperatorList({
-        stream: stream,
-        task: task,
-        resources: this.fieldResources,
-        operatorList: operatorList
-      }).then(function () {
-        return operatorList;
-      });
-    }
-  }]);
-
-  return TextWidgetAnnotation;
-}(WidgetAnnotation);
-
-var ButtonWidgetAnnotation = function (_WidgetAnnotation2) {
-  _inherits(ButtonWidgetAnnotation, _WidgetAnnotation2);
-
-  function ButtonWidgetAnnotation(params) {
-    _classCallCheck(this, ButtonWidgetAnnotation);
-
-    var _this4 = _possibleConstructorReturn(this, (ButtonWidgetAnnotation.__proto__ || Object.getPrototypeOf(ButtonWidgetAnnotation)).call(this, params));
-
-    _this4.data.checkBox = !_this4.hasFieldFlag(_util.AnnotationFieldFlag.RADIO) && !_this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
-    if (_this4.data.checkBox) {
-      if (!(0, _primitives.isName)(_this4.data.fieldValue)) {
-        return _possibleConstructorReturn(_this4);
-      }
-      _this4.data.fieldValue = _this4.data.fieldValue.name;
-    }
-    _this4.data.radioButton = _this4.hasFieldFlag(_util.AnnotationFieldFlag.RADIO) && !_this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
-    if (_this4.data.radioButton) {
-      _this4.data.fieldValue = _this4.data.buttonValue = null;
-      var fieldParent = params.dict.get('Parent');
-      if ((0, _primitives.isDict)(fieldParent) && fieldParent.has('V')) {
-        var fieldParentValue = fieldParent.get('V');
-        if ((0, _primitives.isName)(fieldParentValue)) {
-          _this4.data.fieldValue = fieldParentValue.name;
-        }
-      }
-      var appearanceStates = params.dict.get('AP');
-      if (!(0, _primitives.isDict)(appearanceStates)) {
-        return _possibleConstructorReturn(_this4);
-      }
-      var normalAppearanceState = appearanceStates.get('N');
-      if (!(0, _primitives.isDict)(normalAppearanceState)) {
-        return _possibleConstructorReturn(_this4);
-      }
-      var keys = normalAppearanceState.getKeys();
-      for (var i = 0, ii = keys.length; i < ii; i++) {
-        if (keys[i] !== 'Off') {
-          _this4.data.buttonValue = keys[i];
-          break;
-        }
-      }
-    }
-    return _this4;
-  }
-
-  return ButtonWidgetAnnotation;
-}(WidgetAnnotation);
-
-var ChoiceWidgetAnnotation = function (_WidgetAnnotation3) {
-  _inherits(ChoiceWidgetAnnotation, _WidgetAnnotation3);
-
-  function ChoiceWidgetAnnotation(params) {
-    _classCallCheck(this, ChoiceWidgetAnnotation);
-
-    var _this5 = _possibleConstructorReturn(this, (ChoiceWidgetAnnotation.__proto__ || Object.getPrototypeOf(ChoiceWidgetAnnotation)).call(this, params));
-
-    _this5.data.options = [];
-    var options = _util.Util.getInheritableProperty(params.dict, 'Opt');
-    if (Array.isArray(options)) {
-      var xref = params.xref;
-      for (var i = 0, ii = options.length; i < ii; i++) {
-        var option = xref.fetchIfRef(options[i]);
-        var isOptionArray = Array.isArray(option);
-        _this5.data.options[i] = {
-          exportValue: isOptionArray ? xref.fetchIfRef(option[0]) : option,
-          displayValue: isOptionArray ? xref.fetchIfRef(option[1]) : option
-        };
-      }
-    }
-    if (!Array.isArray(_this5.data.fieldValue)) {
-      _this5.data.fieldValue = [_this5.data.fieldValue];
-    }
-    _this5.data.combo = _this5.hasFieldFlag(_util.AnnotationFieldFlag.COMBO);
-    _this5.data.multiSelect = _this5.hasFieldFlag(_util.AnnotationFieldFlag.MULTISELECT);
-    return _this5;
-  }
-
-  return ChoiceWidgetAnnotation;
-}(WidgetAnnotation);
-
-var TextAnnotation = function (_Annotation2) {
-  _inherits(TextAnnotation, _Annotation2);
-
-  function TextAnnotation(parameters) {
-    _classCallCheck(this, TextAnnotation);
-
-    var DEFAULT_ICON_SIZE = 22;
-
-    var _this6 = _possibleConstructorReturn(this, (TextAnnotation.__proto__ || Object.getPrototypeOf(TextAnnotation)).call(this, parameters));
-
-    _this6.data.annotationType = _util.AnnotationType.TEXT;
-    if (_this6.data.hasAppearance) {
-      _this6.data.name = 'NoIcon';
-    } else {
-      _this6.data.rect[1] = _this6.data.rect[3] - DEFAULT_ICON_SIZE;
-      _this6.data.rect[2] = _this6.data.rect[0] + DEFAULT_ICON_SIZE;
-      _this6.data.name = parameters.dict.has('Name') ? parameters.dict.get('Name').name : 'Note';
-    }
-    _this6._preparePopup(parameters.dict);
-    return _this6;
-  }
-
-  return TextAnnotation;
-}(Annotation);
-
-var LinkAnnotation = function (_Annotation3) {
-  _inherits(LinkAnnotation, _Annotation3);
-
-  function LinkAnnotation(params) {
-    _classCallCheck(this, LinkAnnotation);
-
-    var _this7 = _possibleConstructorReturn(this, (LinkAnnotation.__proto__ || Object.getPrototypeOf(LinkAnnotation)).call(this, params));
-
-    _this7.data.annotationType = _util.AnnotationType.LINK;
-    _obj.Catalog.parseDestDictionary({
-      destDict: params.dict,
-      resultObj: _this7.data,
-      docBaseUrl: params.pdfManager.docBaseUrl
-    });
-    return _this7;
-  }
-
-  return LinkAnnotation;
-}(Annotation);
-
-var PopupAnnotation = function (_Annotation4) {
-  _inherits(PopupAnnotation, _Annotation4);
-
-  function PopupAnnotation(parameters) {
-    _classCallCheck(this, PopupAnnotation);
-
-    var _this8 = _possibleConstructorReturn(this, (PopupAnnotation.__proto__ || Object.getPrototypeOf(PopupAnnotation)).call(this, parameters));
-
-    _this8.data.annotationType = _util.AnnotationType.POPUP;
-    var dict = parameters.dict;
-    var parentItem = dict.get('Parent');
-    if (!parentItem) {
-      (0, _util.warn)('Popup annotation has a missing or invalid parent annotation.');
-      return _possibleConstructorReturn(_this8);
-    }
-    var parentSubtype = parentItem.get('Subtype');
-    _this8.data.parentType = (0, _primitives.isName)(parentSubtype) ? parentSubtype.name : null;
-    _this8.data.parentId = dict.getRaw('Parent').toString();
-    _this8.data.title = (0, _util.stringToPDFString)(parentItem.get('T') || '');
-    _this8.data.contents = (0, _util.stringToPDFString)(parentItem.get('Contents') || '');
-    if (!parentItem.has('C')) {
-      _this8.data.color = null;
-    } else {
-      _this8.setColor(parentItem.getArray('C'));
-      _this8.data.color = _this8.color;
-    }
-    if (!_this8.viewable) {
-      var parentFlags = parentItem.get('F');
-      if (_this8._isViewable(parentFlags)) {
-        _this8.setFlags(parentFlags);
-      }
-    }
-    return _this8;
-  }
-
-  return PopupAnnotation;
-}(Annotation);
-
-var LineAnnotation = function (_Annotation5) {
-  _inherits(LineAnnotation, _Annotation5);
-
-  function LineAnnotation(parameters) {
-    _classCallCheck(this, LineAnnotation);
-
-    var _this9 = _possibleConstructorReturn(this, (LineAnnotation.__proto__ || Object.getPrototypeOf(LineAnnotation)).call(this, parameters));
-
-    _this9.data.annotationType = _util.AnnotationType.LINE;
-    var dict = parameters.dict;
-    _this9.data.lineCoordinates = _util.Util.normalizeRect(dict.getArray('L'));
-    _this9._preparePopup(dict);
-    return _this9;
-  }
-
-  return LineAnnotation;
-}(Annotation);
-
-var SquareAnnotation = function (_Annotation6) {
-  _inherits(SquareAnnotation, _Annotation6);
-
-  function SquareAnnotation(parameters) {
-    _classCallCheck(this, SquareAnnotation);
-
-    var _this10 = _possibleConstructorReturn(this, (SquareAnnotation.__proto__ || Object.getPrototypeOf(SquareAnnotation)).call(this, parameters));
-
-    _this10.data.annotationType = _util.AnnotationType.SQUARE;
-    _this10._preparePopup(parameters.dict);
-    return _this10;
-  }
-
-  return SquareAnnotation;
-}(Annotation);
-
-var CircleAnnotation = function (_Annotation7) {
-  _inherits(CircleAnnotation, _Annotation7);
-
-  function CircleAnnotation(parameters) {
-    _classCallCheck(this, CircleAnnotation);
-
-    var _this11 = _possibleConstructorReturn(this, (CircleAnnotation.__proto__ || Object.getPrototypeOf(CircleAnnotation)).call(this, parameters));
-
-    _this11.data.annotationType = _util.AnnotationType.CIRCLE;
-    _this11._preparePopup(parameters.dict);
-    return _this11;
-  }
-
-  return CircleAnnotation;
-}(Annotation);
-
-var PolylineAnnotation = function (_Annotation8) {
-  _inherits(PolylineAnnotation, _Annotation8);
-
-  function PolylineAnnotation(parameters) {
-    _classCallCheck(this, PolylineAnnotation);
-
-    var _this12 = _possibleConstructorReturn(this, (PolylineAnnotation.__proto__ || Object.getPrototypeOf(PolylineAnnotation)).call(this, parameters));
-
-    _this12.data.annotationType = _util.AnnotationType.POLYLINE;
-    var dict = parameters.dict;
-    var rawVertices = dict.getArray('Vertices');
-    _this12.data.vertices = [];
-    for (var i = 0, ii = rawVertices.length; i < ii; i += 2) {
-      _this12.data.vertices.push({
-        x: rawVertices[i],
-        y: rawVertices[i + 1]
-      });
-    }
-    _this12._preparePopup(dict);
-    return _this12;
-  }
-
-  return PolylineAnnotation;
-}(Annotation);
-
-var PolygonAnnotation = function (_PolylineAnnotation) {
-  _inherits(PolygonAnnotation, _PolylineAnnotation);
-
-  function PolygonAnnotation(parameters) {
-    _classCallCheck(this, PolygonAnnotation);
-
-    var _this13 = _possibleConstructorReturn(this, (PolygonAnnotation.__proto__ || Object.getPrototypeOf(PolygonAnnotation)).call(this, parameters));
-
-    _this13.data.annotationType = _util.AnnotationType.POLYGON;
-    return _this13;
-  }
-
-  return PolygonAnnotation;
-}(PolylineAnnotation);
-
-var HighlightAnnotation = function (_Annotation9) {
-  _inherits(HighlightAnnotation, _Annotation9);
-
-  function HighlightAnnotation(parameters) {
-    _classCallCheck(this, HighlightAnnotation);
-
-    var _this14 = _possibleConstructorReturn(this, (HighlightAnnotation.__proto__ || Object.getPrototypeOf(HighlightAnnotation)).call(this, parameters));
-
-    _this14.data.annotationType = _util.AnnotationType.HIGHLIGHT;
-    _this14._preparePopup(parameters.dict);
-    return _this14;
-  }
-
-  return HighlightAnnotation;
-}(Annotation);
-
-var UnderlineAnnotation = function (_Annotation10) {
-  _inherits(UnderlineAnnotation, _Annotation10);
-
-  function UnderlineAnnotation(parameters) {
-    _classCallCheck(this, UnderlineAnnotation);
-
-    var _this15 = _possibleConstructorReturn(this, (UnderlineAnnotation.__proto__ || Object.getPrototypeOf(UnderlineAnnotation)).call(this, parameters));
-
-    _this15.data.annotationType = _util.AnnotationType.UNDERLINE;
-    _this15._preparePopup(parameters.dict);
-    return _this15;
-  }
-
-  return UnderlineAnnotation;
-}(Annotation);
-
-var SquigglyAnnotation = function (_Annotation11) {
-  _inherits(SquigglyAnnotation, _Annotation11);
-
-  function SquigglyAnnotation(parameters) {
-    _classCallCheck(this, SquigglyAnnotation);
-
-    var _this16 = _possibleConstructorReturn(this, (SquigglyAnnotation.__proto__ || Object.getPrototypeOf(SquigglyAnnotation)).call(this, parameters));
-
-    _this16.data.annotationType = _util.AnnotationType.SQUIGGLY;
-    _this16._preparePopup(parameters.dict);
-    return _this16;
-  }
-
-  return SquigglyAnnotation;
-}(Annotation);
-
-var StrikeOutAnnotation = function (_Annotation12) {
-  _inherits(StrikeOutAnnotation, _Annotation12);
-
-  function StrikeOutAnnotation(parameters) {
-    _classCallCheck(this, StrikeOutAnnotation);
-
-    var _this17 = _possibleConstructorReturn(this, (StrikeOutAnnotation.__proto__ || Object.getPrototypeOf(StrikeOutAnnotation)).call(this, parameters));
-
-    _this17.data.annotationType = _util.AnnotationType.STRIKEOUT;
-    _this17._preparePopup(parameters.dict);
-    return _this17;
-  }
-
-  return StrikeOutAnnotation;
-}(Annotation);
-
-var StampAnnotation = function (_Annotation13) {
-  _inherits(StampAnnotation, _Annotation13);
-
-  function StampAnnotation(parameters) {
-    _classCallCheck(this, StampAnnotation);
-
-    var _this18 = _possibleConstructorReturn(this, (StampAnnotation.__proto__ || Object.getPrototypeOf(StampAnnotation)).call(this, parameters));
-
-    _this18.data.annotationType = _util.AnnotationType.STAMP;
-    _this18._preparePopup(parameters.dict);
-    return _this18;
-  }
-
-  return StampAnnotation;
-}(Annotation);
-
-var FileAttachmentAnnotation = function (_Annotation14) {
-  _inherits(FileAttachmentAnnotation, _Annotation14);
-
-  function FileAttachmentAnnotation(parameters) {
-    _classCallCheck(this, FileAttachmentAnnotation);
-
-    var _this19 = _possibleConstructorReturn(this, (FileAttachmentAnnotation.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotation)).call(this, parameters));
-
-    var file = new _obj.FileSpec(parameters.dict.get('FS'), parameters.xref);
-    _this19.data.annotationType = _util.AnnotationType.FILEATTACHMENT;
-    _this19.data.file = file.serializable;
-    _this19._preparePopup(parameters.dict);
-    return _this19;
-  }
-
-  return FileAttachmentAnnotation;
-}(Annotation);
-
-exports.Annotation = Annotation;
-exports.AnnotationBorderStyle = AnnotationBorderStyle;
-exports.AnnotationFactory = AnnotationFactory;
 
 /***/ })
 /******/ ]);
