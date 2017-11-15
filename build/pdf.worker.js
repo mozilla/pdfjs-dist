@@ -21914,8 +21914,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.118';
-var pdfjsBuild = 'f9a05154';
+var pdfjsVersion = '2.0.120';
+var pdfjsBuild = 'e162df59';
 var pdfjsCoreWorker = __w_pdfjs_require__(71);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22120,7 +22120,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.118';
+    var workerVersion = '2.0.120';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -22920,31 +22920,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         contextPrototype = null;
       }
     }
-  })();
-  (function checkRequestAnimationFrame() {
-    function installFakeAnimationFrameFunctions() {
-      window.requestAnimationFrame = function (callback) {
-        return window.setTimeout(callback, 20);
-      };
-      window.cancelAnimationFrame = function (timeoutID) {
-        window.clearTimeout(timeoutID);
-      };
-    }
-    if (!hasDOM) {
-      return;
-    }
-    if (isIOS) {
-      installFakeAnimationFrameFunctions();
-      return;
-    }
-    if ('requestAnimationFrame' in window) {
-      return;
-    }
-    window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
-    if (window.requestAnimationFrame) {
-      return;
-    }
-    installFakeAnimationFrameFunctions();
   })();
   (function checkCanvasSizeLimitation() {
     if (isIOS || isAndroid) {

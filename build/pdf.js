@@ -3291,7 +3291,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.118';
+  var apiVersion = '2.0.120';
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
   source.chunkedViewerLoading = !!pdfDataRangeTransport;
@@ -4654,8 +4654,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.118';
-  exports.build = build = 'f9a05154';
+  exports.version = version = '2.0.120';
+  exports.build = build = 'e162df59';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -7720,8 +7720,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.118';
-var pdfjsBuild = 'f9a05154';
+var pdfjsVersion = '2.0.120';
+var pdfjsBuild = 'e162df59';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(113);
 var pdfjsDisplayAPI = __w_pdfjs_require__(57);
@@ -8182,31 +8182,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         contextPrototype = null;
       }
     }
-  })();
-  (function checkRequestAnimationFrame() {
-    function installFakeAnimationFrameFunctions() {
-      window.requestAnimationFrame = function (callback) {
-        return window.setTimeout(callback, 20);
-      };
-      window.cancelAnimationFrame = function (timeoutID) {
-        window.clearTimeout(timeoutID);
-      };
-    }
-    if (!hasDOM) {
-      return;
-    }
-    if (isIOS) {
-      installFakeAnimationFrameFunctions();
-      return;
-    }
-    if ('requestAnimationFrame' in window) {
-      return;
-    }
-    window.requestAnimationFrame = window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame;
-    if (window.requestAnimationFrame) {
-      return;
-    }
-    installFakeAnimationFrameFunctions();
   })();
   (function checkCanvasSizeLimitation() {
     if (isIOS || isAndroid) {
@@ -13321,8 +13296,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.118';
-  PDFJS.build = 'f9a05154';
+  PDFJS.version = '2.0.120';
+  PDFJS.build = 'e162df59';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
