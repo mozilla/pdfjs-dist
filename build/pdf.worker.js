@@ -21914,8 +21914,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.114';
-var pdfjsBuild = '85e00672';
+var pdfjsVersion = '2.0.118';
+var pdfjsBuild = 'f9a05154';
 var pdfjsCoreWorker = __w_pdfjs_require__(71);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22120,7 +22120,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.114';
+    var workerVersion = '2.0.118';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -22521,10 +22521,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
   var globalScope = __w_pdfjs_require__(73);
   var userAgent = typeof navigator !== 'undefined' && navigator.userAgent || '';
   var isAndroid = /Android/.test(userAgent);
-  var isAndroidPre3 = /Android\s[0-2][^\d]/.test(userAgent);
   var isAndroidPre5 = /Android\s[0-4][^\d]/.test(userAgent);
   var isChrome = userAgent.indexOf('Chrom') >= 0;
-  var isChromeWithRangeBug = /Chrome\/(39|40)\./.test(userAgent);
   var isIOSChrome = userAgent.indexOf('CriOS') >= 0;
   var isIE = userAgent.indexOf('Trident') >= 0;
   var isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent);
@@ -22878,17 +22876,9 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     PDFJS.locale = navigator.userLanguage || 'en-US';
   })();
   (function checkRangeRequests() {
-    if (isSafari || isAndroidPre3 || isChromeWithRangeBug || isIOS) {
+    if (isSafari || isIOS) {
       PDFJS.disableRange = true;
       PDFJS.disableStream = true;
-    }
-  })();
-  (function checkHistoryManipulation() {
-    if (!hasDOM) {
-      return;
-    }
-    if (!history.pushState || isAndroidPre3) {
-      PDFJS.disableHistory = true;
     }
   })();
   (function checkSetPresenceInImageData() {

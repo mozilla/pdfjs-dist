@@ -11639,7 +11639,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.114';
+  var apiVersion = '2.0.118';
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
   source.chunkedViewerLoading = !!pdfDataRangeTransport;
@@ -12915,8 +12915,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.114';
-  exports.build = build = '85e00672';
+  exports.version = version = '2.0.118';
+  exports.build = build = 'f9a05154';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -26906,8 +26906,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.114';
-var pdfjsBuild = '85e00672';
+var pdfjsVersion = '2.0.118';
+var pdfjsBuild = 'f9a05154';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(129);
 var pdfjsDisplayAPI = __w_pdfjs_require__(64);
@@ -26969,10 +26969,8 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
   var globalScope = __w_pdfjs_require__(16);
   var userAgent = typeof navigator !== 'undefined' && navigator.userAgent || '';
   var isAndroid = /Android/.test(userAgent);
-  var isAndroidPre3 = /Android\s[0-2][^\d]/.test(userAgent);
   var isAndroidPre5 = /Android\s[0-4][^\d]/.test(userAgent);
   var isChrome = userAgent.indexOf('Chrom') >= 0;
-  var isChromeWithRangeBug = /Chrome\/(39|40)\./.test(userAgent);
   var isIOSChrome = userAgent.indexOf('CriOS') >= 0;
   var isIE = userAgent.indexOf('Trident') >= 0;
   var isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent);
@@ -27326,17 +27324,9 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     PDFJS.locale = navigator.userLanguage || 'en-US';
   })();
   (function checkRangeRequests() {
-    if (isSafari || isAndroidPre3 || isChromeWithRangeBug || isIOS) {
+    if (isSafari || isIOS) {
       PDFJS.disableRange = true;
       PDFJS.disableStream = true;
-    }
-  })();
-  (function checkHistoryManipulation() {
-    if (!hasDOM) {
-      return;
-    }
-    if (!history.pushState || isAndroidPre3) {
-      PDFJS.disableHistory = true;
     }
   })();
   (function checkSetPresenceInImageData() {
@@ -32517,8 +32507,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.114';
-  PDFJS.build = '85e00672';
+  PDFJS.version = '2.0.118';
+  PDFJS.build = 'f9a05154';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35447,7 +35437,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.114';
+    var workerVersion = '2.0.118';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
