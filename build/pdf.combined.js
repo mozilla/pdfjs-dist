@@ -11605,7 +11605,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.135';
+  var apiVersion = '2.0.137';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12881,8 +12881,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.135';
-  exports.build = build = '617cb86a';
+  exports.version = version = '2.0.137';
+  exports.build = build = '9e8cf448';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -26882,8 +26882,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.135';
-var pdfjsBuild = '617cb86a';
+var pdfjsVersion = '2.0.137';
+var pdfjsBuild = '9e8cf448';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(130);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -27205,72 +27205,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
       enumerable: true
     });
-  })();
-  (function checkWorkerConsoleCompatibility() {
-    if (typeof importScripts === 'undefined' || 'console' in globalScope) {
-      return;
-    }
-    var consoleTimer = {};
-    var workerConsole = {
-      log: function log() {
-        var args = Array.prototype.slice.call(arguments);
-        globalScope.postMessage({
-          targetName: 'main',
-          action: 'console_log',
-          data: args
-        });
-      },
-      error: function error() {
-        var args = Array.prototype.slice.call(arguments);
-        globalScope.postMessage({
-          targetName: 'main',
-          action: 'console_error',
-          data: args
-        });
-      },
-      time: function time(name) {
-        consoleTimer[name] = Date.now();
-      },
-      timeEnd: function timeEnd(name) {
-        var time = consoleTimer[name];
-        if (!time) {
-          throw new Error('Unknown timer name ' + name);
-        }
-        this.log('Timer:', name, Date.now() - time);
-      }
-    };
-    globalScope.console = workerConsole;
-  })();
-  (function checkConsoleCompatibility() {
-    if (!hasDOM) {
-      return;
-    }
-    if (!('console' in window)) {
-      window.console = {
-        log: function log() {},
-        error: function error() {},
-        warn: function warn() {}
-      };
-      return;
-    }
-    if (!('bind' in console.log)) {
-      console.log = function (fn) {
-        return function (msg) {
-          return fn(msg);
-        };
-      }(console.log);
-      console.error = function (fn) {
-        return function (msg) {
-          return fn(msg);
-        };
-      }(console.error);
-      console.warn = function (fn) {
-        return function (msg) {
-          return fn(msg);
-        };
-      }(console.warn);
-      return;
-    }
   })();
   (function checkOnClickCompatibility() {
     function ignoreIfTargetDisabled(event) {
@@ -32458,8 +32392,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.135';
-  PDFJS.build = '617cb86a';
+  PDFJS.version = '2.0.137';
+  PDFJS.build = '9e8cf448';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35388,7 +35322,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.135';
+    var workerVersion = '2.0.137';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }

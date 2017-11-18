@@ -21883,8 +21883,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.135';
-var pdfjsBuild = '617cb86a';
+var pdfjsVersion = '2.0.137';
+var pdfjsBuild = '9e8cf448';
 var pdfjsCoreWorker = __w_pdfjs_require__(72);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22089,7 +22089,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.135';
+    var workerVersion = '2.0.137';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -22750,72 +22750,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
       enumerable: true
     });
-  })();
-  (function checkWorkerConsoleCompatibility() {
-    if (typeof importScripts === 'undefined' || 'console' in globalScope) {
-      return;
-    }
-    var consoleTimer = {};
-    var workerConsole = {
-      log: function log() {
-        var args = Array.prototype.slice.call(arguments);
-        globalScope.postMessage({
-          targetName: 'main',
-          action: 'console_log',
-          data: args
-        });
-      },
-      error: function error() {
-        var args = Array.prototype.slice.call(arguments);
-        globalScope.postMessage({
-          targetName: 'main',
-          action: 'console_error',
-          data: args
-        });
-      },
-      time: function time(name) {
-        consoleTimer[name] = Date.now();
-      },
-      timeEnd: function timeEnd(name) {
-        var time = consoleTimer[name];
-        if (!time) {
-          throw new Error('Unknown timer name ' + name);
-        }
-        this.log('Timer:', name, Date.now() - time);
-      }
-    };
-    globalScope.console = workerConsole;
-  })();
-  (function checkConsoleCompatibility() {
-    if (!hasDOM) {
-      return;
-    }
-    if (!('console' in window)) {
-      window.console = {
-        log: function log() {},
-        error: function error() {},
-        warn: function warn() {}
-      };
-      return;
-    }
-    if (!('bind' in console.log)) {
-      console.log = function (fn) {
-        return function (msg) {
-          return fn(msg);
-        };
-      }(console.log);
-      console.error = function (fn) {
-        return function (msg) {
-          return fn(msg);
-        };
-      }(console.error);
-      console.warn = function (fn) {
-        return function (msg) {
-          return fn(msg);
-        };
-      }(console.warn);
-      return;
-    }
   })();
   (function checkOnClickCompatibility() {
     function ignoreIfTargetDisabled(event) {
