@@ -21883,8 +21883,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.144';
-var pdfjsBuild = '3ed2290c';
+var pdfjsVersion = '2.0.151';
+var pdfjsBuild = '58760edb';
 var pdfjsCoreWorker = __w_pdfjs_require__(72);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22089,7 +22089,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.144';
+    var workerVersion = '2.0.151';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -22495,7 +22495,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
   var isIOSChrome = userAgent.indexOf('CriOS') >= 0;
   var isIE = userAgent.indexOf('Trident') >= 0;
   var isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent);
-  var isOpera = userAgent.indexOf('Opera') >= 0;
   var isSafari = /Safari\//.test(userAgent) && !/(Chrome\/|Android\s)/.test(userAgent);
   var hasDOM = (typeof window === 'undefined' ? 'undefined' : _typeof(window)) === 'object' && (typeof document === 'undefined' ? 'undefined' : _typeof(document)) === 'object';
   if (typeof PDFJS === 'undefined') {
@@ -22506,49 +22505,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     if (!globalScope.URL) {
       globalScope.URL = globalScope.webkitURL;
     }
-  })();
-  (function checkObjectDefinePropertyCompatibility() {
-    if (typeof Object.defineProperty !== 'undefined') {
-      var definePropertyPossible = true;
-      try {
-        if (hasDOM) {
-          Object.defineProperty(new Image(), 'id', { value: 'test' });
-        }
-        var Test = function Test() {};
-        Test.prototype = {
-          get id() {}
-        };
-        Object.defineProperty(new Test(), 'id', {
-          value: '',
-          configurable: true,
-          enumerable: true,
-          writable: false
-        });
-      } catch (e) {
-        definePropertyPossible = false;
-      }
-      if (definePropertyPossible) {
-        return;
-      }
-    }
-    Object.defineProperty = function objectDefineProperty(obj, name, def) {
-      delete obj[name];
-      if ('get' in def) {
-        obj.__defineGetter__(name, def['get']);
-      }
-      if ('set' in def) {
-        obj.__defineSetter__(name, def['set']);
-      }
-      if ('value' in def) {
-        obj.__defineSetter__(name, function objectDefinePropertySetter(value) {
-          this.__defineGetter__(name, function objectDefinePropertyGetter() {
-            return value;
-          });
-          return value;
-        });
-        obj[name] = def.value;
-      }
-    };
   })();
   (function checkXMLHttpRequestResponseCompatibility() {
     if (typeof XMLHttpRequest === 'undefined') {
@@ -22577,17 +22533,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         }
       }
     });
-    if (typeof VBArray !== 'undefined') {
-      Object.defineProperty(xhrPrototype, 'response', {
-        get: function xmlHttpRequestResponseGet() {
-          if (this.responseType === 'arraybuffer') {
-            return new Uint8Array(new VBArray(this.responseBody).toArray());
-          }
-          return this.responseText;
-        }
-      });
-      return;
-    }
     Object.defineProperty(xhrPrototype, 'response', {
       get: function xmlHttpRequestResponseGet() {
         if (this.responseType !== 'arraybuffer') {
@@ -22603,57 +22548,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
         return result.buffer;
       }
     });
-  })();
-  (function checkWindowBtoaCompatibility() {
-    if ('btoa' in globalScope) {
-      return;
-    }
-    var digits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    globalScope.btoa = function (chars) {
-      var buffer = '';
-      var i, n;
-      for (i = 0, n = chars.length; i < n; i += 3) {
-        var b1 = chars.charCodeAt(i) & 0xFF;
-        var b2 = chars.charCodeAt(i + 1) & 0xFF;
-        var b3 = chars.charCodeAt(i + 2) & 0xFF;
-        var d1 = b1 >> 2,
-            d2 = (b1 & 3) << 4 | b2 >> 4;
-        var d3 = i + 1 < n ? (b2 & 0xF) << 2 | b3 >> 6 : 64;
-        var d4 = i + 2 < n ? b3 & 0x3F : 64;
-        buffer += digits.charAt(d1) + digits.charAt(d2) + digits.charAt(d3) + digits.charAt(d4);
-      }
-      return buffer;
-    };
-  })();
-  (function checkWindowAtobCompatibility() {
-    if ('atob' in globalScope) {
-      return;
-    }
-    var digits = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-    globalScope.atob = function (input) {
-      input = input.replace(/=+$/, '');
-      if (input.length % 4 === 1) {
-        throw new Error('bad atob input');
-      }
-      for (var bc = 0, bs, buffer, idx = 0, output = ''; buffer = input.charAt(idx++); ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer, bc++ % 4) ? output += String.fromCharCode(255 & bs >> (-2 * bc & 6)) : 0) {
-        buffer = digits.indexOf(buffer);
-      }
-      return output;
-    };
-  })();
-  (function checkFunctionPrototypeBindCompatibility() {
-    if (typeof Function.prototype.bind !== 'undefined') {
-      return;
-    }
-    Function.prototype.bind = function functionPrototypeBind(obj) {
-      var fn = this,
-          headArgs = Array.prototype.slice.call(arguments, 1);
-      var bound = function functionPrototypeBindBound() {
-        var args = headArgs.concat(Array.prototype.slice.call(arguments));
-        return fn.apply(obj, args);
-      };
-      return bound;
-    };
   })();
   (function checkDatasetProperty() {
     if (!hasDOM) {
@@ -22689,80 +22583,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 
       enumerable: true
     });
-  })();
-  (function checkClassListProperty() {
-    function changeList(element, itemName, add, remove) {
-      var s = element.className || '';
-      var list = s.split(/\s+/g);
-      if (list[0] === '') {
-        list.shift();
-      }
-      var index = list.indexOf(itemName);
-      if (index < 0 && add) {
-        list.push(itemName);
-      }
-      if (index >= 0 && remove) {
-        list.splice(index, 1);
-      }
-      element.className = list.join(' ');
-      return index >= 0;
-    }
-    if (!hasDOM) {
-      return;
-    }
-    var div = document.createElement('div');
-    if ('classList' in div) {
-      return;
-    }
-    var classListPrototype = {
-      add: function add(name) {
-        changeList(this.element, name, true, false);
-      },
-      contains: function contains(name) {
-        return changeList(this.element, name, false, false);
-      },
-      remove: function remove(name) {
-        changeList(this.element, name, false, true);
-      },
-      toggle: function toggle(name) {
-        changeList(this.element, name, true, true);
-      }
-    };
-    Object.defineProperty(HTMLElement.prototype, 'classList', {
-      get: function get() {
-        if (this._classList) {
-          return this._classList;
-        }
-        var classList = Object.create(classListPrototype, {
-          element: {
-            value: this,
-            writable: false,
-            enumerable: true
-          }
-        });
-        Object.defineProperty(this, '_classList', {
-          value: classList,
-          writable: false,
-          enumerable: false
-        });
-        return classList;
-      },
-
-      enumerable: true
-    });
-  })();
-  (function checkOnClickCompatibility() {
-    function ignoreIfTargetDisabled(event) {
-      if (isDisabled(event.target)) {
-        event.stopPropagation();
-      }
-    }
-    function isDisabled(node) {
-      return node.disabled || node.parentNode && isDisabled(node.parentNode);
-    }
-    if (isOpera) {
-      document.addEventListener('click', ignoreIfTargetDisabled, true);
-    }
   })();
   (function checkOnBlobSupport() {
     if (isIE || isIOSChrome) {
