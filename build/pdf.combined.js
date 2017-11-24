@@ -85,7 +85,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__w_pdfjs_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __w_pdfjs_require__(__w_pdfjs_require__.s = 80);
+/******/ 	return __w_pdfjs_require__(__w_pdfjs_require__.s = 79);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -102,9 +102,9 @@ exports.unreachable = exports.warn = exports.utf8StringToString = exports.string
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-__w_pdfjs_require__(81);
+__w_pdfjs_require__(80);
 
-var _streams_polyfill = __w_pdfjs_require__(128);
+var _streams_polyfill = __w_pdfjs_require__(127);
 
 var FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
 var NativeImageDecoding = {
@@ -2764,8 +2764,8 @@ if (typeof __g == 'number') __g = global;
 var global = __w_pdfjs_require__(5);
 var core = __w_pdfjs_require__(7);
 var hide = __w_pdfjs_require__(13);
-var redefine = __w_pdfjs_require__(11);
-var ctx = __w_pdfjs_require__(12);
+var redefine = __w_pdfjs_require__(10);
+var ctx = __w_pdfjs_require__(11);
 var PROTOTYPE = 'prototype';
 var $export = function $export(type, name, source) {
   var IS_FORCED = type & $export.F;
@@ -2835,6 +2835,72 @@ module.exports = function (it, key) {
 
 /***/ }),
 /* 10 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var global = __w_pdfjs_require__(5);
+var hide = __w_pdfjs_require__(13);
+var has = __w_pdfjs_require__(9);
+var SRC = __w_pdfjs_require__(24)('src');
+var TO_STRING = 'toString';
+var $toString = Function[TO_STRING];
+var TPL = ('' + $toString).split(TO_STRING);
+__w_pdfjs_require__(7).inspectSource = function (it) {
+  return $toString.call(it);
+};
+(module.exports = function (O, key, val, safe) {
+  var isFunction = typeof val == 'function';
+  if (isFunction) has(val, 'name') || hide(val, 'name', key);
+  if (O[key] === val) return;
+  if (isFunction) has(val, SRC) || hide(val, SRC, O[key] ? '' + O[key] : TPL.join(String(key)));
+  if (O === global) {
+    O[key] = val;
+  } else if (!safe) {
+    delete O[key];
+    hide(O, key, val);
+  } else if (O[key]) {
+    O[key] = val;
+  } else {
+    hide(O, key, val);
+  }
+})(Function.prototype, TO_STRING, function toString() {
+  return typeof this == 'function' && this[SRC] || $toString.call(this);
+});
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var aFunction = __w_pdfjs_require__(18);
+module.exports = function (fn, that, length) {
+  aFunction(fn);
+  if (that === undefined) return fn;
+  switch (length) {
+    case 1:
+      return function (a) {
+        return fn.call(that, a);
+      };
+    case 2:
+      return function (a, b) {
+        return fn.call(that, a, b);
+      };
+    case 3:
+      return function (a, b, c) {
+        return fn.call(that, a, b, c);
+      };
+  }
+  return function () {
+    return fn.apply(that, arguments);
+  };
+};
+
+/***/ }),
+/* 12 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -3282,72 +3348,6 @@ exports.DOMCanvasFactory = DOMCanvasFactory;
 exports.DOMCMapReaderFactory = DOMCMapReaderFactory;
 exports.DOMSVGFactory = DOMSVGFactory;
 exports.SimpleXMLParser = SimpleXMLParser;
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-var global = __w_pdfjs_require__(5);
-var hide = __w_pdfjs_require__(13);
-var has = __w_pdfjs_require__(9);
-var SRC = __w_pdfjs_require__(24)('src');
-var TO_STRING = 'toString';
-var $toString = Function[TO_STRING];
-var TPL = ('' + $toString).split(TO_STRING);
-__w_pdfjs_require__(7).inspectSource = function (it) {
-  return $toString.call(it);
-};
-(module.exports = function (O, key, val, safe) {
-  var isFunction = typeof val == 'function';
-  if (isFunction) has(val, 'name') || hide(val, 'name', key);
-  if (O[key] === val) return;
-  if (isFunction) has(val, SRC) || hide(val, SRC, O[key] ? '' + O[key] : TPL.join(String(key)));
-  if (O === global) {
-    O[key] = val;
-  } else if (!safe) {
-    delete O[key];
-    hide(O, key, val);
-  } else if (O[key]) {
-    O[key] = val;
-  } else {
-    hide(O, key, val);
-  }
-})(Function.prototype, TO_STRING, function toString() {
-  return typeof this == 'function' && this[SRC] || $toString.call(this);
-});
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-var aFunction = __w_pdfjs_require__(18);
-module.exports = function (fn, that, length) {
-  aFunction(fn);
-  if (that === undefined) return fn;
-  switch (length) {
-    case 1:
-      return function (a) {
-        return fn.call(that, a);
-      };
-    case 2:
-      return function (a, b) {
-        return fn.call(that, a, b);
-      };
-    case 3:
-      return function (a, b, c) {
-        return fn.call(that, a, b, c);
-      };
-  }
-  return function () {
-    return fn.apply(that, arguments);
-  };
-};
 
 /***/ }),
 /* 13 */
@@ -4461,7 +4461,7 @@ module.exports = function (key) {
 "use strict";
 
 
-var $keys = __w_pdfjs_require__(85);
+var $keys = __w_pdfjs_require__(84);
 var enumBugKeys = __w_pdfjs_require__(51);
 module.exports = Object.keys || function keys(O) {
   return $keys(O, enumBugKeys);
@@ -4491,12 +4491,12 @@ module.exports = function (it, tag, stat) {
 "use strict";
 
 
-var ctx = __w_pdfjs_require__(12);
-var call = __w_pdfjs_require__(104);
-var isArrayIter = __w_pdfjs_require__(105);
+var ctx = __w_pdfjs_require__(11);
+var call = __w_pdfjs_require__(103);
+var isArrayIter = __w_pdfjs_require__(104);
 var anObject = __w_pdfjs_require__(8);
 var toLength = __w_pdfjs_require__(33);
-var getIterFn = __w_pdfjs_require__(106);
+var getIterFn = __w_pdfjs_require__(105);
 var BREAK = {};
 var RETURN = {};
 var _exports = module.exports = function (iterable, entries, fn, that, ITERATOR) {
@@ -5672,7 +5672,7 @@ module.exports.f = function (C) {
 "use strict";
 
 
-var redefine = __w_pdfjs_require__(11);
+var redefine = __w_pdfjs_require__(10);
 module.exports = function (target, src, safe) {
   for (var key in src) {
     redefine(target, key, src[key], safe);
@@ -10994,7 +10994,7 @@ module.exports = function (it, S) {
 
 var toIObject = __w_pdfjs_require__(19);
 var toLength = __w_pdfjs_require__(33);
-var toAbsoluteIndex = __w_pdfjs_require__(86);
+var toAbsoluteIndex = __w_pdfjs_require__(85);
 module.exports = function (IS_INCLUDES) {
   return function ($this, el, fromIndex) {
     var O = toIObject($this);
@@ -11060,7 +11060,7 @@ var classof = __w_pdfjs_require__(37);
 var test = {};
 test[__w_pdfjs_require__(4)('toStringTag')] = 'z';
 if (test + '' != '[object z]') {
-  __w_pdfjs_require__(11)(Object.prototype, 'toString', function toString() {
+  __w_pdfjs_require__(10)(Object.prototype, 'toString', function toString() {
     return '[object ' + classof(this) + ']';
   }, true);
 }
@@ -11074,13 +11074,13 @@ if (test + '' != '[object z]') {
 
 var LIBRARY = __w_pdfjs_require__(55);
 var $export = __w_pdfjs_require__(6);
-var redefine = __w_pdfjs_require__(11);
+var redefine = __w_pdfjs_require__(10);
 var hide = __w_pdfjs_require__(13);
 var has = __w_pdfjs_require__(9);
 var Iterators = __w_pdfjs_require__(21);
-var $iterCreate = __w_pdfjs_require__(97);
+var $iterCreate = __w_pdfjs_require__(96);
 var setToStringTag = __w_pdfjs_require__(26);
-var getPrototypeOf = __w_pdfjs_require__(100);
+var getPrototypeOf = __w_pdfjs_require__(99);
 var ITERATOR = __w_pdfjs_require__(4)('iterator');
 var BUGGY = !([].keys && 'next' in [].keys());
 var FF_ITERATOR = '@@iterator';
@@ -11173,9 +11173,9 @@ module.exports = document && document.documentElement;
 "use strict";
 
 
-var $iterators = __w_pdfjs_require__(101);
+var $iterators = __w_pdfjs_require__(100);
 var getKeys = __w_pdfjs_require__(25);
-var redefine = __w_pdfjs_require__(11);
+var redefine = __w_pdfjs_require__(10);
 var global = __w_pdfjs_require__(5);
 var hide = __w_pdfjs_require__(13);
 var Iterators = __w_pdfjs_require__(21);
@@ -11255,8 +11255,8 @@ module.exports = function (O, D) {
 "use strict";
 
 
-var ctx = __w_pdfjs_require__(12);
-var invoke = __w_pdfjs_require__(107);
+var ctx = __w_pdfjs_require__(11);
+var invoke = __w_pdfjs_require__(106);
 var html = __w_pdfjs_require__(56);
 var cel = __w_pdfjs_require__(29);
 var global = __w_pdfjs_require__(5);
@@ -11413,11 +11413,11 @@ module.exports = function (exec, skipClosing) {
 "use strict";
 
 
-var ctx = __w_pdfjs_require__(12);
+var ctx = __w_pdfjs_require__(11);
 var IObject = __w_pdfjs_require__(31);
 var toObject = __w_pdfjs_require__(38);
 var toLength = __w_pdfjs_require__(33);
-var asc = __w_pdfjs_require__(114);
+var asc = __w_pdfjs_require__(113);
 module.exports = function (TYPE, $create) {
   var IS_MAP = TYPE == 1;
   var IS_FILTER = TYPE == 2;
@@ -11486,19 +11486,21 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(10);
+var _dom_utils = __w_pdfjs_require__(12);
 
-var _font_loader = __w_pdfjs_require__(131);
+var _font_loader = __w_pdfjs_require__(130);
 
-var _canvas = __w_pdfjs_require__(132);
+var _canvas = __w_pdfjs_require__(131);
 
 var _global_scope = __w_pdfjs_require__(16);
 
 var _global_scope2 = _interopRequireDefault(_global_scope);
 
-var _metadata = __w_pdfjs_require__(67);
+var _metadata = __w_pdfjs_require__(66);
 
-var _transport_stream = __w_pdfjs_require__(134);
+var _transport_stream = __w_pdfjs_require__(133);
+
+var _webgl = __w_pdfjs_require__(134);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -11605,7 +11607,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.155';
+  var apiVersion = '2.0.157';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -11845,6 +11847,7 @@ var PDFPageProxy = function PDFPageProxyClosure() {
       this.pendingCleanup = false;
       var renderingIntent = params.intent === 'print' ? 'print' : 'display';
       var canvasFactory = params.canvasFactory || new _dom_utils.DOMCanvasFactory();
+      var webGLContext = new _webgl.WebGLContext({ enable: !(0, _dom_utils.getDefaultSetting)('disableWebGL') });
       if (!this.intentStates[renderingIntent]) {
         this.intentStates[renderingIntent] = Object.create(null);
       }
@@ -11881,7 +11884,7 @@ var PDFPageProxy = function PDFPageProxyClosure() {
         stats.timeEnd('Rendering');
         stats.timeEnd('Overall');
       };
-      var internalRenderTask = new InternalRenderTask(complete, params, this.objs, this.commonObjs, intentState.operatorList, this.pageNumber, canvasFactory);
+      var internalRenderTask = new InternalRenderTask(complete, params, this.objs, this.commonObjs, intentState.operatorList, this.pageNumber, canvasFactory, webGLContext);
       internalRenderTask.useRequestAnimationFrame = renderingIntent !== 'print';
       if (!intentState.renderTasks) {
         intentState.renderTasks = [];
@@ -12768,7 +12771,7 @@ var RenderTask = function RenderTaskClosure() {
 }();
 var InternalRenderTask = function InternalRenderTaskClosure() {
   var canvasInRendering = new WeakMap();
-  function InternalRenderTask(callback, params, objs, commonObjs, operatorList, pageNumber, canvasFactory) {
+  function InternalRenderTask(callback, params, objs, commonObjs, operatorList, pageNumber, canvasFactory, webGLContext) {
     this.callback = callback;
     this.params = params;
     this.objs = objs;
@@ -12777,6 +12780,7 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
     this.operatorList = operatorList;
     this.pageNumber = pageNumber;
     this.canvasFactory = canvasFactory;
+    this.webGLContext = webGLContext;
     this.running = false;
     this.graphicsReadyCallback = null;
     this.graphicsReady = false;
@@ -12806,7 +12810,7 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
         this.stepper.nextBreakPoint = this.stepper.getNextBreakPoint();
       }
       var params = this.params;
-      this.gfx = new _canvas.CanvasGraphics(params.canvasContext, this.commonObjs, this.objs, this.canvasFactory, params.imageLayer);
+      this.gfx = new _canvas.CanvasGraphics(params.canvasContext, this.commonObjs, this.objs, this.canvasFactory, this.webGLContext, params.imageLayer);
       this.gfx.beginDrawing({
         transform: params.transform,
         viewport: params.viewport,
@@ -12881,8 +12885,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.155';
-  exports.build = build = '503bc95a';
+  exports.version = version = '2.0.157';
+  exports.build = build = '343f331b';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -12904,380 +12908,13 @@ exports.build = build;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.WebGLUtils = undefined;
-
-var _dom_utils = __w_pdfjs_require__(10);
-
-var _util = __w_pdfjs_require__(0);
-
-var WebGLUtils = function WebGLUtilsClosure() {
-  function loadShader(gl, code, shaderType) {
-    var shader = gl.createShader(shaderType);
-    gl.shaderSource(shader, code);
-    gl.compileShader(shader);
-    var compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (!compiled) {
-      var errorMsg = gl.getShaderInfoLog(shader);
-      throw new Error('Error during shader compilation: ' + errorMsg);
-    }
-    return shader;
-  }
-  function createVertexShader(gl, code) {
-    return loadShader(gl, code, gl.VERTEX_SHADER);
-  }
-  function createFragmentShader(gl, code) {
-    return loadShader(gl, code, gl.FRAGMENT_SHADER);
-  }
-  function createProgram(gl, shaders) {
-    var program = gl.createProgram();
-    for (var i = 0, ii = shaders.length; i < ii; ++i) {
-      gl.attachShader(program, shaders[i]);
-    }
-    gl.linkProgram(program);
-    var linked = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (!linked) {
-      var errorMsg = gl.getProgramInfoLog(program);
-      throw new Error('Error during program linking: ' + errorMsg);
-    }
-    return program;
-  }
-  function createTexture(gl, image, textureId) {
-    gl.activeTexture(textureId);
-    var texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-    return texture;
-  }
-  var currentGL, currentCanvas;
-  function generateGL() {
-    if (currentGL) {
-      return;
-    }
-    currentCanvas = document.createElement('canvas');
-    currentGL = currentCanvas.getContext('webgl', { premultipliedalpha: false });
-  }
-  var smaskVertexShaderCode = '\
-  attribute vec2 a_position;                                    \
-  attribute vec2 a_texCoord;                                    \
-                                                                \
-  uniform vec2 u_resolution;                                    \
-                                                                \
-  varying vec2 v_texCoord;                                      \
-                                                                \
-  void main() {                                                 \
-    vec2 clipSpace = (a_position / u_resolution) * 2.0 - 1.0;   \
-    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);          \
-                                                                \
-    v_texCoord = a_texCoord;                                    \
-  }                                                             ';
-  var smaskFragmentShaderCode = '\
-  precision mediump float;                                      \
-                                                                \
-  uniform vec4 u_backdrop;                                      \
-  uniform int u_subtype;                                        \
-  uniform sampler2D u_image;                                    \
-  uniform sampler2D u_mask;                                     \
-                                                                \
-  varying vec2 v_texCoord;                                      \
-                                                                \
-  void main() {                                                 \
-    vec4 imageColor = texture2D(u_image, v_texCoord);           \
-    vec4 maskColor = texture2D(u_mask, v_texCoord);             \
-    if (u_backdrop.a > 0.0) {                                   \
-      maskColor.rgb = maskColor.rgb * maskColor.a +             \
-                      u_backdrop.rgb * (1.0 - maskColor.a);     \
-    }                                                           \
-    float lum;                                                  \
-    if (u_subtype == 0) {                                       \
-      lum = maskColor.a;                                        \
-    } else {                                                    \
-      lum = maskColor.r * 0.3 + maskColor.g * 0.59 +            \
-            maskColor.b * 0.11;                                 \
-    }                                                           \
-    imageColor.a *= lum;                                        \
-    imageColor.rgb *= imageColor.a;                             \
-    gl_FragColor = imageColor;                                  \
-  }                                                             ';
-  var smaskCache = null;
-  function initSmaskGL() {
-    var canvas, gl;
-    generateGL();
-    canvas = currentCanvas;
-    currentCanvas = null;
-    gl = currentGL;
-    currentGL = null;
-    var vertexShader = createVertexShader(gl, smaskVertexShaderCode);
-    var fragmentShader = createFragmentShader(gl, smaskFragmentShaderCode);
-    var program = createProgram(gl, [vertexShader, fragmentShader]);
-    gl.useProgram(program);
-    var cache = {};
-    cache.gl = gl;
-    cache.canvas = canvas;
-    cache.resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
-    cache.positionLocation = gl.getAttribLocation(program, 'a_position');
-    cache.backdropLocation = gl.getUniformLocation(program, 'u_backdrop');
-    cache.subtypeLocation = gl.getUniformLocation(program, 'u_subtype');
-    var texCoordLocation = gl.getAttribLocation(program, 'a_texCoord');
-    var texLayerLocation = gl.getUniformLocation(program, 'u_image');
-    var texMaskLocation = gl.getUniformLocation(program, 'u_mask');
-    var texCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(texCoordLocation);
-    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform1i(texLayerLocation, 0);
-    gl.uniform1i(texMaskLocation, 1);
-    smaskCache = cache;
-  }
-  function composeSMask(layer, mask, properties) {
-    var width = layer.width,
-        height = layer.height;
-    if (!smaskCache) {
-      initSmaskGL();
-    }
-    var cache = smaskCache,
-        canvas = cache.canvas,
-        gl = cache.gl;
-    canvas.width = width;
-    canvas.height = height;
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.uniform2f(cache.resolutionLocation, width, height);
-    if (properties.backdrop) {
-      gl.uniform4f(cache.resolutionLocation, properties.backdrop[0], properties.backdrop[1], properties.backdrop[2], 1);
-    } else {
-      gl.uniform4f(cache.resolutionLocation, 0, 0, 0, 0);
-    }
-    gl.uniform1i(cache.subtypeLocation, properties.subtype === 'Luminosity' ? 1 : 0);
-    var texture = createTexture(gl, layer, gl.TEXTURE0);
-    var maskTexture = createTexture(gl, mask, gl.TEXTURE1);
-    var buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, width, 0, 0, height, 0, height, width, 0, width, height]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(cache.positionLocation);
-    gl.vertexAttribPointer(cache.positionLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.clearColor(0, 0, 0, 0);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    gl.flush();
-    gl.deleteTexture(texture);
-    gl.deleteTexture(maskTexture);
-    gl.deleteBuffer(buffer);
-    return canvas;
-  }
-  var figuresVertexShaderCode = '\
-  attribute vec2 a_position;                                    \
-  attribute vec3 a_color;                                       \
-                                                                \
-  uniform vec2 u_resolution;                                    \
-  uniform vec2 u_scale;                                         \
-  uniform vec2 u_offset;                                        \
-                                                                \
-  varying vec4 v_color;                                         \
-                                                                \
-  void main() {                                                 \
-    vec2 position = (a_position + u_offset) * u_scale;          \
-    vec2 clipSpace = (position / u_resolution) * 2.0 - 1.0;     \
-    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);          \
-                                                                \
-    v_color = vec4(a_color / 255.0, 1.0);                       \
-  }                                                             ';
-  var figuresFragmentShaderCode = '\
-  precision mediump float;                                      \
-                                                                \
-  varying vec4 v_color;                                         \
-                                                                \
-  void main() {                                                 \
-    gl_FragColor = v_color;                                     \
-  }                                                             ';
-  var figuresCache = null;
-  function initFiguresGL() {
-    var canvas, gl;
-    generateGL();
-    canvas = currentCanvas;
-    currentCanvas = null;
-    gl = currentGL;
-    currentGL = null;
-    var vertexShader = createVertexShader(gl, figuresVertexShaderCode);
-    var fragmentShader = createFragmentShader(gl, figuresFragmentShaderCode);
-    var program = createProgram(gl, [vertexShader, fragmentShader]);
-    gl.useProgram(program);
-    var cache = {};
-    cache.gl = gl;
-    cache.canvas = canvas;
-    cache.resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
-    cache.scaleLocation = gl.getUniformLocation(program, 'u_scale');
-    cache.offsetLocation = gl.getUniformLocation(program, 'u_offset');
-    cache.positionLocation = gl.getAttribLocation(program, 'a_position');
-    cache.colorLocation = gl.getAttribLocation(program, 'a_color');
-    figuresCache = cache;
-  }
-  function drawFigures(width, height, backgroundColor, figures, context) {
-    if (!figuresCache) {
-      initFiguresGL();
-    }
-    var cache = figuresCache,
-        canvas = cache.canvas,
-        gl = cache.gl;
-    canvas.width = width;
-    canvas.height = height;
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.uniform2f(cache.resolutionLocation, width, height);
-    var count = 0;
-    var i, ii, rows;
-    for (i = 0, ii = figures.length; i < ii; i++) {
-      switch (figures[i].type) {
-        case 'lattice':
-          rows = figures[i].coords.length / figures[i].verticesPerRow | 0;
-          count += (rows - 1) * (figures[i].verticesPerRow - 1) * 6;
-          break;
-        case 'triangles':
-          count += figures[i].coords.length;
-          break;
-      }
-    }
-    var coords = new Float32Array(count * 2);
-    var colors = new Uint8Array(count * 3);
-    var coordsMap = context.coords,
-        colorsMap = context.colors;
-    var pIndex = 0,
-        cIndex = 0;
-    for (i = 0, ii = figures.length; i < ii; i++) {
-      var figure = figures[i],
-          ps = figure.coords,
-          cs = figure.colors;
-      switch (figure.type) {
-        case 'lattice':
-          var cols = figure.verticesPerRow;
-          rows = ps.length / cols | 0;
-          for (var row = 1; row < rows; row++) {
-            var offset = row * cols + 1;
-            for (var col = 1; col < cols; col++, offset++) {
-              coords[pIndex] = coordsMap[ps[offset - cols - 1]];
-              coords[pIndex + 1] = coordsMap[ps[offset - cols - 1] + 1];
-              coords[pIndex + 2] = coordsMap[ps[offset - cols]];
-              coords[pIndex + 3] = coordsMap[ps[offset - cols] + 1];
-              coords[pIndex + 4] = coordsMap[ps[offset - 1]];
-              coords[pIndex + 5] = coordsMap[ps[offset - 1] + 1];
-              colors[cIndex] = colorsMap[cs[offset - cols - 1]];
-              colors[cIndex + 1] = colorsMap[cs[offset - cols - 1] + 1];
-              colors[cIndex + 2] = colorsMap[cs[offset - cols - 1] + 2];
-              colors[cIndex + 3] = colorsMap[cs[offset - cols]];
-              colors[cIndex + 4] = colorsMap[cs[offset - cols] + 1];
-              colors[cIndex + 5] = colorsMap[cs[offset - cols] + 2];
-              colors[cIndex + 6] = colorsMap[cs[offset - 1]];
-              colors[cIndex + 7] = colorsMap[cs[offset - 1] + 1];
-              colors[cIndex + 8] = colorsMap[cs[offset - 1] + 2];
-              coords[pIndex + 6] = coords[pIndex + 2];
-              coords[pIndex + 7] = coords[pIndex + 3];
-              coords[pIndex + 8] = coords[pIndex + 4];
-              coords[pIndex + 9] = coords[pIndex + 5];
-              coords[pIndex + 10] = coordsMap[ps[offset]];
-              coords[pIndex + 11] = coordsMap[ps[offset] + 1];
-              colors[cIndex + 9] = colors[cIndex + 3];
-              colors[cIndex + 10] = colors[cIndex + 4];
-              colors[cIndex + 11] = colors[cIndex + 5];
-              colors[cIndex + 12] = colors[cIndex + 6];
-              colors[cIndex + 13] = colors[cIndex + 7];
-              colors[cIndex + 14] = colors[cIndex + 8];
-              colors[cIndex + 15] = colorsMap[cs[offset]];
-              colors[cIndex + 16] = colorsMap[cs[offset] + 1];
-              colors[cIndex + 17] = colorsMap[cs[offset] + 2];
-              pIndex += 12;
-              cIndex += 18;
-            }
-          }
-          break;
-        case 'triangles':
-          for (var j = 0, jj = ps.length; j < jj; j++) {
-            coords[pIndex] = coordsMap[ps[j]];
-            coords[pIndex + 1] = coordsMap[ps[j] + 1];
-            colors[cIndex] = colorsMap[cs[j]];
-            colors[cIndex + 1] = colorsMap[cs[j] + 1];
-            colors[cIndex + 2] = colorsMap[cs[j] + 2];
-            pIndex += 2;
-            cIndex += 3;
-          }
-          break;
-      }
-    }
-    if (backgroundColor) {
-      gl.clearColor(backgroundColor[0] / 255, backgroundColor[1] / 255, backgroundColor[2] / 255, 1.0);
-    } else {
-      gl.clearColor(0, 0, 0, 0);
-    }
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    var coordsBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, coordsBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(cache.positionLocation);
-    gl.vertexAttribPointer(cache.positionLocation, 2, gl.FLOAT, false, 0, 0);
-    var colorsBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(cache.colorLocation);
-    gl.vertexAttribPointer(cache.colorLocation, 3, gl.UNSIGNED_BYTE, false, 0, 0);
-    gl.uniform2f(cache.scaleLocation, context.scaleX, context.scaleY);
-    gl.uniform2f(cache.offsetLocation, context.offsetX, context.offsetY);
-    gl.drawArrays(gl.TRIANGLES, 0, count);
-    gl.flush();
-    gl.deleteBuffer(coordsBuffer);
-    gl.deleteBuffer(colorsBuffer);
-    return canvas;
-  }
-  function cleanup() {
-    if (smaskCache && smaskCache.canvas) {
-      smaskCache.canvas.width = 0;
-      smaskCache.canvas.height = 0;
-    }
-    if (figuresCache && figuresCache.canvas) {
-      figuresCache.canvas.width = 0;
-      figuresCache.canvas.height = 0;
-    }
-    smaskCache = null;
-    figuresCache = null;
-  }
-  return {
-    get isEnabled() {
-      if ((0, _dom_utils.getDefaultSetting)('disableWebGL')) {
-        return false;
-      }
-      var enabled = false;
-      try {
-        generateGL();
-        enabled = !!currentGL;
-      } catch (e) {}
-      return (0, _util.shadow)(this, 'isEnabled', enabled);
-    },
-    composeSMask: composeSMask,
-    drawFigures: drawFigures,
-    clear: cleanup
-  };
-}();
-exports.WebGLUtils = WebGLUtils;
-
-/***/ }),
-/* 67 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 exports.Metadata = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(10);
+var _dom_utils = __w_pdfjs_require__(12);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -13364,7 +13001,7 @@ var Metadata = function () {
 exports.Metadata = Metadata;
 
 /***/ }),
-/* 68 */
+/* 67 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -13834,7 +13471,7 @@ exports.ChunkedStream = ChunkedStream;
 exports.ChunkedStreamManager = ChunkedStreamManager;
 
 /***/ }),
-/* 69 */
+/* 68 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -13855,9 +13492,9 @@ var _primitives = __w_pdfjs_require__(1);
 
 var _parser = __w_pdfjs_require__(28);
 
-var _chunked_stream = __w_pdfjs_require__(68);
+var _chunked_stream = __w_pdfjs_require__(67);
 
-var _crypto = __w_pdfjs_require__(72);
+var _crypto = __w_pdfjs_require__(71);
 
 var _colorspace = __w_pdfjs_require__(22);
 
@@ -15359,7 +14996,7 @@ exports.XRef = XRef;
 exports.FileSpec = FileSpec;
 
 /***/ }),
-/* 70 */
+/* 69 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -15699,7 +15336,7 @@ var ArithmeticDecoder = function ArithmeticDecoderClosure() {
 exports.ArithmeticDecoder = ArithmeticDecoder;
 
 /***/ }),
-/* 71 */
+/* 70 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -15712,7 +15349,7 @@ exports.JpxImage = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _arithmetic_decoder = __w_pdfjs_require__(70);
+var _arithmetic_decoder = __w_pdfjs_require__(69);
 
 var JpxError = function JpxErrorClosure() {
   function JpxError(msg) {
@@ -17626,7 +17263,7 @@ var JpxImage = function JpxImageClosure() {
 exports.JpxImage = JpxImage;
 
 /***/ }),
-/* 72 */
+/* 71 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -19220,7 +18857,7 @@ exports.calculateSHA384 = calculateSHA384;
 exports.calculateSHA512 = calculateSHA512;
 
 /***/ }),
-/* 73 */
+/* 72 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -20648,7 +20285,7 @@ exports.CFFPrivateDict = CFFPrivateDict;
 exports.CFFCompiler = CFFCompiler;
 
 /***/ }),
-/* 74 */
+/* 73 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -21299,7 +20936,7 @@ exports.getGlyphMapForStandardFonts = getGlyphMapForStandardFonts;
 exports.getSupplementalGlyphMapForArialBlack = getSupplementalGlyphMapForArialBlack;
 
 /***/ }),
-/* 75 */
+/* 74 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -23156,7 +22793,7 @@ exports.getNormalizedUnicodes = getNormalizedUnicodes;
 exports.getUnicodeForGlyph = getUnicodeForGlyph;
 
 /***/ }),
-/* 76 */
+/* 75 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -24290,7 +23927,7 @@ exports.PostScriptEvaluator = PostScriptEvaluator;
 exports.PostScriptCompiler = PostScriptCompiler;
 
 /***/ }),
-/* 77 */
+/* 76 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -24303,7 +23940,7 @@ exports.AnnotationLayer = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _dom_utils = __w_pdfjs_require__(10);
+var _dom_utils = __w_pdfjs_require__(12);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -25293,7 +24930,7 @@ var AnnotationLayer = function () {
 exports.AnnotationLayer = AnnotationLayer;
 
 /***/ }),
-/* 78 */
+/* 77 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -25306,7 +24943,7 @@ exports.renderTextLayer = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(10);
+var _dom_utils = __w_pdfjs_require__(12);
 
 var renderTextLayer = function renderTextLayerClosure() {
   var MAX_TEXT_DIVS_TO_RENDER = 100000;
@@ -25844,7 +25481,7 @@ var renderTextLayer = function renderTextLayerClosure() {
 exports.renderTextLayer = renderTextLayer;
 
 /***/ }),
-/* 79 */
+/* 78 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -25857,7 +25494,7 @@ exports.SVGGraphics = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(10);
+var _dom_utils = __w_pdfjs_require__(12);
 
 var SVGGraphics = function SVGGraphics() {
   throw new Error('Not implemented: SVGGraphics');
@@ -26876,21 +26513,21 @@ var SVGGraphics = function SVGGraphics() {
 exports.SVGGraphics = SVGGraphics;
 
 /***/ }),
-/* 80 */
+/* 79 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-var pdfjsVersion = '2.0.155';
-var pdfjsBuild = '503bc95a';
+var pdfjsVersion = '2.0.157';
+var pdfjsBuild = '343f331b';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
-var pdfjsDisplayGlobal = __w_pdfjs_require__(130);
+var pdfjsDisplayGlobal = __w_pdfjs_require__(129);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
-var pdfjsDisplayTextLayer = __w_pdfjs_require__(78);
-var pdfjsDisplayAnnotationLayer = __w_pdfjs_require__(77);
-var pdfjsDisplayDOMUtils = __w_pdfjs_require__(10);
-var pdfjsDisplaySVG = __w_pdfjs_require__(79);
+var pdfjsDisplayTextLayer = __w_pdfjs_require__(77);
+var pdfjsDisplayAnnotationLayer = __w_pdfjs_require__(76);
+var pdfjsDisplayDOMUtils = __w_pdfjs_require__(12);
+var pdfjsDisplaySVG = __w_pdfjs_require__(78);
 {
   if (pdfjsSharedUtil.isNodeJS()) {
     var PDFNodeStream = __w_pdfjs_require__(157).PDFNodeStream;
@@ -26933,7 +26570,7 @@ exports.addLinkAttributes = pdfjsDisplayDOMUtils.addLinkAttributes;
 exports.StatTimer = pdfjsSharedUtil.StatTimer;
 
 /***/ }),
-/* 81 */
+/* 80 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -27191,37 +26828,37 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     if (Object.values) {
       return;
     }
-    Object.values = __w_pdfjs_require__(82);
+    Object.values = __w_pdfjs_require__(81);
   })();
   (function checkArrayIncludes() {
     if (Array.prototype.includes) {
       return;
     }
-    Array.prototype.includes = __w_pdfjs_require__(87);
+    Array.prototype.includes = __w_pdfjs_require__(86);
   })();
   (function checkNumberIsNaN() {
     if (Number.isNaN) {
       return;
     }
-    Number.isNaN = __w_pdfjs_require__(89);
+    Number.isNaN = __w_pdfjs_require__(88);
   })();
   (function checkNumberIsInteger() {
     if (Number.isInteger) {
       return;
     }
-    Number.isInteger = __w_pdfjs_require__(91);
+    Number.isInteger = __w_pdfjs_require__(90);
   })();
   (function checkPromise() {
     if (globalScope.Promise) {
       return;
     }
-    globalScope.Promise = __w_pdfjs_require__(94);
+    globalScope.Promise = __w_pdfjs_require__(93);
   })();
   (function checkWeakMap() {
     if (globalScope.WeakMap) {
       return;
     }
-    globalScope.WeakMap = __w_pdfjs_require__(112);
+    globalScope.WeakMap = __w_pdfjs_require__(111);
   })();
   (function checkURLConstructor() {
     var hasWorkingUrl = false;
@@ -27776,24 +27413,24 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
 }
 
 /***/ }),
+/* 81 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+__w_pdfjs_require__(82);
+module.exports = __w_pdfjs_require__(7).Object.values;
+
+/***/ }),
 /* 82 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-__w_pdfjs_require__(83);
-module.exports = __w_pdfjs_require__(7).Object.values;
-
-/***/ }),
-/* 83 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
 var $export = __w_pdfjs_require__(6);
-var $values = __w_pdfjs_require__(84)(false);
+var $values = __w_pdfjs_require__(83)(false);
 $export($export.S, 'Object', {
   values: function values(it) {
     return $values(it);
@@ -27801,7 +27438,7 @@ $export($export.S, 'Object', {
 });
 
 /***/ }),
-/* 84 */
+/* 83 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -27827,7 +27464,7 @@ module.exports = function (isEntries) {
 };
 
 /***/ }),
-/* 85 */
+/* 84 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -27852,7 +27489,7 @@ module.exports = function (object, names) {
 };
 
 /***/ }),
-/* 86 */
+/* 85 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -27867,17 +27504,17 @@ module.exports = function (index, length) {
 };
 
 /***/ }),
-/* 87 */
+/* 86 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-__w_pdfjs_require__(88);
+__w_pdfjs_require__(87);
 module.exports = __w_pdfjs_require__(7).Array.includes;
 
 /***/ }),
-/* 88 */
+/* 87 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -27893,17 +27530,17 @@ $export($export.P, 'Array', {
 __w_pdfjs_require__(52)('includes');
 
 /***/ }),
-/* 89 */
+/* 88 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-__w_pdfjs_require__(90);
+__w_pdfjs_require__(89);
 module.exports = __w_pdfjs_require__(7).Number.isNaN;
 
 /***/ }),
-/* 90 */
+/* 89 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -27917,27 +27554,27 @@ $export($export.S, 'Number', {
 });
 
 /***/ }),
+/* 90 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+__w_pdfjs_require__(91);
+module.exports = __w_pdfjs_require__(7).Number.isInteger;
+
+/***/ }),
 /* 91 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-__w_pdfjs_require__(92);
-module.exports = __w_pdfjs_require__(7).Number.isInteger;
+var $export = __w_pdfjs_require__(6);
+$export($export.S, 'Number', { isInteger: __w_pdfjs_require__(92) });
 
 /***/ }),
 /* 92 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-var $export = __w_pdfjs_require__(6);
-$export($export.S, 'Number', { isInteger: __w_pdfjs_require__(93) });
-
-/***/ }),
-/* 93 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -27950,28 +27587,28 @@ module.exports = function isInteger(it) {
 };
 
 /***/ }),
-/* 94 */
+/* 93 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
 __w_pdfjs_require__(53);
-__w_pdfjs_require__(95);
+__w_pdfjs_require__(94);
 __w_pdfjs_require__(57);
-__w_pdfjs_require__(103);
+__w_pdfjs_require__(102);
+__w_pdfjs_require__(109);
 __w_pdfjs_require__(110);
-__w_pdfjs_require__(111);
 module.exports = __w_pdfjs_require__(7).Promise;
 
 /***/ }),
-/* 95 */
+/* 94 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-var $at = __w_pdfjs_require__(96)(true);
+var $at = __w_pdfjs_require__(95)(true);
 __w_pdfjs_require__(54)(String, 'String', function (iterated) {
   this._t = String(iterated);
   this._i = 0;
@@ -27992,7 +27629,7 @@ __w_pdfjs_require__(54)(String, 'String', function (iterated) {
 });
 
 /***/ }),
-/* 96 */
+/* 95 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28013,13 +27650,13 @@ module.exports = function (TO_STRING) {
 };
 
 /***/ }),
-/* 97 */
+/* 96 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-var create = __w_pdfjs_require__(98);
+var create = __w_pdfjs_require__(97);
 var descriptor = __w_pdfjs_require__(30);
 var setToStringTag = __w_pdfjs_require__(26);
 var IteratorPrototype = {};
@@ -28032,14 +27669,14 @@ module.exports = function (Constructor, NAME, next) {
 };
 
 /***/ }),
-/* 98 */
+/* 97 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
 var anObject = __w_pdfjs_require__(8);
-var dPs = __w_pdfjs_require__(99);
+var dPs = __w_pdfjs_require__(98);
 var enumBugKeys = __w_pdfjs_require__(51);
 var IE_PROTO = __w_pdfjs_require__(35)('IE_PROTO');
 var Empty = function Empty() {};
@@ -28074,7 +27711,7 @@ module.exports = Object.create || function create(O, Properties) {
 };
 
 /***/ }),
-/* 99 */
+/* 98 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28095,7 +27732,7 @@ module.exports = __w_pdfjs_require__(14) ? Object.defineProperties : function de
 };
 
 /***/ }),
-/* 100 */
+/* 99 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28115,14 +27752,14 @@ module.exports = Object.getPrototypeOf || function (O) {
 };
 
 /***/ }),
-/* 101 */
+/* 100 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
 var addToUnscopables = __w_pdfjs_require__(52);
-var step = __w_pdfjs_require__(102);
+var step = __w_pdfjs_require__(101);
 var Iterators = __w_pdfjs_require__(21);
 var toIObject = __w_pdfjs_require__(19);
 module.exports = __w_pdfjs_require__(54)(Array, 'Array', function (iterated, kind) {
@@ -28147,7 +27784,7 @@ addToUnscopables('values');
 addToUnscopables('entries');
 
 /***/ }),
-/* 102 */
+/* 101 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28161,7 +27798,7 @@ module.exports = function (done, value) {
 };
 
 /***/ }),
-/* 103 */
+/* 102 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28169,7 +27806,7 @@ module.exports = function (done, value) {
 
 var LIBRARY = __w_pdfjs_require__(55);
 var global = __w_pdfjs_require__(5);
-var ctx = __w_pdfjs_require__(12);
+var ctx = __w_pdfjs_require__(11);
 var classof = __w_pdfjs_require__(37);
 var $export = __w_pdfjs_require__(6);
 var isObject = __w_pdfjs_require__(3);
@@ -28178,7 +27815,7 @@ var anInstance = __w_pdfjs_require__(39);
 var forOf = __w_pdfjs_require__(27);
 var speciesConstructor = __w_pdfjs_require__(58);
 var task = __w_pdfjs_require__(59).set;
-var microtask = __w_pdfjs_require__(108)();
+var microtask = __w_pdfjs_require__(107)();
 var newPromiseCapabilityModule = __w_pdfjs_require__(40);
 var perform = __w_pdfjs_require__(60);
 var promiseResolve = __w_pdfjs_require__(61);
@@ -28382,7 +28019,7 @@ if (!USE_NATIVE) {
 }
 $export($export.G + $export.W + $export.F * !USE_NATIVE, { Promise: $Promise });
 __w_pdfjs_require__(26)($Promise, PROMISE);
-__w_pdfjs_require__(109)(PROMISE);
+__w_pdfjs_require__(108)(PROMISE);
 Wrapper = __w_pdfjs_require__(7)[PROMISE];
 $export($export.S + $export.F * !USE_NATIVE, PROMISE, {
   reject: function reject(r) {
@@ -28441,7 +28078,7 @@ $export($export.S + $export.F * !(USE_NATIVE && __w_pdfjs_require__(62)(function
 });
 
 /***/ }),
-/* 104 */
+/* 103 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28459,7 +28096,7 @@ module.exports = function (iterator, fn, value, entries) {
 };
 
 /***/ }),
-/* 105 */
+/* 104 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28473,7 +28110,7 @@ module.exports = function (it) {
 };
 
 /***/ }),
-/* 106 */
+/* 105 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28487,7 +28124,7 @@ module.exports = __w_pdfjs_require__(7).getIteratorMethod = function (it) {
 };
 
 /***/ }),
-/* 107 */
+/* 106 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28511,7 +28148,7 @@ module.exports = function (fn, args, that) {
 };
 
 /***/ }),
-/* 108 */
+/* 107 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28577,7 +28214,7 @@ module.exports = function () {
 };
 
 /***/ }),
-/* 109 */
+/* 108 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28598,7 +28235,7 @@ module.exports = function (KEY) {
 };
 
 /***/ }),
-/* 110 */
+/* 109 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28626,7 +28263,7 @@ $export($export.P + $export.R, 'Promise', {
 });
 
 /***/ }),
-/* 111 */
+/* 110 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28645,7 +28282,7 @@ $export($export.S, 'Promise', {
 });
 
 /***/ }),
-/* 112 */
+/* 111 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28653,23 +28290,23 @@ $export($export.S, 'Promise', {
 
 __w_pdfjs_require__(53);
 __w_pdfjs_require__(57);
-__w_pdfjs_require__(113);
-__w_pdfjs_require__(124);
-__w_pdfjs_require__(126);
+__w_pdfjs_require__(112);
+__w_pdfjs_require__(123);
+__w_pdfjs_require__(125);
 module.exports = __w_pdfjs_require__(7).WeakMap;
 
 /***/ }),
-/* 113 */
+/* 112 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
 var each = __w_pdfjs_require__(63)(0);
-var redefine = __w_pdfjs_require__(11);
+var redefine = __w_pdfjs_require__(10);
 var meta = __w_pdfjs_require__(42);
-var assign = __w_pdfjs_require__(117);
-var weak = __w_pdfjs_require__(119);
+var assign = __w_pdfjs_require__(116);
+var weak = __w_pdfjs_require__(118);
 var isObject = __w_pdfjs_require__(3);
 var fails = __w_pdfjs_require__(15);
 var validate = __w_pdfjs_require__(64);
@@ -28696,7 +28333,7 @@ var methods = {
     return weak.def(validate(this, WEAK_MAP), key, value);
   }
 };
-var $WeakMap = module.exports = __w_pdfjs_require__(120)(WEAK_MAP, wrapper, methods, weak, true, true);
+var $WeakMap = module.exports = __w_pdfjs_require__(119)(WEAK_MAP, wrapper, methods, weak, true, true);
 if (fails(function () {
   return new $WeakMap().set((Object.freeze || Object)(tmp), 7).get(tmp) != 7;
 })) {
@@ -28718,26 +28355,26 @@ if (fails(function () {
 }
 
 /***/ }),
+/* 113 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var speciesConstructor = __w_pdfjs_require__(114);
+module.exports = function (original, length) {
+  return new (speciesConstructor(original))(length);
+};
+
+/***/ }),
 /* 114 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-var speciesConstructor = __w_pdfjs_require__(115);
-module.exports = function (original, length) {
-  return new (speciesConstructor(original))(length);
-};
-
-/***/ }),
-/* 115 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
 var isObject = __w_pdfjs_require__(3);
-var isArray = __w_pdfjs_require__(116);
+var isArray = __w_pdfjs_require__(115);
 var SPECIES = __w_pdfjs_require__(4)('species');
 module.exports = function (original) {
   var C;
@@ -28753,7 +28390,7 @@ module.exports = function (original) {
 };
 
 /***/ }),
-/* 116 */
+/* 115 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28765,14 +28402,14 @@ module.exports = Array.isArray || function isArray(arg) {
 };
 
 /***/ }),
-/* 117 */
+/* 116 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
 var getKeys = __w_pdfjs_require__(25);
-var gOPS = __w_pdfjs_require__(118);
+var gOPS = __w_pdfjs_require__(117);
 var pIE = __w_pdfjs_require__(36);
 var toObject = __w_pdfjs_require__(38);
 var IObject = __w_pdfjs_require__(31);
@@ -28807,7 +28444,7 @@ module.exports = !$assign || __w_pdfjs_require__(15)(function () {
 } : $assign;
 
 /***/ }),
-/* 118 */
+/* 117 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28816,7 +28453,7 @@ module.exports = !$assign || __w_pdfjs_require__(15)(function () {
 exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
-/* 119 */
+/* 118 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28899,7 +28536,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 120 */
+/* 119 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -28907,7 +28544,7 @@ module.exports = {
 
 var global = __w_pdfjs_require__(5);
 var $export = __w_pdfjs_require__(6);
-var redefine = __w_pdfjs_require__(11);
+var redefine = __w_pdfjs_require__(10);
 var redefineAll = __w_pdfjs_require__(41);
 var meta = __w_pdfjs_require__(42);
 var forOf = __w_pdfjs_require__(27);
@@ -28916,7 +28553,7 @@ var isObject = __w_pdfjs_require__(3);
 var fails = __w_pdfjs_require__(15);
 var $iterDetect = __w_pdfjs_require__(62);
 var setToStringTag = __w_pdfjs_require__(26);
-var inheritIfRequired = __w_pdfjs_require__(121);
+var inheritIfRequired = __w_pdfjs_require__(120);
 module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
   var Base = global[NAME];
   var C = Base;
@@ -28987,14 +28624,14 @@ module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
 };
 
 /***/ }),
-/* 121 */
+/* 120 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
 var isObject = __w_pdfjs_require__(3);
-var setPrototypeOf = __w_pdfjs_require__(122).set;
+var setPrototypeOf = __w_pdfjs_require__(121).set;
 module.exports = function (that, target, C) {
   var S = target.constructor;
   var P;
@@ -29005,7 +28642,7 @@ module.exports = function (that, target, C) {
 };
 
 /***/ }),
-/* 122 */
+/* 121 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -29020,7 +28657,7 @@ var check = function check(O, proto) {
 module.exports = {
   set: Object.setPrototypeOf || ('__proto__' in {} ? function (test, buggy, set) {
     try {
-      set = __w_pdfjs_require__(12)(Function.call, __w_pdfjs_require__(123).f(Object.prototype, '__proto__').set, 2);
+      set = __w_pdfjs_require__(11)(Function.call, __w_pdfjs_require__(122).f(Object.prototype, '__proto__').set, 2);
       set(test, []);
       buggy = !(test instanceof Array);
     } catch (e) {
@@ -29036,7 +28673,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 123 */
+/* 122 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -29059,16 +28696,16 @@ exports.f = __w_pdfjs_require__(14) ? gOPD : function getOwnPropertyDescriptor(O
 };
 
 /***/ }),
-/* 124 */
+/* 123 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-__w_pdfjs_require__(125)('WeakMap');
+__w_pdfjs_require__(124)('WeakMap');
 
 /***/ }),
-/* 125 */
+/* 124 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -29088,16 +28725,16 @@ module.exports = function (COLLECTION) {
 };
 
 /***/ }),
-/* 126 */
+/* 125 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
 
 
-__w_pdfjs_require__(127)('WeakMap');
+__w_pdfjs_require__(126)('WeakMap');
 
 /***/ }),
-/* 127 */
+/* 126 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -29105,7 +28742,7 @@ __w_pdfjs_require__(127)('WeakMap');
 
 var $export = __w_pdfjs_require__(6);
 var aFunction = __w_pdfjs_require__(18);
-var ctx = __w_pdfjs_require__(12);
+var ctx = __w_pdfjs_require__(11);
 var forOf = __w_pdfjs_require__(27);
 module.exports = function (COLLECTION) {
   $export($export.S, COLLECTION, {
@@ -29132,7 +28769,7 @@ module.exports = function (COLLECTION) {
 };
 
 /***/ }),
-/* 128 */
+/* 127 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -29152,11 +28789,11 @@ if (typeof ReadableStream !== 'undefined') {
 if (isReadableStreamSupported) {
   exports.ReadableStream = ReadableStream;
 } else {
-  exports.ReadableStream = __w_pdfjs_require__(129).ReadableStream;
+  exports.ReadableStream = __w_pdfjs_require__(128).ReadableStream;
 }
 
 /***/ }),
-/* 129 */
+/* 128 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -32176,7 +31813,7 @@ var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbo
 }]));
 
 /***/ }),
-/* 130 */
+/* 129 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -32187,23 +31824,23 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.PDFJS = exports.globalScope = undefined;
 
-var _dom_utils = __w_pdfjs_require__(10);
+var _dom_utils = __w_pdfjs_require__(12);
 
 var _util = __w_pdfjs_require__(0);
 
 var _api = __w_pdfjs_require__(65);
 
-var _annotation_layer = __w_pdfjs_require__(77);
+var _annotation_layer = __w_pdfjs_require__(76);
 
 var _global_scope = __w_pdfjs_require__(16);
 
 var _global_scope2 = _interopRequireDefault(_global_scope);
 
-var _metadata = __w_pdfjs_require__(67);
+var _metadata = __w_pdfjs_require__(66);
 
-var _text_layer = __w_pdfjs_require__(78);
+var _text_layer = __w_pdfjs_require__(77);
 
-var _svg = __w_pdfjs_require__(79);
+var _svg = __w_pdfjs_require__(78);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -32212,8 +31849,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.155';
-  PDFJS.build = '503bc95a';
+  PDFJS.version = '2.0.157';
+  PDFJS.build = '343f331b';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -32291,7 +31928,7 @@ exports.globalScope = _global_scope2.default;
 exports.PDFJS = PDFJS;
 
 /***/ }),
-/* 131 */
+/* 130 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -32588,7 +32225,7 @@ exports.FontFaceObject = FontFaceObject;
 exports.FontLoader = FontLoader;
 
 /***/ }),
-/* 132 */
+/* 131 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -32601,9 +32238,7 @@ exports.CanvasGraphics = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _pattern_helper = __w_pdfjs_require__(133);
-
-var _webgl = __w_pdfjs_require__(66);
+var _pattern_helper = __w_pdfjs_require__(132);
 
 var MIN_FONT_SIZE = 16;
 var MAX_FONT_SIZE = 100;
@@ -32901,7 +32536,7 @@ var CanvasExtraState = function CanvasExtraStateClosure() {
 var CanvasGraphics = function CanvasGraphicsClosure() {
   var EXECUTION_TIME = 15;
   var EXECUTION_STEPS = 10;
-  function CanvasGraphics(canvasCtx, commonObjs, objs, canvasFactory, imageLayer) {
+  function CanvasGraphics(canvasCtx, commonObjs, objs, canvasFactory, webGLContext, imageLayer) {
     this.ctx = canvasCtx;
     this.current = new CanvasExtraState();
     this.stateStack = [];
@@ -32912,6 +32547,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
     this.commonObjs = commonObjs;
     this.objs = objs;
     this.canvasFactory = canvasFactory;
+    this.webGLContext = webGLContext;
     this.imageLayer = imageLayer;
     this.groupStack = [];
     this.processingType3 = null;
@@ -33132,15 +32768,19 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       maskCtx.putImageData(layerData, 0, row);
     }
   }
-  function composeSMask(ctx, smask, layerCtx) {
+  function composeSMask(ctx, smask, layerCtx, webGLContext) {
     var mask = smask.canvas;
     var maskCtx = smask.context;
     ctx.setTransform(smask.scaleX, 0, 0, smask.scaleY, smask.offsetX, smask.offsetY);
     var backdrop = smask.backdrop || null;
-    if (!smask.transferMap && _webgl.WebGLUtils.isEnabled) {
-      var composed = _webgl.WebGLUtils.composeSMask(layerCtx.canvas, mask, {
-        subtype: smask.subtype,
-        backdrop: backdrop
+    if (!smask.transferMap && webGLContext.isEnabled) {
+      var composed = webGLContext.composeSMask({
+        layer: layerCtx.canvas,
+        mask: mask,
+        properties: {
+          subtype: smask.subtype,
+          backdrop: backdrop
+        }
       });
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.drawImage(composed, smask.offsetX, smask.offsetY);
@@ -33248,7 +32888,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
         this.transparentCanvas = null;
       }
       this.cachedCanvases.clear();
-      _webgl.WebGLUtils.clear();
+      this.webGLContext.clear();
       if (this.imageLayer) {
         this.imageLayer.endLayout();
       }
@@ -33356,7 +32996,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       var groupCtx = this.ctx;
       this.groupLevel--;
       this.ctx = this.groupStack.pop();
-      composeSMask(this.ctx, this.current.activeSMask, groupCtx);
+      composeSMask(this.ctx, this.current.activeSMask, groupCtx, this.webGLContext);
       this.ctx.restore();
       this.ctx.save();
       copyCtxState(groupCtx, this.ctx);
@@ -33379,7 +33019,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       var groupCtx = this.ctx;
       this.groupLevel--;
       this.ctx = this.groupStack.pop();
-      composeSMask(this.ctx, this.current.activeSMask, groupCtx);
+      composeSMask(this.ctx, this.current.activeSMask, groupCtx, this.webGLContext);
       this.ctx.restore();
       copyCtxState(groupCtx, this.ctx);
       var deltaTransform = _util.Util.transform(this.current.activeSMask.startTransformInverse, groupCtx.mozCurrentTransform);
@@ -34326,7 +33966,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
 exports.CanvasGraphics = CanvasGraphics;
 
 /***/ }),
-/* 133 */
+/* 132 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -34338,8 +33978,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.TilingPattern = exports.getShadingPatternFromIR = undefined;
 
 var _util = __w_pdfjs_require__(0);
-
-var _webgl = __w_pdfjs_require__(66);
 
 var ShadingIRs = {};
 ShadingIRs.RadialAxial = {
@@ -34480,7 +34118,7 @@ var createMeshCanvas = function createMeshCanvasClosure() {
         throw new Error('illegal figure');
     }
   }
-  function createMeshCanvas(bounds, combinesScale, coords, colors, figures, backgroundColor, cachedCanvases) {
+  function createMeshCanvas(bounds, combinesScale, coords, colors, figures, backgroundColor, cachedCanvases, webGLContext) {
     var EXPECTED_SCALE = 1.1;
     var MAX_PATTERN_SIZE = 3000;
     var BORDER_SIZE = 2;
@@ -34503,8 +34141,14 @@ var createMeshCanvas = function createMeshCanvasClosure() {
     var paddedWidth = width + BORDER_SIZE * 2;
     var paddedHeight = height + BORDER_SIZE * 2;
     var canvas, tmpCanvas, i, ii;
-    if (_webgl.WebGLUtils.isEnabled) {
-      canvas = _webgl.WebGLUtils.drawFigures(width, height, backgroundColor, figures, context);
+    if (webGLContext.isEnabled) {
+      canvas = webGLContext.drawFigures({
+        width: width,
+        height: height,
+        backgroundColor: backgroundColor,
+        figures: figures,
+        context: context
+      });
       tmpCanvas = cachedCanvases.getCanvas('mesh', paddedWidth, paddedHeight, false);
       tmpCanvas.context.drawImage(canvas, BORDER_SIZE, BORDER_SIZE);
       canvas = tmpCanvas.canvas;
@@ -34558,7 +34202,7 @@ ShadingIRs.Mesh = {
             scale = [scale[0] * matrixScale[0], scale[1] * matrixScale[1]];
           }
         }
-        var temporaryPatternCanvas = createMeshCanvas(bounds, scale, coords, colors, figures, shadingFill ? null : background, owner.cachedCanvases);
+        var temporaryPatternCanvas = createMeshCanvas(bounds, scale, coords, colors, figures, shadingFill ? null : background, owner.cachedCanvases, owner.webGLContext);
         if (!shadingFill) {
           ctx.setTransform.apply(ctx, owner.baseTransform);
           if (matrix) {
@@ -34704,7 +34348,7 @@ exports.getShadingPatternFromIR = getShadingPatternFromIR;
 exports.TilingPattern = TilingPattern;
 
 /***/ }),
-/* 134 */
+/* 133 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -34942,6 +34586,420 @@ var PDFDataTransportStream = function PDFDataTransportStreamClosure() {
 exports.PDFDataTransportStream = PDFDataTransportStream;
 
 /***/ }),
+/* 134 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.WebGLContext = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _util = __w_pdfjs_require__(0);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var WebGLContext = function () {
+  function WebGLContext(_ref) {
+    var _ref$enable = _ref.enable,
+        enable = _ref$enable === undefined ? false : _ref$enable;
+
+    _classCallCheck(this, WebGLContext);
+
+    this._enabled = enable === true;
+  }
+
+  _createClass(WebGLContext, [{
+    key: 'composeSMask',
+    value: function composeSMask(_ref2) {
+      var layer = _ref2.layer,
+          mask = _ref2.mask,
+          properties = _ref2.properties;
+
+      return WebGLUtils.composeSMask(layer, mask, properties);
+    }
+  }, {
+    key: 'drawFigures',
+    value: function drawFigures(_ref3) {
+      var width = _ref3.width,
+          height = _ref3.height,
+          backgroundColor = _ref3.backgroundColor,
+          figures = _ref3.figures,
+          context = _ref3.context;
+
+      return WebGLUtils.drawFigures(width, height, backgroundColor, figures, context);
+    }
+  }, {
+    key: 'clear',
+    value: function clear() {
+      WebGLUtils.cleanup();
+    }
+  }, {
+    key: 'isEnabled',
+    get: function get() {
+      var enabled = this._enabled;
+      if (enabled) {
+        enabled = WebGLUtils.tryInitGL();
+      }
+      return (0, _util.shadow)(this, 'isEnabled', enabled);
+    }
+  }]);
+
+  return WebGLContext;
+}();
+
+var WebGLUtils = function WebGLUtilsClosure() {
+  function loadShader(gl, code, shaderType) {
+    var shader = gl.createShader(shaderType);
+    gl.shaderSource(shader, code);
+    gl.compileShader(shader);
+    var compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+    if (!compiled) {
+      var errorMsg = gl.getShaderInfoLog(shader);
+      throw new Error('Error during shader compilation: ' + errorMsg);
+    }
+    return shader;
+  }
+  function createVertexShader(gl, code) {
+    return loadShader(gl, code, gl.VERTEX_SHADER);
+  }
+  function createFragmentShader(gl, code) {
+    return loadShader(gl, code, gl.FRAGMENT_SHADER);
+  }
+  function createProgram(gl, shaders) {
+    var program = gl.createProgram();
+    for (var i = 0, ii = shaders.length; i < ii; ++i) {
+      gl.attachShader(program, shaders[i]);
+    }
+    gl.linkProgram(program);
+    var linked = gl.getProgramParameter(program, gl.LINK_STATUS);
+    if (!linked) {
+      var errorMsg = gl.getProgramInfoLog(program);
+      throw new Error('Error during program linking: ' + errorMsg);
+    }
+    return program;
+  }
+  function createTexture(gl, image, textureId) {
+    gl.activeTexture(textureId);
+    var texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    return texture;
+  }
+  var currentGL, currentCanvas;
+  function generateGL() {
+    if (currentGL) {
+      return;
+    }
+    currentCanvas = document.createElement('canvas');
+    currentGL = currentCanvas.getContext('webgl', { premultipliedalpha: false });
+  }
+  var smaskVertexShaderCode = '\
+  attribute vec2 a_position;                                    \
+  attribute vec2 a_texCoord;                                    \
+                                                                \
+  uniform vec2 u_resolution;                                    \
+                                                                \
+  varying vec2 v_texCoord;                                      \
+                                                                \
+  void main() {                                                 \
+    vec2 clipSpace = (a_position / u_resolution) * 2.0 - 1.0;   \
+    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);          \
+                                                                \
+    v_texCoord = a_texCoord;                                    \
+  }                                                             ';
+  var smaskFragmentShaderCode = '\
+  precision mediump float;                                      \
+                                                                \
+  uniform vec4 u_backdrop;                                      \
+  uniform int u_subtype;                                        \
+  uniform sampler2D u_image;                                    \
+  uniform sampler2D u_mask;                                     \
+                                                                \
+  varying vec2 v_texCoord;                                      \
+                                                                \
+  void main() {                                                 \
+    vec4 imageColor = texture2D(u_image, v_texCoord);           \
+    vec4 maskColor = texture2D(u_mask, v_texCoord);             \
+    if (u_backdrop.a > 0.0) {                                   \
+      maskColor.rgb = maskColor.rgb * maskColor.a +             \
+                      u_backdrop.rgb * (1.0 - maskColor.a);     \
+    }                                                           \
+    float lum;                                                  \
+    if (u_subtype == 0) {                                       \
+      lum = maskColor.a;                                        \
+    } else {                                                    \
+      lum = maskColor.r * 0.3 + maskColor.g * 0.59 +            \
+            maskColor.b * 0.11;                                 \
+    }                                                           \
+    imageColor.a *= lum;                                        \
+    imageColor.rgb *= imageColor.a;                             \
+    gl_FragColor = imageColor;                                  \
+  }                                                             ';
+  var smaskCache = null;
+  function initSmaskGL() {
+    var canvas, gl;
+    generateGL();
+    canvas = currentCanvas;
+    currentCanvas = null;
+    gl = currentGL;
+    currentGL = null;
+    var vertexShader = createVertexShader(gl, smaskVertexShaderCode);
+    var fragmentShader = createFragmentShader(gl, smaskFragmentShaderCode);
+    var program = createProgram(gl, [vertexShader, fragmentShader]);
+    gl.useProgram(program);
+    var cache = {};
+    cache.gl = gl;
+    cache.canvas = canvas;
+    cache.resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+    cache.positionLocation = gl.getAttribLocation(program, 'a_position');
+    cache.backdropLocation = gl.getUniformLocation(program, 'u_backdrop');
+    cache.subtypeLocation = gl.getUniformLocation(program, 'u_subtype');
+    var texCoordLocation = gl.getAttribLocation(program, 'a_texCoord');
+    var texLayerLocation = gl.getUniformLocation(program, 'u_image');
+    var texMaskLocation = gl.getUniformLocation(program, 'u_mask');
+    var texCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(texCoordLocation);
+    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform1i(texLayerLocation, 0);
+    gl.uniform1i(texMaskLocation, 1);
+    smaskCache = cache;
+  }
+  function composeSMask(layer, mask, properties) {
+    var width = layer.width,
+        height = layer.height;
+    if (!smaskCache) {
+      initSmaskGL();
+    }
+    var cache = smaskCache,
+        canvas = cache.canvas,
+        gl = cache.gl;
+    canvas.width = width;
+    canvas.height = height;
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.uniform2f(cache.resolutionLocation, width, height);
+    if (properties.backdrop) {
+      gl.uniform4f(cache.resolutionLocation, properties.backdrop[0], properties.backdrop[1], properties.backdrop[2], 1);
+    } else {
+      gl.uniform4f(cache.resolutionLocation, 0, 0, 0, 0);
+    }
+    gl.uniform1i(cache.subtypeLocation, properties.subtype === 'Luminosity' ? 1 : 0);
+    var texture = createTexture(gl, layer, gl.TEXTURE0);
+    var maskTexture = createTexture(gl, mask, gl.TEXTURE1);
+    var buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, width, 0, 0, height, 0, height, width, 0, width, height]), gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(cache.positionLocation);
+    gl.vertexAttribPointer(cache.positionLocation, 2, gl.FLOAT, false, 0, 0);
+    gl.clearColor(0, 0, 0, 0);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.flush();
+    gl.deleteTexture(texture);
+    gl.deleteTexture(maskTexture);
+    gl.deleteBuffer(buffer);
+    return canvas;
+  }
+  var figuresVertexShaderCode = '\
+  attribute vec2 a_position;                                    \
+  attribute vec3 a_color;                                       \
+                                                                \
+  uniform vec2 u_resolution;                                    \
+  uniform vec2 u_scale;                                         \
+  uniform vec2 u_offset;                                        \
+                                                                \
+  varying vec4 v_color;                                         \
+                                                                \
+  void main() {                                                 \
+    vec2 position = (a_position + u_offset) * u_scale;          \
+    vec2 clipSpace = (position / u_resolution) * 2.0 - 1.0;     \
+    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);          \
+                                                                \
+    v_color = vec4(a_color / 255.0, 1.0);                       \
+  }                                                             ';
+  var figuresFragmentShaderCode = '\
+  precision mediump float;                                      \
+                                                                \
+  varying vec4 v_color;                                         \
+                                                                \
+  void main() {                                                 \
+    gl_FragColor = v_color;                                     \
+  }                                                             ';
+  var figuresCache = null;
+  function initFiguresGL() {
+    var canvas, gl;
+    generateGL();
+    canvas = currentCanvas;
+    currentCanvas = null;
+    gl = currentGL;
+    currentGL = null;
+    var vertexShader = createVertexShader(gl, figuresVertexShaderCode);
+    var fragmentShader = createFragmentShader(gl, figuresFragmentShaderCode);
+    var program = createProgram(gl, [vertexShader, fragmentShader]);
+    gl.useProgram(program);
+    var cache = {};
+    cache.gl = gl;
+    cache.canvas = canvas;
+    cache.resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+    cache.scaleLocation = gl.getUniformLocation(program, 'u_scale');
+    cache.offsetLocation = gl.getUniformLocation(program, 'u_offset');
+    cache.positionLocation = gl.getAttribLocation(program, 'a_position');
+    cache.colorLocation = gl.getAttribLocation(program, 'a_color');
+    figuresCache = cache;
+  }
+  function drawFigures(width, height, backgroundColor, figures, context) {
+    if (!figuresCache) {
+      initFiguresGL();
+    }
+    var cache = figuresCache,
+        canvas = cache.canvas,
+        gl = cache.gl;
+    canvas.width = width;
+    canvas.height = height;
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.uniform2f(cache.resolutionLocation, width, height);
+    var count = 0;
+    var i, ii, rows;
+    for (i = 0, ii = figures.length; i < ii; i++) {
+      switch (figures[i].type) {
+        case 'lattice':
+          rows = figures[i].coords.length / figures[i].verticesPerRow | 0;
+          count += (rows - 1) * (figures[i].verticesPerRow - 1) * 6;
+          break;
+        case 'triangles':
+          count += figures[i].coords.length;
+          break;
+      }
+    }
+    var coords = new Float32Array(count * 2);
+    var colors = new Uint8Array(count * 3);
+    var coordsMap = context.coords,
+        colorsMap = context.colors;
+    var pIndex = 0,
+        cIndex = 0;
+    for (i = 0, ii = figures.length; i < ii; i++) {
+      var figure = figures[i],
+          ps = figure.coords,
+          cs = figure.colors;
+      switch (figure.type) {
+        case 'lattice':
+          var cols = figure.verticesPerRow;
+          rows = ps.length / cols | 0;
+          for (var row = 1; row < rows; row++) {
+            var offset = row * cols + 1;
+            for (var col = 1; col < cols; col++, offset++) {
+              coords[pIndex] = coordsMap[ps[offset - cols - 1]];
+              coords[pIndex + 1] = coordsMap[ps[offset - cols - 1] + 1];
+              coords[pIndex + 2] = coordsMap[ps[offset - cols]];
+              coords[pIndex + 3] = coordsMap[ps[offset - cols] + 1];
+              coords[pIndex + 4] = coordsMap[ps[offset - 1]];
+              coords[pIndex + 5] = coordsMap[ps[offset - 1] + 1];
+              colors[cIndex] = colorsMap[cs[offset - cols - 1]];
+              colors[cIndex + 1] = colorsMap[cs[offset - cols - 1] + 1];
+              colors[cIndex + 2] = colorsMap[cs[offset - cols - 1] + 2];
+              colors[cIndex + 3] = colorsMap[cs[offset - cols]];
+              colors[cIndex + 4] = colorsMap[cs[offset - cols] + 1];
+              colors[cIndex + 5] = colorsMap[cs[offset - cols] + 2];
+              colors[cIndex + 6] = colorsMap[cs[offset - 1]];
+              colors[cIndex + 7] = colorsMap[cs[offset - 1] + 1];
+              colors[cIndex + 8] = colorsMap[cs[offset - 1] + 2];
+              coords[pIndex + 6] = coords[pIndex + 2];
+              coords[pIndex + 7] = coords[pIndex + 3];
+              coords[pIndex + 8] = coords[pIndex + 4];
+              coords[pIndex + 9] = coords[pIndex + 5];
+              coords[pIndex + 10] = coordsMap[ps[offset]];
+              coords[pIndex + 11] = coordsMap[ps[offset] + 1];
+              colors[cIndex + 9] = colors[cIndex + 3];
+              colors[cIndex + 10] = colors[cIndex + 4];
+              colors[cIndex + 11] = colors[cIndex + 5];
+              colors[cIndex + 12] = colors[cIndex + 6];
+              colors[cIndex + 13] = colors[cIndex + 7];
+              colors[cIndex + 14] = colors[cIndex + 8];
+              colors[cIndex + 15] = colorsMap[cs[offset]];
+              colors[cIndex + 16] = colorsMap[cs[offset] + 1];
+              colors[cIndex + 17] = colorsMap[cs[offset] + 2];
+              pIndex += 12;
+              cIndex += 18;
+            }
+          }
+          break;
+        case 'triangles':
+          for (var j = 0, jj = ps.length; j < jj; j++) {
+            coords[pIndex] = coordsMap[ps[j]];
+            coords[pIndex + 1] = coordsMap[ps[j] + 1];
+            colors[cIndex] = colorsMap[cs[j]];
+            colors[cIndex + 1] = colorsMap[cs[j] + 1];
+            colors[cIndex + 2] = colorsMap[cs[j] + 2];
+            pIndex += 2;
+            cIndex += 3;
+          }
+          break;
+      }
+    }
+    if (backgroundColor) {
+      gl.clearColor(backgroundColor[0] / 255, backgroundColor[1] / 255, backgroundColor[2] / 255, 1.0);
+    } else {
+      gl.clearColor(0, 0, 0, 0);
+    }
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    var coordsBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, coordsBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(cache.positionLocation);
+    gl.vertexAttribPointer(cache.positionLocation, 2, gl.FLOAT, false, 0, 0);
+    var colorsBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+    gl.enableVertexAttribArray(cache.colorLocation);
+    gl.vertexAttribPointer(cache.colorLocation, 3, gl.UNSIGNED_BYTE, false, 0, 0);
+    gl.uniform2f(cache.scaleLocation, context.scaleX, context.scaleY);
+    gl.uniform2f(cache.offsetLocation, context.offsetX, context.offsetY);
+    gl.drawArrays(gl.TRIANGLES, 0, count);
+    gl.flush();
+    gl.deleteBuffer(coordsBuffer);
+    gl.deleteBuffer(colorsBuffer);
+    return canvas;
+  }
+  return {
+    tryInitGL: function tryInitGL() {
+      try {
+        generateGL();
+        return !!currentGL;
+      } catch (ex) {}
+      return false;
+    },
+
+    composeSMask: composeSMask,
+    drawFigures: drawFigures,
+    cleanup: function cleanup() {
+      if (smaskCache && smaskCache.canvas) {
+        smaskCache.canvas.width = 0;
+        smaskCache.canvas.height = 0;
+      }
+      if (figuresCache && figuresCache.canvas) {
+        figuresCache.canvas.width = 0;
+        figuresCache.canvas.height = 0;
+      }
+      smaskCache = null;
+      figuresCache = null;
+    }
+  };
+}();
+exports.WebGLContext = WebGLContext;
+
+/***/ }),
 /* 135 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
@@ -35142,7 +35200,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.155';
+    var workerVersion = '2.0.157';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -35544,7 +35602,7 @@ exports.NetworkPdfManager = exports.LocalPdfManager = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _chunked_stream = __w_pdfjs_require__(68);
+var _chunked_stream = __w_pdfjs_require__(67);
 
 var _document = __w_pdfjs_require__(137);
 
@@ -35728,7 +35786,7 @@ exports.PDFDocument = exports.Page = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
-var _obj = __w_pdfjs_require__(69);
+var _obj = __w_pdfjs_require__(68);
 
 var _primitives = __w_pdfjs_require__(1);
 
@@ -35738,7 +35796,7 @@ var _stream = __w_pdfjs_require__(2);
 
 var _annotation = __w_pdfjs_require__(144);
 
-var _crypto = __w_pdfjs_require__(72);
+var _crypto = __w_pdfjs_require__(71);
 
 var _parser = __w_pdfjs_require__(28);
 
@@ -35746,7 +35804,7 @@ var _operator_list = __w_pdfjs_require__(44);
 
 var _evaluator = __w_pdfjs_require__(145);
 
-var _function = __w_pdfjs_require__(76);
+var _function = __w_pdfjs_require__(75);
 
 var Page = function PageClosure() {
   var DEFAULT_USER_UNIT = 1.0;
@@ -36964,7 +37022,7 @@ exports.Jbig2Image = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _arithmetic_decoder = __w_pdfjs_require__(70);
+var _arithmetic_decoder = __w_pdfjs_require__(69);
 
 var Jbig2Error = function Jbig2ErrorClosure() {
   function Jbig2Error(msg) {
@@ -39135,7 +39193,7 @@ exports.JpxStream = undefined;
 
 var _stream = __w_pdfjs_require__(2);
 
-var _jpx = __w_pdfjs_require__(71);
+var _jpx = __w_pdfjs_require__(70);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -39214,7 +39272,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _util = __w_pdfjs_require__(0);
 
-var _obj = __w_pdfjs_require__(69);
+var _obj = __w_pdfjs_require__(68);
 
 var _primitives = __w_pdfjs_require__(1);
 
@@ -40119,9 +40177,9 @@ var _fonts = __w_pdfjs_require__(147);
 
 var _encodings = __w_pdfjs_require__(23);
 
-var _unicode = __w_pdfjs_require__(75);
+var _unicode = __w_pdfjs_require__(74);
 
-var _standard_fonts = __w_pdfjs_require__(74);
+var _standard_fonts = __w_pdfjs_require__(73);
 
 var _pattern = __w_pdfjs_require__(151);
 
@@ -40135,7 +40193,7 @@ var _glyphlist = __w_pdfjs_require__(45);
 
 var _metrics = __w_pdfjs_require__(153);
 
-var _function = __w_pdfjs_require__(76);
+var _function = __w_pdfjs_require__(75);
 
 var _jpeg_stream = __w_pdfjs_require__(43);
 
@@ -43562,15 +43620,15 @@ exports.getFontType = exports.ProblematicCharRanges = exports.IdentityToUnicodeM
 
 var _util = __w_pdfjs_require__(0);
 
-var _cff_parser = __w_pdfjs_require__(73);
+var _cff_parser = __w_pdfjs_require__(72);
 
 var _glyphlist = __w_pdfjs_require__(45);
 
 var _encodings = __w_pdfjs_require__(23);
 
-var _standard_fonts = __w_pdfjs_require__(74);
+var _standard_fonts = __w_pdfjs_require__(73);
 
-var _unicode = __w_pdfjs_require__(75);
+var _unicode = __w_pdfjs_require__(74);
 
 var _font_renderer = __w_pdfjs_require__(149);
 
@@ -46054,7 +46112,7 @@ exports.FontRendererFactory = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _cff_parser = __w_pdfjs_require__(73);
+var _cff_parser = __w_pdfjs_require__(72);
 
 var _glyphlist = __w_pdfjs_require__(45);
 
@@ -51679,7 +51737,7 @@ var _stream = __w_pdfjs_require__(2);
 
 var _jpeg_stream = __w_pdfjs_require__(43);
 
-var _jpx = __w_pdfjs_require__(71);
+var _jpx = __w_pdfjs_require__(70);
 
 var PDFImage = function PDFImageClosure() {
   function handleImageData(image, nativeDecoder) {
