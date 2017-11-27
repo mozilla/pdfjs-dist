@@ -11607,7 +11607,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.161';
+  var apiVersion = '2.0.163';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12887,8 +12887,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.161';
-  exports.build = build = 'b32d659d';
+  exports.version = version = '2.0.163';
+  exports.build = build = '3e34eb31';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -23940,6 +23940,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.AnnotationLayer = undefined;
 
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _dom_utils = __w_pdfjs_require__(12);
@@ -23977,8 +23979,7 @@ var AnnotationElementFactory = function () {
               } else if (parameters.data.checkBox) {
                 return new CheckboxWidgetAnnotationElement(parameters);
               }
-              (0, _util.warn)('Unimplemented button widget annotation: pushbutton');
-              break;
+              return new PushButtonWidgetAnnotationElement(parameters);
             case 'Ch':
               return new ChoiceWidgetAnnotationElement(parameters);
           }
@@ -24367,6 +24368,27 @@ var RadioButtonWidgetAnnotationElement = function (_WidgetAnnotationElem3) {
   return RadioButtonWidgetAnnotationElement;
 }(WidgetAnnotationElement);
 
+var PushButtonWidgetAnnotationElement = function (_LinkAnnotationElemen) {
+  _inherits(PushButtonWidgetAnnotationElement, _LinkAnnotationElemen);
+
+  function PushButtonWidgetAnnotationElement() {
+    _classCallCheck(this, PushButtonWidgetAnnotationElement);
+
+    return _possibleConstructorReturn(this, (PushButtonWidgetAnnotationElement.__proto__ || Object.getPrototypeOf(PushButtonWidgetAnnotationElement)).apply(this, arguments));
+  }
+
+  _createClass(PushButtonWidgetAnnotationElement, [{
+    key: 'render',
+    value: function render() {
+      var container = _get(PushButtonWidgetAnnotationElement.prototype.__proto__ || Object.getPrototypeOf(PushButtonWidgetAnnotationElement.prototype), 'render', this).call(this);
+      container.className = 'buttonWidgetAnnotation pushButton';
+      return container;
+    }
+  }]);
+
+  return PushButtonWidgetAnnotationElement;
+}(LinkAnnotationElement);
+
 var ChoiceWidgetAnnotationElement = function (_WidgetAnnotationElem4) {
   _inherits(ChoiceWidgetAnnotationElement, _WidgetAnnotationElem4);
 
@@ -24661,11 +24683,11 @@ var PolylineAnnotationElement = function (_AnnotationElement8) {
 
     var isRenderable = !!(parameters.data.hasPopup || parameters.data.title || parameters.data.contents);
 
-    var _this14 = _possibleConstructorReturn(this, (PolylineAnnotationElement.__proto__ || Object.getPrototypeOf(PolylineAnnotationElement)).call(this, parameters, isRenderable, true));
+    var _this15 = _possibleConstructorReturn(this, (PolylineAnnotationElement.__proto__ || Object.getPrototypeOf(PolylineAnnotationElement)).call(this, parameters, isRenderable, true));
 
-    _this14.containerClassName = 'polylineAnnotation';
-    _this14.svgElementName = 'svg:polyline';
-    return _this14;
+    _this15.containerClassName = 'polylineAnnotation';
+    _this15.svgElementName = 'svg:polyline';
+    return _this15;
   }
 
   _createClass(PolylineAnnotationElement, [{
@@ -24706,11 +24728,11 @@ var PolygonAnnotationElement = function (_PolylineAnnotationEl) {
   function PolygonAnnotationElement(parameters) {
     _classCallCheck(this, PolygonAnnotationElement);
 
-    var _this15 = _possibleConstructorReturn(this, (PolygonAnnotationElement.__proto__ || Object.getPrototypeOf(PolygonAnnotationElement)).call(this, parameters));
+    var _this16 = _possibleConstructorReturn(this, (PolygonAnnotationElement.__proto__ || Object.getPrototypeOf(PolygonAnnotationElement)).call(this, parameters));
 
-    _this15.containerClassName = 'polygonAnnotation';
-    _this15.svgElementName = 'svg:polygon';
-    return _this15;
+    _this16.containerClassName = 'polygonAnnotation';
+    _this16.svgElementName = 'svg:polygon';
+    return _this16;
   }
 
   return PolygonAnnotationElement;
@@ -24842,17 +24864,17 @@ var FileAttachmentAnnotationElement = function (_AnnotationElement14) {
   function FileAttachmentAnnotationElement(parameters) {
     _classCallCheck(this, FileAttachmentAnnotationElement);
 
-    var _this21 = _possibleConstructorReturn(this, (FileAttachmentAnnotationElement.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotationElement)).call(this, parameters, true));
+    var _this22 = _possibleConstructorReturn(this, (FileAttachmentAnnotationElement.__proto__ || Object.getPrototypeOf(FileAttachmentAnnotationElement)).call(this, parameters, true));
 
-    var file = _this21.data.file;
-    _this21.filename = (0, _dom_utils.getFilenameFromUrl)(file.filename);
-    _this21.content = file.content;
-    _this21.linkService.onFileAttachmentAnnotation({
+    var file = _this22.data.file;
+    _this22.filename = (0, _dom_utils.getFilenameFromUrl)(file.filename);
+    _this22.content = file.content;
+    _this22.linkService.onFileAttachmentAnnotation({
       id: (0, _util.stringToPDFString)(file.filename),
       filename: file.filename,
       content: file.content
     });
-    return _this21;
+    return _this22;
   }
 
   _createClass(FileAttachmentAnnotationElement, [{
@@ -26521,8 +26543,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.161';
-var pdfjsBuild = 'b32d659d';
+var pdfjsVersion = '2.0.163';
+var pdfjsBuild = '3e34eb31';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(129);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -31851,8 +31873,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.161';
-  PDFJS.build = 'b32d659d';
+  PDFJS.version = '2.0.163';
+  PDFJS.build = '3e34eb31';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35202,7 +35224,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.161';
+    var workerVersion = '2.0.163';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -39810,40 +39832,69 @@ var ButtonWidgetAnnotation = function (_WidgetAnnotation2) {
     var _this4 = _possibleConstructorReturn(this, (ButtonWidgetAnnotation.__proto__ || Object.getPrototypeOf(ButtonWidgetAnnotation)).call(this, params));
 
     _this4.data.checkBox = !_this4.hasFieldFlag(_util.AnnotationFieldFlag.RADIO) && !_this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
-    if (_this4.data.checkBox) {
-      if (!(0, _primitives.isName)(_this4.data.fieldValue)) {
-        return _possibleConstructorReturn(_this4);
-      }
-      _this4.data.fieldValue = _this4.data.fieldValue.name;
-    }
     _this4.data.radioButton = _this4.hasFieldFlag(_util.AnnotationFieldFlag.RADIO) && !_this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
-    if (_this4.data.radioButton) {
-      _this4.data.fieldValue = _this4.data.buttonValue = null;
+    _this4.data.pushButton = _this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
+    if (_this4.data.checkBox) {
+      _this4._processCheckBox();
+    } else if (_this4.data.radioButton) {
+      _this4._processRadioButton(params);
+    } else if (_this4.data.pushButton) {
+      _this4._processPushButton(params);
+    } else {
+      (0, _util.warn)('Invalid field flags for button widget annotation');
+    }
+    return _this4;
+  }
+
+  _createClass(ButtonWidgetAnnotation, [{
+    key: '_processCheckBox',
+    value: function _processCheckBox() {
+      if (!(0, _primitives.isName)(this.data.fieldValue)) {
+        return;
+      }
+      this.data.fieldValue = this.data.fieldValue.name;
+    }
+  }, {
+    key: '_processRadioButton',
+    value: function _processRadioButton(params) {
+      this.data.fieldValue = this.data.buttonValue = null;
       var fieldParent = params.dict.get('Parent');
       if ((0, _primitives.isDict)(fieldParent) && fieldParent.has('V')) {
         var fieldParentValue = fieldParent.get('V');
         if ((0, _primitives.isName)(fieldParentValue)) {
-          _this4.data.fieldValue = fieldParentValue.name;
+          this.data.fieldValue = fieldParentValue.name;
         }
       }
       var appearanceStates = params.dict.get('AP');
       if (!(0, _primitives.isDict)(appearanceStates)) {
-        return _possibleConstructorReturn(_this4);
+        return;
       }
       var normalAppearanceState = appearanceStates.get('N');
       if (!(0, _primitives.isDict)(normalAppearanceState)) {
-        return _possibleConstructorReturn(_this4);
+        return;
       }
       var keys = normalAppearanceState.getKeys();
       for (var i = 0, ii = keys.length; i < ii; i++) {
         if (keys[i] !== 'Off') {
-          _this4.data.buttonValue = keys[i];
+          this.data.buttonValue = keys[i];
           break;
         }
       }
     }
-    return _this4;
-  }
+  }, {
+    key: '_processPushButton',
+    value: function _processPushButton(params) {
+      if (!params.dict.has('A')) {
+        (0, _util.warn)('Push buttons without action dictionaries are not supported');
+        return;
+      }
+      _obj.Catalog.parseDestDictionary({
+        destDict: params.dict,
+        resultObj: this.data,
+        docBaseUrl: params.pdfManager.docBaseUrl
+      });
+    }
+  }]);
 
   return ButtonWidgetAnnotation;
 }(WidgetAnnotation);

@@ -21883,8 +21883,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.161';
-var pdfjsBuild = 'b32d659d';
+var pdfjsVersion = '2.0.163';
+var pdfjsBuild = '3e34eb31';
 var pdfjsCoreWorker = __w_pdfjs_require__(72);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22089,7 +22089,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.161';
+    var workerVersion = '2.0.163';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -31949,40 +31949,69 @@ var ButtonWidgetAnnotation = function (_WidgetAnnotation2) {
     var _this4 = _possibleConstructorReturn(this, (ButtonWidgetAnnotation.__proto__ || Object.getPrototypeOf(ButtonWidgetAnnotation)).call(this, params));
 
     _this4.data.checkBox = !_this4.hasFieldFlag(_util.AnnotationFieldFlag.RADIO) && !_this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
-    if (_this4.data.checkBox) {
-      if (!(0, _primitives.isName)(_this4.data.fieldValue)) {
-        return _possibleConstructorReturn(_this4);
-      }
-      _this4.data.fieldValue = _this4.data.fieldValue.name;
-    }
     _this4.data.radioButton = _this4.hasFieldFlag(_util.AnnotationFieldFlag.RADIO) && !_this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
-    if (_this4.data.radioButton) {
-      _this4.data.fieldValue = _this4.data.buttonValue = null;
+    _this4.data.pushButton = _this4.hasFieldFlag(_util.AnnotationFieldFlag.PUSHBUTTON);
+    if (_this4.data.checkBox) {
+      _this4._processCheckBox();
+    } else if (_this4.data.radioButton) {
+      _this4._processRadioButton(params);
+    } else if (_this4.data.pushButton) {
+      _this4._processPushButton(params);
+    } else {
+      (0, _util.warn)('Invalid field flags for button widget annotation');
+    }
+    return _this4;
+  }
+
+  _createClass(ButtonWidgetAnnotation, [{
+    key: '_processCheckBox',
+    value: function _processCheckBox() {
+      if (!(0, _primitives.isName)(this.data.fieldValue)) {
+        return;
+      }
+      this.data.fieldValue = this.data.fieldValue.name;
+    }
+  }, {
+    key: '_processRadioButton',
+    value: function _processRadioButton(params) {
+      this.data.fieldValue = this.data.buttonValue = null;
       var fieldParent = params.dict.get('Parent');
       if ((0, _primitives.isDict)(fieldParent) && fieldParent.has('V')) {
         var fieldParentValue = fieldParent.get('V');
         if ((0, _primitives.isName)(fieldParentValue)) {
-          _this4.data.fieldValue = fieldParentValue.name;
+          this.data.fieldValue = fieldParentValue.name;
         }
       }
       var appearanceStates = params.dict.get('AP');
       if (!(0, _primitives.isDict)(appearanceStates)) {
-        return _possibleConstructorReturn(_this4);
+        return;
       }
       var normalAppearanceState = appearanceStates.get('N');
       if (!(0, _primitives.isDict)(normalAppearanceState)) {
-        return _possibleConstructorReturn(_this4);
+        return;
       }
       var keys = normalAppearanceState.getKeys();
       for (var i = 0, ii = keys.length; i < ii; i++) {
         if (keys[i] !== 'Off') {
-          _this4.data.buttonValue = keys[i];
+          this.data.buttonValue = keys[i];
           break;
         }
       }
     }
-    return _this4;
-  }
+  }, {
+    key: '_processPushButton',
+    value: function _processPushButton(params) {
+      if (!params.dict.has('A')) {
+        (0, _util.warn)('Push buttons without action dictionaries are not supported');
+        return;
+      }
+      _obj.Catalog.parseDestDictionary({
+        destDict: params.dict,
+        resultObj: this.data,
+        docBaseUrl: params.pdfManager.docBaseUrl
+      });
+    }
+  }]);
 
   return ButtonWidgetAnnotation;
 }(WidgetAnnotation);
