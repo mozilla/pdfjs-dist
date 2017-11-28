@@ -11607,7 +11607,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.165';
+  var apiVersion = '2.0.167';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12887,8 +12887,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.165';
-  exports.build = build = 'e78fe842';
+  exports.version = version = '2.0.167';
+  exports.build = build = 'e3202438';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -25635,7 +25635,7 @@ var SVGGraphics = function SVGGraphics() {
       idat[pi++] = adler & 0xff;
       return idat;
     }
-    function encode(imgData, kind, forceDataSchema) {
+    function encode(imgData, kind, forceDataSchema, isMask) {
       var width = imgData.width;
       var height = imgData.height;
       var bitDepth, colorType, lineSize;
@@ -25669,7 +25669,7 @@ var SVGGraphics = function SVGGraphics() {
         offsetBytes += lineSize;
         offsetLiterals += lineSize;
       }
-      if (kind === _util.ImageKind.GRAYSCALE_1BPP) {
+      if (kind === _util.ImageKind.GRAYSCALE_1BPP && isMask) {
         offsetLiterals = 0;
         for (y = 0; y < height; y++) {
           offsetLiterals++;
@@ -25692,9 +25692,9 @@ var SVGGraphics = function SVGGraphics() {
       writePngChunk('IEND', new Uint8Array(0), data, offset);
       return (0, _util.createObjectURL)(data, 'image/png', forceDataSchema);
     }
-    return function convertImgDataToPng(imgData, forceDataSchema) {
+    return function convertImgDataToPng(imgData, forceDataSchema, isMask) {
       var kind = imgData.kind === undefined ? _util.ImageKind.GRAYSCALE_1BPP : imgData.kind;
-      return encode(imgData, kind, forceDataSchema);
+      return encode(imgData, kind, forceDataSchema, isMask);
     };
   }();
   var SVGExtraState = function SVGExtraStateClosure() {
@@ -26439,7 +26439,7 @@ var SVGGraphics = function SVGGraphics() {
       paintInlineImageXObject: function SVGGraphics_paintInlineImageXObject(imgData, mask) {
         var width = imgData.width;
         var height = imgData.height;
-        var imgSrc = convertImgDataToPng(imgData, this.forceDataSchema);
+        var imgSrc = convertImgDataToPng(imgData, this.forceDataSchema, !!mask);
         var cliprect = this.svgFactory.createElement('svg:rect');
         cliprect.setAttributeNS(null, 'x', '0');
         cliprect.setAttributeNS(null, 'y', '0');
@@ -26543,8 +26543,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.165';
-var pdfjsBuild = 'e78fe842';
+var pdfjsVersion = '2.0.167';
+var pdfjsBuild = 'e3202438';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(129);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -31873,8 +31873,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.165';
-  PDFJS.build = 'e78fe842';
+  PDFJS.version = '2.0.167';
+  PDFJS.build = 'e3202438';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35234,7 +35234,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.165';
+    var workerVersion = '2.0.167';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
