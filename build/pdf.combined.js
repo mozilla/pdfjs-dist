@@ -11607,7 +11607,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.169';
+  var apiVersion = '2.0.172';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12887,8 +12887,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.169';
-  exports.build = build = 'fbf456f5';
+  exports.version = version = '2.0.172';
+  exports.build = build = '3f3ade55';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -26543,8 +26543,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.169';
-var pdfjsBuild = 'fbf456f5';
+var pdfjsVersion = '2.0.172';
+var pdfjsBuild = '3f3ade55';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(129);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -31873,8 +31873,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.169';
-  PDFJS.build = 'fbf456f5';
+  PDFJS.version = '2.0.172';
+  PDFJS.build = '3f3ade55';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35234,7 +35234,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.169';
+    var workerVersion = '2.0.172';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -41809,69 +41809,77 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         return properties;
       });
     },
-    buildToUnicode: function PartialEvaluator_buildToUnicode(properties) {
+    _buildSimpleFontToUnicode: function _buildSimpleFontToUnicode(properties) {
+      (0, _util.assert)(!properties.composite, 'Must be a simple font.');
+      var toUnicode = [],
+          charcode = void 0,
+          glyphName = void 0;
+      var encoding = properties.defaultEncoding.slice();
+      var baseEncodingName = properties.baseEncodingName;
+      var differences = properties.differences;
+      for (charcode in differences) {
+        glyphName = differences[charcode];
+        if (glyphName === '.notdef') {
+          continue;
+        }
+        encoding[charcode] = glyphName;
+      }
+      var glyphsUnicodeMap = (0, _glyphlist.getGlyphsUnicode)();
+      for (charcode in encoding) {
+        glyphName = encoding[charcode];
+        if (glyphName === '') {
+          continue;
+        } else if (glyphsUnicodeMap[glyphName] === undefined) {
+          var code = 0;
+          switch (glyphName[0]) {
+            case 'G':
+              if (glyphName.length === 3) {
+                code = parseInt(glyphName.substr(1), 16);
+              }
+              break;
+            case 'g':
+              if (glyphName.length === 5) {
+                code = parseInt(glyphName.substr(1), 16);
+              }
+              break;
+            case 'C':
+            case 'c':
+              if (glyphName.length >= 3) {
+                code = +glyphName.substr(1);
+              }
+              break;
+            default:
+              var unicode = (0, _unicode.getUnicodeForGlyph)(glyphName, glyphsUnicodeMap);
+              if (unicode !== -1) {
+                code = unicode;
+              }
+          }
+          if (code) {
+            if (baseEncodingName && code === +charcode) {
+              var baseEncoding = (0, _encodings.getEncoding)(baseEncodingName);
+              if (baseEncoding && (glyphName = baseEncoding[charcode])) {
+                toUnicode[charcode] = String.fromCharCode(glyphsUnicodeMap[glyphName]);
+                continue;
+              }
+            }
+            toUnicode[charcode] = String.fromCharCode(code);
+          }
+          continue;
+        }
+        toUnicode[charcode] = String.fromCharCode(glyphsUnicodeMap[glyphName]);
+      }
+      return new _fonts.ToUnicodeMap(toUnicode);
+    },
+    buildToUnicode: function buildToUnicode(properties) {
       properties.hasIncludedToUnicodeMap = !!properties.toUnicode && properties.toUnicode.length > 0;
       if (properties.hasIncludedToUnicodeMap) {
+        if (!properties.composite && properties.hasEncoding) {
+          properties.fallbackToUnicode = this._buildSimpleFontToUnicode(properties);
+        }
         return Promise.resolve(properties.toUnicode);
       }
-      var toUnicode, charcode, glyphName;
       if (!properties.composite) {
-        toUnicode = [];
-        var encoding = properties.defaultEncoding.slice();
-        var baseEncodingName = properties.baseEncodingName;
-        var differences = properties.differences;
-        for (charcode in differences) {
-          glyphName = differences[charcode];
-          if (glyphName === '.notdef') {
-            continue;
-          }
-          encoding[charcode] = glyphName;
-        }
-        var glyphsUnicodeMap = (0, _glyphlist.getGlyphsUnicode)();
-        for (charcode in encoding) {
-          glyphName = encoding[charcode];
-          if (glyphName === '') {
-            continue;
-          } else if (glyphsUnicodeMap[glyphName] === undefined) {
-            var code = 0;
-            switch (glyphName[0]) {
-              case 'G':
-                if (glyphName.length === 3) {
-                  code = parseInt(glyphName.substr(1), 16);
-                }
-                break;
-              case 'g':
-                if (glyphName.length === 5) {
-                  code = parseInt(glyphName.substr(1), 16);
-                }
-                break;
-              case 'C':
-              case 'c':
-                if (glyphName.length >= 3) {
-                  code = +glyphName.substr(1);
-                }
-                break;
-              default:
-                var unicode = (0, _unicode.getUnicodeForGlyph)(glyphName, glyphsUnicodeMap);
-                if (unicode !== -1) {
-                  code = unicode;
-                }
-            }
-            if (code) {
-              if (baseEncodingName && code === +charcode) {
-                var baseEncoding = (0, _encodings.getEncoding)(baseEncodingName);
-                if (baseEncoding && (glyphName = baseEncoding[charcode])) {
-                  toUnicode[charcode] = String.fromCharCode(glyphsUnicodeMap[glyphName]);
-                  continue;
-                }
-              }
-              toUnicode[charcode] = String.fromCharCode(code);
-            }
-            continue;
-          }
-          toUnicode[charcode] = String.fromCharCode(glyphsUnicodeMap[glyphName]);
-        }
-        return Promise.resolve(new _fonts.ToUnicodeMap(toUnicode));
+        return Promise.resolve(this._buildSimpleFontToUnicode(properties));
       }
       if (properties.composite && (properties.cMap.builtInCMap && !(properties.cMap instanceof _cmap.IdentityCMap) || properties.cidSystemInfo.registry === 'Adobe' && (properties.cidSystemInfo.ordering === 'GB1' || properties.cidSystemInfo.ordering === 'CNS1' || properties.cidSystemInfo.ordering === 'Japan1' || properties.cidSystemInfo.ordering === 'Korea1'))) {
         var registry = properties.cidSystemInfo.registry;
@@ -41883,7 +41891,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           useCMap: null
         }).then(function (ucs2CMap) {
           var cMap = properties.cMap;
-          toUnicode = [];
+          var toUnicode = [];
           cMap.forEach(function (charcode, cid) {
             if (cid > 0xffff) {
               throw new _util.FormatError('Max size of CID is 65,535');
@@ -41898,6 +41906,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       }
       return Promise.resolve(new _fonts.IdentityToUnicodeMap(properties.firstChar, properties.lastChar));
     },
+
     readToUnicode: function PartialEvaluator_readToUnicode(toUnicode) {
       var cmapObj = toUnicode;
       if ((0, _primitives.isName)(cmapObj)) {
@@ -43806,7 +43815,9 @@ var Glyph = function GlyphClosure() {
   return Glyph;
 }();
 var ToUnicodeMap = function ToUnicodeMapClosure() {
-  function ToUnicodeMap(cmap) {
+  function ToUnicodeMap() {
+    var cmap = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
     this._map = cmap;
   }
   ToUnicodeMap.prototype = {
@@ -44012,6 +44023,7 @@ var Font = function FontClosure() {
     this.bbox = properties.bbox;
     this.defaultEncoding = properties.defaultEncoding;
     this.toUnicode = properties.toUnicode;
+    this.fallbackToUnicode = properties.fallbackToUnicode || new ToUnicodeMap();
     this.toFontChar = [];
     if (properties.type === 'Type3') {
       for (charCode = 0; charCode < 256; charCode++) {
@@ -45677,7 +45689,7 @@ var Font = function FontClosure() {
       width = this.widths[widthCode];
       width = (0, _util.isNum)(width) ? width : this.defaultWidth;
       var vmetric = this.vmetrics && this.vmetrics[widthCode];
-      var unicode = this.toUnicode.get(charcode) || charcode;
+      var unicode = this.toUnicode.get(charcode) || this.fallbackToUnicode.get(charcode) || charcode;
       if (typeof unicode === 'number') {
         unicode = String.fromCharCode(unicode);
       }
