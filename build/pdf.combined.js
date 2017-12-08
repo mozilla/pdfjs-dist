@@ -11645,7 +11645,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.193';
+  var apiVersion = '2.0.195';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12935,8 +12935,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.193';
-  exports.build = build = 'a5e3261b';
+  exports.version = version = '2.0.195';
+  exports.build = build = 'af1d80d4';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -20344,7 +20344,7 @@ exports.CFFCompiler = CFFCompiler;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.getSupplementalGlyphMapForArialBlack = exports.getGlyphMapForStandardFonts = exports.getSymbolsFonts = exports.getSerifFonts = exports.getNonStdFontMap = exports.getStdFontMap = undefined;
+exports.getSupplementalGlyphMapForCalibri = exports.getSupplementalGlyphMapForArialBlack = exports.getGlyphMapForStandardFonts = exports.getSymbolsFonts = exports.getSerifFonts = exports.getNonStdFontMap = exports.getStdFontMap = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
@@ -20407,6 +20407,10 @@ var getStdFontMap = (0, _util.getLookupTableFactory)(function (t) {
   t['TimesNewRomanPSMT-Italic'] = 'Times-Italic';
 });
 var getNonStdFontMap = (0, _util.getLookupTableFactory)(function (t) {
+  t['Calibri'] = 'Helvetica';
+  t['Calibri-Bold'] = 'Helvetica-Bold';
+  t['Calibri-BoldItalic'] = 'Helvetica-BoldOblique';
+  t['Calibri-Italic'] = 'Helvetica-Oblique';
   t['CenturyGothic'] = 'Helvetica';
   t['CenturyGothic-Bold'] = 'Helvetica-Bold';
   t['CenturyGothic-BoldItalic'] = 'Helvetica-BoldOblique';
@@ -20978,12 +20982,99 @@ var getSupplementalGlyphMapForArialBlack = (0, _util.getLookupTableFactory)(func
   t[264] = 261;
   t[291] = 346;
 });
+var getSupplementalGlyphMapForCalibri = (0, _util.getLookupTableFactory)(function (t) {
+  t[1] = 32;
+  t[4] = 65;
+  t[17] = 66;
+  t[18] = 67;
+  t[24] = 68;
+  t[28] = 69;
+  t[38] = 70;
+  t[39] = 71;
+  t[44] = 72;
+  t[47] = 73;
+  t[58] = 74;
+  t[60] = 75;
+  t[62] = 76;
+  t[68] = 77;
+  t[69] = 78;
+  t[75] = 79;
+  t[87] = 80;
+  t[89] = 81;
+  t[90] = 82;
+  t[94] = 83;
+  t[100] = 84;
+  t[104] = 85;
+  t[115] = 86;
+  t[116] = 87;
+  t[121] = 88;
+  t[122] = 89;
+  t[127] = 90;
+  t[258] = 97;
+  t[268] = 261;
+  t[271] = 98;
+  t[272] = 99;
+  t[273] = 263;
+  t[282] = 100;
+  t[286] = 101;
+  t[295] = 281;
+  t[296] = 102;
+  t[336] = 103;
+  t[346] = 104;
+  t[349] = 105;
+  t[361] = 106;
+  t[364] = 107;
+  t[367] = 108;
+  t[371] = 322;
+  t[373] = 109;
+  t[374] = 110;
+  t[381] = 111;
+  t[383] = 243;
+  t[393] = 112;
+  t[395] = 113;
+  t[396] = 114;
+  t[400] = 115;
+  t[401] = 347;
+  t[410] = 116;
+  t[437] = 117;
+  t[448] = 118;
+  t[449] = 119;
+  t[454] = 120;
+  t[455] = 121;
+  t[460] = 122;
+  t[463] = 380;
+  t[853] = 44;
+  t[855] = 58;
+  t[856] = 46;
+  t[876] = 47;
+  t[878] = 45;
+  t[882] = 45;
+  t[894] = 40;
+  t[895] = 41;
+  t[896] = 91;
+  t[897] = 93;
+  t[923] = 64;
+  t[1004] = 48;
+  t[1005] = 49;
+  t[1006] = 50;
+  t[1007] = 51;
+  t[1008] = 52;
+  t[1009] = 53;
+  t[1010] = 54;
+  t[1011] = 55;
+  t[1012] = 56;
+  t[1013] = 57;
+  t[1081] = 37;
+  t[1085] = 43;
+  t[1086] = 45;
+});
 exports.getStdFontMap = getStdFontMap;
 exports.getNonStdFontMap = getNonStdFontMap;
 exports.getSerifFonts = getSerifFonts;
 exports.getSymbolsFonts = getSymbolsFonts;
 exports.getGlyphMapForStandardFonts = getGlyphMapForStandardFonts;
 exports.getSupplementalGlyphMapForArialBlack = getSupplementalGlyphMapForArialBlack;
+exports.getSupplementalGlyphMapForCalibri = getSupplementalGlyphMapForCalibri;
 
 /***/ }),
 /* 74 */
@@ -26591,8 +26682,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.193';
-var pdfjsBuild = 'a5e3261b';
+var pdfjsVersion = '2.0.195';
+var pdfjsBuild = 'af1d80d4';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(129);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -31920,8 +32011,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.193';
-  PDFJS.build = 'a5e3261b';
+  PDFJS.version = '2.0.195';
+  PDFJS.build = 'af1d80d4';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35281,7 +35372,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.193';
+    var workerVersion = '2.0.195';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -44560,6 +44651,11 @@ var Font = function FontClosure() {
           var SupplementalGlyphMapForArialBlack = (0, _standard_fonts.getSupplementalGlyphMapForArialBlack)();
           for (charCode in SupplementalGlyphMapForArialBlack) {
             map[+charCode] = SupplementalGlyphMapForArialBlack[charCode];
+          }
+        } else if (/Calibri/i.test(name)) {
+          var SupplementalGlyphMapForCalibri = (0, _standard_fonts.getSupplementalGlyphMapForCalibri)();
+          for (charCode in SupplementalGlyphMapForCalibri) {
+            map[+charCode] = SupplementalGlyphMapForCalibri[charCode];
           }
         }
         var isIdentityUnicode = this.toUnicode instanceof IdentityToUnicodeMap;
