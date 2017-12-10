@@ -5294,10 +5294,6 @@ var JpegStream = function JpegStreamClosure() {
     this.bufferLength = data.length;
     this.eof = true;
   };
-  JpegStream.prototype.getBytes = function (length) {
-    this.readBlock();
-    return this.buffer;
-  };
   JpegStream.prototype.getIR = function () {
     var forceDataSchema = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
 
@@ -21913,8 +21909,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.199';
-var pdfjsBuild = 'af14620b';
+var pdfjsVersion = '2.0.201';
+var pdfjsBuild = '095c63cc';
 var pdfjsCoreWorker = __w_pdfjs_require__(72);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22119,7 +22115,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.199';
+    var workerVersion = '2.0.201';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
