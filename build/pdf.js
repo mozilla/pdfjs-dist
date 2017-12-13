@@ -3325,7 +3325,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.205';
+  var apiVersion = '2.0.207';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -4696,8 +4696,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.205';
-  exports.build = build = 'b327633a';
+  exports.version = version = '2.0.207';
+  exports.build = build = '546cd2b6';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -4747,6 +4747,20 @@ var Metadata = function () {
       return data.replace(/>\\376\\377([^<]+)/g, function (all, codes) {
         var bytes = codes.replace(/\\([0-3])([0-7])([0-7])/g, function (code, d1, d2, d3) {
           return String.fromCharCode(d1 * 64 + d2 * 8 + d3 * 1);
+        }).replace(/&(amp|apos|gt|lt|quot);/g, function (str, name) {
+          switch (name) {
+            case 'amp':
+              return '&';
+            case 'apos':
+              return '\'';
+            case 'gt':
+              return '>';
+            case 'lt':
+              return '<';
+            case 'quot':
+              return '\"';
+          }
+          throw new Error('_repair: ' + name + ' isn\'t defined.');
         });
         var chars = '';
         for (var i = 0, ii = bytes.length; i < ii; i += 2) {
@@ -7427,8 +7441,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.205';
-var pdfjsBuild = 'b327633a';
+var pdfjsVersion = '2.0.207';
+var pdfjsBuild = '546cd2b6';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(114);
 var pdfjsDisplayAPI = __w_pdfjs_require__(57);
@@ -12778,8 +12792,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.205';
-  PDFJS.build = 'b327633a';
+  PDFJS.version = '2.0.207';
+  PDFJS.build = '546cd2b6';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
