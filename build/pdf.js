@@ -2106,7 +2106,7 @@ var DummyStatTimer = function () {
   function DummyStatTimer() {
     _classCallCheck(this, DummyStatTimer);
 
-    throw new Error('Cannot initialize DummyStatTimer.');
+    (0, _util.unreachable)('Cannot initialize DummyStatTimer.');
   }
 
   _createClass(DummyStatTimer, null, [{
@@ -3325,7 +3325,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.209';
+  var apiVersion = '2.0.211';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -3444,7 +3444,7 @@ var PDFDataRangeTransport = function pdfDataRangeTransportClosure() {
       this._readyCapability.resolve();
     },
     requestDataRange: function PDFDataRangeTransport_requestDataRange(begin, end) {
-      throw new Error('Abstract method PDFDataRangeTransport.requestDataRange');
+      (0, _util.unreachable)('Abstract method PDFDataRangeTransport.requestDataRange');
     },
     abort: function PDFDataRangeTransport_abort() {}
   };
@@ -4696,8 +4696,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.209';
-  exports.build = build = '6515b911';
+  exports.version = version = '2.0.211';
+  exports.build = build = '6bbe9107';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -5018,7 +5018,7 @@ var AnnotationElement = function () {
   }, {
     key: 'render',
     value: function render() {
-      throw new Error('Abstract method `AnnotationElement.render` called');
+      (0, _util.unreachable)('Abstract method `AnnotationElement.render` called');
     }
   }]);
 
@@ -7441,8 +7441,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.209';
-var pdfjsBuild = '6515b911';
+var pdfjsVersion = '2.0.211';
+var pdfjsBuild = '6bbe9107';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(114);
 var pdfjsDisplayAPI = __w_pdfjs_require__(57);
@@ -12792,8 +12792,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.209';
-  PDFJS.build = '6515b911';
+  PDFJS.version = '2.0.211';
+  PDFJS.build = '6bbe9107';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -14527,10 +14527,10 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       this.restore();
     },
     beginInlineImage: function CanvasGraphics_beginInlineImage() {
-      throw new Error('Should not call beginInlineImage');
+      (0, _util.unreachable)('Should not call beginInlineImage');
     },
     beginImageData: function CanvasGraphics_beginImageData() {
-      throw new Error('Should not call beginImageData');
+      (0, _util.unreachable)('Should not call beginImageData');
     },
     paintFormXObjectBegin: function CanvasGraphics_paintFormXObjectBegin(matrix, bbox) {
       this.save();

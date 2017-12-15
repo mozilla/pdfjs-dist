@@ -3347,7 +3347,7 @@ var DummyStatTimer = function () {
   function DummyStatTimer() {
     _classCallCheck(this, DummyStatTimer);
 
-    throw new Error('Cannot initialize DummyStatTimer.');
+    (0, _util.unreachable)('Cannot initialize DummyStatTimer.');
   }
 
   _createClass(DummyStatTimer, null, [{
@@ -3552,7 +3552,7 @@ var ColorSpace = function ColorSpaceClosure() {
     }
   }
   function ColorSpace() {
-    throw new Error('should not call ColorSpace constructor');
+    (0, _util.unreachable)('should not call ColorSpace constructor');
   }
   ColorSpace.prototype = {
     getRgb: function ColorSpace_getRgb(src, srcOffset) {
@@ -3561,13 +3561,13 @@ var ColorSpace = function ColorSpaceClosure() {
       return rgb;
     },
     getRgbItem: function ColorSpace_getRgbItem(src, srcOffset, dest, destOffset) {
-      throw new Error('Should not call ColorSpace.getRgbItem');
+      (0, _util.unreachable)('Should not call ColorSpace.getRgbItem');
     },
     getRgbBuffer: function ColorSpace_getRgbBuffer(src, srcOffset, count, dest, destOffset, bits, alpha01) {
-      throw new Error('Should not call ColorSpace.getRgbBuffer');
+      (0, _util.unreachable)('Should not call ColorSpace.getRgbBuffer');
     },
     getOutputLength: function ColorSpace_getOutputLength(inputLength, alpha01) {
-      throw new Error('Should not call ColorSpace.getOutputLength');
+      (0, _util.unreachable)('Should not call ColorSpace.getOutputLength');
     },
     isPassthrough: function ColorSpace_isPassthrough(bits) {
       return false;
@@ -11638,7 +11638,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.209';
+  var apiVersion = '2.0.211';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -11757,7 +11757,7 @@ var PDFDataRangeTransport = function pdfDataRangeTransportClosure() {
       this._readyCapability.resolve();
     },
     requestDataRange: function PDFDataRangeTransport_requestDataRange(begin, end) {
-      throw new Error('Abstract method PDFDataRangeTransport.requestDataRange');
+      (0, _util.unreachable)('Abstract method PDFDataRangeTransport.requestDataRange');
     },
     abort: function PDFDataRangeTransport_abort() {}
   };
@@ -12928,8 +12928,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.209';
-  exports.build = build = '6515b911';
+  exports.version = version = '2.0.211';
+  exports.build = build = '6bbe9107';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -14747,7 +14747,7 @@ var XRef = function XRefClosure() {
 }();
 var NameOrNumberTree = function NameOrNumberTreeClosure() {
   function NameOrNumberTree(root, xref) {
-    throw new Error('Cannot initialize NameOrNumberTree.');
+    (0, _util.unreachable)('Cannot initialize NameOrNumberTree.');
   }
   NameOrNumberTree.prototype = {
     getAll: function NameOrNumberTree_getAll() {
@@ -23754,7 +23754,7 @@ var PostScriptCompiler = function PostScriptCompilerClosure() {
     this.type = type;
   }
   AstNode.prototype.visit = function (visitor) {
-    throw new Error('abstract method');
+    (0, _util.unreachable)('abstract method');
   };
   function AstArgument(index, min, max) {
     AstNode.call(this, 'args');
@@ -24267,7 +24267,7 @@ var AnnotationElement = function () {
   }, {
     key: 'render',
     value: function render() {
-      throw new Error('Abstract method `AnnotationElement.render` called');
+      (0, _util.unreachable)('Abstract method `AnnotationElement.render` called');
     }
   }]);
 
@@ -26689,8 +26689,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.209';
-var pdfjsBuild = '6515b911';
+var pdfjsVersion = '2.0.211';
+var pdfjsBuild = '6bbe9107';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(131);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -32040,8 +32040,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.209';
-  PDFJS.build = '6515b911';
+  PDFJS.version = '2.0.211';
+  PDFJS.build = '6bbe9107';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -33775,10 +33775,10 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
       this.restore();
     },
     beginInlineImage: function CanvasGraphics_beginInlineImage() {
-      throw new Error('Should not call beginInlineImage');
+      (0, _util.unreachable)('Should not call beginInlineImage');
     },
     beginImageData: function CanvasGraphics_beginImageData() {
-      throw new Error('Should not call beginImageData');
+      (0, _util.unreachable)('Should not call beginImageData');
     },
     paintFormXObjectBegin: function CanvasGraphics_paintFormXObjectBegin(matrix, bbox) {
       this.save();
@@ -35401,7 +35401,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.209';
+    var workerVersion = '2.0.211';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -35811,7 +35811,7 @@ var _stream = __w_pdfjs_require__(2);
 
 var BasePdfManager = function BasePdfManagerClosure() {
   function BasePdfManager() {
-    throw new Error('Cannot initialize BaseManagerManager');
+    (0, _util.unreachable)('Cannot initialize BaseManagerManager');
   }
   BasePdfManager.prototype = {
     get docId() {
@@ -43274,16 +43274,16 @@ var IdentityCMap = function IdentityCMapClosure() {
   IdentityCMap.prototype = {
     addCodespaceRange: CMap.prototype.addCodespaceRange,
     mapCidRange: function mapCidRange(low, high, dstLow) {
-      throw new Error('should not call mapCidRange');
+      (0, _util.unreachable)('should not call mapCidRange');
     },
     mapBfRange: function mapBfRange(low, high, dstLow) {
-      throw new Error('should not call mapBfRange');
+      (0, _util.unreachable)('should not call mapBfRange');
     },
     mapBfRangeToArray: function mapBfRangeToArray(low, high, array) {
-      throw new Error('should not call mapBfRangeToArray');
+      (0, _util.unreachable)('should not call mapBfRangeToArray');
     },
     mapOne: function mapOne(src, dst) {
-      throw new Error('should not call mapCidOne');
+      (0, _util.unreachable)('should not call mapCidOne');
     },
     lookup: function lookup(code) {
       return Number.isInteger(code) && code <= 0xffff ? code : undefined;
@@ -43312,7 +43312,7 @@ var IdentityCMap = function IdentityCMapClosure() {
       return 0x10000;
     },
     get isIdentityCMap() {
-      throw new Error('should not access .isIdentityCMap');
+      (0, _util.unreachable)('should not access .isIdentityCMap');
     }
   };
   return IdentityCMap;
@@ -44049,7 +44049,7 @@ var IdentityToUnicodeMap = function IdentityToUnicodeMapClosure() {
       return Number.isInteger(v) && v >= this.firstChar && v <= this.lastChar ? v : -1;
     },
     amend: function amend(map) {
-      throw new Error('Should not call amend()');
+      (0, _util.unreachable)('Should not call amend()');
     }
   };
   return IdentityToUnicodeMap;
@@ -47016,7 +47016,7 @@ var FontRendererFactory = function FontRendererFactoryClosure() {
       return cmds;
     },
     compileGlyphImpl: function compileGlyphImpl() {
-      throw new Error('Children classes should implement this.');
+      (0, _util.unreachable)('Children classes should implement this.');
     },
     hasBuiltPath: function hasBuiltPath(unicode) {
       var cmap = lookupCmap(this.cmap, unicode);
@@ -47680,11 +47680,11 @@ var ShadingType = {
 };
 var Pattern = function PatternClosure() {
   function Pattern() {
-    throw new Error('should not call Pattern constructor');
+    (0, _util.unreachable)('should not call Pattern constructor');
   }
   Pattern.prototype = {
     getPattern: function Pattern_getPattern(ctx) {
-      throw new Error('Should not call Pattern.getStyle: ' + ctx);
+      (0, _util.unreachable)('Should not call Pattern.getStyle: ' + ctx);
     }
   };
   Pattern.parseShading = function (shading, matrix, xref, res, handler, pdfFunctionFactory) {
