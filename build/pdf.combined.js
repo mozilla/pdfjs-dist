@@ -11638,7 +11638,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.213';
+  var apiVersion = '2.0.220';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12928,8 +12928,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.213';
-  exports.build = build = '8ae3fd49';
+  exports.version = version = '2.0.220';
+  exports.build = build = 'e081a708';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -26710,8 +26710,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.213';
-var pdfjsBuild = '8ae3fd49';
+var pdfjsVersion = '2.0.220';
+var pdfjsBuild = 'e081a708';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(131);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -26772,8 +26772,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
   var globalScope = __w_pdfjs_require__(16);
   var userAgent = typeof navigator !== 'undefined' && navigator.userAgent || '';
   var isAndroid = /Android/.test(userAgent);
-  var isAndroidPre5 = /Android\s[0-4][^\d]/.test(userAgent);
-  var isChrome = userAgent.indexOf('Chrom') >= 0;
   var isIOSChrome = userAgent.indexOf('CriOS') >= 0;
   var isIE = userAgent.indexOf('Trident') >= 0;
   var isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent);
@@ -26783,89 +26781,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     globalScope.PDFJS = {};
   }
   PDFJS.compatibilityChecked = true;
-  (function normalizeURLObject() {
-    if (!globalScope.URL) {
-      globalScope.URL = globalScope.webkitURL;
-    }
-  })();
-  (function checkXMLHttpRequestResponseCompatibility() {
-    if (typeof XMLHttpRequest === 'undefined') {
-      return;
-    }
-    var xhrPrototype = XMLHttpRequest.prototype;
-    var xhr = new XMLHttpRequest();
-    if (!('overrideMimeType' in xhr)) {
-      Object.defineProperty(xhrPrototype, 'overrideMimeType', {
-        value: function xmlHttpRequestOverrideMimeType(mimeType) {}
-      });
-    }
-    if ('responseType' in xhr) {
-      return;
-    }
-    Object.defineProperty(xhrPrototype, 'responseType', {
-      get: function xmlHttpRequestGetResponseType() {
-        return this._responseType || 'text';
-      },
-      set: function xmlHttpRequestSetResponseType(value) {
-        if (value === 'text' || value === 'arraybuffer') {
-          this._responseType = value;
-          if (value === 'arraybuffer' && typeof this.overrideMimeType === 'function') {
-            this.overrideMimeType('text/plain; charset=x-user-defined');
-          }
-        }
-      }
-    });
-    Object.defineProperty(xhrPrototype, 'response', {
-      get: function xmlHttpRequestResponseGet() {
-        if (this.responseType !== 'arraybuffer') {
-          return this.responseText;
-        }
-        var text = this.responseText;
-        var i,
-            n = text.length;
-        var result = new Uint8Array(n);
-        for (i = 0; i < n; ++i) {
-          result[i] = text.charCodeAt(i) & 0xFF;
-        }
-        return result.buffer;
-      }
-    });
-  })();
-  (function checkDatasetProperty() {
-    if (!hasDOM) {
-      return;
-    }
-    var div = document.createElement('div');
-    if ('dataset' in div) {
-      return;
-    }
-    Object.defineProperty(HTMLElement.prototype, 'dataset', {
-      get: function get() {
-        if (this._dataset) {
-          return this._dataset;
-        }
-        var dataset = {};
-        for (var j = 0, jj = this.attributes.length; j < jj; j++) {
-          var attribute = this.attributes[j];
-          if (attribute.name.substring(0, 5) !== 'data-') {
-            continue;
-          }
-          var key = attribute.name.substring(5).replace(/\-([a-z])/g, function (all, ch) {
-            return ch.toUpperCase();
-          });
-          dataset[key] = attribute.value;
-        }
-        Object.defineProperty(this, '_dataset', {
-          value: dataset,
-          writable: false,
-          enumerable: false
-        });
-        return dataset;
-      },
-
-      enumerable: true
-    });
-  })();
   (function checkOnBlobSupport() {
     if (isIE || isIOSChrome) {
       PDFJS.disableCreateObjectURL = true;
@@ -26884,46 +26799,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     if (isSafari || isIOS) {
       PDFJS.disableRange = true;
       PDFJS.disableStream = true;
-    }
-  })();
-  (function checkSetPresenceInImageData() {
-    if (!hasDOM) {
-      return;
-    }
-    if (window.CanvasPixelArray) {
-      if (typeof window.CanvasPixelArray.prototype.set !== 'function') {
-        window.CanvasPixelArray.prototype.set = function (arr) {
-          for (var i = 0, ii = this.length; i < ii; i++) {
-            this[i] = arr[i];
-          }
-        };
-      }
-    } else {
-      var polyfill = false,
-          versionMatch;
-      if (isChrome) {
-        versionMatch = userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
-        polyfill = versionMatch && parseInt(versionMatch[2]) < 21;
-      } else if (isAndroid) {
-        polyfill = isAndroidPre5;
-      } else if (isSafari) {
-        versionMatch = userAgent.match(/Version\/([0-9]+)\.([0-9]+)\.([0-9]+) Safari\//);
-        polyfill = versionMatch && parseInt(versionMatch[1]) < 6;
-      }
-      if (polyfill) {
-        var contextPrototype = window.CanvasRenderingContext2D.prototype;
-        var createImageData = contextPrototype.createImageData;
-        contextPrototype.createImageData = function (w, h) {
-          var imageData = createImageData.call(this, w, h);
-          imageData.data.set = function (arr) {
-            for (var i = 0, ii = this.length; i < ii; i++) {
-              this[i] = arr[i];
-            }
-          };
-          return imageData;
-        };
-        contextPrototype = null;
-      }
     }
   })();
   (function checkCanvasSizeLimitation() {
@@ -26950,51 +26825,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       get: function get() {
         var scripts = document.getElementsByTagName('script');
         return scripts[scripts.length - 1];
-      },
-
-      enumerable: true,
-      configurable: true
-    });
-  })();
-  (function checkInputTypeNumberAssign() {
-    if (!hasDOM) {
-      return;
-    }
-    var el = document.createElement('input');
-    try {
-      el.type = 'number';
-    } catch (ex) {
-      var inputProto = el.constructor.prototype;
-      var typeProperty = Object.getOwnPropertyDescriptor(inputProto, 'type');
-      Object.defineProperty(inputProto, 'type', {
-        get: function get() {
-          return typeProperty.get.call(this);
-        },
-        set: function set(value) {
-          typeProperty.set.call(this, value === 'number' ? 'text' : value);
-        },
-
-        enumerable: true,
-        configurable: true
-      });
-    }
-  })();
-  (function checkDocumentReadyState() {
-    if (!hasDOM) {
-      return;
-    }
-    if (!document.attachEvent) {
-      return;
-    }
-    var documentProto = document.constructor.prototype;
-    var readyStateProto = Object.getOwnPropertyDescriptor(documentProto, 'readyState');
-    Object.defineProperty(documentProto, 'readyState', {
-      get: function get() {
-        var value = readyStateProto.get.call(this);
-        return value === 'interactive' ? 'loading' : value;
-      },
-      set: function set(value) {
-        readyStateProto.set.call(this, value);
       },
 
       enumerable: true,
@@ -32061,8 +31891,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.213';
-  PDFJS.build = '8ae3fd49';
+  PDFJS.version = '2.0.220';
+  PDFJS.build = 'e081a708';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35422,7 +35252,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.213';
+    var workerVersion = '2.0.220';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
