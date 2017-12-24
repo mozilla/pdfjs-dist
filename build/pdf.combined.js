@@ -11638,7 +11638,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.224';
+  var apiVersion = '2.0.226';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12929,8 +12929,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.224';
-  exports.build = build = '1d4651b2';
+  exports.version = version = '2.0.226';
+  exports.build = build = 'fe30d4d4';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -20452,6 +20452,7 @@ var getNonStdFontMap = (0, _util.getLookupTableFactory)(function (t) {
   t['LucidaConsole-Bold'] = 'Courier-Bold';
   t['LucidaConsole-BoldItalic'] = 'Courier-BoldOblique';
   t['LucidaConsole-Italic'] = 'Courier-Oblique';
+  t['LucidaSans-Demi'] = 'Helvetica-Bold';
   t['MS-Gothic'] = 'MS Gothic';
   t['MS-Gothic-Bold'] = 'MS Gothic-Bold';
   t['MS-Gothic-BoldItalic'] = 'MS Gothic-BoldItalic';
@@ -26711,8 +26712,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.224';
-var pdfjsBuild = '1d4651b2';
+var pdfjsVersion = '2.0.226';
+var pdfjsBuild = 'fe30d4d4';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(131);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -31892,8 +31893,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.224';
-  PDFJS.build = '1d4651b2';
+  PDFJS.version = '2.0.226';
+  PDFJS.build = 'fe30d4d4';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35255,7 +35256,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.224';
+    var workerVersion = '2.0.226';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }

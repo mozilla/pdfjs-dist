@@ -18279,6 +18279,7 @@ var getNonStdFontMap = (0, _util.getLookupTableFactory)(function (t) {
   t['LucidaConsole-Bold'] = 'Courier-Bold';
   t['LucidaConsole-BoldItalic'] = 'Courier-BoldOblique';
   t['LucidaConsole-Italic'] = 'Courier-Oblique';
+  t['LucidaSans-Demi'] = 'Helvetica-Bold';
   t['MS-Gothic'] = 'MS Gothic';
   t['MS-Gothic-Bold'] = 'MS Gothic-Bold';
   t['MS-Gothic-BoldItalic'] = 'MS Gothic-BoldItalic';
@@ -21930,8 +21931,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.224';
-var pdfjsBuild = '1d4651b2';
+var pdfjsVersion = '2.0.226';
+var pdfjsBuild = 'fe30d4d4';
 var pdfjsCoreWorker = __w_pdfjs_require__(72);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22138,7 +22139,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.224';
+    var workerVersion = '2.0.226';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
