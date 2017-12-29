@@ -21931,8 +21931,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.232';
-var pdfjsBuild = '25bbff46';
+var pdfjsVersion = '2.0.234';
+var pdfjsBuild = 'ad0dc7e8';
 var pdfjsCoreWorker = __w_pdfjs_require__(72);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22139,7 +22139,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.232';
+    var workerVersion = '2.0.234';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -44271,10 +44271,17 @@ var PDFImage = function PDFImageClosure() {
           }
           return imgData;
         }
-        if (this.image instanceof _jpeg_stream.JpegStream && !this.smask && !this.mask && (this.colorSpace.name === 'DeviceGray' || this.colorSpace.name === 'DeviceRGB' || this.colorSpace.name === 'DeviceCMYK')) {
-          imgData.kind = _util.ImageKind.RGB_24BPP;
-          imgData.data = this.getImageBytes(originalHeight * rowBytes, drawWidth, drawHeight, true);
-          return imgData;
+        if (this.image instanceof _jpeg_stream.JpegStream && !this.smask && !this.mask) {
+          var imageLength = originalHeight * rowBytes;
+          switch (this.colorSpace.name) {
+            case 'DeviceGray':
+              imageLength *= 3;
+            case 'DeviceRGB':
+            case 'DeviceCMYK':
+              imgData.kind = _util.ImageKind.RGB_24BPP;
+              imgData.data = this.getImageBytes(imageLength, drawWidth, drawHeight, true);
+              return imgData;
+          }
         }
       }
       imgArray = this.getImageBytes(originalHeight * rowBytes);

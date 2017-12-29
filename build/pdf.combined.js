@@ -11638,7 +11638,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.232';
+  var apiVersion = '2.0.234';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12929,8 +12929,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.232';
-  exports.build = build = '25bbff46';
+  exports.version = version = '2.0.234';
+  exports.build = build = 'ad0dc7e8';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -26712,8 +26712,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.232';
-var pdfjsBuild = '25bbff46';
+var pdfjsVersion = '2.0.234';
+var pdfjsBuild = 'ad0dc7e8';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(131);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -31893,8 +31893,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.232';
-  PDFJS.build = '25bbff46';
+  PDFJS.version = '2.0.234';
+  PDFJS.build = 'ad0dc7e8';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35256,7 +35256,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.232';
+    var workerVersion = '2.0.234';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -52284,10 +52284,17 @@ var PDFImage = function PDFImageClosure() {
           }
           return imgData;
         }
-        if (this.image instanceof _jpeg_stream.JpegStream && !this.smask && !this.mask && (this.colorSpace.name === 'DeviceGray' || this.colorSpace.name === 'DeviceRGB' || this.colorSpace.name === 'DeviceCMYK')) {
-          imgData.kind = _util.ImageKind.RGB_24BPP;
-          imgData.data = this.getImageBytes(originalHeight * rowBytes, drawWidth, drawHeight, true);
-          return imgData;
+        if (this.image instanceof _jpeg_stream.JpegStream && !this.smask && !this.mask) {
+          var imageLength = originalHeight * rowBytes;
+          switch (this.colorSpace.name) {
+            case 'DeviceGray':
+              imageLength *= 3;
+            case 'DeviceRGB':
+            case 'DeviceCMYK':
+              imgData.kind = _util.ImageKind.RGB_24BPP;
+              imgData.data = this.getImageBytes(imageLength, drawWidth, drawHeight, true);
+              return imgData;
+          }
         }
       }
       imgArray = this.getImageBytes(originalHeight * rowBytes);
