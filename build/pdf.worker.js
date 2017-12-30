@@ -21938,8 +21938,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.236';
-var pdfjsBuild = '18d82d9c';
+var pdfjsVersion = '2.0.239';
+var pdfjsBuild = '4cc0f8c7';
 var pdfjsCoreWorker = __w_pdfjs_require__(72);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22146,7 +22146,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.236';
+    var workerVersion = '2.0.239';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -30512,7 +30512,8 @@ var JpegImage = function JpegImageClosure() {
       var s;
       var rs;
       while (k <= e) {
-        var z = dctZigZag[k];
+        var offsetZ = offset + dctZigZag[k];
+        var sign = component.blockData[offsetZ] < 0 ? -1 : 1;
         switch (successiveACState) {
           case 0:
             rs = decodeHuffman(component.huffmanTableAC);
@@ -30536,8 +30537,8 @@ var JpegImage = function JpegImageClosure() {
             continue;
           case 1:
           case 2:
-            if (component.blockData[offset + z]) {
-              component.blockData[offset + z] += readBit() << successive;
+            if (component.blockData[offsetZ]) {
+              component.blockData[offsetZ] += sign * (readBit() << successive);
             } else {
               r--;
               if (r === 0) {
@@ -30546,16 +30547,16 @@ var JpegImage = function JpegImageClosure() {
             }
             break;
           case 3:
-            if (component.blockData[offset + z]) {
-              component.blockData[offset + z] += readBit() << successive;
+            if (component.blockData[offsetZ]) {
+              component.blockData[offsetZ] += sign * (readBit() << successive);
             } else {
-              component.blockData[offset + z] = successiveACNextValue << successive;
+              component.blockData[offsetZ] = successiveACNextValue << successive;
               successiveACState = 0;
             }
             break;
           case 4:
-            if (component.blockData[offset + z]) {
-              component.blockData[offset + z] += readBit() << successive;
+            if (component.blockData[offsetZ]) {
+              component.blockData[offsetZ] += sign * (readBit() << successive);
             }
             break;
         }

@@ -11645,7 +11645,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.236';
+  var apiVersion = '2.0.239';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12936,8 +12936,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.236';
-  exports.build = build = '18d82d9c';
+  exports.version = version = '2.0.239';
+  exports.build = build = '4cc0f8c7';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -26719,8 +26719,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.236';
-var pdfjsBuild = '18d82d9c';
+var pdfjsVersion = '2.0.239';
+var pdfjsBuild = '4cc0f8c7';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(131);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -31900,8 +31900,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.236';
-  PDFJS.build = '18d82d9c';
+  PDFJS.version = '2.0.239';
+  PDFJS.build = '4cc0f8c7';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35263,7 +35263,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.236';
+    var workerVersion = '2.0.239';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -38525,7 +38525,8 @@ var JpegImage = function JpegImageClosure() {
       var s;
       var rs;
       while (k <= e) {
-        var z = dctZigZag[k];
+        var offsetZ = offset + dctZigZag[k];
+        var sign = component.blockData[offsetZ] < 0 ? -1 : 1;
         switch (successiveACState) {
           case 0:
             rs = decodeHuffman(component.huffmanTableAC);
@@ -38549,8 +38550,8 @@ var JpegImage = function JpegImageClosure() {
             continue;
           case 1:
           case 2:
-            if (component.blockData[offset + z]) {
-              component.blockData[offset + z] += readBit() << successive;
+            if (component.blockData[offsetZ]) {
+              component.blockData[offsetZ] += sign * (readBit() << successive);
             } else {
               r--;
               if (r === 0) {
@@ -38559,16 +38560,16 @@ var JpegImage = function JpegImageClosure() {
             }
             break;
           case 3:
-            if (component.blockData[offset + z]) {
-              component.blockData[offset + z] += readBit() << successive;
+            if (component.blockData[offsetZ]) {
+              component.blockData[offsetZ] += sign * (readBit() << successive);
             } else {
-              component.blockData[offset + z] = successiveACNextValue << successive;
+              component.blockData[offsetZ] = successiveACNextValue << successive;
               successiveACState = 0;
             }
             break;
           case 4:
-            if (component.blockData[offset + z]) {
-              component.blockData[offset + z] += readBit() << successive;
+            if (component.blockData[offsetZ]) {
+              component.blockData[offsetZ] += sign * (readBit() << successive);
             }
             break;
         }
