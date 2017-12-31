@@ -2855,7 +2855,7 @@ module.exports = function (fn, that, length) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DummyStatTimer = exports.StatTimer = exports.SimpleXMLParser = exports.DOMSVGFactory = exports.DOMCMapReaderFactory = exports.DOMCanvasFactory = exports.DEFAULT_LINK_REL = exports.getDefaultSetting = exports.LinkTarget = exports.getFilenameFromUrl = exports.isExternalLinkTargetSet = exports.addLinkAttributes = exports.RenderingCancelledException = exports.CustomStyle = undefined;
+exports.DummyStatTimer = exports.StatTimer = exports.SimpleXMLParser = exports.DOMSVGFactory = exports.DOMCMapReaderFactory = exports.DOMCanvasFactory = exports.DEFAULT_LINK_REL = exports.getDefaultSetting = exports.LinkTarget = exports.getFilenameFromUrl = exports.isExternalLinkTargetSet = exports.addLinkAttributes = exports.RenderingCancelledException = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -3140,38 +3140,6 @@ var SimpleXMLParser = function () {
   return SimpleXMLParser;
 }();
 
-var CustomStyle = function CustomStyleClosure() {
-  var prefixes = ['ms', 'Moz', 'Webkit', 'O'];
-  var _cache = Object.create(null);
-  function CustomStyle() {}
-  CustomStyle.getProp = function get(propName, element) {
-    if (arguments.length === 1 && typeof _cache[propName] === 'string') {
-      return _cache[propName];
-    }
-    element = element || document.documentElement;
-    var style = element.style,
-        prefixed,
-        uPropName;
-    if (typeof style[propName] === 'string') {
-      return _cache[propName] = propName;
-    }
-    uPropName = propName.charAt(0).toUpperCase() + propName.slice(1);
-    for (var i = 0, l = prefixes.length; i < l; i++) {
-      prefixed = prefixes[i] + uPropName;
-      if (typeof style[prefixed] === 'string') {
-        return _cache[propName] = prefixed;
-      }
-    }
-    return _cache[propName] = 'undefined';
-  };
-  CustomStyle.setProp = function set(propName, element, str) {
-    var prop = this.getProp(propName);
-    if (prop !== 'undefined') {
-      element.style[prop] = str;
-    }
-  };
-  return CustomStyle;
-}();
 var RenderingCancelledException = function RenderingCancelledException() {
   function RenderingCancelledException(msg, type) {
     this.message = msg;
@@ -3376,7 +3344,6 @@ var DummyStatTimer = function () {
   return DummyStatTimer;
 }();
 
-exports.CustomStyle = CustomStyle;
 exports.RenderingCancelledException = RenderingCancelledException;
 exports.addLinkAttributes = addLinkAttributes;
 exports.isExternalLinkTargetSet = isExternalLinkTargetSet;
@@ -11645,7 +11612,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.241';
+  var apiVersion = '2.0.243';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12936,8 +12903,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.241';
-  exports.build = build = '3f88bfcd';
+  exports.version = version = '2.0.243';
+  exports.build = build = 'ae65c661';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -24228,8 +24195,8 @@ var AnnotationElement = function () {
       var height = data.rect[3] - data.rect[1];
       container.setAttribute('data-annotation-id', data.id);
       var rect = _util.Util.normalizeRect([data.rect[0], page.view[3] - data.rect[1] + page.view[1], data.rect[2], page.view[3] - data.rect[3] + page.view[1]]);
-      _dom_utils.CustomStyle.setProp('transform', container, 'matrix(' + viewport.transform.join(',') + ')');
-      _dom_utils.CustomStyle.setProp('transformOrigin', container, -rect[0] + 'px ' + -rect[1] + 'px');
+      container.style.transform = 'matrix(' + viewport.transform.join(',') + ')';
+      container.style.transformOrigin = -rect[0] + 'px ' + -rect[1] + 'px';
       if (!ignoreBorder && data.borderStyle.width > 0) {
         container.style.borderWidth = data.borderStyle.width + 'px';
         if (data.borderStyle.style !== _util.AnnotationBorderStyleType.UNDERLINE) {
@@ -24240,7 +24207,7 @@ var AnnotationElement = function () {
         var verticalRadius = data.borderStyle.verticalCornerRadius;
         if (horizontalRadius > 0 || verticalRadius > 0) {
           var radius = horizontalRadius + 'px / ' + verticalRadius + 'px';
-          _dom_utils.CustomStyle.setProp('borderRadius', container, radius);
+          container.style.borderRadius = radius;
         }
         switch (data.borderStyle.style) {
           case _util.AnnotationBorderStyleType.SOLID:
@@ -24636,7 +24603,7 @@ var PopupAnnotationElement = function (_AnnotationElement4) {
       });
       var parentLeft = parseFloat(parentElement.style.left);
       var parentWidth = parseFloat(parentElement.style.width);
-      _dom_utils.CustomStyle.setProp('transformOrigin', this.container, -(parentLeft + parentWidth) + 'px -' + parentElement.style.top);
+      this.container.style.transformOrigin = -(parentLeft + parentWidth) + 'px -' + parentElement.style.top;
       this.container.style.left = parentLeft + parentWidth + 'px';
       this.container.appendChild(popup.render());
       return this.container;
@@ -25117,7 +25084,7 @@ var AnnotationLayer = function () {
         var data = parameters.annotations[i];
         var element = parameters.div.querySelector('[data-annotation-id="' + data.id + '"]');
         if (element) {
-          _dom_utils.CustomStyle.setProp('transform', element, 'matrix(' + parameters.viewport.transform.join(',') + ')');
+          element.style.transform = 'matrix(' + parameters.viewport.transform.join(',') + ')';
         }
       }
       parameters.div.removeAttribute('hidden');
@@ -25563,7 +25530,7 @@ var renderTextLayer = function renderTextLayerClosure() {
       }
       if (transform !== '') {
         textDivProperties.originalTransform = transform;
-        _dom_utils.CustomStyle.setProp('transform', textDiv, transform);
+        textDiv.style.transform = transform;
       }
       this._textDivProperties.set(textDiv, textDivProperties);
       textLayerFrag.appendChild(textDiv);
@@ -25654,11 +25621,11 @@ var renderTextLayer = function renderTextLayerClosure() {
             div.setAttribute('style', divProperties.style + padding);
           }
           if (transform !== '') {
-            _dom_utils.CustomStyle.setProp('transform', div, transform);
+            div.style.transform = transform;
           }
         } else {
           div.style.padding = 0;
-          _dom_utils.CustomStyle.setProp('transform', div, divProperties.originalTransform || '');
+          div.style.transform = divProperties.originalTransform || '';
         }
       }
     }
@@ -26719,8 +26686,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.241';
-var pdfjsBuild = '3f88bfcd';
+var pdfjsVersion = '2.0.243';
+var pdfjsBuild = 'ae65c661';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(131);
 var pdfjsDisplayAPI = __w_pdfjs_require__(65);
@@ -26749,7 +26716,6 @@ exports.PDFDataRangeTransport = pdfjsDisplayAPI.PDFDataRangeTransport;
 exports.PDFWorker = pdfjsDisplayAPI.PDFWorker;
 exports.renderTextLayer = pdfjsDisplayTextLayer.renderTextLayer;
 exports.AnnotationLayer = pdfjsDisplayAnnotationLayer.AnnotationLayer;
-exports.CustomStyle = pdfjsDisplayDOMUtils.CustomStyle;
 exports.createPromiseCapability = pdfjsSharedUtil.createPromiseCapability;
 exports.PasswordResponses = pdfjsSharedUtil.PasswordResponses;
 exports.InvalidPDFException = pdfjsSharedUtil.InvalidPDFException;
@@ -31900,8 +31866,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.241';
-  PDFJS.build = '3f88bfcd';
+  PDFJS.version = '2.0.243';
+  PDFJS.build = 'ae65c661';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -31966,7 +31932,6 @@ PDFJS.getDocument = _api.getDocument;
 PDFJS.LoopbackPort = _api.LoopbackPort;
 PDFJS.PDFDataRangeTransport = _api.PDFDataRangeTransport;
 PDFJS.PDFWorker = _api.PDFWorker;
-PDFJS.CustomStyle = _dom_utils.CustomStyle;
 PDFJS.LinkTarget = _dom_utils.LinkTarget;
 PDFJS.addLinkAttributes = _dom_utils.addLinkAttributes;
 PDFJS.getFilenameFromUrl = _dom_utils.getFilenameFromUrl;
@@ -35263,7 +35228,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.241';
+    var workerVersion = '2.0.243';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
