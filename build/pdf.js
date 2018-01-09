@@ -3299,7 +3299,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.256';
+  var apiVersion = '2.0.258';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -4672,8 +4672,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.256';
-  exports.build = build = '3925aab0';
+  exports.version = version = '2.0.258';
+  exports.build = build = '5a52ee0a';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -6894,6 +6894,9 @@ var SVGGraphics = function SVGGraphics() {
             case _util.OPS.closeFillStroke:
               this.closeFillStroke();
               break;
+            case _util.OPS.closeEOFillStroke:
+              this.closeEOFillStroke();
+              break;
             case _util.OPS.nextLine:
               this.nextLine();
               break;
@@ -7281,6 +7284,11 @@ var SVGGraphics = function SVGGraphics() {
         this.closePath();
         this.fillStroke();
       },
+      closeEOFillStroke: function closeEOFillStroke() {
+        this.closePath();
+        this.eoFillStroke();
+      },
+
       paintSolidColorImageMask: function SVGGraphics_paintSolidColorImageMask() {
         var current = this.current;
         var rect = this.svgFactory.createElement('svg:rect');
@@ -7417,8 +7425,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.256';
-var pdfjsBuild = '3925aab0';
+var pdfjsVersion = '2.0.258';
+var pdfjsBuild = '5a52ee0a';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(114);
 var pdfjsDisplayAPI = __w_pdfjs_require__(57);
@@ -12597,8 +12605,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.256';
-  PDFJS.build = '3925aab0';
+  PDFJS.version = '2.0.258';
+  PDFJS.build = '5a52ee0a';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
