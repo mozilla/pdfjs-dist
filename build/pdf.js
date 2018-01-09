@@ -3299,7 +3299,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.252';
+  var apiVersion = '2.0.254';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -3517,12 +3517,13 @@ var PDFPageProxy = function PDFPageProxyClosure() {
     get view() {
       return this.pageInfo.view;
     },
-    getViewport: function PDFPageProxy_getViewport(scale, rotate) {
-      if (arguments.length < 2) {
-        rotate = this.rotate;
-      }
-      return new _util.PageViewport(this.view, scale, rotate, 0, 0);
+    getViewport: function getViewport(scale) {
+      var rotate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.rotate;
+      var dontFlip = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+      return new _util.PageViewport(this.view, scale, rotate, 0, 0, dontFlip);
     },
+
     getAnnotations: function PDFPageProxy_getAnnotations(params) {
       var intent = params && params.intent || null;
       if (!this.annotationsPromise || this.annotationsIntent !== intent) {
@@ -4671,8 +4672,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.252';
-  exports.build = build = 'a3b2456c';
+  exports.version = version = '2.0.254';
+  exports.build = build = '915e3f4c';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -7416,8 +7417,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.252';
-var pdfjsBuild = 'a3b2456c';
+var pdfjsVersion = '2.0.254';
+var pdfjsBuild = '915e3f4c';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(114);
 var pdfjsDisplayAPI = __w_pdfjs_require__(57);
@@ -12596,8 +12597,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.252';
-  PDFJS.build = 'a3b2456c';
+  PDFJS.version = '2.0.254';
+  PDFJS.build = '915e3f4c';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
