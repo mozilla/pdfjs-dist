@@ -3135,16 +3135,10 @@ var ColorSpace = function ColorSpaceClosure() {
         throw new _util.FormatError('Unknown colorspace name: ' + name);
     }
   };
-  ColorSpace.parseToIR = function (cs, xref, res, pdfFunctionFactory) {
-    if ((0, _primitives.isName)(cs)) {
-      var colorSpaces = res.get('ColorSpace');
-      if ((0, _primitives.isDict)(colorSpaces)) {
-        var refcs = colorSpaces.get(cs.name);
-        if (refcs) {
-          cs = refcs;
-        }
-      }
-    }
+  ColorSpace.parseToIR = function (cs, xref) {
+    var res = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    var pdfFunctionFactory = arguments[3];
+
     cs = xref.fetchIfRef(cs);
     if ((0, _primitives.isName)(cs)) {
       switch (cs.name) {
@@ -3160,6 +3154,19 @@ var ColorSpace = function ColorSpaceClosure() {
         case 'Pattern':
           return ['PatternCS', null];
         default:
+          if ((0, _primitives.isDict)(res)) {
+            var colorSpaces = res.get('ColorSpace');
+            if ((0, _primitives.isDict)(colorSpaces)) {
+              var resCS = colorSpaces.get(cs.name);
+              if (resCS) {
+                if ((0, _primitives.isName)(resCS)) {
+                  return ColorSpace.parseToIR(resCS, xref, res, pdfFunctionFactory);
+                }
+                cs = resCS;
+                break;
+              }
+            }
+          }
           throw new _util.FormatError('unrecognized colorspace ' + cs.name);
       }
     }
@@ -21939,8 +21946,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.258';
-var pdfjsBuild = '5a52ee0a';
+var pdfjsVersion = '2.0.260';
+var pdfjsBuild = 'd77fc888';
 var pdfjsCoreWorker = __w_pdfjs_require__(72);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22147,7 +22154,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.258';
+    var workerVersion = '2.0.260';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -32596,6 +32603,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           xref: this.xref,
           res: resources,
           image: image,
+          isInline: inline,
           pdfFunctionFactory: this.pdfFunctionFactory
         });
         imgData = imageObj.createImageData(true);
@@ -32632,6 +32640,7 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         xref: this.xref,
         res: resources,
         image: image,
+        isInline: inline,
         nativeDecoder: nativeImageDecoder,
         pdfFunctionFactory: this.pdfFunctionFactory
       }).then(function (imageObj) {
@@ -43948,6 +43957,8 @@ var PDFImage = function PDFImageClosure() {
     var xref = _ref.xref,
         res = _ref.res,
         image = _ref.image,
+        _ref$isInline = _ref.isInline,
+        isInline = _ref$isInline === undefined ? false : _ref$isInline,
         _ref$smask = _ref.smask,
         smask = _ref$smask === undefined ? null : _ref$smask,
         _ref$mask = _ref.mask,
@@ -44009,7 +44020,8 @@ var PDFImage = function PDFImageClosure() {
             throw new Error('JPX images with ' + this.numComps + ' ' + 'color components not supported.');
         }
       }
-      this.colorSpace = _colorspace.ColorSpace.parse(colorSpace, xref, res, pdfFunctionFactory);
+      var resources = isInline ? res : null;
+      this.colorSpace = _colorspace.ColorSpace.parse(colorSpace, xref, resources, pdfFunctionFactory);
       this.numComps = this.colorSpace.numComps;
     }
     this.decode = dict.getArray('Decode', 'D');
@@ -44031,6 +44043,7 @@ var PDFImage = function PDFImageClosure() {
         xref: xref,
         res: res,
         image: smask,
+        isInline: isInline,
         pdfFunctionFactory: pdfFunctionFactory
       });
     } else if (mask) {
@@ -44044,6 +44057,7 @@ var PDFImage = function PDFImageClosure() {
             xref: xref,
             res: res,
             image: mask,
+            isInline: isInline,
             isMask: true,
             pdfFunctionFactory: pdfFunctionFactory
           });
@@ -44058,6 +44072,8 @@ var PDFImage = function PDFImageClosure() {
         xref = _ref2.xref,
         res = _ref2.res,
         image = _ref2.image,
+        _ref2$isInline = _ref2.isInline,
+        isInline = _ref2$isInline === undefined ? false : _ref2$isInline,
         _ref2$nativeDecoder = _ref2.nativeDecoder,
         nativeDecoder = _ref2$nativeDecoder === undefined ? null : _ref2$nativeDecoder,
         pdfFunctionFactory = _ref2.pdfFunctionFactory;
@@ -44095,6 +44111,7 @@ var PDFImage = function PDFImageClosure() {
         xref: xref,
         res: res,
         image: imageData,
+        isInline: isInline,
         smask: smaskData,
         mask: maskData,
         pdfFunctionFactory: pdfFunctionFactory
