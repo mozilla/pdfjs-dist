@@ -2706,8 +2706,8 @@ if (typeof __g == 'number') __g = global;
 var global = __w_pdfjs_require__(5);
 var core = __w_pdfjs_require__(7);
 var hide = __w_pdfjs_require__(13);
-var redefine = __w_pdfjs_require__(10);
-var ctx = __w_pdfjs_require__(11);
+var redefine = __w_pdfjs_require__(11);
+var ctx = __w_pdfjs_require__(12);
 var PROTOTYPE = 'prototype';
 var $export = function $export(type, name, source) {
   var IS_FORCED = type & $export.F;
@@ -2777,72 +2777,6 @@ module.exports = function (it, key) {
 
 /***/ }),
 /* 10 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-var global = __w_pdfjs_require__(5);
-var hide = __w_pdfjs_require__(13);
-var has = __w_pdfjs_require__(9);
-var SRC = __w_pdfjs_require__(25)('src');
-var TO_STRING = 'toString';
-var $toString = Function[TO_STRING];
-var TPL = ('' + $toString).split(TO_STRING);
-__w_pdfjs_require__(7).inspectSource = function (it) {
-  return $toString.call(it);
-};
-(module.exports = function (O, key, val, safe) {
-  var isFunction = typeof val == 'function';
-  if (isFunction) has(val, 'name') || hide(val, 'name', key);
-  if (O[key] === val) return;
-  if (isFunction) has(val, SRC) || hide(val, SRC, O[key] ? '' + O[key] : TPL.join(String(key)));
-  if (O === global) {
-    O[key] = val;
-  } else if (!safe) {
-    delete O[key];
-    hide(O, key, val);
-  } else if (O[key]) {
-    O[key] = val;
-  } else {
-    hide(O, key, val);
-  }
-})(Function.prototype, TO_STRING, function toString() {
-  return typeof this == 'function' && this[SRC] || $toString.call(this);
-});
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
-var aFunction = __w_pdfjs_require__(18);
-module.exports = function (fn, that, length) {
-  aFunction(fn);
-  if (that === undefined) return fn;
-  switch (length) {
-    case 1:
-      return function (a) {
-        return fn.call(that, a);
-      };
-    case 2:
-      return function (a, b) {
-        return fn.call(that, a, b);
-      };
-    case 3:
-      return function (a, b, c) {
-        return fn.call(that, a, b, c);
-      };
-  }
-  return function () {
-    return fn.apply(that, arguments);
-  };
-};
-
-/***/ }),
-/* 12 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -3353,6 +3287,72 @@ exports.DOMSVGFactory = DOMSVGFactory;
 exports.SimpleXMLParser = SimpleXMLParser;
 exports.StatTimer = StatTimer;
 exports.DummyStatTimer = DummyStatTimer;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var global = __w_pdfjs_require__(5);
+var hide = __w_pdfjs_require__(13);
+var has = __w_pdfjs_require__(9);
+var SRC = __w_pdfjs_require__(25)('src');
+var TO_STRING = 'toString';
+var $toString = Function[TO_STRING];
+var TPL = ('' + $toString).split(TO_STRING);
+__w_pdfjs_require__(7).inspectSource = function (it) {
+  return $toString.call(it);
+};
+(module.exports = function (O, key, val, safe) {
+  var isFunction = typeof val == 'function';
+  if (isFunction) has(val, 'name') || hide(val, 'name', key);
+  if (O[key] === val) return;
+  if (isFunction) has(val, SRC) || hide(val, SRC, O[key] ? '' + O[key] : TPL.join(String(key)));
+  if (O === global) {
+    O[key] = val;
+  } else if (!safe) {
+    delete O[key];
+    hide(O, key, val);
+  } else if (O[key]) {
+    O[key] = val;
+  } else {
+    hide(O, key, val);
+  }
+})(Function.prototype, TO_STRING, function toString() {
+  return typeof this == 'function' && this[SRC] || $toString.call(this);
+});
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var aFunction = __w_pdfjs_require__(18);
+module.exports = function (fn, that, length) {
+  aFunction(fn);
+  if (that === undefined) return fn;
+  switch (length) {
+    case 1:
+      return function (a) {
+        return fn.call(that, a);
+      };
+    case 2:
+      return function (a, b) {
+        return fn.call(that, a, b);
+      };
+    case 3:
+      return function (a, b, c) {
+        return fn.call(that, a, b, c);
+      };
+  }
+  return function () {
+    return fn.apply(that, arguments);
+  };
+};
 
 /***/ }),
 /* 13 */
@@ -4516,7 +4516,7 @@ module.exports = function (it, tag, stat) {
 "use strict";
 
 
-var ctx = __w_pdfjs_require__(11);
+var ctx = __w_pdfjs_require__(12);
 var call = __w_pdfjs_require__(106);
 var isArrayIter = __w_pdfjs_require__(107);
 var anObject = __w_pdfjs_require__(8);
@@ -5697,7 +5697,7 @@ module.exports.f = function (C) {
 "use strict";
 
 
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(11);
 module.exports = function (target, src, safe) {
   for (var key in src) {
     redefine(target, key, src[key], safe);
@@ -10925,9 +10925,11 @@ exports.getDingbatsGlyphsUnicode = getDingbatsGlyphsUnicode;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.validateResponseStatus = exports.validateRangeRequestCapabilities = exports.createResponseStatusError = undefined;
+exports.validateResponseStatus = exports.validateRangeRequestCapabilities = exports.extractFilenameFromHeader = exports.createResponseStatusError = undefined;
 
 var _util = __w_pdfjs_require__(0);
+
+var _dom_utils = __w_pdfjs_require__(10);
 
 function validateRangeRequestCapabilities(_ref) {
   var getResponseHeader = _ref.getResponseHeader,
@@ -10961,6 +10963,16 @@ function validateRangeRequestCapabilities(_ref) {
   returnValues.allowRangeRequests = true;
   return returnValues;
 }
+function extractFilenameFromHeader(getResponseHeader) {
+  var contentDisposition = getResponseHeader('Content-Disposition');
+  if (contentDisposition) {
+    var parts = /.+;\s*filename=(?:'|")(.+\.pdf)(?:'|")/gi.exec(contentDisposition);
+    if (parts !== null && parts.length > 1) {
+      return (0, _dom_utils.getFilenameFromUrl)(parts[1]);
+    }
+  }
+  return null;
+}
 function createResponseStatusError(status, url) {
   if (status === 404 || status === 0 && /^file:/.test(url)) {
     return new _util.MissingPDFException('Missing PDF "' + url + '".');
@@ -10971,6 +10983,7 @@ function validateResponseStatus(status) {
   return status === 200 || status === 206;
 }
 exports.createResponseStatusError = createResponseStatusError;
+exports.extractFilenameFromHeader = extractFilenameFromHeader;
 exports.validateRangeRequestCapabilities = validateRangeRequestCapabilities;
 exports.validateResponseStatus = validateResponseStatus;
 
@@ -11081,7 +11094,7 @@ var classof = __w_pdfjs_require__(38);
 var test = {};
 test[__w_pdfjs_require__(4)('toStringTag')] = 'z';
 if (test + '' != '[object z]') {
-  __w_pdfjs_require__(10)(Object.prototype, 'toString', function toString() {
+  __w_pdfjs_require__(11)(Object.prototype, 'toString', function toString() {
     return '[object ' + classof(this) + ']';
   }, true);
 }
@@ -11095,7 +11108,7 @@ if (test + '' != '[object z]') {
 
 var LIBRARY = __w_pdfjs_require__(56);
 var $export = __w_pdfjs_require__(6);
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(11);
 var hide = __w_pdfjs_require__(13);
 var has = __w_pdfjs_require__(9);
 var Iterators = __w_pdfjs_require__(21);
@@ -11196,7 +11209,7 @@ module.exports = document && document.documentElement;
 
 var $iterators = __w_pdfjs_require__(103);
 var getKeys = __w_pdfjs_require__(26);
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(11);
 var global = __w_pdfjs_require__(5);
 var hide = __w_pdfjs_require__(13);
 var Iterators = __w_pdfjs_require__(21);
@@ -11276,7 +11289,7 @@ module.exports = function (O, D) {
 "use strict";
 
 
-var ctx = __w_pdfjs_require__(11);
+var ctx = __w_pdfjs_require__(12);
 var invoke = __w_pdfjs_require__(109);
 var html = __w_pdfjs_require__(57);
 var cel = __w_pdfjs_require__(30);
@@ -11434,7 +11447,7 @@ module.exports = function (exec, skipClosing) {
 "use strict";
 
 
-var ctx = __w_pdfjs_require__(11);
+var ctx = __w_pdfjs_require__(12);
 var IObject = __w_pdfjs_require__(32);
 var toObject = __w_pdfjs_require__(39);
 var toLength = __w_pdfjs_require__(34);
@@ -11507,7 +11520,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(12);
+var _dom_utils = __w_pdfjs_require__(10);
 
 var _font_loader = __w_pdfjs_require__(133);
 
@@ -11628,7 +11641,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.276';
+  var apiVersion = '2.0.279';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12702,10 +12715,13 @@ var WorkerTransport = function WorkerTransportClosure() {
       return this.messageHandler.sendWithPromise('GetOutline', null);
     },
     getMetadata: function WorkerTransport_getMetadata() {
-      return this.messageHandler.sendWithPromise('GetMetadata', null).then(function transportMetadata(results) {
+      var _this13 = this;
+
+      return this.messageHandler.sendWithPromise('GetMetadata', null).then(function (results) {
         return {
           info: results[0],
-          metadata: results[1] ? new _metadata.Metadata(results[1]) : null
+          metadata: results[1] ? new _metadata.Metadata(results[1]) : null,
+          contentDispositionFilename: _this13._fullReader ? _this13._fullReader.filename : null
         };
       });
     },
@@ -12713,17 +12729,17 @@ var WorkerTransport = function WorkerTransportClosure() {
       return this.messageHandler.sendWithPromise('GetStats', null);
     },
     startCleanup: function WorkerTransport_startCleanup() {
-      var _this13 = this;
+      var _this14 = this;
 
       this.messageHandler.sendWithPromise('Cleanup', null).then(function () {
-        for (var i = 0, ii = _this13.pageCache.length; i < ii; i++) {
-          var page = _this13.pageCache[i];
+        for (var i = 0, ii = _this14.pageCache.length; i < ii; i++) {
+          var page = _this14.pageCache[i];
           if (page) {
             page.cleanup();
           }
         }
-        _this13.commonObjs.clear();
-        _this13.fontLoader.clear();
+        _this14.commonObjs.clear();
+        _this14.fontLoader.clear();
       });
     }
   };
@@ -12920,8 +12936,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.276';
-  exports.build = build = '96c573ad';
+  exports.version = version = '2.0.279';
+  exports.build = build = '75dc2bbd';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -12949,7 +12965,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(12);
+var _dom_utils = __w_pdfjs_require__(10);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -24105,7 +24121,7 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _dom_utils = __w_pdfjs_require__(12);
+var _dom_utils = __w_pdfjs_require__(10);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -25128,7 +25144,7 @@ exports.renderTextLayer = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(12);
+var _dom_utils = __w_pdfjs_require__(10);
 
 var renderTextLayer = function renderTextLayerClosure() {
   var MAX_TEXT_DIVS_TO_RENDER = 100000;
@@ -25679,7 +25695,7 @@ exports.SVGGraphics = undefined;
 
 var _util = __w_pdfjs_require__(0);
 
-var _dom_utils = __w_pdfjs_require__(12);
+var _dom_utils = __w_pdfjs_require__(10);
 
 var _is_node = __w_pdfjs_require__(24);
 
@@ -26718,14 +26734,14 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.276';
-var pdfjsBuild = '96c573ad';
+var pdfjsVersion = '2.0.279';
+var pdfjsBuild = '75dc2bbd';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(132);
 var pdfjsDisplayAPI = __w_pdfjs_require__(66);
 var pdfjsDisplayTextLayer = __w_pdfjs_require__(78);
 var pdfjsDisplayAnnotationLayer = __w_pdfjs_require__(77);
-var pdfjsDisplayDOMUtils = __w_pdfjs_require__(12);
+var pdfjsDisplayDOMUtils = __w_pdfjs_require__(10);
 var pdfjsDisplaySVG = __w_pdfjs_require__(79);
 {
   var isNodeJS = __w_pdfjs_require__(24);
@@ -27881,7 +27897,7 @@ module.exports = function (done, value) {
 
 var LIBRARY = __w_pdfjs_require__(56);
 var global = __w_pdfjs_require__(5);
-var ctx = __w_pdfjs_require__(11);
+var ctx = __w_pdfjs_require__(12);
 var classof = __w_pdfjs_require__(38);
 var $export = __w_pdfjs_require__(6);
 var isObject = __w_pdfjs_require__(3);
@@ -28370,7 +28386,7 @@ module.exports = __w_pdfjs_require__(7).WeakMap;
 
 
 var each = __w_pdfjs_require__(64)(0);
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(11);
 var meta = __w_pdfjs_require__(43);
 var assign = __w_pdfjs_require__(119);
 var weak = __w_pdfjs_require__(121);
@@ -28611,7 +28627,7 @@ module.exports = {
 
 var global = __w_pdfjs_require__(5);
 var $export = __w_pdfjs_require__(6);
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(11);
 var redefineAll = __w_pdfjs_require__(42);
 var meta = __w_pdfjs_require__(43);
 var forOf = __w_pdfjs_require__(28);
@@ -28724,7 +28740,7 @@ var check = function check(O, proto) {
 module.exports = {
   set: Object.setPrototypeOf || ('__proto__' in {} ? function (test, buggy, set) {
     try {
-      set = __w_pdfjs_require__(11)(Function.call, __w_pdfjs_require__(125).f(Object.prototype, '__proto__').set, 2);
+      set = __w_pdfjs_require__(12)(Function.call, __w_pdfjs_require__(125).f(Object.prototype, '__proto__').set, 2);
       set(test, []);
       buggy = !(test instanceof Array);
     } catch (e) {
@@ -28809,7 +28825,7 @@ __w_pdfjs_require__(129)('WeakMap');
 
 var $export = __w_pdfjs_require__(6);
 var aFunction = __w_pdfjs_require__(18);
-var ctx = __w_pdfjs_require__(11);
+var ctx = __w_pdfjs_require__(12);
 var forOf = __w_pdfjs_require__(28);
 module.exports = function (COLLECTION) {
   $export($export.S, COLLECTION, {
@@ -31891,7 +31907,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.PDFJS = exports.globalScope = undefined;
 
-var _dom_utils = __w_pdfjs_require__(12);
+var _dom_utils = __w_pdfjs_require__(10);
 
 var _util = __w_pdfjs_require__(0);
 
@@ -31916,8 +31932,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.276';
-  PDFJS.build = '96c573ad';
+  PDFJS.version = '2.0.279';
+  PDFJS.build = '75dc2bbd';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -34528,6 +34544,7 @@ var PDFDataTransportStream = function PDFDataTransportStreamClosure() {
   function PDFDataTransportStreamReader(stream, queuedChunks) {
     this._stream = stream;
     this._done = false;
+    this._filename = null;
     this._queuedChunks = queuedChunks || [];
     this._requests = [];
     this._headersReady = Promise.resolve();
@@ -34551,6 +34568,9 @@ var PDFDataTransportStream = function PDFDataTransportStreamClosure() {
     },
     get headersReady() {
       return this._headersReady;
+    },
+    get filename() {
+      return this._filename;
     },
     get isRangeSupported() {
       return this._stream._isRangeSupported;
@@ -35284,7 +35304,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.276';
+    var workerVersion = '2.0.279';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -52565,6 +52585,7 @@ var BaseFullReader = function () {
     var source = stream.source;
     this._contentLength = source.length;
     this._loaded = 0;
+    this._filename = null;
     this._disableRange = source.disableRange || false;
     this._rangeChunkSize = source.rangeChunkSize;
     if (!this._rangeChunkSize && !this._disableRange) {
@@ -52655,6 +52676,11 @@ var BaseFullReader = function () {
     key: 'headersReady',
     get: function get() {
       return this._headersCapability.promise;
+    }
+  }, {
+    key: 'filename',
+    get: function get() {
+      return this._filename;
     }
   }, {
     key: 'contentLength',
@@ -52793,11 +52819,12 @@ var PDFNodeStreamFullReader = function (_BaseFullReader) {
     var handleResponse = function handleResponse(response) {
       _this5._headersCapability.resolve();
       _this5._setReadableStream(response);
+      var getResponseHeader = function getResponseHeader(name) {
+        return _this5._readableStream.headers[name.toLowerCase()];
+      };
 
       var _validateRangeRequest = (0, _network_utils.validateRangeRequestCapabilities)({
-        getResponseHeader: function getResponseHeader(name) {
-          return _this5._readableStream.headers[name.toLowerCase()];
-        },
+        getResponseHeader: getResponseHeader,
         isHttp: stream.isHttp,
         rangeChunkSize: _this5._rangeChunkSize,
         disableRange: _this5._disableRange
@@ -52809,6 +52836,7 @@ var PDFNodeStreamFullReader = function (_BaseFullReader) {
         _this5._isRangeSupported = true;
       }
       _this5._contentLength = suggestedLength;
+      _this5._filename = (0, _network_utils.extractFilenameFromHeader)(getResponseHeader);
     };
     _this5._request = null;
     if (_this5._url.protocol === 'http:') {
@@ -52999,6 +53027,7 @@ var PDFFetchStreamReader = function () {
     this._stream = stream;
     this._reader = null;
     this._loaded = 0;
+    this._filename = null;
     var source = stream.source;
     this._withCredentials = source.withCredentials;
     this._contentLength = source.length;
@@ -53025,11 +53054,12 @@ var PDFFetchStreamReader = function () {
       }
       _this._reader = response.body.getReader();
       _this._headersCapability.resolve();
+      var getResponseHeader = function getResponseHeader(name) {
+        return response.headers.get(name);
+      };
 
       var _validateRangeRequest = (0, _network_utils.validateRangeRequestCapabilities)({
-        getResponseHeader: function getResponseHeader(name) {
-          return response.headers.get(name);
-        },
+        getResponseHeader: getResponseHeader,
         isHttp: _this._stream.isHttp,
         rangeChunkSize: _this._rangeChunkSize,
         disableRange: _this._disableRange
@@ -53039,6 +53069,7 @@ var PDFFetchStreamReader = function () {
 
       _this._contentLength = suggestedLength;
       _this._isRangeSupported = allowRangeRequests;
+      _this._filename = (0, _network_utils.extractFilenameFromHeader)(getResponseHeader);
       if (!_this._isStreamingSupported && _this._isRangeSupported) {
         _this.cancel(new _util.AbortException('streaming is disabled'));
       }
@@ -53088,6 +53119,11 @@ var PDFFetchStreamReader = function () {
     key: 'headersReady',
     get: function get() {
       return this._headersCapability.promise;
+    }
+  }, {
+    key: 'filename',
+    get: function get() {
+      return this._filename;
     }
   }, {
     key: 'contentLength',
@@ -53459,17 +53495,19 @@ function PDFNetworkStreamFullRequestReader(manager, source) {
   this._requests = [];
   this._done = false;
   this._storedError = undefined;
+  this._filename = null;
   this.onProgress = null;
 }
 PDFNetworkStreamFullRequestReader.prototype = {
   _onHeadersReceived: function PDFNetworkStreamFullRequestReader_onHeadersReceived() {
     var fullRequestXhrId = this._fullRequestId;
     var fullRequestXhr = this._manager.getRequestXhr(fullRequestXhrId);
+    var getResponseHeader = function getResponseHeader(name) {
+      return fullRequestXhr.getResponseHeader(name);
+    };
 
     var _validateRangeRequest = (0, _network_utils.validateRangeRequestCapabilities)({
-      getResponseHeader: function getResponseHeader(name) {
-        return fullRequestXhr.getResponseHeader(name);
-      },
+      getResponseHeader: getResponseHeader,
       isHttp: this._manager.isHttp,
       rangeChunkSize: this._rangeChunkSize,
       disableRange: this._disableRange
@@ -53481,6 +53519,7 @@ PDFNetworkStreamFullRequestReader.prototype = {
     if (allowRangeRequests) {
       this._isRangeSupported = true;
     }
+    this._filename = (0, _network_utils.extractFilenameFromHeader)(getResponseHeader);
     var networkManager = this._manager;
     if (networkManager.isStreamingRequest(fullRequestXhrId)) {
       this._isStreamingSupported = true;
@@ -53534,6 +53573,9 @@ PDFNetworkStreamFullRequestReader.prototype = {
         total: data.lengthComputable ? data.total : this._contentLength
       });
     }
+  },
+  get filename() {
+    return this._filename;
   },
   get isRangeSupported() {
     return this._isRangeSupported;
