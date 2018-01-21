@@ -11512,7 +11512,7 @@ module.exports = function (it, TYPE) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.build = exports.version = exports.setPDFNetworkStreamClass = exports.PDFPageProxy = exports.PDFDocumentProxy = exports.PDFWorker = exports.PDFDataRangeTransport = exports.LoopbackPort = exports.getDocument = undefined;
+exports.build = exports.version = exports.setPDFNetworkStreamFactory = exports.PDFPageProxy = exports.PDFDocumentProxy = exports.PDFWorker = exports.PDFDataRangeTransport = exports.LoopbackPort = exports.getDocument = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -11548,9 +11548,9 @@ var pdfjsFilePath = typeof document !== 'undefined' && document.currentScript ? 
 var fakeWorkerFilesLoader = null;
 var useRequireEnsure = false;
 ;
-var PDFNetworkStream;
-function setPDFNetworkStreamClass(cls) {
-  PDFNetworkStream = cls;
+var createPDFNetworkStream;
+function setPDFNetworkStreamFactory(pdfNetworkStreamFactory) {
+  createPDFNetworkStream = pdfNetworkStreamFactory;
 }
 function getDocument(src) {
   var task = new PDFDocumentLoadingTask();
@@ -11626,7 +11626,7 @@ function getDocument(src) {
       if (rangeTransport) {
         networkStream = new _transport_stream.PDFDataTransportStream(params, rangeTransport);
       } else if (!params.data) {
-        networkStream = new PDFNetworkStream(params);
+        networkStream = createPDFNetworkStream(params);
       }
       var messageHandler = new _util.MessageHandler(docId, workerId, worker.port);
       messageHandler.postMessageTransfers = worker.postMessageTransfers;
@@ -11641,7 +11641,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.281';
+  var apiVersion = '2.0.283';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -12936,8 +12936,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.281';
-  exports.build = build = 'fad2a3f4';
+  exports.version = version = '2.0.283';
+  exports.build = build = 'fe5102a2';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -12945,7 +12945,7 @@ exports.PDFDataRangeTransport = PDFDataRangeTransport;
 exports.PDFWorker = PDFWorker;
 exports.PDFDocumentProxy = PDFDocumentProxy;
 exports.PDFPageProxy = PDFPageProxy;
-exports.setPDFNetworkStreamClass = setPDFNetworkStreamClass;
+exports.setPDFNetworkStreamFactory = setPDFNetworkStreamFactory;
 exports.version = version;
 exports.build = build;
 
@@ -26734,8 +26734,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.281';
-var pdfjsBuild = 'fad2a3f4';
+var pdfjsVersion = '2.0.283';
+var pdfjsBuild = 'fe5102a2';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(132);
 var pdfjsDisplayAPI = __w_pdfjs_require__(66);
@@ -26747,13 +26747,19 @@ var pdfjsDisplaySVG = __w_pdfjs_require__(79);
   var isNodeJS = __w_pdfjs_require__(24);
   if (isNodeJS()) {
     var PDFNodeStream = __w_pdfjs_require__(160).PDFNodeStream;
-    pdfjsDisplayAPI.setPDFNetworkStreamClass(PDFNodeStream);
+    pdfjsDisplayAPI.setPDFNetworkStreamFactory(function (params) {
+      return new PDFNodeStream(params);
+    });
   } else if (typeof Response !== 'undefined' && 'body' in Response.prototype && typeof ReadableStream !== 'undefined') {
     var PDFFetchStream = __w_pdfjs_require__(161).PDFFetchStream;
-    pdfjsDisplayAPI.setPDFNetworkStreamClass(PDFFetchStream);
+    pdfjsDisplayAPI.setPDFNetworkStreamFactory(function (params) {
+      return new PDFFetchStream(params);
+    });
   } else {
     var PDFNetworkStream = __w_pdfjs_require__(162).PDFNetworkStream;
-    pdfjsDisplayAPI.setPDFNetworkStreamClass(PDFNetworkStream);
+    pdfjsDisplayAPI.setPDFNetworkStreamFactory(function (params) {
+      return new PDFNetworkStream(params);
+    });
   }
 }
 exports.PDFJS = pdfjsDisplayGlobal.PDFJS;
@@ -31932,8 +31938,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.281';
-  PDFJS.build = 'fad2a3f4';
+  PDFJS.version = '2.0.283';
+  PDFJS.build = 'fe5102a2';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -35304,7 +35310,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.281';
+    var workerVersion = '2.0.283';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
