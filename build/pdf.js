@@ -1962,8 +1962,6 @@ function getDefaultSetting(id) {
       return globalSettings ? globalSettings.workerPort : null;
     case 'workerSrc':
       return globalSettings ? globalSettings.workerSrc : null;
-    case 'disableWorker':
-      return globalSettings ? globalSettings.disableWorker : false;
     case 'maxImageSize':
       return globalSettings ? globalSettings.maxImageSize : -1;
     case 'imageResourcesPath':
@@ -3313,7 +3311,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.305';
+  var apiVersion = '2.0.310';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -3860,13 +3858,23 @@ var PDFWorker = function PDFWorkerClosure() {
     }
     throw new Error('No PDFJS.workerSrc specified');
   }
+  function getMainThreadWorkerMessageHandler() {
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    return window.pdfjsDistBuildPdfWorker && window.pdfjsDistBuildPdfWorker.WorkerMessageHandler;
+  }
   var fakeWorkerFilesLoadedCapability = void 0;
   function setupFakeWorkerGlobal() {
-    var WorkerMessageHandler;
     if (fakeWorkerFilesLoadedCapability) {
       return fakeWorkerFilesLoadedCapability.promise;
     }
     fakeWorkerFilesLoadedCapability = (0, _util.createPromiseCapability)();
+    var mainWorkerMessageHandler = getMainThreadWorkerMessageHandler();
+    if (mainWorkerMessageHandler) {
+      fakeWorkerFilesLoadedCapability.resolve(mainWorkerMessageHandler);
+      return fakeWorkerFilesLoadedCapability.promise;
+    }
     var loader = fakeWorkerFilesLoader || function (callback) {
       _util.Util.loadScript(getWorkerSrc(), function () {
         callback(window.pdfjsDistBuildPdfWorker.WorkerMessageHandler);
@@ -3917,7 +3925,7 @@ var PDFWorker = function PDFWorkerClosure() {
     _initialize: function PDFWorker_initialize() {
       var _this6 = this;
 
-      if (!isWorkerDisabled && !(0, _dom_utils.getDefaultSetting)('disableWorker') && typeof Worker !== 'undefined') {
+      if (typeof Worker !== 'undefined' && !isWorkerDisabled && !getMainThreadWorkerMessageHandler()) {
         var workerSrc = getWorkerSrc();
         try {
           if (!(0, _util.isSameOrigin)(window.location.href, workerSrc)) {
@@ -3998,7 +4006,7 @@ var PDFWorker = function PDFWorkerClosure() {
     _setupFakeWorker: function PDFWorker_setupFakeWorker() {
       var _this7 = this;
 
-      if (!isWorkerDisabled && !(0, _dom_utils.getDefaultSetting)('disableWorker')) {
+      if (!isWorkerDisabled) {
         (0, _util.warn)('Setting up fake worker.');
         isWorkerDisabled = true;
       }
@@ -4037,6 +4045,9 @@ var PDFWorker = function PDFWorkerClosure() {
       return pdfWorkerPorts.get(port);
     }
     return new PDFWorker(null, port);
+  };
+  PDFWorker.getWorkerSrc = function () {
+    return getWorkerSrc();
   };
   return PDFWorker;
 }();
@@ -4689,8 +4700,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.305';
-  exports.build = build = '9c6a8801';
+  exports.version = version = '2.0.310';
+  exports.build = build = '29d77ded';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -7448,8 +7459,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.305';
-var pdfjsBuild = '9c6a8801';
+var pdfjsVersion = '2.0.310';
+var pdfjsBuild = '29d77ded';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(115);
 var pdfjsDisplayAPI = __w_pdfjs_require__(58);
@@ -12652,8 +12663,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.305';
-  PDFJS.build = '9c6a8801';
+  PDFJS.version = '2.0.310';
+  PDFJS.build = '29d77ded';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -12701,7 +12712,6 @@ PDFJS.cMapUrl = PDFJS.cMapUrl === undefined ? null : PDFJS.cMapUrl;
 PDFJS.cMapPacked = PDFJS.cMapPacked === undefined ? false : PDFJS.cMapPacked;
 PDFJS.disableFontFace = PDFJS.disableFontFace === undefined ? false : PDFJS.disableFontFace;
 PDFJS.imageResourcesPath = PDFJS.imageResourcesPath === undefined ? '' : PDFJS.imageResourcesPath;
-PDFJS.disableWorker = PDFJS.disableWorker === undefined ? false : PDFJS.disableWorker;
 PDFJS.workerSrc = PDFJS.workerSrc === undefined ? null : PDFJS.workerSrc;
 PDFJS.workerPort = PDFJS.workerPort === undefined ? null : PDFJS.workerPort;
 PDFJS.disableRange = PDFJS.disableRange === undefined ? false : PDFJS.disableRange;
