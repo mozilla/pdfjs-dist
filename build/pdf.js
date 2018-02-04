@@ -3311,7 +3311,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.323';
+  var apiVersion = '2.0.326';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -4700,8 +4700,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.323';
-  exports.build = build = 'db9f71fe';
+  exports.version = version = '2.0.326';
+  exports.build = build = '24f96e0f';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -7459,8 +7459,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.323';
-var pdfjsBuild = 'db9f71fe';
+var pdfjsVersion = '2.0.326';
+var pdfjsBuild = '24f96e0f';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(120);
 var pdfjsDisplayAPI = __w_pdfjs_require__(58);
@@ -12745,8 +12745,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.323';
-  PDFJS.build = 'db9f71fe';
+  PDFJS.version = '2.0.326';
+  PDFJS.build = '24f96e0f';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -16370,7 +16370,7 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 function getFilenameFromContentDispositionHeader(contentDisposition) {
   var needsEncodingFixup = true;
-  var tmp = /(?:^|;)\s*filename\*\s*=\s*([^;\s]+)/i.exec(contentDisposition);
+  var tmp = toParamRegExp('filename\\*', 'i').exec(contentDisposition);
   if (tmp) {
     tmp = tmp[1];
     var filename = rfc2616unquote(tmp);
@@ -16384,12 +16384,15 @@ function getFilenameFromContentDispositionHeader(contentDisposition) {
     var _filename = rfc2047decode(tmp);
     return fixupEncoding(_filename);
   }
-  tmp = /(?:^|;)\s*filename\s*=\s*([^;\s]+)/.exec(contentDisposition);
+  tmp = toParamRegExp('filename', 'i').exec(contentDisposition);
   if (tmp) {
     tmp = tmp[1];
     var _filename2 = rfc2616unquote(tmp);
     _filename2 = rfc2047decode(_filename2);
     return fixupEncoding(_filename2);
+  }
+  function toParamRegExp(attributePattern, flags) {
+    return new RegExp('(?:^|;)\\s*' + attributePattern + '\\s*=\\s*' + '(' + '[^";\\s][^;\\s]*' + '|' + '"(?:[^"\\\\]|\\\\"?)+"?' + ')', flags);
   }
   function textdecode(encoding, value) {
     if (encoding) {
@@ -16422,7 +16425,7 @@ function getFilenameFromContentDispositionHeader(contentDisposition) {
   function rfc2231getparam(contentDisposition) {
     var matches = [],
         match = void 0;
-    var iter = /(?:^|;)\s*filename\*((?!0\d)\d+)(\*?)\s*=\s*([^;\s]+)/ig;
+    var iter = toParamRegExp('filename\\*((?!0\\d)\\d+)(\\*?)', 'ig');
     while ((match = iter.exec(contentDisposition)) !== null) {
       var _match = match,
           _match2 = _slicedToArray(_match, 4),
@@ -16489,7 +16492,7 @@ function getFilenameFromContentDispositionHeader(contentDisposition) {
     if (value.slice(0, 2) !== '=?' || /[\x00-\x19\x80-\xff]/.test(value)) {
       return value;
     }
-    return value.replace(/=\?([\w\-]*)\?([QqBb])\?((?:[^?]|\?(?!=))*)\?=/g, function (_, charset, encoding, text) {
+    return value.replace(/=\?([\w-]*)\?([QqBb])\?((?:[^?]|\?(?!=))*)\?=/g, function (_, charset, encoding, text) {
       if (encoding === 'q' || encoding === 'Q') {
         text = text.replace(/_/g, ' ');
         text = text.replace(/=([0-9a-fA-F]{2})/g, function (_, hex) {
