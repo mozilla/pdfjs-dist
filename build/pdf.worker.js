@@ -105,7 +105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.loadJpegStream = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isSpace = exports.isString = exports.isNum = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VERBOSITY_LEVELS = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
+exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isSpace = exports.isString = exports.isNum = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VERBOSITY_LEVELS = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -1338,17 +1338,6 @@ MessageHandler.prototype = {
     this.comObj.removeEventListener('message', this._onComObjOnMessage);
   }
 };
-function loadJpegStream(id, imageUrl, objs) {
-  var img = new Image();
-  img.onload = function loadJpegStream_onloadClosure() {
-    objs.resolve(id, img);
-  };
-  img.onerror = function loadJpegStream_onerrorClosure() {
-    objs.resolve(id, null);
-    warn('Error during JPEG image loading');
-  };
-  img.src = imageUrl;
-}
 exports.FONT_IDENTITY_MATRIX = FONT_IDENTITY_MATRIX;
 exports.IDENTITY_MATRIX = IDENTITY_MATRIX;
 exports.OPS = OPS;
@@ -1399,7 +1388,6 @@ exports.isSameOrigin = isSameOrigin;
 exports.createValidAbsoluteUrl = createValidAbsoluteUrl;
 exports.isLittleEndian = isLittleEndian;
 exports.isEvalSupported = isEvalSupported;
-exports.loadJpegStream = loadJpegStream;
 exports.log2 = log2;
 exports.readInt8 = readInt8;
 exports.readUint16 = readUint16;
@@ -22307,8 +22295,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.338';
-var pdfjsBuild = '25293628';
+var pdfjsVersion = '2.0.345';
+var pdfjsBuild = '7bb06649';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22521,7 +22509,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.338';
+    var workerVersion = '2.0.345';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -30799,6 +30787,16 @@ var JpegError = function JpegErrorClosure() {
   JpegError.constructor = JpegError;
   return JpegError;
 }();
+var DNLMarkerError = function DNLMarkerErrorClosure() {
+  function DNLMarkerError(message, scanLines) {
+    this.message = message;
+    this.scanLines = scanLines;
+  }
+  DNLMarkerError.prototype = new Error();
+  DNLMarkerError.prototype.name = 'DNLMarkerError';
+  DNLMarkerError.constructor = DNLMarkerError;
+  return DNLMarkerError;
+}();
 var JpegImage = function JpegImageClosure() {
   var dctZigZag = new Uint8Array([0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63]);
   var dctCos1 = 4017;
@@ -30862,6 +30860,8 @@ var JpegImage = function JpegImageClosure() {
     return 64 * ((component.blocksPerLine + 1) * row + col);
   }
   function decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successivePrev, successive) {
+    var parseDNLMarker = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : false;
+
     var mcusPerLine = frame.mcusPerLine;
     var progressive = frame.progressive;
     var startOffset = offset,
@@ -30876,6 +30876,13 @@ var JpegImage = function JpegImageClosure() {
       if (bitsData === 0xFF) {
         var nextByte = data[offset++];
         if (nextByte) {
+          if (nextByte === 0xDC && parseDNLMarker) {
+            offset += 2;
+            var scanLines = data[offset++] << 8 | data[offset++];
+            if (scanLines > 0 && scanLines !== frame.scanLines) {
+              throw new DNLMarkerError('Found DNL marker (0xFFDC) while parsing scan data', scanLines);
+            }
+          }
           throw new JpegError('unexpected marker ' + (bitsData << 8 | nextByte).toString(16));
         }
       }
@@ -31314,6 +31321,10 @@ var JpegImage = function JpegImageClosure() {
   }
   JpegImage.prototype = {
     parse: function parse(data) {
+      var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+          _ref$dnlScanLines = _ref.dnlScanLines,
+          dnlScanLines = _ref$dnlScanLines === undefined ? null : _ref$dnlScanLines;
+
       function readUint16() {
         var value = data[offset] << 8 | data[offset + 1];
         offset += 2;
@@ -31352,6 +31363,7 @@ var JpegImage = function JpegImageClosure() {
       var jfif = null;
       var adobe = null;
       var frame, resetInterval;
+      var numSOSMarkers = 0;
       var quantizationTables = [];
       var huffmanTablesAC = [],
           huffmanTablesDC = [];
@@ -31442,7 +31454,8 @@ var JpegImage = function JpegImageClosure() {
             frame.extended = fileMarker === 0xFFC1;
             frame.progressive = fileMarker === 0xFFC2;
             frame.precision = data[offset++];
-            frame.scanLines = readUint16();
+            var sofScanLines = readUint16();
+            frame.scanLines = dnlScanLines || sofScanLines;
             frame.samplesPerLine = readUint16();
             frame.components = [];
             frame.componentIds = {};
@@ -31496,6 +31509,7 @@ var JpegImage = function JpegImageClosure() {
             resetInterval = readUint16();
             break;
           case 0xFFDA:
+            var parseDNLMarker = ++numSOSMarkers === 1 && !dnlScanLines;
             readUint16();
             var selectorsCount = data[offset++];
             var components = [],
@@ -31511,8 +31525,19 @@ var JpegImage = function JpegImageClosure() {
             var spectralStart = data[offset++];
             var spectralEnd = data[offset++];
             var successiveApproximation = data[offset++];
-            var processed = decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successiveApproximation >> 4, successiveApproximation & 15);
-            offset += processed;
+            try {
+              var processed = decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successiveApproximation >> 4, successiveApproximation & 15, parseDNLMarker);
+              offset += processed;
+            } catch (ex) {
+              if (ex instanceof DNLMarkerError) {
+                (0, _util.warn)('Attempting to re-parse JPEG image using "scanLines" ' + 'parameter found in DNL marker (0xFFDC) segment.');
+                return this.parse(data, { dnlScanLines: ex.scanLines });
+              }
+              throw ex;
+            }
+            break;
+          case 0xFFDC:
+            offset += 4;
             break;
           case 0xFFFF:
             if (data[offset] !== 0xFF) {
@@ -31555,6 +31580,7 @@ var JpegImage = function JpegImageClosure() {
       }
       this.numComponents = this.components.length;
     },
+
     _getLinearizedBlockData: function getLinearizedBlockData(width, height) {
       var scaleX = this.width / width,
           scaleY = this.height / height;
@@ -32786,10 +32812,11 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       var dict = image.dict;
       var colorSpace = dict.get('ColorSpace', 'CS');
       colorSpace = _colorspace.ColorSpace.parse(colorSpace, this.xref, this.resources, this.pdfFunctionFactory);
-      var numComps = colorSpace.numComps;
-      var decodePromise = this.handler.sendWithPromise('JpegDecode', [image.getIR(this.forceDataSchema), numComps]);
-      return decodePromise.then(function (message) {
-        var data = message.data;
+      return this.handler.sendWithPromise('JpegDecode', [image.getIR(this.forceDataSchema), colorSpace.numComps]).then(function (_ref2) {
+        var data = _ref2.data,
+            width = _ref2.width,
+            height = _ref2.height;
+
         return new _stream.Stream(data, 0, data.length, image.dict);
       });
     }
@@ -32810,19 +32837,19 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
     var cs = _colorspace.ColorSpace.parse(dict.get('ColorSpace', 'CS'), xref, res, pdfFunctionFactory);
     return (cs.numComps === 1 || cs.numComps === 3) && cs.isDefaultDecode(dict.getArray('Decode', 'D'));
   };
-  function PartialEvaluator(_ref2) {
+  function PartialEvaluator(_ref3) {
     var _this = this;
 
-    var pdfManager = _ref2.pdfManager,
-        xref = _ref2.xref,
-        handler = _ref2.handler,
-        pageIndex = _ref2.pageIndex,
-        idFactory = _ref2.idFactory,
-        fontCache = _ref2.fontCache,
-        builtInCMapCache = _ref2.builtInCMapCache,
-        _ref2$options = _ref2.options,
-        options = _ref2$options === undefined ? null : _ref2$options,
-        pdfFunctionFactory = _ref2.pdfFunctionFactory;
+    var pdfManager = _ref3.pdfManager,
+        xref = _ref3.xref,
+        handler = _ref3.handler,
+        pageIndex = _ref3.pageIndex,
+        idFactory = _ref3.idFactory,
+        fontCache = _ref3.fontCache,
+        builtInCMapCache = _ref3.builtInCMapCache,
+        _ref3$options = _ref3.options,
+        options = _ref3$options === undefined ? null : _ref3$options,
+        pdfFunctionFactory = _ref3.pdfFunctionFactory;
 
     this.pdfManager = pdfManager;
     this.xref = xref;
@@ -33019,20 +33046,30 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         }
       });
     },
-    buildPaintImageXObject: function PartialEvaluator_buildPaintImageXObject(resources, image, inline, operatorList, cacheKey, imageCache) {
+    buildPaintImageXObject: function buildPaintImageXObject(_ref4) {
       var _this2 = this;
+
+      var resources = _ref4.resources,
+          image = _ref4.image,
+          _ref4$isInline = _ref4.isInline,
+          isInline = _ref4$isInline === undefined ? false : _ref4$isInline,
+          operatorList = _ref4.operatorList,
+          cacheKey = _ref4.cacheKey,
+          imageCache = _ref4.imageCache,
+          _ref4$forceDisableNat = _ref4.forceDisableNativeImageDecoder,
+          forceDisableNativeImageDecoder = _ref4$forceDisableNat === undefined ? false : _ref4$forceDisableNat;
 
       var dict = image.dict;
       var w = dict.get('Width', 'W');
       var h = dict.get('Height', 'H');
       if (!(w && (0, _util.isNum)(w)) || !(h && (0, _util.isNum)(h))) {
         (0, _util.warn)('Image dimensions are missing, or not numbers.');
-        return;
+        return Promise.resolve();
       }
       var maxImageSize = this.options.maxImageSize;
       if (maxImageSize !== -1 && w * h > maxImageSize) {
         (0, _util.warn)('Image exceeded maximum allowed size and was removed.');
-        return;
+        return Promise.resolve();
       }
       var imageMask = dict.get('ImageMask', 'IM') || false;
       var imgData, args;
@@ -33058,37 +33095,48 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
             args: args
           };
         }
-        return;
+        return Promise.resolve();
       }
       var softMask = dict.get('SMask', 'SM') || false;
       var mask = dict.get('Mask') || false;
       var SMALL_IMAGE_DIMENSIONS = 200;
-      if (inline && !softMask && !mask && !(image instanceof _jpeg_stream.JpegStream) && w + h < SMALL_IMAGE_DIMENSIONS) {
+      if (isInline && !softMask && !mask && !(image instanceof _jpeg_stream.JpegStream) && w + h < SMALL_IMAGE_DIMENSIONS) {
         var imageObj = new _image.PDFImage({
           xref: this.xref,
           res: resources,
           image: image,
-          isInline: inline,
+          isInline: isInline,
           pdfFunctionFactory: this.pdfFunctionFactory
         });
         imgData = imageObj.createImageData(true);
         operatorList.addOp(_util.OPS.paintInlineImageXObject, [imgData]);
-        return;
+        return Promise.resolve();
       }
-      var nativeImageDecoderSupport = this.options.nativeImageDecoderSupport;
+      var nativeImageDecoderSupport = forceDisableNativeImageDecoder ? _util.NativeImageDecoding.NONE : this.options.nativeImageDecoderSupport;
       var objId = 'img_' + this.idFactory.createObjId();
-      operatorList.addDependency(objId);
-      args = [objId, w, h];
       if (nativeImageDecoderSupport !== _util.NativeImageDecoding.NONE && !softMask && !mask && image instanceof _jpeg_stream.JpegStream && NativeImageDecoder.isSupported(image, this.xref, resources, this.pdfFunctionFactory)) {
-        operatorList.addOp(_util.OPS.paintJpegXObject, args);
-        this.handler.send('obj', [objId, this.pageIndex, 'JpegStream', image.getIR(this.options.forceDataSchema)]);
-        if (cacheKey) {
-          imageCache[cacheKey] = {
-            fn: _util.OPS.paintJpegXObject,
-            args: args
-          };
-        }
-        return;
+        return this.handler.sendWithPromise('obj', [objId, this.pageIndex, 'JpegStream', image.getIR(this.options.forceDataSchema)]).then(function () {
+          operatorList.addDependency(objId);
+          args = [objId, w, h];
+          operatorList.addOp(_util.OPS.paintJpegXObject, args);
+          if (cacheKey) {
+            imageCache[cacheKey] = {
+              fn: _util.OPS.paintJpegXObject,
+              args: args
+            };
+          }
+        }, function (reason) {
+          (0, _util.warn)('Native JPEG decoding failed -- trying to recover: ' + (reason && reason.message));
+          return _this2.buildPaintImageXObject({
+            resources: resources,
+            image: image,
+            isInline: isInline,
+            operatorList: operatorList,
+            cacheKey: cacheKey,
+            imageCache: imageCache,
+            forceDisableNativeImageDecoder: true
+          });
+        });
       }
       var nativeImageDecoder = null;
       if (nativeImageDecoderSupport === _util.NativeImageDecoding.DECODE && (image instanceof _jpeg_stream.JpegStream || mask instanceof _jpeg_stream.JpegStream || softMask instanceof _jpeg_stream.JpegStream)) {
@@ -33100,12 +33148,14 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           pdfFunctionFactory: this.pdfFunctionFactory
         });
       }
+      operatorList.addDependency(objId);
+      args = [objId, w, h];
       _image.PDFImage.buildImage({
         handler: this.handler,
         xref: this.xref,
         res: resources,
         image: image,
-        isInline: inline,
+        isInline: isInline,
         nativeDecoder: nativeImageDecoder,
         pdfFunctionFactory: this.pdfFunctionFactory
       }).then(function (imageObj) {
@@ -33122,7 +33172,9 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
           args: args
         };
       }
+      return Promise.resolve();
     },
+
     handleSMask: function PartialEvaluator_handleSmask(smask, resources, operatorList, task, stateManager) {
       var smaskContent = smask.get('G');
       var smaskOptions = {
@@ -33435,15 +33487,15 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
       operatorList.addOp(fn, args);
       return Promise.resolve();
     },
-    getOperatorList: function getOperatorList(_ref3) {
+    getOperatorList: function getOperatorList(_ref5) {
       var _this8 = this;
 
-      var stream = _ref3.stream,
-          task = _ref3.task,
-          resources = _ref3.resources,
-          operatorList = _ref3.operatorList,
-          _ref3$initialState = _ref3.initialState,
-          initialState = _ref3$initialState === undefined ? null : _ref3$initialState;
+      var stream = _ref5.stream,
+          task = _ref5.task,
+          resources = _ref5.resources,
+          operatorList = _ref5.operatorList,
+          _ref5$initialState = _ref5.initialState,
+          initialState = _ref5$initialState === undefined ? null : _ref5$initialState;
 
       resources = resources || _primitives.Dict.empty;
       initialState = initialState || new EvalState();
@@ -33520,7 +33572,14 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
                   }, rejectXObject);
                   return;
                 } else if (type.name === 'Image') {
-                  self.buildPaintImageXObject(resources, xobj, false, operatorList, name, imageCache);
+                  self.buildPaintImageXObject({
+                    resources: resources,
+                    image: xobj,
+                    operatorList: operatorList,
+                    cacheKey: name,
+                    imageCache: imageCache
+                  }).then(resolveXObject, rejectXObject);
+                  return;
                 } else if (type.name === 'PS') {
                   (0, _util.info)('Ignored XObject subtype PS');
                 } else {
@@ -33553,9 +33612,15 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
                   continue;
                 }
               }
-              self.buildPaintImageXObject(resources, args[0], true, operatorList, cacheKey, imageCache);
-              args = null;
-              continue;
+              next(self.buildPaintImageXObject({
+                resources: resources,
+                image: args[0],
+                isInline: true,
+                operatorList: operatorList,
+                cacheKey: cacheKey,
+                imageCache: imageCache
+              }));
+              return;
             case _util.OPS.showText:
               args[0] = self.handleText(args[0], stateManager.state);
               break;
@@ -33725,21 +33790,21 @@ var PartialEvaluator = function PartialEvaluatorClosure() {
         throw reason;
       });
     },
-    getTextContent: function getTextContent(_ref4) {
+    getTextContent: function getTextContent(_ref6) {
       var _this9 = this;
 
-      var stream = _ref4.stream,
-          task = _ref4.task,
-          resources = _ref4.resources,
-          _ref4$stateManager = _ref4.stateManager,
-          stateManager = _ref4$stateManager === undefined ? null : _ref4$stateManager,
-          _ref4$normalizeWhites = _ref4.normalizeWhitespace,
-          normalizeWhitespace = _ref4$normalizeWhites === undefined ? false : _ref4$normalizeWhites,
-          _ref4$combineTextItem = _ref4.combineTextItems,
-          combineTextItems = _ref4$combineTextItem === undefined ? false : _ref4$combineTextItem,
-          sink = _ref4.sink,
-          _ref4$seenStyles = _ref4.seenStyles,
-          seenStyles = _ref4$seenStyles === undefined ? Object.create(null) : _ref4$seenStyles;
+      var stream = _ref6.stream,
+          task = _ref6.task,
+          resources = _ref6.resources,
+          _ref6$stateManager = _ref6.stateManager,
+          stateManager = _ref6$stateManager === undefined ? null : _ref6$stateManager,
+          _ref6$normalizeWhites = _ref6.normalizeWhitespace,
+          normalizeWhitespace = _ref6$normalizeWhites === undefined ? false : _ref6$normalizeWhites,
+          _ref6$combineTextItem = _ref6.combineTextItems,
+          combineTextItems = _ref6$combineTextItem === undefined ? false : _ref6$combineTextItem,
+          sink = _ref6.sink,
+          _ref6$seenStyles = _ref6.seenStyles,
+          seenStyles = _ref6$seenStyles === undefined ? Object.create(null) : _ref6$seenStyles;
 
       resources = resources || _primitives.Dict.empty;
       stateManager = stateManager || new StateManager(new TextState());
@@ -44386,7 +44451,10 @@ var _jpx = __w_pdfjs_require__(67);
 var PDFImage = function PDFImageClosure() {
   function handleImageData(image, nativeDecoder) {
     if (nativeDecoder && nativeDecoder.canDecode(image)) {
-      return nativeDecoder.decode(image);
+      return nativeDecoder.decode(image).catch(function (reason) {
+        (0, _util.warn)('Native image decoding failed -- trying to recover: ' + (reason && reason.message));
+        return image;
+      });
     }
     return Promise.resolve(image);
   }
