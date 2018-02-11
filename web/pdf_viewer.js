@@ -411,7 +411,7 @@ function getPDFFileNameFromURL(url) {
   var suggestedFilename = reFilename.exec(splitURI[1]) || reFilename.exec(splitURI[2]) || reFilename.exec(splitURI[3]);
   if (suggestedFilename) {
     suggestedFilename = suggestedFilename[0];
-    if (suggestedFilename.indexOf('%') !== -1) {
+    if (suggestedFilename.includes('%')) {
       try {
         suggestedFilename = reFilename.exec(decodeURIComponent(suggestedFilename))[0];
       } catch (ex) {}
@@ -917,7 +917,7 @@ var PDFLinkService = function () {
     value: function setHash(hash) {
       var pageNumber = void 0,
           dest = void 0;
-      if (hash.indexOf('=') >= 0) {
+      if (hash.includes('=')) {
         var params = (0, _ui_utils.parseQueryString)(hash);
         if ('search' in params) {
           this.eventBus.dispatch('findfromurlhash', {
@@ -937,7 +937,7 @@ var PDFLinkService = function () {
           var zoomArgs = params.zoom.split(',');
           var zoomArg = zoomArgs[0];
           var zoomArgNumber = parseFloat(zoomArg);
-          if (zoomArg.indexOf('Fit') === -1) {
+          if (!zoomArg.includes('Fit')) {
             dest = [null, { name: 'XYZ' }, zoomArgs.length > 1 ? zoomArgs[1] | 0 : null, zoomArgs.length > 2 ? zoomArgs[2] | 0 : null, zoomArgNumber ? zoomArgNumber / 100 : zoomArg];
           } else {
             if (zoomArg === 'Fit' || zoomArg === 'FitB') {
@@ -3202,10 +3202,10 @@ function _download(blobUrl, filename) {
     }
     (document.body || document.documentElement).appendChild(a);
     a.click();
-    a.parentNode.removeChild(a);
+    a.remove();
   } else {
     if (window.top === window && blobUrl.split('#')[0] === window.location.href.split('#')[0]) {
-      var padCharacter = blobUrl.indexOf('?') === -1 ? '?' : '&';
+      var padCharacter = blobUrl.includes('?') ? '&' : '?';
       blobUrl = blobUrl.replace(/#|$/, padCharacter + '$&');
     }
     window.open(blobUrl, '_parent');
