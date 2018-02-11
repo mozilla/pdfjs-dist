@@ -3299,7 +3299,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.352';
+  var apiVersion = '2.0.354';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -4698,8 +4698,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.352';
-  exports.build = build = '368a91b5';
+  exports.version = version = '2.0.354';
+  exports.build = build = 'b3557483';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -7457,8 +7457,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.352';
-var pdfjsBuild = '368a91b5';
+var pdfjsVersion = '2.0.354';
+var pdfjsBuild = 'b3557483';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(120);
 var pdfjsDisplayAPI = __w_pdfjs_require__(58);
@@ -12743,8 +12743,8 @@ if (!_global_scope2.default.PDFJS) {
 }
 var PDFJS = _global_scope2.default.PDFJS;
 {
-  PDFJS.version = '2.0.352';
-  PDFJS.build = '368a91b5';
+  PDFJS.version = '2.0.354';
+  PDFJS.build = 'b3557483';
 }
 PDFJS.pdfBug = false;
 if (PDFJS.verbosity !== undefined) {
@@ -15275,8 +15275,8 @@ var PDFDataTransportStream = function PDFDataTransportStreamClosure() {
       this._queuedChunks.push(buffer);
     }
     this._pdfDataRangeTransport = pdfDataRangeTransport;
-    this._isRangeSupported = !params.disableRange;
     this._isStreamingSupported = !params.disableStream;
+    this._isRangeSupported = !params.disableRange;
     this._contentLength = params.length;
     this._fullRequestReader = null;
     this._rangeReaders = [];
@@ -16238,10 +16238,8 @@ var PDFNodeStreamFullReader = function (_BaseFullReader) {
           allowRangeRequests = _validateRangeRequest.allowRangeRequests,
           suggestedLength = _validateRangeRequest.suggestedLength;
 
-      if (allowRangeRequests) {
-        _this5._isRangeSupported = true;
-      }
-      _this5._contentLength = suggestedLength;
+      _this5._isRangeSupported = allowRangeRequests;
+      _this5._contentLength = suggestedLength || _this5._contentLength;
       _this5._filename = (0, _network_utils.extractFilenameFromHeader)(getResponseHeader);
     };
     _this5._request = null;
@@ -16594,13 +16592,13 @@ var PDFFetchStreamReader = function () {
     this._withCredentials = source.withCredentials;
     this._contentLength = source.length;
     this._headersCapability = (0, _util.createPromiseCapability)();
-    this._disableRange = source.disableRange;
+    this._disableRange = source.disableRange || false;
     this._rangeChunkSize = source.rangeChunkSize;
     if (!this._rangeChunkSize && !this._disableRange) {
       this._disableRange = true;
     }
-    this._isRangeSupported = !source.disableRange;
     this._isStreamingSupported = !source.disableStream;
+    this._isRangeSupported = !source.disableRange;
     this._headers = new Headers();
     for (var property in this._stream.httpHeaders) {
       var value = this._stream.httpHeaders[property];
@@ -16629,8 +16627,8 @@ var PDFFetchStreamReader = function () {
           allowRangeRequests = _validateRangeRequest.allowRangeRequests,
           suggestedLength = _validateRangeRequest.suggestedLength;
 
-      _this._contentLength = suggestedLength;
       _this._isRangeSupported = allowRangeRequests;
+      _this._contentLength = suggestedLength || _this._contentLength;
       _this._filename = (0, _network_utils.extractFilenameFromHeader)(getResponseHeader);
       if (!_this._isStreamingSupported && _this._isRangeSupported) {
         _this.cancel(new _util.AbortException('streaming is disabled'));
@@ -17077,10 +17075,10 @@ PDFNetworkStreamFullRequestReader.prototype = {
         allowRangeRequests = _validateRangeRequest.allowRangeRequests,
         suggestedLength = _validateRangeRequest.suggestedLength;
 
-    this._contentLength = suggestedLength || this._contentLength;
     if (allowRangeRequests) {
       this._isRangeSupported = true;
     }
+    this._contentLength = suggestedLength || this._contentLength;
     this._filename = (0, _network_utils.extractFilenameFromHeader)(getResponseHeader);
     var networkManager = this._manager;
     if (networkManager.isStreamingRequest(fullRequestXhrId)) {
