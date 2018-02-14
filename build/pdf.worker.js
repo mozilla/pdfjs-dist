@@ -4035,6 +4035,20 @@ var _jpeg_stream = __w_pdfjs_require__(41);
 var _jpx_stream = __w_pdfjs_require__(138);
 
 var MAX_LENGTH_TO_CACHE = 1000;
+var MAX_ADLER32_LENGTH = 5552;
+function computeAdler32(bytes) {
+  var bytesLength = bytes.length;
+  if (bytesLength >= MAX_ADLER32_LENGTH) {
+    throw new Error('computeAdler32: The input is too large.');
+  }
+  var a = 1,
+      b = 0;
+  for (var i = 0; i < bytesLength; ++i) {
+    a += bytes[i] & 0xFF;
+    b += a;
+  }
+  return b % 65521 << 16 | a % 65521;
+}
 var Parser = function ParserClosure() {
   function Parser(lexer, allowStreams, xref, recoveryMode) {
     this.lexer = lexer;
@@ -4324,7 +4338,8 @@ var Parser = function ParserClosure() {
     makeInlineImage: function Parser_makeInlineImage(cipherTransform) {
       var lexer = this.lexer;
       var stream = lexer.stream;
-      var dict = new _primitives.Dict(this.xref);
+      var dict = new _primitives.Dict(this.xref),
+          dictLength = void 0;
       while (!(0, _primitives.isCmd)(this.buf1, 'ID') && !(0, _primitives.isEOF)(this.buf1)) {
         if (!(0, _primitives.isName)(this.buf1)) {
           throw new _util.FormatError('Dictionary key must be a name object');
@@ -4335,6 +4350,9 @@ var Parser = function ParserClosure() {
           break;
         }
         dict.set(key, this.getObj(cipherTransform));
+      }
+      if (lexer.beginInlineImagePos !== -1) {
+        dictLength = stream.pos - lexer.beginInlineImagePos;
       }
       var filter = dict.get('Filter', 'F'),
           filterName;
@@ -4347,9 +4365,7 @@ var Parser = function ParserClosure() {
         }
       }
       var startPos = stream.pos,
-          length,
-          i,
-          ii;
+          length = void 0;
       if (filterName === 'DCTDecode' || filterName === 'DCT') {
         length = this.findDCTDecodeInlineStreamEnd(stream);
       } else if (filterName === 'ASCII85Decode' || filterName === 'A85') {
@@ -4360,18 +4376,16 @@ var Parser = function ParserClosure() {
         length = this.findDefaultInlineStreamEnd(stream);
       }
       var imageStream = stream.makeSubStream(startPos, length, dict);
-      var adler32;
-      if (length < MAX_LENGTH_TO_CACHE) {
+      var cacheKey = void 0;
+      if (length < MAX_LENGTH_TO_CACHE && dictLength < MAX_ADLER32_LENGTH) {
         var imageBytes = imageStream.getBytes();
         imageStream.reset();
-        var a = 1;
-        var b = 0;
-        for (i = 0, ii = imageBytes.length; i < ii; ++i) {
-          a += imageBytes[i] & 0xff;
-          b += a;
-        }
-        adler32 = b % 65521 << 16 | a % 65521;
-        var cacheEntry = this.imageCache[adler32];
+        var initialStreamPos = stream.pos;
+        stream.pos = lexer.beginInlineImagePos;
+        var dictBytes = stream.getBytes(dictLength);
+        stream.pos = initialStreamPos;
+        cacheKey = computeAdler32(imageBytes) + '_' + computeAdler32(dictBytes);
+        var cacheEntry = this.imageCache[cacheKey];
         if (cacheEntry !== undefined) {
           this.buf2 = _primitives.Cmd.get('EI');
           this.shift();
@@ -4384,9 +4398,9 @@ var Parser = function ParserClosure() {
       }
       imageStream = this.filter(imageStream, dict, length);
       imageStream.dict = dict;
-      if (adler32 !== undefined) {
-        imageStream.cacheKey = 'inline_' + length + '_' + adler32;
-        this.imageCache[adler32] = imageStream;
+      if (cacheKey !== undefined) {
+        imageStream.cacheKey = 'inline_' + length + '_' + cacheKey;
+        this.imageCache[cacheKey] = imageStream;
       }
       this.buf2 = _primitives.Cmd.get('EI');
       this.shift();
@@ -4559,6 +4573,7 @@ var Lexer = function LexerClosure() {
     this.nextChar();
     this.strBuf = [];
     this.knownCommands = knownCommands;
+    this.beginInlineImagePos = -1;
   }
   var specialChars = [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   function toHexDigit(ch) {
@@ -4912,6 +4927,9 @@ var Lexer = function LexerClosure() {
       }
       if (str === 'null') {
         return null;
+      }
+      if (str === 'BI') {
+        this.beginInlineImagePos = this.stream.pos;
       }
       return _primitives.Cmd.get(str);
     },
@@ -22295,8 +22313,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.361';
-var pdfjsBuild = 'df0836b9';
+var pdfjsVersion = '2.0.363';
+var pdfjsBuild = '2e780d4e';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22509,7 +22527,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.361';
+    var workerVersion = '2.0.363';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
