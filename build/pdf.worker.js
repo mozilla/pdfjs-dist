@@ -22313,8 +22313,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.363';
-var pdfjsBuild = '2e780d4e';
+var pdfjsVersion = '2.0.374';
+var pdfjsBuild = '538dda10';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22527,7 +22527,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.363';
+    var workerVersion = '2.0.374';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -22927,7 +22927,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
   var globalScope = __w_pdfjs_require__(76);
   var isNodeJS = __w_pdfjs_require__(44);
   var userAgent = typeof navigator !== 'undefined' && navigator.userAgent || '';
-  var isAndroid = /Android/.test(userAgent);
   var isIOSChrome = userAgent.indexOf('CriOS') >= 0;
   var isIE = userAgent.indexOf('Trident') >= 0;
   var isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent);
@@ -22958,32 +22957,10 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
       PDFJS.disableCreateObjectURL = true;
     }
   })();
-  (function checkNavigatorLanguage() {
-    if (typeof navigator === 'undefined') {
-      return;
-    }
-    if ('language' in navigator) {
-      return;
-    }
-    PDFJS.locale = navigator.userLanguage || 'en-US';
-  })();
   (function checkRangeRequests() {
     if (isSafari || isIOS) {
       PDFJS.disableRange = true;
       PDFJS.disableStream = true;
-    }
-  })();
-  (function checkCanvasSizeLimitation() {
-    if (isIOS || isAndroid) {
-      PDFJS.maxCanvasPixels = 5242880;
-    }
-  })();
-  (function checkFullscreenSupport() {
-    if (!hasDOM) {
-      return;
-    }
-    if (isIE && window.parent !== window) {
-      PDFJS.disableFullscreen = true;
     }
   })();
   (function checkCurrentScript() {
