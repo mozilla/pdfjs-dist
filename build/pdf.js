@@ -3283,7 +3283,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   if (worker.destroyed) {
     return Promise.reject(new Error('Worker was destroyed'));
   }
-  var apiVersion = '2.0.398';
+  var apiVersion = '2.0.400';
   source.disableRange = (0, _dom_utils.getDefaultSetting)('disableRange');
   source.disableAutoFetch = (0, _dom_utils.getDefaultSetting)('disableAutoFetch');
   source.disableStream = (0, _dom_utils.getDefaultSetting)('disableStream');
@@ -4691,8 +4691,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.398';
-  exports.build = build = '80bf6150';
+  exports.version = version = '2.0.400';
+  exports.build = build = 'f893bcd4';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -7454,8 +7454,8 @@ exports.SVGGraphics = SVGGraphics;
 "use strict";
 
 
-var pdfjsVersion = '2.0.398';
-var pdfjsBuild = '80bf6150';
+var pdfjsVersion = '2.0.400';
+var pdfjsBuild = 'f893bcd4';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayGlobal = __w_pdfjs_require__(121);
 var pdfjsDisplayAPI = __w_pdfjs_require__(59);
@@ -15887,15 +15887,28 @@ var https = require('https');
 var url = require('url');
 
 var fileUriRegex = /^file:\/\/\/[a-zA-Z]:\//;
+function parseUrl(sourceUrl) {
+  var parsedUrl = url.parse(sourceUrl);
+  if (parsedUrl.protocol === 'file:' || parsedUrl.host) {
+    return parsedUrl;
+  }
+  if (/^[a-z]:[/\\]/i.test(sourceUrl)) {
+    return url.parse('file:///' + sourceUrl);
+  }
+  if (!parsedUrl.host) {
+    parsedUrl.protocol = 'file:';
+  }
+  return parsedUrl;
+}
 
 var PDFNodeStream = function () {
   function PDFNodeStream(source) {
     _classCallCheck(this, PDFNodeStream);
 
     this.source = source;
-    this.url = url.parse(source.url);
+    this.url = parseUrl(source.url);
     this.isHttp = this.url.protocol === 'http:' || this.url.protocol === 'https:';
-    this.isFsUrl = this.url.protocol === 'file:' || !this.url.host;
+    this.isFsUrl = this.url.protocol === 'file:';
     this.httpHeaders = this.isHttp && source.httpHeaders || {};
     this._fullRequest = null;
     this._rangeRequestReaders = [];
