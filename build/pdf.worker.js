@@ -22315,8 +22315,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.400';
-var pdfjsBuild = 'f893bcd4';
+var pdfjsVersion = '2.0.402';
+var pdfjsBuild = '401f3a9d';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22529,7 +22529,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.400';
+    var workerVersion = '2.0.402';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -22999,13 +22999,13 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     if (String.prototype.includes) {
       return;
     }
-    String.prototype.includes = __w_pdfjs_require__(77);
+    __w_pdfjs_require__(77);
   })();
   (function checkArrayIncludes() {
     if (Array.prototype.includes) {
       return;
     }
-    Array.prototype.includes = __w_pdfjs_require__(82);
+    __w_pdfjs_require__(82);
   })();
   (function checkMathLog2() {
     if (Math.log2) {
