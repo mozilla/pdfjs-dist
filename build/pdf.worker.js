@@ -22315,8 +22315,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.402';
-var pdfjsBuild = '401f3a9d';
+var pdfjsVersion = '2.0.419';
+var pdfjsBuild = 'c33bf800';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22529,7 +22529,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.402';
+    var workerVersion = '2.0.419';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -22720,7 +22720,7 @@ var WorkerMessageHandler = {
       ensureNotTerminated();
       var evaluatorOptions = {
         forceDataSchema: data.disableCreateObjectURL,
-        maxImageSize: data.maxImageSize === undefined ? -1 : data.maxImageSize,
+        maxImageSize: data.maxImageSize,
         disableFontFace: data.disableFontFace,
         nativeImageDecoderSupport: data.nativeImageDecoderSupport,
         ignoreErrors: data.ignoreErrors,
@@ -22925,19 +22925,11 @@ exports.WorkerMessageHandler = WorkerMessageHandler;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
-  var globalScope = __w_pdfjs_require__(76);
+var globalScope = __w_pdfjs_require__(76);
+if (!globalScope._pdfjsCompatibilityChecked) {
+  globalScope._pdfjsCompatibilityChecked = true;
   var isNodeJS = __w_pdfjs_require__(44);
-  var userAgent = typeof navigator !== 'undefined' && navigator.userAgent || '';
-  var isIOSChrome = userAgent.indexOf('CriOS') >= 0;
-  var isIE = userAgent.indexOf('Trident') >= 0;
-  var isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent);
-  var isSafari = /Safari\//.test(userAgent) && !/(Chrome\/|Android\s)/.test(userAgent);
   var hasDOM = (typeof window === 'undefined' ? 'undefined' : _typeof(window)) === 'object' && (typeof document === 'undefined' ? 'undefined' : _typeof(document)) === 'object';
-  if (typeof PDFJS === 'undefined') {
-    globalScope.PDFJS = {};
-  }
-  PDFJS.compatibilityChecked = true;
   (function checkNodeBtoa() {
     if (globalScope.btoa || !isNodeJS()) {
       return;
@@ -22953,17 +22945,6 @@ if (typeof PDFJS === 'undefined' || !PDFJS.compatibilityChecked) {
     globalScope.atob = function (input) {
       return Buffer.from(input, 'base64').toString('binary');
     };
-  })();
-  (function checkOnBlobSupport() {
-    if (isIE || isIOSChrome) {
-      PDFJS.disableCreateObjectURL = true;
-    }
-  })();
-  (function checkRangeRequests() {
-    if (isSafari || isIOS) {
-      PDFJS.disableRange = true;
-      PDFJS.disableStream = true;
-    }
   })();
   (function checkCurrentScript() {
     if (!hasDOM) {

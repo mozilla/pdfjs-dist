@@ -102,21 +102,6 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 
-var pdfjsLib = void 0;
-if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
-  pdfjsLib = window['pdfjs-dist/build/pdf'];
-} else {
-  pdfjsLib = require('../build/pdf.js');
-}
-module.exports = pdfjsLib;
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -126,7 +111,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _pdfjsLib = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(1);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -173,12 +158,6 @@ var NullL10n = {
     return Promise.resolve();
   }
 };
-_pdfjsLib.PDFJS.useOnlyCssZoom = _pdfjsLib.PDFJS.useOnlyCssZoom === undefined ? false : _pdfjsLib.PDFJS.useOnlyCssZoom;
-_pdfjsLib.PDFJS.maxCanvasPixels = _pdfjsLib.PDFJS.maxCanvasPixels === undefined ? 16777216 : _pdfjsLib.PDFJS.maxCanvasPixels;
-_pdfjsLib.PDFJS.disableHistory = _pdfjsLib.PDFJS.disableHistory === undefined ? false : _pdfjsLib.PDFJS.disableHistory;
-{
-  _pdfjsLib.PDFJS.locale = (_pdfjsLib.PDFJS.locale === undefined && typeof navigator !== 'undefined' ? navigator.language : _pdfjsLib.PDFJS.locale) || 'en-US';
-}
 function getOutputScale(ctx) {
   var devicePixelRatio = window.devicePixelRatio || 1;
   var backingStoreRatio = ctx.webkitBackingStorePixelRatio || ctx.mozBackingStorePixelRatio || ctx.msBackingStorePixelRatio || ctx.oBackingStorePixelRatio || ctx.backingStorePixelRatio || 1;
@@ -654,6 +633,21 @@ exports.WaitOnType = WaitOnType;
 exports.waitOnEventOrTimeout = waitOnEventOrTimeout;
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var pdfjsLib = void 0;
+if (typeof window !== 'undefined' && window['pdfjs-dist/build/pdf']) {
+  pdfjsLib = window['pdfjs-dist/build/pdf'];
+} else {
+  pdfjsLib = require('../build/pdf.js');
+}
+module.exports = pdfjsLib;
+
+/***/ }),
 /* 2 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
@@ -665,7 +659,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.getGlobalEventBus = exports.attachDOMEventsToEventBus = undefined;
 
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
 function attachDOMEventsToEventBus(eventBus) {
   eventBus.on('documentload', function () {
@@ -793,7 +787,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _dom_events = __w_pdfjs_require__(2);
 
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1208,9 +1202,9 @@ exports.DefaultAnnotationLayerFactory = exports.AnnotationLayerBuilder = undefin
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pdfjsLib = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(1);
 
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
 var _pdf_link_service = __w_pdfjs_require__(3);
 
@@ -1341,7 +1335,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _dom_events = __w_pdfjs_require__(2);
 
-var _pdfjsLib = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(1);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1683,9 +1677,9 @@ exports.PDFPageView = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
-var _pdfjsLib = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(1);
 
 var _dom_events = __w_pdfjs_require__(2);
 
@@ -2357,13 +2351,13 @@ exports.BaseViewer = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pdfjsLib = __w_pdfjs_require__(0);
-
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
 var _pdf_rendering_queue = __w_pdfjs_require__(7);
 
 var _annotation_layer_builder = __w_pdfjs_require__(4);
+
+var _pdfjsLib = __w_pdfjs_require__(1);
 
 var _dom_events = __w_pdfjs_require__(2);
 
@@ -2548,7 +2542,7 @@ var BaseViewer = function () {
           _this._pages.push(pageView);
         }
         onePageRenderedCapability.promise.then(function () {
-          if (_pdfjsLib.PDFJS.disableAutoFetch) {
+          if (pdfDocument.loadingParams['disableAutoFetch']) {
             pagesCapability.resolve();
             return;
           }
@@ -3162,13 +3156,13 @@ exports.BaseViewer = BaseViewer;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.PDFJS = undefined;
+exports.NullL10n = exports.GenericL10n = exports.ProgressBar = exports.DownloadManager = exports.EventBus = exports.PDFFindController = exports.PDFHistory = exports.DefaultAnnotationLayerFactory = exports.AnnotationLayerBuilder = exports.DefaultTextLayerFactory = exports.TextLayerBuilder = exports.SimpleLinkService = exports.PDFLinkService = exports.PDFPageView = exports.PDFSinglePageViewer = exports.PDFViewer = undefined;
 
 var _annotation_layer_builder = __w_pdfjs_require__(4);
 
 var _text_layer_builder = __w_pdfjs_require__(5);
 
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
 var _pdf_link_service = __w_pdfjs_require__(3);
 
@@ -3180,37 +3174,30 @@ var _pdf_find_controller = __w_pdfjs_require__(13);
 
 var _pdf_history = __w_pdfjs_require__(14);
 
-var _pdfjs = __w_pdfjs_require__(0);
-
-var _pdfjs2 = _interopRequireDefault(_pdfjs);
-
 var _pdf_page_view = __w_pdfjs_require__(6);
 
 var _pdf_single_page_viewer = __w_pdfjs_require__(16);
 
 var _pdf_viewer = __w_pdfjs_require__(17);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var PDFJS = _pdfjs2.default.PDFJS;
-
-PDFJS.PDFViewer = _pdf_viewer.PDFViewer;
-PDFJS.PDFSinglePageViewer = _pdf_single_page_viewer.PDFSinglePageViewer;
-PDFJS.PDFPageView = _pdf_page_view.PDFPageView;
-PDFJS.PDFLinkService = _pdf_link_service.PDFLinkService;
-PDFJS.SimpleLinkService = _pdf_link_service.SimpleLinkService;
-PDFJS.TextLayerBuilder = _text_layer_builder.TextLayerBuilder;
-PDFJS.DefaultTextLayerFactory = _text_layer_builder.DefaultTextLayerFactory;
-PDFJS.AnnotationLayerBuilder = _annotation_layer_builder.AnnotationLayerBuilder;
-PDFJS.DefaultAnnotationLayerFactory = _annotation_layer_builder.DefaultAnnotationLayerFactory;
-PDFJS.PDFHistory = _pdf_history.PDFHistory;
-PDFJS.PDFFindController = _pdf_find_controller.PDFFindController;
-PDFJS.EventBus = _ui_utils.EventBus;
-PDFJS.DownloadManager = _download_manager.DownloadManager;
-PDFJS.ProgressBar = _ui_utils.ProgressBar;
-PDFJS.GenericL10n = _genericl10n.GenericL10n;
-PDFJS.NullL10n = _ui_utils.NullL10n;
-exports.PDFJS = PDFJS;
+var pdfjsVersion = '2.0.419';
+var pdfjsBuild = 'c33bf800';
+exports.PDFViewer = _pdf_viewer.PDFViewer;
+exports.PDFSinglePageViewer = _pdf_single_page_viewer.PDFSinglePageViewer;
+exports.PDFPageView = _pdf_page_view.PDFPageView;
+exports.PDFLinkService = _pdf_link_service.PDFLinkService;
+exports.SimpleLinkService = _pdf_link_service.SimpleLinkService;
+exports.TextLayerBuilder = _text_layer_builder.TextLayerBuilder;
+exports.DefaultTextLayerFactory = _text_layer_builder.DefaultTextLayerFactory;
+exports.AnnotationLayerBuilder = _annotation_layer_builder.AnnotationLayerBuilder;
+exports.DefaultAnnotationLayerFactory = _annotation_layer_builder.DefaultAnnotationLayerFactory;
+exports.PDFHistory = _pdf_history.PDFHistory;
+exports.PDFFindController = _pdf_find_controller.PDFFindController;
+exports.EventBus = _ui_utils.EventBus;
+exports.DownloadManager = _download_manager.DownloadManager;
+exports.ProgressBar = _ui_utils.ProgressBar;
+exports.GenericL10n = _genericl10n.GenericL10n;
+exports.NullL10n = _ui_utils.NullL10n;
 
 /***/ }),
 /* 10 */
@@ -3226,11 +3213,12 @@ exports.DownloadManager = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pdfjsLib = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(1);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 ;
+var DISABLE_CREATE_OBJECT_URL = _pdfjsLib.apiCompatibilityParams.disableCreateObjectURL || false;
 function _download(blobUrl, filename) {
   var a = document.createElement('a');
   if (!a.click) {
@@ -3247,8 +3235,13 @@ function _download(blobUrl, filename) {
 }
 
 var DownloadManager = function () {
-  function DownloadManager() {
+  function DownloadManager(_ref) {
+    var _ref$disableCreateObj = _ref.disableCreateObjectURL,
+        disableCreateObjectURL = _ref$disableCreateObj === undefined ? DISABLE_CREATE_OBJECT_URL : _ref$disableCreateObj;
+
     _classCallCheck(this, DownloadManager);
+
+    this.disableCreateObjectURL = disableCreateObjectURL;
   }
 
   _createClass(DownloadManager, [{
@@ -3265,7 +3258,7 @@ var DownloadManager = function () {
       if (navigator.msSaveBlob) {
         return navigator.msSaveBlob(new Blob([data], { type: contentType }), filename);
       }
-      var blobUrl = (0, _pdfjsLib.createObjectURL)(data, contentType, _pdfjsLib.PDFJS.disableCreateObjectURL);
+      var blobUrl = (0, _pdfjsLib.createObjectURL)(data, contentType, this.disableCreateObjectURL);
       _download(blobUrl, filename);
     }
   }, {
@@ -3277,7 +3270,7 @@ var DownloadManager = function () {
         }
         return;
       }
-      if (_pdfjsLib.PDFJS.disableCreateObjectURL) {
+      if (this.disableCreateObjectURL) {
         this.downloadUrl(url, filename);
         return;
       }
@@ -4099,9 +4092,9 @@ exports.PDFFindController = exports.FindState = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _pdfjsLib = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(1);
 
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -4528,7 +4521,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
 var _dom_events = __w_pdfjs_require__(2);
 
@@ -5020,9 +5013,9 @@ var _get = function get(object, property, receiver) { if (object === null) objec
 
 var _base_viewer = __w_pdfjs_require__(8);
 
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
-var _pdfjsLib = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(1);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -5179,11 +5172,11 @@ exports.PDFViewer = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _ui_utils = __w_pdfjs_require__(1);
+var _ui_utils = __w_pdfjs_require__(0);
 
 var _base_viewer = __w_pdfjs_require__(8);
 
-var _pdfjsLib = __w_pdfjs_require__(0);
+var _pdfjsLib = __w_pdfjs_require__(1);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
