@@ -105,7 +105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isSpace = exports.isString = exports.isNum = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VerbosityLevel = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
+exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isSpace = exports.isString = exports.isNum = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.getInheritableProperty = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VerbosityLevel = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -629,6 +629,36 @@ function isEvalSupported() {
     return false;
   }
 }
+function getInheritableProperty(_ref) {
+  var dict = _ref.dict,
+      key = _ref.key,
+      _ref$getArray = _ref.getArray,
+      getArray = _ref$getArray === undefined ? false : _ref$getArray,
+      _ref$stopWhenFound = _ref.stopWhenFound,
+      stopWhenFound = _ref$stopWhenFound === undefined ? true : _ref$stopWhenFound;
+
+  var LOOP_LIMIT = 100;
+  var loopCount = 0;
+  var values = void 0;
+  while (dict) {
+    var value = getArray ? dict.getArray(key) : dict.get(key);
+    if (value !== undefined) {
+      if (stopWhenFound) {
+        return value;
+      }
+      if (!values) {
+        values = [];
+      }
+      values.push(value);
+    }
+    if (++loopCount > LOOP_LIMIT) {
+      warn('getInheritableProperty: maximum loop count exceeded for "' + key + '"');
+      break;
+    }
+    dict = dict.get('Parent');
+  }
+  return values;
+}
 var IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 var Util = function UtilClosure() {
   function Util() {}
@@ -743,15 +773,6 @@ var Util = function UtilClosure() {
     for (var key in obj2) {
       obj1[key] = obj2[key];
     }
-  };
-  Util.getInheritableProperty = function Util_getInheritableProperty(dict, name, getArray) {
-    while (dict && !dict.has(name)) {
-      dict = dict.get('Parent');
-    }
-    if (!dict) {
-      return null;
-    }
-    return getArray ? dict.getArray(name) : dict.get(name);
   };
   Util.inherit = function Util_inherit(sub, base, prototype) {
     sub.prototype = Object.create(base.prototype);
@@ -1143,12 +1164,12 @@ MessageHandler.prototype = {
     var sourceName = this.sourceName;
     var targetName = data.sourceName;
     var capability = createPromiseCapability();
-    var sendStreamRequest = function sendStreamRequest(_ref) {
-      var stream = _ref.stream,
-          chunk = _ref.chunk,
-          transfers = _ref.transfers,
-          success = _ref.success,
-          reason = _ref.reason;
+    var sendStreamRequest = function sendStreamRequest(_ref2) {
+      var stream = _ref2.stream,
+          chunk = _ref2.chunk,
+          transfers = _ref2.transfers,
+          success = _ref2.success,
+          reason = _ref2.reason;
 
       _this3.postMessage({
         sourceName: sourceName,
@@ -1228,10 +1249,10 @@ MessageHandler.prototype = {
     var sourceName = this.sourceName;
     var targetName = data.sourceName;
     var streamId = data.streamId;
-    var sendStreamResponse = function sendStreamResponse(_ref2) {
-      var stream = _ref2.stream,
-          success = _ref2.success,
-          reason = _ref2.reason;
+    var sendStreamResponse = function sendStreamResponse(_ref3) {
+      var stream = _ref3.stream,
+          success = _ref3.success,
+          reason = _ref3.reason;
 
       _this4.comObj.postMessage({
         sourceName: sourceName,
@@ -1377,6 +1398,7 @@ exports.createBlob = createBlob;
 exports.createPromiseCapability = createPromiseCapability;
 exports.createObjectURL = createObjectURL;
 exports.deprecated = deprecated;
+exports.getInheritableProperty = getInheritableProperty;
 exports.getLookupTableFactory = getLookupTableFactory;
 exports.getVerbosityLevel = getVerbosityLevel;
 exports.info = info;
@@ -3113,8 +3135,8 @@ exports.GlobalWorkerOptions = GlobalWorkerOptions;
 "use strict";
 
 
-var pdfjsVersion = '2.0.421';
-var pdfjsBuild = 'e0fb18a3';
+var pdfjsVersion = '2.0.424';
+var pdfjsBuild = 'fded22c6';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayAPI = __w_pdfjs_require__(117);
 var pdfjsDisplayTextLayer = __w_pdfjs_require__(124);
@@ -8545,7 +8567,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   }
   return worker.messageHandler.sendWithPromise('GetDocRequest', {
     docId: docId,
-    apiVersion: '2.0.421',
+    apiVersion: '2.0.424',
     source: {
       data: source.data,
       url: source.url,
@@ -9979,8 +10001,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.421';
-  exports.build = build = 'e0fb18a3';
+  exports.version = version = '2.0.424';
+  exports.build = build = 'fded22c6';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;

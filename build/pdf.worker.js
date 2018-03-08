@@ -105,7 +105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isSpace = exports.isString = exports.isNum = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VerbosityLevel = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
+exports.unreachable = exports.warn = exports.utf8StringToString = exports.stringToUTF8String = exports.stringToPDFString = exports.stringToBytes = exports.string32 = exports.shadow = exports.setVerbosityLevel = exports.ReadableStream = exports.removeNullCharacters = exports.readUint32 = exports.readUint16 = exports.readInt8 = exports.log2 = exports.isEvalSupported = exports.isLittleEndian = exports.createValidAbsoluteUrl = exports.isSameOrigin = exports.isSpace = exports.isString = exports.isNum = exports.isEmptyObj = exports.isBool = exports.isArrayBuffer = exports.info = exports.getVerbosityLevel = exports.getLookupTableFactory = exports.getInheritableProperty = exports.deprecated = exports.createObjectURL = exports.createPromiseCapability = exports.createBlob = exports.bytesToString = exports.assert = exports.arraysToBytes = exports.arrayByteLength = exports.FormatError = exports.XRefParseException = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PasswordResponses = exports.PasswordException = exports.PageViewport = exports.NotImplementedException = exports.NativeImageDecoding = exports.MissingPDFException = exports.MissingDataException = exports.MessageHandler = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VerbosityLevel = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = undefined;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
@@ -629,6 +629,36 @@ function isEvalSupported() {
     return false;
   }
 }
+function getInheritableProperty(_ref) {
+  var dict = _ref.dict,
+      key = _ref.key,
+      _ref$getArray = _ref.getArray,
+      getArray = _ref$getArray === undefined ? false : _ref$getArray,
+      _ref$stopWhenFound = _ref.stopWhenFound,
+      stopWhenFound = _ref$stopWhenFound === undefined ? true : _ref$stopWhenFound;
+
+  var LOOP_LIMIT = 100;
+  var loopCount = 0;
+  var values = void 0;
+  while (dict) {
+    var value = getArray ? dict.getArray(key) : dict.get(key);
+    if (value !== undefined) {
+      if (stopWhenFound) {
+        return value;
+      }
+      if (!values) {
+        values = [];
+      }
+      values.push(value);
+    }
+    if (++loopCount > LOOP_LIMIT) {
+      warn('getInheritableProperty: maximum loop count exceeded for "' + key + '"');
+      break;
+    }
+    dict = dict.get('Parent');
+  }
+  return values;
+}
 var IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 var Util = function UtilClosure() {
   function Util() {}
@@ -743,15 +773,6 @@ var Util = function UtilClosure() {
     for (var key in obj2) {
       obj1[key] = obj2[key];
     }
-  };
-  Util.getInheritableProperty = function Util_getInheritableProperty(dict, name, getArray) {
-    while (dict && !dict.has(name)) {
-      dict = dict.get('Parent');
-    }
-    if (!dict) {
-      return null;
-    }
-    return getArray ? dict.getArray(name) : dict.get(name);
   };
   Util.inherit = function Util_inherit(sub, base, prototype) {
     sub.prototype = Object.create(base.prototype);
@@ -1143,12 +1164,12 @@ MessageHandler.prototype = {
     var sourceName = this.sourceName;
     var targetName = data.sourceName;
     var capability = createPromiseCapability();
-    var sendStreamRequest = function sendStreamRequest(_ref) {
-      var stream = _ref.stream,
-          chunk = _ref.chunk,
-          transfers = _ref.transfers,
-          success = _ref.success,
-          reason = _ref.reason;
+    var sendStreamRequest = function sendStreamRequest(_ref2) {
+      var stream = _ref2.stream,
+          chunk = _ref2.chunk,
+          transfers = _ref2.transfers,
+          success = _ref2.success,
+          reason = _ref2.reason;
 
       _this3.postMessage({
         sourceName: sourceName,
@@ -1228,10 +1249,10 @@ MessageHandler.prototype = {
     var sourceName = this.sourceName;
     var targetName = data.sourceName;
     var streamId = data.streamId;
-    var sendStreamResponse = function sendStreamResponse(_ref2) {
-      var stream = _ref2.stream,
-          success = _ref2.success,
-          reason = _ref2.reason;
+    var sendStreamResponse = function sendStreamResponse(_ref3) {
+      var stream = _ref3.stream,
+          success = _ref3.success,
+          reason = _ref3.reason;
 
       _this4.comObj.postMessage({
         sourceName: sourceName,
@@ -1377,6 +1398,7 @@ exports.createBlob = createBlob;
 exports.createPromiseCapability = createPromiseCapability;
 exports.createObjectURL = createObjectURL;
 exports.deprecated = deprecated;
+exports.getInheritableProperty = getInheritableProperty;
 exports.getLookupTableFactory = getLookupTableFactory;
 exports.getVerbosityLevel = getVerbosityLevel;
 exports.info = info;
@@ -22315,8 +22337,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.421';
-var pdfjsBuild = 'e0fb18a3';
+var pdfjsVersion = '2.0.424';
+var pdfjsBuild = 'fded22c6';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22529,7 +22551,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.421';
+    var workerVersion = '2.0.424';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -28330,59 +28352,46 @@ var Page = function PageClosure() {
     };
   }
   Page.prototype = {
-    getPageProp: function Page_getPageProp(key) {
-      return this.pageDict.get(key);
+    _getInheritableProperty: function _getInheritableProperty(key) {
+      var getArray = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      var value = (0, _util.getInheritableProperty)({
+        dict: this.pageDict,
+        key: key,
+        getArray: getArray,
+        stopWhenFound: false
+      });
+      if (!Array.isArray(value)) {
+        return value;
+      }
+      if (value.length === 1 || !(0, _primitives.isDict)(value[0])) {
+        return value[0];
+      }
+      return _primitives.Dict.merge(this.xref, value);
     },
-    getInheritedPageProp: function Page_getInheritedPageProp(key, getArray) {
-      var dict = this.pageDict,
-          valueArray = null,
-          loopCount = 0;
-      var MAX_LOOP_COUNT = 100;
-      getArray = getArray || false;
-      while (dict) {
-        var value = getArray ? dict.getArray(key) : dict.get(key);
-        if (value !== undefined) {
-          if (!valueArray) {
-            valueArray = [];
-          }
-          valueArray.push(value);
-        }
-        if (++loopCount > MAX_LOOP_COUNT) {
-          (0, _util.warn)('getInheritedPageProp: maximum loop count exceeded for ' + key);
-          return valueArray ? valueArray[0] : undefined;
-        }
-        dict = dict.get('Parent');
-      }
-      if (!valueArray) {
-        return undefined;
-      }
-      if (valueArray.length === 1 || !(0, _primitives.isDict)(valueArray[0])) {
-        return valueArray[0];
-      }
-      return _primitives.Dict.merge(this.xref, valueArray);
-    },
+
     get content() {
-      return this.getPageProp('Contents');
+      return this.pageDict.get('Contents');
     },
     get resources() {
-      return (0, _util.shadow)(this, 'resources', this.getInheritedPageProp('Resources') || _primitives.Dict.empty);
+      return (0, _util.shadow)(this, 'resources', this._getInheritableProperty('Resources') || _primitives.Dict.empty);
     },
     get mediaBox() {
-      var mediaBox = this.getInheritedPageProp('MediaBox', true);
+      var mediaBox = this._getInheritableProperty('MediaBox', true);
       if (!Array.isArray(mediaBox) || mediaBox.length !== 4) {
         return (0, _util.shadow)(this, 'mediaBox', LETTER_SIZE_MEDIABOX);
       }
       return (0, _util.shadow)(this, 'mediaBox', mediaBox);
     },
     get cropBox() {
-      var cropBox = this.getInheritedPageProp('CropBox', true);
+      var cropBox = this._getInheritableProperty('CropBox', true);
       if (!Array.isArray(cropBox) || cropBox.length !== 4) {
         return (0, _util.shadow)(this, 'cropBox', this.mediaBox);
       }
       return (0, _util.shadow)(this, 'cropBox', cropBox);
     },
     get userUnit() {
-      var obj = this.getPageProp('UserUnit');
+      var obj = this.pageDict.get('UserUnit');
       if (!(0, _util.isNum)(obj) || obj <= 0) {
         obj = DEFAULT_USER_UNIT;
       }
@@ -28398,7 +28407,7 @@ var Page = function PageClosure() {
       return (0, _util.shadow)(this, 'view', intersection || mediaBox);
     },
     get rotate() {
-      var rotate = this.getInheritedPageProp('Rotate') || 0;
+      var rotate = this._getInheritableProperty('Rotate') || 0;
       if (rotate % 90 !== 0) {
         rotate = 0;
       } else if (rotate >= 360) {
@@ -28558,7 +28567,7 @@ var Page = function PageClosure() {
     },
     get annotations() {
       var annotations = [];
-      var annotationRefs = this.getInheritedPageProp('Annots') || [];
+      var annotationRefs = this._getInheritableProperty('Annots') || [];
       for (var i = 0, n = annotationRefs.length; i < n; ++i) {
         var annotationRef = annotationRefs[i];
         var annotation = _annotation.AnnotationFactory.create(this.xref, annotationRef, this.pdfManager, this.idFactory);
@@ -31844,7 +31853,10 @@ var AnnotationFactory = function () {
         case 'Text':
           return new TextAnnotation(parameters);
         case 'Widget':
-          var fieldType = _util.Util.getInheritableProperty(dict, 'FT');
+          var fieldType = (0, _util.getInheritableProperty)({
+            dict: dict,
+            key: 'FT'
+          });
           fieldType = (0, _primitives.isName)(fieldType) ? fieldType.name : null;
           switch (fieldType) {
             case 'Tx':
@@ -32216,13 +32228,29 @@ var WidgetAnnotation = function (_Annotation) {
     var data = _this2.data;
     data.annotationType = _util.AnnotationType.WIDGET;
     data.fieldName = _this2._constructFieldName(dict);
-    data.fieldValue = _util.Util.getInheritableProperty(dict, 'V', true);
+    data.fieldValue = (0, _util.getInheritableProperty)({
+      dict: dict,
+      key: 'V',
+      getArray: true
+    });
     data.alternativeText = (0, _util.stringToPDFString)(dict.get('TU') || '');
-    data.defaultAppearance = _util.Util.getInheritableProperty(dict, 'DA') || '';
-    var fieldType = _util.Util.getInheritableProperty(dict, 'FT');
+    data.defaultAppearance = (0, _util.getInheritableProperty)({
+      dict: dict,
+      key: 'DA'
+    }) || '';
+    var fieldType = (0, _util.getInheritableProperty)({
+      dict: dict,
+      key: 'FT'
+    });
     data.fieldType = (0, _primitives.isName)(fieldType) ? fieldType.name : null;
-    _this2.fieldResources = _util.Util.getInheritableProperty(dict, 'DR') || _primitives.Dict.empty;
-    data.fieldFlags = _util.Util.getInheritableProperty(dict, 'Ff');
+    _this2.fieldResources = (0, _util.getInheritableProperty)({
+      dict: dict,
+      key: 'DR'
+    }) || _primitives.Dict.empty;
+    data.fieldFlags = (0, _util.getInheritableProperty)({
+      dict: dict,
+      key: 'Ff'
+    });
     if (!Number.isInteger(data.fieldFlags) || data.fieldFlags < 0) {
       data.fieldFlags = 0;
     }
@@ -32285,13 +32313,20 @@ var TextWidgetAnnotation = function (_WidgetAnnotation) {
 
     var _this3 = _possibleConstructorReturn(this, (TextWidgetAnnotation.__proto__ || Object.getPrototypeOf(TextWidgetAnnotation)).call(this, params));
 
+    var dict = params.dict;
     _this3.data.fieldValue = (0, _util.stringToPDFString)(_this3.data.fieldValue || '');
-    var alignment = _util.Util.getInheritableProperty(params.dict, 'Q');
+    var alignment = (0, _util.getInheritableProperty)({
+      dict: dict,
+      key: 'Q'
+    });
     if (!Number.isInteger(alignment) || alignment < 0 || alignment > 2) {
       alignment = null;
     }
     _this3.data.textAlignment = alignment;
-    var maximumLength = _util.Util.getInheritableProperty(params.dict, 'MaxLen');
+    var maximumLength = (0, _util.getInheritableProperty)({
+      dict: dict,
+      key: 'MaxLen'
+    });
     if (!Number.isInteger(maximumLength) || maximumLength < 0) {
       maximumLength = null;
     }
@@ -32411,7 +32446,10 @@ var ChoiceWidgetAnnotation = function (_WidgetAnnotation3) {
     var _this5 = _possibleConstructorReturn(this, (ChoiceWidgetAnnotation.__proto__ || Object.getPrototypeOf(ChoiceWidgetAnnotation)).call(this, params));
 
     _this5.data.options = [];
-    var options = _util.Util.getInheritableProperty(params.dict, 'Opt');
+    var options = (0, _util.getInheritableProperty)({
+      dict: params.dict,
+      key: 'Opt'
+    });
     if (Array.isArray(options)) {
       var xref = params.xref;
       for (var i = 0, ii = options.length; i < ii; i++) {
