@@ -11871,16 +11871,26 @@ var Catalog = function CatalogClosure() {
             return;
           }
           count = currentNode.get('Count');
-          var objId = currentNode.objId;
-          if (objId && !pageKidsCountCache.has(objId)) {
-            pageKidsCountCache.put(objId, count);
-          }
-          if (currentPageIndex + count <= pageIndex) {
-            currentPageIndex += count;
-            continue;
+          if (Number.isInteger(count) && count >= 0) {
+            var objId = currentNode.objId;
+            if (objId && !pageKidsCountCache.has(objId)) {
+              pageKidsCountCache.put(objId, count);
+            }
+            if (currentPageIndex + count <= pageIndex) {
+              currentPageIndex += count;
+              continue;
+            }
           }
           var kids = currentNode.get('Kids');
           if (!Array.isArray(kids)) {
+            if ((0, _primitives.isName)(currentNode.get('Type'), 'Page') || !currentNode.has('Type') && currentNode.has('Contents')) {
+              if (currentPageIndex === pageIndex) {
+                capability.resolve([currentNode, null]);
+                return;
+              }
+              currentPageIndex++;
+              continue;
+            }
             capability.reject(new _util.FormatError('page dictionary kids object is not an array'));
             return;
           }
@@ -11929,11 +11939,14 @@ var Catalog = function CatalogClosure() {
             if (!(0, _primitives.isRef)(kid)) {
               throw new _util.FormatError('kid must be a Ref.');
             }
-            if (kid.num === kidRef.num) {
+            if ((0, _primitives.isRefsEqual)(kid, kidRef)) {
               found = true;
               break;
             }
             kidPromises.push(xref.fetchAsync(kid).then(function (kid) {
+              if (!(0, _primitives.isDict)(kid)) {
+                throw new _util.FormatError('kid node must be a Dict.');
+              }
               if (kid.has('Count')) {
                 var count = kid.get('Count');
                 total += count;
@@ -22337,8 +22350,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.428';
-var pdfjsBuild = '6662985a';
+var pdfjsVersion = '2.0.430';
+var pdfjsBuild = 'db6e316e';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22551,7 +22564,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.428';
+    var workerVersion = '2.0.430';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
