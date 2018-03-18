@@ -3135,8 +3135,8 @@ exports.GlobalWorkerOptions = GlobalWorkerOptions;
 "use strict";
 
 
-var pdfjsVersion = '2.0.432';
-var pdfjsBuild = '4136d41a';
+var pdfjsVersion = '2.0.437';
+var pdfjsBuild = '0d391dac';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayAPI = __w_pdfjs_require__(117);
 var pdfjsDisplayTextLayer = __w_pdfjs_require__(124);
@@ -8567,7 +8567,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   }
   return worker.messageHandler.sendWithPromise('GetDocRequest', {
     docId: docId,
-    apiVersion: '2.0.432',
+    apiVersion: '2.0.437',
     source: {
       data: source.data,
       url: source.url,
@@ -8728,22 +8728,6 @@ var PDFDocumentProxy = function PDFDocumentProxyClosure() {
     getMetadata: function PDFDocumentProxy_getMetadata() {
       return this.transport.getMetadata();
     },
-    getPageSizeInches: function getPageSizeInches(pageNumber) {
-      pageNumber = pageNumber || 1;
-      return this.getPage(pageNumber).then(function (page) {
-        var _page$view = _slicedToArray(page.view, 4),
-            x1 = _page$view[0],
-            y1 = _page$view[1],
-            x2 = _page$view[2],
-            y2 = _page$view[3];
-
-        return {
-          width: (x2 - x1) / 72 * page.userUnit,
-          height: (y2 - y1) / 72 * page.userUnit
-        };
-      });
-    },
-
     getData: function PDFDocumentProxy_getData() {
       return this.transport.getData();
     },
@@ -8796,6 +8780,19 @@ var PDFPageProxy = function PDFPageProxyClosure() {
     },
     get view() {
       return this.pageInfo.view;
+    },
+    get pageSizeInches() {
+      var _view = _slicedToArray(this.view, 4),
+          x1 = _view[0],
+          y1 = _view[1],
+          x2 = _view[2],
+          y2 = _view[3],
+          userUnit = this.userUnit;
+
+      return {
+        width: (x2 - x1) / 72 * userUnit,
+        height: (y2 - y1) / 72 * userUnit
+      };
     },
     getViewport: function getViewport(scale) {
       var rotate = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.rotate;
@@ -10001,8 +9998,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.432';
-  exports.build = build = '4136d41a';
+  exports.version = version = '2.0.437';
+  exports.build = build = '0d391dac';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
