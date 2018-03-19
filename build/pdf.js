@@ -3135,8 +3135,8 @@ exports.GlobalWorkerOptions = GlobalWorkerOptions;
 "use strict";
 
 
-var pdfjsVersion = '2.0.437';
-var pdfjsBuild = '0d391dac';
+var pdfjsVersion = '2.0.439';
+var pdfjsBuild = '6db9c3cb';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayAPI = __w_pdfjs_require__(117);
 var pdfjsDisplayTextLayer = __w_pdfjs_require__(124);
@@ -8567,7 +8567,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   }
   return worker.messageHandler.sendWithPromise('GetDocRequest', {
     docId: docId,
-    apiVersion: '2.0.437',
+    apiVersion: '2.0.439',
     source: {
       data: source.data,
       url: source.url,
@@ -9998,8 +9998,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.437';
-  exports.build = build = '0d391dac';
+  exports.version = version = '2.0.439';
+  exports.build = build = '6db9c3cb';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
