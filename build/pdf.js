@@ -28,7 +28,7 @@
 	else if(typeof exports === 'object')
 		exports["pdfjs-dist/build/pdf"] = factory();
 	else
-		root["pdfjs-dist/build/pdf"] = root.pdfjsDistBuildPdf = factory();
+		root["pdfjs-dist/build/pdf"] = root.pdfjsLib = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -3135,8 +3135,8 @@ exports.GlobalWorkerOptions = GlobalWorkerOptions;
 "use strict";
 
 
-var pdfjsVersion = '2.0.442';
-var pdfjsBuild = '3bfc797b';
+var pdfjsVersion = '2.0.444';
+var pdfjsBuild = '63c7aee1';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayAPI = __w_pdfjs_require__(117);
 var pdfjsDisplayTextLayer = __w_pdfjs_require__(124);
@@ -8567,7 +8567,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   }
   return worker.messageHandler.sendWithPromise('GetDocRequest', {
     docId: docId,
-    apiVersion: '2.0.442',
+    apiVersion: '2.0.444',
     source: {
       data: source.data,
       url: source.url,
@@ -9127,7 +9127,7 @@ var PDFWorker = function PDFWorkerClosure() {
     if (typeof window === 'undefined') {
       return null;
     }
-    return window.pdfjsDistBuildPdfWorker && window.pdfjsDistBuildPdfWorker.WorkerMessageHandler;
+    return window.pdfjsWorker && window.pdfjsWorker.WorkerMessageHandler;
   }
   var fakeWorkerFilesLoadedCapability = void 0;
   function setupFakeWorkerGlobal() {
@@ -9142,7 +9142,7 @@ var PDFWorker = function PDFWorkerClosure() {
     }
     var loader = fakeWorkerFilesLoader || function (callback) {
       _util.Util.loadScript(getWorkerSrc(), function () {
-        callback(window.pdfjsDistBuildPdfWorker.WorkerMessageHandler);
+        callback(window.pdfjsWorker.WorkerMessageHandler);
       });
     };
     loader(fakeWorkerFilesLoadedCapability.resolve);
@@ -9998,8 +9998,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.442';
-  exports.build = build = '3bfc797b';
+  exports.version = version = '2.0.444';
+  exports.build = build = '63c7aee1';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;

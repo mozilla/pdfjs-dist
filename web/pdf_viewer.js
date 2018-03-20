@@ -28,7 +28,7 @@
 	else if(typeof exports === 'object')
 		exports["pdfjs-dist/web/pdf_viewer"] = factory();
 	else
-		root["pdfjs-dist/web/pdf_viewer"] = root.pdfjsDistWebPdfViewer = factory();
+		root["pdfjs-dist/web/pdf_viewer"] = root.pdfjsViewer = factory();
 })(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -3179,8 +3179,8 @@ var _pdf_single_page_viewer = __w_pdfjs_require__(16);
 
 var _pdf_viewer = __w_pdfjs_require__(17);
 
-var pdfjsVersion = '2.0.442';
-var pdfjsBuild = '3bfc797b';
+var pdfjsVersion = '2.0.444';
+var pdfjsBuild = '63c7aee1';
 exports.PDFViewer = _pdf_viewer.PDFViewer;
 exports.PDFSinglePageViewer = _pdf_single_page_viewer.PDFSinglePageViewer;
 exports.PDFPageView = _pdf_page_view.PDFPageView;
