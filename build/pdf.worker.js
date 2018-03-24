@@ -11664,25 +11664,36 @@ var Catalog = function CatalogClosure() {
           if (!(0, _primitives.isDict)(labelDict)) {
             throw new _util.FormatError('The PageLabel is not a dictionary.');
           }
-          var type = labelDict.get('Type');
-          if (type && !(0, _primitives.isName)(type, 'PageLabel')) {
+          if (labelDict.has('Type') && !(0, _primitives.isName)(labelDict.get('Type'), 'PageLabel')) {
             throw new _util.FormatError('Invalid type in PageLabel dictionary.');
           }
-          var s = labelDict.get('S');
-          if (s && !(0, _primitives.isName)(s)) {
-            throw new _util.FormatError('Invalid style in PageLabel dictionary.');
+          if (labelDict.has('S')) {
+            var s = labelDict.get('S');
+            if (!(0, _primitives.isName)(s)) {
+              throw new _util.FormatError('Invalid style in PageLabel dictionary.');
+            }
+            style = s.name;
+          } else {
+            style = null;
           }
-          style = s ? s.name : null;
-          var p = labelDict.get('P');
-          if (p && !(0, _util.isString)(p)) {
-            throw new _util.FormatError('Invalid prefix in PageLabel dictionary.');
+          if (labelDict.has('P')) {
+            var p = labelDict.get('P');
+            if (!(0, _util.isString)(p)) {
+              throw new _util.FormatError('Invalid prefix in PageLabel dictionary.');
+            }
+            prefix = (0, _util.stringToPDFString)(p);
+          } else {
+            prefix = '';
           }
-          prefix = p ? (0, _util.stringToPDFString)(p) : '';
-          var st = labelDict.get('St');
-          if (st && !(Number.isInteger(st) && st >= 1)) {
-            throw new _util.FormatError('Invalid start in PageLabel dictionary.');
+          if (labelDict.has('St')) {
+            var st = labelDict.get('St');
+            if (!(Number.isInteger(st) && st >= 1)) {
+              throw new _util.FormatError('Invalid start in PageLabel dictionary.');
+            }
+            currentIndex = st;
+          } else {
+            currentIndex = 1;
           }
-          currentIndex = st || 1;
         }
         switch (style) {
           case 'D':
@@ -11710,9 +11721,9 @@ var Catalog = function CatalogClosure() {
             if (style) {
               throw new _util.FormatError('Invalid style "' + style + '" in PageLabel dictionary.');
             }
+            currentLabel = '';
         }
         pageLabels[i] = prefix + currentLabel;
-        currentLabel = '';
         currentIndex++;
       }
       return pageLabels;
@@ -22350,8 +22361,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.451';
-var pdfjsBuild = '24f766b1';
+var pdfjsVersion = '2.0.453';
+var pdfjsBuild = '115fbc47';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22564,7 +22575,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.451';
+    var workerVersion = '2.0.453';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
