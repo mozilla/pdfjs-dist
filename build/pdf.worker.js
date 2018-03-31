@@ -2708,7 +2708,7 @@ exports.LZWStream = LZWStream;
 var global = __w_pdfjs_require__(6);
 var core = __w_pdfjs_require__(7);
 var hide = __w_pdfjs_require__(12);
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(9);
 var ctx = __w_pdfjs_require__(11);
 var PROTOTYPE = 'prototype';
 var $export = function $export(type, name, source) {
@@ -2759,7 +2759,7 @@ if (typeof __g == 'number') __g = global;
 "use strict";
 
 
-var core = module.exports = { version: '2.5.3' };
+var core = module.exports = { version: '2.5.4' };
 if (typeof __e == 'number') __e = core;
 
 /***/ }),
@@ -2782,21 +2782,9 @@ module.exports = function (it) {
 "use strict";
 
 
-var hasOwnProperty = {}.hasOwnProperty;
-module.exports = function (it, key) {
-  return hasOwnProperty.call(it, key);
-};
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __w_pdfjs_require__) {
-
-"use strict";
-
-
 var global = __w_pdfjs_require__(6);
 var hide = __w_pdfjs_require__(12);
-var has = __w_pdfjs_require__(9);
+var has = __w_pdfjs_require__(10);
 var SRC = __w_pdfjs_require__(22)('src');
 var TO_STRING = 'toString';
 var $toString = Function[TO_STRING];
@@ -2822,6 +2810,18 @@ __w_pdfjs_require__(7).inspectSource = function (it) {
 })(Function.prototype, TO_STRING, function toString() {
   return typeof this == 'function' && this[SRC] || $toString.call(this);
 });
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+var hasOwnProperty = {}.hasOwnProperty;
+module.exports = function (it, key) {
+  return hasOwnProperty.call(it, key);
+};
 
 /***/ }),
 /* 11 */
@@ -3989,7 +3989,7 @@ module.exports = Object.keys || function keys(O) {
 
 
 var def = __w_pdfjs_require__(16).f;
-var has = __w_pdfjs_require__(9);
+var has = __w_pdfjs_require__(10);
 var TAG = __w_pdfjs_require__(2)('toStringTag');
 module.exports = function (it, tag, stat) {
   if (it && !has(it = stat ? it : it.prototype, TAG)) def(it, TAG, {
@@ -5183,7 +5183,7 @@ module.exports.f = function (C) {
 "use strict";
 
 
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(9);
 module.exports = function (target, src, safe) {
   for (var key in src) {
     redefine(target, key, src[key], safe);
@@ -5201,7 +5201,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var META = __w_pdfjs_require__(22)('meta');
 var isObject = __w_pdfjs_require__(3);
-var has = __w_pdfjs_require__(9);
+var has = __w_pdfjs_require__(10);
 var setDesc = __w_pdfjs_require__(16).f;
 var id = 0;
 var isExtensible = Object.isExtensible || function () {
@@ -10521,7 +10521,7 @@ var classof = __w_pdfjs_require__(33);
 var test = {};
 test[__w_pdfjs_require__(2)('toStringTag')] = 'z';
 if (test + '' != '[object z]') {
-  __w_pdfjs_require__(10)(Object.prototype, 'toString', function toString() {
+  __w_pdfjs_require__(9)(Object.prototype, 'toString', function toString() {
     return '[object ' + classof(this) + ']';
   }, true);
 }
@@ -10535,9 +10535,8 @@ if (test + '' != '[object z]') {
 
 var LIBRARY = __w_pdfjs_require__(52);
 var $export = __w_pdfjs_require__(5);
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(9);
 var hide = __w_pdfjs_require__(12);
-var has = __w_pdfjs_require__(9);
 var Iterators = __w_pdfjs_require__(19);
 var $iterCreate = __w_pdfjs_require__(95);
 var setToStringTag = __w_pdfjs_require__(25);
@@ -10573,7 +10572,7 @@ module.exports = function (Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCE
   var VALUES_BUG = false;
   var proto = Base.prototype;
   var $native = proto[ITERATOR] || proto[FF_ITERATOR] || DEFAULT && proto[DEFAULT];
-  var $default = !BUGGY && $native || getMethod(DEFAULT);
+  var $default = $native || getMethod(DEFAULT);
   var $entries = DEFAULT ? !DEF_VALUES ? $default : getMethod('entries') : undefined;
   var $anyNative = NAME == 'Array' ? proto.entries || $native : $native;
   var methods, key, IteratorPrototype;
@@ -10581,7 +10580,7 @@ module.exports = function (Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCE
     IteratorPrototype = getPrototypeOf($anyNative.call(new Base()));
     if (IteratorPrototype !== Object.prototype && IteratorPrototype.next) {
       setToStringTag(IteratorPrototype, TAG, true);
-      if (!LIBRARY && !has(IteratorPrototype, ITERATOR)) hide(IteratorPrototype, ITERATOR, returnThis);
+      if (!LIBRARY && typeof IteratorPrototype[ITERATOR] != 'function') hide(IteratorPrototype, ITERATOR, returnThis);
     }
   }
   if (DEF_VALUES && $native && $native.name !== VALUES) {
@@ -10645,7 +10644,7 @@ module.exports = document && document.documentElement;
 
 var $iterators = __w_pdfjs_require__(100);
 var getKeys = __w_pdfjs_require__(24);
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(9);
 var global = __w_pdfjs_require__(6);
 var hide = __w_pdfjs_require__(12);
 var Iterators = __w_pdfjs_require__(19);
@@ -22361,8 +22360,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.466';
-var pdfjsBuild = 'a8e9f6cc';
+var pdfjsVersion = '2.0.468';
+var pdfjsBuild = '85125965';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22575,7 +22574,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.466';
+    var workerVersion = '2.0.468';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
@@ -23981,7 +23980,7 @@ module.exports = __w_pdfjs_require__(13) ? Object.defineProperties : function de
 "use strict";
 
 
-var has = __w_pdfjs_require__(9);
+var has = __w_pdfjs_require__(10);
 var toIObject = __w_pdfjs_require__(18);
 var arrayIndexOf = __w_pdfjs_require__(48)(false);
 var IE_PROTO = __w_pdfjs_require__(34)('IE_PROTO');
@@ -24006,7 +24005,7 @@ module.exports = function (object, names) {
 "use strict";
 
 
-var has = __w_pdfjs_require__(9);
+var has = __w_pdfjs_require__(10);
 var toObject = __w_pdfjs_require__(35);
 var IE_PROTO = __w_pdfjs_require__(34)('IE_PROTO');
 var ObjectProto = Object.prototype;
@@ -24121,7 +24120,7 @@ var notify = function notify(promise, isReject) {
       var resolve = reaction.resolve;
       var reject = reaction.reject;
       var domain = reaction.domain;
-      var result, then;
+      var result, then, exited;
       try {
         if (handler) {
           if (!ok) {
@@ -24131,7 +24130,10 @@ var notify = function notify(promise, isReject) {
           if (handler === true) result = value;else {
             if (domain) domain.enter();
             result = handler(value);
-            if (domain) domain.exit();
+            if (domain) {
+              domain.exit();
+              exited = true;
+            }
           }
           if (result === reaction.promise) {
             reject(TypeError('Promise-chain cycle'));
@@ -24140,6 +24142,7 @@ var notify = function notify(promise, isReject) {
           } else resolve(result);
         } else reject(value);
       } catch (e) {
+        if (domain && !exited) domain.exit();
         reject(e);
       }
     };
@@ -24563,7 +24566,7 @@ module.exports = __w_pdfjs_require__(7).WeakMap;
 
 
 var each = __w_pdfjs_require__(61)(0);
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(9);
 var meta = __w_pdfjs_require__(39);
 var assign = __w_pdfjs_require__(116);
 var weak = __w_pdfjs_require__(118);
@@ -24726,7 +24729,7 @@ var isObject = __w_pdfjs_require__(3);
 var anInstance = __w_pdfjs_require__(36);
 var forOf = __w_pdfjs_require__(26);
 var createArrayMethod = __w_pdfjs_require__(61);
-var $has = __w_pdfjs_require__(9);
+var $has = __w_pdfjs_require__(10);
 var validate = __w_pdfjs_require__(62);
 var arrayFind = createArrayMethod(5);
 var arrayFindIndex = createArrayMethod(6);
@@ -24804,7 +24807,7 @@ module.exports = {
 
 var global = __w_pdfjs_require__(6);
 var $export = __w_pdfjs_require__(5);
-var redefine = __w_pdfjs_require__(10);
+var redefine = __w_pdfjs_require__(9);
 var redefineAll = __w_pdfjs_require__(38);
 var meta = __w_pdfjs_require__(39);
 var forOf = __w_pdfjs_require__(26);
@@ -24943,7 +24946,7 @@ var pIE = __w_pdfjs_require__(40);
 var createDesc = __w_pdfjs_require__(29);
 var toIObject = __w_pdfjs_require__(18);
 var toPrimitive = __w_pdfjs_require__(46);
-var has = __w_pdfjs_require__(9);
+var has = __w_pdfjs_require__(10);
 var IE8_DOM_DEFINE = __w_pdfjs_require__(45);
 var gOPD = Object.getOwnPropertyDescriptor;
 exports.f = __w_pdfjs_require__(13) ? gOPD : function getOwnPropertyDescriptor(O, P) {
