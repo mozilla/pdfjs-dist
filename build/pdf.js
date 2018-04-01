@@ -3003,8 +3003,8 @@ exports.GlobalWorkerOptions = GlobalWorkerOptions;
 "use strict";
 
 
-var pdfjsVersion = '2.0.468';
-var pdfjsBuild = '85125965';
+var pdfjsVersion = '2.0.470';
+var pdfjsBuild = '8887a09e';
 var pdfjsSharedUtil = __w_pdfjs_require__(0);
 var pdfjsDisplayAPI = __w_pdfjs_require__(117);
 var pdfjsDisplayTextLayer = __w_pdfjs_require__(125);
@@ -8437,7 +8437,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
   }
   return worker.messageHandler.sendWithPromise('GetDocRequest', {
     docId: docId,
-    apiVersion: '2.0.468',
+    apiVersion: '2.0.470',
     source: {
       data: source.data,
       url: source.url,
@@ -9855,8 +9855,8 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
 }();
 var version, build;
 {
-  exports.version = version = '2.0.468';
-  exports.build = build = '85125965';
+  exports.version = version = '2.0.470';
+  exports.build = build = '8887a09e';
 }
 exports.getDocument = getDocument;
 exports.LoopbackPort = LoopbackPort;
@@ -11801,7 +11801,7 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
           d = currentTransform[3];
       var heightScale = Math.max(Math.sqrt(c * c + d * d), 1);
       var imgToPaint, tmpCanvas;
-      if (imgData instanceof HTMLElement || !imgData.data) {
+      if (typeof HTMLElement === 'function' && imgData instanceof HTMLElement || !imgData.data) {
         imgToPaint = imgData;
       } else {
         tmpCanvas = this.cachedCanvases.getCanvas('inlineImage', width, height);

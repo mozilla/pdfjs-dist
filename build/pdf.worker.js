@@ -22360,8 +22360,8 @@ exports.PostScriptCompiler = PostScriptCompiler;
 "use strict";
 
 
-var pdfjsVersion = '2.0.468';
-var pdfjsBuild = '85125965';
+var pdfjsVersion = '2.0.470';
+var pdfjsBuild = '8887a09e';
 var pdfjsCoreWorker = __w_pdfjs_require__(74);
 exports.WorkerMessageHandler = pdfjsCoreWorker.WorkerMessageHandler;
 
@@ -22574,7 +22574,7 @@ var WorkerMessageHandler = {
     var cancelXHRs = null;
     var WorkerTasks = [];
     var apiVersion = docParams.apiVersion;
-    var workerVersion = '2.0.468';
+    var workerVersion = '2.0.470';
     if (apiVersion !== null && apiVersion !== workerVersion) {
       throw new Error('The API version "' + apiVersion + '" does not match ' + ('the Worker version "' + workerVersion + '".'));
     }
