@@ -3204,8 +3204,8 @@ var _pdf_single_page_viewer = __w_pdfjs_require__(16);
 
 var _pdf_viewer = __w_pdfjs_require__(17);
 
-var pdfjsVersion = '2.0.476';
-var pdfjsBuild = 'd21eecef';
+var pdfjsVersion = '2.0.478';
+var pdfjsBuild = 'e8cf7fd5';
 exports.PDFViewer = _pdf_viewer.PDFViewer;
 exports.PDFSinglePageViewer = _pdf_single_page_viewer.PDFSinglePageViewer;
 exports.PDFPageView = _pdf_page_view.PDFPageView;
