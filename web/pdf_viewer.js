@@ -468,7 +468,7 @@ function waitOnEventOrTimeout(_ref2) {
       delay = _ref2$delay === undefined ? 0 : _ref2$delay;
 
   if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) !== 'object' || !(name && typeof name === 'string') || !(Number.isInteger(delay) && delay >= 0)) {
-    return Promise.reject(new Error('waitOnEventOrTimeout - invalid paramaters.'));
+    return Promise.reject(new Error('waitOnEventOrTimeout - invalid parameters.'));
   }
   var capability = (0, _pdfjsLib.createPromiseCapability)();
   function handler(type) {
@@ -3204,8 +3204,8 @@ var _pdf_single_page_viewer = __w_pdfjs_require__(16);
 
 var _pdf_viewer = __w_pdfjs_require__(17);
 
-var pdfjsVersion = '2.0.474';
-var pdfjsBuild = '2f63ca07';
+var pdfjsVersion = '2.0.476';
+var pdfjsBuild = 'd21eecef';
 exports.PDFViewer = _pdf_viewer.PDFViewer;
 exports.PDFSinglePageViewer = _pdf_single_page_viewer.PDFSinglePageViewer;
 exports.PDFPageView = _pdf_page_view.PDFPageView;
