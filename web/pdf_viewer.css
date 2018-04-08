@@ -30,10 +30,7 @@
   white-space: pre;
   cursor: text;
   -webkit-transform-origin: 0% 0%;
-  -moz-transform-origin: 0% 0%;
-  -o-transform-origin: 0% 0%;
-  -ms-transform-origin: 0% 0%;
-  transform-origin: 0% 0%;
+          transform-origin: 0% 0%;
 }
 
 .textLayer .highlight {
@@ -60,8 +57,9 @@
   background-color: rgb(0, 100, 0);
 }
 
-.textLayer ::selection { background: rgb(0,0,255); }
 .textLayer ::-moz-selection { background: rgb(0,0,255); }
+
+.textLayer ::selection { background: rgb(0,0,255); }
 
 .textLayer .endOfContent {
   display: block;
@@ -73,8 +71,9 @@
   z-index: -1;
   cursor: default;
   -webkit-user-select: none;
-  -ms-user-select: none;
-  -moz-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
 
 .textLayer .endOfContent.active {
@@ -180,11 +179,13 @@
 }
 
 .annotationLayer .buttonWidgetAnnotation.checkBox input:checked:before {
-  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+          transform: rotate(45deg);
 }
 
 .annotationLayer .buttonWidgetAnnotation.checkBox input:checked:after {
-  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+          transform: rotate(-45deg);
 }
 
 .annotationLayer .buttonWidgetAnnotation.radioButton input:checked:before {
@@ -214,9 +215,8 @@
 .annotationLayer .buttonWidgetAnnotation.checkBox input,
 .annotationLayer .buttonWidgetAnnotation.radioButton input {
   -webkit-appearance: none;
-  -moz-appearance: none;
-  -ms-appearance: none;
-  appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   padding: 0;
 }
 
@@ -278,7 +278,8 @@
   overflow: visible;
   border: 9px solid transparent;
   background-clip: content-box;
-  border-image: url(images/shadow.png) 9 9 repeat;
+  -o-border-image: url(images/shadow.png) 9 9 repeat;
+     border-image: url(images/shadow.png) 9 9 repeat;
   background-color: white;
 }
 
@@ -315,6 +316,10 @@
   background: url('images/loading-icon.gif') center no-repeat;
 }
 
+.pdfPresentationMode:-ms-fullscreen .pdfViewer .page {
+  margin-bottom: 100% !important;
+}
+
 .pdfPresentationMode:-webkit-full-screen .pdfViewer .page {
   margin-bottom: 100%;
   border: 0;
@@ -322,11 +327,6 @@
 
 .pdfPresentationMode:-moz-full-screen .pdfViewer .page {
   margin-bottom: 100%;
-  border: 0;
-}
-
-.pdfPresentationMode:-ms-fullscreen .pdfViewer .page {
-  margin-bottom: 100% !important;
   border: 0;
 }
 
