@@ -30,7 +30,10 @@
   white-space: pre;
   cursor: text;
   -webkit-transform-origin: 0% 0%;
-          transform-origin: 0% 0%;
+  -moz-transform-origin: 0% 0%;
+  -o-transform-origin: 0% 0%;
+  -ms-transform-origin: 0% 0%;
+  transform-origin: 0% 0%;
 }
 
 .textLayer .highlight {
@@ -57,9 +60,8 @@
   background-color: rgb(0, 100, 0);
 }
 
-.textLayer ::-moz-selection { background: rgb(0,0,255); }
-
 .textLayer ::selection { background: rgb(0,0,255); }
+.textLayer ::-moz-selection { background: rgb(0,0,255); }
 
 .textLayer .endOfContent {
   display: block;
@@ -71,9 +73,8 @@
   z-index: -1;
   cursor: default;
   -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
 }
 
 .textLayer .endOfContent.active {
@@ -85,8 +86,7 @@
   position: absolute;
 }
 
-.annotationLayer .linkAnnotation > a,
-.annotationLayer .buttonWidgetAnnotation.pushButton > a {
+.annotationLayer .linkAnnotation > a {
   position: absolute;
   font-size: 1em;
   top: 0;
@@ -95,8 +95,11 @@
   height: 100%;
 }
 
-.annotationLayer .linkAnnotation > a:hover,
-.annotationLayer .buttonWidgetAnnotation.pushButton > a:hover {
+.annotationLayer .linkAnnotation > a /* -ms-a */  {
+  background: url("data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7") 0 0 repeat;
+}
+
+.annotationLayer .linkAnnotation > a:hover {
   opacity: 0.2;
   background: #ff0;
   box-shadow: 0px 2px 10px #ff0;
@@ -179,13 +182,11 @@
 }
 
 .annotationLayer .buttonWidgetAnnotation.checkBox input:checked:before {
-  -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
+  transform: rotate(45deg);
 }
 
 .annotationLayer .buttonWidgetAnnotation.checkBox input:checked:after {
-  -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
+  transform: rotate(-45deg);
 }
 
 .annotationLayer .buttonWidgetAnnotation.radioButton input:checked:before {
@@ -215,8 +216,9 @@
 .annotationLayer .buttonWidgetAnnotation.checkBox input,
 .annotationLayer .buttonWidgetAnnotation.radioButton input {
   -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
   padding: 0;
 }
 
@@ -278,8 +280,7 @@
   overflow: visible;
   border: 9px solid transparent;
   background-clip: content-box;
-  -o-border-image: url(images/shadow.png) 9 9 repeat;
-     border-image: url(images/shadow.png) 9 9 repeat;
+  border-image: url(images/shadow.png) 9 9 repeat;
   background-color: white;
 }
 
@@ -316,10 +317,6 @@
   background: url('images/loading-icon.gif') center no-repeat;
 }
 
-.pdfPresentationMode:-ms-fullscreen .pdfViewer .page {
-  margin-bottom: 100% !important;
-}
-
 .pdfPresentationMode:-webkit-full-screen .pdfViewer .page {
   margin-bottom: 100%;
   border: 0;
@@ -327,6 +324,11 @@
 
 .pdfPresentationMode:-moz-full-screen .pdfViewer .page {
   margin-bottom: 100%;
+  border: 0;
+}
+
+.pdfPresentationMode:-ms-fullscreen .pdfViewer .page {
+  margin-bottom: 100% !important;
   border: 0;
 }
 

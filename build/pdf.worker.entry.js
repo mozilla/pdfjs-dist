@@ -13,5 +13,5 @@
  * limitations under the License.
  */
 
-(typeof window !== 'undefined' ? window : {}).pdfjsWorker =
+(typeof window !== 'undefined' ? window : {}).pdfjsDistBuildPdfWorker =
   require('./pdf.worker.js');
