@@ -29,8 +29,7 @@
   position: absolute;
   white-space: pre;
   cursor: text;
-  -webkit-transform-origin: 0% 0%;
-          transform-origin: 0% 0%;
+  transform-origin: 0% 0%;
 }
 
 .textLayer .highlight {
@@ -182,13 +181,11 @@
 }
 
 .annotationLayer .buttonWidgetAnnotation.checkBox input:checked:before {
-  -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
+  transform: rotate(45deg);
 }
 
 .annotationLayer .buttonWidgetAnnotation.checkBox input:checked:after {
-  -webkit-transform: rotate(-45deg);
-          transform: rotate(-45deg);
+  transform: rotate(-45deg);
 }
 
 .annotationLayer .buttonWidgetAnnotation.radioButton input:checked:before {
@@ -292,9 +289,8 @@
   overflow: visible;
   border: 9px solid transparent;
   background-clip: content-box;
-  -webkit-border-image: url(images/shadow.png) 9 9 repeat;
-       -o-border-image: url(images/shadow.png) 9 9 repeat;
-          border-image: url(images/shadow.png) 9 9 repeat;
+  -o-border-image: url(images/shadow.png) 9 9 repeat;
+     border-image: url(images/shadow.png) 9 9 repeat;
   background-color: rgba(255, 255, 255, 1);
 }
 

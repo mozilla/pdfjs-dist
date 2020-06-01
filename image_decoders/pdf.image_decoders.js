@@ -159,14 +159,14 @@ Object.defineProperty(exports, "JpxImage", {
 
 var _util = __w_pdfjs_require__(1);
 
-var _jbig = __w_pdfjs_require__(3);
+var _jbig = __w_pdfjs_require__(4);
 
-var _jpg = __w_pdfjs_require__(7);
+var _jpg = __w_pdfjs_require__(8);
 
-var _jpx = __w_pdfjs_require__(8);
+var _jpx = __w_pdfjs_require__(9);
 
-const pdfjsVersion = '2.4.456';
-const pdfjsBuild = '228a591c';
+const pdfjsVersion = '2.5.207';
+const pdfjsBuild = '0974d605';
 
 /***/ }),
 /* 1 */
@@ -203,7 +203,7 @@ exports.stringToUTF8String = stringToUTF8String;
 exports.utf8StringToString = utf8StringToString;
 exports.warn = warn;
 exports.unreachable = unreachable;
-exports.IsEvalSupportedCached = exports.IsLittleEndianCached = exports.createObjectURL = exports.FormatError = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.NativeImageDecoding = exports.MissingPDFException = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VerbosityLevel = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = exports.BaseException = void 0;
+exports.IsEvalSupportedCached = exports.IsLittleEndianCached = exports.createObjectURL = exports.FormatError = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.MissingPDFException = exports.InvalidPDFException = exports.AbortException = exports.CMapCompressionType = exports.ImageKind = exports.FontType = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.UNSUPPORTED_FEATURES = exports.VerbosityLevel = exports.OPS = exports.IDENTITY_MATRIX = exports.FONT_IDENTITY_MATRIX = exports.BaseException = void 0;
 
 __w_pdfjs_require__(2);
 
@@ -211,12 +211,6 @@ const IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 exports.IDENTITY_MATRIX = IDENTITY_MATRIX;
 const FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
 exports.FONT_IDENTITY_MATRIX = FONT_IDENTITY_MATRIX;
-const NativeImageDecoding = {
-  NONE: "none",
-  DECODE: "decode",
-  DISPLAY: "display"
-};
-exports.NativeImageDecoding = NativeImageDecoding;
 const PermissionFlag = {
   PRINT: 0x04,
   MODIFY_CONTENTS: 0x08,
@@ -481,7 +475,19 @@ const UNSUPPORTED_FEATURES = {
   javaScript: "javaScript",
   smask: "smask",
   shadingPattern: "shadingPattern",
-  font: "font"
+  font: "font",
+  errorTilingPattern: "errorTilingPattern",
+  errorExtGState: "errorExtGState",
+  errorXObject: "errorXObject",
+  errorFontLoadType3: "errorFontLoadType3",
+  errorFontState: "errorFontState",
+  errorFontMissing: "errorFontMissing",
+  errorFontTranslate: "errorFontTranslate",
+  errorColorSpace: "errorColorSpace",
+  errorOperatorList: "errorOperatorList",
+  errorFontToUnicode: "errorFontToUnicode",
+  errorFontLoadNative: "errorFontLoadNative",
+  errorFontGetPath: "errorFontGetPath"
 };
 exports.UNSUPPORTED_FEATURES = UNSUPPORTED_FEATURES;
 const PasswordResponses = {
@@ -694,7 +700,7 @@ function arrayByteLength(arr) {
     return arr.length;
   }
 
-  assert(arr.byteLength !== undefined);
+  assert(arr.byteLength !== undefined, "arrayByteLength - invalid argument.");
   return arr.byteLength;
 }
 
@@ -997,6 +1003,8 @@ exports.createObjectURL = createObjectURL;
 "use strict";
 
 
+var _is_node = __w_pdfjs_require__(3);
+
 ;
 
 /***/ }),
@@ -1009,15 +1017,29 @@ exports.createObjectURL = createObjectURL;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.isNodeJS = void 0;
+const isNodeJS = typeof process === "object" && process + "" === "[object process]" && !process.versions.nw && !process.versions.electron;
+exports.isNodeJS = isNodeJS;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __w_pdfjs_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.Jbig2Image = void 0;
 
 var _util = __w_pdfjs_require__(1);
 
-var _core_utils = __w_pdfjs_require__(4);
+var _core_utils = __w_pdfjs_require__(5);
 
-var _arithmetic_decoder = __w_pdfjs_require__(5);
+var _arithmetic_decoder = __w_pdfjs_require__(6);
 
-var _ccitt = __w_pdfjs_require__(6);
+var _ccitt = __w_pdfjs_require__(7);
 
 class Jbig2Error extends _util.BaseException {
   constructor(msg) {
@@ -3208,7 +3230,7 @@ var Jbig2Image = function Jbig2ImageClosure() {
 exports.Jbig2Image = Jbig2Image;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -3345,7 +3367,7 @@ function isWhiteSpace(ch) {
 }
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -3699,7 +3721,7 @@ class ArithmeticDecoder {
 exports.ArithmeticDecoder = ArithmeticDecoder;
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -3738,19 +3760,19 @@ const CCITTFaxDecoder = function CCITTFaxDecoder() {
 
     this.source = source;
     this.eof = false;
-    this.encoding = options["K"] || 0;
-    this.eoline = options["EndOfLine"] || false;
-    this.byteAlign = options["EncodedByteAlign"] || false;
-    this.columns = options["Columns"] || 1728;
-    this.rows = options["Rows"] || 0;
-    let eoblock = options["EndOfBlock"];
+    this.encoding = options.K || 0;
+    this.eoline = options.EndOfLine || false;
+    this.byteAlign = options.EncodedByteAlign || false;
+    this.columns = options.Columns || 1728;
+    this.rows = options.Rows || 0;
+    let eoblock = options.EndOfBlock;
 
     if (eoblock === null || eoblock === undefined) {
       eoblock = true;
     }
 
     this.eoblock = eoblock;
-    this.black = options["BlackIs1"] || false;
+    this.black = options.BlackIs1 || false;
     this.codingLine = new Uint32Array(this.columns + 1);
     this.refLine = new Uint32Array(this.columns + 2);
     this.codingLine[0] = this.columns;
@@ -4404,7 +4426,7 @@ const CCITTFaxDecoder = function CCITTFaxDecoder() {
 exports.CCITTFaxDecoder = CCITTFaxDecoder;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -4417,7 +4439,7 @@ exports.JpegImage = void 0;
 
 var _util = __w_pdfjs_require__(1);
 
-var _core_utils = __w_pdfjs_require__(4);
+var _core_utils = __w_pdfjs_require__(5);
 
 class JpegError extends _util.BaseException {
   constructor(msg) {
@@ -4517,8 +4539,8 @@ var JpegImage = function JpegImageClosure() {
   function decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successivePrev, successive, parseDNLMarker = false) {
     var mcusPerLine = frame.mcusPerLine;
     var progressive = frame.progressive;
-    var startOffset = offset,
-        bitsData = 0,
+    const startOffset = offset;
+    let bitsData = 0,
         bitsCount = 0;
 
     function readBit() {
@@ -4604,10 +4626,10 @@ var JpegImage = function JpegImageClosure() {
       return n + (-1 << length) + 1;
     }
 
-    function decodeBaseline(component, offset) {
+    function decodeBaseline(component, blockOffset) {
       var t = decodeHuffman(component.huffmanTableDC);
       var diff = t === 0 ? 0 : receiveAndExtend(t);
-      component.blockData[offset] = component.pred += diff;
+      component.blockData[blockOffset] = component.pred += diff;
       var k = 1;
 
       while (k < 64) {
@@ -4626,24 +4648,24 @@ var JpegImage = function JpegImageClosure() {
 
         k += r;
         var z = dctZigZag[k];
-        component.blockData[offset + z] = receiveAndExtend(s);
+        component.blockData[blockOffset + z] = receiveAndExtend(s);
         k++;
       }
     }
 
-    function decodeDCFirst(component, offset) {
+    function decodeDCFirst(component, blockOffset) {
       var t = decodeHuffman(component.huffmanTableDC);
       var diff = t === 0 ? 0 : receiveAndExtend(t) << successive;
-      component.blockData[offset] = component.pred += diff;
+      component.blockData[blockOffset] = component.pred += diff;
     }
 
-    function decodeDCSuccessive(component, offset) {
-      component.blockData[offset] |= readBit() << successive;
+    function decodeDCSuccessive(component, blockOffset) {
+      component.blockData[blockOffset] |= readBit() << successive;
     }
 
     var eobrun = 0;
 
-    function decodeACFirst(component, offset) {
+    function decodeACFirst(component, blockOffset) {
       if (eobrun > 0) {
         eobrun--;
         return;
@@ -4669,7 +4691,7 @@ var JpegImage = function JpegImageClosure() {
 
         k += r;
         var z = dctZigZag[k];
-        component.blockData[offset + z] = receiveAndExtend(s) * (1 << successive);
+        component.blockData[blockOffset + z] = receiveAndExtend(s) * (1 << successive);
         k++;
       }
     }
@@ -4677,7 +4699,7 @@ var JpegImage = function JpegImageClosure() {
     var successiveACState = 0,
         successiveACNextValue;
 
-    function decodeACSuccessive(component, offset) {
+    function decodeACSuccessive(component, blockOffset) {
       var k = spectralStart;
       var e = spectralEnd;
       var r = 0;
@@ -4685,7 +4707,7 @@ var JpegImage = function JpegImageClosure() {
       var rs;
 
       while (k <= e) {
-        const offsetZ = offset + dctZigZag[k];
+        const offsetZ = blockOffset + dctZigZag[k];
         const sign = component.blockData[offsetZ] < 0 ? -1 : 1;
 
         switch (successiveACState) {
@@ -4764,15 +4786,15 @@ var JpegImage = function JpegImageClosure() {
       var mcuCol = mcu % mcusPerLine;
       blockRow = mcuRow * component.v + row;
       var blockCol = mcuCol * component.h + col;
-      var offset = getBlockBufferOffset(component, blockRow, blockCol);
-      decode(component, offset);
+      const blockOffset = getBlockBufferOffset(component, blockRow, blockCol);
+      decode(component, blockOffset);
     }
 
     function decodeBlock(component, decode, mcu) {
       blockRow = mcu / component.blocksPerLine | 0;
       var blockCol = mcu % component.blocksPerLine;
-      var offset = getBlockBufferOffset(component, blockRow, blockCol);
-      decode(component, offset);
+      const blockOffset = getBlockBufferOffset(component, blockRow, blockCol);
+      decode(component, blockOffset);
     }
 
     var componentsLength = components.length;
@@ -4801,37 +4823,39 @@ var JpegImage = function JpegImageClosure() {
 
     var h, v;
 
-    while (mcu < mcuExpected) {
+    while (mcu <= mcuExpected) {
       var mcuToRead = resetInterval ? Math.min(mcuExpected - mcu, resetInterval) : mcuExpected;
 
-      for (i = 0; i < componentsLength; i++) {
-        components[i].pred = 0;
-      }
-
-      eobrun = 0;
-
-      if (componentsLength === 1) {
-        component = components[0];
-
-        for (n = 0; n < mcuToRead; n++) {
-          decodeBlock(component, decodeFn, mcu);
-          mcu++;
+      if (mcuToRead > 0) {
+        for (i = 0; i < componentsLength; i++) {
+          components[i].pred = 0;
         }
-      } else {
-        for (n = 0; n < mcuToRead; n++) {
-          for (i = 0; i < componentsLength; i++) {
-            component = components[i];
-            h = component.h;
-            v = component.v;
 
-            for (j = 0; j < v; j++) {
-              for (k = 0; k < h; k++) {
-                decodeMcu(component, decodeFn, mcu, j, k);
+        eobrun = 0;
+
+        if (componentsLength === 1) {
+          component = components[0];
+
+          for (n = 0; n < mcuToRead; n++) {
+            decodeBlock(component, decodeFn, mcu);
+            mcu++;
+          }
+        } else {
+          for (n = 0; n < mcuToRead; n++) {
+            for (i = 0; i < componentsLength; i++) {
+              component = components[i];
+              h = component.h;
+              v = component.v;
+
+              for (j = 0; j < v; j++) {
+                for (k = 0; k < h; k++) {
+                  decodeMcu(component, decodeFn, mcu, j, k);
+                }
               }
             }
-          }
 
-          mcu++;
+            mcu++;
+          }
         }
       }
 
@@ -4840,29 +4864,19 @@ var JpegImage = function JpegImageClosure() {
 
       if (!fileMarker) {
         break;
-      } else if (fileMarker.invalid) {
-        (0, _util.warn)("decodeScan - unexpected MCU data, current marker is: " + fileMarker.invalid);
+      }
+
+      if (fileMarker.invalid) {
+        const partialMsg = mcuToRead > 0 ? "unexpected" : "excessive";
+        (0, _util.warn)(`decodeScan - ${partialMsg} MCU data, current marker is: ${fileMarker.invalid}`);
         offset = fileMarker.offset;
       }
 
-      var marker = fileMarker && fileMarker.marker;
-
-      if (!marker || marker <= 0xff00) {
-        throw new JpegError("decodeScan - a valid marker was not found.");
-      }
-
-      if (marker >= 0xffd0 && marker <= 0xffd7) {
+      if (fileMarker.marker >= 0xffd0 && fileMarker.marker <= 0xffd7) {
         offset += 2;
       } else {
         break;
       }
-    }
-
-    fileMarker = findNextFileMarker(data, offset);
-
-    if (fileMarker && fileMarker.invalid) {
-      (0, _util.warn)("decodeScan - unexpected Scan data, current marker is: " + fileMarker.invalid);
-      offset = fileMarker.offset;
     }
 
     return offset - startOffset;
@@ -5653,7 +5667,7 @@ var JpegImage = function JpegImageClosure() {
 exports.JpegImage = JpegImage;
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __w_pdfjs_require__) {
 
 "use strict";
@@ -5666,9 +5680,9 @@ exports.JpxImage = void 0;
 
 var _util = __w_pdfjs_require__(1);
 
-var _core_utils = __w_pdfjs_require__(4);
+var _core_utils = __w_pdfjs_require__(5);
 
-var _arithmetic_decoder = __w_pdfjs_require__(5);
+var _arithmetic_decoder = __w_pdfjs_require__(6);
 
 class JpxError extends _util.BaseException {
   constructor(msg) {
@@ -6423,7 +6437,7 @@ var JpxImage = function JpxImageClosure() {
     var maxDecompositionLevelsCount = 0;
 
     for (c = 0; c < componentsCount; c++) {
-      var component = tile.components[c];
+      const component = tile.components[c];
       maxDecompositionLevelsCount = Math.max(maxDecompositionLevelsCount, component.codingStyleParameters.decompositionLevelsCount);
     }
 
@@ -6452,7 +6466,7 @@ var JpxImage = function JpxImageClosure() {
       for (; r <= maxDecompositionLevelsCount; r++) {
         for (; p < maxNumPrecinctsInLevel[r]; p++) {
           for (; c < componentsCount; c++) {
-            var component = tile.components[c];
+            const component = tile.components[c];
 
             if (r > component.codingStyleParameters.decompositionLevelsCount) {
               continue;
@@ -6871,13 +6885,13 @@ var JpxImage = function JpxImageClosure() {
         var firstTimeInclusion = false;
         var valueReady;
 
-        if (codeblock["included"] !== undefined) {
+        if (codeblock.included !== undefined) {
           codeblockIncluded = !!readBits(1);
         } else {
           precinct = codeblock.precinct;
           var inclusionTree, zeroBitPlanesTree;
 
-          if (precinct["inclusionTree"] !== undefined) {
+          if (precinct.inclusionTree !== undefined) {
             inclusionTree = precinct.inclusionTree;
           } else {
             var width = precinct.cbxMax - precinct.cbxMin + 1;
@@ -6955,7 +6969,7 @@ var JpxImage = function JpxImageClosure() {
         var packetItem = queue.shift();
         codeblock = packetItem.codeblock;
 
-        if (codeblock["data"] === undefined) {
+        if (codeblock.data === undefined) {
           codeblock.data = [];
         }
 
@@ -6989,7 +7003,7 @@ var JpxImage = function JpxImageClosure() {
         continue;
       }
 
-      if (codeblock["data"] === undefined) {
+      if (codeblock.data === undefined) {
         continue;
       }
 
