@@ -5073,7 +5073,9 @@ class PDFSinglePageViewer extends _base_viewer.BaseViewer {
 
     switch (viewerNodes.length) {
       case 0:
-        this.viewer.appendChild(pageView.div);
+        if (pageView !== undefined) {
+          this.viewer.appendChild(pageView.div);
+	}
         break;
 
       case 1:
