@@ -1,7 +1,8 @@
 {
   "name": "pdfjs-dist",
-  "version": "2.5.207",
+  "version": "2.6.347",
   "main": "build/pdf.js",
+  "types": "types/pdf.d.ts",
   "description": "Generic build of Mozilla's PDF.js library.",
   "keywords": [
     "Mozilla",
@@ -12,6 +13,7 @@
   "bugs": "https://github.com/mozilla/pdf.js/issues",
   "license": "Apache-2.0",
   "browser": {
+    "canvas": false,
     "fs": false,
     "http": false,
     "https": false,
