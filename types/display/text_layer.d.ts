@@ -6,12 +6,12 @@ export type TextLayerRenderParameters = {
      * - Text content to
      * render (the object is returned by the page's `getTextContent` method).
      */
-    textContent?: import("./api").TextContent;
+    textContent?: import("./api.js").TextContent | undefined;
     /**
      * - Text content stream to
      * render (the stream is returned by the page's `streamTextContent` method).
      */
-    textContentStream?: ReadableStream;
+    textContentStream?: ReadableStream<any> | undefined;
     /**
      * - HTML element that will contain text runs.
      */
@@ -26,23 +26,23 @@ export type TextLayerRenderParameters = {
      * to the text items of the textContent input. This is output and shall be
      * initially be set to empty array.
      */
-    textDivs?: Array<HTMLElement>;
+    textDivs?: HTMLElement[] | undefined;
     /**
      * - Strings that correspond to
      * the `str` property of the text items of textContent input. This is output
      * and shall be initially be set to empty array.
      */
-    textContentItemsStr?: Array<string>;
+    textContentItemsStr?: string[] | undefined;
     /**
      * - Delay in milliseconds before rendering of the
      * text runs occurs.
      */
-    timeout?: number;
+    timeout?: number | undefined;
     /**
      * - Whether to turn on the text
      * selection enhancement.
      */
-    enhanceTextSelection?: boolean;
+    enhanceTextSelection?: boolean | undefined;
 };
 export type TextLayerRenderTask = {
     promise: Promise<void>;
@@ -80,4 +80,4 @@ export type TextLayerRenderTask = {
 /**
  * @type {(renderParameters: TextLayerRenderParameters) => TextLayerRenderTask}
  */
-export var renderTextLayer: (renderParameters: TextLayerRenderParameters) => TextLayerRenderTask;
+export const renderTextLayer: (renderParameters: TextLayerRenderParameters) => TextLayerRenderTask;

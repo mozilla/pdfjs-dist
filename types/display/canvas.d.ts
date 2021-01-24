@@ -1,4 +1,4 @@
 /**
  * @type {any}
  */
-export var CanvasGraphics: any;
+export const CanvasGraphics: any;

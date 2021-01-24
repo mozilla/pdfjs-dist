@@ -19,160 +19,56 @@ export type PromiseCapability = {
      */
     reject: Function;
 };
+declare const AbortException_base: any;
 /**
- * @type {any}
+ * Error used to indicate task cancellation.
  */
-export const BaseException: any;
-export const FONT_IDENTITY_MATRIX: number[];
-export const IDENTITY_MATRIX: number[];
-export namespace OPS {
-    export const dependency: number;
-    export const setLineWidth: number;
-    export const setLineCap: number;
-    export const setLineJoin: number;
-    export const setMiterLimit: number;
-    export const setDash: number;
-    export const setRenderingIntent: number;
-    export const setFlatness: number;
-    export const setGState: number;
-    export const save: number;
-    export const restore: number;
-    export const transform: number;
-    export const moveTo: number;
-    export const lineTo: number;
-    export const curveTo: number;
-    export const curveTo2: number;
-    export const curveTo3: number;
-    export const closePath: number;
-    export const rectangle: number;
-    export const stroke: number;
-    export const closeStroke: number;
-    export const fill: number;
-    export const eoFill: number;
-    export const fillStroke: number;
-    export const eoFillStroke: number;
-    export const closeFillStroke: number;
-    export const closeEOFillStroke: number;
-    export const endPath: number;
-    export const clip: number;
-    export const eoClip: number;
-    export const beginText: number;
-    export const endText: number;
-    export const setCharSpacing: number;
-    export const setWordSpacing: number;
-    export const setHScale: number;
-    export const setLeading: number;
-    export const setFont: number;
-    export const setTextRenderingMode: number;
-    export const setTextRise: number;
-    export const moveText: number;
-    export const setLeadingMoveText: number;
-    export const setTextMatrix: number;
-    export const nextLine: number;
-    export const showText: number;
-    export const showSpacedText: number;
-    export const nextLineShowText: number;
-    export const nextLineSetSpacingShowText: number;
-    export const setCharWidth: number;
-    export const setCharWidthAndBounds: number;
-    export const setStrokeColorSpace: number;
-    export const setFillColorSpace: number;
-    export const setStrokeColor: number;
-    export const setStrokeColorN: number;
-    export const setFillColor: number;
-    export const setFillColorN: number;
-    export const setStrokeGray: number;
-    export const setFillGray: number;
-    export const setStrokeRGBColor: number;
-    export const setFillRGBColor: number;
-    export const setStrokeCMYKColor: number;
-    export const setFillCMYKColor: number;
-    export const shadingFill: number;
-    export const beginInlineImage: number;
-    export const beginImageData: number;
-    export const endInlineImage: number;
-    export const paintXObject: number;
-    export const markPoint: number;
-    export const markPointProps: number;
-    export const beginMarkedContent: number;
-    export const beginMarkedContentProps: number;
-    export const endMarkedContent: number;
-    export const beginCompat: number;
-    export const endCompat: number;
-    export const paintFormXObjectBegin: number;
-    export const paintFormXObjectEnd: number;
-    export const beginGroup: number;
-    export const endGroup: number;
-    export const beginAnnotations: number;
-    export const endAnnotations: number;
-    export const beginAnnotation: number;
-    export const endAnnotation: number;
-    export const paintJpegXObject: number;
-    export const paintImageMaskXObject: number;
-    export const paintImageMaskXObjectGroup: number;
-    export const paintImageXObject: number;
-    export const paintInlineImageXObject: number;
-    export const paintInlineImageXObjectGroup: number;
-    export const paintImageXObjectRepeat: number;
-    export const paintImageMaskXObjectRepeat: number;
-    export const paintSolidColorImageMask: number;
-    export const constructPath: number;
+export class AbortException extends AbortException_base {
+    [x: string]: any;
 }
-export namespace VerbosityLevel {
-    export const ERRORS: number;
-    export const WARNINGS: number;
-    export const INFOS: number;
+export namespace AnnotationActionEventType {
+    const E: string;
+    const X: string;
+    const D: string;
+    const U: string;
+    const Fo: string;
+    const Bl: string;
+    const PO: string;
+    const PC: string;
+    const PV: string;
+    const PI: string;
+    const K: string;
+    const F: string;
+    const V: string;
+    const C: string;
 }
-export const UNSUPPORTED_FEATURES: {
-    /** @deprecated unused */
-    unknown: string;
-    forms: string;
-    javaScript: string;
-    smask: string;
-    shadingPattern: string;
-    /** @deprecated unused */
-    font: string;
-    errorTilingPattern: string;
-    errorExtGState: string;
-    errorXObject: string;
-    errorFontLoadType3: string;
-    errorFontState: string;
-    errorFontMissing: string;
-    errorFontTranslate: string;
-    errorColorSpace: string;
-    errorOperatorList: string;
-    errorFontToUnicode: string;
-    errorFontLoadNative: string;
-    errorFontGetPath: string;
-    errorMarkedContent: string;
-};
 export namespace AnnotationBorderStyleType {
-    export const SOLID: number;
-    export const DASHED: number;
-    export const BEVELED: number;
-    export const INSET: number;
-    export const UNDERLINE: number;
+    const SOLID: number;
+    const DASHED: number;
+    const BEVELED: number;
+    const INSET: number;
+    const UNDERLINE: number;
 }
 export namespace AnnotationFieldFlag {
-    export const READONLY: number;
-    export const REQUIRED: number;
-    export const NOEXPORT: number;
-    export const MULTILINE: number;
-    export const PASSWORD: number;
-    export const NOTOGGLETOOFF: number;
-    export const RADIO: number;
-    export const PUSHBUTTON: number;
-    export const COMBO: number;
-    export const EDIT: number;
-    export const SORT: number;
-    export const FILESELECT: number;
-    export const MULTISELECT: number;
-    export const DONOTSPELLCHECK: number;
-    export const DONOTSCROLL: number;
-    export const COMB: number;
-    export const RICHTEXT: number;
-    export const RADIOSINUNISON: number;
-    export const COMMITONSELCHANGE: number;
+    const READONLY: number;
+    const REQUIRED: number;
+    const NOEXPORT: number;
+    const MULTILINE: number;
+    const PASSWORD: number;
+    const NOTOGGLETOOFF: number;
+    const RADIO: number;
+    const PUSHBUTTON: number;
+    const COMBO: number;
+    const EDIT: number;
+    const SORT: number;
+    const FILESELECT: number;
+    const MULTISELECT: number;
+    const DONOTSPELLCHECK: number;
+    const DONOTSCROLL: number;
+    const COMB: number;
+    const RICHTEXT: number;
+    const RADIOSINUNISON: number;
+    const COMMITONSELCHANGE: number;
 }
 export namespace AnnotationFlag {
     export const INVISIBLE: number;
@@ -188,19 +84,19 @@ export namespace AnnotationFlag {
     export const LOCKEDCONTENTS: number;
 }
 export namespace AnnotationMarkedState {
-    export const MARKED: string;
-    export const UNMARKED: string;
+    const MARKED: string;
+    const UNMARKED: string;
 }
 export namespace AnnotationReplyType {
-    export const GROUP: string;
-    export const REPLY: string;
+    const GROUP: string;
+    const REPLY: string;
 }
 export namespace AnnotationReviewState {
-    export const ACCEPTED: string;
-    export const REJECTED: string;
-    export const CANCELLED: string;
-    export const COMPLETED: string;
-    export const NONE: string;
+    const ACCEPTED: string;
+    const REJECTED: string;
+    const CANCELLED: string;
+    const COMPLETED: string;
+    const NONE: string;
 }
 export namespace AnnotationStateModelType {
     const MARKED_1: string;
@@ -236,44 +132,211 @@ export namespace AnnotationType {
     export const THREED: number;
     export const REDACT: number;
 }
-export namespace FontType {
-    export const UNKNOWN: string;
-    export const TYPE1: string;
-    export const TYPE1C: string;
-    export const CIDFONTTYPE0: string;
-    export const CIDFONTTYPE0C: string;
-    export const TRUETYPE: string;
-    export const CIDFONTTYPE2: string;
-    export const TYPE3: string;
-    export const OPENTYPE: string;
-    export const TYPE0: string;
-    export const MMTYPE1: string;
-}
-export namespace ImageKind {
-    export const GRAYSCALE_1BPP: number;
-    export const RGB_24BPP: number;
-    export const RGBA_32BPP: number;
-}
+/**
+ * Gets length of the array (Array, Uint8Array, or string) in bytes.
+ * @param {Array<any>|Uint8Array|string} arr
+ * @returns {number}
+ */
+export function arrayByteLength(arr: Array<any> | Uint8Array | string): number;
+/**
+ * Combines array items (arrays) into single Uint8Array object.
+ * @param {Array<Array<any>|Uint8Array|string>} arr - the array of the arrays
+ *   (Array, Uint8Array, or string).
+ * @returns {Uint8Array}
+ */
+export function arraysToBytes(arr: Array<Array<any> | Uint8Array | string>): Uint8Array;
+export function assert(cond: any, msg: any): void;
+/**
+ * @type {any}
+ */
+export const BaseException: any;
+export function bytesToString(bytes: any): string;
 export namespace CMapCompressionType {
     const NONE_1: number;
     export { NONE_1 as NONE };
     export const BINARY: number;
     export const STREAM: number;
 }
-declare const AbortException_base: any;
+export function createObjectURL(data: any, contentType: any, forceDataSchema?: boolean): string;
 /**
- * Error used to indicate task cancellation.
+ * Promise Capability object.
+ *
+ * @typedef {Object} PromiseCapability
+ * @property {Promise<any>} promise - A Promise object.
+ * @property {boolean} settled - If the Promise has been fulfilled/rejected.
+ * @property {function} resolve - Fulfills the Promise.
+ * @property {function} reject - Rejects the Promise.
  */
-export class AbortException extends AbortException_base {
+/**
+ * Creates a promise capability object.
+ * @alias createPromiseCapability
+ *
+ * @returns {PromiseCapability}
+ */
+export function createPromiseCapability(): PromiseCapability;
+/**
+ * Attempts to create a valid absolute URL.
+ *
+ * @param {URL|string} url - An absolute, or relative, URL.
+ * @param {URL|string} baseUrl - An absolute URL.
+ * @returns Either a valid {URL}, or `null` otherwise.
+ */
+export function createValidAbsoluteUrl(url: URL | string, baseUrl: URL | string): URL | null;
+export namespace DocumentActionEventType {
+    const WC: string;
+    const WS: string;
+    const DS: string;
+    const WP: string;
+    const DP: string;
+}
+export function encodeToXmlString(str: any): any;
+export function escapeString(str: any): any;
+export const FONT_IDENTITY_MATRIX: number[];
+export namespace FontType {
+    const UNKNOWN: string;
+    const TYPE1: string;
+    const TYPE1C: string;
+    const CIDFONTTYPE0: string;
+    const CIDFONTTYPE0C: string;
+    const TRUETYPE: string;
+    const CIDFONTTYPE2: string;
+    const TYPE3: string;
+    const OPENTYPE: string;
+    const TYPE0: string;
+    const MMTYPE1: string;
+}
+declare const FormatError_base: any;
+/**
+ * Error caused during parsing PDF data.
+ */
+export class FormatError extends FormatError_base {
     [x: string]: any;
 }
+export function getModificationDate(date?: Date): string;
+export function getVerbosityLevel(): number;
+export const IDENTITY_MATRIX: number[];
+export namespace ImageKind {
+    const GRAYSCALE_1BPP: number;
+    const RGB_24BPP: number;
+    const RGBA_32BPP: number;
+}
+export function info(msg: any): void;
 declare const InvalidPDFException_base: any;
 export class InvalidPDFException extends InvalidPDFException_base {
     [x: string]: any;
 }
+export function isArrayBuffer(v: any): boolean;
+export function isArrayEqual(arr1: any, arr2: any): any;
+export function isAscii(str: any): boolean;
+export function isBool(v: any): boolean;
+export namespace IsEvalSupportedCached { }
+export namespace IsLittleEndianCached { }
+export function isNum(v: any): boolean;
+export function isSameOrigin(baseUrl: any, otherUrl: any): boolean;
+export function isString(v: any): boolean;
 declare const MissingPDFException_base: any;
 export class MissingPDFException extends MissingPDFException_base {
     [x: string]: any;
+}
+export function objectFromEntries(iterable: any): any;
+export function objectSize(obj: any): number;
+export namespace OPS {
+    const dependency: number;
+    const setLineWidth: number;
+    const setLineCap: number;
+    const setLineJoin: number;
+    const setMiterLimit: number;
+    const setDash: number;
+    const setRenderingIntent: number;
+    const setFlatness: number;
+    const setGState: number;
+    const save: number;
+    const restore: number;
+    const transform: number;
+    const moveTo: number;
+    const lineTo: number;
+    const curveTo: number;
+    const curveTo2: number;
+    const curveTo3: number;
+    const closePath: number;
+    const rectangle: number;
+    const stroke: number;
+    const closeStroke: number;
+    const fill: number;
+    const eoFill: number;
+    const fillStroke: number;
+    const eoFillStroke: number;
+    const closeFillStroke: number;
+    const closeEOFillStroke: number;
+    const endPath: number;
+    const clip: number;
+    const eoClip: number;
+    const beginText: number;
+    const endText: number;
+    const setCharSpacing: number;
+    const setWordSpacing: number;
+    const setHScale: number;
+    const setLeading: number;
+    const setFont: number;
+    const setTextRenderingMode: number;
+    const setTextRise: number;
+    const moveText: number;
+    const setLeadingMoveText: number;
+    const setTextMatrix: number;
+    const nextLine: number;
+    const showText: number;
+    const showSpacedText: number;
+    const nextLineShowText: number;
+    const nextLineSetSpacingShowText: number;
+    const setCharWidth: number;
+    const setCharWidthAndBounds: number;
+    const setStrokeColorSpace: number;
+    const setFillColorSpace: number;
+    const setStrokeColor: number;
+    const setStrokeColorN: number;
+    const setFillColor: number;
+    const setFillColorN: number;
+    const setStrokeGray: number;
+    const setFillGray: number;
+    const setStrokeRGBColor: number;
+    const setFillRGBColor: number;
+    const setStrokeCMYKColor: number;
+    const setFillCMYKColor: number;
+    const shadingFill: number;
+    const beginInlineImage: number;
+    const beginImageData: number;
+    const endInlineImage: number;
+    const paintXObject: number;
+    const markPoint: number;
+    const markPointProps: number;
+    const beginMarkedContent: number;
+    const beginMarkedContentProps: number;
+    const endMarkedContent: number;
+    const beginCompat: number;
+    const endCompat: number;
+    const paintFormXObjectBegin: number;
+    const paintFormXObjectEnd: number;
+    const beginGroup: number;
+    const endGroup: number;
+    const beginAnnotations: number;
+    const endAnnotations: number;
+    const beginAnnotation: number;
+    const endAnnotation: number;
+    const paintJpegXObject: number;
+    const paintImageMaskXObject: number;
+    const paintImageMaskXObjectGroup: number;
+    const paintImageXObject: number;
+    const paintInlineImageXObject: number;
+    const paintInlineImageXObjectGroup: number;
+    const paintImageXObjectRepeat: number;
+    const paintImageMaskXObjectRepeat: number;
+    const paintSolidColorImageMask: number;
+    const constructPath: number;
+}
+export namespace PageActionEventType {
+    export const O: string;
+    const C_1: string;
+    export { C_1 as C };
 }
 declare const PasswordException_base: any;
 export class PasswordException extends PasswordException_base {
@@ -282,8 +345,8 @@ export class PasswordException extends PasswordException_base {
     code: any;
 }
 export namespace PasswordResponses {
-    export const NEED_PASSWORD: number;
-    export const INCORRECT_PASSWORD: number;
+    const NEED_PASSWORD: number;
+    const INCORRECT_PASSWORD: number;
 }
 export namespace PermissionFlag {
     const PRINT_1: number;
@@ -296,6 +359,12 @@ export namespace PermissionFlag {
     export const ASSEMBLE: number;
     export const PRINT_HIGH_QUALITY: number;
 }
+/**
+ * @param {string} str
+ */
+export function removeNullCharacters(str: string): string;
+export function setVerbosityLevel(level: any): void;
+export function shadow(obj: any, prop: any, value: any): any;
 export namespace StreamType {
     const UNKNOWN_1: string;
     export { UNKNOWN_1 as UNKNOWN };
@@ -309,6 +378,11 @@ export namespace StreamType {
     export const CCF: string;
     export const RLX: string;
 }
+export function string32(value: any): string;
+export function stringToBytes(str: any): Uint8Array;
+export function stringToPDFString(str: any): string;
+export function stringToUTF16BEString(str: any): string;
+export function stringToUTF8String(str: any): string;
 export namespace TextRenderingMode {
     export const FILL: number;
     export const STROKE: number;
@@ -334,8 +408,31 @@ export class UnknownErrorException extends UnknownErrorException_base {
     constructor(msg: any, details: any);
     details: any;
 }
+export function unreachable(msg: any): void;
+export namespace UNSUPPORTED_FEATURES {
+    const unknown: string;
+    const forms: string;
+    const javaScript: string;
+    const smask: string;
+    const shadingPattern: string;
+    const font: string;
+    const errorTilingPattern: string;
+    const errorExtGState: string;
+    const errorXObject: string;
+    const errorFontLoadType3: string;
+    const errorFontState: string;
+    const errorFontMissing: string;
+    const errorFontTranslate: string;
+    const errorColorSpace: string;
+    const errorOperatorList: string;
+    const errorFontToUnicode: string;
+    const errorFontLoadNative: string;
+    const errorFontGetPath: string;
+    const errorMarkedContent: string;
+}
+export function utf8StringToString(str: any): string;
 export class Util {
-    static makeCssRgb(r: any, g: any, b: any): string;
+    static makeHexColor(r: any, g: any, b: any): string;
     static transform(m1: any, m2: any): any[];
     static applyTransform(p: any, m: any): any[];
     static applyInverseTransform(p: any, m: any): number[];
@@ -346,76 +443,10 @@ export class Util {
     static normalizeRect(rect: any): any;
     static intersect(rect1: any, rect2: any): any[] | null;
 }
-declare const FormatError_base: any;
-/**
- * Error caused during parsing PDF data.
- */
-export class FormatError extends FormatError_base {
-    [x: string]: any;
+export namespace VerbosityLevel {
+    const ERRORS: number;
+    const WARNINGS: number;
+    const INFOS: number;
 }
-/**
- * Gets length of the array (Array, Uint8Array, or string) in bytes.
- * @param {Array<any>|Uint8Array|string} arr
- * @returns {number}
- */
-export function arrayByteLength(arr: Array<any> | Uint8Array | string): number;
-/**
- * Combines array items (arrays) into single Uint8Array object.
- * @param {Array<Array<any>|Uint8Array|string>} arr - the array of the arrays
- *   (Array, Uint8Array, or string).
- * @returns {Uint8Array}
- */
-export function arraysToBytes(arr: Array<Array<any> | Uint8Array | string>): Uint8Array;
-export function assert(cond: any, msg: any): void;
-export function bytesToString(bytes: any): string;
-/**
- * Promise Capability object.
- *
- * @typedef {Object} PromiseCapability
- * @property {Promise<any>} promise - A Promise object.
- * @property {boolean} settled - If the Promise has been fulfilled/rejected.
- * @property {function} resolve - Fulfills the Promise.
- * @property {function} reject - Rejects the Promise.
- */
-/**
- * Creates a promise capability object.
- * @alias createPromiseCapability
- *
- * @returns {PromiseCapability}
- */
-export function createPromiseCapability(): PromiseCapability;
-export function createObjectURL(data: any, contentType: any, forceDataSchema?: boolean): string;
-export function escapeString(str: any): any;
-export function getModificationDate(date?: Date): string;
-export function getVerbosityLevel(): number;
-export function info(msg: any): void;
-export function isArrayBuffer(v: any): boolean;
-export function isArrayEqual(arr1: any, arr2: any): any;
-export function isBool(v: any): boolean;
-export function isNum(v: any): boolean;
-export function isString(v: any): boolean;
-export function isSameOrigin(baseUrl: any, otherUrl: any): boolean;
-/**
- * Attempts to create a valid absolute URL.
- *
- * @param {URL|string} url - An absolute, or relative, URL.
- * @param {URL|string} baseUrl - An absolute URL.
- * @returns Either a valid {URL}, or `null` otherwise.
- */
-export function createValidAbsoluteUrl(url: URL | string, baseUrl: URL | string): URL | null;
-export namespace IsLittleEndianCached { }
-export namespace IsEvalSupportedCached { }
-/**
- * @param {string} str
- */
-export function removeNullCharacters(str: string): string;
-export function setVerbosityLevel(level: any): void;
-export function shadow(obj: any, prop: any, value: any): any;
-export function string32(value: any): string;
-export function stringToBytes(str: any): Uint8Array;
-export function stringToPDFString(str: any): string;
-export function stringToUTF8String(str: any): string;
-export function utf8StringToString(str: any): string;
 export function warn(msg: any): void;
-export function unreachable(msg: any): void;
 export {};

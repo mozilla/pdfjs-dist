@@ -1,7 +1,7 @@
 /** @implements {IPDFStream} */
 export class PDFDataTransportStream {
     constructor(params: any, pdfDataRangeTransport: any);
-    _queuedChunks: any[];
+    _queuedChunks: ArrayBuffer[];
     _progressiveDone: any;
     _pdfDataRangeTransport: any;
     _isStreamingSupported: boolean;

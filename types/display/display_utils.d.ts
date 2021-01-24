@@ -17,45 +17,120 @@ export type PageViewportParameters = {
      * - The horizontal, i.e. x-axis, offset. The
      * default value is `0`.
      */
-    offsetX?: number;
+    offsetX?: number | undefined;
     /**
      * - The vertical, i.e. y-axis, offset. The
      * default value is `0`.
      */
-    offsetY?: number;
+    offsetY?: number | undefined;
     /**
      * - If true, the y-axis will not be flipped.
      * The default value is `false`.
      */
-    dontFlip?: boolean;
+    dontFlip?: boolean | undefined;
 };
 export type PageViewportCloneParameters = {
     /**
      * - The scale, overriding the one in the cloned
      * viewport. The default value is `this.scale`.
      */
-    scale?: number;
+    scale?: number | undefined;
     /**
      * - The rotation, in degrees, overriding the one
      * in the cloned viewport. The default value is `this.rotation`.
      */
-    rotation?: number;
+    rotation?: number | undefined;
     /**
      * - The horizontal, i.e. x-axis, offset.
      * The default value is `this.offsetX`.
      */
-    offsetX?: number;
+    offsetX?: number | undefined;
     /**
      * - The vertical, i.e. y-axis, offset.
      * The default value is `this.offsetY`.
      */
-    offsetY?: number;
+    offsetY?: number | undefined;
     /**
      * - If true, the x-axis will not be flipped.
      * The default value is `false`.
      */
-    dontFlip?: boolean;
+    dontFlip?: boolean | undefined;
 };
+/**
+ * @typedef ExternalLinkParameters
+ * @typedef {Object} ExternalLinkParameters
+ * @property {string} url - An absolute URL.
+ * @property {LinkTarget} [target] - The link target. The default value is
+ *   `LinkTarget.NONE`.
+ * @property {string} [rel] - The link relationship. The default value is
+ *   `DEFAULT_LINK_REL`.
+ * @property {boolean} [enabled] - Whether the link should be enabled. The
+ *   default value is true.
+ */
+/**
+ * Adds various attributes (href, title, target, rel) to hyperlinks.
+ * @param {HTMLLinkElement} link - The link element.
+ * @param {ExternalLinkParameters} params
+ */
+export function addLinkAttributes(link: HTMLLinkElement, { url, target, rel, enabled }?: any): void;
+export class BaseCanvasFactory {
+    create(width: any, height: any): void;
+    reset(canvasAndContext: any, width: any, height: any): void;
+    destroy(canvasAndContext: any): void;
+}
+export class BaseCMapReaderFactory {
+    constructor({ baseUrl, isCompressed }: {
+        baseUrl?: any;
+        isCompressed?: boolean | undefined;
+    });
+    baseUrl: any;
+    isCompressed: boolean;
+    fetch({ name }: {
+        name: any;
+    }): Promise<any>;
+    /**
+     * @private
+     */
+    private _fetchData;
+}
+export const DEFAULT_LINK_REL: "noopener noreferrer nofollow";
+export function deprecated(details: any): void;
+export class DOMCanvasFactory extends BaseCanvasFactory {
+    constructor({ ownerDocument }?: {
+        ownerDocument?: Document | undefined;
+    });
+    _document: Document;
+}
+export class DOMCMapReaderFactory extends BaseCMapReaderFactory {
+    constructor({ baseUrl, isCompressed }: {
+        baseUrl?: any;
+        isCompressed?: boolean | undefined;
+    });
+}
+export class DOMSVGFactory {
+    create(width: any, height: any): SVGElement;
+    createElement(type: any): any;
+}
+/**
+ * Gets the file name from a given URL.
+ * @param {string} url
+ */
+export function getFilenameFromUrl(url: string): string;
+export function isFetchSupported(): boolean;
+export function isValidFetchUrl(url: any, baseUrl: any): boolean;
+export namespace LinkTarget {
+    const NONE: number;
+    const SELF: number;
+    const BLANK: number;
+    const PARENT: number;
+    const TOP: number;
+}
+/**
+ * @param {string} src
+ * @param {boolean} [removeScriptElement]
+ * @returns {Promise<void>}
+ */
+export function loadScript(src: string, removeScriptElement?: boolean | undefined): Promise<void>;
 /**
  * @typedef {Object} PageViewportParameters
  * @property {Array<number>} viewBox - The xMin, yMin, xMax and
@@ -134,93 +209,6 @@ export class PageViewport {
      */
     convertToPdfPoint(x: number, y: number): Object;
 }
-declare const RenderingCancelledException_base: any;
-export class RenderingCancelledException extends RenderingCancelledException_base {
-    [x: string]: any;
-    constructor(msg: any, type: any);
-    type: any;
-}
-/**
- * @typedef ExternalLinkParameters
- * @typedef {Object} ExternalLinkParameters
- * @property {string} url - An absolute URL.
- * @property {LinkTarget} [target] - The link target. The default value is
- *   `LinkTarget.NONE`.
- * @property {string} [rel] - The link relationship. The default value is
- *   `DEFAULT_LINK_REL`.
- * @property {boolean} [enabled] - Whether the link should be enabled. The
- *   default value is true.
- */
-/**
- * Adds various attributes (href, title, target, rel) to hyperlinks.
- * @param {HTMLLinkElement} link - The link element.
- * @param {ExternalLinkParameters} params
- */
-export function addLinkAttributes(link: HTMLLinkElement, { url, target, rel, enabled }?: any): void;
-/**
- * Gets the file name from a given URL.
- * @param {string} url
- */
-export function getFilenameFromUrl(url: string): string;
-export namespace LinkTarget {
-    export const NONE: number;
-    export const SELF: number;
-    export const BLANK: number;
-    export const PARENT: number;
-    export const TOP: number;
-}
-export const DEFAULT_LINK_REL: "noopener noreferrer nofollow";
-export class BaseCanvasFactory {
-    create(width: any, height: any): void;
-    reset(canvasAndContext: any, width: any, height: any): void;
-    destroy(canvasAndContext: any): void;
-}
-export class DOMCanvasFactory extends BaseCanvasFactory {
-    constructor({ ownerDocument }?: {
-        ownerDocument?: Document | undefined;
-    });
-    _document: Document;
-}
-export class BaseCMapReaderFactory {
-    constructor({ baseUrl, isCompressed }: {
-        baseUrl?: any;
-        isCompressed?: boolean | undefined;
-    });
-    baseUrl: any;
-    isCompressed: boolean;
-    fetch({ name }: {
-        name: any;
-    }): Promise<any>;
-    /**
-     * @private
-     */
-    private _fetchData;
-}
-export class DOMCMapReaderFactory extends BaseCMapReaderFactory {
-    constructor({ baseUrl, isCompressed }: {
-        baseUrl?: any;
-        isCompressed?: boolean | undefined;
-    });
-}
-export class DOMSVGFactory {
-    create(width: any, height: any): SVGElement;
-    createElement(type: any): any;
-}
-export class StatTimer {
-    started: any;
-    times: any[];
-    time(name: any): void;
-    timeEnd(name: any): void;
-    toString(): string;
-}
-export function isFetchSupported(): boolean;
-export function isValidFetchUrl(url: any, baseUrl: any): boolean;
-/**
- * @param {string} src
- * @returns {Promise<void>}
- */
-export function loadScript(src: string): Promise<void>;
-export function deprecated(details: any): void;
 export class PDFDateString {
     /**
      * Convert a PDF date string to a JavaScript `Date` object.
@@ -239,5 +227,18 @@ export class PDFDateString {
      * @returns {Date|null}
      */
     static toDateObject(input: string): Date | null;
+}
+declare const RenderingCancelledException_base: any;
+export class RenderingCancelledException extends RenderingCancelledException_base {
+    [x: string]: any;
+    constructor(msg: any, type: any);
+    type: any;
+}
+export class StatTimer {
+    started: any;
+    times: any[];
+    time(name: any): void;
+    timeEnd(name: any): void;
+    toString(): string;
 }
 export {};
