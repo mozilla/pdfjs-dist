@@ -157,7 +157,7 @@ export namespace CMapCompressionType {
     export const BINARY: number;
     export const STREAM: number;
 }
-export function createObjectURL(data: any, contentType: any, forceDataSchema?: boolean): string;
+export function createObjectURL(data: any, contentType?: string, forceDataSchema?: boolean): string;
 /**
  * Promise Capability object.
  *
@@ -189,7 +189,6 @@ export namespace DocumentActionEventType {
     const WP: string;
     const DP: string;
 }
-export function encodeToXmlString(str: any): any;
 export function escapeString(str: any): any;
 export const FONT_IDENTITY_MATRIX: number[];
 export namespace FontType {
@@ -226,7 +225,7 @@ export class InvalidPDFException extends InvalidPDFException_base {
     [x: string]: any;
 }
 export function isArrayBuffer(v: any): boolean;
-export function isArrayEqual(arr1: any, arr2: any): any;
+export function isArrayEqual(arr1: any, arr2: any): boolean;
 export function isAscii(str: any): boolean;
 export function isBool(v: any): boolean;
 export namespace IsEvalSupportedCached { }
@@ -238,7 +237,7 @@ declare const MissingPDFException_base: any;
 export class MissingPDFException extends MissingPDFException_base {
     [x: string]: any;
 }
-export function objectFromEntries(iterable: any): any;
+export function objectFromMap(map: any): any;
 export function objectSize(obj: any): number;
 export namespace OPS {
     const dependency: number;

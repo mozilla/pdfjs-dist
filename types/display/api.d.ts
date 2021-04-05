@@ -6,13 +6,13 @@ export type DocumentInitParameters = {
     /**
      * - The URL of the PDF.
      */
-    url?: string | undefined;
+    url?: string | URL | undefined;
     /**
      * - Binary PDF data. Use
      * typed arrays (Uint8Array) to improve the memory usage. If PDF data is
      * BASE64-encoded, use `atob()` to convert it to a binary string first.
      */
-    data?: string | number[] | Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array | undefined;
+    data?: string | number[] | TypedArray | undefined;
     /**
      * - Basic authentication headers.
      */
@@ -32,7 +32,7 @@ export type DocumentInitParameters = {
      * or all of the pdf data. Used by the extension since some data is already
      * loaded before the switch to range requests.
      */
-    initialData?: Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array | undefined;
+    initialData?: TypedArray | undefined;
     /**
      * - The PDF file length. It's used for progress
      * reports and range requests operations.
@@ -116,6 +116,11 @@ export type DocumentInitParameters = {
      */
     fontExtraProperties?: boolean | undefined;
     /**
+     * - Render Xfa forms if any.
+     * The default value is `false`.
+     */
+    enableXfa?: boolean | undefined;
+    /**
      * - Specify an explicit document
      * context to create elements with and to load resources, such as fonts,
      * into. Defaults to the current document.
@@ -148,24 +153,6 @@ export type DocumentInitParameters = {
      * (see `web/debugger.js`). The default value is `false`.
      */
     pdfBug?: boolean | undefined;
-};
-export type PDFDocumentStats = {
-    /**
-     * - Used stream types in the
-     * document (an item is set to true if specific stream ID was used in the
-     * document).
-     */
-    streamTypes: {
-        [x: string]: boolean;
-    };
-    /**
-     * - Used font types in the
-     * document (an item is set to true if specific font ID was used in the
-     * document).
-     */
-    fontTypes: {
-        [x: string]: boolean;
-    };
 };
 export type IPDFStreamFactory = Function;
 /**
@@ -213,6 +200,48 @@ export type PDFDocumentLoadingTask = {
      * completed.
      */
     destroy: Function;
+};
+export type OutlineNode = {
+    title: string;
+    bold: boolean;
+    italic: boolean;
+    /**
+     * - The color in RGB format to use for
+     * display purposes.
+     */
+    color: Uint8ClampedArray;
+    dest: string | Array<any> | null;
+    url: string | null;
+    unsafeUrl: string | undefined;
+    newWindow: boolean | undefined;
+    count: number | undefined;
+    items: Array<OutlineNode>;
+};
+/**
+ * Properties correspond to Table 321 of the PDF 32000-1:2008 spec.
+ */
+export type MarkInfo = {
+    Marked: boolean;
+    UserProperties: boolean;
+    Suspects: boolean;
+};
+export type PDFDocumentStats = {
+    /**
+     * - Used stream types in the
+     * document (an item is set to true if specific stream ID was used in the
+     * document).
+     */
+    streamTypes: {
+        [x: string]: boolean;
+    };
+    /**
+     * - Used font types in the
+     * document (an item is set to true if specific font ID was used in the
+     * document).
+     */
+    fontTypes: {
+        [x: string]: boolean;
+    };
 };
 /**
  * Page getViewport parameters.
@@ -449,7 +478,7 @@ export const DefaultCMapReaderFactory: typeof DOMCMapReaderFactory | {
  * Document initialization / loading parameters object.
  *
  * @typedef {Object} DocumentInitParameters
- * @property {string} [url] - The URL of the PDF.
+ * @property {string|URL} [url] - The URL of the PDF.
  * @property {TypedArray|Array<number>|string} [data] - Binary PDF data. Use
  *    typed arrays (Uint8Array) to improve the memory usage. If PDF data is
  *    BASE64-encoded, use `atob()` to convert it to a binary string first.
@@ -501,6 +530,8 @@ export const DefaultCMapReaderFactory: typeof DOMCMapReaderFactory | {
  *   parsed font data from the worker-thread. This may be useful for debugging
  *   purposes (and backwards compatibility), but note that it will lead to
  *   increased memory usage. The default value is `false`.
+ * @property {boolean} [enableXfa] - Render Xfa forms if any.
+ *   The default value is `false`.
  * @property {HTMLDocument} [ownerDocument] - Specify an explicit document
  *   context to create elements with and to load resources, such as fonts,
  *   into. Defaults to the current document.
@@ -521,31 +552,20 @@ export const DefaultCMapReaderFactory: typeof DOMCMapReaderFactory | {
  *   (see `web/debugger.js`). The default value is `false`.
  */
 /**
- * @typedef {Object} PDFDocumentStats
- * @property {Object<string, boolean>} streamTypes - Used stream types in the
- *   document (an item is set to true if specific stream ID was used in the
- *   document).
- * @property {Object<string, boolean>} fontTypes - Used font types in the
- *   document (an item is set to true if specific font ID was used in the
- *   document).
- */
-/**
  * This is the main entry point for loading a PDF and interacting with it.
  *
  * NOTE: If a URL is used to fetch the PDF data a standard Fetch API call (or
  * XHR as fallback) is used, which means it must follow same origin rules,
  * e.g. no cross-domain requests without CORS.
  *
- * @param {string|TypedArray|DocumentInitParameters|PDFDataRangeTransport} src -
- *   Can be a URL to where a PDF file is located, a typed array (Uint8Array)
- *   already populated with data or parameter object.
+ * @param {string|URL|TypedArray|PDFDataRangeTransport|DocumentInitParameters}
+ *   src - Can be a URL where a PDF file is located, a typed array (Uint8Array)
+ *         already populated with data, or a parameter object.
  * @returns {PDFDocumentLoadingTask}
  */
-export function getDocument(src: string | TypedArray | DocumentInitParameters | PDFDataRangeTransport): PDFDocumentLoadingTask;
+export function getDocument(src: string | URL | TypedArray | PDFDataRangeTransport | DocumentInitParameters): PDFDocumentLoadingTask;
 export class LoopbackPort {
-    constructor(defer?: boolean);
     _listeners: any[];
-    _defer: boolean;
     _deferred: Promise<undefined>;
     postMessage(obj: any, transfers: any): void;
     addEventListener(name: any, listener: any): void;
@@ -560,11 +580,13 @@ export class PDFDataRangeTransport {
      * @param {number} length
      * @param {Uint8Array} initialData
      * @param {boolean} [progressiveDone]
+     * @param {string} [contentDispositionFilename]
      */
-    constructor(length: number, initialData: Uint8Array, progressiveDone?: boolean | undefined);
+    constructor(length: number, initialData: Uint8Array, progressiveDone?: boolean | undefined, contentDispositionFilename?: string | undefined);
     length: number;
     initialData: Uint8Array;
     progressiveDone: boolean;
+    contentDispositionFilename: string;
     _rangeListeners: any[];
     _progressListeners: any[];
     _progressiveReadListeners: any[];
@@ -601,6 +623,10 @@ export class PDFDocumentProxy {
      * @type {string} A (not guaranteed to be) unique ID to identify a PDF.
      */
     get fingerprint(): string;
+    /**
+     * @type {boolean} True if only XFA form.
+     */
+    get isPureXfa(): boolean;
     /**
      * @param {number} pageNumber - The page number to get. The first page is 1.
      * @returns {Promise<PDFPageProxy>} A promise that is resolved with
@@ -701,22 +727,7 @@ export class PDFDocumentProxy {
      * @returns {Promise<Array<OutlineNode>>} A promise that is resolved with an
      *   {Array} that is a tree outline (if it has one) of the PDF file.
      */
-    getOutline(): Promise<{
-        title: string;
-        bold: boolean;
-        italic: boolean;
-        /**
-         * - The color in RGB format to use for
-         * display purposes.
-         */
-        color: Uint8ClampedArray;
-        dest: string | Array<any> | null;
-        url: string | null;
-        unsafeUrl: string | undefined;
-        newWindow: boolean | undefined;
-        count: number | undefined;
-        items: any[];
-    }[]>;
+    getOutline(): Promise<Array<OutlineNode>>;
     /**
      * @returns {Promise<OptionalContentConfig>} A promise that is resolved with
      *   an {@link OptionalContentConfig} that contains all the optional content
@@ -752,11 +763,7 @@ export class PDFDocumentProxy {
      *   a {MarkInfo} object that contains the MarkInfo flags for the PDF
      *   document, or `null` when no MarkInfo values are present in the PDF file.
      */
-    getMarkInfo(): Promise<{
-        Marked: boolean;
-        UserProperties: boolean;
-        Suspects: boolean;
-    } | null>;
+    getMarkInfo(): Promise<MarkInfo | null>;
     /**
      * @returns {Promise<TypedArray>} A promise that is resolved with a
      *   {TypedArray} that has the raw data from the PDF.
@@ -771,6 +778,15 @@ export class PDFDocumentProxy {
         length: number;
     }>;
     /**
+     * @typedef {Object} PDFDocumentStats
+     * @property {Object<string, boolean>} streamTypes - Used stream types in the
+     *   document (an item is set to true if specific stream ID was used in the
+     *   document).
+     * @property {Object<string, boolean>} fontTypes - Used font types in the
+     *   document (an item is set to true if specific font ID was used in the
+     *   document).
+     */
+    /**
      * @returns {Promise<PDFDocumentStats>} A promise this is resolved with
      *   current statistics about document structures (see
      *   {@link PDFDocumentStats}).
@@ -783,9 +799,12 @@ export class PDFDocumentProxy {
      * NOTE: Do not, under any circumstances, call this method when rendering is
      * currently ongoing since that may lead to rendering errors.
      *
+     * @param {boolean} [keepLoadedFonts] - Let fonts remain attached to the DOM.
+     *   NOTE: This will increase persistent memory usage, hence don't use this
+     *   option unless absolutely necessary. The default value is `false`.
      * @returns {Promise} A promise that is resolved when clean-up has finished.
      */
-    cleanup(): Promise<any>;
+    cleanup(keepLoadedFonts?: boolean | undefined): Promise<any>;
     /**
      * Destroys the current document instance and terminates the worker.
      */
@@ -976,13 +995,20 @@ export class PDFPageProxy {
      *   {Array} of the annotation objects.
      */
     getAnnotations({ intent }?: GetAnnotationsParameters): Promise<Array<any>>;
-    annotationsPromise: any;
-    annotationsIntent: string | undefined;
+    _annotationsPromise: any;
+    _annotationsIntent: string | undefined;
     /**
      * @returns {Promise<Object>} A promise that is resolved with an
      *   {Object} with JS actions.
      */
     getJSActions(): Promise<Object>;
+    /**
+     * @returns {Promise<Object | null>} A promise that is resolved with
+     *   an {Object} with a fake DOM object (a tree structure where elements
+     *   are {Object} with a name, attributes (class, style, ...), value and
+     *   children, very similar to a HTML DOM tree), or `null` if no XFA exists.
+     */
+    getXfa(): Promise<Object | null>;
     /**
      * Begins the process of rendering a page to the desired context.
      *
@@ -1013,6 +1039,7 @@ export class PDFPageProxy {
      */
     private _destroy;
     _jsActionsPromise: any;
+    _xfaPromise: any;
     /**
      * Cleans up resources allocated by the page.
      *

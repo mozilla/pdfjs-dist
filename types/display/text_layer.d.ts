@@ -6,7 +6,7 @@ export type TextLayerRenderParameters = {
      * - Text content to
      * render (the object is returned by the page's `getTextContent` method).
      */
-    textContent?: import("./api.js").TextContent | undefined;
+    textContent?: import("./api").TextContent | undefined;
     /**
      * - Text content stream to
      * render (the stream is returned by the page's `streamTextContent` method).

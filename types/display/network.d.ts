@@ -1,5 +1,5 @@
 /** @implements {IPDFStream} */
-export class PDFNetworkStream {
+export class PDFNetworkStream implements IPDFStream {
     constructor(source: any);
     _source: any;
     _manager: NetworkManager;
@@ -30,7 +30,7 @@ declare class NetworkManager {
     abortRequest(xhrId: any): void;
 }
 /** @implements {IPDFStreamReader} */
-declare class PDFNetworkStreamFullRequestReader {
+declare class PDFNetworkStreamFullRequestReader implements IPDFStreamReader {
     constructor(manager: any, source: any);
     _manager: any;
     _url: any;
@@ -61,7 +61,7 @@ declare class PDFNetworkStreamFullRequestReader {
     _fullRequestReader: any;
 }
 /** @implements {IPDFStreamRangeReader} */
-declare class PDFNetworkStreamRangeRequestReader {
+declare class PDFNetworkStreamRangeRequestReader implements IPDFStreamRangeReader {
     constructor(manager: any, begin: any, end: any);
     _manager: any;
     _requestId: any;

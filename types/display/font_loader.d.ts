@@ -3,7 +3,7 @@ export class FontFaceObject {
         isEvalSupported?: boolean | undefined;
         disableFontFace?: boolean | undefined;
         ignoreErrors?: boolean | undefined;
-        onUnsupportedFeature?: any;
+        onUnsupportedFeature: any;
         fontRegistry?: any;
     });
     compiledGlyphs: any;

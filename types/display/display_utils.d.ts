@@ -102,21 +102,28 @@ export class DOMCanvasFactory extends BaseCanvasFactory {
     _document: Document;
 }
 export class DOMCMapReaderFactory extends BaseCMapReaderFactory {
-    constructor({ baseUrl, isCompressed }: {
-        baseUrl?: any;
-        isCompressed?: boolean | undefined;
-    });
 }
 export class DOMSVGFactory {
     create(width: any, height: any): SVGElement;
     createElement(type: any): any;
 }
 /**
- * Gets the file name from a given URL.
+ * Gets the filename from a given URL.
  * @param {string} url
+ * @returns {string}
  */
 export function getFilenameFromUrl(url: string): string;
+/**
+ * Returns the filename or guessed filename from the url (see issue 3455).
+ * @param {string} url - The original PDF location.
+ * @param {string} defaultFilename - The value returned if the filename is
+ *   unknown, or the protocol is unsupported.
+ * @returns {string} Guessed PDF filename.
+ */
+export function getPdfFilenameFromUrl(url: string, defaultFilename?: string): string;
+export function isDataScheme(url: any): boolean;
 export function isFetchSupported(): boolean;
+export function isPdfFile(filename: any): boolean;
 export function isValidFetchUrl(url: any, baseUrl: any): boolean;
 export namespace LinkTarget {
     const NONE: number;

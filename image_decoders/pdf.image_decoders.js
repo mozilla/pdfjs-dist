@@ -2,7 +2,7 @@
  * @licstart The following is the entire license notice for the
  * Javascript code in this page
  *
- * Copyright 2020 Mozilla Foundation
+ * Copyright 2021 Mozilla Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,57 +33,7 @@
 return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ([
-/* 0 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
-
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-Object.defineProperty(exports, "getVerbosityLevel", ({
-  enumerable: true,
-  get: function () {
-    return _util.getVerbosityLevel;
-  }
-}));
-Object.defineProperty(exports, "setVerbosityLevel", ({
-  enumerable: true,
-  get: function () {
-    return _util.setVerbosityLevel;
-  }
-}));
-Object.defineProperty(exports, "Jbig2mage", ({
-  enumerable: true,
-  get: function () {
-    return _jbig.Jbig2mage;
-  }
-}));
-Object.defineProperty(exports, "JpegImage", ({
-  enumerable: true,
-  get: function () {
-    return _jpg.JpegImage;
-  }
-}));
-Object.defineProperty(exports, "JpxImage", ({
-  enumerable: true,
-  get: function () {
-    return _jpx.JpxImage;
-  }
-}));
-
-var _util = __w_pdfjs_require__(1);
-
-var _jbig = __w_pdfjs_require__(4);
-
-var _jpg = __w_pdfjs_require__(9);
-
-var _jpx = __w_pdfjs_require__(10);
-
-const pdfjsVersion = '2.7.570';
-const pdfjsBuild = 'f2c7338b0';
-
-/***/ }),
+/* 0 */,
 /* 1 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
@@ -96,9 +46,9 @@ exports.arrayByteLength = arrayByteLength;
 exports.arraysToBytes = arraysToBytes;
 exports.assert = assert;
 exports.bytesToString = bytesToString;
+exports.createObjectURL = createObjectURL;
 exports.createPromiseCapability = createPromiseCapability;
 exports.createValidAbsoluteUrl = createValidAbsoluteUrl;
-exports.encodeToXmlString = encodeToXmlString;
 exports.escapeString = escapeString;
 exports.getModificationDate = getModificationDate;
 exports.getVerbosityLevel = getVerbosityLevel;
@@ -110,7 +60,7 @@ exports.isBool = isBool;
 exports.isNum = isNum;
 exports.isSameOrigin = isSameOrigin;
 exports.isString = isString;
-exports.objectFromEntries = objectFromEntries;
+exports.objectFromMap = objectFromMap;
 exports.objectSize = objectSize;
 exports.removeNullCharacters = removeNullCharacters;
 exports.setVerbosityLevel = setVerbosityLevel;
@@ -123,7 +73,7 @@ exports.stringToUTF8String = stringToUTF8String;
 exports.unreachable = unreachable;
 exports.utf8StringToString = utf8StringToString;
 exports.warn = warn;
-exports.VerbosityLevel = exports.Util = exports.UNSUPPORTED_FEATURES = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.PageActionEventType = exports.OPS = exports.MissingPDFException = exports.IsLittleEndianCached = exports.IsEvalSupportedCached = exports.InvalidPDFException = exports.ImageKind = exports.IDENTITY_MATRIX = exports.FormatError = exports.FontType = exports.FONT_IDENTITY_MATRIX = exports.DocumentActionEventType = exports.createObjectURL = exports.CMapCompressionType = exports.BaseException = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.AnnotationActionEventType = exports.AbortException = void 0;
+exports.VerbosityLevel = exports.Util = exports.UNSUPPORTED_FEATURES = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.PageActionEventType = exports.OPS = exports.MissingPDFException = exports.IsLittleEndianCached = exports.IsEvalSupportedCached = exports.InvalidPDFException = exports.ImageKind = exports.IDENTITY_MATRIX = exports.FormatError = exports.FontType = exports.FONT_IDENTITY_MATRIX = exports.DocumentActionEventType = exports.CMapCompressionType = exports.BaseException = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.AnnotationActionEventType = exports.AbortException = void 0;
 
 __w_pdfjs_require__(2);
 
@@ -698,8 +648,14 @@ function objectSize(obj) {
   return Object.keys(obj).length;
 }
 
-function objectFromEntries(iterable) {
-  return Object.assign(Object.create(null), Object.fromEntries(iterable));
+function objectFromMap(map) {
+  const obj = Object.create(null);
+
+  for (const [key, value] of map) {
+    obj[key] = value;
+  }
+
+  return obj;
 }
 
 function isLittleEndian() {
@@ -781,7 +737,7 @@ class Util {
     const c = m[2] * transpose[0] + m[3] * transpose[2];
     const d = m[2] * transpose[1] + m[3] * transpose[3];
     const first = (a + d) / 2;
-    const second = Math.sqrt((a + d) * (a + d) - 4 * (a * d - c * b)) / 2;
+    const second = Math.sqrt((a + d) ** 2 - 4 * (a * d - c * b)) / 2;
     const sx = first + second || 1;
     const sy = first - second || 1;
     return [Math.sqrt(sx), Math.sqrt(sy)];
@@ -915,9 +871,13 @@ function isArrayEqual(arr1, arr2) {
     return false;
   }
 
-  return arr1.every(function (element, index) {
-    return element === arr2[index];
-  });
+  for (let i = 0, ii = arr1.length; i < ii; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function getModificationDate(date = new Date()) {
@@ -948,84 +908,28 @@ function createPromiseCapability() {
   return capability;
 }
 
-const createObjectURL = function createObjectURLClosure() {
+function createObjectURL(data, contentType = "", forceDataSchema = false) {
+  if (URL.createObjectURL && !forceDataSchema) {
+    return URL.createObjectURL(new Blob([data], {
+      type: contentType
+    }));
+  }
+
   const digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-  return function createObjectURL(data, contentType, forceDataSchema = false) {
-    if (!forceDataSchema && URL.createObjectURL) {
-      const blob = new Blob([data], {
-        type: contentType
-      });
-      return URL.createObjectURL(blob);
-    }
+  let buffer = `data:${contentType};base64,`;
 
-    let buffer = `data:${contentType};base64,`;
-
-    for (let i = 0, ii = data.length; i < ii; i += 3) {
-      const b1 = data[i] & 0xff;
-      const b2 = data[i + 1] & 0xff;
-      const b3 = data[i + 2] & 0xff;
-      const d1 = b1 >> 2,
-            d2 = (b1 & 3) << 4 | b2 >> 4;
-      const d3 = i + 1 < ii ? (b2 & 0xf) << 2 | b3 >> 6 : 64;
-      const d4 = i + 2 < ii ? b3 & 0x3f : 64;
-      buffer += digits[d1] + digits[d2] + digits[d3] + digits[d4];
-    }
-
-    return buffer;
-  };
-}();
-
-exports.createObjectURL = createObjectURL;
-const XMLEntities = {
-  0x3c: "&lt;",
-  0x3e: "&gt;",
-  0x26: "&amp;",
-  0x22: "&quot;",
-  0x27: "&apos;"
-};
-
-function encodeToXmlString(str) {
-  const buffer = [];
-  let start = 0;
-
-  for (let i = 0, ii = str.length; i < ii; i++) {
-    const char = str.codePointAt(i);
-
-    if (0x20 <= char && char <= 0x7e) {
-      const entity = XMLEntities[char];
-
-      if (entity) {
-        if (start < i) {
-          buffer.push(str.substring(start, i));
-        }
-
-        buffer.push(entity);
-        start = i + 1;
-      }
-    } else {
-      if (start < i) {
-        buffer.push(str.substring(start, i));
-      }
-
-      buffer.push(`&#x${char.toString(16).toUpperCase()};`);
-
-      if (char > 0xd7ff && (char < 0xe000 || char > 0xfffd)) {
-        i++;
-      }
-
-      start = i + 1;
-    }
+  for (let i = 0, ii = data.length; i < ii; i += 3) {
+    const b1 = data[i] & 0xff;
+    const b2 = data[i + 1] & 0xff;
+    const b3 = data[i + 2] & 0xff;
+    const d1 = b1 >> 2,
+          d2 = (b1 & 3) << 4 | b2 >> 4;
+    const d3 = i + 1 < ii ? (b2 & 0xf) << 2 | b3 >> 6 : 64;
+    const d4 = i + 2 < ii ? b3 & 0x3f : 64;
+    buffer += digits[d1] + digits[d2] + digits[d3] + digits[d4];
   }
 
-  if (buffer.length === 0) {
-    return str;
-  }
-
-  if (start < str.length) {
-    buffer.push(str.substring(start, str.length));
-  }
-
-  return buffer.join("");
+  return buffer;
 }
 
 /***/ }),
@@ -3268,6 +3172,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports.collectActions = collectActions;
+exports.encodeToXmlString = encodeToXmlString;
 exports.escapePDFName = escapePDFName;
 exports.getArrayLookupTableFactory = getArrayLookupTableFactory;
 exports.getInheritableProperty = getInheritableProperty;
@@ -3342,11 +3247,14 @@ function getInheritableProperty({
   getArray = false,
   stopWhenFound = true
 }) {
-  const LOOP_LIMIT = 100;
-  let loopCount = 0;
   let values;
+  const visited = new _primitives.RefSet();
 
-  while (dict) {
+  while (dict instanceof _primitives.Dict && !(dict.objId && visited.has(dict.objId))) {
+    if (dict.objId) {
+      visited.put(dict.objId);
+    }
+
     const value = getArray ? dict.getArray(key) : dict.get(key);
 
     if (value !== undefined) {
@@ -3359,11 +3267,6 @@ function getInheritableProperty({
       }
 
       values.push(value);
-    }
-
-    if (++loopCount > LOOP_LIMIT) {
-      (0, _util.warn)(`getInheritableProperty: maximum loop count exceeded for "${key}"`);
-      break;
     }
 
     dict = dict.get("Parent");
@@ -3515,25 +3418,36 @@ function _collectJS(entry, xref, list, parents) {
 
 function collectActions(xref, dict, eventType) {
   const actions = Object.create(null);
+  const additionalActionsDicts = getInheritableProperty({
+    dict,
+    key: "AA",
+    stopWhenFound: false
+  });
 
-  if (dict.has("AA")) {
-    const additionalActions = dict.get("AA");
+  if (additionalActionsDicts) {
+    for (let i = additionalActionsDicts.length - 1; i >= 0; i--) {
+      const additionalActions = additionalActionsDicts[i];
 
-    for (const key of additionalActions.getKeys()) {
-      const action = eventType[key];
-
-      if (!action) {
+      if (!(additionalActions instanceof _primitives.Dict)) {
         continue;
       }
 
-      const actionDict = additionalActions.getRaw(key);
-      const parents = new _primitives.RefSet();
-      const list = [];
+      for (const key of additionalActions.getKeys()) {
+        const action = eventType[key];
 
-      _collectJS(actionDict, xref, list, parents);
+        if (!action) {
+          continue;
+        }
 
-      if (list.length > 0) {
-        actions[action] = list;
+        const actionDict = additionalActions.getRaw(key);
+        const parents = new _primitives.RefSet();
+        const list = [];
+
+        _collectJS(actionDict, xref, list, parents);
+
+        if (list.length > 0) {
+          actions[action] = list;
+        }
       }
     }
   }
@@ -3551,6 +3465,58 @@ function collectActions(xref, dict, eventType) {
   }
 
   return (0, _util.objectSize)(actions) > 0 ? actions : null;
+}
+
+const XMLEntities = {
+  0x3c: "&lt;",
+  0x3e: "&gt;",
+  0x26: "&amp;",
+  0x22: "&quot;",
+  0x27: "&apos;"
+};
+
+function encodeToXmlString(str) {
+  const buffer = [];
+  let start = 0;
+
+  for (let i = 0, ii = str.length; i < ii; i++) {
+    const char = str.codePointAt(i);
+
+    if (0x20 <= char && char <= 0x7e) {
+      const entity = XMLEntities[char];
+
+      if (entity) {
+        if (start < i) {
+          buffer.push(str.substring(start, i));
+        }
+
+        buffer.push(entity);
+        start = i + 1;
+      }
+    } else {
+      if (start < i) {
+        buffer.push(str.substring(start, i));
+      }
+
+      buffer.push(`&#x${char.toString(16).toUpperCase()};`);
+
+      if (char > 0xd7ff && (char < 0xe000 || char > 0xfffd)) {
+        i++;
+      }
+
+      start = i + 1;
+    }
+  }
+
+  if (buffer.length === 0) {
+    return str;
+  }
+
+  if (start < str.length) {
+    buffer.push(str.substring(start, str.length));
+  }
+
+  return buffer.join("");
 }
 
 /***/ }),
@@ -3574,10 +3540,10 @@ exports.RefSetCache = exports.RefSet = exports.Ref = exports.Name = exports.EOF 
 
 var _util = __w_pdfjs_require__(1);
 
-var EOF = {};
+const EOF = {};
 exports.EOF = EOF;
 
-var Name = function NameClosure() {
+const Name = function NameClosure() {
   let nameCache = Object.create(null);
 
   function Name(name) {
@@ -3587,7 +3553,7 @@ var Name = function NameClosure() {
   Name.prototype = {};
 
   Name.get = function Name_get(name) {
-    var nameValue = nameCache[name];
+    const nameValue = nameCache[name];
     return nameValue ? nameValue : nameCache[name] = new Name(name);
   };
 
@@ -3600,7 +3566,7 @@ var Name = function NameClosure() {
 
 exports.Name = Name;
 
-var Cmd = function CmdClosure() {
+const Cmd = function CmdClosure() {
   let cmdCache = Object.create(null);
 
   function Cmd(cmd) {
@@ -3610,7 +3576,7 @@ var Cmd = function CmdClosure() {
   Cmd.prototype = {};
 
   Cmd.get = function Cmd_get(cmd) {
-    var cmdValue = cmdCache[cmd];
+    const cmdValue = cmdCache[cmd];
     return cmdValue ? cmdValue : cmdCache[cmd] = new Cmd(cmd);
   };
 
@@ -3623,8 +3589,8 @@ var Cmd = function CmdClosure() {
 
 exports.Cmd = Cmd;
 
-var Dict = function DictClosure() {
-  var nonSerializable = function nonSerializableClosure() {
+const Dict = function DictClosure() {
+  const nonSerializable = function nonSerializableClosure() {
     return nonSerializable;
   };
 
@@ -3717,7 +3683,7 @@ var Dict = function DictClosure() {
       return this._map[key] !== undefined;
     },
     forEach: function Dict_forEach(callback) {
-      for (var key in this._map) {
+      for (const key in this._map) {
         callback(key, this.get(key));
       }
     }
@@ -3809,7 +3775,7 @@ var Dict = function DictClosure() {
 
 exports.Dict = Dict;
 
-var Ref = function RefClosure() {
+const Ref = function RefClosure() {
   let refCache = Object.create(null);
 
   function Ref(num, gen) {
@@ -8594,8 +8560,9 @@ exports.JpxImage = JpxImage;
 /******/ 	// The require function
 /******/ 	function __w_pdfjs_require__(moduleId) {
 /******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {
@@ -8612,10 +8579,59 @@ exports.JpxImage = JpxImage;
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	// module exports must be returned from runtime so entry inlining is disabled
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	return __w_pdfjs_require__(0);
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+var exports = __webpack_exports__;
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+Object.defineProperty(exports, "getVerbosityLevel", ({
+  enumerable: true,
+  get: function () {
+    return _util.getVerbosityLevel;
+  }
+}));
+Object.defineProperty(exports, "setVerbosityLevel", ({
+  enumerable: true,
+  get: function () {
+    return _util.setVerbosityLevel;
+  }
+}));
+Object.defineProperty(exports, "Jbig2mage", ({
+  enumerable: true,
+  get: function () {
+    return _jbig.Jbig2mage;
+  }
+}));
+Object.defineProperty(exports, "JpegImage", ({
+  enumerable: true,
+  get: function () {
+    return _jpg.JpegImage;
+  }
+}));
+Object.defineProperty(exports, "JpxImage", ({
+  enumerable: true,
+  get: function () {
+    return _jpx.JpxImage;
+  }
+}));
+
+var _util = __w_pdfjs_require__(1);
+
+var _jbig = __w_pdfjs_require__(4);
+
+var _jpg = __w_pdfjs_require__(9);
+
+var _jpx = __w_pdfjs_require__(10);
+
+const pdfjsVersion = '2.8.335';
+const pdfjsBuild = '228adbf67';
+})();
+
+/******/ 	return __webpack_exports__;
 /******/ })()
 ;
 });
