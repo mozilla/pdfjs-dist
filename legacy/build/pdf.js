@@ -61,7 +61,7 @@ var _util = __w_pdfjs_require__(4);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
@@ -1515,7 +1515,7 @@ function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableTo
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
@@ -1523,11 +1523,11 @@ function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArra
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
@@ -1847,6 +1847,7 @@ var UNSUPPORTED_FEATURES = {
   unknown: "unknown",
   forms: "forms",
   javaScript: "javaScript",
+  signatures: "signatures",
   smask: "smask",
   shadingPattern: "shadingPattern",
   font: "font",
@@ -1861,6 +1862,7 @@ var UNSUPPORTED_FEATURES = {
   errorOperatorList: "errorOperatorList",
   errorFontToUnicode: "errorFontToUnicode",
   errorFontLoadNative: "errorFontLoadNative",
+  errorFontBuildPath: "errorFontBuildPath",
   errorFontGetPath: "errorFontGetPath",
   errorMarkedContent: "errorMarkedContent"
 };
@@ -2375,7 +2377,7 @@ var Util = /*#__PURE__*/function () {
 }();
 
 exports.Util = Util;
-var PDFStringTranslateTable = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2D8, 0x2C7, 0x2C6, 0x2D9, 0x2DD, 0x2DB, 0x2DA, 0x2DC, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2022, 0x2020, 0x2021, 0x2026, 0x2014, 0x2013, 0x192, 0x2044, 0x2039, 0x203A, 0x2212, 0x2030, 0x201E, 0x201C, 0x201D, 0x2018, 0x2019, 0x201A, 0x2122, 0xFB01, 0xFB02, 0x141, 0x152, 0x160, 0x178, 0x17D, 0x131, 0x142, 0x153, 0x161, 0x17E, 0, 0x20AC];
+var PDFStringTranslateTable = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2d8, 0x2c7, 0x2c6, 0x2d9, 0x2dd, 0x2db, 0x2da, 0x2dc, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2022, 0x2020, 0x2021, 0x2026, 0x2014, 0x2013, 0x192, 0x2044, 0x2039, 0x203a, 0x2212, 0x2030, 0x201e, 0x201c, 0x201d, 0x2018, 0x2019, 0x201a, 0x2122, 0xfb01, 0xfb02, 0x141, 0x152, 0x160, 0x178, 0x17d, 0x131, 0x142, 0x153, 0x161, 0x17e, 0, 0x20ac];
 
 function stringToPDFString(str) {
   var length = str.length,
@@ -2421,8 +2423,7 @@ function stringToUTF16BEString(str) {
   for (var i = 0, ii = str.length; i < ii; i++) {
     var _char = str.charCodeAt(i);
 
-    buf.push(String.fromCharCode(_char >> 8 & 0xff));
-    buf.push(String.fromCharCode(_char & 0xff));
+    buf.push(String.fromCharCode(_char >> 8 & 0xff), String.fromCharCode(_char & 0xff));
   }
 
   return buf.join("");
@@ -2562,7 +2563,7 @@ if (typeof globalThis === "undefined" || !globalThis._pdfjsCompatibilityChecked)
       return;
     }
 
-    __w_pdfjs_require__(52);
+    __w_pdfjs_require__(53);
   })();
 
   (function checkPromise() {
@@ -2570,7 +2571,7 @@ if (typeof globalThis === "undefined" || !globalThis._pdfjsCompatibilityChecked)
       return;
     }
 
-    globalThis.Promise = __w_pdfjs_require__(85);
+    globalThis.Promise = __w_pdfjs_require__(84);
   })();
 
   (function checkReadableStream() {
@@ -2591,39 +2592,7 @@ if (typeof globalThis === "undefined" || !globalThis._pdfjsCompatibilityChecked)
       return;
     }
 
-    globalThis.ReadableStream = __w_pdfjs_require__(111).ReadableStream;
-  })();
-
-  (function checkStringPadStart() {
-    if (String.prototype.padStart) {
-      return;
-    }
-
-    __w_pdfjs_require__(112);
-  })();
-
-  (function checkStringPadEnd() {
-    if (String.prototype.padEnd) {
-      return;
-    }
-
-    __w_pdfjs_require__(118);
-  })();
-
-  (function checkObjectValues() {
-    if (Object.values) {
-      return;
-    }
-
-    Object.values = __w_pdfjs_require__(120);
-  })();
-
-  (function checkObjectEntries() {
-    if (Object.entries) {
-      return;
-    }
-
-    Object.entries = __w_pdfjs_require__(123);
+    globalThis.ReadableStream = __w_pdfjs_require__(112).ReadableStream;
   })();
 }
 
@@ -2665,11 +2634,11 @@ $({ global: true }, { globalThis: global });
 
 var global = __w_pdfjs_require__(10);
 var getOwnPropertyDescriptor = __w_pdfjs_require__(11).f;
-var createNonEnumerableProperty = __w_pdfjs_require__(25);
-var redefine = __w_pdfjs_require__(28);
-var setGlobal = __w_pdfjs_require__(29);
-var copyConstructorProperties = __w_pdfjs_require__(39);
-var isForced = __w_pdfjs_require__(51);
+var createNonEnumerableProperty = __w_pdfjs_require__(26);
+var redefine = __w_pdfjs_require__(29);
+var setGlobal = __w_pdfjs_require__(30);
+var copyConstructorProperties = __w_pdfjs_require__(40);
+var isForced = __w_pdfjs_require__(52);
 module.exports = function (options, source) {
  var TARGET = options.target;
  var GLOBAL = options.global;
@@ -2724,7 +2693,7 @@ var createPropertyDescriptor = __w_pdfjs_require__(15);
 var toIndexedObject = __w_pdfjs_require__(16);
 var toPrimitive = __w_pdfjs_require__(20);
 var has = __w_pdfjs_require__(22);
-var IE8_DOM_DEFINE = __w_pdfjs_require__(23);
+var IE8_DOM_DEFINE = __w_pdfjs_require__(24);
 var $getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
 exports.f = DESCRIPTORS ? $getOwnPropertyDescriptor : function getOwnPropertyDescriptor(O, P) {
  O = toIndexedObject(O);
@@ -2860,20 +2829,30 @@ module.exports = function (it) {
 
 /***/ }),
 /* 22 */
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
+var toObject = __w_pdfjs_require__(23);
 var hasOwnProperty = {}.hasOwnProperty;
-module.exports = function (it, key) {
- return hasOwnProperty.call(it, key);
+module.exports = Object.hasOwn || function hasOwn(it, key) {
+ return hasOwnProperty.call(toObject(it), key);
 };
 
 /***/ }),
 /* 23 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
+var requireObjectCoercible = __w_pdfjs_require__(19);
+module.exports = function (argument) {
+ return Object(requireObjectCoercible(argument));
+};
+
+/***/ }),
+/* 24 */
+/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
+
 var DESCRIPTORS = __w_pdfjs_require__(12);
 var fails = __w_pdfjs_require__(13);
-var createElement = __w_pdfjs_require__(24);
+var createElement = __w_pdfjs_require__(25);
 module.exports = !DESCRIPTORS && !fails(function () {
  return Object.defineProperty(createElement('div'), 'a', {
   get: function () {
@@ -2883,7 +2862,7 @@ module.exports = !DESCRIPTORS && !fails(function () {
 });
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
@@ -2895,11 +2874,11 @@ module.exports = function (it) {
 };
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var DESCRIPTORS = __w_pdfjs_require__(12);
-var definePropertyModule = __w_pdfjs_require__(26);
+var definePropertyModule = __w_pdfjs_require__(27);
 var createPropertyDescriptor = __w_pdfjs_require__(15);
 module.exports = DESCRIPTORS ? function (object, key, value) {
  return definePropertyModule.f(object, key, createPropertyDescriptor(1, value));
@@ -2909,12 +2888,12 @@ module.exports = DESCRIPTORS ? function (object, key, value) {
 };
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 var DESCRIPTORS = __w_pdfjs_require__(12);
-var IE8_DOM_DEFINE = __w_pdfjs_require__(23);
-var anObject = __w_pdfjs_require__(27);
+var IE8_DOM_DEFINE = __w_pdfjs_require__(24);
+var anObject = __w_pdfjs_require__(28);
 var toPrimitive = __w_pdfjs_require__(20);
 var $defineProperty = Object.defineProperty;
 exports.f = DESCRIPTORS ? $defineProperty : function defineProperty(O, P, Attributes) {
@@ -2934,7 +2913,7 @@ exports.f = DESCRIPTORS ? $defineProperty : function defineProperty(O, P, Attrib
 };
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var isObject = __w_pdfjs_require__(21);
@@ -2946,15 +2925,15 @@ module.exports = function (it) {
 };
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
-var createNonEnumerableProperty = __w_pdfjs_require__(25);
+var createNonEnumerableProperty = __w_pdfjs_require__(26);
 var has = __w_pdfjs_require__(22);
-var setGlobal = __w_pdfjs_require__(29);
-var inspectSource = __w_pdfjs_require__(30);
-var InternalStateModule = __w_pdfjs_require__(32);
+var setGlobal = __w_pdfjs_require__(30);
+var inspectSource = __w_pdfjs_require__(31);
+var InternalStateModule = __w_pdfjs_require__(33);
 var getInternalState = InternalStateModule.get;
 var enforceInternalState = InternalStateModule.enforce;
 var TEMPLATE = String(String).split('String');
@@ -2992,11 +2971,11 @@ var TEMPLATE = String(String).split('String');
 });
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
-var createNonEnumerableProperty = __w_pdfjs_require__(25);
+var createNonEnumerableProperty = __w_pdfjs_require__(26);
 module.exports = function (key, value) {
  try {
   createNonEnumerableProperty(global, key, value);
@@ -3007,10 +2986,10 @@ module.exports = function (key, value) {
 };
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var store = __w_pdfjs_require__(31);
+var store = __w_pdfjs_require__(32);
 var functionToString = Function.toString;
 if (typeof store.inspectSource != 'function') {
  store.inspectSource = function (it) {
@@ -3020,27 +2999,28 @@ if (typeof store.inspectSource != 'function') {
 module.exports = store.inspectSource;
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
-var setGlobal = __w_pdfjs_require__(29);
+var setGlobal = __w_pdfjs_require__(30);
 var SHARED = '__core-js_shared__';
 var store = global[SHARED] || setGlobal(SHARED, {});
 module.exports = store;
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var NATIVE_WEAK_MAP = __w_pdfjs_require__(33);
+var NATIVE_WEAK_MAP = __w_pdfjs_require__(34);
 var global = __w_pdfjs_require__(10);
 var isObject = __w_pdfjs_require__(21);
-var createNonEnumerableProperty = __w_pdfjs_require__(25);
+var createNonEnumerableProperty = __w_pdfjs_require__(26);
 var objectHas = __w_pdfjs_require__(22);
-var shared = __w_pdfjs_require__(31);
-var sharedKey = __w_pdfjs_require__(34);
-var hiddenKeys = __w_pdfjs_require__(38);
+var shared = __w_pdfjs_require__(32);
+var sharedKey = __w_pdfjs_require__(35);
+var hiddenKeys = __w_pdfjs_require__(39);
+var OBJECT_ALREADY_INITIALIZED = 'Object already initialized';
 var WeakMap = global.WeakMap;
 var set, get, has;
 var enforce = function (it) {
@@ -3055,12 +3035,14 @@ var getterFor = function (TYPE) {
   return state;
  };
 };
-if (NATIVE_WEAK_MAP) {
+if (NATIVE_WEAK_MAP || shared.state) {
  var store = shared.state || (shared.state = new WeakMap());
  var wmget = store.get;
  var wmhas = store.has;
  var wmset = store.set;
  set = function (it, metadata) {
+  if (wmhas.call(store, it))
+   throw new TypeError(OBJECT_ALREADY_INITIALIZED);
   metadata.facade = it;
   wmset.call(store, it, metadata);
   return metadata;
@@ -3075,6 +3057,8 @@ if (NATIVE_WEAK_MAP) {
  var STATE = sharedKey('state');
  hiddenKeys[STATE] = true;
  set = function (it, metadata) {
+  if (objectHas(it, STATE))
+   throw new TypeError(OBJECT_ALREADY_INITIALIZED);
   metadata.facade = it;
   createNonEnumerableProperty(it, STATE, metadata);
   return metadata;
@@ -3095,47 +3079,47 @@ module.exports = {
 };
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
-var inspectSource = __w_pdfjs_require__(30);
+var inspectSource = __w_pdfjs_require__(31);
 var WeakMap = global.WeakMap;
 module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSource(WeakMap));
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var shared = __w_pdfjs_require__(35);
-var uid = __w_pdfjs_require__(37);
+var shared = __w_pdfjs_require__(36);
+var uid = __w_pdfjs_require__(38);
 var keys = shared('keys');
 module.exports = function (key) {
  return keys[key] || (keys[key] = uid(key));
 };
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var IS_PURE = __w_pdfjs_require__(36);
-var store = __w_pdfjs_require__(31);
+var IS_PURE = __w_pdfjs_require__(37);
+var store = __w_pdfjs_require__(32);
 (module.exports = function (key, value) {
  return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
- version: '3.10.0',
+ version: '3.13.1',
  mode: IS_PURE ? 'pure' : 'global',
  copyright: '© 2021 Denis Pushkarev (zloirock.ru)'
 });
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ ((module) => {
 
 module.exports = false;
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ ((module) => {
 
 var id = 0;
@@ -3145,19 +3129,19 @@ module.exports = function (key) {
 };
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ ((module) => {
 
 module.exports = {};
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var has = __w_pdfjs_require__(22);
-var ownKeys = __w_pdfjs_require__(40);
+var ownKeys = __w_pdfjs_require__(41);
 var getOwnPropertyDescriptorModule = __w_pdfjs_require__(11);
-var definePropertyModule = __w_pdfjs_require__(26);
+var definePropertyModule = __w_pdfjs_require__(27);
 module.exports = function (target, source) {
  var keys = ownKeys(source);
  var defineProperty = definePropertyModule.f;
@@ -3170,13 +3154,13 @@ module.exports = function (target, source) {
 };
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var getBuiltIn = __w_pdfjs_require__(41);
-var getOwnPropertyNamesModule = __w_pdfjs_require__(43);
-var getOwnPropertySymbolsModule = __w_pdfjs_require__(50);
-var anObject = __w_pdfjs_require__(27);
+var getBuiltIn = __w_pdfjs_require__(42);
+var getOwnPropertyNamesModule = __w_pdfjs_require__(44);
+var getOwnPropertySymbolsModule = __w_pdfjs_require__(51);
+var anObject = __w_pdfjs_require__(28);
 module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
  var keys = getOwnPropertyNamesModule.f(anObject(it));
  var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
@@ -3184,10 +3168,10 @@ module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
 };
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var path = __w_pdfjs_require__(42);
+var path = __w_pdfjs_require__(43);
 var global = __w_pdfjs_require__(10);
 var aFunction = function (variable) {
  return typeof variable == 'function' ? variable : undefined;
@@ -3197,31 +3181,31 @@ module.exports = function (namespace, method) {
 };
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
 module.exports = global;
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
-var internalObjectKeys = __w_pdfjs_require__(44);
-var enumBugKeys = __w_pdfjs_require__(49);
+var internalObjectKeys = __w_pdfjs_require__(45);
+var enumBugKeys = __w_pdfjs_require__(50);
 var hiddenKeys = enumBugKeys.concat('length', 'prototype');
 exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
  return internalObjectKeys(O, hiddenKeys);
 };
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var has = __w_pdfjs_require__(22);
 var toIndexedObject = __w_pdfjs_require__(16);
-var indexOf = __w_pdfjs_require__(45).indexOf;
-var hiddenKeys = __w_pdfjs_require__(38);
+var indexOf = __w_pdfjs_require__(46).indexOf;
+var hiddenKeys = __w_pdfjs_require__(39);
 module.exports = function (object, names) {
  var O = toIndexedObject(object);
  var i = 0;
@@ -3237,12 +3221,12 @@ module.exports = function (object, names) {
 };
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var toIndexedObject = __w_pdfjs_require__(16);
-var toLength = __w_pdfjs_require__(46);
-var toAbsoluteIndex = __w_pdfjs_require__(48);
+var toLength = __w_pdfjs_require__(47);
+var toAbsoluteIndex = __w_pdfjs_require__(49);
 var createMethod = function (IS_INCLUDES) {
  return function ($this, el, fromIndex) {
   var O = toIndexedObject($this);
@@ -3269,17 +3253,17 @@ module.exports = {
 };
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var toInteger = __w_pdfjs_require__(47);
+var toInteger = __w_pdfjs_require__(48);
 var min = Math.min;
 module.exports = function (argument) {
  return argument > 0 ? min(toInteger(argument), 0x1FFFFFFFFFFFFF) : 0;
 };
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ ((module) => {
 
 var ceil = Math.ceil;
@@ -3289,10 +3273,10 @@ module.exports = function (argument) {
 };
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var toInteger = __w_pdfjs_require__(47);
+var toInteger = __w_pdfjs_require__(48);
 var max = Math.max;
 var min = Math.min;
 module.exports = function (index, length) {
@@ -3301,7 +3285,7 @@ module.exports = function (index, length) {
 };
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ ((module) => {
 
 module.exports = [
@@ -3315,13 +3299,13 @@ module.exports = [
 ];
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ ((__unused_webpack_module, exports) => {
 
 exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var fails = __w_pdfjs_require__(13);
@@ -3339,24 +3323,24 @@ var POLYFILL = isForced.POLYFILL = 'P';
 module.exports = isForced;
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-__w_pdfjs_require__(53);
-__w_pdfjs_require__(75);
-var path = __w_pdfjs_require__(42);
+__w_pdfjs_require__(54);
+__w_pdfjs_require__(74);
+var path = __w_pdfjs_require__(43);
 module.exports = path.Object.fromEntries;
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
 var toIndexedObject = __w_pdfjs_require__(16);
-var addToUnscopables = __w_pdfjs_require__(54);
+var addToUnscopables = __w_pdfjs_require__(55);
 var Iterators = __w_pdfjs_require__(65);
-var InternalStateModule = __w_pdfjs_require__(32);
+var InternalStateModule = __w_pdfjs_require__(33);
 var defineIterator = __w_pdfjs_require__(66);
 var ARRAY_ITERATOR = 'Array Iterator';
 var setInternalState = InternalStateModule.set;
@@ -3404,12 +3388,12 @@ addToUnscopables('values');
 addToUnscopables('entries');
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var create = __w_pdfjs_require__(61);
-var definePropertyModule = __w_pdfjs_require__(26);
+var definePropertyModule = __w_pdfjs_require__(27);
 var UNSCOPABLES = wellKnownSymbol('unscopables');
 var ArrayPrototype = Array.prototype;
 if (ArrayPrototype[UNSCOPABLES] == undefined) {
@@ -3423,14 +3407,14 @@ module.exports = function (key) {
 };
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
-var shared = __w_pdfjs_require__(35);
+var shared = __w_pdfjs_require__(36);
 var has = __w_pdfjs_require__(22);
-var uid = __w_pdfjs_require__(37);
-var NATIVE_SYMBOL = __w_pdfjs_require__(56);
+var uid = __w_pdfjs_require__(38);
+var NATIVE_SYMBOL = __w_pdfjs_require__(57);
 var USE_SYMBOL_AS_UID = __w_pdfjs_require__(60);
 var WellKnownSymbolsStore = shared('wks');
 var Symbol = global.Symbol;
@@ -3447,23 +3431,15 @@ module.exports = function (name) {
 };
 
 /***/ }),
-/* 56 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-var IS_NODE = __w_pdfjs_require__(57);
-var V8_VERSION = __w_pdfjs_require__(58);
-var fails = __w_pdfjs_require__(13);
-module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
- return !Symbol.sham && (IS_NODE ? V8_VERSION === 38 : V8_VERSION > 37 && V8_VERSION < 41);
-});
-
-/***/ }),
 /* 57 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var classof = __w_pdfjs_require__(18);
-var global = __w_pdfjs_require__(10);
-module.exports = classof(global.process) == 'process';
+var V8_VERSION = __w_pdfjs_require__(58);
+var fails = __w_pdfjs_require__(13);
+module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
+ var symbol = Symbol();
+ return !String(symbol) || !(Object(symbol) instanceof Symbol) || !Symbol.sham && V8_VERSION && V8_VERSION < 41;
+});
 
 /***/ }),
 /* 58 */
@@ -3477,7 +3453,7 @@ var v8 = versions && versions.v8;
 var match, version;
 if (v8) {
  match = v8.split('.');
- version = match[0] + match[1];
+ version = match[0] < 4 ? 1 : match[0] + match[1];
 } else if (userAgent) {
  match = userAgent.match(/Edge\/(\d+)/);
  if (!match || match[1] >= 74) {
@@ -3492,27 +3468,27 @@ module.exports = version && +version;
 /* 59 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var getBuiltIn = __w_pdfjs_require__(41);
+var getBuiltIn = __w_pdfjs_require__(42);
 module.exports = getBuiltIn('navigator', 'userAgent') || '';
 
 /***/ }),
 /* 60 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var NATIVE_SYMBOL = __w_pdfjs_require__(56);
+var NATIVE_SYMBOL = __w_pdfjs_require__(57);
 module.exports = NATIVE_SYMBOL && !Symbol.sham && typeof Symbol.iterator == 'symbol';
 
 /***/ }),
 /* 61 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var anObject = __w_pdfjs_require__(27);
+var anObject = __w_pdfjs_require__(28);
 var defineProperties = __w_pdfjs_require__(62);
-var enumBugKeys = __w_pdfjs_require__(49);
-var hiddenKeys = __w_pdfjs_require__(38);
+var enumBugKeys = __w_pdfjs_require__(50);
+var hiddenKeys = __w_pdfjs_require__(39);
 var html = __w_pdfjs_require__(64);
-var documentCreateElement = __w_pdfjs_require__(24);
-var sharedKey = __w_pdfjs_require__(34);
+var documentCreateElement = __w_pdfjs_require__(25);
+var sharedKey = __w_pdfjs_require__(35);
 var GT = '>';
 var LT = '<';
 var PROTOTYPE = 'prototype';
@@ -3573,8 +3549,8 @@ module.exports = Object.create || function create(O, Properties) {
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var DESCRIPTORS = __w_pdfjs_require__(12);
-var definePropertyModule = __w_pdfjs_require__(26);
-var anObject = __w_pdfjs_require__(27);
+var definePropertyModule = __w_pdfjs_require__(27);
+var anObject = __w_pdfjs_require__(28);
 var objectKeys = __w_pdfjs_require__(63);
 module.exports = DESCRIPTORS ? Object.defineProperties : function defineProperties(O, Properties) {
  anObject(O);
@@ -3591,8 +3567,8 @@ module.exports = DESCRIPTORS ? Object.defineProperties : function defineProperti
 /* 63 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var internalObjectKeys = __w_pdfjs_require__(44);
-var enumBugKeys = __w_pdfjs_require__(49);
+var internalObjectKeys = __w_pdfjs_require__(45);
+var enumBugKeys = __w_pdfjs_require__(50);
 module.exports = Object.keys || function keys(O) {
  return internalObjectKeys(O, enumBugKeys);
 };
@@ -3601,7 +3577,7 @@ module.exports = Object.keys || function keys(O) {
 /* 64 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var getBuiltIn = __w_pdfjs_require__(41);
+var getBuiltIn = __w_pdfjs_require__(42);
 module.exports = getBuiltIn('document', 'documentElement');
 
 /***/ }),
@@ -3619,12 +3595,12 @@ module.exports = {};
 var $ = __w_pdfjs_require__(9);
 var createIteratorConstructor = __w_pdfjs_require__(67);
 var getPrototypeOf = __w_pdfjs_require__(69);
-var setPrototypeOf = __w_pdfjs_require__(73);
-var setToStringTag = __w_pdfjs_require__(72);
-var createNonEnumerableProperty = __w_pdfjs_require__(25);
-var redefine = __w_pdfjs_require__(28);
-var wellKnownSymbol = __w_pdfjs_require__(55);
-var IS_PURE = __w_pdfjs_require__(36);
+var setPrototypeOf = __w_pdfjs_require__(72);
+var setToStringTag = __w_pdfjs_require__(71);
+var createNonEnumerableProperty = __w_pdfjs_require__(26);
+var redefine = __w_pdfjs_require__(29);
+var wellKnownSymbol = __w_pdfjs_require__(56);
+var IS_PURE = __w_pdfjs_require__(37);
 var Iterators = __w_pdfjs_require__(65);
 var IteratorsCore = __w_pdfjs_require__(68);
 var IteratorPrototype = IteratorsCore.IteratorPrototype;
@@ -3724,7 +3700,7 @@ module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, I
 var IteratorPrototype = __w_pdfjs_require__(68).IteratorPrototype;
 var create = __w_pdfjs_require__(61);
 var createPropertyDescriptor = __w_pdfjs_require__(15);
-var setToStringTag = __w_pdfjs_require__(72);
+var setToStringTag = __w_pdfjs_require__(71);
 var Iterators = __w_pdfjs_require__(65);
 var returnThis = function () {
  return this;
@@ -3745,10 +3721,10 @@ module.exports = function (IteratorConstructor, NAME, next) {
 
 var fails = __w_pdfjs_require__(13);
 var getPrototypeOf = __w_pdfjs_require__(69);
-var createNonEnumerableProperty = __w_pdfjs_require__(25);
+var createNonEnumerableProperty = __w_pdfjs_require__(26);
 var has = __w_pdfjs_require__(22);
-var wellKnownSymbol = __w_pdfjs_require__(55);
-var IS_PURE = __w_pdfjs_require__(36);
+var wellKnownSymbol = __w_pdfjs_require__(56);
+var IS_PURE = __w_pdfjs_require__(37);
 var ITERATOR = wellKnownSymbol('iterator');
 var BUGGY_SAFARI_ITERATORS = false;
 var returnThis = function () {
@@ -3784,9 +3760,9 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var has = __w_pdfjs_require__(22);
-var toObject = __w_pdfjs_require__(70);
-var sharedKey = __w_pdfjs_require__(34);
-var CORRECT_PROTOTYPE_GETTER = __w_pdfjs_require__(71);
+var toObject = __w_pdfjs_require__(23);
+var sharedKey = __w_pdfjs_require__(35);
+var CORRECT_PROTOTYPE_GETTER = __w_pdfjs_require__(70);
 var IE_PROTO = sharedKey('IE_PROTO');
 var ObjectPrototype = Object.prototype;
 module.exports = CORRECT_PROTOTYPE_GETTER ? Object.getPrototypeOf : function (O) {
@@ -3803,15 +3779,6 @@ module.exports = CORRECT_PROTOTYPE_GETTER ? Object.getPrototypeOf : function (O)
 /* 70 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var requireObjectCoercible = __w_pdfjs_require__(19);
-module.exports = function (argument) {
- return Object(requireObjectCoercible(argument));
-};
-
-/***/ }),
-/* 71 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
 var fails = __w_pdfjs_require__(13);
 module.exports = !fails(function () {
  function F() {
@@ -3821,12 +3788,12 @@ module.exports = !fails(function () {
 });
 
 /***/ }),
-/* 72 */
+/* 71 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var defineProperty = __w_pdfjs_require__(26).f;
+var defineProperty = __w_pdfjs_require__(27).f;
 var has = __w_pdfjs_require__(22);
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 module.exports = function (it, TAG, STATIC) {
  if (it && !has(it = STATIC ? it : it.prototype, TO_STRING_TAG)) {
@@ -3838,11 +3805,11 @@ module.exports = function (it, TAG, STATIC) {
 };
 
 /***/ }),
-/* 73 */
+/* 72 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var anObject = __w_pdfjs_require__(27);
-var aPossiblePrototype = __w_pdfjs_require__(74);
+var anObject = __w_pdfjs_require__(28);
+var aPossiblePrototype = __w_pdfjs_require__(73);
 module.exports = Object.setPrototypeOf || ('__proto__' in {} ? function () {
  var CORRECT_SETTER = false;
  var test = {};
@@ -3865,7 +3832,7 @@ module.exports = Object.setPrototypeOf || ('__proto__' in {} ? function () {
 }() : undefined);
 
 /***/ }),
-/* 74 */
+/* 73 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var isObject = __w_pdfjs_require__(21);
@@ -3877,12 +3844,12 @@ module.exports = function (it) {
 };
 
 /***/ }),
-/* 75 */
+/* 74 */
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var $ = __w_pdfjs_require__(9);
-var iterate = __w_pdfjs_require__(76);
-var createProperty = __w_pdfjs_require__(84);
+var iterate = __w_pdfjs_require__(75);
+var createProperty = __w_pdfjs_require__(83);
 $({
  target: 'Object',
  stat: true
@@ -3897,15 +3864,15 @@ $({
 });
 
 /***/ }),
-/* 76 */
+/* 75 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var anObject = __w_pdfjs_require__(27);
-var isArrayIteratorMethod = __w_pdfjs_require__(77);
-var toLength = __w_pdfjs_require__(46);
-var bind = __w_pdfjs_require__(78);
-var getIteratorMethod = __w_pdfjs_require__(80);
-var iteratorClose = __w_pdfjs_require__(83);
+var anObject = __w_pdfjs_require__(28);
+var isArrayIteratorMethod = __w_pdfjs_require__(76);
+var toLength = __w_pdfjs_require__(47);
+var bind = __w_pdfjs_require__(77);
+var getIteratorMethod = __w_pdfjs_require__(79);
+var iteratorClose = __w_pdfjs_require__(82);
 var Result = function (stopped, result) {
  this.stopped = stopped;
  this.result = result;
@@ -3960,10 +3927,10 @@ module.exports = function (iterable, unboundFunction, options) {
 };
 
 /***/ }),
-/* 77 */
+/* 76 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var Iterators = __w_pdfjs_require__(65);
 var ITERATOR = wellKnownSymbol('iterator');
 var ArrayPrototype = Array.prototype;
@@ -3972,10 +3939,10 @@ module.exports = function (it) {
 };
 
 /***/ }),
-/* 78 */
+/* 77 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var aFunction = __w_pdfjs_require__(79);
+var aFunction = __w_pdfjs_require__(78);
 module.exports = function (fn, that, length) {
  aFunction(fn);
  if (that === undefined)
@@ -4004,7 +3971,7 @@ module.exports = function (fn, that, length) {
 };
 
 /***/ }),
-/* 79 */
+/* 78 */
 /***/ ((module) => {
 
 module.exports = function (it) {
@@ -4015,12 +3982,12 @@ module.exports = function (it) {
 };
 
 /***/ }),
-/* 80 */
+/* 79 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var classof = __w_pdfjs_require__(81);
+var classof = __w_pdfjs_require__(80);
 var Iterators = __w_pdfjs_require__(65);
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var ITERATOR = wellKnownSymbol('iterator');
 module.exports = function (it) {
  if (it != undefined)
@@ -4028,12 +3995,12 @@ module.exports = function (it) {
 };
 
 /***/ }),
-/* 81 */
+/* 80 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var TO_STRING_TAG_SUPPORT = __w_pdfjs_require__(82);
+var TO_STRING_TAG_SUPPORT = __w_pdfjs_require__(81);
 var classofRaw = __w_pdfjs_require__(18);
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 var CORRECT_ARGUMENTS = classofRaw(function () {
  return arguments;
@@ -4050,20 +4017,20 @@ module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
 };
 
 /***/ }),
-/* 82 */
+/* 81 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 var test = {};
 test[TO_STRING_TAG] = 'z';
 module.exports = String(test) === '[object z]';
 
 /***/ }),
-/* 83 */
+/* 82 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var anObject = __w_pdfjs_require__(27);
+var anObject = __w_pdfjs_require__(28);
 module.exports = function (iterator) {
  var returnMethod = iterator['return'];
  if (returnMethod !== undefined) {
@@ -4072,13 +4039,13 @@ module.exports = function (iterator) {
 };
 
 /***/ }),
-/* 84 */
+/* 83 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
 var toPrimitive = __w_pdfjs_require__(20);
-var definePropertyModule = __w_pdfjs_require__(26);
+var definePropertyModule = __w_pdfjs_require__(27);
 var createPropertyDescriptor = __w_pdfjs_require__(15);
 module.exports = function (object, key, value) {
  var propertyKey = toPrimitive(key);
@@ -4089,33 +4056,33 @@ module.exports = function (object, key, value) {
 };
 
 /***/ }),
-/* 85 */
+/* 84 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
+__w_pdfjs_require__(85);
 __w_pdfjs_require__(86);
-__w_pdfjs_require__(87);
-__w_pdfjs_require__(89);
-__w_pdfjs_require__(104);
+__w_pdfjs_require__(88);
 __w_pdfjs_require__(105);
 __w_pdfjs_require__(106);
 __w_pdfjs_require__(107);
-__w_pdfjs_require__(109);
-var path = __w_pdfjs_require__(42);
+__w_pdfjs_require__(108);
+__w_pdfjs_require__(110);
+var path = __w_pdfjs_require__(43);
 module.exports = path.Promise;
 
 /***/ }),
-/* 86 */
+/* 85 */
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
 var $ = __w_pdfjs_require__(9);
 var getPrototypeOf = __w_pdfjs_require__(69);
-var setPrototypeOf = __w_pdfjs_require__(73);
+var setPrototypeOf = __w_pdfjs_require__(72);
 var create = __w_pdfjs_require__(61);
-var createNonEnumerableProperty = __w_pdfjs_require__(25);
+var createNonEnumerableProperty = __w_pdfjs_require__(26);
 var createPropertyDescriptor = __w_pdfjs_require__(15);
-var iterate = __w_pdfjs_require__(76);
+var iterate = __w_pdfjs_require__(75);
 var $AggregateError = function AggregateError(errors, message) {
  var that = this;
  if (!(that instanceof $AggregateError))
@@ -4138,71 +4105,74 @@ $AggregateError.prototype = create(Error.prototype, {
 $({ global: true }, { AggregateError: $AggregateError });
 
 /***/ }),
-/* 87 */
+/* 86 */
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var TO_STRING_TAG_SUPPORT = __w_pdfjs_require__(82);
-var redefine = __w_pdfjs_require__(28);
-var toString = __w_pdfjs_require__(88);
+var TO_STRING_TAG_SUPPORT = __w_pdfjs_require__(81);
+var redefine = __w_pdfjs_require__(29);
+var toString = __w_pdfjs_require__(87);
 if (!TO_STRING_TAG_SUPPORT) {
  redefine(Object.prototype, 'toString', toString, { unsafe: true });
 }
 
 /***/ }),
-/* 88 */
+/* 87 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
-var TO_STRING_TAG_SUPPORT = __w_pdfjs_require__(82);
-var classof = __w_pdfjs_require__(81);
+var TO_STRING_TAG_SUPPORT = __w_pdfjs_require__(81);
+var classof = __w_pdfjs_require__(80);
 module.exports = TO_STRING_TAG_SUPPORT ? {}.toString : function toString() {
  return '[object ' + classof(this) + ']';
 };
 
 /***/ }),
-/* 89 */
+/* 88 */
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
 var $ = __w_pdfjs_require__(9);
-var IS_PURE = __w_pdfjs_require__(36);
+var IS_PURE = __w_pdfjs_require__(37);
 var global = __w_pdfjs_require__(10);
-var getBuiltIn = __w_pdfjs_require__(41);
-var NativePromise = __w_pdfjs_require__(90);
-var redefine = __w_pdfjs_require__(28);
-var redefineAll = __w_pdfjs_require__(91);
-var setToStringTag = __w_pdfjs_require__(72);
-var setSpecies = __w_pdfjs_require__(92);
+var getBuiltIn = __w_pdfjs_require__(42);
+var NativePromise = __w_pdfjs_require__(89);
+var redefine = __w_pdfjs_require__(29);
+var redefineAll = __w_pdfjs_require__(90);
+var setPrototypeOf = __w_pdfjs_require__(72);
+var setToStringTag = __w_pdfjs_require__(71);
+var setSpecies = __w_pdfjs_require__(91);
 var isObject = __w_pdfjs_require__(21);
-var aFunction = __w_pdfjs_require__(79);
-var anInstance = __w_pdfjs_require__(93);
-var inspectSource = __w_pdfjs_require__(30);
-var iterate = __w_pdfjs_require__(76);
-var checkCorrectnessOfIteration = __w_pdfjs_require__(94);
-var speciesConstructor = __w_pdfjs_require__(95);
-var task = __w_pdfjs_require__(96).set;
+var aFunction = __w_pdfjs_require__(78);
+var anInstance = __w_pdfjs_require__(92);
+var inspectSource = __w_pdfjs_require__(31);
+var iterate = __w_pdfjs_require__(75);
+var checkCorrectnessOfIteration = __w_pdfjs_require__(93);
+var speciesConstructor = __w_pdfjs_require__(94);
+var task = __w_pdfjs_require__(95).set;
 var microtask = __w_pdfjs_require__(98);
 var promiseResolve = __w_pdfjs_require__(100);
 var hostReportErrors = __w_pdfjs_require__(102);
 var newPromiseCapabilityModule = __w_pdfjs_require__(101);
 var perform = __w_pdfjs_require__(103);
-var InternalStateModule = __w_pdfjs_require__(32);
-var isForced = __w_pdfjs_require__(51);
-var wellKnownSymbol = __w_pdfjs_require__(55);
-var IS_NODE = __w_pdfjs_require__(57);
+var InternalStateModule = __w_pdfjs_require__(33);
+var isForced = __w_pdfjs_require__(52);
+var wellKnownSymbol = __w_pdfjs_require__(56);
+var IS_BROWSER = __w_pdfjs_require__(104);
+var IS_NODE = __w_pdfjs_require__(97);
 var V8_VERSION = __w_pdfjs_require__(58);
 var SPECIES = wellKnownSymbol('species');
 var PROMISE = 'Promise';
 var getInternalState = InternalStateModule.get;
 var setInternalState = InternalStateModule.set;
 var getInternalPromiseState = InternalStateModule.getterFor(PROMISE);
+var NativePromisePrototype = NativePromise && NativePromise.prototype;
 var PromiseConstructor = NativePromise;
+var PromiseConstructorPrototype = NativePromisePrototype;
 var TypeError = global.TypeError;
 var document = global.document;
 var process = global.process;
-var $fetch = getBuiltIn('fetch');
 var newPromiseCapability = newPromiseCapabilityModule.f;
 var newGenericPromiseCapability = newPromiseCapability;
 var DISPATCH_EVENT = !!(document && document.createEvent && global.dispatchEvent);
@@ -4214,20 +4184,19 @@ var FULFILLED = 1;
 var REJECTED = 2;
 var HANDLED = 1;
 var UNHANDLED = 2;
+var SUBCLASSING = false;
 var Internal, OwnPromiseCapability, PromiseWrapper, nativeThen;
 var FORCED = isForced(PROMISE, function () {
  var GLOBAL_CORE_JS_PROMISE = inspectSource(PromiseConstructor) !== String(PromiseConstructor);
- if (!GLOBAL_CORE_JS_PROMISE) {
-  if (V8_VERSION === 66)
-   return true;
-  if (!IS_NODE && !NATIVE_REJECTION_EVENT)
-   return true;
- }
- if (IS_PURE && !PromiseConstructor.prototype['finally'])
+ if (!GLOBAL_CORE_JS_PROMISE && V8_VERSION === 66)
+  return true;
+ if (IS_PURE && !PromiseConstructorPrototype['finally'])
   return true;
  if (V8_VERSION >= 51 && /native code/.test(PromiseConstructor))
   return false;
- var promise = PromiseConstructor.resolve(1);
+ var promise = new PromiseConstructor(function (resolve) {
+  resolve(1);
+ });
  var FakePromise = function (exec) {
   exec(function () {
   }, function () {
@@ -4235,8 +4204,11 @@ var FORCED = isForced(PROMISE, function () {
  };
  var constructor = promise.constructor = {};
  constructor[SPECIES] = FakePromise;
- return !(promise.then(function () {
- }) instanceof FakePromise);
+ SUBCLASSING = promise.then(function () {
+ }) instanceof FakePromise;
+ if (!SUBCLASSING)
+  return true;
+ return !GLOBAL_CORE_JS_PROMISE && IS_BROWSER && !NATIVE_REJECTION_EVENT;
 });
 var INCORRECT_ITERATION = FORCED || !checkCorrectnessOfIteration(function (iterable) {
  PromiseConstructor.all(iterable)['catch'](function () {
@@ -4404,6 +4376,7 @@ if (FORCED) {
    internalReject(state, error);
   }
  };
+ PromiseConstructorPrototype = PromiseConstructor.prototype;
  Internal = function Promise(executor) {
   setInternalState(this, {
    type: PROMISE,
@@ -4416,7 +4389,7 @@ if (FORCED) {
    value: undefined
   });
  };
- Internal.prototype = redefineAll(PromiseConstructor.prototype, {
+ Internal.prototype = redefineAll(PromiseConstructorPrototype, {
   then: function then(onFulfilled, onRejected) {
    var state = getInternalPromiseState(this);
    var reaction = newPromiseCapability(speciesConstructor(this, PromiseConstructor));
@@ -4443,24 +4416,24 @@ if (FORCED) {
  newPromiseCapabilityModule.f = newPromiseCapability = function (C) {
   return C === PromiseConstructor || C === PromiseWrapper ? new OwnPromiseCapability(C) : newGenericPromiseCapability(C);
  };
- if (!IS_PURE && typeof NativePromise == 'function') {
-  nativeThen = NativePromise.prototype.then;
-  redefine(NativePromise.prototype, 'then', function then(onFulfilled, onRejected) {
-   var that = this;
-   return new PromiseConstructor(function (resolve, reject) {
-    nativeThen.call(that, resolve, reject);
-   }).then(onFulfilled, onRejected);
-  }, { unsafe: true });
-  if (typeof $fetch == 'function')
-   $({
-    global: true,
-    enumerable: true,
-    forced: true
-   }, {
-    fetch: function fetch(input) {
-     return promiseResolve(PromiseConstructor, $fetch.apply(global, arguments));
-    }
-   });
+ if (!IS_PURE && typeof NativePromise == 'function' && NativePromisePrototype !== Object.prototype) {
+  nativeThen = NativePromisePrototype.then;
+  if (!SUBCLASSING) {
+   redefine(NativePromisePrototype, 'then', function then(onFulfilled, onRejected) {
+    var that = this;
+    return new PromiseConstructor(function (resolve, reject) {
+     nativeThen.call(that, resolve, reject);
+    }).then(onFulfilled, onRejected);
+   }, { unsafe: true });
+   redefine(NativePromisePrototype, 'catch', PromiseConstructorPrototype['catch'], { unsafe: true });
+  }
+  try {
+   delete NativePromisePrototype.constructor;
+  } catch (error) {
+  }
+  if (setPrototypeOf) {
+   setPrototypeOf(NativePromisePrototype, PromiseConstructorPrototype);
+  }
  }
 }
 $({
@@ -4542,17 +4515,17 @@ $({
 });
 
 /***/ }),
-/* 90 */
+/* 89 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
 module.exports = global.Promise;
 
 /***/ }),
-/* 91 */
+/* 90 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var redefine = __w_pdfjs_require__(28);
+var redefine = __w_pdfjs_require__(29);
 module.exports = function (target, src, options) {
  for (var key in src)
   redefine(target, key, src[key], options);
@@ -4560,14 +4533,14 @@ module.exports = function (target, src, options) {
 };
 
 /***/ }),
-/* 92 */
+/* 91 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
-var getBuiltIn = __w_pdfjs_require__(41);
-var definePropertyModule = __w_pdfjs_require__(26);
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var getBuiltIn = __w_pdfjs_require__(42);
+var definePropertyModule = __w_pdfjs_require__(27);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var DESCRIPTORS = __w_pdfjs_require__(12);
 var SPECIES = wellKnownSymbol('species');
 module.exports = function (CONSTRUCTOR_NAME) {
@@ -4584,7 +4557,7 @@ module.exports = function (CONSTRUCTOR_NAME) {
 };
 
 /***/ }),
-/* 93 */
+/* 92 */
 /***/ ((module) => {
 
 module.exports = function (it, Constructor, name) {
@@ -4595,10 +4568,10 @@ module.exports = function (it, Constructor, name) {
 };
 
 /***/ }),
-/* 94 */
+/* 93 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var ITERATOR = wellKnownSymbol('iterator');
 var SAFE_CLOSING = false;
 try {
@@ -4639,12 +4612,12 @@ module.exports = function (exec, SKIP_CLOSING) {
 };
 
 /***/ }),
-/* 95 */
+/* 94 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var anObject = __w_pdfjs_require__(27);
-var aFunction = __w_pdfjs_require__(79);
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var anObject = __w_pdfjs_require__(28);
+var aFunction = __w_pdfjs_require__(78);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var SPECIES = wellKnownSymbol('species');
 module.exports = function (O, defaultConstructor) {
  var C = anObject(O).constructor;
@@ -4653,16 +4626,16 @@ module.exports = function (O, defaultConstructor) {
 };
 
 /***/ }),
-/* 96 */
+/* 95 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
 var fails = __w_pdfjs_require__(13);
-var bind = __w_pdfjs_require__(78);
+var bind = __w_pdfjs_require__(77);
 var html = __w_pdfjs_require__(64);
-var createElement = __w_pdfjs_require__(24);
-var IS_IOS = __w_pdfjs_require__(97);
-var IS_NODE = __w_pdfjs_require__(57);
+var createElement = __w_pdfjs_require__(25);
+var IS_IOS = __w_pdfjs_require__(96);
+var IS_NODE = __w_pdfjs_require__(97);
 var location = global.location;
 var set = global.setImmediate;
 var clear = global.clearImmediate;
@@ -4741,11 +4714,19 @@ module.exports = {
 };
 
 /***/ }),
-/* 97 */
+/* 96 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var userAgent = __w_pdfjs_require__(59);
-module.exports = /(iphone|ipod|ipad).*applewebkit/i.test(userAgent);
+module.exports = /(?:iphone|ipod|ipad).*applewebkit/i.test(userAgent);
+
+/***/ }),
+/* 97 */
+/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
+
+var classof = __w_pdfjs_require__(18);
+var global = __w_pdfjs_require__(10);
+module.exports = classof(global.process) == 'process';
 
 /***/ }),
 /* 98 */
@@ -4753,10 +4734,10 @@ module.exports = /(iphone|ipod|ipad).*applewebkit/i.test(userAgent);
 
 var global = __w_pdfjs_require__(10);
 var getOwnPropertyDescriptor = __w_pdfjs_require__(11).f;
-var macrotask = __w_pdfjs_require__(96).set;
-var IS_IOS = __w_pdfjs_require__(97);
+var macrotask = __w_pdfjs_require__(95).set;
+var IS_IOS = __w_pdfjs_require__(96);
 var IS_WEBOS_WEBKIT = __w_pdfjs_require__(99);
-var IS_NODE = __w_pdfjs_require__(57);
+var IS_NODE = __w_pdfjs_require__(97);
 var MutationObserver = global.MutationObserver || global.WebKitMutationObserver;
 var document = global.document;
 var process = global.process;
@@ -4795,6 +4776,7 @@ if (!queueMicrotask) {
   };
  } else if (Promise && Promise.resolve) {
   promise = Promise.resolve(undefined);
+  promise.constructor = Promise;
   then = promise.then;
   notify = function () {
    then.call(promise, flush);
@@ -4834,7 +4816,7 @@ module.exports = /web0s(?!.*chrome)/i.test(userAgent);
 /* 100 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var anObject = __w_pdfjs_require__(27);
+var anObject = __w_pdfjs_require__(28);
 var isObject = __w_pdfjs_require__(21);
 var newPromiseCapability = __w_pdfjs_require__(101);
 module.exports = function (C, x) {
@@ -4853,7 +4835,7 @@ module.exports = function (C, x) {
 
 "use strict";
 
-var aFunction = __w_pdfjs_require__(79);
+var aFunction = __w_pdfjs_require__(78);
 var PromiseCapability = function (C) {
  var resolve, reject;
  this.promise = new C(function ($$resolve, $$reject) {
@@ -4901,15 +4883,21 @@ module.exports = function (exec) {
 
 /***/ }),
 /* 104 */
+/***/ ((module) => {
+
+module.exports = typeof window == 'object';
+
+/***/ }),
+/* 105 */
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
 var $ = __w_pdfjs_require__(9);
-var aFunction = __w_pdfjs_require__(79);
+var aFunction = __w_pdfjs_require__(78);
 var newPromiseCapabilityModule = __w_pdfjs_require__(101);
 var perform = __w_pdfjs_require__(103);
-var iterate = __w_pdfjs_require__(76);
+var iterate = __w_pdfjs_require__(75);
 $({
  target: 'Promise',
  stat: true
@@ -4958,17 +4946,17 @@ $({
 });
 
 /***/ }),
-/* 105 */
+/* 106 */
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
 var $ = __w_pdfjs_require__(9);
-var aFunction = __w_pdfjs_require__(79);
-var getBuiltIn = __w_pdfjs_require__(41);
+var aFunction = __w_pdfjs_require__(78);
+var getBuiltIn = __w_pdfjs_require__(42);
 var newPromiseCapabilityModule = __w_pdfjs_require__(101);
 var perform = __w_pdfjs_require__(103);
-var iterate = __w_pdfjs_require__(76);
+var iterate = __w_pdfjs_require__(75);
 var PROMISE_ANY_ERROR = 'No one promise resolved';
 $({
  target: 'Promise',
@@ -5012,19 +5000,19 @@ $({
 });
 
 /***/ }),
-/* 106 */
+/* 107 */
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
 var $ = __w_pdfjs_require__(9);
-var IS_PURE = __w_pdfjs_require__(36);
-var NativePromise = __w_pdfjs_require__(90);
+var IS_PURE = __w_pdfjs_require__(37);
+var NativePromise = __w_pdfjs_require__(89);
 var fails = __w_pdfjs_require__(13);
-var getBuiltIn = __w_pdfjs_require__(41);
-var speciesConstructor = __w_pdfjs_require__(95);
+var getBuiltIn = __w_pdfjs_require__(42);
+var speciesConstructor = __w_pdfjs_require__(94);
 var promiseResolve = __w_pdfjs_require__(100);
-var redefine = __w_pdfjs_require__(28);
+var redefine = __w_pdfjs_require__(29);
 var NON_GENERIC = !!NativePromise && fails(function () {
  NativePromise.prototype['finally'].call({
   then: function () {
@@ -5052,18 +5040,21 @@ $({
   } : onFinally);
  }
 });
-if (!IS_PURE && typeof NativePromise == 'function' && !NativePromise.prototype['finally']) {
- redefine(NativePromise.prototype, 'finally', getBuiltIn('Promise').prototype['finally']);
+if (!IS_PURE && typeof NativePromise == 'function') {
+ var method = getBuiltIn('Promise').prototype['finally'];
+ if (NativePromise.prototype['finally'] !== method) {
+  redefine(NativePromise.prototype, 'finally', method, { unsafe: true });
+ }
 }
 
 /***/ }),
-/* 107 */
+/* 108 */
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 "use strict";
 
-var charAt = __w_pdfjs_require__(108).charAt;
-var InternalStateModule = __w_pdfjs_require__(32);
+var charAt = __w_pdfjs_require__(109).charAt;
+var InternalStateModule = __w_pdfjs_require__(33);
 var defineIterator = __w_pdfjs_require__(66);
 var STRING_ITERATOR = 'String Iterator';
 var setInternalState = InternalStateModule.set;
@@ -5093,10 +5084,10 @@ defineIterator(String, 'String', function (iterated) {
 });
 
 /***/ }),
-/* 108 */
+/* 109 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
-var toInteger = __w_pdfjs_require__(47);
+var toInteger = __w_pdfjs_require__(48);
 var requireObjectCoercible = __w_pdfjs_require__(19);
 var createMethod = function (CONVERT_TO_STRING) {
  return function ($this, pos) {
@@ -5116,14 +5107,14 @@ module.exports = {
 };
 
 /***/ }),
-/* 109 */
+/* 110 */
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 var global = __w_pdfjs_require__(10);
-var DOMIterables = __w_pdfjs_require__(110);
-var ArrayIteratorMethods = __w_pdfjs_require__(53);
-var createNonEnumerableProperty = __w_pdfjs_require__(25);
-var wellKnownSymbol = __w_pdfjs_require__(55);
+var DOMIterables = __w_pdfjs_require__(111);
+var ArrayIteratorMethods = __w_pdfjs_require__(54);
+var createNonEnumerableProperty = __w_pdfjs_require__(26);
+var wellKnownSymbol = __w_pdfjs_require__(56);
 var ITERATOR = wellKnownSymbol('iterator');
 var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 var ArrayValues = ArrayIteratorMethods.values;
@@ -5153,7 +5144,7 @@ for (var COLLECTION_NAME in DOMIterables) {
 }
 
 /***/ }),
-/* 110 */
+/* 111 */
 /***/ ((module) => {
 
 module.exports = {
@@ -5191,7 +5182,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 111 */
+/* 112 */
 /***/ (function(__unused_webpack_module, exports) {
 
 (function (global, factory) {
@@ -5202,6 +5193,7 @@ module.exports = {
   return "Symbol(" + description + ")";
  };
  function noop() {
+  return undefined;
  }
  function getGlobals() {
   if (typeof self !== 'undefined') {
@@ -6681,7 +6673,7 @@ module.exports = {
   Object.defineProperty(WritableStream.prototype, "locked", {
    get: function () {
     if (!IsWritableStream(this)) {
-     throw streamBrandCheckException('locked');
+     throw streamBrandCheckException$2('locked');
     }
     return IsWritableStreamLocked(this);
    },
@@ -6693,7 +6685,7 @@ module.exports = {
     reason = undefined;
    }
    if (!IsWritableStream(this)) {
-    return promiseRejectedWith(streamBrandCheckException('abort'));
+    return promiseRejectedWith(streamBrandCheckException$2('abort'));
    }
    if (IsWritableStreamLocked(this)) {
     return promiseRejectedWith(new TypeError('Cannot abort a stream that already has a writer'));
@@ -6702,7 +6694,7 @@ module.exports = {
   };
   WritableStream.prototype.close = function () {
    if (!IsWritableStream(this)) {
-    return promiseRejectedWith(streamBrandCheckException('close'));
+    return promiseRejectedWith(streamBrandCheckException$2('close'));
    }
    if (IsWritableStreamLocked(this)) {
     return promiseRejectedWith(new TypeError('Cannot close a stream that already has a writer'));
@@ -6714,7 +6706,7 @@ module.exports = {
   };
   WritableStream.prototype.getWriter = function () {
    if (!IsWritableStream(this)) {
-    throw streamBrandCheckException('getWriter');
+    throw streamBrandCheckException$2('getWriter');
    }
    return AcquireWritableStreamDefaultWriter(this);
   };
@@ -7373,7 +7365,7 @@ module.exports = {
   WritableStreamDefaultControllerClearAlgorithms(controller);
   WritableStreamStartErroring(stream, error);
  }
- function streamBrandCheckException(name) {
+ function streamBrandCheckException$2(name) {
   return new TypeError("WritableStream.prototype." + name + " can only be used on a WritableStream");
  }
  function defaultWriterBrandCheckException(name) {
@@ -7679,7 +7671,7 @@ module.exports = {
   Object.defineProperty(ReadableStreamDefaultController.prototype, "desiredSize", {
    get: function () {
     if (!IsReadableStreamDefaultController(this)) {
-     throw defaultControllerBrandCheckException('desiredSize');
+     throw defaultControllerBrandCheckException$1('desiredSize');
     }
     return ReadableStreamDefaultControllerGetDesiredSize(this);
    },
@@ -7688,7 +7680,7 @@ module.exports = {
   });
   ReadableStreamDefaultController.prototype.close = function () {
    if (!IsReadableStreamDefaultController(this)) {
-    throw defaultControllerBrandCheckException('close');
+    throw defaultControllerBrandCheckException$1('close');
    }
    if (!ReadableStreamDefaultControllerCanCloseOrEnqueue(this)) {
     throw new TypeError('The stream is not in a state that permits close');
@@ -7700,7 +7692,7 @@ module.exports = {
     chunk = undefined;
    }
    if (!IsReadableStreamDefaultController(this)) {
-    throw defaultControllerBrandCheckException('enqueue');
+    throw defaultControllerBrandCheckException$1('enqueue');
    }
    if (!ReadableStreamDefaultControllerCanCloseOrEnqueue(this)) {
     throw new TypeError('The stream is not in a state that permits enqueue');
@@ -7712,7 +7704,7 @@ module.exports = {
     e = undefined;
    }
    if (!IsReadableStreamDefaultController(this)) {
-    throw defaultControllerBrandCheckException('error');
+    throw defaultControllerBrandCheckException$1('error');
    }
    ReadableStreamDefaultControllerError(this, e);
   };
@@ -7921,7 +7913,7 @@ module.exports = {
   }
   SetUpReadableStreamDefaultController(stream, controller, startAlgorithm, pullAlgorithm, cancelAlgorithm, highWaterMark, sizeAlgorithm);
  }
- function defaultControllerBrandCheckException(name) {
+ function defaultControllerBrandCheckException$1(name) {
   return new TypeError("ReadableStreamDefaultController.prototype." + name + " can only be used on a ReadableStreamDefaultController");
  }
  function ReadableStreamTee(stream, cloneForBranch2) {
@@ -7954,7 +7946,6 @@ module.exports = {
       if (!canceled2) {
        ReadableStreamDefaultControllerEnqueue(branch2._readableStreamController, value2);
       }
-      resolveCancelPromise(undefined);
      });
     },
     _closeSteps: function () {
@@ -7964,6 +7955,9 @@ module.exports = {
      }
      if (!canceled2) {
       ReadableStreamDefaultControllerClose(branch2._readableStreamController);
+     }
+     if (!canceled1 || !canceled2) {
+      resolveCancelPromise(undefined);
      }
     },
     _errorSteps: function () {
@@ -8006,7 +8000,9 @@ module.exports = {
   uponRejection(reader._closedPromise, function (r) {
    ReadableStreamDefaultControllerError(branch1._readableStreamController, r);
    ReadableStreamDefaultControllerError(branch2._readableStreamController, r);
-   resolveCancelPromise(undefined);
+   if (!canceled1 || !canceled2) {
+    resolveCancelPromise(undefined);
+   }
   });
   return [
    branch1,
@@ -8531,7 +8527,7 @@ module.exports = {
   Object.defineProperty(TransformStream.prototype, "readable", {
    get: function () {
     if (!IsTransformStream(this)) {
-     throw streamBrandCheckException$2('readable');
+     throw streamBrandCheckException('readable');
     }
     return this._readable;
    },
@@ -8541,7 +8537,7 @@ module.exports = {
   Object.defineProperty(TransformStream.prototype, "writable", {
    get: function () {
     if (!IsTransformStream(this)) {
-     throw streamBrandCheckException$2('writable');
+     throw streamBrandCheckException('writable');
     }
     return this._writable;
    },
@@ -8624,7 +8620,7 @@ module.exports = {
   Object.defineProperty(TransformStreamDefaultController.prototype, "desiredSize", {
    get: function () {
     if (!IsTransformStreamDefaultController(this)) {
-     throw defaultControllerBrandCheckException$1('desiredSize');
+     throw defaultControllerBrandCheckException('desiredSize');
     }
     var readableController = this._controlledTransformStream._readable._readableStreamController;
     return ReadableStreamDefaultControllerGetDesiredSize(readableController);
@@ -8637,7 +8633,7 @@ module.exports = {
     chunk = undefined;
    }
    if (!IsTransformStreamDefaultController(this)) {
-    throw defaultControllerBrandCheckException$1('enqueue');
+    throw defaultControllerBrandCheckException('enqueue');
    }
    TransformStreamDefaultControllerEnqueue(this, chunk);
   };
@@ -8646,13 +8642,13 @@ module.exports = {
     reason = undefined;
    }
    if (!IsTransformStreamDefaultController(this)) {
-    throw defaultControllerBrandCheckException$1('error');
+    throw defaultControllerBrandCheckException('error');
    }
    TransformStreamDefaultControllerError(this, reason);
   };
   TransformStreamDefaultController.prototype.terminate = function () {
    if (!IsTransformStreamDefaultController(this)) {
-    throw defaultControllerBrandCheckException$1('terminate');
+    throw defaultControllerBrandCheckException('terminate');
    }
    TransformStreamDefaultControllerTerminate(this);
   };
@@ -8786,10 +8782,10 @@ module.exports = {
   TransformStreamSetBackpressure(stream, false);
   return stream._backpressureChangePromise;
  }
- function defaultControllerBrandCheckException$1(name) {
+ function defaultControllerBrandCheckException(name) {
   return new TypeError("TransformStreamDefaultController.prototype." + name + " can only be used on a TransformStreamDefaultController");
  }
- function streamBrandCheckException$2(name) {
+ function streamBrandCheckException(name) {
   return new TypeError("TransformStream.prototype." + name + " can only be used on a TransformStream");
  }
  exports.ByteLengthQueuingStrategy = ByteLengthQueuingStrategy;
@@ -8809,207 +8805,7 @@ module.exports = {
 }));
 
 /***/ }),
-/* 112 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-__w_pdfjs_require__(113);
-var entryUnbind = __w_pdfjs_require__(117);
-module.exports = entryUnbind('String', 'padStart');
-
-/***/ }),
 /* 113 */
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-"use strict";
-
-var $ = __w_pdfjs_require__(9);
-var $padStart = __w_pdfjs_require__(114).start;
-var WEBKIT_BUG = __w_pdfjs_require__(116);
-$({
- target: 'String',
- proto: true,
- forced: WEBKIT_BUG
-}, {
- padStart: function padStart(maxLength) {
-  return $padStart(this, maxLength, arguments.length > 1 ? arguments[1] : undefined);
- }
-});
-
-/***/ }),
-/* 114 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-var toLength = __w_pdfjs_require__(46);
-var repeat = __w_pdfjs_require__(115);
-var requireObjectCoercible = __w_pdfjs_require__(19);
-var ceil = Math.ceil;
-var createMethod = function (IS_END) {
- return function ($this, maxLength, fillString) {
-  var S = String(requireObjectCoercible($this));
-  var stringLength = S.length;
-  var fillStr = fillString === undefined ? ' ' : String(fillString);
-  var intMaxLength = toLength(maxLength);
-  var fillLen, stringFiller;
-  if (intMaxLength <= stringLength || fillStr == '')
-   return S;
-  fillLen = intMaxLength - stringLength;
-  stringFiller = repeat.call(fillStr, ceil(fillLen / fillStr.length));
-  if (stringFiller.length > fillLen)
-   stringFiller = stringFiller.slice(0, fillLen);
-  return IS_END ? S + stringFiller : stringFiller + S;
- };
-};
-module.exports = {
- start: createMethod(false),
- end: createMethod(true)
-};
-
-/***/ }),
-/* 115 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-"use strict";
-
-var toInteger = __w_pdfjs_require__(47);
-var requireObjectCoercible = __w_pdfjs_require__(19);
-module.exports = function repeat(count) {
- var str = String(requireObjectCoercible(this));
- var result = '';
- var n = toInteger(count);
- if (n < 0 || n == Infinity)
-  throw RangeError('Wrong number of repetitions');
- for (; n > 0; (n >>>= 1) && (str += str))
-  if (n & 1)
-   result += str;
- return result;
-};
-
-/***/ }),
-/* 116 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-var userAgent = __w_pdfjs_require__(59);
-module.exports = /Version\/10\.\d+(\.\d+)?( Mobile\/\w+)? Safari\//.test(userAgent);
-
-/***/ }),
-/* 117 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-var global = __w_pdfjs_require__(10);
-var bind = __w_pdfjs_require__(78);
-var call = Function.call;
-module.exports = function (CONSTRUCTOR, METHOD, length) {
- return bind(call, global[CONSTRUCTOR].prototype[METHOD], length);
-};
-
-/***/ }),
-/* 118 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-__w_pdfjs_require__(119);
-var entryUnbind = __w_pdfjs_require__(117);
-module.exports = entryUnbind('String', 'padEnd');
-
-/***/ }),
-/* 119 */
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-"use strict";
-
-var $ = __w_pdfjs_require__(9);
-var $padEnd = __w_pdfjs_require__(114).end;
-var WEBKIT_BUG = __w_pdfjs_require__(116);
-$({
- target: 'String',
- proto: true,
- forced: WEBKIT_BUG
-}, {
- padEnd: function padEnd(maxLength) {
-  return $padEnd(this, maxLength, arguments.length > 1 ? arguments[1] : undefined);
- }
-});
-
-/***/ }),
-/* 120 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-__w_pdfjs_require__(121);
-var path = __w_pdfjs_require__(42);
-module.exports = path.Object.values;
-
-/***/ }),
-/* 121 */
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-var $ = __w_pdfjs_require__(9);
-var $values = __w_pdfjs_require__(122).values;
-$({
- target: 'Object',
- stat: true
-}, {
- values: function values(O) {
-  return $values(O);
- }
-});
-
-/***/ }),
-/* 122 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-var DESCRIPTORS = __w_pdfjs_require__(12);
-var objectKeys = __w_pdfjs_require__(63);
-var toIndexedObject = __w_pdfjs_require__(16);
-var propertyIsEnumerable = __w_pdfjs_require__(14).f;
-var createMethod = function (TO_ENTRIES) {
- return function (it) {
-  var O = toIndexedObject(it);
-  var keys = objectKeys(O);
-  var length = keys.length;
-  var i = 0;
-  var result = [];
-  var key;
-  while (length > i) {
-   key = keys[i++];
-   if (!DESCRIPTORS || propertyIsEnumerable.call(O, key)) {
-    result.push(TO_ENTRIES ? [
-     key,
-     O[key]
-    ] : O[key]);
-   }
-  }
-  return result;
- };
-};
-module.exports = {
- entries: createMethod(true),
- values: createMethod(false)
-};
-
-/***/ }),
-/* 123 */
-/***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-__w_pdfjs_require__(124);
-var path = __w_pdfjs_require__(42);
-module.exports = path.Object.entries;
-
-/***/ }),
-/* 124 */
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __w_pdfjs_require__) => {
-
-var $ = __w_pdfjs_require__(9);
-var $entries = __w_pdfjs_require__(122).entries;
-$({
- target: 'Object',
- stat: true
-}, {
- entries: function entries(O) {
-  return $entries(O);
- }
-});
-
-/***/ }),
-/* 125 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -9028,29 +8824,27 @@ var _util = __w_pdfjs_require__(4);
 
 var _display_utils = __w_pdfjs_require__(1);
 
-var _font_loader = __w_pdfjs_require__(126);
+var _font_loader = __w_pdfjs_require__(114);
 
-var _node_utils = __w_pdfjs_require__(127);
+var _node_utils = __w_pdfjs_require__(115);
 
-var _annotation_storage = __w_pdfjs_require__(128);
+var _annotation_storage = __w_pdfjs_require__(116);
 
-var _api_compatibility = __w_pdfjs_require__(129);
+var _api_compatibility = __w_pdfjs_require__(117);
 
-var _canvas = __w_pdfjs_require__(130);
+var _canvas = __w_pdfjs_require__(118);
 
-var _worker_options = __w_pdfjs_require__(132);
+var _worker_options = __w_pdfjs_require__(120);
 
 var _is_node = __w_pdfjs_require__(6);
 
-var _message_handler = __w_pdfjs_require__(133);
+var _message_handler = __w_pdfjs_require__(121);
 
-var _metadata = __w_pdfjs_require__(134);
+var _metadata = __w_pdfjs_require__(122);
 
-var _optional_content_config = __w_pdfjs_require__(135);
+var _optional_content_config = __w_pdfjs_require__(123);
 
-var _transport_stream = __w_pdfjs_require__(136);
-
-var _webgl = __w_pdfjs_require__(137);
+var _transport_stream = __w_pdfjs_require__(124);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -9062,11 +8856,11 @@ function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableTo
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -9082,7 +8876,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
@@ -9297,7 +9091,7 @@ function _fetchDocument(worker, source, pdfDataRangeTransport, docId) {
 
   return worker.messageHandler.sendWithPromise("GetDocRequest", {
     docId: docId,
-    apiVersion: '2.8.335',
+    apiVersion: '2.9.359',
     source: {
       data: source.data,
       url: source.url,
@@ -9519,7 +9313,7 @@ var PDFDocumentProxy = /*#__PURE__*/function () {
   _createClass(PDFDocumentProxy, [{
     key: "annotationStorage",
     get: function get() {
-      return (0, _util.shadow)(this, "annotationStorage", new _annotation_storage.AnnotationStorage());
+      return this._transport.annotationStorage;
     }
   }, {
     key: "numPages",
@@ -9659,8 +9453,16 @@ var PDFDocumentProxy = /*#__PURE__*/function () {
     }
   }, {
     key: "saveDocument",
-    value: function saveDocument(annotationStorage) {
-      return this._transport.saveDocument(annotationStorage);
+    value: function saveDocument() {
+      if (arguments.length > 0) {
+        (0, _display_utils.deprecated)("saveDocument no longer accepts any options.");
+      }
+
+      if (this._transport.annotationStorage.size <= 0) {
+        (0, _display_utils.deprecated)("saveDocument called while `annotationStorage` is empty, " + "please use the getData-method instead.");
+      }
+
+      return this._transport.saveDocument();
     }
   }, {
     key: "getFieldObjects",
@@ -9779,15 +9581,14 @@ var PDFPageProxy = /*#__PURE__*/function () {
   }, {
     key: "render",
     value: function render(_ref5) {
-      var _this5 = this,
+      var _arguments$,
+          _this5 = this,
           _intentState;
 
       var canvasContext = _ref5.canvasContext,
           viewport = _ref5.viewport,
           _ref5$intent = _ref5.intent,
           intent = _ref5$intent === void 0 ? "display" : _ref5$intent,
-          _ref5$enableWebGL = _ref5.enableWebGL,
-          enableWebGL = _ref5$enableWebGL === void 0 ? false : _ref5$enableWebGL,
           _ref5$renderInteracti = _ref5.renderInteractiveForms,
           renderInteractiveForms = _ref5$renderInteracti === void 0 ? false : _ref5$renderInteracti,
           _ref5$transform = _ref5.transform,
@@ -9798,10 +9599,15 @@ var PDFPageProxy = /*#__PURE__*/function () {
           canvasFactory = _ref5$canvasFactory === void 0 ? null : _ref5$canvasFactory,
           _ref5$background = _ref5.background,
           background = _ref5$background === void 0 ? null : _ref5$background,
-          _ref5$annotationStora = _ref5.annotationStorage,
-          annotationStorage = _ref5$annotationStora === void 0 ? null : _ref5$annotationStora,
+          _ref5$includeAnnotati = _ref5.includeAnnotationStorage,
+          includeAnnotationStorage = _ref5$includeAnnotati === void 0 ? false : _ref5$includeAnnotati,
           _ref5$optionalContent = _ref5.optionalContentConfigPromise,
           optionalContentConfigPromise = _ref5$optionalContent === void 0 ? null : _ref5$optionalContent;
+
+      if (((_arguments$ = arguments[0]) === null || _arguments$ === void 0 ? void 0 : _arguments$.annotationStorage) !== undefined) {
+        (0, _display_utils.deprecated)("render no longer accepts an `annotationStorage` option, " + "please use the `includeAnnotationStorage`-boolean instead.");
+        includeAnnotationStorage || (includeAnnotationStorage = !!arguments[0].annotationStorage);
+      }
 
       if (this._stats) {
         this._stats.time("Overall");
@@ -9830,9 +9636,7 @@ var PDFPageProxy = /*#__PURE__*/function () {
       var canvasFactoryInstance = canvasFactory || new DefaultCanvasFactory({
         ownerDocument: this._ownerDocument
       });
-      var webGLContext = new _webgl.WebGLContext({
-        enable: enableWebGL
-      });
+      var annotationStorage = includeAnnotationStorage ? this._transport.annotationStorage.serializable : null;
 
       if (!intentState.displayReadyCapability) {
         intentState.displayReadyCapability = (0, _util.createPromiseCapability)();
@@ -9850,7 +9654,7 @@ var PDFPageProxy = /*#__PURE__*/function () {
           pageIndex: this._pageIndex,
           intent: renderingIntent,
           renderInteractiveForms: renderInteractiveForms === true,
-          annotationStorage: (annotationStorage === null || annotationStorage === void 0 ? void 0 : annotationStorage.serializable) || null
+          annotationStorage: annotationStorage
         });
       }
 
@@ -9895,7 +9699,6 @@ var PDFPageProxy = /*#__PURE__*/function () {
         operatorList: intentState.operatorList,
         pageIndex: this._pageIndex,
         canvasFactory: canvasFactoryInstance,
-        webGLContext: webGLContext,
         useRequestAnimationFrame: renderingIntent !== "print",
         pdfBug: this._pdfBug
       });
@@ -9977,13 +9780,16 @@ var PDFPageProxy = /*#__PURE__*/function () {
           _ref8$normalizeWhites = _ref8.normalizeWhitespace,
           normalizeWhitespace = _ref8$normalizeWhites === void 0 ? false : _ref8$normalizeWhites,
           _ref8$disableCombineT = _ref8.disableCombineTextItems,
-          disableCombineTextItems = _ref8$disableCombineT === void 0 ? false : _ref8$disableCombineT;
+          disableCombineTextItems = _ref8$disableCombineT === void 0 ? false : _ref8$disableCombineT,
+          _ref8$includeMarkedCo = _ref8.includeMarkedContent,
+          includeMarkedContent = _ref8$includeMarkedCo === void 0 ? false : _ref8$includeMarkedCo;
 
       var TEXT_CONTENT_CHUNK_SIZE = 100;
       return this._transport.messageHandler.sendWithStream("GetTextContent", {
         pageIndex: this._pageIndex,
         normalizeWhitespace: normalizeWhitespace === true,
-        combineTextItems: disableCombineTextItems !== true
+        combineTextItems: disableCombineTextItems !== true,
+        includeMarkedContent: includeMarkedContent === true
       }, {
         highWaterMark: TEXT_CONTENT_CHUNK_SIZE,
         size: function size(textContent) {
@@ -10024,6 +9830,11 @@ var PDFPageProxy = /*#__PURE__*/function () {
         };
         pump();
       });
+    }
+  }, {
+    key: "getStructTree",
+    value: function getStructTree() {
+      return this._structTreePromise || (this._structTreePromise = this._transport.getStructTree(this._pageIndex));
     }
   }, {
     key: "_destroy",
@@ -10076,6 +9887,7 @@ var PDFPageProxy = /*#__PURE__*/function () {
       this._annotationsPromise = null;
       this._jsActionsPromise = null;
       this._xfaPromise = null;
+      this._structTreePromise = null;
       this.pendingCleanup = false;
       return Promise.all(waitOn);
     }
@@ -10120,6 +9932,7 @@ var PDFPageProxy = /*#__PURE__*/function () {
       this._annotationsPromise = null;
       this._jsActionsPromise = null;
       this._xfaPromise = null;
+      this._structTreePromise = null;
 
       if (resetStats && this._stats) {
         this._stats = new _display_utils.StatTimer();
@@ -10400,7 +10213,11 @@ var LoopbackPort = /*#__PURE__*/function () {
           return result;
         }
 
-        result = Array.isArray(value) ? [] : {};
+        if (value instanceof URL) {
+          throw new Error("LoopbackPort.postMessage - cannot clone: ".concat(value));
+        }
+
+        result = Array.isArray(value) ? [] : Object.create(null);
         cloned.set(value, result);
 
         for (var i in value) {
@@ -10858,9 +10675,9 @@ var WorkerTransport = /*#__PURE__*/function () {
   }
 
   _createClass(WorkerTransport, [{
-    key: "loadingTaskSettled",
+    key: "annotationStorage",
     get: function get() {
-      return this.loadingTask._capability.settled;
+      return (0, _util.shadow)(this, "annotationStorage", new _annotation_storage.AnnotationStorage());
     }
   }, {
     key: "destroy",
@@ -10879,25 +10696,33 @@ var WorkerTransport = /*#__PURE__*/function () {
       }
 
       var waitOn = [];
-      this.pageCache.forEach(function (page) {
-        if (page) {
-          waitOn.push(page._destroy());
-        }
-      });
-      this.pageCache.length = 0;
-      this.pagePromises.length = 0;
-      var terminated = this.messageHandler.sendWithPromise("Terminate", null);
-      waitOn.push(terminated);
 
-      if (this.loadingTaskSettled) {
-        var annotationStorageResetModified = this.loadingTask.promise.then(function (pdfDocument) {
-          if (pdfDocument.hasOwnProperty("annotationStorage")) {
-            pdfDocument.annotationStorage.resetModified();
+      var _iterator14 = _createForOfIteratorHelper(this.pageCache),
+          _step14;
+
+      try {
+        for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+          var page = _step14.value;
+
+          if (page) {
+            waitOn.push(page._destroy());
           }
-        })["catch"](function () {});
-        waitOn.push(annotationStorageResetModified);
+        }
+      } catch (err) {
+        _iterator14.e(err);
+      } finally {
+        _iterator14.f();
       }
 
+      this.pageCache.length = 0;
+      this.pagePromises.length = 0;
+
+      if (this.hasOwnProperty("annotationStorage")) {
+        this.annotationStorage.resetModified();
+      }
+
+      var terminated = this.messageHandler.sendWithPromise("Terminate", null);
+      waitOn.push(terminated);
       Promise.all(waitOn).then(function () {
         _this11.commonObjs.clear();
 
@@ -11319,17 +11144,17 @@ var WorkerTransport = /*#__PURE__*/function () {
     }
   }, {
     key: "saveDocument",
-    value: function saveDocument(annotationStorage) {
-      var _this$_fullReader$fil, _this$_fullReader;
+    value: function saveDocument() {
+      var _this$_fullReader$fil,
+          _this$_fullReader,
+          _this14 = this;
 
       return this.messageHandler.sendWithPromise("SaveDocument", {
         numPages: this._numPages,
-        annotationStorage: (annotationStorage === null || annotationStorage === void 0 ? void 0 : annotationStorage.serializable) || null,
+        annotationStorage: this.annotationStorage.serializable,
         filename: (_this$_fullReader$fil = (_this$_fullReader = this._fullReader) === null || _this$_fullReader === void 0 ? void 0 : _this$_fullReader.filename) !== null && _this$_fullReader$fil !== void 0 ? _this$_fullReader$fil : null
       })["finally"](function () {
-        if (annotationStorage) {
-          annotationStorage.resetModified();
-        }
+        _this14.annotationStorage.resetModified();
       });
     }
   }, {
@@ -11418,6 +11243,13 @@ var WorkerTransport = /*#__PURE__*/function () {
       });
     }
   }, {
+    key: "getStructTree",
+    value: function getStructTree(pageIndex) {
+      return this.messageHandler.sendWithPromise("GetStructTree", {
+        pageIndex: pageIndex
+      });
+    }
+  }, {
     key: "getOutline",
     value: function getOutline() {
       return this.messageHandler.sendWithPromise("GetOutline", null);
@@ -11437,16 +11269,16 @@ var WorkerTransport = /*#__PURE__*/function () {
   }, {
     key: "getMetadata",
     value: function getMetadata() {
-      var _this14 = this;
+      var _this15 = this;
 
       return this.messageHandler.sendWithPromise("GetMetadata", null).then(function (results) {
-        var _this14$_fullReader$f, _this14$_fullReader, _this14$_fullReader$c, _this14$_fullReader2;
+        var _this15$_fullReader$f, _this15$_fullReader, _this15$_fullReader$c, _this15$_fullReader2;
 
         return {
           info: results[0],
           metadata: results[1] ? new _metadata.Metadata(results[1]) : null,
-          contentDispositionFilename: (_this14$_fullReader$f = (_this14$_fullReader = _this14._fullReader) === null || _this14$_fullReader === void 0 ? void 0 : _this14$_fullReader.filename) !== null && _this14$_fullReader$f !== void 0 ? _this14$_fullReader$f : null,
-          contentLength: (_this14$_fullReader$c = (_this14$_fullReader2 = _this14._fullReader) === null || _this14$_fullReader2 === void 0 ? void 0 : _this14$_fullReader2.contentLength) !== null && _this14$_fullReader$c !== void 0 ? _this14$_fullReader$c : null
+          contentDispositionFilename: (_this15$_fullReader$f = (_this15$_fullReader = _this15._fullReader) === null || _this15$_fullReader === void 0 ? void 0 : _this15$_fullReader.filename) !== null && _this15$_fullReader$f !== void 0 ? _this15$_fullReader$f : null,
+          contentLength: (_this15$_fullReader$c = (_this15$_fullReader2 = _this15._fullReader) === null || _this15$_fullReader2 === void 0 ? void 0 : _this15$_fullReader2.contentLength) !== null && _this15$_fullReader$c !== void 0 ? _this15$_fullReader$c : null
         };
       });
     }
@@ -11655,7 +11487,6 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
           operatorList = _ref18.operatorList,
           pageIndex = _ref18.pageIndex,
           canvasFactory = _ref18.canvasFactory,
-          webGLContext = _ref18.webGLContext,
           _ref18$useRequestAnim = _ref18.useRequestAnimationFrame,
           useRequestAnimationFrame = _ref18$useRequestAnim === void 0 ? false : _ref18$useRequestAnim,
           _ref18$pdfBug = _ref18.pdfBug,
@@ -11671,7 +11502,6 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
       this.operatorList = operatorList;
       this._pageIndex = pageIndex;
       this.canvasFactory = canvasFactory;
-      this.webGLContext = webGLContext;
       this._pdfBug = pdfBug;
       this.running = false;
       this.graphicsReadyCallback = null;
@@ -11725,7 +11555,7 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
             transform = _this$params.transform,
             imageLayer = _this$params.imageLayer,
             background = _this$params.background;
-        this.gfx = new _canvas.CanvasGraphics(canvasContext, this.commonObjs, this.objs, this.canvasFactory, this.webGLContext, imageLayer, optionalContentConfig);
+        this.gfx = new _canvas.CanvasGraphics(canvasContext, this.commonObjs, this.objs, this.canvasFactory, imageLayer, optionalContentConfig);
         this.gfx.beginDrawing({
           transform: transform,
           viewport: viewport,
@@ -11795,11 +11625,11 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
     }, {
       key: "_scheduleNext",
       value: function _scheduleNext() {
-        var _this15 = this;
+        var _this16 = this;
 
         if (this._useRequestAnimationFrame) {
           window.requestAnimationFrame(function () {
-            _this15._nextBound()["catch"](_this15._cancelBound);
+            _this16._nextBound()["catch"](_this16._cancelBound);
           });
         } else {
           Promise.resolve().then(this._nextBound)["catch"](this._cancelBound);
@@ -11859,13 +11689,13 @@ var InternalRenderTask = function InternalRenderTaskClosure() {
   return InternalRenderTask;
 }();
 
-var version = '2.8.335';
+var version = '2.9.359';
 exports.version = version;
-var build = '228adbf67';
+var build = 'e667c8cbc';
 exports.build = build;
 
 /***/ }),
-/* 126 */
+/* 114 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -11901,6 +11731,12 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -11953,11 +11789,21 @@ var BaseFontLoader = /*#__PURE__*/function () {
   }, {
     key: "clear",
     value: function clear() {
-      var _this = this;
+      var _iterator = _createForOfIteratorHelper(this.nativeFontFaces),
+          _step;
 
-      this.nativeFontFaces.forEach(function (nativeFontFace) {
-        _this._document.fonts["delete"](nativeFontFace);
-      });
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var nativeFontFace = _step.value;
+
+          this._document.fonts["delete"](nativeFontFace);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
       this.nativeFontFaces.length = 0;
 
       if (this.styleElement) {
@@ -11969,7 +11815,7 @@ var BaseFontLoader = /*#__PURE__*/function () {
     key: "bind",
     value: function () {
       var _bind = _asyncToGenerator( /*#__PURE__*/_regenerator["default"].mark(function _callee(font) {
-        var _this2 = this;
+        var _this = this;
 
         var nativeFontFace, rule;
         return _regenerator["default"].wrap(function _callee$(_context) {
@@ -12042,9 +11888,9 @@ var BaseFontLoader = /*#__PURE__*/function () {
               case 24:
                 _context.next = 26;
                 return new Promise(function (resolve) {
-                  var request = _this2._queueLoadingCallback(resolve);
+                  var request = _this._queueLoadingCallback(resolve);
 
-                  _this2._prepareFontLoadEvent([rule], [font], request);
+                  _this._prepareFontLoadEvent([rule], [font], request);
                 });
 
               case 26:
@@ -12102,17 +11948,17 @@ exports.FontLoader = FontLoader;
     var _super = _createSuper(GenericFontLoader);
 
     function GenericFontLoader(params) {
-      var _this3;
+      var _this2;
 
       _classCallCheck(this, GenericFontLoader);
 
-      _this3 = _super.call(this, params);
-      _this3.loadingContext = {
+      _this2 = _super.call(this, params);
+      _this2.loadingContext = {
         requests: [],
         nextRequestId: 0
       };
-      _this3.loadTestFontId = 0;
-      return _this3;
+      _this2.loadTestFontId = 0;
+      return _this2;
     }
 
     _createClass(GenericFontLoader, [{
@@ -12167,7 +12013,7 @@ exports.FontLoader = FontLoader;
     }, {
       key: "_prepareFontLoadEvent",
       value: function _prepareFontLoadEvent(rules, fonts, request) {
-        var _this4 = this;
+        var _this3 = this;
 
         function int32(data, offset) {
           return data.charCodeAt(offset) << 24 | data.charCodeAt(offset + 1) << 16 | data.charCodeAt(offset + 2) << 8 | data.charCodeAt(offset + 3) & 0xff;
@@ -12231,8 +12077,18 @@ exports.FontLoader = FontLoader;
         this.insertRule(rule);
         var names = [];
 
-        for (i = 0, ii = fonts.length; i < ii; i++) {
-          names.push(fonts[i].loadedName);
+        var _iterator2 = _createForOfIteratorHelper(fonts),
+            _step2;
+
+        try {
+          for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+            var font = _step2.value;
+            names.push(font.loadedName);
+          }
+        } catch (err) {
+          _iterator2.e(err);
+        } finally {
+          _iterator2.f();
         }
 
         names.push(loadTestFontId);
@@ -12244,18 +12100,20 @@ exports.FontLoader = FontLoader;
         div.style.position = "absolute";
         div.style.top = div.style.left = "0px";
 
-        for (i = 0, ii = names.length; i < ii; ++i) {
+        for (var _i = 0, _names = names; _i < _names.length; _i++) {
+          var name = _names[_i];
+
           var span = this._document.createElement("span");
 
           span.textContent = "Hi";
-          span.style.fontFamily = names[i];
+          span.style.fontFamily = name;
           div.appendChild(span);
         }
 
         this._document.body.appendChild(div);
 
         isFontReady(loadTestFontId, function () {
-          _this4._document.body.removeChild(div);
+          _this3._document.body.removeChild(div);
 
           request.complete();
         });
@@ -12300,7 +12158,21 @@ var FontFaceObject = /*#__PURE__*/function () {
         return null;
       }
 
-      var nativeFontFace = new FontFace(this.loadedName, this.data, {});
+      var nativeFontFace;
+
+      if (!this.cssFontInfo) {
+        nativeFontFace = new FontFace(this.loadedName, this.data, {});
+      } else {
+        var css = {
+          weight: this.cssFontInfo.fontWeight
+        };
+
+        if (this.cssFontInfo.italicAngle) {
+          css.style = "oblique ".concat(this.cssFontInfo.italicAngle, "deg");
+        }
+
+        nativeFontFace = new FontFace(this.cssFontInfo.fontFamily, this.data, css);
+      }
 
       if (this.fontRegistry) {
         this.fontRegistry.registerFont(this);
@@ -12315,9 +12187,21 @@ var FontFaceObject = /*#__PURE__*/function () {
         return null;
       }
 
-      var data = (0, _util.bytesToString)(new Uint8Array(this.data));
+      var data = (0, _util.bytesToString)(this.data);
       var url = "url(data:".concat(this.mimetype, ";base64,").concat(btoa(data), ");");
-      var rule = "@font-face {font-family:\"".concat(this.loadedName, "\";src:").concat(url, "}");
+      var rule;
+
+      if (!this.cssFontInfo) {
+        rule = "@font-face {font-family:\"".concat(this.loadedName, "\";src:").concat(url, "}");
+      } else {
+        var css = "font-weight: ".concat(this.cssFontInfo.fontWeight, ";");
+
+        if (this.cssFontInfo.italicAngle) {
+          css += "font-style: oblique ".concat(this.cssFontInfo.italicAngle, "deg;");
+        }
+
+        rule = "@font-face {font-family:\"".concat(this.cssFontInfo.fontFamily, "\";").concat(css, "src:").concat(url, "}");
+      }
 
       if (this.fontRegistry) {
         this.fontRegistry.registerFont(this, url);
@@ -12332,7 +12216,7 @@ var FontFaceObject = /*#__PURE__*/function () {
         return this.compiledGlyphs[character];
       }
 
-      var cmds, current;
+      var cmds;
 
       try {
         cmds = objs.get(this.loadedName + "_path_" + character);
@@ -12350,33 +12234,44 @@ var FontFaceObject = /*#__PURE__*/function () {
       }
 
       if (this.isEvalSupported && _util.IsEvalSupportedCached.value) {
-        var args,
-            js = "";
+        var jsBuf = [];
 
-        for (var i = 0, ii = cmds.length; i < ii; i++) {
-          current = cmds[i];
+        var _iterator3 = _createForOfIteratorHelper(cmds),
+            _step3;
 
-          if (current.args !== undefined) {
-            args = current.args.join(",");
-          } else {
-            args = "";
+        try {
+          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+            var current = _step3.value;
+            var args = current.args !== undefined ? current.args.join(",") : "";
+            jsBuf.push("c.", current.cmd, "(", args, ");\n");
           }
-
-          js += "c." + current.cmd + "(" + args + ");\n";
+        } catch (err) {
+          _iterator3.e(err);
+        } finally {
+          _iterator3.f();
         }
 
-        return this.compiledGlyphs[character] = new Function("c", "size", js);
+        return this.compiledGlyphs[character] = new Function("c", "size", jsBuf.join(""));
       }
 
       return this.compiledGlyphs[character] = function (c, size) {
-        for (var _i = 0, _ii = cmds.length; _i < _ii; _i++) {
-          current = cmds[_i];
+        var _iterator4 = _createForOfIteratorHelper(cmds),
+            _step4;
 
-          if (current.cmd === "scale") {
-            current.args = [size, -size];
+        try {
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+            var _current = _step4.value;
+
+            if (_current.cmd === "scale") {
+              _current.args = [size, -size];
+            }
+
+            c[_current.cmd].apply(c, _current.args);
           }
-
-          c[current.cmd].apply(c, current.args);
+        } catch (err) {
+          _iterator4.e(err);
+        } finally {
+          _iterator4.f();
         }
       };
     }
@@ -12388,7 +12283,7 @@ var FontFaceObject = /*#__PURE__*/function () {
 exports.FontFaceObject = FontFaceObject;
 
 /***/ }),
-/* 127 */
+/* 115 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -12512,7 +12407,7 @@ if (_is_node.isNodeJS) {
 }
 
 /***/ }),
-/* 128 */
+/* 116 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -12522,8 +12417,6 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports.AnnotationStorage = void 0;
-
-var _display_utils = __w_pdfjs_require__(1);
 
 var _util = __w_pdfjs_require__(4);
 
@@ -12535,7 +12428,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
@@ -12561,19 +12454,6 @@ var AnnotationStorage = /*#__PURE__*/function () {
       var obj = this._storage.get(key);
 
       return obj !== undefined ? obj : defaultValue;
-    }
-  }, {
-    key: "getOrCreateValue",
-    value: function getOrCreateValue(key, defaultValue) {
-      (0, _display_utils.deprecated)("Use getValue instead.");
-
-      if (this._storage.has(key)) {
-        return this._storage.get(key);
-      }
-
-      this._storage.set(key, defaultValue);
-
-      return defaultValue;
     }
   }, {
     key: "setValue",
@@ -12648,7 +12528,7 @@ var AnnotationStorage = /*#__PURE__*/function () {
 exports.AnnotationStorage = AnnotationStorage;
 
 /***/ }),
-/* 129 */
+/* 117 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -12673,7 +12553,7 @@ var apiCompatibilityParams = Object.freeze(compatibilityParams);
 exports.apiCompatibilityParams = apiCompatibilityParams;
 
 /***/ }),
-/* 130 */
+/* 118 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -12686,15 +12566,29 @@ exports.CanvasGraphics = void 0;
 
 var _util = __w_pdfjs_require__(4);
 
-var _pattern_helper = __w_pdfjs_require__(131);
+var _pattern_helper = __w_pdfjs_require__(119);
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 var MIN_FONT_SIZE = 16;
 var MAX_FONT_SIZE = 100;
@@ -12705,128 +12599,134 @@ var FULL_CHUNK_HEIGHT = 16;
 var LINEWIDTH_SCALE_FACTOR = 1.000001;
 
 function addContextCurrentTransform(ctx) {
-  if (!ctx.mozCurrentTransform) {
-    ctx._originalSave = ctx.save;
-    ctx._originalRestore = ctx.restore;
-    ctx._originalRotate = ctx.rotate;
-    ctx._originalScale = ctx.scale;
-    ctx._originalTranslate = ctx.translate;
-    ctx._originalTransform = ctx.transform;
-    ctx._originalSetTransform = ctx.setTransform;
-    ctx._originalResetTransform = ctx.resetTransform;
-    ctx._transformMatrix = ctx._transformMatrix || [1, 0, 0, 1, 0, 0];
-    ctx._transformStack = [];
-
-    try {
-      var desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(ctx), "lineWidth");
-      ctx._setLineWidth = desc.set;
-      ctx._getLineWidth = desc.get;
-      Object.defineProperty(ctx, "lineWidth", {
-        set: function setLineWidth(width) {
-          this._setLineWidth(width * LINEWIDTH_SCALE_FACTOR);
-        },
-        get: function getLineWidth() {
-          return this._getLineWidth();
-        }
-      });
-    } catch (_) {}
-
-    Object.defineProperty(ctx, "mozCurrentTransform", {
-      get: function getCurrentTransform() {
-        return this._transformMatrix;
-      }
-    });
-    Object.defineProperty(ctx, "mozCurrentTransformInverse", {
-      get: function getCurrentTransformInverse() {
-        var m = this._transformMatrix;
-        var a = m[0],
-            b = m[1],
-            c = m[2],
-            d = m[3],
-            e = m[4],
-            f = m[5];
-        var ad_bc = a * d - b * c;
-        var bc_ad = b * c - a * d;
-        return [d / ad_bc, b / bc_ad, c / bc_ad, a / ad_bc, (d * e - c * f) / bc_ad, (b * e - a * f) / ad_bc];
-      }
-    });
-
-    ctx.save = function ctxSave() {
-      var old = this._transformMatrix;
-
-      this._transformStack.push(old);
-
-      this._transformMatrix = old.slice(0, 6);
-
-      this._originalSave();
-    };
-
-    ctx.restore = function ctxRestore() {
-      var prev = this._transformStack.pop();
-
-      if (prev) {
-        this._transformMatrix = prev;
-
-        this._originalRestore();
-      }
-    };
-
-    ctx.translate = function ctxTranslate(x, y) {
-      var m = this._transformMatrix;
-      m[4] = m[0] * x + m[2] * y + m[4];
-      m[5] = m[1] * x + m[3] * y + m[5];
-
-      this._originalTranslate(x, y);
-    };
-
-    ctx.scale = function ctxScale(x, y) {
-      var m = this._transformMatrix;
-      m[0] = m[0] * x;
-      m[1] = m[1] * x;
-      m[2] = m[2] * y;
-      m[3] = m[3] * y;
-
-      this._originalScale(x, y);
-    };
-
-    ctx.transform = function ctxTransform(a, b, c, d, e, f) {
-      var m = this._transformMatrix;
-      this._transformMatrix = [m[0] * a + m[2] * b, m[1] * a + m[3] * b, m[0] * c + m[2] * d, m[1] * c + m[3] * d, m[0] * e + m[2] * f + m[4], m[1] * e + m[3] * f + m[5]];
-
-      ctx._originalTransform(a, b, c, d, e, f);
-    };
-
-    ctx.setTransform = function ctxSetTransform(a, b, c, d, e, f) {
-      this._transformMatrix = [a, b, c, d, e, f];
-
-      ctx._originalSetTransform(a, b, c, d, e, f);
-    };
-
-    ctx.resetTransform = function ctxResetTransform() {
-      this._transformMatrix = [1, 0, 0, 1, 0, 0];
-
-      ctx._originalResetTransform();
-    };
-
-    ctx.rotate = function ctxRotate(angle) {
-      var cosValue = Math.cos(angle);
-      var sinValue = Math.sin(angle);
-      var m = this._transformMatrix;
-      this._transformMatrix = [m[0] * cosValue + m[2] * sinValue, m[1] * cosValue + m[3] * sinValue, m[0] * -sinValue + m[2] * cosValue, m[1] * -sinValue + m[3] * cosValue, m[4], m[5]];
-
-      this._originalRotate(angle);
-    };
+  if (ctx.mozCurrentTransform) {
+    return;
   }
+
+  ctx._originalSave = ctx.save;
+  ctx._originalRestore = ctx.restore;
+  ctx._originalRotate = ctx.rotate;
+  ctx._originalScale = ctx.scale;
+  ctx._originalTranslate = ctx.translate;
+  ctx._originalTransform = ctx.transform;
+  ctx._originalSetTransform = ctx.setTransform;
+  ctx._originalResetTransform = ctx.resetTransform;
+  ctx._transformMatrix = ctx._transformMatrix || [1, 0, 0, 1, 0, 0];
+  ctx._transformStack = [];
+
+  try {
+    var desc = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(ctx), "lineWidth");
+    ctx._setLineWidth = desc.set;
+    ctx._getLineWidth = desc.get;
+    Object.defineProperty(ctx, "lineWidth", {
+      set: function setLineWidth(width) {
+        this._setLineWidth(width * LINEWIDTH_SCALE_FACTOR);
+      },
+      get: function getLineWidth() {
+        return this._getLineWidth();
+      }
+    });
+  } catch (_) {}
+
+  Object.defineProperty(ctx, "mozCurrentTransform", {
+    get: function getCurrentTransform() {
+      return this._transformMatrix;
+    }
+  });
+  Object.defineProperty(ctx, "mozCurrentTransformInverse", {
+    get: function getCurrentTransformInverse() {
+      var _this$_transformMatri = _slicedToArray(this._transformMatrix, 6),
+          a = _this$_transformMatri[0],
+          b = _this$_transformMatri[1],
+          c = _this$_transformMatri[2],
+          d = _this$_transformMatri[3],
+          e = _this$_transformMatri[4],
+          f = _this$_transformMatri[5];
+
+      var ad_bc = a * d - b * c;
+      var bc_ad = b * c - a * d;
+      return [d / ad_bc, b / bc_ad, c / bc_ad, a / ad_bc, (d * e - c * f) / bc_ad, (b * e - a * f) / ad_bc];
+    }
+  });
+
+  ctx.save = function ctxSave() {
+    var old = this._transformMatrix;
+
+    this._transformStack.push(old);
+
+    this._transformMatrix = old.slice(0, 6);
+
+    this._originalSave();
+  };
+
+  ctx.restore = function ctxRestore() {
+    var prev = this._transformStack.pop();
+
+    if (prev) {
+      this._transformMatrix = prev;
+
+      this._originalRestore();
+    }
+  };
+
+  ctx.translate = function ctxTranslate(x, y) {
+    var m = this._transformMatrix;
+    m[4] = m[0] * x + m[2] * y + m[4];
+    m[5] = m[1] * x + m[3] * y + m[5];
+
+    this._originalTranslate(x, y);
+  };
+
+  ctx.scale = function ctxScale(x, y) {
+    var m = this._transformMatrix;
+    m[0] = m[0] * x;
+    m[1] = m[1] * x;
+    m[2] = m[2] * y;
+    m[3] = m[3] * y;
+
+    this._originalScale(x, y);
+  };
+
+  ctx.transform = function ctxTransform(a, b, c, d, e, f) {
+    var m = this._transformMatrix;
+    this._transformMatrix = [m[0] * a + m[2] * b, m[1] * a + m[3] * b, m[0] * c + m[2] * d, m[1] * c + m[3] * d, m[0] * e + m[2] * f + m[4], m[1] * e + m[3] * f + m[5]];
+
+    ctx._originalTransform(a, b, c, d, e, f);
+  };
+
+  ctx.setTransform = function ctxSetTransform(a, b, c, d, e, f) {
+    this._transformMatrix = [a, b, c, d, e, f];
+
+    ctx._originalSetTransform(a, b, c, d, e, f);
+  };
+
+  ctx.resetTransform = function ctxResetTransform() {
+    this._transformMatrix = [1, 0, 0, 1, 0, 0];
+
+    ctx._originalResetTransform();
+  };
+
+  ctx.rotate = function ctxRotate(angle) {
+    var cosValue = Math.cos(angle);
+    var sinValue = Math.sin(angle);
+    var m = this._transformMatrix;
+    this._transformMatrix = [m[0] * cosValue + m[2] * sinValue, m[1] * cosValue + m[3] * sinValue, m[0] * -sinValue + m[2] * cosValue, m[1] * -sinValue + m[3] * cosValue, m[4], m[5]];
+
+    this._originalRotate(angle);
+  };
 }
 
-var CachedCanvases = function CachedCanvasesClosure() {
+var CachedCanvases = /*#__PURE__*/function () {
   function CachedCanvases(canvasFactory) {
+    _classCallCheck(this, CachedCanvases);
+
     this.canvasFactory = canvasFactory;
     this.cache = Object.create(null);
   }
 
-  CachedCanvases.prototype = {
-    getCanvas: function CachedCanvases_getCanvas(id, width, height, trackTransform) {
+  _createClass(CachedCanvases, [{
+    key: "getCanvas",
+    value: function getCanvas(id, width, height, trackTransform) {
       var canvasEntry;
 
       if (this.cache[id] !== undefined) {
@@ -12843,26 +12743,29 @@ var CachedCanvases = function CachedCanvasesClosure() {
       }
 
       return canvasEntry;
-    },
-    clear: function clear() {
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
       for (var id in this.cache) {
         var canvasEntry = this.cache[id];
         this.canvasFactory.destroy(canvasEntry);
         delete this.cache[id];
       }
     }
-  };
+  }]);
+
   return CachedCanvases;
 }();
 
 function compileType3Glyph(imgData) {
   var POINT_TO_PROCESS_LIMIT = 1000;
+  var POINT_TYPES = new Uint8Array([0, 2, 4, 0, 1, 0, 5, 4, 8, 10, 0, 8, 0, 2, 1, 0]);
   var width = imgData.width,
       height = imgData.height,
       width1 = width + 1;
   var i, ii, j, j0;
   var points = new Uint8Array(width1 * (height + 1));
-  var POINT_TYPES = new Uint8Array([0, 2, 4, 0, 1, 0, 5, 4, 8, 10, 0, 8, 0, 2, 1, 0]);
   var lineSize = width + 7 & ~7,
       data0 = imgData.data;
   var data = new Uint8Array(lineSize * height);
@@ -12994,8 +12897,7 @@ function compileType3Glyph(imgData) {
         points[p] &= type >> 2 | type << 2;
       }
 
-      coords.push(p % width1);
-      coords.push(p / width1 | 0);
+      coords.push(p % width1, p / width1 | 0);
 
       if (!points[p]) {
         --count;
@@ -13029,8 +12931,10 @@ function compileType3Glyph(imgData) {
   return drawOutline;
 }
 
-var CanvasExtraState = function CanvasExtraStateClosure() {
+var CanvasExtraState = /*#__PURE__*/function () {
   function CanvasExtraState() {
+    _classCallCheck(this, CanvasExtraState);
+
     this.alphaIsShape = false;
     this.fontSize = 0;
     this.fontSizeScale = 1;
@@ -13058,54 +12962,25 @@ var CanvasExtraState = function CanvasExtraStateClosure() {
     this.transferMaps = null;
   }
 
-  CanvasExtraState.prototype = {
-    clone: function CanvasExtraState_clone() {
+  _createClass(CanvasExtraState, [{
+    key: "clone",
+    value: function clone() {
       return Object.create(this);
-    },
-    setCurrentPoint: function CanvasExtraState_setCurrentPoint(x, y) {
+    }
+  }, {
+    key: "setCurrentPoint",
+    value: function setCurrentPoint(x, y) {
       this.x = x;
       this.y = y;
     }
-  };
+  }]);
+
   return CanvasExtraState;
 }();
 
 var CanvasGraphics = function CanvasGraphicsClosure() {
   var EXECUTION_TIME = 15;
   var EXECUTION_STEPS = 10;
-
-  function CanvasGraphics(canvasCtx, commonObjs, objs, canvasFactory, webGLContext, imageLayer, optionalContentConfig) {
-    this.ctx = canvasCtx;
-    this.current = new CanvasExtraState();
-    this.stateStack = [];
-    this.pendingClip = null;
-    this.pendingEOFill = false;
-    this.res = null;
-    this.xobjs = null;
-    this.commonObjs = commonObjs;
-    this.objs = objs;
-    this.canvasFactory = canvasFactory;
-    this.webGLContext = webGLContext;
-    this.imageLayer = imageLayer;
-    this.groupStack = [];
-    this.processingType3 = null;
-    this.baseTransform = null;
-    this.baseTransformStack = [];
-    this.groupLevel = 0;
-    this.smaskStack = [];
-    this.smaskCounter = 0;
-    this.tempSMask = null;
-    this.contentVisible = true;
-    this.markedContentStack = [];
-    this.optionalContentConfig = optionalContentConfig;
-    this.cachedCanvases = new CachedCanvases(this.canvasFactory);
-
-    if (canvasCtx) {
-      addContextCurrentTransform(canvasCtx);
-    }
-
-    this._cachedGetSinglePixelWidth = null;
-  }
 
   function putBinaryImageData(ctx, imgData) {
     var transferMaps = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -13436,27 +13311,11 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
     }
   }
 
-  function composeSMask(ctx, smask, layerCtx, webGLContext) {
+  function composeSMask(ctx, smask, layerCtx) {
     var mask = smask.canvas;
     var maskCtx = smask.context;
     ctx.setTransform(smask.scaleX, 0, 0, smask.scaleY, smask.offsetX, smask.offsetY);
-    var backdrop = smask.backdrop || null;
-
-    if (!smask.transferMap && webGLContext.isEnabled) {
-      var composed = webGLContext.composeSMask({
-        layer: layerCtx.canvas,
-        mask: mask,
-        properties: {
-          subtype: smask.subtype,
-          backdrop: backdrop
-        }
-      });
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.drawImage(composed, smask.offsetX, smask.offsetY);
-      return;
-    }
-
-    genericComposeSMask(maskCtx, layerCtx, mask.width, mask.height, smask.subtype, backdrop, smask.transferMap);
+    genericComposeSMask(maskCtx, layerCtx, mask.width, mask.height, smask.subtype, smask.backdrop, smask.transferMap);
     ctx.drawImage(mask, 0, 0);
   }
 
@@ -13464,1498 +13323,1687 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
   var LINE_JOIN_STYLES = ["miter", "round", "bevel"];
   var NORMAL_CLIP = {};
   var EO_CLIP = {};
-  CanvasGraphics.prototype = {
-    beginDrawing: function beginDrawing(_ref2) {
-      var transform = _ref2.transform,
-          viewport = _ref2.viewport,
-          _ref2$transparency = _ref2.transparency,
-          transparency = _ref2$transparency === void 0 ? false : _ref2$transparency,
-          _ref2$background = _ref2.background,
-          background = _ref2$background === void 0 ? null : _ref2$background;
-      var width = this.ctx.canvas.width;
-      var height = this.ctx.canvas.height;
-      this.ctx.save();
-      this.ctx.fillStyle = background || "rgb(255, 255, 255)";
-      this.ctx.fillRect(0, 0, width, height);
-      this.ctx.restore();
 
-      if (transparency) {
-        var transparentCanvas = this.cachedCanvases.getCanvas("transparent", width, height, true);
-        this.compositeCtx = this.ctx;
-        this.transparentCanvas = transparentCanvas.canvas;
-        this.ctx = transparentCanvas.context;
+  var CanvasGraphics = /*#__PURE__*/function () {
+    function CanvasGraphics(canvasCtx, commonObjs, objs, canvasFactory, imageLayer, optionalContentConfig) {
+      _classCallCheck(this, CanvasGraphics);
+
+      this.ctx = canvasCtx;
+      this.current = new CanvasExtraState();
+      this.stateStack = [];
+      this.pendingClip = null;
+      this.pendingEOFill = false;
+      this.res = null;
+      this.xobjs = null;
+      this.commonObjs = commonObjs;
+      this.objs = objs;
+      this.canvasFactory = canvasFactory;
+      this.imageLayer = imageLayer;
+      this.groupStack = [];
+      this.processingType3 = null;
+      this.baseTransform = null;
+      this.baseTransformStack = [];
+      this.groupLevel = 0;
+      this.smaskStack = [];
+      this.smaskCounter = 0;
+      this.tempSMask = null;
+      this.contentVisible = true;
+      this.markedContentStack = [];
+      this.optionalContentConfig = optionalContentConfig;
+      this.cachedCanvases = new CachedCanvases(this.canvasFactory);
+
+      if (canvasCtx) {
+        addContextCurrentTransform(canvasCtx);
+      }
+
+      this._cachedGetSinglePixelWidth = null;
+    }
+
+    _createClass(CanvasGraphics, [{
+      key: "beginDrawing",
+      value: function beginDrawing(_ref2) {
+        var transform = _ref2.transform,
+            viewport = _ref2.viewport,
+            _ref2$transparency = _ref2.transparency,
+            transparency = _ref2$transparency === void 0 ? false : _ref2$transparency,
+            _ref2$background = _ref2.background,
+            background = _ref2$background === void 0 ? null : _ref2$background;
+        var width = this.ctx.canvas.width;
+        var height = this.ctx.canvas.height;
         this.ctx.save();
-        this.ctx.transform.apply(this.ctx, this.compositeCtx.mozCurrentTransform);
+        this.ctx.fillStyle = background || "rgb(255, 255, 255)";
+        this.ctx.fillRect(0, 0, width, height);
+        this.ctx.restore();
+
+        if (transparency) {
+          var transparentCanvas = this.cachedCanvases.getCanvas("transparent", width, height, true);
+          this.compositeCtx = this.ctx;
+          this.transparentCanvas = transparentCanvas.canvas;
+          this.ctx = transparentCanvas.context;
+          this.ctx.save();
+          this.ctx.transform.apply(this.ctx, this.compositeCtx.mozCurrentTransform);
+        }
+
+        this.ctx.save();
+        resetCtxToDefault(this.ctx);
+
+        if (transform) {
+          this.ctx.transform.apply(this.ctx, transform);
+        }
+
+        this.ctx.transform.apply(this.ctx, viewport.transform);
+        this.baseTransform = this.ctx.mozCurrentTransform.slice();
+        this._combinedScaleFactor = Math.hypot(this.baseTransform[0], this.baseTransform[2]);
+
+        if (this.imageLayer) {
+          this.imageLayer.beginLayout();
+        }
       }
+    }, {
+      key: "executeOperatorList",
+      value: function executeOperatorList(operatorList, executionStartIdx, continueCallback, stepper) {
+        var argsArray = operatorList.argsArray;
+        var fnArray = operatorList.fnArray;
+        var i = executionStartIdx || 0;
+        var argsArrayLen = argsArray.length;
 
-      this.ctx.save();
-      resetCtxToDefault(this.ctx);
-
-      if (transform) {
-        this.ctx.transform.apply(this.ctx, transform);
-      }
-
-      this.ctx.transform.apply(this.ctx, viewport.transform);
-      this.baseTransform = this.ctx.mozCurrentTransform.slice();
-      this._combinedScaleFactor = Math.hypot(this.baseTransform[0], this.baseTransform[2]);
-
-      if (this.imageLayer) {
-        this.imageLayer.beginLayout();
-      }
-    },
-    executeOperatorList: function CanvasGraphics_executeOperatorList(operatorList, executionStartIdx, continueCallback, stepper) {
-      var argsArray = operatorList.argsArray;
-      var fnArray = operatorList.fnArray;
-      var i = executionStartIdx || 0;
-      var argsArrayLen = argsArray.length;
-
-      if (argsArrayLen === i) {
-        return i;
-      }
-
-      var chunkOperations = argsArrayLen - i > EXECUTION_STEPS && typeof continueCallback === "function";
-      var endTime = chunkOperations ? Date.now() + EXECUTION_TIME : 0;
-      var steps = 0;
-      var commonObjs = this.commonObjs;
-      var objs = this.objs;
-      var fnId;
-
-      while (true) {
-        if (stepper !== undefined && i === stepper.nextBreakPoint) {
-          stepper.breakIt(i, continueCallback);
+        if (argsArrayLen === i) {
           return i;
         }
 
-        fnId = fnArray[i];
+        var chunkOperations = argsArrayLen - i > EXECUTION_STEPS && typeof continueCallback === "function";
+        var endTime = chunkOperations ? Date.now() + EXECUTION_TIME : 0;
+        var steps = 0;
+        var commonObjs = this.commonObjs;
+        var objs = this.objs;
+        var fnId;
 
-        if (fnId !== _util.OPS.dependency) {
-          this[fnId].apply(this, argsArray[i]);
-        } else {
-          var _iterator = _createForOfIteratorHelper(argsArray[i]),
-              _step;
-
-          try {
-            for (_iterator.s(); !(_step = _iterator.n()).done;) {
-              var depObjId = _step.value;
-              var objsPool = depObjId.startsWith("g_") ? commonObjs : objs;
-
-              if (!objsPool.has(depObjId)) {
-                objsPool.get(depObjId, continueCallback);
-                return i;
-              }
-            }
-          } catch (err) {
-            _iterator.e(err);
-          } finally {
-            _iterator.f();
-          }
-        }
-
-        i++;
-
-        if (i === argsArrayLen) {
-          return i;
-        }
-
-        if (chunkOperations && ++steps > EXECUTION_STEPS) {
-          if (Date.now() > endTime) {
-            continueCallback();
+        while (true) {
+          if (stepper !== undefined && i === stepper.nextBreakPoint) {
+            stepper.breakIt(i, continueCallback);
             return i;
           }
 
-          steps = 0;
-        }
-      }
-    },
-    endDrawing: function CanvasGraphics_endDrawing() {
-      while (this.stateStack.length || this.current.activeSMask !== null) {
-        this.restore();
-      }
+          fnId = fnArray[i];
 
-      this.ctx.restore();
+          if (fnId !== _util.OPS.dependency) {
+            this[fnId].apply(this, argsArray[i]);
+          } else {
+            var _iterator = _createForOfIteratorHelper(argsArray[i]),
+                _step;
 
-      if (this.transparentCanvas) {
-        this.ctx = this.compositeCtx;
-        this.ctx.save();
-        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        this.ctx.drawImage(this.transparentCanvas, 0, 0);
-        this.ctx.restore();
-        this.transparentCanvas = null;
-      }
+            try {
+              for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                var depObjId = _step.value;
+                var objsPool = depObjId.startsWith("g_") ? commonObjs : objs;
 
-      this.cachedCanvases.clear();
-      this.webGLContext.clear();
-
-      if (this.imageLayer) {
-        this.imageLayer.endLayout();
-      }
-    },
-    setLineWidth: function CanvasGraphics_setLineWidth(width) {
-      this.current.lineWidth = width;
-      this.ctx.lineWidth = width;
-    },
-    setLineCap: function CanvasGraphics_setLineCap(style) {
-      this.ctx.lineCap = LINE_CAP_STYLES[style];
-    },
-    setLineJoin: function CanvasGraphics_setLineJoin(style) {
-      this.ctx.lineJoin = LINE_JOIN_STYLES[style];
-    },
-    setMiterLimit: function CanvasGraphics_setMiterLimit(limit) {
-      this.ctx.miterLimit = limit;
-    },
-    setDash: function CanvasGraphics_setDash(dashArray, dashPhase) {
-      var ctx = this.ctx;
-
-      if (ctx.setLineDash !== undefined) {
-        ctx.setLineDash(dashArray);
-        ctx.lineDashOffset = dashPhase;
-      }
-    },
-    setRenderingIntent: function setRenderingIntent(intent) {},
-    setFlatness: function setFlatness(flatness) {},
-    setGState: function CanvasGraphics_setGState(states) {
-      for (var i = 0, ii = states.length; i < ii; i++) {
-        var state = states[i];
-        var key = state[0];
-        var value = state[1];
-
-        switch (key) {
-          case "LW":
-            this.setLineWidth(value);
-            break;
-
-          case "LC":
-            this.setLineCap(value);
-            break;
-
-          case "LJ":
-            this.setLineJoin(value);
-            break;
-
-          case "ML":
-            this.setMiterLimit(value);
-            break;
-
-          case "D":
-            this.setDash(value[0], value[1]);
-            break;
-
-          case "RI":
-            this.setRenderingIntent(value);
-            break;
-
-          case "FL":
-            this.setFlatness(value);
-            break;
-
-          case "Font":
-            this.setFont(value[0], value[1]);
-            break;
-
-          case "CA":
-            this.current.strokeAlpha = state[1];
-            break;
-
-          case "ca":
-            this.current.fillAlpha = state[1];
-            this.ctx.globalAlpha = state[1];
-            break;
-
-          case "BM":
-            this.ctx.globalCompositeOperation = value;
-            break;
-
-          case "SMask":
-            if (this.current.activeSMask) {
-              if (this.stateStack.length > 0 && this.stateStack[this.stateStack.length - 1].activeSMask === this.current.activeSMask) {
-                this.suspendSMaskGroup();
-              } else {
-                this.endSMaskGroup();
+                if (!objsPool.has(depObjId)) {
+                  objsPool.get(depObjId, continueCallback);
+                  return i;
+                }
               }
-            }
-
-            this.current.activeSMask = value ? this.tempSMask : null;
-
-            if (this.current.activeSMask) {
-              this.beginSMaskGroup();
-            }
-
-            this.tempSMask = null;
-            break;
-
-          case "TR":
-            this.current.transferMaps = value;
-        }
-      }
-    },
-    beginSMaskGroup: function CanvasGraphics_beginSMaskGroup() {
-      var activeSMask = this.current.activeSMask;
-      var drawnWidth = activeSMask.canvas.width;
-      var drawnHeight = activeSMask.canvas.height;
-      var cacheId = "smaskGroupAt" + this.groupLevel;
-      var scratchCanvas = this.cachedCanvases.getCanvas(cacheId, drawnWidth, drawnHeight, true);
-      var currentCtx = this.ctx;
-      var currentTransform = currentCtx.mozCurrentTransform;
-      this.ctx.save();
-      var groupCtx = scratchCanvas.context;
-      groupCtx.scale(1 / activeSMask.scaleX, 1 / activeSMask.scaleY);
-      groupCtx.translate(-activeSMask.offsetX, -activeSMask.offsetY);
-      groupCtx.transform.apply(groupCtx, currentTransform);
-      activeSMask.startTransformInverse = groupCtx.mozCurrentTransformInverse;
-      copyCtxState(currentCtx, groupCtx);
-      this.ctx = groupCtx;
-      this.setGState([["BM", "source-over"], ["ca", 1], ["CA", 1]]);
-      this.groupStack.push(currentCtx);
-      this.groupLevel++;
-    },
-    suspendSMaskGroup: function CanvasGraphics_endSMaskGroup() {
-      var groupCtx = this.ctx;
-      this.groupLevel--;
-      this.ctx = this.groupStack.pop();
-      composeSMask(this.ctx, this.current.activeSMask, groupCtx, this.webGLContext);
-      this.ctx.restore();
-      this.ctx.save();
-      copyCtxState(groupCtx, this.ctx);
-      this.current.resumeSMaskCtx = groupCtx;
-
-      var deltaTransform = _util.Util.transform(this.current.activeSMask.startTransformInverse, groupCtx.mozCurrentTransform);
-
-      this.ctx.transform.apply(this.ctx, deltaTransform);
-      groupCtx.save();
-      groupCtx.setTransform(1, 0, 0, 1, 0, 0);
-      groupCtx.clearRect(0, 0, groupCtx.canvas.width, groupCtx.canvas.height);
-      groupCtx.restore();
-    },
-    resumeSMaskGroup: function CanvasGraphics_resumeSMaskGroup() {
-      var groupCtx = this.current.resumeSMaskCtx;
-      var currentCtx = this.ctx;
-      this.ctx = groupCtx;
-      this.groupStack.push(currentCtx);
-      this.groupLevel++;
-    },
-    endSMaskGroup: function CanvasGraphics_endSMaskGroup() {
-      var groupCtx = this.ctx;
-      this.groupLevel--;
-      this.ctx = this.groupStack.pop();
-      composeSMask(this.ctx, this.current.activeSMask, groupCtx, this.webGLContext);
-      this.ctx.restore();
-      copyCtxState(groupCtx, this.ctx);
-
-      var deltaTransform = _util.Util.transform(this.current.activeSMask.startTransformInverse, groupCtx.mozCurrentTransform);
-
-      this.ctx.transform.apply(this.ctx, deltaTransform);
-    },
-    save: function CanvasGraphics_save() {
-      this.ctx.save();
-      var old = this.current;
-      this.stateStack.push(old);
-      this.current = old.clone();
-      this.current.resumeSMaskCtx = null;
-    },
-    restore: function CanvasGraphics_restore() {
-      if (this.current.resumeSMaskCtx) {
-        this.resumeSMaskGroup();
-      }
-
-      if (this.current.activeSMask !== null && (this.stateStack.length === 0 || this.stateStack[this.stateStack.length - 1].activeSMask !== this.current.activeSMask)) {
-        this.endSMaskGroup();
-      }
-
-      if (this.stateStack.length !== 0) {
-        this.current = this.stateStack.pop();
-        this.ctx.restore();
-        this.pendingClip = null;
-        this._cachedGetSinglePixelWidth = null;
-      } else {
-        this.current.activeSMask = null;
-      }
-    },
-    transform: function CanvasGraphics_transform(a, b, c, d, e, f) {
-      this.ctx.transform(a, b, c, d, e, f);
-      this._cachedGetSinglePixelWidth = null;
-    },
-    constructPath: function CanvasGraphics_constructPath(ops, args) {
-      var ctx = this.ctx;
-      var current = this.current;
-      var x = current.x,
-          y = current.y;
-
-      for (var i = 0, j = 0, ii = ops.length; i < ii; i++) {
-        switch (ops[i] | 0) {
-          case _util.OPS.rectangle:
-            x = args[j++];
-            y = args[j++];
-            var width = args[j++];
-            var height = args[j++];
-            var xw = x + width;
-            var yh = y + height;
-            ctx.moveTo(x, y);
-
-            if (width === 0 || height === 0) {
-              ctx.lineTo(xw, yh);
-            } else {
-              ctx.lineTo(xw, y);
-              ctx.lineTo(xw, yh);
-              ctx.lineTo(x, yh);
-            }
-
-            ctx.closePath();
-            break;
-
-          case _util.OPS.moveTo:
-            x = args[j++];
-            y = args[j++];
-            ctx.moveTo(x, y);
-            break;
-
-          case _util.OPS.lineTo:
-            x = args[j++];
-            y = args[j++];
-            ctx.lineTo(x, y);
-            break;
-
-          case _util.OPS.curveTo:
-            x = args[j + 4];
-            y = args[j + 5];
-            ctx.bezierCurveTo(args[j], args[j + 1], args[j + 2], args[j + 3], x, y);
-            j += 6;
-            break;
-
-          case _util.OPS.curveTo2:
-            ctx.bezierCurveTo(x, y, args[j], args[j + 1], args[j + 2], args[j + 3]);
-            x = args[j + 2];
-            y = args[j + 3];
-            j += 4;
-            break;
-
-          case _util.OPS.curveTo3:
-            x = args[j + 2];
-            y = args[j + 3];
-            ctx.bezierCurveTo(args[j], args[j + 1], x, y, x, y);
-            j += 4;
-            break;
-
-          case _util.OPS.closePath:
-            ctx.closePath();
-            break;
-        }
-      }
-
-      current.setCurrentPoint(x, y);
-    },
-    closePath: function CanvasGraphics_closePath() {
-      this.ctx.closePath();
-    },
-    stroke: function CanvasGraphics_stroke(consumePath) {
-      consumePath = typeof consumePath !== "undefined" ? consumePath : true;
-      var ctx = this.ctx;
-      var strokeColor = this.current.strokeColor;
-      ctx.globalAlpha = this.current.strokeAlpha;
-
-      if (this.contentVisible) {
-        if (_typeof(strokeColor) === "object" && strokeColor !== null && strokeColor !== void 0 && strokeColor.getPattern) {
-          ctx.save();
-          var transform = ctx.mozCurrentTransform;
-
-          var scale = _util.Util.singularValueDecompose2dScale(transform)[0];
-
-          ctx.strokeStyle = strokeColor.getPattern(ctx, this);
-          var lineWidth = this.getSinglePixelWidth();
-          var scaledLineWidth = this.current.lineWidth * scale;
-
-          if (lineWidth < 0 && -lineWidth >= scaledLineWidth) {
-            ctx.resetTransform();
-            ctx.lineWidth = Math.round(this._combinedScaleFactor);
-          } else {
-            ctx.lineWidth = Math.max(lineWidth, scaledLineWidth);
-          }
-
-          ctx.stroke();
-          ctx.restore();
-        } else {
-          var _lineWidth = this.getSinglePixelWidth();
-
-          if (_lineWidth < 0 && -_lineWidth >= this.current.lineWidth) {
-            ctx.save();
-            ctx.resetTransform();
-            ctx.lineWidth = Math.round(this._combinedScaleFactor);
-            ctx.stroke();
-            ctx.restore();
-          } else {
-            ctx.lineWidth = Math.max(_lineWidth, this.current.lineWidth);
-            ctx.stroke();
-          }
-        }
-      }
-
-      if (consumePath) {
-        this.consumePath();
-      }
-
-      ctx.globalAlpha = this.current.fillAlpha;
-    },
-    closeStroke: function CanvasGraphics_closeStroke() {
-      this.closePath();
-      this.stroke();
-    },
-    fill: function CanvasGraphics_fill(consumePath) {
-      consumePath = typeof consumePath !== "undefined" ? consumePath : true;
-      var ctx = this.ctx;
-      var fillColor = this.current.fillColor;
-      var isPatternFill = this.current.patternFill;
-      var needRestore = false;
-
-      if (isPatternFill) {
-        ctx.save();
-
-        if (this.baseTransform) {
-          ctx.setTransform.apply(ctx, this.baseTransform);
-        }
-
-        ctx.fillStyle = fillColor.getPattern(ctx, this);
-        needRestore = true;
-      }
-
-      if (this.contentVisible) {
-        if (this.pendingEOFill) {
-          ctx.fill("evenodd");
-          this.pendingEOFill = false;
-        } else {
-          ctx.fill();
-        }
-      }
-
-      if (needRestore) {
-        ctx.restore();
-      }
-
-      if (consumePath) {
-        this.consumePath();
-      }
-    },
-    eoFill: function CanvasGraphics_eoFill() {
-      this.pendingEOFill = true;
-      this.fill();
-    },
-    fillStroke: function CanvasGraphics_fillStroke() {
-      this.fill(false);
-      this.stroke(false);
-      this.consumePath();
-    },
-    eoFillStroke: function CanvasGraphics_eoFillStroke() {
-      this.pendingEOFill = true;
-      this.fillStroke();
-    },
-    closeFillStroke: function CanvasGraphics_closeFillStroke() {
-      this.closePath();
-      this.fillStroke();
-    },
-    closeEOFillStroke: function CanvasGraphics_closeEOFillStroke() {
-      this.pendingEOFill = true;
-      this.closePath();
-      this.fillStroke();
-    },
-    endPath: function CanvasGraphics_endPath() {
-      this.consumePath();
-    },
-    clip: function CanvasGraphics_clip() {
-      this.pendingClip = NORMAL_CLIP;
-    },
-    eoClip: function CanvasGraphics_eoClip() {
-      this.pendingClip = EO_CLIP;
-    },
-    beginText: function CanvasGraphics_beginText() {
-      this.current.textMatrix = _util.IDENTITY_MATRIX;
-      this.current.textMatrixScale = 1;
-      this.current.x = this.current.lineX = 0;
-      this.current.y = this.current.lineY = 0;
-    },
-    endText: function CanvasGraphics_endText() {
-      var paths = this.pendingTextPaths;
-      var ctx = this.ctx;
-
-      if (paths === undefined) {
-        ctx.beginPath();
-        return;
-      }
-
-      ctx.save();
-      ctx.beginPath();
-
-      for (var i = 0; i < paths.length; i++) {
-        var path = paths[i];
-        ctx.setTransform.apply(ctx, path.transform);
-        ctx.translate(path.x, path.y);
-        path.addToPath(ctx, path.fontSize);
-      }
-
-      ctx.restore();
-      ctx.clip();
-      ctx.beginPath();
-      delete this.pendingTextPaths;
-    },
-    setCharSpacing: function CanvasGraphics_setCharSpacing(spacing) {
-      this.current.charSpacing = spacing;
-    },
-    setWordSpacing: function CanvasGraphics_setWordSpacing(spacing) {
-      this.current.wordSpacing = spacing;
-    },
-    setHScale: function CanvasGraphics_setHScale(scale) {
-      this.current.textHScale = scale / 100;
-    },
-    setLeading: function CanvasGraphics_setLeading(leading) {
-      this.current.leading = -leading;
-    },
-    setFont: function CanvasGraphics_setFont(fontRefName, size) {
-      var fontObj = this.commonObjs.get(fontRefName);
-      var current = this.current;
-
-      if (!fontObj) {
-        throw new Error("Can't find font for ".concat(fontRefName));
-      }
-
-      current.fontMatrix = fontObj.fontMatrix || _util.FONT_IDENTITY_MATRIX;
-
-      if (current.fontMatrix[0] === 0 || current.fontMatrix[3] === 0) {
-        (0, _util.warn)("Invalid font matrix for font " + fontRefName);
-      }
-
-      if (size < 0) {
-        size = -size;
-        current.fontDirection = -1;
-      } else {
-        current.fontDirection = 1;
-      }
-
-      this.current.font = fontObj;
-      this.current.fontSize = size;
-
-      if (fontObj.isType3Font) {
-        return;
-      }
-
-      var name = fontObj.loadedName || "sans-serif";
-      var bold = "normal";
-
-      if (fontObj.black) {
-        bold = "900";
-      } else if (fontObj.bold) {
-        bold = "bold";
-      }
-
-      var italic = fontObj.italic ? "italic" : "normal";
-      var typeface = "\"".concat(name, "\", ").concat(fontObj.fallbackName);
-      var browserFontSize = size;
-
-      if (size < MIN_FONT_SIZE) {
-        browserFontSize = MIN_FONT_SIZE;
-      } else if (size > MAX_FONT_SIZE) {
-        browserFontSize = MAX_FONT_SIZE;
-      }
-
-      this.current.fontSizeScale = size / browserFontSize;
-      this.ctx.font = "".concat(italic, " ").concat(bold, " ").concat(browserFontSize, "px ").concat(typeface);
-    },
-    setTextRenderingMode: function CanvasGraphics_setTextRenderingMode(mode) {
-      this.current.textRenderingMode = mode;
-    },
-    setTextRise: function CanvasGraphics_setTextRise(rise) {
-      this.current.textRise = rise;
-    },
-    moveText: function CanvasGraphics_moveText(x, y) {
-      this.current.x = this.current.lineX += x;
-      this.current.y = this.current.lineY += y;
-    },
-    setLeadingMoveText: function CanvasGraphics_setLeadingMoveText(x, y) {
-      this.setLeading(-y);
-      this.moveText(x, y);
-    },
-    setTextMatrix: function CanvasGraphics_setTextMatrix(a, b, c, d, e, f) {
-      this.current.textMatrix = [a, b, c, d, e, f];
-      this.current.textMatrixScale = Math.hypot(a, b);
-      this.current.x = this.current.lineX = 0;
-      this.current.y = this.current.lineY = 0;
-    },
-    nextLine: function CanvasGraphics_nextLine() {
-      this.moveText(0, this.current.leading);
-    },
-    paintChar: function paintChar(character, x, y, patternTransform, resetLineWidthToOne) {
-      var ctx = this.ctx;
-      var current = this.current;
-      var font = current.font;
-      var textRenderingMode = current.textRenderingMode;
-      var fontSize = current.fontSize / current.fontSizeScale;
-      var fillStrokeMode = textRenderingMode & _util.TextRenderingMode.FILL_STROKE_MASK;
-      var isAddToPathSet = !!(textRenderingMode & _util.TextRenderingMode.ADD_TO_PATH_FLAG);
-      var patternFill = current.patternFill && !font.missingFile;
-      var addToPath;
-
-      if (font.disableFontFace || isAddToPathSet || patternFill) {
-        addToPath = font.getPathGenerator(this.commonObjs, character);
-      }
-
-      if (font.disableFontFace || patternFill) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.beginPath();
-        addToPath(ctx, fontSize);
-
-        if (patternTransform) {
-          ctx.setTransform.apply(ctx, patternTransform);
-        }
-
-        if (fillStrokeMode === _util.TextRenderingMode.FILL || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
-          ctx.fill();
-        }
-
-        if (fillStrokeMode === _util.TextRenderingMode.STROKE || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
-          if (resetLineWidthToOne) {
-            ctx.resetTransform();
-            ctx.lineWidth = Math.round(this._combinedScaleFactor);
-          }
-
-          ctx.stroke();
-        }
-
-        ctx.restore();
-      } else {
-        if (fillStrokeMode === _util.TextRenderingMode.FILL || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
-          ctx.fillText(character, x, y);
-        }
-
-        if (fillStrokeMode === _util.TextRenderingMode.STROKE || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
-          if (resetLineWidthToOne) {
-            ctx.save();
-            ctx.moveTo(x, y);
-            ctx.resetTransform();
-            ctx.lineWidth = Math.round(this._combinedScaleFactor);
-            ctx.strokeText(character, 0, 0);
-            ctx.restore();
-          } else {
-            ctx.strokeText(character, x, y);
-          }
-        }
-      }
-
-      if (isAddToPathSet) {
-        var paths = this.pendingTextPaths || (this.pendingTextPaths = []);
-        paths.push({
-          transform: ctx.mozCurrentTransform,
-          x: x,
-          y: y,
-          fontSize: fontSize,
-          addToPath: addToPath
-        });
-      }
-    },
-
-    get isFontSubpixelAAEnabled() {
-      var _this$cachedCanvases$ = this.cachedCanvases.getCanvas("isFontSubpixelAAEnabled", 10, 10),
-          ctx = _this$cachedCanvases$.context;
-
-      ctx.scale(1.5, 1);
-      ctx.fillText("I", 0, 10);
-      var data = ctx.getImageData(0, 0, 10, 10).data;
-      var enabled = false;
-
-      for (var i = 3; i < data.length; i += 4) {
-        if (data[i] > 0 && data[i] < 255) {
-          enabled = true;
-          break;
-        }
-      }
-
-      return (0, _util.shadow)(this, "isFontSubpixelAAEnabled", enabled);
-    },
-
-    showText: function CanvasGraphics_showText(glyphs) {
-      var current = this.current;
-      var font = current.font;
-
-      if (font.isType3Font) {
-        return this.showType3Text(glyphs);
-      }
-
-      var fontSize = current.fontSize;
-
-      if (fontSize === 0) {
-        return undefined;
-      }
-
-      var ctx = this.ctx;
-      var fontSizeScale = current.fontSizeScale;
-      var charSpacing = current.charSpacing;
-      var wordSpacing = current.wordSpacing;
-      var fontDirection = current.fontDirection;
-      var textHScale = current.textHScale * fontDirection;
-      var glyphsLength = glyphs.length;
-      var vertical = font.vertical;
-      var spacingDir = vertical ? 1 : -1;
-      var defaultVMetrics = font.defaultVMetrics;
-      var widthAdvanceScale = fontSize * current.fontMatrix[0];
-      var simpleFillText = current.textRenderingMode === _util.TextRenderingMode.FILL && !font.disableFontFace && !current.patternFill;
-      ctx.save();
-      var patternTransform;
-
-      if (current.patternFill) {
-        ctx.save();
-        var pattern = current.fillColor.getPattern(ctx, this);
-        patternTransform = ctx.mozCurrentTransform;
-        ctx.restore();
-        ctx.fillStyle = pattern;
-      }
-
-      ctx.transform.apply(ctx, current.textMatrix);
-      ctx.translate(current.x, current.y + current.textRise);
-
-      if (fontDirection > 0) {
-        ctx.scale(textHScale, -1);
-      } else {
-        ctx.scale(textHScale, 1);
-      }
-
-      var lineWidth = current.lineWidth;
-      var resetLineWidthToOne = false;
-      var scale = current.textMatrixScale;
-
-      if (scale === 0 || lineWidth === 0) {
-        var fillStrokeMode = current.textRenderingMode & _util.TextRenderingMode.FILL_STROKE_MASK;
-
-        if (fillStrokeMode === _util.TextRenderingMode.STROKE || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
-          this._cachedGetSinglePixelWidth = null;
-          lineWidth = this.getSinglePixelWidth();
-          resetLineWidthToOne = lineWidth < 0;
-        }
-      } else {
-        lineWidth /= scale;
-      }
-
-      if (fontSizeScale !== 1.0) {
-        ctx.scale(fontSizeScale, fontSizeScale);
-        lineWidth /= fontSizeScale;
-      }
-
-      ctx.lineWidth = lineWidth;
-      var x = 0,
-          i;
-
-      for (i = 0; i < glyphsLength; ++i) {
-        var glyph = glyphs[i];
-
-        if ((0, _util.isNum)(glyph)) {
-          x += spacingDir * glyph * fontSize / 1000;
-          continue;
-        }
-
-        var restoreNeeded = false;
-        var spacing = (glyph.isSpace ? wordSpacing : 0) + charSpacing;
-        var character = glyph.fontChar;
-        var accent = glyph.accent;
-        var scaledX = void 0,
-            scaledY = void 0;
-        var width = glyph.width;
-
-        if (vertical) {
-          var vmetric = glyph.vmetric || defaultVMetrics;
-          var vx = -(glyph.vmetric ? vmetric[1] : width * 0.5) * widthAdvanceScale;
-          var vy = vmetric[2] * widthAdvanceScale;
-          width = vmetric ? -vmetric[0] : width;
-          scaledX = vx / fontSizeScale;
-          scaledY = (x + vy) / fontSizeScale;
-        } else {
-          scaledX = x / fontSizeScale;
-          scaledY = 0;
-        }
-
-        if (font.remeasure && width > 0) {
-          var measuredWidth = ctx.measureText(character).width * 1000 / fontSize * fontSizeScale;
-
-          if (width < measuredWidth && this.isFontSubpixelAAEnabled) {
-            var characterScaleX = width / measuredWidth;
-            restoreNeeded = true;
-            ctx.save();
-            ctx.scale(characterScaleX, 1);
-            scaledX /= characterScaleX;
-          } else if (width !== measuredWidth) {
-            scaledX += (width - measuredWidth) / 2000 * fontSize / fontSizeScale;
-          }
-        }
-
-        if (this.contentVisible && (glyph.isInFont || font.missingFile)) {
-          if (simpleFillText && !accent) {
-            ctx.fillText(character, scaledX, scaledY);
-          } else {
-            this.paintChar(character, scaledX, scaledY, patternTransform, resetLineWidthToOne);
-
-            if (accent) {
-              var scaledAccentX = scaledX + fontSize * accent.offset.x / fontSizeScale;
-              var scaledAccentY = scaledY - fontSize * accent.offset.y / fontSizeScale;
-              this.paintChar(accent.fontChar, scaledAccentX, scaledAccentY, patternTransform, resetLineWidthToOne);
+            } catch (err) {
+              _iterator.e(err);
+            } finally {
+              _iterator.f();
             }
           }
-        }
 
-        var charWidth = void 0;
+          i++;
 
-        if (vertical) {
-          charWidth = width * widthAdvanceScale - spacing * fontDirection;
-        } else {
-          charWidth = width * widthAdvanceScale + spacing * fontDirection;
-        }
+          if (i === argsArrayLen) {
+            return i;
+          }
 
-        x += charWidth;
+          if (chunkOperations && ++steps > EXECUTION_STEPS) {
+            if (Date.now() > endTime) {
+              continueCallback();
+              return i;
+            }
 
-        if (restoreNeeded) {
-          ctx.restore();
+            steps = 0;
+          }
         }
       }
-
-      if (vertical) {
-        current.y -= x;
-      } else {
-        current.x += x * textHScale;
-      }
-
-      ctx.restore();
-    },
-    showType3Text: function CanvasGraphics_showType3Text(glyphs) {
-      var ctx = this.ctx;
-      var current = this.current;
-      var font = current.font;
-      var fontSize = current.fontSize;
-      var fontDirection = current.fontDirection;
-      var spacingDir = font.vertical ? 1 : -1;
-      var charSpacing = current.charSpacing;
-      var wordSpacing = current.wordSpacing;
-      var textHScale = current.textHScale * fontDirection;
-      var fontMatrix = current.fontMatrix || _util.FONT_IDENTITY_MATRIX;
-      var glyphsLength = glyphs.length;
-      var isTextInvisible = current.textRenderingMode === _util.TextRenderingMode.INVISIBLE;
-      var i, glyph, width, spacingLength;
-
-      if (isTextInvisible || fontSize === 0) {
-        return;
-      }
-
-      this._cachedGetSinglePixelWidth = null;
-      ctx.save();
-      ctx.transform.apply(ctx, current.textMatrix);
-      ctx.translate(current.x, current.y);
-      ctx.scale(textHScale, fontDirection);
-
-      for (i = 0; i < glyphsLength; ++i) {
-        glyph = glyphs[i];
-
-        if ((0, _util.isNum)(glyph)) {
-          spacingLength = spacingDir * glyph * fontSize / 1000;
-          this.ctx.translate(spacingLength, 0);
-          current.x += spacingLength * textHScale;
-          continue;
-        }
-
-        var spacing = (glyph.isSpace ? wordSpacing : 0) + charSpacing;
-        var operatorList = font.charProcOperatorList[glyph.operatorListId];
-
-        if (!operatorList) {
-          (0, _util.warn)("Type3 character \"".concat(glyph.operatorListId, "\" is not available."));
-          continue;
-        }
-
-        if (this.contentVisible) {
-          this.processingType3 = glyph;
-          this.save();
-          ctx.scale(fontSize, fontSize);
-          ctx.transform.apply(ctx, fontMatrix);
-          this.executeOperatorList(operatorList);
+    }, {
+      key: "endDrawing",
+      value: function endDrawing() {
+        while (this.stateStack.length || this.current.activeSMask !== null) {
           this.restore();
         }
 
-        var transformed = _util.Util.applyTransform([glyph.width, 0], fontMatrix);
+        this.ctx.restore();
 
-        width = transformed[0] * fontSize + spacing;
-        ctx.translate(width, 0);
-        current.x += width * textHScale;
-      }
+        if (this.transparentCanvas) {
+          this.ctx = this.compositeCtx;
+          this.ctx.save();
+          this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+          this.ctx.drawImage(this.transparentCanvas, 0, 0);
+          this.ctx.restore();
+          this.transparentCanvas = null;
+        }
 
-      ctx.restore();
-      this.processingType3 = null;
-    },
-    setCharWidth: function CanvasGraphics_setCharWidth(xWidth, yWidth) {},
-    setCharWidthAndBounds: function CanvasGraphics_setCharWidthAndBounds(xWidth, yWidth, llx, lly, urx, ury) {
-      this.ctx.rect(llx, lly, urx - llx, ury - lly);
-      this.clip();
-      this.endPath();
-    },
-    getColorN_Pattern: function CanvasGraphics_getColorN_Pattern(IR) {
-      var _this = this;
+        this.cachedCanvases.clear();
 
-      var pattern;
-
-      if (IR[0] === "TilingPattern") {
-        var color = IR[1];
-        var baseTransform = this.baseTransform || this.ctx.mozCurrentTransform.slice();
-        var canvasGraphicsFactory = {
-          createCanvasGraphics: function createCanvasGraphics(ctx) {
-            return new CanvasGraphics(ctx, _this.commonObjs, _this.objs, _this.canvasFactory, _this.webGLContext);
-          }
-        };
-        pattern = new _pattern_helper.TilingPattern(IR, color, this.ctx, canvasGraphicsFactory, baseTransform);
-      } else {
-        pattern = (0, _pattern_helper.getShadingPatternFromIR)(IR);
-      }
-
-      return pattern;
-    },
-    setStrokeColorN: function CanvasGraphics_setStrokeColorN() {
-      this.current.strokeColor = this.getColorN_Pattern(arguments);
-    },
-    setFillColorN: function CanvasGraphics_setFillColorN() {
-      this.current.fillColor = this.getColorN_Pattern(arguments);
-      this.current.patternFill = true;
-    },
-    setStrokeRGBColor: function CanvasGraphics_setStrokeRGBColor(r, g, b) {
-      var color = _util.Util.makeHexColor(r, g, b);
-
-      this.ctx.strokeStyle = color;
-      this.current.strokeColor = color;
-    },
-    setFillRGBColor: function CanvasGraphics_setFillRGBColor(r, g, b) {
-      var color = _util.Util.makeHexColor(r, g, b);
-
-      this.ctx.fillStyle = color;
-      this.current.fillColor = color;
-      this.current.patternFill = false;
-    },
-    shadingFill: function CanvasGraphics_shadingFill(patternIR) {
-      if (!this.contentVisible) {
-        return;
-      }
-
-      var ctx = this.ctx;
-      this.save();
-      var pattern = (0, _pattern_helper.getShadingPatternFromIR)(patternIR);
-      ctx.fillStyle = pattern.getPattern(ctx, this, true);
-      var inv = ctx.mozCurrentTransformInverse;
-
-      if (inv) {
-        var canvas = ctx.canvas;
-        var width = canvas.width;
-        var height = canvas.height;
-
-        var bl = _util.Util.applyTransform([0, 0], inv);
-
-        var br = _util.Util.applyTransform([0, height], inv);
-
-        var ul = _util.Util.applyTransform([width, 0], inv);
-
-        var ur = _util.Util.applyTransform([width, height], inv);
-
-        var x0 = Math.min(bl[0], br[0], ul[0], ur[0]);
-        var y0 = Math.min(bl[1], br[1], ul[1], ur[1]);
-        var x1 = Math.max(bl[0], br[0], ul[0], ur[0]);
-        var y1 = Math.max(bl[1], br[1], ul[1], ur[1]);
-        this.ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
-      } else {
-        this.ctx.fillRect(-1e10, -1e10, 2e10, 2e10);
-      }
-
-      this.restore();
-    },
-    beginInlineImage: function CanvasGraphics_beginInlineImage() {
-      (0, _util.unreachable)("Should not call beginInlineImage");
-    },
-    beginImageData: function CanvasGraphics_beginImageData() {
-      (0, _util.unreachable)("Should not call beginImageData");
-    },
-    paintFormXObjectBegin: function CanvasGraphics_paintFormXObjectBegin(matrix, bbox) {
-      if (!this.contentVisible) {
-        return;
-      }
-
-      this.save();
-      this.baseTransformStack.push(this.baseTransform);
-
-      if (Array.isArray(matrix) && matrix.length === 6) {
-        this.transform.apply(this, matrix);
-      }
-
-      this.baseTransform = this.ctx.mozCurrentTransform;
-
-      if (bbox) {
-        var width = bbox[2] - bbox[0];
-        var height = bbox[3] - bbox[1];
-        this.ctx.rect(bbox[0], bbox[1], width, height);
-        this.clip();
-        this.endPath();
-      }
-    },
-    paintFormXObjectEnd: function CanvasGraphics_paintFormXObjectEnd() {
-      if (!this.contentVisible) {
-        return;
-      }
-
-      this.restore();
-      this.baseTransform = this.baseTransformStack.pop();
-    },
-    beginGroup: function CanvasGraphics_beginGroup(group) {
-      if (!this.contentVisible) {
-        return;
-      }
-
-      this.save();
-      var currentCtx = this.ctx;
-
-      if (!group.isolated) {
-        (0, _util.info)("TODO: Support non-isolated groups.");
-      }
-
-      if (group.knockout) {
-        (0, _util.warn)("Knockout groups not supported.");
-      }
-
-      var currentTransform = currentCtx.mozCurrentTransform;
-
-      if (group.matrix) {
-        currentCtx.transform.apply(currentCtx, group.matrix);
-      }
-
-      if (!group.bbox) {
-        throw new Error("Bounding box is required.");
-      }
-
-      var bounds = _util.Util.getAxialAlignedBoundingBox(group.bbox, currentCtx.mozCurrentTransform);
-
-      var canvasBounds = [0, 0, currentCtx.canvas.width, currentCtx.canvas.height];
-      bounds = _util.Util.intersect(bounds, canvasBounds) || [0, 0, 0, 0];
-      var offsetX = Math.floor(bounds[0]);
-      var offsetY = Math.floor(bounds[1]);
-      var drawnWidth = Math.max(Math.ceil(bounds[2]) - offsetX, 1);
-      var drawnHeight = Math.max(Math.ceil(bounds[3]) - offsetY, 1);
-      var scaleX = 1,
-          scaleY = 1;
-
-      if (drawnWidth > MAX_GROUP_SIZE) {
-        scaleX = drawnWidth / MAX_GROUP_SIZE;
-        drawnWidth = MAX_GROUP_SIZE;
-      }
-
-      if (drawnHeight > MAX_GROUP_SIZE) {
-        scaleY = drawnHeight / MAX_GROUP_SIZE;
-        drawnHeight = MAX_GROUP_SIZE;
-      }
-
-      var cacheId = "groupAt" + this.groupLevel;
-
-      if (group.smask) {
-        cacheId += "_smask_" + this.smaskCounter++ % 2;
-      }
-
-      var scratchCanvas = this.cachedCanvases.getCanvas(cacheId, drawnWidth, drawnHeight, true);
-      var groupCtx = scratchCanvas.context;
-      groupCtx.scale(1 / scaleX, 1 / scaleY);
-      groupCtx.translate(-offsetX, -offsetY);
-      groupCtx.transform.apply(groupCtx, currentTransform);
-
-      if (group.smask) {
-        this.smaskStack.push({
-          canvas: scratchCanvas.canvas,
-          context: groupCtx,
-          offsetX: offsetX,
-          offsetY: offsetY,
-          scaleX: scaleX,
-          scaleY: scaleY,
-          subtype: group.smask.subtype,
-          backdrop: group.smask.backdrop,
-          transferMap: group.smask.transferMap || null,
-          startTransformInverse: null
-        });
-      } else {
-        currentCtx.setTransform(1, 0, 0, 1, 0, 0);
-        currentCtx.translate(offsetX, offsetY);
-        currentCtx.scale(scaleX, scaleY);
-      }
-
-      copyCtxState(currentCtx, groupCtx);
-      this.ctx = groupCtx;
-      this.setGState([["BM", "source-over"], ["ca", 1], ["CA", 1]]);
-      this.groupStack.push(currentCtx);
-      this.groupLevel++;
-      this.current.activeSMask = null;
-    },
-    endGroup: function CanvasGraphics_endGroup(group) {
-      if (!this.contentVisible) {
-        return;
-      }
-
-      this.groupLevel--;
-      var groupCtx = this.ctx;
-      this.ctx = this.groupStack.pop();
-
-      if (this.ctx.imageSmoothingEnabled !== undefined) {
-        this.ctx.imageSmoothingEnabled = false;
-      } else {
-        this.ctx.mozImageSmoothingEnabled = false;
-      }
-
-      if (group.smask) {
-        this.tempSMask = this.smaskStack.pop();
-      } else {
-        this.ctx.drawImage(groupCtx.canvas, 0, 0);
-      }
-
-      this.restore();
-    },
-    beginAnnotations: function CanvasGraphics_beginAnnotations() {
-      this.save();
-
-      if (this.baseTransform) {
-        this.ctx.setTransform.apply(this.ctx, this.baseTransform);
-      }
-    },
-    endAnnotations: function CanvasGraphics_endAnnotations() {
-      this.restore();
-    },
-    beginAnnotation: function CanvasGraphics_beginAnnotation(rect, transform, matrix) {
-      this.save();
-      resetCtxToDefault(this.ctx);
-      this.current = new CanvasExtraState();
-
-      if (Array.isArray(rect) && rect.length === 4) {
-        var width = rect[2] - rect[0];
-        var height = rect[3] - rect[1];
-        this.ctx.rect(rect[0], rect[1], width, height);
-        this.clip();
-        this.endPath();
-      }
-
-      this.transform.apply(this, transform);
-      this.transform.apply(this, matrix);
-    },
-    endAnnotation: function CanvasGraphics_endAnnotation() {
-      this.restore();
-    },
-    paintImageMaskXObject: function CanvasGraphics_paintImageMaskXObject(img) {
-      if (!this.contentVisible) {
-        return;
-      }
-
-      var ctx = this.ctx;
-      var width = img.width,
-          height = img.height;
-      var fillColor = this.current.fillColor;
-      var isPatternFill = this.current.patternFill;
-      var glyph = this.processingType3;
-
-      if (COMPILE_TYPE3_GLYPHS && glyph && glyph.compiled === undefined) {
-        if (width <= MAX_SIZE_TO_COMPILE && height <= MAX_SIZE_TO_COMPILE) {
-          glyph.compiled = compileType3Glyph({
-            data: img.data,
-            width: width,
-            height: height
-          });
-        } else {
-          glyph.compiled = null;
+        if (this.imageLayer) {
+          this.imageLayer.endLayout();
         }
       }
-
-      if (glyph !== null && glyph !== void 0 && glyph.compiled) {
-        glyph.compiled(ctx);
-        return;
+    }, {
+      key: "setLineWidth",
+      value: function setLineWidth(width) {
+        this.current.lineWidth = width;
+        this.ctx.lineWidth = width;
       }
-
-      var maskCanvas = this.cachedCanvases.getCanvas("maskCanvas", width, height);
-      var maskCtx = maskCanvas.context;
-      maskCtx.save();
-      putBinaryImageMask(maskCtx, img);
-      maskCtx.globalCompositeOperation = "source-in";
-      maskCtx.fillStyle = isPatternFill ? fillColor.getPattern(maskCtx, this) : fillColor;
-      maskCtx.fillRect(0, 0, width, height);
-      maskCtx.restore();
-      this.paintInlineImageXObject(maskCanvas.canvas);
-    },
-    paintImageMaskXObjectRepeat: function paintImageMaskXObjectRepeat(imgData, scaleX) {
-      var skewX = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
-      var skewY = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
-      var scaleY = arguments.length > 4 ? arguments[4] : undefined;
-      var positions = arguments.length > 5 ? arguments[5] : undefined;
-
-      if (!this.contentVisible) {
-        return;
+    }, {
+      key: "setLineCap",
+      value: function setLineCap(style) {
+        this.ctx.lineCap = LINE_CAP_STYLES[style];
       }
+    }, {
+      key: "setLineJoin",
+      value: function setLineJoin(style) {
+        this.ctx.lineJoin = LINE_JOIN_STYLES[style];
+      }
+    }, {
+      key: "setMiterLimit",
+      value: function setMiterLimit(limit) {
+        this.ctx.miterLimit = limit;
+      }
+    }, {
+      key: "setDash",
+      value: function setDash(dashArray, dashPhase) {
+        var ctx = this.ctx;
 
-      var width = imgData.width;
-      var height = imgData.height;
-      var fillColor = this.current.fillColor;
-      var isPatternFill = this.current.patternFill;
-      var maskCanvas = this.cachedCanvases.getCanvas("maskCanvas", width, height);
-      var maskCtx = maskCanvas.context;
-      maskCtx.save();
-      putBinaryImageMask(maskCtx, imgData);
-      maskCtx.globalCompositeOperation = "source-in";
-      maskCtx.fillStyle = isPatternFill ? fillColor.getPattern(maskCtx, this) : fillColor;
-      maskCtx.fillRect(0, 0, width, height);
-      maskCtx.restore();
-      var ctx = this.ctx;
+        if (ctx.setLineDash !== undefined) {
+          ctx.setLineDash(dashArray);
+          ctx.lineDashOffset = dashPhase;
+        }
+      }
+    }, {
+      key: "setRenderingIntent",
+      value: function setRenderingIntent(intent) {}
+    }, {
+      key: "setFlatness",
+      value: function setFlatness(flatness) {}
+    }, {
+      key: "setGState",
+      value: function setGState(states) {
+        for (var i = 0, ii = states.length; i < ii; i++) {
+          var state = states[i];
+          var key = state[0];
+          var value = state[1];
 
-      for (var i = 0, ii = positions.length; i < ii; i += 2) {
+          switch (key) {
+            case "LW":
+              this.setLineWidth(value);
+              break;
+
+            case "LC":
+              this.setLineCap(value);
+              break;
+
+            case "LJ":
+              this.setLineJoin(value);
+              break;
+
+            case "ML":
+              this.setMiterLimit(value);
+              break;
+
+            case "D":
+              this.setDash(value[0], value[1]);
+              break;
+
+            case "RI":
+              this.setRenderingIntent(value);
+              break;
+
+            case "FL":
+              this.setFlatness(value);
+              break;
+
+            case "Font":
+              this.setFont(value[0], value[1]);
+              break;
+
+            case "CA":
+              this.current.strokeAlpha = state[1];
+              break;
+
+            case "ca":
+              this.current.fillAlpha = state[1];
+              this.ctx.globalAlpha = state[1];
+              break;
+
+            case "BM":
+              this.ctx.globalCompositeOperation = value;
+              break;
+
+            case "SMask":
+              if (this.current.activeSMask) {
+                if (this.stateStack.length > 0 && this.stateStack[this.stateStack.length - 1].activeSMask === this.current.activeSMask) {
+                  this.suspendSMaskGroup();
+                } else {
+                  this.endSMaskGroup();
+                }
+              }
+
+              this.current.activeSMask = value ? this.tempSMask : null;
+
+              if (this.current.activeSMask) {
+                this.beginSMaskGroup();
+              }
+
+              this.tempSMask = null;
+              break;
+
+            case "TR":
+              this.current.transferMaps = value;
+          }
+        }
+      }
+    }, {
+      key: "beginSMaskGroup",
+      value: function beginSMaskGroup() {
+        var activeSMask = this.current.activeSMask;
+        var drawnWidth = activeSMask.canvas.width;
+        var drawnHeight = activeSMask.canvas.height;
+        var cacheId = "smaskGroupAt" + this.groupLevel;
+        var scratchCanvas = this.cachedCanvases.getCanvas(cacheId, drawnWidth, drawnHeight, true);
+        var currentCtx = this.ctx;
+        var currentTransform = currentCtx.mozCurrentTransform;
+        this.ctx.save();
+        var groupCtx = scratchCanvas.context;
+        groupCtx.scale(1 / activeSMask.scaleX, 1 / activeSMask.scaleY);
+        groupCtx.translate(-activeSMask.offsetX, -activeSMask.offsetY);
+        groupCtx.transform.apply(groupCtx, currentTransform);
+        activeSMask.startTransformInverse = groupCtx.mozCurrentTransformInverse;
+        copyCtxState(currentCtx, groupCtx);
+        this.ctx = groupCtx;
+        this.setGState([["BM", "source-over"], ["ca", 1], ["CA", 1]]);
+        this.groupStack.push(currentCtx);
+        this.groupLevel++;
+      }
+    }, {
+      key: "suspendSMaskGroup",
+      value: function suspendSMaskGroup() {
+        var groupCtx = this.ctx;
+        this.groupLevel--;
+        this.ctx = this.groupStack.pop();
+        composeSMask(this.ctx, this.current.activeSMask, groupCtx);
+        this.ctx.restore();
+        this.ctx.save();
+        copyCtxState(groupCtx, this.ctx);
+        this.current.resumeSMaskCtx = groupCtx;
+
+        var deltaTransform = _util.Util.transform(this.current.activeSMask.startTransformInverse, groupCtx.mozCurrentTransform);
+
+        this.ctx.transform.apply(this.ctx, deltaTransform);
+        groupCtx.save();
+        groupCtx.setTransform(1, 0, 0, 1, 0, 0);
+        groupCtx.clearRect(0, 0, groupCtx.canvas.width, groupCtx.canvas.height);
+        groupCtx.restore();
+      }
+    }, {
+      key: "resumeSMaskGroup",
+      value: function resumeSMaskGroup() {
+        var groupCtx = this.current.resumeSMaskCtx;
+        var currentCtx = this.ctx;
+        this.ctx = groupCtx;
+        this.groupStack.push(currentCtx);
+        this.groupLevel++;
+      }
+    }, {
+      key: "endSMaskGroup",
+      value: function endSMaskGroup() {
+        var groupCtx = this.ctx;
+        this.groupLevel--;
+        this.ctx = this.groupStack.pop();
+        composeSMask(this.ctx, this.current.activeSMask, groupCtx);
+        this.ctx.restore();
+        copyCtxState(groupCtx, this.ctx);
+
+        var deltaTransform = _util.Util.transform(this.current.activeSMask.startTransformInverse, groupCtx.mozCurrentTransform);
+
+        this.ctx.transform.apply(this.ctx, deltaTransform);
+      }
+    }, {
+      key: "save",
+      value: function save() {
+        this.ctx.save();
+        var old = this.current;
+        this.stateStack.push(old);
+        this.current = old.clone();
+        this.current.resumeSMaskCtx = null;
+      }
+    }, {
+      key: "restore",
+      value: function restore() {
+        if (this.current.resumeSMaskCtx) {
+          this.resumeSMaskGroup();
+        }
+
+        if (this.current.activeSMask !== null && (this.stateStack.length === 0 || this.stateStack[this.stateStack.length - 1].activeSMask !== this.current.activeSMask)) {
+          this.endSMaskGroup();
+        }
+
+        if (this.stateStack.length !== 0) {
+          this.current = this.stateStack.pop();
+          this.ctx.restore();
+          this.pendingClip = null;
+          this._cachedGetSinglePixelWidth = null;
+        } else {
+          this.current.activeSMask = null;
+        }
+      }
+    }, {
+      key: "transform",
+      value: function transform(a, b, c, d, e, f) {
+        this.ctx.transform(a, b, c, d, e, f);
+        this._cachedGetSinglePixelWidth = null;
+      }
+    }, {
+      key: "constructPath",
+      value: function constructPath(ops, args) {
+        var ctx = this.ctx;
+        var current = this.current;
+        var x = current.x,
+            y = current.y;
+
+        for (var i = 0, j = 0, ii = ops.length; i < ii; i++) {
+          switch (ops[i] | 0) {
+            case _util.OPS.rectangle:
+              x = args[j++];
+              y = args[j++];
+              var width = args[j++];
+              var height = args[j++];
+              var xw = x + width;
+              var yh = y + height;
+              ctx.moveTo(x, y);
+
+              if (width === 0 || height === 0) {
+                ctx.lineTo(xw, yh);
+              } else {
+                ctx.lineTo(xw, y);
+                ctx.lineTo(xw, yh);
+                ctx.lineTo(x, yh);
+              }
+
+              ctx.closePath();
+              break;
+
+            case _util.OPS.moveTo:
+              x = args[j++];
+              y = args[j++];
+              ctx.moveTo(x, y);
+              break;
+
+            case _util.OPS.lineTo:
+              x = args[j++];
+              y = args[j++];
+              ctx.lineTo(x, y);
+              break;
+
+            case _util.OPS.curveTo:
+              x = args[j + 4];
+              y = args[j + 5];
+              ctx.bezierCurveTo(args[j], args[j + 1], args[j + 2], args[j + 3], x, y);
+              j += 6;
+              break;
+
+            case _util.OPS.curveTo2:
+              ctx.bezierCurveTo(x, y, args[j], args[j + 1], args[j + 2], args[j + 3]);
+              x = args[j + 2];
+              y = args[j + 3];
+              j += 4;
+              break;
+
+            case _util.OPS.curveTo3:
+              x = args[j + 2];
+              y = args[j + 3];
+              ctx.bezierCurveTo(args[j], args[j + 1], x, y, x, y);
+              j += 4;
+              break;
+
+            case _util.OPS.closePath:
+              ctx.closePath();
+              break;
+          }
+        }
+
+        current.setCurrentPoint(x, y);
+      }
+    }, {
+      key: "closePath",
+      value: function closePath() {
+        this.ctx.closePath();
+      }
+    }, {
+      key: "stroke",
+      value: function stroke(consumePath) {
+        consumePath = typeof consumePath !== "undefined" ? consumePath : true;
+        var ctx = this.ctx;
+        var strokeColor = this.current.strokeColor;
+        ctx.globalAlpha = this.current.strokeAlpha;
+
+        if (this.contentVisible) {
+          if (_typeof(strokeColor) === "object" && strokeColor !== null && strokeColor !== void 0 && strokeColor.getPattern) {
+            var lineWidth = this.getSinglePixelWidth();
+            ctx.save();
+            ctx.strokeStyle = strokeColor.getPattern(ctx, this);
+            ctx.lineWidth = Math.max(lineWidth, this.current.lineWidth);
+            ctx.stroke();
+            ctx.restore();
+          } else {
+            var _lineWidth = this.getSinglePixelWidth();
+
+            if (_lineWidth < 0 && -_lineWidth >= this.current.lineWidth) {
+              ctx.save();
+              ctx.resetTransform();
+              ctx.lineWidth = Math.round(this._combinedScaleFactor);
+              ctx.stroke();
+              ctx.restore();
+            } else {
+              ctx.lineWidth = Math.max(_lineWidth, this.current.lineWidth);
+              ctx.stroke();
+            }
+          }
+        }
+
+        if (consumePath) {
+          this.consumePath();
+        }
+
+        ctx.globalAlpha = this.current.fillAlpha;
+      }
+    }, {
+      key: "closeStroke",
+      value: function closeStroke() {
+        this.closePath();
+        this.stroke();
+      }
+    }, {
+      key: "fill",
+      value: function fill(consumePath) {
+        consumePath = typeof consumePath !== "undefined" ? consumePath : true;
+        var ctx = this.ctx;
+        var fillColor = this.current.fillColor;
+        var isPatternFill = this.current.patternFill;
+        var needRestore = false;
+
+        if (isPatternFill) {
+          ctx.save();
+          ctx.fillStyle = fillColor.getPattern(ctx, this);
+          needRestore = true;
+        }
+
+        if (this.contentVisible) {
+          if (this.pendingEOFill) {
+            ctx.fill("evenodd");
+            this.pendingEOFill = false;
+          } else {
+            ctx.fill();
+          }
+        }
+
+        if (needRestore) {
+          ctx.restore();
+        }
+
+        if (consumePath) {
+          this.consumePath();
+        }
+      }
+    }, {
+      key: "eoFill",
+      value: function eoFill() {
+        this.pendingEOFill = true;
+        this.fill();
+      }
+    }, {
+      key: "fillStroke",
+      value: function fillStroke() {
+        this.fill(false);
+        this.stroke(false);
+        this.consumePath();
+      }
+    }, {
+      key: "eoFillStroke",
+      value: function eoFillStroke() {
+        this.pendingEOFill = true;
+        this.fillStroke();
+      }
+    }, {
+      key: "closeFillStroke",
+      value: function closeFillStroke() {
+        this.closePath();
+        this.fillStroke();
+      }
+    }, {
+      key: "closeEOFillStroke",
+      value: function closeEOFillStroke() {
+        this.pendingEOFill = true;
+        this.closePath();
+        this.fillStroke();
+      }
+    }, {
+      key: "endPath",
+      value: function endPath() {
+        this.consumePath();
+      }
+    }, {
+      key: "clip",
+      value: function clip() {
+        this.pendingClip = NORMAL_CLIP;
+      }
+    }, {
+      key: "eoClip",
+      value: function eoClip() {
+        this.pendingClip = EO_CLIP;
+      }
+    }, {
+      key: "beginText",
+      value: function beginText() {
+        this.current.textMatrix = _util.IDENTITY_MATRIX;
+        this.current.textMatrixScale = 1;
+        this.current.x = this.current.lineX = 0;
+        this.current.y = this.current.lineY = 0;
+      }
+    }, {
+      key: "endText",
+      value: function endText() {
+        var paths = this.pendingTextPaths;
+        var ctx = this.ctx;
+
+        if (paths === undefined) {
+          ctx.beginPath();
+          return;
+        }
+
         ctx.save();
-        ctx.transform(scaleX, skewX, skewY, scaleY, positions[i], positions[i + 1]);
-        ctx.scale(1, -1);
-        ctx.drawImage(maskCanvas.canvas, 0, 0, width, height, 0, -1, 1, 1);
+        ctx.beginPath();
+
+        for (var i = 0; i < paths.length; i++) {
+          var path = paths[i];
+          ctx.setTransform.apply(ctx, path.transform);
+          ctx.translate(path.x, path.y);
+          path.addToPath(ctx, path.fontSize);
+        }
+
         ctx.restore();
+        ctx.clip();
+        ctx.beginPath();
+        delete this.pendingTextPaths;
       }
-    },
-    paintImageMaskXObjectGroup: function CanvasGraphics_paintImageMaskXObjectGroup(images) {
-      if (!this.contentVisible) {
-        return;
+    }, {
+      key: "setCharSpacing",
+      value: function setCharSpacing(spacing) {
+        this.current.charSpacing = spacing;
       }
+    }, {
+      key: "setWordSpacing",
+      value: function setWordSpacing(spacing) {
+        this.current.wordSpacing = spacing;
+      }
+    }, {
+      key: "setHScale",
+      value: function setHScale(scale) {
+        this.current.textHScale = scale / 100;
+      }
+    }, {
+      key: "setLeading",
+      value: function setLeading(leading) {
+        this.current.leading = -leading;
+      }
+    }, {
+      key: "setFont",
+      value: function setFont(fontRefName, size) {
+        var fontObj = this.commonObjs.get(fontRefName);
+        var current = this.current;
 
-      var ctx = this.ctx;
-      var fillColor = this.current.fillColor;
-      var isPatternFill = this.current.patternFill;
+        if (!fontObj) {
+          throw new Error("Can't find font for ".concat(fontRefName));
+        }
 
-      for (var i = 0, ii = images.length; i < ii; i++) {
-        var image = images[i];
-        var width = image.width,
-            height = image.height;
+        current.fontMatrix = fontObj.fontMatrix || _util.FONT_IDENTITY_MATRIX;
+
+        if (current.fontMatrix[0] === 0 || current.fontMatrix[3] === 0) {
+          (0, _util.warn)("Invalid font matrix for font " + fontRefName);
+        }
+
+        if (size < 0) {
+          size = -size;
+          current.fontDirection = -1;
+        } else {
+          current.fontDirection = 1;
+        }
+
+        this.current.font = fontObj;
+        this.current.fontSize = size;
+
+        if (fontObj.isType3Font) {
+          return;
+        }
+
+        var name = fontObj.loadedName || "sans-serif";
+        var bold = "normal";
+
+        if (fontObj.black) {
+          bold = "900";
+        } else if (fontObj.bold) {
+          bold = "bold";
+        }
+
+        var italic = fontObj.italic ? "italic" : "normal";
+        var typeface = "\"".concat(name, "\", ").concat(fontObj.fallbackName);
+        var browserFontSize = size;
+
+        if (size < MIN_FONT_SIZE) {
+          browserFontSize = MIN_FONT_SIZE;
+        } else if (size > MAX_FONT_SIZE) {
+          browserFontSize = MAX_FONT_SIZE;
+        }
+
+        this.current.fontSizeScale = size / browserFontSize;
+        this.ctx.font = "".concat(italic, " ").concat(bold, " ").concat(browserFontSize, "px ").concat(typeface);
+      }
+    }, {
+      key: "setTextRenderingMode",
+      value: function setTextRenderingMode(mode) {
+        this.current.textRenderingMode = mode;
+      }
+    }, {
+      key: "setTextRise",
+      value: function setTextRise(rise) {
+        this.current.textRise = rise;
+      }
+    }, {
+      key: "moveText",
+      value: function moveText(x, y) {
+        this.current.x = this.current.lineX += x;
+        this.current.y = this.current.lineY += y;
+      }
+    }, {
+      key: "setLeadingMoveText",
+      value: function setLeadingMoveText(x, y) {
+        this.setLeading(-y);
+        this.moveText(x, y);
+      }
+    }, {
+      key: "setTextMatrix",
+      value: function setTextMatrix(a, b, c, d, e, f) {
+        this.current.textMatrix = [a, b, c, d, e, f];
+        this.current.textMatrixScale = Math.hypot(a, b);
+        this.current.x = this.current.lineX = 0;
+        this.current.y = this.current.lineY = 0;
+      }
+    }, {
+      key: "nextLine",
+      value: function nextLine() {
+        this.moveText(0, this.current.leading);
+      }
+    }, {
+      key: "paintChar",
+      value: function paintChar(character, x, y, patternTransform, resetLineWidthToOne) {
+        var ctx = this.ctx;
+        var current = this.current;
+        var font = current.font;
+        var textRenderingMode = current.textRenderingMode;
+        var fontSize = current.fontSize / current.fontSizeScale;
+        var fillStrokeMode = textRenderingMode & _util.TextRenderingMode.FILL_STROKE_MASK;
+        var isAddToPathSet = !!(textRenderingMode & _util.TextRenderingMode.ADD_TO_PATH_FLAG);
+        var patternFill = current.patternFill && !font.missingFile;
+        var addToPath;
+
+        if (font.disableFontFace || isAddToPathSet || patternFill) {
+          addToPath = font.getPathGenerator(this.commonObjs, character);
+        }
+
+        if (font.disableFontFace || patternFill) {
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.beginPath();
+          addToPath(ctx, fontSize);
+
+          if (patternTransform) {
+            ctx.setTransform.apply(ctx, patternTransform);
+          }
+
+          if (fillStrokeMode === _util.TextRenderingMode.FILL || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
+            ctx.fill();
+          }
+
+          if (fillStrokeMode === _util.TextRenderingMode.STROKE || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
+            if (resetLineWidthToOne) {
+              ctx.resetTransform();
+              ctx.lineWidth = Math.round(this._combinedScaleFactor);
+            }
+
+            ctx.stroke();
+          }
+
+          ctx.restore();
+        } else {
+          if (fillStrokeMode === _util.TextRenderingMode.FILL || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
+            ctx.fillText(character, x, y);
+          }
+
+          if (fillStrokeMode === _util.TextRenderingMode.STROKE || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
+            if (resetLineWidthToOne) {
+              ctx.save();
+              ctx.moveTo(x, y);
+              ctx.resetTransform();
+              ctx.lineWidth = Math.round(this._combinedScaleFactor);
+              ctx.strokeText(character, 0, 0);
+              ctx.restore();
+            } else {
+              ctx.strokeText(character, x, y);
+            }
+          }
+        }
+
+        if (isAddToPathSet) {
+          var paths = this.pendingTextPaths || (this.pendingTextPaths = []);
+          paths.push({
+            transform: ctx.mozCurrentTransform,
+            x: x,
+            y: y,
+            fontSize: fontSize,
+            addToPath: addToPath
+          });
+        }
+      }
+    }, {
+      key: "isFontSubpixelAAEnabled",
+      get: function get() {
+        var _this$cachedCanvases$ = this.cachedCanvases.getCanvas("isFontSubpixelAAEnabled", 10, 10),
+            ctx = _this$cachedCanvases$.context;
+
+        ctx.scale(1.5, 1);
+        ctx.fillText("I", 0, 10);
+        var data = ctx.getImageData(0, 0, 10, 10).data;
+        var enabled = false;
+
+        for (var i = 3; i < data.length; i += 4) {
+          if (data[i] > 0 && data[i] < 255) {
+            enabled = true;
+            break;
+          }
+        }
+
+        return (0, _util.shadow)(this, "isFontSubpixelAAEnabled", enabled);
+      }
+    }, {
+      key: "showText",
+      value: function showText(glyphs) {
+        var current = this.current;
+        var font = current.font;
+
+        if (font.isType3Font) {
+          return this.showType3Text(glyphs);
+        }
+
+        var fontSize = current.fontSize;
+
+        if (fontSize === 0) {
+          return undefined;
+        }
+
+        var ctx = this.ctx;
+        var fontSizeScale = current.fontSizeScale;
+        var charSpacing = current.charSpacing;
+        var wordSpacing = current.wordSpacing;
+        var fontDirection = current.fontDirection;
+        var textHScale = current.textHScale * fontDirection;
+        var glyphsLength = glyphs.length;
+        var vertical = font.vertical;
+        var spacingDir = vertical ? 1 : -1;
+        var defaultVMetrics = font.defaultVMetrics;
+        var widthAdvanceScale = fontSize * current.fontMatrix[0];
+        var simpleFillText = current.textRenderingMode === _util.TextRenderingMode.FILL && !font.disableFontFace && !current.patternFill;
+        ctx.save();
+        var patternTransform;
+
+        if (current.patternFill) {
+          ctx.save();
+          var pattern = current.fillColor.getPattern(ctx, this);
+          patternTransform = ctx.mozCurrentTransform;
+          ctx.restore();
+          ctx.fillStyle = pattern;
+        }
+
+        ctx.transform.apply(ctx, current.textMatrix);
+        ctx.translate(current.x, current.y + current.textRise);
+
+        if (fontDirection > 0) {
+          ctx.scale(textHScale, -1);
+        } else {
+          ctx.scale(textHScale, 1);
+        }
+
+        var lineWidth = current.lineWidth;
+        var resetLineWidthToOne = false;
+        var scale = current.textMatrixScale;
+
+        if (scale === 0 || lineWidth === 0) {
+          var fillStrokeMode = current.textRenderingMode & _util.TextRenderingMode.FILL_STROKE_MASK;
+
+          if (fillStrokeMode === _util.TextRenderingMode.STROKE || fillStrokeMode === _util.TextRenderingMode.FILL_STROKE) {
+            this._cachedGetSinglePixelWidth = null;
+            lineWidth = this.getSinglePixelWidth();
+            resetLineWidthToOne = lineWidth < 0;
+          }
+        } else {
+          lineWidth /= scale;
+        }
+
+        if (fontSizeScale !== 1.0) {
+          ctx.scale(fontSizeScale, fontSizeScale);
+          lineWidth /= fontSizeScale;
+        }
+
+        ctx.lineWidth = lineWidth;
+        var x = 0,
+            i;
+
+        for (i = 0; i < glyphsLength; ++i) {
+          var glyph = glyphs[i];
+
+          if ((0, _util.isNum)(glyph)) {
+            x += spacingDir * glyph * fontSize / 1000;
+            continue;
+          }
+
+          var restoreNeeded = false;
+          var spacing = (glyph.isSpace ? wordSpacing : 0) + charSpacing;
+          var character = glyph.fontChar;
+          var accent = glyph.accent;
+          var scaledX = void 0,
+              scaledY = void 0;
+          var width = glyph.width;
+
+          if (vertical) {
+            var vmetric = glyph.vmetric || defaultVMetrics;
+            var vx = -(glyph.vmetric ? vmetric[1] : width * 0.5) * widthAdvanceScale;
+            var vy = vmetric[2] * widthAdvanceScale;
+            width = vmetric ? -vmetric[0] : width;
+            scaledX = vx / fontSizeScale;
+            scaledY = (x + vy) / fontSizeScale;
+          } else {
+            scaledX = x / fontSizeScale;
+            scaledY = 0;
+          }
+
+          if (font.remeasure && width > 0) {
+            var measuredWidth = ctx.measureText(character).width * 1000 / fontSize * fontSizeScale;
+
+            if (width < measuredWidth && this.isFontSubpixelAAEnabled) {
+              var characterScaleX = width / measuredWidth;
+              restoreNeeded = true;
+              ctx.save();
+              ctx.scale(characterScaleX, 1);
+              scaledX /= characterScaleX;
+            } else if (width !== measuredWidth) {
+              scaledX += (width - measuredWidth) / 2000 * fontSize / fontSizeScale;
+            }
+          }
+
+          if (this.contentVisible && (glyph.isInFont || font.missingFile)) {
+            if (simpleFillText && !accent) {
+              ctx.fillText(character, scaledX, scaledY);
+            } else {
+              this.paintChar(character, scaledX, scaledY, patternTransform, resetLineWidthToOne);
+
+              if (accent) {
+                var scaledAccentX = scaledX + fontSize * accent.offset.x / fontSizeScale;
+                var scaledAccentY = scaledY - fontSize * accent.offset.y / fontSizeScale;
+                this.paintChar(accent.fontChar, scaledAccentX, scaledAccentY, patternTransform, resetLineWidthToOne);
+              }
+            }
+          }
+
+          var charWidth = void 0;
+
+          if (vertical) {
+            charWidth = width * widthAdvanceScale - spacing * fontDirection;
+          } else {
+            charWidth = width * widthAdvanceScale + spacing * fontDirection;
+          }
+
+          x += charWidth;
+
+          if (restoreNeeded) {
+            ctx.restore();
+          }
+        }
+
+        if (vertical) {
+          current.y -= x;
+        } else {
+          current.x += x * textHScale;
+        }
+
+        ctx.restore();
+        return undefined;
+      }
+    }, {
+      key: "showType3Text",
+      value: function showType3Text(glyphs) {
+        var ctx = this.ctx;
+        var current = this.current;
+        var font = current.font;
+        var fontSize = current.fontSize;
+        var fontDirection = current.fontDirection;
+        var spacingDir = font.vertical ? 1 : -1;
+        var charSpacing = current.charSpacing;
+        var wordSpacing = current.wordSpacing;
+        var textHScale = current.textHScale * fontDirection;
+        var fontMatrix = current.fontMatrix || _util.FONT_IDENTITY_MATRIX;
+        var glyphsLength = glyphs.length;
+        var isTextInvisible = current.textRenderingMode === _util.TextRenderingMode.INVISIBLE;
+        var i, glyph, width, spacingLength;
+
+        if (isTextInvisible || fontSize === 0) {
+          return;
+        }
+
+        this._cachedGetSinglePixelWidth = null;
+        ctx.save();
+        ctx.transform.apply(ctx, current.textMatrix);
+        ctx.translate(current.x, current.y);
+        ctx.scale(textHScale, fontDirection);
+
+        for (i = 0; i < glyphsLength; ++i) {
+          glyph = glyphs[i];
+
+          if ((0, _util.isNum)(glyph)) {
+            spacingLength = spacingDir * glyph * fontSize / 1000;
+            this.ctx.translate(spacingLength, 0);
+            current.x += spacingLength * textHScale;
+            continue;
+          }
+
+          var spacing = (glyph.isSpace ? wordSpacing : 0) + charSpacing;
+          var operatorList = font.charProcOperatorList[glyph.operatorListId];
+
+          if (!operatorList) {
+            (0, _util.warn)("Type3 character \"".concat(glyph.operatorListId, "\" is not available."));
+            continue;
+          }
+
+          if (this.contentVisible) {
+            this.processingType3 = glyph;
+            this.save();
+            ctx.scale(fontSize, fontSize);
+            ctx.transform.apply(ctx, fontMatrix);
+            this.executeOperatorList(operatorList);
+            this.restore();
+          }
+
+          var transformed = _util.Util.applyTransform([glyph.width, 0], fontMatrix);
+
+          width = transformed[0] * fontSize + spacing;
+          ctx.translate(width, 0);
+          current.x += width * textHScale;
+        }
+
+        ctx.restore();
+        this.processingType3 = null;
+      }
+    }, {
+      key: "setCharWidth",
+      value: function setCharWidth(xWidth, yWidth) {}
+    }, {
+      key: "setCharWidthAndBounds",
+      value: function setCharWidthAndBounds(xWidth, yWidth, llx, lly, urx, ury) {
+        this.ctx.rect(llx, lly, urx - llx, ury - lly);
+        this.clip();
+        this.endPath();
+      }
+    }, {
+      key: "getColorN_Pattern",
+      value: function getColorN_Pattern(IR) {
+        var _this = this;
+
+        var pattern;
+
+        if (IR[0] === "TilingPattern") {
+          var color = IR[1];
+          var baseTransform = this.baseTransform || this.ctx.mozCurrentTransform.slice();
+          var canvasGraphicsFactory = {
+            createCanvasGraphics: function createCanvasGraphics(ctx) {
+              return new CanvasGraphics(ctx, _this.commonObjs, _this.objs, _this.canvasFactory);
+            }
+          };
+          pattern = new _pattern_helper.TilingPattern(IR, color, this.ctx, canvasGraphicsFactory, baseTransform);
+        } else {
+          pattern = (0, _pattern_helper.getShadingPattern)(IR);
+        }
+
+        return pattern;
+      }
+    }, {
+      key: "setStrokeColorN",
+      value: function setStrokeColorN() {
+        this.current.strokeColor = this.getColorN_Pattern(arguments);
+      }
+    }, {
+      key: "setFillColorN",
+      value: function setFillColorN() {
+        this.current.fillColor = this.getColorN_Pattern(arguments);
+        this.current.patternFill = true;
+      }
+    }, {
+      key: "setStrokeRGBColor",
+      value: function setStrokeRGBColor(r, g, b) {
+        var color = _util.Util.makeHexColor(r, g, b);
+
+        this.ctx.strokeStyle = color;
+        this.current.strokeColor = color;
+      }
+    }, {
+      key: "setFillRGBColor",
+      value: function setFillRGBColor(r, g, b) {
+        var color = _util.Util.makeHexColor(r, g, b);
+
+        this.ctx.fillStyle = color;
+        this.current.fillColor = color;
+        this.current.patternFill = false;
+      }
+    }, {
+      key: "shadingFill",
+      value: function shadingFill(patternIR) {
+        if (!this.contentVisible) {
+          return;
+        }
+
+        var ctx = this.ctx;
+        this.save();
+        var pattern = (0, _pattern_helper.getShadingPattern)(patternIR);
+        ctx.fillStyle = pattern.getPattern(ctx, this, true);
+        var inv = ctx.mozCurrentTransformInverse;
+
+        if (inv) {
+          var canvas = ctx.canvas;
+          var width = canvas.width;
+          var height = canvas.height;
+
+          var bl = _util.Util.applyTransform([0, 0], inv);
+
+          var br = _util.Util.applyTransform([0, height], inv);
+
+          var ul = _util.Util.applyTransform([width, 0], inv);
+
+          var ur = _util.Util.applyTransform([width, height], inv);
+
+          var x0 = Math.min(bl[0], br[0], ul[0], ur[0]);
+          var y0 = Math.min(bl[1], br[1], ul[1], ur[1]);
+          var x1 = Math.max(bl[0], br[0], ul[0], ur[0]);
+          var y1 = Math.max(bl[1], br[1], ul[1], ur[1]);
+          this.ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+        } else {
+          this.ctx.fillRect(-1e10, -1e10, 2e10, 2e10);
+        }
+
+        this.restore();
+      }
+    }, {
+      key: "beginInlineImage",
+      value: function beginInlineImage() {
+        (0, _util.unreachable)("Should not call beginInlineImage");
+      }
+    }, {
+      key: "beginImageData",
+      value: function beginImageData() {
+        (0, _util.unreachable)("Should not call beginImageData");
+      }
+    }, {
+      key: "paintFormXObjectBegin",
+      value: function paintFormXObjectBegin(matrix, bbox) {
+        if (!this.contentVisible) {
+          return;
+        }
+
+        this.save();
+        this.baseTransformStack.push(this.baseTransform);
+
+        if (Array.isArray(matrix) && matrix.length === 6) {
+          this.transform.apply(this, matrix);
+        }
+
+        this.baseTransform = this.ctx.mozCurrentTransform;
+
+        if (bbox) {
+          var width = bbox[2] - bbox[0];
+          var height = bbox[3] - bbox[1];
+          this.ctx.rect(bbox[0], bbox[1], width, height);
+          this.clip();
+          this.endPath();
+        }
+      }
+    }, {
+      key: "paintFormXObjectEnd",
+      value: function paintFormXObjectEnd() {
+        if (!this.contentVisible) {
+          return;
+        }
+
+        this.restore();
+        this.baseTransform = this.baseTransformStack.pop();
+      }
+    }, {
+      key: "beginGroup",
+      value: function beginGroup(group) {
+        if (!this.contentVisible) {
+          return;
+        }
+
+        this.save();
+        var currentCtx = this.ctx;
+
+        if (!group.isolated) {
+          (0, _util.info)("TODO: Support non-isolated groups.");
+        }
+
+        if (group.knockout) {
+          (0, _util.warn)("Knockout groups not supported.");
+        }
+
+        var currentTransform = currentCtx.mozCurrentTransform;
+
+        if (group.matrix) {
+          currentCtx.transform.apply(currentCtx, group.matrix);
+        }
+
+        if (!group.bbox) {
+          throw new Error("Bounding box is required.");
+        }
+
+        var bounds = _util.Util.getAxialAlignedBoundingBox(group.bbox, currentCtx.mozCurrentTransform);
+
+        var canvasBounds = [0, 0, currentCtx.canvas.width, currentCtx.canvas.height];
+        bounds = _util.Util.intersect(bounds, canvasBounds) || [0, 0, 0, 0];
+        var offsetX = Math.floor(bounds[0]);
+        var offsetY = Math.floor(bounds[1]);
+        var drawnWidth = Math.max(Math.ceil(bounds[2]) - offsetX, 1);
+        var drawnHeight = Math.max(Math.ceil(bounds[3]) - offsetY, 1);
+        var scaleX = 1,
+            scaleY = 1;
+
+        if (drawnWidth > MAX_GROUP_SIZE) {
+          scaleX = drawnWidth / MAX_GROUP_SIZE;
+          drawnWidth = MAX_GROUP_SIZE;
+        }
+
+        if (drawnHeight > MAX_GROUP_SIZE) {
+          scaleY = drawnHeight / MAX_GROUP_SIZE;
+          drawnHeight = MAX_GROUP_SIZE;
+        }
+
+        var cacheId = "groupAt" + this.groupLevel;
+
+        if (group.smask) {
+          cacheId += "_smask_" + this.smaskCounter++ % 2;
+        }
+
+        var scratchCanvas = this.cachedCanvases.getCanvas(cacheId, drawnWidth, drawnHeight, true);
+        var groupCtx = scratchCanvas.context;
+        groupCtx.scale(1 / scaleX, 1 / scaleY);
+        groupCtx.translate(-offsetX, -offsetY);
+        groupCtx.transform.apply(groupCtx, currentTransform);
+
+        if (group.smask) {
+          this.smaskStack.push({
+            canvas: scratchCanvas.canvas,
+            context: groupCtx,
+            offsetX: offsetX,
+            offsetY: offsetY,
+            scaleX: scaleX,
+            scaleY: scaleY,
+            subtype: group.smask.subtype,
+            backdrop: group.smask.backdrop,
+            transferMap: group.smask.transferMap || null,
+            startTransformInverse: null
+          });
+        } else {
+          currentCtx.setTransform(1, 0, 0, 1, 0, 0);
+          currentCtx.translate(offsetX, offsetY);
+          currentCtx.scale(scaleX, scaleY);
+        }
+
+        copyCtxState(currentCtx, groupCtx);
+        this.ctx = groupCtx;
+        this.setGState([["BM", "source-over"], ["ca", 1], ["CA", 1]]);
+        this.groupStack.push(currentCtx);
+        this.groupLevel++;
+        this.current.activeSMask = null;
+      }
+    }, {
+      key: "endGroup",
+      value: function endGroup(group) {
+        if (!this.contentVisible) {
+          return;
+        }
+
+        this.groupLevel--;
+        var groupCtx = this.ctx;
+        this.ctx = this.groupStack.pop();
+
+        if (this.ctx.imageSmoothingEnabled !== undefined) {
+          this.ctx.imageSmoothingEnabled = false;
+        } else {
+          this.ctx.mozImageSmoothingEnabled = false;
+        }
+
+        if (group.smask) {
+          this.tempSMask = this.smaskStack.pop();
+        } else {
+          this.ctx.drawImage(groupCtx.canvas, 0, 0);
+        }
+
+        this.restore();
+      }
+    }, {
+      key: "beginAnnotations",
+      value: function beginAnnotations() {
+        this.save();
+
+        if (this.baseTransform) {
+          this.ctx.setTransform.apply(this.ctx, this.baseTransform);
+        }
+      }
+    }, {
+      key: "endAnnotations",
+      value: function endAnnotations() {
+        this.restore();
+      }
+    }, {
+      key: "beginAnnotation",
+      value: function beginAnnotation(rect, transform, matrix) {
+        this.save();
+        resetCtxToDefault(this.ctx);
+        this.current = new CanvasExtraState();
+
+        if (Array.isArray(rect) && rect.length === 4) {
+          var width = rect[2] - rect[0];
+          var height = rect[3] - rect[1];
+          this.ctx.rect(rect[0], rect[1], width, height);
+          this.clip();
+          this.endPath();
+        }
+
+        this.transform.apply(this, transform);
+        this.transform.apply(this, matrix);
+      }
+    }, {
+      key: "endAnnotation",
+      value: function endAnnotation() {
+        this.restore();
+      }
+    }, {
+      key: "paintImageMaskXObject",
+      value: function paintImageMaskXObject(img) {
+        if (!this.contentVisible) {
+          return;
+        }
+
+        var ctx = this.ctx;
+        var width = img.width,
+            height = img.height;
+        var fillColor = this.current.fillColor;
+        var isPatternFill = this.current.patternFill;
+        var glyph = this.processingType3;
+
+        if (COMPILE_TYPE3_GLYPHS && glyph && glyph.compiled === undefined) {
+          if (width <= MAX_SIZE_TO_COMPILE && height <= MAX_SIZE_TO_COMPILE) {
+            glyph.compiled = compileType3Glyph({
+              data: img.data,
+              width: width,
+              height: height
+            });
+          } else {
+            glyph.compiled = null;
+          }
+        }
+
+        if (glyph !== null && glyph !== void 0 && glyph.compiled) {
+          glyph.compiled(ctx);
+          return;
+        }
+
         var maskCanvas = this.cachedCanvases.getCanvas("maskCanvas", width, height);
         var maskCtx = maskCanvas.context;
         maskCtx.save();
-        putBinaryImageMask(maskCtx, image);
+        putBinaryImageMask(maskCtx, img);
         maskCtx.globalCompositeOperation = "source-in";
         maskCtx.fillStyle = isPatternFill ? fillColor.getPattern(maskCtx, this) : fillColor;
         maskCtx.fillRect(0, 0, width, height);
         maskCtx.restore();
-        ctx.save();
-        ctx.transform.apply(ctx, image.transform);
-        ctx.scale(1, -1);
-        ctx.drawImage(maskCanvas.canvas, 0, 0, width, height, 0, -1, 1, 1);
-        ctx.restore();
+        this.paintInlineImageXObject(maskCanvas.canvas);
       }
-    },
-    paintImageXObject: function CanvasGraphics_paintImageXObject(objId) {
-      if (!this.contentVisible) {
-        return;
-      }
+    }, {
+      key: "paintImageMaskXObjectRepeat",
+      value: function paintImageMaskXObjectRepeat(imgData, scaleX) {
+        var skewX = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+        var skewY = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+        var scaleY = arguments.length > 4 ? arguments[4] : undefined;
+        var positions = arguments.length > 5 ? arguments[5] : undefined;
 
-      var imgData = objId.startsWith("g_") ? this.commonObjs.get(objId) : this.objs.get(objId);
-
-      if (!imgData) {
-        (0, _util.warn)("Dependent image isn't ready yet");
-        return;
-      }
-
-      this.paintInlineImageXObject(imgData);
-    },
-    paintImageXObjectRepeat: function CanvasGraphics_paintImageXObjectRepeat(objId, scaleX, scaleY, positions) {
-      if (!this.contentVisible) {
-        return;
-      }
-
-      var imgData = objId.startsWith("g_") ? this.commonObjs.get(objId) : this.objs.get(objId);
-
-      if (!imgData) {
-        (0, _util.warn)("Dependent image isn't ready yet");
-        return;
-      }
-
-      var width = imgData.width;
-      var height = imgData.height;
-      var map = [];
-
-      for (var i = 0, ii = positions.length; i < ii; i += 2) {
-        map.push({
-          transform: [scaleX, 0, 0, scaleY, positions[i], positions[i + 1]],
-          x: 0,
-          y: 0,
-          w: width,
-          h: height
-        });
-      }
-
-      this.paintInlineImageXObjectGroup(imgData, map);
-    },
-    paintInlineImageXObject: function CanvasGraphics_paintInlineImageXObject(imgData) {
-      if (!this.contentVisible) {
-        return;
-      }
-
-      var width = imgData.width;
-      var height = imgData.height;
-      var ctx = this.ctx;
-      this.save();
-      ctx.scale(1 / width, -1 / height);
-      var currentTransform = ctx.mozCurrentTransformInverse;
-      var widthScale = Math.max(Math.hypot(currentTransform[0], currentTransform[1]), 1);
-      var heightScale = Math.max(Math.hypot(currentTransform[2], currentTransform[3]), 1);
-      var imgToPaint, tmpCanvas, tmpCtx;
-
-      if (typeof HTMLElement === "function" && imgData instanceof HTMLElement || !imgData.data) {
-        imgToPaint = imgData;
-      } else {
-        tmpCanvas = this.cachedCanvases.getCanvas("inlineImage", width, height);
-        tmpCtx = tmpCanvas.context;
-        putBinaryImageData(tmpCtx, imgData, this.current.transferMaps);
-        imgToPaint = tmpCanvas.canvas;
-      }
-
-      var paintWidth = width,
-          paintHeight = height;
-      var tmpCanvasId = "prescale1";
-
-      while (widthScale > 2 && paintWidth > 1 || heightScale > 2 && paintHeight > 1) {
-        var newWidth = paintWidth,
-            newHeight = paintHeight;
-
-        if (widthScale > 2 && paintWidth > 1) {
-          newWidth = Math.ceil(paintWidth / 2);
-          widthScale /= paintWidth / newWidth;
+        if (!this.contentVisible) {
+          return;
         }
 
-        if (heightScale > 2 && paintHeight > 1) {
-          newHeight = Math.ceil(paintHeight / 2);
-          heightScale /= paintHeight / newHeight;
+        var width = imgData.width;
+        var height = imgData.height;
+        var fillColor = this.current.fillColor;
+        var isPatternFill = this.current.patternFill;
+        var maskCanvas = this.cachedCanvases.getCanvas("maskCanvas", width, height);
+        var maskCtx = maskCanvas.context;
+        maskCtx.save();
+        putBinaryImageMask(maskCtx, imgData);
+        maskCtx.globalCompositeOperation = "source-in";
+        maskCtx.fillStyle = isPatternFill ? fillColor.getPattern(maskCtx, this) : fillColor;
+        maskCtx.fillRect(0, 0, width, height);
+        maskCtx.restore();
+        var ctx = this.ctx;
+
+        for (var i = 0, ii = positions.length; i < ii; i += 2) {
+          ctx.save();
+          ctx.transform(scaleX, skewX, skewY, scaleY, positions[i], positions[i + 1]);
+          ctx.scale(1, -1);
+          ctx.drawImage(maskCanvas.canvas, 0, 0, width, height, 0, -1, 1, 1);
+          ctx.restore();
+        }
+      }
+    }, {
+      key: "paintImageMaskXObjectGroup",
+      value: function paintImageMaskXObjectGroup(images) {
+        if (!this.contentVisible) {
+          return;
         }
 
-        tmpCanvas = this.cachedCanvases.getCanvas(tmpCanvasId, newWidth, newHeight);
-        tmpCtx = tmpCanvas.context;
-        tmpCtx.clearRect(0, 0, newWidth, newHeight);
-        tmpCtx.drawImage(imgToPaint, 0, 0, paintWidth, paintHeight, 0, 0, newWidth, newHeight);
-        imgToPaint = tmpCanvas.canvas;
-        paintWidth = newWidth;
-        paintHeight = newHeight;
-        tmpCanvasId = tmpCanvasId === "prescale1" ? "prescale2" : "prescale1";
+        var ctx = this.ctx;
+        var fillColor = this.current.fillColor;
+        var isPatternFill = this.current.patternFill;
+
+        for (var i = 0, ii = images.length; i < ii; i++) {
+          var image = images[i];
+          var width = image.width,
+              height = image.height;
+          var maskCanvas = this.cachedCanvases.getCanvas("maskCanvas", width, height);
+          var maskCtx = maskCanvas.context;
+          maskCtx.save();
+          putBinaryImageMask(maskCtx, image);
+          maskCtx.globalCompositeOperation = "source-in";
+          maskCtx.fillStyle = isPatternFill ? fillColor.getPattern(maskCtx, this) : fillColor;
+          maskCtx.fillRect(0, 0, width, height);
+          maskCtx.restore();
+          ctx.save();
+          ctx.transform.apply(ctx, image.transform);
+          ctx.scale(1, -1);
+          ctx.drawImage(maskCanvas.canvas, 0, 0, width, height, 0, -1, 1, 1);
+          ctx.restore();
+        }
       }
+    }, {
+      key: "paintImageXObject",
+      value: function paintImageXObject(objId) {
+        if (!this.contentVisible) {
+          return;
+        }
 
-      ctx.drawImage(imgToPaint, 0, 0, paintWidth, paintHeight, 0, -height, width, height);
+        var imgData = objId.startsWith("g_") ? this.commonObjs.get(objId) : this.objs.get(objId);
 
-      if (this.imageLayer) {
-        var position = this.getCanvasPosition(0, -height);
-        this.imageLayer.appendImage({
-          imgData: imgData,
-          left: position[0],
-          top: position[1],
-          width: width / currentTransform[0],
-          height: height / currentTransform[3]
-        });
+        if (!imgData) {
+          (0, _util.warn)("Dependent image isn't ready yet");
+          return;
+        }
+
+        this.paintInlineImageXObject(imgData);
       }
+    }, {
+      key: "paintImageXObjectRepeat",
+      value: function paintImageXObjectRepeat(objId, scaleX, scaleY, positions) {
+        if (!this.contentVisible) {
+          return;
+        }
 
-      this.restore();
-    },
-    paintInlineImageXObjectGroup: function CanvasGraphics_paintInlineImageXObjectGroup(imgData, map) {
-      if (!this.contentVisible) {
-        return;
+        var imgData = objId.startsWith("g_") ? this.commonObjs.get(objId) : this.objs.get(objId);
+
+        if (!imgData) {
+          (0, _util.warn)("Dependent image isn't ready yet");
+          return;
+        }
+
+        var width = imgData.width;
+        var height = imgData.height;
+        var map = [];
+
+        for (var i = 0, ii = positions.length; i < ii; i += 2) {
+          map.push({
+            transform: [scaleX, 0, 0, scaleY, positions[i], positions[i + 1]],
+            x: 0,
+            y: 0,
+            w: width,
+            h: height
+          });
+        }
+
+        this.paintInlineImageXObjectGroup(imgData, map);
       }
+    }, {
+      key: "paintInlineImageXObject",
+      value: function paintInlineImageXObject(imgData) {
+        if (!this.contentVisible) {
+          return;
+        }
 
-      var ctx = this.ctx;
-      var w = imgData.width;
-      var h = imgData.height;
-      var tmpCanvas = this.cachedCanvases.getCanvas("inlineImage", w, h);
-      var tmpCtx = tmpCanvas.context;
-      putBinaryImageData(tmpCtx, imgData, this.current.transferMaps);
+        var width = imgData.width;
+        var height = imgData.height;
+        var ctx = this.ctx;
+        this.save();
+        ctx.scale(1 / width, -1 / height);
+        var currentTransform = ctx.mozCurrentTransformInverse;
+        var widthScale = Math.max(Math.hypot(currentTransform[0], currentTransform[1]), 1);
+        var heightScale = Math.max(Math.hypot(currentTransform[2], currentTransform[3]), 1);
+        var imgToPaint, tmpCanvas, tmpCtx;
 
-      for (var i = 0, ii = map.length; i < ii; i++) {
-        var entry = map[i];
-        ctx.save();
-        ctx.transform.apply(ctx, entry.transform);
-        ctx.scale(1, -1);
-        ctx.drawImage(tmpCanvas.canvas, entry.x, entry.y, entry.w, entry.h, 0, -1, 1, 1);
+        if (typeof HTMLElement === "function" && imgData instanceof HTMLElement || !imgData.data) {
+          imgToPaint = imgData;
+        } else {
+          tmpCanvas = this.cachedCanvases.getCanvas("inlineImage", width, height);
+          tmpCtx = tmpCanvas.context;
+          putBinaryImageData(tmpCtx, imgData, this.current.transferMaps);
+          imgToPaint = tmpCanvas.canvas;
+        }
+
+        var paintWidth = width,
+            paintHeight = height;
+        var tmpCanvasId = "prescale1";
+
+        while (widthScale > 2 && paintWidth > 1 || heightScale > 2 && paintHeight > 1) {
+          var newWidth = paintWidth,
+              newHeight = paintHeight;
+
+          if (widthScale > 2 && paintWidth > 1) {
+            newWidth = Math.ceil(paintWidth / 2);
+            widthScale /= paintWidth / newWidth;
+          }
+
+          if (heightScale > 2 && paintHeight > 1) {
+            newHeight = Math.ceil(paintHeight / 2);
+            heightScale /= paintHeight / newHeight;
+          }
+
+          tmpCanvas = this.cachedCanvases.getCanvas(tmpCanvasId, newWidth, newHeight);
+          tmpCtx = tmpCanvas.context;
+          tmpCtx.clearRect(0, 0, newWidth, newHeight);
+          tmpCtx.drawImage(imgToPaint, 0, 0, paintWidth, paintHeight, 0, 0, newWidth, newHeight);
+          imgToPaint = tmpCanvas.canvas;
+          paintWidth = newWidth;
+          paintHeight = newHeight;
+          tmpCanvasId = tmpCanvasId === "prescale1" ? "prescale2" : "prescale1";
+        }
+
+        ctx.drawImage(imgToPaint, 0, 0, paintWidth, paintHeight, 0, -height, width, height);
 
         if (this.imageLayer) {
-          var position = this.getCanvasPosition(entry.x, entry.y);
+          var position = this.getCanvasPosition(0, -height);
           this.imageLayer.appendImage({
             imgData: imgData,
             left: position[0],
             top: position[1],
-            width: w,
-            height: h
+            width: width / currentTransform[0],
+            height: height / currentTransform[3]
           });
         }
 
-        ctx.restore();
+        this.restore();
       }
-    },
-    paintSolidColorImageMask: function CanvasGraphics_paintSolidColorImageMask() {
-      if (!this.contentVisible) {
-        return;
-      }
+    }, {
+      key: "paintInlineImageXObjectGroup",
+      value: function paintInlineImageXObjectGroup(imgData, map) {
+        if (!this.contentVisible) {
+          return;
+        }
 
-      this.ctx.fillRect(0, 0, 1, 1);
-    },
-    markPoint: function CanvasGraphics_markPoint(tag) {},
-    markPointProps: function CanvasGraphics_markPointProps(tag, properties) {},
-    beginMarkedContent: function CanvasGraphics_beginMarkedContent(tag) {
-      this.markedContentStack.push({
-        visible: true
-      });
-    },
-    beginMarkedContentProps: function CanvasGraphics_beginMarkedContentProps(tag, properties) {
-      if (tag === "OC") {
-        this.markedContentStack.push({
-          visible: this.optionalContentConfig.isVisible(properties)
-        });
-      } else {
+        var ctx = this.ctx;
+        var w = imgData.width;
+        var h = imgData.height;
+        var tmpCanvas = this.cachedCanvases.getCanvas("inlineImage", w, h);
+        var tmpCtx = tmpCanvas.context;
+        putBinaryImageData(tmpCtx, imgData, this.current.transferMaps);
+
+        for (var i = 0, ii = map.length; i < ii; i++) {
+          var entry = map[i];
+          ctx.save();
+          ctx.transform.apply(ctx, entry.transform);
+          ctx.scale(1, -1);
+          ctx.drawImage(tmpCanvas.canvas, entry.x, entry.y, entry.w, entry.h, 0, -1, 1, 1);
+
+          if (this.imageLayer) {
+            var position = this.getCanvasPosition(entry.x, entry.y);
+            this.imageLayer.appendImage({
+              imgData: imgData,
+              left: position[0],
+              top: position[1],
+              width: w,
+              height: h
+            });
+          }
+
+          ctx.restore();
+        }
+      }
+    }, {
+      key: "paintSolidColorImageMask",
+      value: function paintSolidColorImageMask() {
+        if (!this.contentVisible) {
+          return;
+        }
+
+        this.ctx.fillRect(0, 0, 1, 1);
+      }
+    }, {
+      key: "markPoint",
+      value: function markPoint(tag) {}
+    }, {
+      key: "markPointProps",
+      value: function markPointProps(tag, properties) {}
+    }, {
+      key: "beginMarkedContent",
+      value: function beginMarkedContent(tag) {
         this.markedContentStack.push({
           visible: true
         });
       }
-
-      this.contentVisible = this.isContentVisible();
-    },
-    endMarkedContent: function CanvasGraphics_endMarkedContent() {
-      this.markedContentStack.pop();
-      this.contentVisible = this.isContentVisible();
-    },
-    beginCompat: function CanvasGraphics_beginCompat() {},
-    endCompat: function CanvasGraphics_endCompat() {},
-    consumePath: function CanvasGraphics_consumePath() {
-      var ctx = this.ctx;
-
-      if (this.pendingClip) {
-        if (this.pendingClip === EO_CLIP) {
-          ctx.clip("evenodd");
+    }, {
+      key: "beginMarkedContentProps",
+      value: function beginMarkedContentProps(tag, properties) {
+        if (tag === "OC") {
+          this.markedContentStack.push({
+            visible: this.optionalContentConfig.isVisible(properties)
+          });
         } else {
-          ctx.clip();
+          this.markedContentStack.push({
+            visible: true
+          });
         }
 
-        this.pendingClip = null;
+        this.contentVisible = this.isContentVisible();
       }
+    }, {
+      key: "endMarkedContent",
+      value: function endMarkedContent() {
+        this.markedContentStack.pop();
+        this.contentVisible = this.isContentVisible();
+      }
+    }, {
+      key: "beginCompat",
+      value: function beginCompat() {}
+    }, {
+      key: "endCompat",
+      value: function endCompat() {}
+    }, {
+      key: "consumePath",
+      value: function consumePath() {
+        var ctx = this.ctx;
 
-      ctx.beginPath();
-    },
-    getSinglePixelWidth: function getSinglePixelWidth() {
-      if (this._cachedGetSinglePixelWidth === null) {
-        var m = this.ctx.mozCurrentTransform;
-        var absDet = Math.abs(m[0] * m[3] - m[2] * m[1]);
-        var sqNorm1 = Math.pow(m[0], 2) + Math.pow(m[2], 2);
-        var sqNorm2 = Math.pow(m[1], 2) + Math.pow(m[3], 2);
-        var pixelHeight = Math.sqrt(Math.max(sqNorm1, sqNorm2)) / absDet;
+        if (this.pendingClip) {
+          if (this.pendingClip === EO_CLIP) {
+            ctx.clip("evenodd");
+          } else {
+            ctx.clip();
+          }
 
-        if (sqNorm1 !== sqNorm2 && this._combinedScaleFactor * pixelHeight > 1) {
-          this._cachedGetSinglePixelWidth = -(this._combinedScaleFactor * pixelHeight);
-        } else if (absDet > Number.EPSILON) {
-          this._cachedGetSinglePixelWidth = pixelHeight;
-        } else {
-          this._cachedGetSinglePixelWidth = 1;
+          this.pendingClip = null;
         }
-      }
 
-      return this._cachedGetSinglePixelWidth;
-    },
-    getCanvasPosition: function CanvasGraphics_getCanvasPosition(x, y) {
-      var transform = this.ctx.mozCurrentTransform;
-      return [transform[0] * x + transform[2] * y + transform[4], transform[1] * x + transform[3] * y + transform[5]];
-    },
-    isContentVisible: function CanvasGraphics_isContentVisible() {
-      for (var i = this.markedContentStack.length - 1; i >= 0; i--) {
-        if (!this.markedContentStack[i].visible) {
-          return false;
+        ctx.beginPath();
+      }
+    }, {
+      key: "getSinglePixelWidth",
+      value: function getSinglePixelWidth() {
+        if (this._cachedGetSinglePixelWidth === null) {
+          var m = this.ctx.mozCurrentTransform;
+          var absDet = Math.abs(m[0] * m[3] - m[2] * m[1]);
+          var sqNorm1 = Math.pow(m[0], 2) + Math.pow(m[2], 2);
+          var sqNorm2 = Math.pow(m[1], 2) + Math.pow(m[3], 2);
+          var pixelHeight = Math.sqrt(Math.max(sqNorm1, sqNorm2)) / absDet;
+
+          if (sqNorm1 !== sqNorm2 && this._combinedScaleFactor * pixelHeight > 1) {
+            this._cachedGetSinglePixelWidth = -(this._combinedScaleFactor * pixelHeight);
+          } else if (absDet > Number.EPSILON) {
+            this._cachedGetSinglePixelWidth = pixelHeight;
+          } else {
+            this._cachedGetSinglePixelWidth = 1;
+          }
         }
-      }
 
-      return true;
-    }
-  };
+        return this._cachedGetSinglePixelWidth;
+      }
+    }, {
+      key: "getCanvasPosition",
+      value: function getCanvasPosition(x, y) {
+        var transform = this.ctx.mozCurrentTransform;
+        return [transform[0] * x + transform[2] * y + transform[4], transform[1] * x + transform[3] * y + transform[5]];
+      }
+    }, {
+      key: "isContentVisible",
+      value: function isContentVisible() {
+        for (var i = this.markedContentStack.length - 1; i >= 0; i--) {
+          if (!this.markedContentStack[i].visible) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+    }]);
+
+    return CanvasGraphics;
+  }();
 
   for (var op in _util.OPS) {
     CanvasGraphics.prototype[_util.OPS[op]] = CanvasGraphics.prototype[op];
@@ -14967,21 +15015,61 @@ var CanvasGraphics = function CanvasGraphicsClosure() {
 exports.CanvasGraphics = CanvasGraphics;
 
 /***/ }),
-/* 131 */
+/* 119 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
 
 
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.getShadingPatternFromIR = getShadingPatternFromIR;
+exports.getShadingPattern = getShadingPattern;
 exports.TilingPattern = void 0;
 
 var _util = __w_pdfjs_require__(4);
 
-var ShadingIRs = {};
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var svgElement;
+
+function createMatrix(matrix) {
+  if (typeof DOMMatrix !== "undefined") {
+    return new DOMMatrix(matrix);
+  }
+
+  if (!svgElement) {
+    svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  }
+
+  return svgElement.createSVGMatrix(matrix);
+}
 
 function applyBoundingBox(ctx, bbox) {
   if (!bbox || typeof Path2D === "undefined") {
@@ -14995,243 +15083,314 @@ function applyBoundingBox(ctx, bbox) {
   ctx.clip(region);
 }
 
-ShadingIRs.RadialAxial = {
-  fromIR: function RadialAxial_fromIR(raw) {
-    var type = raw[1];
-    var bbox = raw[2];
-    var colorStops = raw[3];
-    var p0 = raw[4];
-    var p1 = raw[5];
-    var r0 = raw[6];
-    var r1 = raw[7];
-    return {
-      getPattern: function RadialAxial_getPattern(ctx) {
-        applyBoundingBox(ctx, bbox);
-        var grad;
+var BaseShadingPattern = /*#__PURE__*/function () {
+  function BaseShadingPattern() {
+    _classCallCheck(this, BaseShadingPattern);
 
-        if (type === "axial") {
-          grad = ctx.createLinearGradient(p0[0], p0[1], p1[0], p1[1]);
-        } else if (type === "radial") {
-          grad = ctx.createRadialGradient(p0[0], p0[1], r0, p1[0], p1[1], r1);
-        }
-
-        for (var i = 0, ii = colorStops.length; i < ii; ++i) {
-          var c = colorStops[i];
-          grad.addColorStop(c[0], c[1]);
-        }
-
-        return grad;
-      }
-    };
+    if (this.constructor === BaseShadingPattern) {
+      (0, _util.unreachable)("Cannot initialize BaseShadingPattern.");
+    }
   }
-};
 
-var createMeshCanvas = function createMeshCanvasClosure() {
-  function drawTriangle(data, context, p1, p2, p3, c1, c2, c3) {
-    var coords = context.coords,
-        colors = context.colors;
-    var bytes = data.data,
-        rowSize = data.width * 4;
-    var tmp;
-
-    if (coords[p1 + 1] > coords[p2 + 1]) {
-      tmp = p1;
-      p1 = p2;
-      p2 = tmp;
-      tmp = c1;
-      c1 = c2;
-      c2 = tmp;
+  _createClass(BaseShadingPattern, [{
+    key: "getPattern",
+    value: function getPattern() {
+      (0, _util.unreachable)("Abstract method `getPattern` called.");
     }
+  }]);
 
-    if (coords[p2 + 1] > coords[p3 + 1]) {
-      tmp = p2;
-      p2 = p3;
-      p3 = tmp;
-      tmp = c2;
-      c2 = c3;
-      c3 = tmp;
-    }
+  return BaseShadingPattern;
+}();
 
-    if (coords[p1 + 1] > coords[p2 + 1]) {
-      tmp = p1;
-      p1 = p2;
-      p2 = tmp;
-      tmp = c1;
-      c1 = c2;
-      c2 = tmp;
-    }
+var RadialAxialShadingPattern = /*#__PURE__*/function (_BaseShadingPattern) {
+  _inherits(RadialAxialShadingPattern, _BaseShadingPattern);
 
-    var x1 = (coords[p1] + context.offsetX) * context.scaleX;
-    var y1 = (coords[p1 + 1] + context.offsetY) * context.scaleY;
-    var x2 = (coords[p2] + context.offsetX) * context.scaleX;
-    var y2 = (coords[p2 + 1] + context.offsetY) * context.scaleY;
-    var x3 = (coords[p3] + context.offsetX) * context.scaleX;
-    var y3 = (coords[p3 + 1] + context.offsetY) * context.scaleY;
+  var _super = _createSuper(RadialAxialShadingPattern);
 
-    if (y1 >= y3) {
-      return;
-    }
+  function RadialAxialShadingPattern(IR) {
+    var _this;
 
-    var c1r = colors[c1],
-        c1g = colors[c1 + 1],
-        c1b = colors[c1 + 2];
-    var c2r = colors[c2],
-        c2g = colors[c2 + 1],
-        c2b = colors[c2 + 2];
-    var c3r = colors[c3],
-        c3g = colors[c3 + 1],
-        c3b = colors[c3 + 2];
-    var minY = Math.round(y1),
-        maxY = Math.round(y3);
-    var xa, car, cag, cab;
-    var xb, cbr, cbg, cbb;
+    _classCallCheck(this, RadialAxialShadingPattern);
 
-    for (var y = minY; y <= maxY; y++) {
-      if (y < y2) {
-        var _k = void 0;
+    _this = _super.call(this);
+    _this._type = IR[1];
+    _this._bbox = IR[2];
+    _this._colorStops = IR[3];
+    _this._p0 = IR[4];
+    _this._p1 = IR[5];
+    _this._r0 = IR[6];
+    _this._r1 = IR[7];
+    _this._matrix = IR[8];
+    return _this;
+  }
 
-        if (y < y1) {
-          _k = 0;
-        } else if (y1 === y2) {
-          _k = 1;
-        } else {
-          _k = (y1 - y) / (y1 - y2);
+  _createClass(RadialAxialShadingPattern, [{
+    key: "getPattern",
+    value: function getPattern(ctx, owner, shadingFill) {
+      var tmpCanvas = owner.cachedCanvases.getCanvas("pattern", ctx.canvas.width, ctx.canvas.height, true);
+      var tmpCtx = tmpCanvas.context;
+      tmpCtx.clearRect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+      tmpCtx.beginPath();
+      tmpCtx.rect(0, 0, tmpCtx.canvas.width, tmpCtx.canvas.height);
+
+      if (!shadingFill) {
+        tmpCtx.setTransform.apply(tmpCtx, owner.baseTransform);
+
+        if (this._matrix) {
+          tmpCtx.transform.apply(tmpCtx, this._matrix);
         }
-
-        xa = x1 - (x1 - x2) * _k;
-        car = c1r - (c1r - c2r) * _k;
-        cag = c1g - (c1g - c2g) * _k;
-        cab = c1b - (c1b - c2b) * _k;
       } else {
-        var _k2 = void 0;
-
-        if (y > y3) {
-          _k2 = 1;
-        } else if (y2 === y3) {
-          _k2 = 0;
-        } else {
-          _k2 = (y2 - y) / (y2 - y3);
-        }
-
-        xa = x2 - (x2 - x3) * _k2;
-        car = c2r - (c2r - c3r) * _k2;
-        cag = c2g - (c2g - c3g) * _k2;
-        cab = c2b - (c2b - c3b) * _k2;
+        tmpCtx.setTransform.apply(tmpCtx, ctx.mozCurrentTransform);
       }
 
-      var k = void 0;
+      applyBoundingBox(tmpCtx, this._bbox);
+      var grad;
+
+      if (this._type === "axial") {
+        grad = tmpCtx.createLinearGradient(this._p0[0], this._p0[1], this._p1[0], this._p1[1]);
+      } else if (this._type === "radial") {
+        grad = tmpCtx.createRadialGradient(this._p0[0], this._p0[1], this._r0, this._p1[0], this._p1[1], this._r1);
+      }
+
+      var _iterator = _createForOfIteratorHelper(this._colorStops),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var colorStop = _step.value;
+          grad.addColorStop(colorStop[0], colorStop[1]);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
+      tmpCtx.fillStyle = grad;
+      tmpCtx.fill();
+      var pattern = ctx.createPattern(tmpCanvas.canvas, "repeat");
+      pattern.setTransform(createMatrix(ctx.mozCurrentTransformInverse));
+      return pattern;
+    }
+  }]);
+
+  return RadialAxialShadingPattern;
+}(BaseShadingPattern);
+
+function drawTriangle(data, context, p1, p2, p3, c1, c2, c3) {
+  var coords = context.coords,
+      colors = context.colors;
+  var bytes = data.data,
+      rowSize = data.width * 4;
+  var tmp;
+
+  if (coords[p1 + 1] > coords[p2 + 1]) {
+    tmp = p1;
+    p1 = p2;
+    p2 = tmp;
+    tmp = c1;
+    c1 = c2;
+    c2 = tmp;
+  }
+
+  if (coords[p2 + 1] > coords[p3 + 1]) {
+    tmp = p2;
+    p2 = p3;
+    p3 = tmp;
+    tmp = c2;
+    c2 = c3;
+    c3 = tmp;
+  }
+
+  if (coords[p1 + 1] > coords[p2 + 1]) {
+    tmp = p1;
+    p1 = p2;
+    p2 = tmp;
+    tmp = c1;
+    c1 = c2;
+    c2 = tmp;
+  }
+
+  var x1 = (coords[p1] + context.offsetX) * context.scaleX;
+  var y1 = (coords[p1 + 1] + context.offsetY) * context.scaleY;
+  var x2 = (coords[p2] + context.offsetX) * context.scaleX;
+  var y2 = (coords[p2 + 1] + context.offsetY) * context.scaleY;
+  var x3 = (coords[p3] + context.offsetX) * context.scaleX;
+  var y3 = (coords[p3 + 1] + context.offsetY) * context.scaleY;
+
+  if (y1 >= y3) {
+    return;
+  }
+
+  var c1r = colors[c1],
+      c1g = colors[c1 + 1],
+      c1b = colors[c1 + 2];
+  var c2r = colors[c2],
+      c2g = colors[c2 + 1],
+      c2b = colors[c2 + 2];
+  var c3r = colors[c3],
+      c3g = colors[c3 + 1],
+      c3b = colors[c3 + 2];
+  var minY = Math.round(y1),
+      maxY = Math.round(y3);
+  var xa, car, cag, cab;
+  var xb, cbr, cbg, cbb;
+
+  for (var y = minY; y <= maxY; y++) {
+    if (y < y2) {
+      var _k = void 0;
 
       if (y < y1) {
-        k = 0;
-      } else if (y > y3) {
-        k = 1;
+        _k = 0;
+      } else if (y1 === y2) {
+        _k = 1;
       } else {
-        k = (y1 - y) / (y1 - y3);
+        _k = (y1 - y) / (y1 - y2);
       }
 
-      xb = x1 - (x1 - x3) * k;
-      cbr = c1r - (c1r - c3r) * k;
-      cbg = c1g - (c1g - c3g) * k;
-      cbb = c1b - (c1b - c3b) * k;
-      var x1_ = Math.round(Math.min(xa, xb));
-      var x2_ = Math.round(Math.max(xa, xb));
-      var j = rowSize * y + x1_ * 4;
-
-      for (var x = x1_; x <= x2_; x++) {
-        k = (xa - x) / (xa - xb);
-
-        if (k < 0) {
-          k = 0;
-        } else if (k > 1) {
-          k = 1;
-        }
-
-        bytes[j++] = car - (car - cbr) * k | 0;
-        bytes[j++] = cag - (cag - cbg) * k | 0;
-        bytes[j++] = cab - (cab - cbb) * k | 0;
-        bytes[j++] = 255;
-      }
-    }
-  }
-
-  function drawFigure(data, figure, context) {
-    var ps = figure.coords;
-    var cs = figure.colors;
-    var i, ii;
-
-    switch (figure.type) {
-      case "lattice":
-        var verticesPerRow = figure.verticesPerRow;
-        var rows = Math.floor(ps.length / verticesPerRow) - 1;
-        var cols = verticesPerRow - 1;
-
-        for (i = 0; i < rows; i++) {
-          var q = i * verticesPerRow;
-
-          for (var j = 0; j < cols; j++, q++) {
-            drawTriangle(data, context, ps[q], ps[q + 1], ps[q + verticesPerRow], cs[q], cs[q + 1], cs[q + verticesPerRow]);
-            drawTriangle(data, context, ps[q + verticesPerRow + 1], ps[q + 1], ps[q + verticesPerRow], cs[q + verticesPerRow + 1], cs[q + 1], cs[q + verticesPerRow]);
-          }
-        }
-
-        break;
-
-      case "triangles":
-        for (i = 0, ii = ps.length; i < ii; i += 3) {
-          drawTriangle(data, context, ps[i], ps[i + 1], ps[i + 2], cs[i], cs[i + 1], cs[i + 2]);
-        }
-
-        break;
-
-      default:
-        throw new Error("illegal figure");
-    }
-  }
-
-  function createMeshCanvas(bounds, combinesScale, coords, colors, figures, backgroundColor, cachedCanvases, webGLContext) {
-    var EXPECTED_SCALE = 1.1;
-    var MAX_PATTERN_SIZE = 3000;
-    var BORDER_SIZE = 2;
-    var offsetX = Math.floor(bounds[0]);
-    var offsetY = Math.floor(bounds[1]);
-    var boundsWidth = Math.ceil(bounds[2]) - offsetX;
-    var boundsHeight = Math.ceil(bounds[3]) - offsetY;
-    var width = Math.min(Math.ceil(Math.abs(boundsWidth * combinesScale[0] * EXPECTED_SCALE)), MAX_PATTERN_SIZE);
-    var height = Math.min(Math.ceil(Math.abs(boundsHeight * combinesScale[1] * EXPECTED_SCALE)), MAX_PATTERN_SIZE);
-    var scaleX = boundsWidth / width;
-    var scaleY = boundsHeight / height;
-    var context = {
-      coords: coords,
-      colors: colors,
-      offsetX: -offsetX,
-      offsetY: -offsetY,
-      scaleX: 1 / scaleX,
-      scaleY: 1 / scaleY
-    };
-    var paddedWidth = width + BORDER_SIZE * 2;
-    var paddedHeight = height + BORDER_SIZE * 2;
-    var canvas, tmpCanvas, i, ii;
-
-    if (webGLContext.isEnabled) {
-      canvas = webGLContext.drawFigures({
-        width: width,
-        height: height,
-        backgroundColor: backgroundColor,
-        figures: figures,
-        context: context
-      });
-      tmpCanvas = cachedCanvases.getCanvas("mesh", paddedWidth, paddedHeight, false);
-      tmpCanvas.context.drawImage(canvas, BORDER_SIZE, BORDER_SIZE);
-      canvas = tmpCanvas.canvas;
+      xa = x1 - (x1 - x2) * _k;
+      car = c1r - (c1r - c2r) * _k;
+      cag = c1g - (c1g - c2g) * _k;
+      cab = c1b - (c1b - c2b) * _k;
     } else {
-      tmpCanvas = cachedCanvases.getCanvas("mesh", paddedWidth, paddedHeight, false);
+      var _k2 = void 0;
+
+      if (y > y3) {
+        _k2 = 1;
+      } else if (y2 === y3) {
+        _k2 = 0;
+      } else {
+        _k2 = (y2 - y) / (y2 - y3);
+      }
+
+      xa = x2 - (x2 - x3) * _k2;
+      car = c2r - (c2r - c3r) * _k2;
+      cag = c2g - (c2g - c3g) * _k2;
+      cab = c2b - (c2b - c3b) * _k2;
+    }
+
+    var k = void 0;
+
+    if (y < y1) {
+      k = 0;
+    } else if (y > y3) {
+      k = 1;
+    } else {
+      k = (y1 - y) / (y1 - y3);
+    }
+
+    xb = x1 - (x1 - x3) * k;
+    cbr = c1r - (c1r - c3r) * k;
+    cbg = c1g - (c1g - c3g) * k;
+    cbb = c1b - (c1b - c3b) * k;
+    var x1_ = Math.round(Math.min(xa, xb));
+    var x2_ = Math.round(Math.max(xa, xb));
+    var j = rowSize * y + x1_ * 4;
+
+    for (var x = x1_; x <= x2_; x++) {
+      k = (xa - x) / (xa - xb);
+
+      if (k < 0) {
+        k = 0;
+      } else if (k > 1) {
+        k = 1;
+      }
+
+      bytes[j++] = car - (car - cbr) * k | 0;
+      bytes[j++] = cag - (cag - cbg) * k | 0;
+      bytes[j++] = cab - (cab - cbb) * k | 0;
+      bytes[j++] = 255;
+    }
+  }
+}
+
+function drawFigure(data, figure, context) {
+  var ps = figure.coords;
+  var cs = figure.colors;
+  var i, ii;
+
+  switch (figure.type) {
+    case "lattice":
+      var verticesPerRow = figure.verticesPerRow;
+      var rows = Math.floor(ps.length / verticesPerRow) - 1;
+      var cols = verticesPerRow - 1;
+
+      for (i = 0; i < rows; i++) {
+        var q = i * verticesPerRow;
+
+        for (var j = 0; j < cols; j++, q++) {
+          drawTriangle(data, context, ps[q], ps[q + 1], ps[q + verticesPerRow], cs[q], cs[q + 1], cs[q + verticesPerRow]);
+          drawTriangle(data, context, ps[q + verticesPerRow + 1], ps[q + 1], ps[q + verticesPerRow], cs[q + verticesPerRow + 1], cs[q + 1], cs[q + verticesPerRow]);
+        }
+      }
+
+      break;
+
+    case "triangles":
+      for (i = 0, ii = ps.length; i < ii; i += 3) {
+        drawTriangle(data, context, ps[i], ps[i + 1], ps[i + 2], cs[i], cs[i + 1], cs[i + 2]);
+      }
+
+      break;
+
+    default:
+      throw new Error("illegal figure");
+  }
+}
+
+var MeshShadingPattern = /*#__PURE__*/function (_BaseShadingPattern2) {
+  _inherits(MeshShadingPattern, _BaseShadingPattern2);
+
+  var _super2 = _createSuper(MeshShadingPattern);
+
+  function MeshShadingPattern(IR) {
+    var _this2;
+
+    _classCallCheck(this, MeshShadingPattern);
+
+    _this2 = _super2.call(this);
+    _this2._coords = IR[2];
+    _this2._colors = IR[3];
+    _this2._figures = IR[4];
+    _this2._bounds = IR[5];
+    _this2._matrix = IR[6];
+    _this2._bbox = IR[7];
+    _this2._background = IR[8];
+    return _this2;
+  }
+
+  _createClass(MeshShadingPattern, [{
+    key: "_createMeshCanvas",
+    value: function _createMeshCanvas(combinedScale, backgroundColor, cachedCanvases) {
+      var EXPECTED_SCALE = 1.1;
+      var MAX_PATTERN_SIZE = 3000;
+      var BORDER_SIZE = 2;
+      var offsetX = Math.floor(this._bounds[0]);
+      var offsetY = Math.floor(this._bounds[1]);
+      var boundsWidth = Math.ceil(this._bounds[2]) - offsetX;
+      var boundsHeight = Math.ceil(this._bounds[3]) - offsetY;
+      var width = Math.min(Math.ceil(Math.abs(boundsWidth * combinedScale[0] * EXPECTED_SCALE)), MAX_PATTERN_SIZE);
+      var height = Math.min(Math.ceil(Math.abs(boundsHeight * combinedScale[1] * EXPECTED_SCALE)), MAX_PATTERN_SIZE);
+      var scaleX = boundsWidth / width;
+      var scaleY = boundsHeight / height;
+      var context = {
+        coords: this._coords,
+        colors: this._colors,
+        offsetX: -offsetX,
+        offsetY: -offsetY,
+        scaleX: 1 / scaleX,
+        scaleY: 1 / scaleY
+      };
+      var paddedWidth = width + BORDER_SIZE * 2;
+      var paddedHeight = height + BORDER_SIZE * 2;
+      var tmpCanvas = cachedCanvases.getCanvas("mesh", paddedWidth, paddedHeight, false);
       var tmpCtx = tmpCanvas.context;
       var data = tmpCtx.createImageData(width, height);
 
       if (backgroundColor) {
         var bytes = data.data;
 
-        for (i = 0, ii = bytes.length; i < ii; i += 4) {
+        for (var i = 0, ii = bytes.length; i < ii; i += 4) {
           bytes[i] = backgroundColor[0];
           bytes[i + 1] = backgroundColor[1];
           bytes[i + 2] = backgroundColor[2];
@@ -15239,97 +15398,112 @@ var createMeshCanvas = function createMeshCanvasClosure() {
         }
       }
 
-      for (i = 0; i < figures.length; i++) {
-        drawFigure(data, figures[i], context);
+      var _iterator2 = _createForOfIteratorHelper(this._figures),
+          _step2;
+
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var figure = _step2.value;
+          drawFigure(data, figure, context);
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
       }
 
       tmpCtx.putImageData(data, BORDER_SIZE, BORDER_SIZE);
-      canvas = tmpCanvas.canvas;
+      var canvas = tmpCanvas.canvas;
+      return {
+        canvas: canvas,
+        offsetX: offsetX - BORDER_SIZE * scaleX,
+        offsetY: offsetY - BORDER_SIZE * scaleY,
+        scaleX: scaleX,
+        scaleY: scaleY
+      };
     }
+  }, {
+    key: "getPattern",
+    value: function getPattern(ctx, owner, shadingFill) {
+      applyBoundingBox(ctx, this._bbox);
+      var scale;
 
-    return {
-      canvas: canvas,
-      offsetX: offsetX - BORDER_SIZE * scaleX,
-      offsetY: offsetY - BORDER_SIZE * scaleY,
-      scaleX: scaleX,
-      scaleY: scaleY
-    };
-  }
+      if (shadingFill) {
+        scale = _util.Util.singularValueDecompose2dScale(ctx.mozCurrentTransform);
+      } else {
+        scale = _util.Util.singularValueDecompose2dScale(owner.baseTransform);
 
-  return createMeshCanvas;
-}();
+        if (this._matrix) {
+          var matrixScale = _util.Util.singularValueDecompose2dScale(this._matrix);
 
-ShadingIRs.Mesh = {
-  fromIR: function Mesh_fromIR(raw) {
-    var coords = raw[2];
-    var colors = raw[3];
-    var figures = raw[4];
-    var bounds = raw[5];
-    var matrix = raw[6];
-    var bbox = raw[7];
-    var background = raw[8];
-    return {
-      getPattern: function Mesh_getPattern(ctx, owner, shadingFill) {
-        applyBoundingBox(ctx, bbox);
-        var scale;
-
-        if (shadingFill) {
-          scale = _util.Util.singularValueDecompose2dScale(ctx.mozCurrentTransform);
-        } else {
-          scale = _util.Util.singularValueDecompose2dScale(owner.baseTransform);
-
-          if (matrix) {
-            var matrixScale = _util.Util.singularValueDecompose2dScale(matrix);
-
-            scale = [scale[0] * matrixScale[0], scale[1] * matrixScale[1]];
-          }
+          scale = [scale[0] * matrixScale[0], scale[1] * matrixScale[1]];
         }
+      }
 
-        var temporaryPatternCanvas = createMeshCanvas(bounds, scale, coords, colors, figures, shadingFill ? null : background, owner.cachedCanvases, owner.webGLContext);
+      var temporaryPatternCanvas = this._createMeshCanvas(scale, shadingFill ? null : this._background, owner.cachedCanvases);
 
-        if (!shadingFill) {
-          ctx.setTransform.apply(ctx, owner.baseTransform);
+      if (!shadingFill) {
+        ctx.setTransform.apply(ctx, owner.baseTransform);
 
-          if (matrix) {
-            ctx.transform.apply(ctx, matrix);
-          }
+        if (this._matrix) {
+          ctx.transform.apply(ctx, this._matrix);
         }
-
-        ctx.translate(temporaryPatternCanvas.offsetX, temporaryPatternCanvas.offsetY);
-        ctx.scale(temporaryPatternCanvas.scaleX, temporaryPatternCanvas.scaleY);
-        return ctx.createPattern(temporaryPatternCanvas.canvas, "no-repeat");
       }
-    };
-  }
-};
-ShadingIRs.Dummy = {
-  fromIR: function Dummy_fromIR() {
-    return {
-      getPattern: function Dummy_fromIR_getPattern() {
-        return "hotpink";
-      }
-    };
-  }
-};
 
-function getShadingPatternFromIR(raw) {
-  var shadingIR = ShadingIRs[raw[0]];
+      ctx.translate(temporaryPatternCanvas.offsetX, temporaryPatternCanvas.offsetY);
+      ctx.scale(temporaryPatternCanvas.scaleX, temporaryPatternCanvas.scaleY);
+      return ctx.createPattern(temporaryPatternCanvas.canvas, "no-repeat");
+    }
+  }]);
 
-  if (!shadingIR) {
-    throw new Error("Unknown IR type: ".concat(raw[0]));
+  return MeshShadingPattern;
+}(BaseShadingPattern);
+
+var DummyShadingPattern = /*#__PURE__*/function (_BaseShadingPattern3) {
+  _inherits(DummyShadingPattern, _BaseShadingPattern3);
+
+  var _super3 = _createSuper(DummyShadingPattern);
+
+  function DummyShadingPattern() {
+    _classCallCheck(this, DummyShadingPattern);
+
+    return _super3.apply(this, arguments);
   }
 
-  return shadingIR.fromIR(raw);
+  _createClass(DummyShadingPattern, [{
+    key: "getPattern",
+    value: function getPattern() {
+      return "hotpink";
+    }
+  }]);
+
+  return DummyShadingPattern;
+}(BaseShadingPattern);
+
+function getShadingPattern(IR) {
+  switch (IR[0]) {
+    case "RadialAxial":
+      return new RadialAxialShadingPattern(IR);
+
+    case "Mesh":
+      return new MeshShadingPattern(IR);
+
+    case "Dummy":
+      return new DummyShadingPattern();
+  }
+
+  throw new Error("Unknown IR type: ".concat(IR[0]));
 }
 
-var TilingPattern = function TilingPatternClosure() {
-  var PaintType = {
-    COLORED: 1,
-    UNCOLORED: 2
-  };
-  var MAX_PATTERN_SIZE = 3000;
+var PaintType = {
+  COLORED: 1,
+  UNCOLORED: 2
+};
 
+var TilingPattern = /*#__PURE__*/function () {
   function TilingPattern(IR, color, ctx, canvasGraphicsFactory, baseTransform) {
+    _classCallCheck(this, TilingPattern);
+
     this.operatorList = IR[2];
     this.matrix = IR[3] || [1, 0, 0, 1, 0, 0];
     this.bbox = IR[4];
@@ -15338,13 +15512,14 @@ var TilingPattern = function TilingPatternClosure() {
     this.paintType = IR[7];
     this.tilingType = IR[8];
     this.color = color;
+    this.ctx = ctx;
     this.canvasGraphicsFactory = canvasGraphicsFactory;
     this.baseTransform = baseTransform;
-    this.ctx = ctx;
   }
 
-  TilingPattern.prototype = {
-    createPatternCanvas: function TilinPattern_createPatternCanvas(owner) {
+  _createClass(TilingPattern, [{
+    key: "createPatternCanvas",
+    value: function createPatternCanvas(owner) {
       var operatorList = this.operatorList;
       var bbox = this.bbox;
       var xstep = this.xstep;
@@ -15372,16 +15547,21 @@ var TilingPattern = function TilingPatternClosure() {
       graphics.groupLevel = owner.groupLevel;
       this.setFillAndStrokeStyleToContext(graphics, paintType, color);
       graphics.transform(dimx.scale, 0, 0, dimy.scale, 0, 0);
-      graphics.transform(1, 0, 0, 1, -x0, -y0);
       this.clipBbox(graphics, bbox, x0, y0, x1, y1);
+      graphics.baseTransform = graphics.ctx.mozCurrentTransform.slice();
       graphics.executeOperatorList(operatorList);
-      this.ctx.transform(1, 0, 0, 1, x0, y0);
-      this.ctx.scale(1 / dimx.scale, 1 / dimy.scale);
-      return tmpCanvas.canvas;
-    },
-    getSizeAndScale: function TilingPattern_getSizeAndScale(step, realOutputSize, scale) {
+      graphics.endDrawing();
+      return {
+        canvas: tmpCanvas.canvas,
+        scaleX: dimx.scale,
+        scaleY: dimy.scale
+      };
+    }
+  }, {
+    key: "getSizeAndScale",
+    value: function getSizeAndScale(step, realOutputSize, scale) {
       step = Math.abs(step);
-      var maxSize = Math.max(MAX_PATTERN_SIZE, realOutputSize);
+      var maxSize = Math.max(TilingPattern.MAX_PATTERN_SIZE, realOutputSize);
       var size = Math.ceil(step * scale);
 
       if (size >= maxSize) {
@@ -15394,8 +15574,10 @@ var TilingPattern = function TilingPatternClosure() {
         scale: scale,
         size: size
       };
-    },
-    clipBbox: function clipBbox(graphics, bbox, x0, y0, x1, y1) {
+    }
+  }, {
+    key: "clipBbox",
+    value: function clipBbox(graphics, bbox, x0, y0, x1, y1) {
       if (Array.isArray(bbox) && bbox.length === 4) {
         var bboxWidth = x1 - x0;
         var bboxHeight = y1 - y0;
@@ -15403,8 +15585,10 @@ var TilingPattern = function TilingPatternClosure() {
         graphics.clip();
         graphics.endPath();
       }
-    },
-    setFillAndStrokeStyleToContext: function setFillAndStrokeStyleToContext(graphics, paintType, color) {
+    }
+  }, {
+    key: "setFillAndStrokeStyleToContext",
+    value: function setFillAndStrokeStyleToContext(graphics, paintType, color) {
       var context = graphics.ctx,
           current = graphics.current;
 
@@ -15429,22 +15613,42 @@ var TilingPattern = function TilingPatternClosure() {
         default:
           throw new _util.FormatError("Unsupported paint type: ".concat(paintType));
       }
-    },
-    getPattern: function TilingPattern_getPattern(ctx, owner) {
-      ctx = this.ctx;
-      ctx.setTransform.apply(ctx, this.baseTransform);
-      ctx.transform.apply(ctx, this.matrix);
-      var temporaryPatternCanvas = this.createPatternCanvas(owner);
-      return ctx.createPattern(temporaryPatternCanvas, "repeat");
     }
-  };
+  }, {
+    key: "getPattern",
+    value: function getPattern(ctx, owner, shadingFill) {
+      ctx = this.ctx;
+      var matrix = ctx.mozCurrentTransformInverse;
+
+      if (!shadingFill) {
+        matrix = _util.Util.transform(matrix, owner.baseTransform);
+
+        if (this.matrix) {
+          matrix = _util.Util.transform(matrix, this.matrix);
+        }
+      }
+
+      var temporaryPatternCanvas = this.createPatternCanvas(owner);
+      var domMatrix = createMatrix(matrix);
+      domMatrix = domMatrix.scale(1 / temporaryPatternCanvas.scaleX, 1 / temporaryPatternCanvas.scaleY);
+      var pattern = ctx.createPattern(temporaryPatternCanvas.canvas, "repeat");
+      pattern.setTransform(domMatrix);
+      return pattern;
+    }
+  }], [{
+    key: "MAX_PATTERN_SIZE",
+    get: function get() {
+      return (0, _util.shadow)(this, "MAX_PATTERN_SIZE", 3000);
+    }
+  }]);
+
   return TilingPattern;
 }();
 
 exports.TilingPattern = TilingPattern;
 
 /***/ }),
-/* 132 */
+/* 120 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -15460,7 +15664,7 @@ GlobalWorkerOptions.workerPort = GlobalWorkerOptions.workerPort === undefined ? 
 GlobalWorkerOptions.workerSrc = GlobalWorkerOptions.workerSrc === undefined ? "" : GlobalWorkerOptions.workerSrc;
 
 /***/ }),
-/* 133 */
+/* 121 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -16013,7 +16217,7 @@ var MessageHandler = /*#__PURE__*/function () {
 exports.MessageHandler = MessageHandler;
 
 /***/ }),
-/* 134 */
+/* 122 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -16073,7 +16277,7 @@ var Metadata = /*#__PURE__*/function () {
 exports.Metadata = Metadata;
 
 /***/ }),
-/* 135 */
+/* 123 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -16086,7 +16290,7 @@ exports.OptionalContentConfig = void 0;
 
 var _util = __w_pdfjs_require__(4);
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
@@ -16184,6 +16388,55 @@ var OptionalContentConfig = /*#__PURE__*/function () {
   }
 
   _createClass(OptionalContentConfig, [{
+    key: "_evaluateVisibilityExpression",
+    value: function _evaluateVisibilityExpression(array) {
+      var length = array.length;
+
+      if (length < 2) {
+        return true;
+      }
+
+      var operator = array[0];
+
+      for (var i = 1; i < length; i++) {
+        var element = array[i];
+        var state = void 0;
+
+        if (Array.isArray(element)) {
+          state = this._evaluateVisibilityExpression(element);
+        } else if (this._groups.has(element)) {
+          state = this._groups.get(element).visible;
+        } else {
+          (0, _util.warn)("Optional content group not found: ".concat(element));
+          return true;
+        }
+
+        switch (operator) {
+          case "And":
+            if (!state) {
+              return false;
+            }
+
+            break;
+
+          case "Or":
+            if (state) {
+              return true;
+            }
+
+            break;
+
+          case "Not":
+            return !state;
+
+          default:
+            return true;
+        }
+      }
+
+      return operator === "And";
+    }
+  }, {
     key: "isVisible",
     value: function isVisible(group) {
       if (group.type === "OCG") {
@@ -16195,7 +16448,7 @@ var OptionalContentConfig = /*#__PURE__*/function () {
         return this._groups.get(group.id).visible;
       } else if (group.type === "OCMD") {
         if (group.expression) {
-          (0, _util.warn)("Visibility expression not supported yet.");
+          return this._evaluateVisibilityExpression(group.expression);
         }
 
         if (!group.policy || group.policy === "AnyOn") {
@@ -16346,7 +16599,7 @@ var OptionalContentConfig = /*#__PURE__*/function () {
 exports.OptionalContentConfig = OptionalContentConfig;
 
 /***/ }),
-/* 136 */
+/* 124 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -16369,7 +16622,7 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
@@ -16535,11 +16788,19 @@ var PDFDataTransportStream = /*#__PURE__*/function () {
         this._fullRequestReader.cancel(reason);
       }
 
-      var readers = this._rangeReaders.slice(0);
+      var _iterator = _createForOfIteratorHelper(this._rangeReaders.slice(0)),
+          _step;
 
-      readers.forEach(function (rangeReader) {
-        rangeReader.cancel(reason);
-      });
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var reader = _step.value;
+          reader.cancel(reason);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
 
       this._pdfDataRangeTransport.abort();
     }
@@ -16563,18 +16824,18 @@ var PDFDataTransportStreamReader = /*#__PURE__*/function () {
     this._queuedChunks = queuedChunks || [];
     this._loaded = 0;
 
-    var _iterator = _createForOfIteratorHelper(this._queuedChunks),
-        _step;
+    var _iterator2 = _createForOfIteratorHelper(this._queuedChunks),
+        _step2;
 
     try {
-      for (_iterator.s(); !(_step = _iterator.n()).done;) {
-        var chunk = _step.value;
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var chunk = _step2.value;
         this._loaded += chunk.byteLength;
       }
     } catch (err) {
-      _iterator.e(err);
+      _iterator2.e(err);
     } finally {
-      _iterator.f();
+      _iterator2.f();
     }
 
     this._requests = [];
@@ -16685,14 +16946,24 @@ var PDFDataTransportStreamReader = /*#__PURE__*/function () {
     value: function cancel(reason) {
       this._done = true;
 
-      this._requests.forEach(function (requestCapability) {
-        requestCapability.resolve({
-          value: undefined,
-          done: true
-        });
-      });
+      var _iterator3 = _createForOfIteratorHelper(this._requests),
+          _step3;
 
-      this._requests = [];
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var requestCapability = _step3.value;
+          requestCapability.resolve({
+            value: undefined,
+            done: true
+          });
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+
+      this._requests.length = 0;
     }
   }, {
     key: "progressiveDone",
@@ -16738,14 +17009,24 @@ var PDFDataTransportStreamRangeReader = /*#__PURE__*/function () {
           done: false
         });
 
-        this._requests.forEach(function (requestCapability) {
-          requestCapability.resolve({
-            value: undefined,
-            done: true
-          });
-        });
+        var _iterator4 = _createForOfIteratorHelper(this._requests),
+            _step4;
 
-        this._requests = [];
+        try {
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+            var requestCapability = _step4.value;
+            requestCapability.resolve({
+              value: undefined,
+              done: true
+            });
+          }
+        } catch (err) {
+          _iterator4.e(err);
+        } finally {
+          _iterator4.f();
+        }
+
+        this._requests.length = 0;
       }
 
       this._done = true;
@@ -16815,14 +17096,24 @@ var PDFDataTransportStreamRangeReader = /*#__PURE__*/function () {
     value: function cancel(reason) {
       this._done = true;
 
-      this._requests.forEach(function (requestCapability) {
-        requestCapability.resolve({
-          value: undefined,
-          done: true
-        });
-      });
+      var _iterator5 = _createForOfIteratorHelper(this._requests),
+          _step5;
 
-      this._requests = [];
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+          var requestCapability = _step5.value;
+          requestCapability.resolve({
+            value: undefined,
+            done: true
+          });
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
+      }
+
+      this._requests.length = 0;
 
       this._stream._removeRangeReader(this);
     }
@@ -16832,465 +17123,7 @@ var PDFDataTransportStreamRangeReader = /*#__PURE__*/function () {
 }();
 
 /***/ }),
-/* 137 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports.WebGLContext = void 0;
-
-var _util = __w_pdfjs_require__(4);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var WebGLContext = /*#__PURE__*/function () {
-  function WebGLContext(_ref) {
-    var _ref$enable = _ref.enable,
-        enable = _ref$enable === void 0 ? false : _ref$enable;
-
-    _classCallCheck(this, WebGLContext);
-
-    this._enabled = enable === true;
-  }
-
-  _createClass(WebGLContext, [{
-    key: "isEnabled",
-    get: function get() {
-      var enabled = this._enabled;
-
-      if (enabled) {
-        enabled = WebGLUtils.tryInitGL();
-      }
-
-      return (0, _util.shadow)(this, "isEnabled", enabled);
-    }
-  }, {
-    key: "composeSMask",
-    value: function composeSMask(_ref2) {
-      var layer = _ref2.layer,
-          mask = _ref2.mask,
-          properties = _ref2.properties;
-      return WebGLUtils.composeSMask(layer, mask, properties);
-    }
-  }, {
-    key: "drawFigures",
-    value: function drawFigures(_ref3) {
-      var width = _ref3.width,
-          height = _ref3.height,
-          backgroundColor = _ref3.backgroundColor,
-          figures = _ref3.figures,
-          context = _ref3.context;
-      return WebGLUtils.drawFigures(width, height, backgroundColor, figures, context);
-    }
-  }, {
-    key: "clear",
-    value: function clear() {
-      WebGLUtils.cleanup();
-    }
-  }]);
-
-  return WebGLContext;
-}();
-
-exports.WebGLContext = WebGLContext;
-
-var WebGLUtils = function WebGLUtilsClosure() {
-  function loadShader(gl, code, shaderType) {
-    var shader = gl.createShader(shaderType);
-    gl.shaderSource(shader, code);
-    gl.compileShader(shader);
-    var compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-
-    if (!compiled) {
-      var errorMsg = gl.getShaderInfoLog(shader);
-      throw new Error("Error during shader compilation: " + errorMsg);
-    }
-
-    return shader;
-  }
-
-  function createVertexShader(gl, code) {
-    return loadShader(gl, code, gl.VERTEX_SHADER);
-  }
-
-  function createFragmentShader(gl, code) {
-    return loadShader(gl, code, gl.FRAGMENT_SHADER);
-  }
-
-  function createProgram(gl, shaders) {
-    var program = gl.createProgram();
-
-    for (var i = 0, ii = shaders.length; i < ii; ++i) {
-      gl.attachShader(program, shaders[i]);
-    }
-
-    gl.linkProgram(program);
-    var linked = gl.getProgramParameter(program, gl.LINK_STATUS);
-
-    if (!linked) {
-      var errorMsg = gl.getProgramInfoLog(program);
-      throw new Error("Error during program linking: " + errorMsg);
-    }
-
-    return program;
-  }
-
-  function createTexture(gl, image, textureId) {
-    gl.activeTexture(textureId);
-    var texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-    return texture;
-  }
-
-  var currentGL, currentCanvas;
-
-  function generateGL() {
-    if (currentGL) {
-      return;
-    }
-
-    currentCanvas = document.createElement("canvas");
-    currentGL = currentCanvas.getContext("webgl", {
-      premultipliedalpha: false
-    });
-  }
-
-  var smaskVertexShaderCode = "\
-  attribute vec2 a_position;                                    \
-  attribute vec2 a_texCoord;                                    \
-                                                                \
-  uniform vec2 u_resolution;                                    \
-                                                                \
-  varying vec2 v_texCoord;                                      \
-                                                                \
-  void main() {                                                 \
-    vec2 clipSpace = (a_position / u_resolution) * 2.0 - 1.0;   \
-    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);          \
-                                                                \
-    v_texCoord = a_texCoord;                                    \
-  }                                                             ";
-  var smaskFragmentShaderCode = "\
-  precision mediump float;                                      \
-                                                                \
-  uniform vec4 u_backdrop;                                      \
-  uniform int u_subtype;                                        \
-  uniform sampler2D u_image;                                    \
-  uniform sampler2D u_mask;                                     \
-                                                                \
-  varying vec2 v_texCoord;                                      \
-                                                                \
-  void main() {                                                 \
-    vec4 imageColor = texture2D(u_image, v_texCoord);           \
-    vec4 maskColor = texture2D(u_mask, v_texCoord);             \
-    if (u_backdrop.a > 0.0) {                                   \
-      maskColor.rgb = maskColor.rgb * maskColor.a +             \
-                      u_backdrop.rgb * (1.0 - maskColor.a);     \
-    }                                                           \
-    float lum;                                                  \
-    if (u_subtype == 0) {                                       \
-      lum = maskColor.a;                                        \
-    } else {                                                    \
-      lum = maskColor.r * 0.3 + maskColor.g * 0.59 +            \
-            maskColor.b * 0.11;                                 \
-    }                                                           \
-    imageColor.a *= lum;                                        \
-    imageColor.rgb *= imageColor.a;                             \
-    gl_FragColor = imageColor;                                  \
-  }                                                             ";
-  var smaskCache = null;
-
-  function initSmaskGL() {
-    generateGL();
-    var canvas = currentCanvas;
-    currentCanvas = null;
-    var gl = currentGL;
-    currentGL = null;
-    var vertexShader = createVertexShader(gl, smaskVertexShaderCode);
-    var fragmentShader = createFragmentShader(gl, smaskFragmentShaderCode);
-    var program = createProgram(gl, [vertexShader, fragmentShader]);
-    gl.useProgram(program);
-    var cache = {};
-    cache.gl = gl;
-    cache.canvas = canvas;
-    cache.resolutionLocation = gl.getUniformLocation(program, "u_resolution");
-    cache.positionLocation = gl.getAttribLocation(program, "a_position");
-    cache.backdropLocation = gl.getUniformLocation(program, "u_backdrop");
-    cache.subtypeLocation = gl.getUniformLocation(program, "u_subtype");
-    var texCoordLocation = gl.getAttribLocation(program, "a_texCoord");
-    var texLayerLocation = gl.getUniformLocation(program, "u_image");
-    var texMaskLocation = gl.getUniformLocation(program, "u_mask");
-    var texCoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(texCoordLocation);
-    gl.vertexAttribPointer(texCoordLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform1i(texLayerLocation, 0);
-    gl.uniform1i(texMaskLocation, 1);
-    smaskCache = cache;
-  }
-
-  function composeSMask(layer, mask, properties) {
-    var width = layer.width,
-        height = layer.height;
-
-    if (!smaskCache) {
-      initSmaskGL();
-    }
-
-    var cache = smaskCache,
-        canvas = cache.canvas,
-        gl = cache.gl;
-    canvas.width = width;
-    canvas.height = height;
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.uniform2f(cache.resolutionLocation, width, height);
-
-    if (properties.backdrop) {
-      gl.uniform4f(cache.resolutionLocation, properties.backdrop[0], properties.backdrop[1], properties.backdrop[2], 1);
-    } else {
-      gl.uniform4f(cache.resolutionLocation, 0, 0, 0, 0);
-    }
-
-    gl.uniform1i(cache.subtypeLocation, properties.subtype === "Luminosity" ? 1 : 0);
-    var texture = createTexture(gl, layer, gl.TEXTURE0);
-    var maskTexture = createTexture(gl, mask, gl.TEXTURE1);
-    var buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, width, 0, 0, height, 0, height, width, 0, width, height]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(cache.positionLocation);
-    gl.vertexAttribPointer(cache.positionLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.clearColor(0, 0, 0, 0);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-    gl.flush();
-    gl.deleteTexture(texture);
-    gl.deleteTexture(maskTexture);
-    gl.deleteBuffer(buffer);
-    return canvas;
-  }
-
-  var figuresVertexShaderCode = "\
-  attribute vec2 a_position;                                    \
-  attribute vec3 a_color;                                       \
-                                                                \
-  uniform vec2 u_resolution;                                    \
-  uniform vec2 u_scale;                                         \
-  uniform vec2 u_offset;                                        \
-                                                                \
-  varying vec4 v_color;                                         \
-                                                                \
-  void main() {                                                 \
-    vec2 position = (a_position + u_offset) * u_scale;          \
-    vec2 clipSpace = (position / u_resolution) * 2.0 - 1.0;     \
-    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);          \
-                                                                \
-    v_color = vec4(a_color / 255.0, 1.0);                       \
-  }                                                             ";
-  var figuresFragmentShaderCode = "\
-  precision mediump float;                                      \
-                                                                \
-  varying vec4 v_color;                                         \
-                                                                \
-  void main() {                                                 \
-    gl_FragColor = v_color;                                     \
-  }                                                             ";
-  var figuresCache = null;
-
-  function initFiguresGL() {
-    generateGL();
-    var canvas = currentCanvas;
-    currentCanvas = null;
-    var gl = currentGL;
-    currentGL = null;
-    var vertexShader = createVertexShader(gl, figuresVertexShaderCode);
-    var fragmentShader = createFragmentShader(gl, figuresFragmentShaderCode);
-    var program = createProgram(gl, [vertexShader, fragmentShader]);
-    gl.useProgram(program);
-    var cache = {};
-    cache.gl = gl;
-    cache.canvas = canvas;
-    cache.resolutionLocation = gl.getUniformLocation(program, "u_resolution");
-    cache.scaleLocation = gl.getUniformLocation(program, "u_scale");
-    cache.offsetLocation = gl.getUniformLocation(program, "u_offset");
-    cache.positionLocation = gl.getAttribLocation(program, "a_position");
-    cache.colorLocation = gl.getAttribLocation(program, "a_color");
-    figuresCache = cache;
-  }
-
-  function drawFigures(width, height, backgroundColor, figures, context) {
-    if (!figuresCache) {
-      initFiguresGL();
-    }
-
-    var cache = figuresCache,
-        canvas = cache.canvas,
-        gl = cache.gl;
-    canvas.width = width;
-    canvas.height = height;
-    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.uniform2f(cache.resolutionLocation, width, height);
-    var count = 0;
-
-    for (var i = 0, ii = figures.length; i < ii; i++) {
-      switch (figures[i].type) {
-        case "lattice":
-          var rows = figures[i].coords.length / figures[i].verticesPerRow | 0;
-          count += (rows - 1) * (figures[i].verticesPerRow - 1) * 6;
-          break;
-
-        case "triangles":
-          count += figures[i].coords.length;
-          break;
-      }
-    }
-
-    var coords = new Float32Array(count * 2);
-    var colors = new Uint8Array(count * 3);
-    var coordsMap = context.coords,
-        colorsMap = context.colors;
-    var pIndex = 0,
-        cIndex = 0;
-
-    for (var _i = 0, _ii = figures.length; _i < _ii; _i++) {
-      var figure = figures[_i],
-          ps = figure.coords,
-          cs = figure.colors;
-
-      switch (figure.type) {
-        case "lattice":
-          var cols = figure.verticesPerRow;
-
-          var _rows = ps.length / cols | 0;
-
-          for (var row = 1; row < _rows; row++) {
-            var offset = row * cols + 1;
-
-            for (var col = 1; col < cols; col++, offset++) {
-              coords[pIndex] = coordsMap[ps[offset - cols - 1]];
-              coords[pIndex + 1] = coordsMap[ps[offset - cols - 1] + 1];
-              coords[pIndex + 2] = coordsMap[ps[offset - cols]];
-              coords[pIndex + 3] = coordsMap[ps[offset - cols] + 1];
-              coords[pIndex + 4] = coordsMap[ps[offset - 1]];
-              coords[pIndex + 5] = coordsMap[ps[offset - 1] + 1];
-              colors[cIndex] = colorsMap[cs[offset - cols - 1]];
-              colors[cIndex + 1] = colorsMap[cs[offset - cols - 1] + 1];
-              colors[cIndex + 2] = colorsMap[cs[offset - cols - 1] + 2];
-              colors[cIndex + 3] = colorsMap[cs[offset - cols]];
-              colors[cIndex + 4] = colorsMap[cs[offset - cols] + 1];
-              colors[cIndex + 5] = colorsMap[cs[offset - cols] + 2];
-              colors[cIndex + 6] = colorsMap[cs[offset - 1]];
-              colors[cIndex + 7] = colorsMap[cs[offset - 1] + 1];
-              colors[cIndex + 8] = colorsMap[cs[offset - 1] + 2];
-              coords[pIndex + 6] = coords[pIndex + 2];
-              coords[pIndex + 7] = coords[pIndex + 3];
-              coords[pIndex + 8] = coords[pIndex + 4];
-              coords[pIndex + 9] = coords[pIndex + 5];
-              coords[pIndex + 10] = coordsMap[ps[offset]];
-              coords[pIndex + 11] = coordsMap[ps[offset] + 1];
-              colors[cIndex + 9] = colors[cIndex + 3];
-              colors[cIndex + 10] = colors[cIndex + 4];
-              colors[cIndex + 11] = colors[cIndex + 5];
-              colors[cIndex + 12] = colors[cIndex + 6];
-              colors[cIndex + 13] = colors[cIndex + 7];
-              colors[cIndex + 14] = colors[cIndex + 8];
-              colors[cIndex + 15] = colorsMap[cs[offset]];
-              colors[cIndex + 16] = colorsMap[cs[offset] + 1];
-              colors[cIndex + 17] = colorsMap[cs[offset] + 2];
-              pIndex += 12;
-              cIndex += 18;
-            }
-          }
-
-          break;
-
-        case "triangles":
-          for (var j = 0, jj = ps.length; j < jj; j++) {
-            coords[pIndex] = coordsMap[ps[j]];
-            coords[pIndex + 1] = coordsMap[ps[j] + 1];
-            colors[cIndex] = colorsMap[cs[j]];
-            colors[cIndex + 1] = colorsMap[cs[j] + 1];
-            colors[cIndex + 2] = colorsMap[cs[j] + 2];
-            pIndex += 2;
-            cIndex += 3;
-          }
-
-          break;
-      }
-    }
-
-    if (backgroundColor) {
-      gl.clearColor(backgroundColor[0] / 255, backgroundColor[1] / 255, backgroundColor[2] / 255, 1.0);
-    } else {
-      gl.clearColor(0, 0, 0, 0);
-    }
-
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    var coordsBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, coordsBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, coords, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(cache.positionLocation);
-    gl.vertexAttribPointer(cache.positionLocation, 2, gl.FLOAT, false, 0, 0);
-    var colorsBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(cache.colorLocation);
-    gl.vertexAttribPointer(cache.colorLocation, 3, gl.UNSIGNED_BYTE, false, 0, 0);
-    gl.uniform2f(cache.scaleLocation, context.scaleX, context.scaleY);
-    gl.uniform2f(cache.offsetLocation, context.offsetX, context.offsetY);
-    gl.drawArrays(gl.TRIANGLES, 0, count);
-    gl.flush();
-    gl.deleteBuffer(coordsBuffer);
-    gl.deleteBuffer(colorsBuffer);
-    return canvas;
-  }
-
-  return {
-    tryInitGL: function tryInitGL() {
-      try {
-        generateGL();
-        return !!currentGL;
-      } catch (ex) {}
-
-      return false;
-    },
-    composeSMask: composeSMask,
-    drawFigures: drawFigures,
-    cleanup: function cleanup() {
-      var _smaskCache, _figuresCache;
-
-      if ((_smaskCache = smaskCache) !== null && _smaskCache !== void 0 && _smaskCache.canvas) {
-        smaskCache.canvas.width = 0;
-        smaskCache.canvas.height = 0;
-      }
-
-      if ((_figuresCache = figuresCache) !== null && _figuresCache !== void 0 && _figuresCache.canvas) {
-        figuresCache.canvas.width = 0;
-        figuresCache.canvas.height = 0;
-      }
-
-      smaskCache = null;
-      figuresCache = null;
-    }
-  };
-}();
-
-/***/ }),
-/* 138 */
+/* 125 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -17307,9 +17140,9 @@ var _display_utils = __w_pdfjs_require__(1);
 
 var _util = __w_pdfjs_require__(4);
 
-var _annotation_storage = __w_pdfjs_require__(128);
+var _annotation_storage = __w_pdfjs_require__(116);
 
-var _scripting_utils = __w_pdfjs_require__(139);
+var _scripting_utils = __w_pdfjs_require__(126);
 
 function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
 
@@ -17319,7 +17152,7 @@ function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArra
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
@@ -17337,7 +17170,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
@@ -17612,9 +17445,20 @@ var AnnotationElement = /*#__PURE__*/function () {
   }, {
     key: "_renderQuadrilaterals",
     value: function _renderQuadrilaterals(className) {
-      this.quadrilaterals.forEach(function (quadrilateral) {
-        quadrilateral.className = className;
-      });
+      var _iterator2 = _createForOfIteratorHelper(this.quadrilaterals),
+          _step2;
+
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var quadrilateral = _step2.value;
+          quadrilateral.className = className;
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+
       return this.quadrilaterals;
     }
   }, {
@@ -17858,59 +17702,109 @@ var WidgetAnnotationElement = /*#__PURE__*/function (_AnnotationElement3) {
   }, {
     key: "_setEventListeners",
     value: function _setEventListeners(element, names, getter) {
-      var _iterator2 = _createForOfIteratorHelper(names),
-          _step2;
+      var _iterator3 = _createForOfIteratorHelper(names),
+          _step3;
 
       try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
           var _this$data$actions;
 
-          var _step2$value = _slicedToArray(_step2.value, 2),
-              baseName = _step2$value[0],
-              eventName = _step2$value[1];
+          var _step3$value = _slicedToArray(_step3.value, 2),
+              baseName = _step3$value[0],
+              eventName = _step3$value[1];
 
           if (eventName === "Action" || (_this$data$actions = this.data.actions) !== null && _this$data$actions !== void 0 && _this$data$actions[eventName]) {
             this._setEventListener(element, baseName, eventName, getter);
           }
         }
       } catch (err) {
-        _iterator2.e(err);
+        _iterator3.e(err);
       } finally {
-        _iterator2.f();
+        _iterator3.f();
       }
     }
   }, {
-    key: "_setColor",
-    value: function _setColor(event) {
-      var detail = event.detail,
-          target = event.target;
-      var style = target.style;
+    key: "_dispatchEventFromSandbox",
+    value: function _dispatchEventFromSandbox(actions, jsEvent) {
+      var _this5 = this;
 
-      for (var _i2 = 0, _arr2 = ["bgColor", "fillColor", "fgColor", "textColor", "borderColor", "strokeColor"]; _i2 < _arr2.length; _i2++) {
-        var name = _arr2[_i2];
-        var color = detail[name];
+      var setColor = function setColor(jsName, styleName, event) {
+        var color = event.detail[jsName];
+        event.target.style[styleName] = _scripting_utils.ColorConverters["".concat(color[0], "_HTML")](color.slice(1));
+      };
 
-        if (!color) {
-          continue;
+      var commonActions = {
+        display: function display(event) {
+          var hidden = event.detail.display % 2 === 1;
+          event.target.style.visibility = hidden ? "hidden" : "visible";
+
+          _this5.annotationStorage.setValue(_this5.data.id, {
+            hidden: hidden,
+            print: event.detail.display === 0 || event.detail.display === 3
+          });
+        },
+        print: function print(event) {
+          _this5.annotationStorage.setValue(_this5.data.id, {
+            print: event.detail.print
+          });
+        },
+        hidden: function hidden(event) {
+          event.target.style.visibility = event.detail.hidden ? "hidden" : "visible";
+
+          _this5.annotationStorage.setValue(_this5.data.id, {
+            hidden: event.detail.hidden
+          });
+        },
+        focus: function focus(event) {
+          setTimeout(function () {
+            return event.target.focus({
+              preventScroll: false
+            });
+          }, 0);
+        },
+        userName: function userName(event) {
+          event.target.title = event.detail.userName;
+        },
+        readonly: function readonly(event) {
+          if (event.detail.readonly) {
+            event.target.setAttribute("readonly", "");
+          } else {
+            event.target.removeAttribute("readonly");
+          }
+        },
+        required: function required(event) {
+          if (event.detail.required) {
+            event.target.setAttribute("required", "");
+          } else {
+            event.target.removeAttribute("required");
+          }
+        },
+        bgColor: function bgColor(event) {
+          setColor("bgColor", "backgroundColor", event);
+        },
+        fillColor: function fillColor(event) {
+          setColor("fillColor", "backgroundColor", event);
+        },
+        fgColor: function fgColor(event) {
+          setColor("fgColor", "color", event);
+        },
+        textColor: function textColor(event) {
+          setColor("textColor", "color", event);
+        },
+        borderColor: function borderColor(event) {
+          setColor("borderColor", "borderColor", event);
+        },
+        strokeColor: function strokeColor(event) {
+          setColor("strokeColor", "borderColor", event);
         }
+      };
 
-        color = _scripting_utils.ColorConverters["".concat(color[0], "_HTML")](color.slice(1));
+      for (var _i2 = 0, _Object$keys2 = Object.keys(jsEvent.detail); _i2 < _Object$keys2.length; _i2++) {
+        var name = _Object$keys2[_i2];
+        var action = actions[name] || commonActions[name];
 
-        switch (name) {
-          case "bgColor":
-          case "fillColor":
-            style.backgroundColor = color;
-            break;
-
-          case "fgColor":
-          case "textColor":
-            style.color = color;
-            break;
-
-          case "borderColor":
-          case "strokeColor":
-            style.borderColor = color;
-            break;
+        if (action) {
+          action(jsEvent);
         }
       }
     }
@@ -17934,9 +17828,34 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
   }
 
   _createClass(TextWidgetAnnotationElement, [{
+    key: "setPropertyOnSiblings",
+    value: function setPropertyOnSiblings(base, key, value, keyInStorage) {
+      var storage = this.annotationStorage;
+
+      var _iterator4 = _createForOfIteratorHelper(document.getElementsByName(base.name)),
+          _step4;
+
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var element = _step4.value;
+
+          if (element !== base) {
+            element[key] = value;
+            var data = Object.create(null);
+            data[keyInStorage] = value;
+            storage.setValue(element.getAttribute("id"), data);
+          }
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this6 = this;
 
       var storage = this.annotationStorage;
       var id = this.data.id;
@@ -17971,6 +17890,8 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
           storage.setValue(id, {
             value: event.target.value
           });
+
+          _this6.setPropertyOnSiblings(element, "value", event.target.value, "value");
         });
 
         var blurListener = function blurListener(event) {
@@ -17978,7 +17899,7 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
             event.target.value = elementData.formattedValue;
           }
 
-          event.target.setSelectionRange(0, 0);
+          event.target.scrollLeft = 0;
           elementData.beforeInputSelectionRange = null;
         };
 
@@ -17990,11 +17911,10 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
               event.target.value = elementData.userValue;
             }
           });
-          element.addEventListener("updatefromsandbox", function (event) {
-            var detail = event.detail;
+          element.addEventListener("updatefromsandbox", function (jsEvent) {
             var actions = {
-              value: function value() {
-                elementData.userValue = detail.value || "";
+              value: function value(event) {
+                elementData.userValue = event.detail.value || "";
                 storage.setValue(id, {
                   value: elementData.userValue.toString()
                 });
@@ -18003,8 +17923,8 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
                   event.target.value = elementData.userValue;
                 }
               },
-              valueAsString: function valueAsString() {
-                elementData.formattedValue = detail.valueAsString || "";
+              valueAsString: function valueAsString(event) {
+                elementData.formattedValue = event.detail.valueAsString || "";
 
                 if (event.target !== document.activeElement) {
                   event.target.value = elementData.formattedValue;
@@ -18014,45 +17934,21 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
                   formattedValue: elementData.formattedValue
                 });
               },
-              focus: function focus() {
-                setTimeout(function () {
-                  return event.target.focus({
-                    preventScroll: false
-                  });
-                }, 0);
-              },
-              userName: function userName() {
-                event.target.title = detail.userName;
-              },
-              hidden: function hidden() {
-                event.target.style.visibility = detail.hidden ? "hidden" : "visible";
-                storage.setValue(id, {
-                  hidden: detail.hidden
-                });
-              },
-              editable: function editable() {
-                event.target.disabled = !detail.editable;
-              },
-              selRange: function selRange() {
-                var _detail$selRange = _slicedToArray(detail.selRange, 2),
-                    selStart = _detail$selRange[0],
-                    selEnd = _detail$selRange[1];
+              selRange: function selRange(event) {
+                var _event$detail$selRang = _slicedToArray(event.detail.selRange, 2),
+                    selStart = _event$detail$selRang[0],
+                    selEnd = _event$detail$selRang[1];
 
                 if (selStart >= 0 && selEnd < event.target.value.length) {
                   event.target.setSelectionRange(selStart, selEnd);
                 }
               }
             };
-            Object.keys(detail).filter(function (name) {
-              return name in actions;
-            }).forEach(function (name) {
-              return actions[name]();
-            });
 
-            _this5._setColor(event);
+            _this6._dispatchEventFromSandbox(actions, jsEvent);
           });
           element.addEventListener("keydown", function (event) {
-            var _this5$linkService$ev;
+            var _this6$linkService$ev;
 
             elementData.beforeInputValue = event.target.value;
             var commitKey = -1;
@@ -18070,8 +17966,8 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
             }
 
             elementData.userValue = event.target.value;
-            (_this5$linkService$ev = _this5.linkService.eventBus) === null || _this5$linkService$ev === void 0 ? void 0 : _this5$linkService$ev.dispatch("dispatcheventinsandbox", {
-              source: _this5,
+            (_this6$linkService$ev = _this6.linkService.eventBus) === null || _this6$linkService$ev === void 0 ? void 0 : _this6$linkService$ev.dispatch("dispatcheventinsandbox", {
+              source: _this6,
               detail: {
                 id: id,
                 name: "Keystroke",
@@ -18086,12 +17982,12 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
           var _blurListener = blurListener;
           blurListener = null;
           element.addEventListener("blur", function (event) {
-            if (_this5._mouseState.isDown) {
-              var _this5$linkService$ev2;
+            if (_this6._mouseState.isDown) {
+              var _this6$linkService$ev2;
 
               elementData.userValue = event.target.value;
-              (_this5$linkService$ev2 = _this5.linkService.eventBus) === null || _this5$linkService$ev2 === void 0 ? void 0 : _this5$linkService$ev2.dispatch("dispatcheventinsandbox", {
-                source: _this5,
+              (_this6$linkService$ev2 = _this6.linkService.eventBus) === null || _this6$linkService$ev2 === void 0 ? void 0 : _this6$linkService$ev2.dispatch("dispatcheventinsandbox", {
+                source: _this6,
                 detail: {
                   id: id,
                   name: "Keystroke",
@@ -18121,7 +18017,7 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
 
           if ((_this$data$actions2 = this.data.actions) !== null && _this$data$actions2 !== void 0 && _this$data$actions2.Keystroke) {
             element.addEventListener("input", function (event) {
-              var _this5$linkService$ev3;
+              var _this6$linkService$ev3;
 
               var selStart = -1;
               var selEnd = -1;
@@ -18133,8 +18029,8 @@ var TextWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem) 
                 selEnd = _elementData$beforeIn[1];
               }
 
-              (_this5$linkService$ev3 = _this5.linkService.eventBus) === null || _this5$linkService$ev3 === void 0 ? void 0 : _this5$linkService$ev3.dispatch("dispatcheventinsandbox", {
-                source: _this5,
+              (_this6$linkService$ev3 = _this6.linkService.eventBus) === null || _this6$linkService$ev3 === void 0 ? void 0 : _this6$linkService$ev3.dispatch("dispatcheventinsandbox", {
+                source: _this6,
                 detail: {
                   id: id,
                   name: "Keystroke",
@@ -18222,7 +18118,7 @@ var CheckboxWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationEl
   _createClass(CheckboxWidgetAnnotationElement, [{
     key: "render",
     value: function render() {
-      var _this6 = this;
+      var _this7 = this;
 
       var storage = this.annotationStorage;
       var data = this.data;
@@ -18230,6 +18126,14 @@ var CheckboxWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationEl
       var value = storage.getValue(id, {
         value: data.fieldValue && (data.exportValue && data.exportValue === data.fieldValue || !data.exportValue && data.fieldValue !== "Off")
       }).value;
+
+      if (typeof value === "string") {
+        value = value !== "Off";
+        storage.setValue(id, {
+          value: value
+        });
+      }
+
       this.container.className = "buttonWidgetAnnotation checkBox";
       var element = document.createElement("input");
       element.disabled = data.readOnly;
@@ -18244,12 +18148,12 @@ var CheckboxWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationEl
       element.addEventListener("change", function (event) {
         var name = event.target.name;
 
-        var _iterator3 = _createForOfIteratorHelper(document.getElementsByName(name)),
-            _step3;
+        var _iterator5 = _createForOfIteratorHelper(document.getElementsByName(name)),
+            _step5;
 
         try {
-          for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-            var checkbox = _step3.value;
+          for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+            var checkbox = _step5.value;
 
             if (checkbox !== event.target) {
               checkbox.checked = false;
@@ -18259,9 +18163,9 @@ var CheckboxWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationEl
             }
           }
         } catch (err) {
-          _iterator3.e(err);
+          _iterator5.e(err);
         } finally {
-          _iterator3.f();
+          _iterator5.f();
         }
 
         storage.setValue(id, {
@@ -18270,39 +18174,17 @@ var CheckboxWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationEl
       });
 
       if (this.enableScripting && this.hasJSActions) {
-        element.addEventListener("updatefromsandbox", function (event) {
-          var detail = event.detail;
+        element.addEventListener("updatefromsandbox", function (jsEvent) {
           var actions = {
-            value: function value() {
-              event.target.checked = detail.value !== "Off";
+            value: function value(event) {
+              event.target.checked = event.detail.value !== "Off";
               storage.setValue(id, {
                 value: event.target.checked
               });
-            },
-            focus: function focus() {
-              setTimeout(function () {
-                return event.target.focus({
-                  preventScroll: false
-                });
-              }, 0);
-            },
-            hidden: function hidden() {
-              event.target.style.visibility = detail.hidden ? "hidden" : "visible";
-              storage.setValue(id, {
-                hidden: detail.hidden
-              });
-            },
-            editable: function editable() {
-              event.target.disabled = !detail.editable;
             }
           };
-          Object.keys(detail).filter(function (name) {
-            return name in actions;
-          }).forEach(function (name) {
-            return actions[name]();
-          });
 
-          _this6._setColor(event);
+          _this7._dispatchEventFromSandbox(actions, jsEvent);
         });
 
         this._setEventListeners(element, [["change", "Validate"], ["change", "Action"], ["focus", "Focus"], ["blur", "Blur"], ["mousedown", "Mouse Down"], ["mouseenter", "Mouse Enter"], ["mouseleave", "Mouse Exit"], ["mouseup", "Mouse Up"]], function (event) {
@@ -18334,7 +18216,7 @@ var RadioButtonWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotatio
   _createClass(RadioButtonWidgetAnnotationElement, [{
     key: "render",
     value: function render() {
-      var _this7 = this;
+      var _this8 = this;
 
       this.container.className = "buttonWidgetAnnotation radioButton";
       var storage = this.annotationStorage;
@@ -18343,6 +18225,14 @@ var RadioButtonWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotatio
       var value = storage.getValue(id, {
         value: data.fieldValue === data.buttonValue
       }).value;
+
+      if (typeof value === "string") {
+        value = value !== data.buttonValue;
+        storage.setValue(id, {
+          value: value
+        });
+      }
+
       var element = document.createElement("input");
       element.disabled = data.readOnly;
       element.type = "radio";
@@ -18356,12 +18246,12 @@ var RadioButtonWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotatio
       element.addEventListener("change", function (event) {
         var target = event.target;
 
-        var _iterator4 = _createForOfIteratorHelper(document.getElementsByName(target.name)),
-            _step4;
+        var _iterator6 = _createForOfIteratorHelper(document.getElementsByName(target.name)),
+            _step6;
 
         try {
-          for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-            var radio = _step4.value;
+          for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+            var radio = _step6.value;
 
             if (radio !== target) {
               storage.setValue(radio.getAttribute("id"), {
@@ -18370,9 +18260,9 @@ var RadioButtonWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotatio
             }
           }
         } catch (err) {
-          _iterator4.e(err);
+          _iterator6.e(err);
         } finally {
-          _iterator4.f();
+          _iterator6.f();
         }
 
         storage.setValue(id, {
@@ -18382,18 +18272,17 @@ var RadioButtonWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotatio
 
       if (this.enableScripting && this.hasJSActions) {
         var pdfButtonValue = data.buttonValue;
-        element.addEventListener("updatefromsandbox", function (event) {
-          var detail = event.detail;
+        element.addEventListener("updatefromsandbox", function (jsEvent) {
           var actions = {
-            value: function value() {
-              var checked = pdfButtonValue === detail.value;
+            value: function value(event) {
+              var checked = pdfButtonValue === event.detail.value;
 
-              var _iterator5 = _createForOfIteratorHelper(document.getElementsByName(event.target.name)),
-                  _step5;
+              var _iterator7 = _createForOfIteratorHelper(document.getElementsByName(event.target.name)),
+                  _step7;
 
               try {
-                for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-                  var radio = _step5.value;
+                for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+                  var radio = _step7.value;
                   var radioId = radio.getAttribute("id");
                   radio.checked = radioId === id && checked;
                   storage.setValue(radioId, {
@@ -18401,35 +18290,14 @@ var RadioButtonWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotatio
                   });
                 }
               } catch (err) {
-                _iterator5.e(err);
+                _iterator7.e(err);
               } finally {
-                _iterator5.f();
+                _iterator7.f();
               }
-            },
-            focus: function focus() {
-              setTimeout(function () {
-                return event.target.focus({
-                  preventScroll: false
-                });
-              }, 0);
-            },
-            hidden: function hidden() {
-              event.target.style.visibility = detail.hidden ? "hidden" : "visible";
-              storage.setValue(id, {
-                hidden: detail.hidden
-              });
-            },
-            editable: function editable() {
-              event.target.disabled = !detail.editable;
             }
           };
-          Object.keys(detail).filter(function (name) {
-            return name in actions;
-          }).forEach(function (name) {
-            return actions[name]();
-          });
 
-          _this7._setColor(event);
+          _this8._dispatchEventFromSandbox(actions, jsEvent);
         });
 
         this._setEventListeners(element, [["change", "Validate"], ["change", "Action"], ["focus", "Focus"], ["blur", "Blur"], ["mousedown", "Mouse Down"], ["mouseenter", "Mouse Enter"], ["mouseleave", "Mouse Exit"], ["mouseup", "Mouse Up"]], function (event) {
@@ -18490,7 +18358,7 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
   _createClass(ChoiceWidgetAnnotationElement, [{
     key: "render",
     value: function render() {
-      var _this8 = this;
+      var _this9 = this;
 
       this.container.className = "choiceWidgetAnnotation";
       var storage = this.annotationStorage;
@@ -18511,12 +18379,12 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
         }
       }
 
-      var _iterator6 = _createForOfIteratorHelper(this.data.options),
-          _step6;
+      var _iterator8 = _createForOfIteratorHelper(this.data.options),
+          _step8;
 
       try {
-        for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
-          var option = _step6.value;
+        for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+          var option = _step8.value;
           var optionElement = document.createElement("option");
           optionElement.textContent = option.displayValue;
           optionElement.value = option.exportValue;
@@ -18528,9 +18396,9 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
           selectElement.appendChild(optionElement);
         }
       } catch (err) {
-        _iterator6.e(err);
+        _iterator8.e(err);
       } finally {
-        _iterator6.f();
+        _iterator8.f();
       }
 
       var getValue = function getValue(event, isExport) {
@@ -18559,12 +18427,11 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
       };
 
       if (this.enableScripting && this.hasJSActions) {
-        selectElement.addEventListener("updatefromsandbox", function (event) {
-          var detail = event.detail;
+        selectElement.addEventListener("updatefromsandbox", function (jsEvent) {
           var actions = {
-            value: function value() {
+            value: function value(event) {
               var options = selectElement.options;
-              var value = detail.value;
+              var value = event.detail.value;
               var values = new Set(Array.isArray(value) ? value : [value]);
               Array.prototype.forEach.call(options, function (option) {
                 option.selected = values.has(option.value);
@@ -18573,12 +18440,12 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
                 value: getValue(event, true)
               });
             },
-            multipleSelection: function multipleSelection() {
+            multipleSelection: function multipleSelection(event) {
               selectElement.multiple = true;
             },
-            remove: function remove() {
+            remove: function remove(event) {
               var options = selectElement.options;
-              var index = detail.remove;
+              var index = event.detail.remove;
               options[index].selected = false;
               selectElement.remove(index);
 
@@ -18597,7 +18464,7 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
                 items: getItems(event)
               });
             },
-            clear: function clear() {
+            clear: function clear(event) {
               while (selectElement.length !== 0) {
                 selectElement.remove(0);
               }
@@ -18607,11 +18474,11 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
                 items: []
               });
             },
-            insert: function insert() {
-              var _detail$insert = detail.insert,
-                  index = _detail$insert.index,
-                  displayValue = _detail$insert.displayValue,
-                  exportValue = _detail$insert.exportValue;
+            insert: function insert(event) {
+              var _event$detail$insert = event.detail.insert,
+                  index = _event$detail$insert.index,
+                  displayValue = _event$detail$insert.displayValue,
+                  exportValue = _event$detail$insert.exportValue;
               var optionElement = document.createElement("option");
               optionElement.textContent = displayValue;
               optionElement.value = exportValue;
@@ -18621,19 +18488,19 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
                 items: getItems(event)
               });
             },
-            items: function items() {
-              var items = detail.items;
+            items: function items(event) {
+              var items = event.detail.items;
 
               while (selectElement.length !== 0) {
                 selectElement.remove(0);
               }
 
-              var _iterator7 = _createForOfIteratorHelper(items),
-                  _step7;
+              var _iterator9 = _createForOfIteratorHelper(items),
+                  _step9;
 
               try {
-                for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
-                  var item = _step7.value;
+                for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+                  var item = _step9.value;
                   var displayValue = item.displayValue,
                       exportValue = item.exportValue;
                   var optionElement = document.createElement("option");
@@ -18642,9 +18509,9 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
                   selectElement.appendChild(optionElement);
                 }
               } catch (err) {
-                _iterator7.e(err);
+                _iterator9.e(err);
               } finally {
-                _iterator7.f();
+                _iterator9.f();
               }
 
               if (selectElement.options.length > 0) {
@@ -18656,8 +18523,8 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
                 items: getItems(event)
               });
             },
-            indices: function indices() {
-              var indices = new Set(detail.indices);
+            indices: function indices(event) {
+              var indices = new Set(event.detail.indices);
               var options = event.target.options;
               Array.prototype.forEach.call(options, function (option, i) {
                 option.selected = indices.has(i);
@@ -18666,41 +18533,23 @@ var ChoiceWidgetAnnotationElement = /*#__PURE__*/function (_WidgetAnnotationElem
                 value: getValue(event, true)
               });
             },
-            focus: function focus() {
-              setTimeout(function () {
-                return event.target.focus({
-                  preventScroll: false
-                });
-              }, 0);
-            },
-            hidden: function hidden() {
-              event.target.style.visibility = detail.hidden ? "hidden" : "visible";
-              storage.setValue(id, {
-                hidden: detail.hidden
-              });
-            },
-            editable: function editable() {
-              event.target.disabled = !detail.editable;
+            editable: function editable(event) {
+              event.target.disabled = !event.detail.editable;
             }
           };
-          Object.keys(detail).filter(function (name) {
-            return name in actions;
-          }).forEach(function (name) {
-            return actions[name]();
-          });
 
-          _this8._setColor(event);
+          _this9._dispatchEventFromSandbox(actions, jsEvent);
         });
         selectElement.addEventListener("input", function (event) {
-          var _this8$linkService$ev;
+          var _this9$linkService$ev;
 
           var exportValue = getValue(event, true);
           var value = getValue(event, false);
           storage.setValue(id, {
             value: exportValue
           });
-          (_this8$linkService$ev = _this8.linkService.eventBus) === null || _this8$linkService$ev === void 0 ? void 0 : _this8$linkService$ev.dispatch("dispatcheventinsandbox", {
-            source: _this8,
+          (_this9$linkService$ev = _this9.linkService.eventBus) === null || _this9$linkService$ev === void 0 ? void 0 : _this9$linkService$ev.dispatch("dispatcheventinsandbox", {
+            source: _this9,
             detail: {
               id: id,
               name: "Keystroke",
@@ -18805,8 +18654,6 @@ var PopupElement = /*#__PURE__*/function () {
   _createClass(PopupElement, [{
     key: "render",
     value: function render() {
-      var _this9 = this;
-
       var BACKGROUND_ENLIGHT = 0.7;
       var wrapper = document.createElement("div");
       wrapper.className = "popupWrapper";
@@ -18848,11 +18695,22 @@ var PopupElement = /*#__PURE__*/function () {
         this.trigger = [this.trigger];
       }
 
-      this.trigger.forEach(function (element) {
-        element.addEventListener("click", _this9._toggle.bind(_this9));
-        element.addEventListener("mouseover", _this9._show.bind(_this9, false));
-        element.addEventListener("mouseout", _this9._hide.bind(_this9, false));
-      });
+      var _iterator10 = _createForOfIteratorHelper(this.trigger),
+          _step10;
+
+      try {
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+          var element = _step10.value;
+          element.addEventListener("click", this._toggle.bind(this));
+          element.addEventListener("mouseover", this._show.bind(this, false));
+          element.addEventListener("mouseout", this._hide.bind(this, false));
+        }
+      } catch (err) {
+        _iterator10.e(err);
+      } finally {
+        _iterator10.f();
+      }
+
       popup.addEventListener("click", this._hide.bind(this, true));
       wrapper.appendChild(popup);
       return wrapper;
@@ -19107,20 +18965,20 @@ var PolylineAnnotationElement = /*#__PURE__*/function (_AnnotationElement9) {
       var svg = this.svgFactory.create(width, height);
       var points = [];
 
-      var _iterator8 = _createForOfIteratorHelper(data.vertices),
-          _step8;
+      var _iterator11 = _createForOfIteratorHelper(data.vertices),
+          _step11;
 
       try {
-        for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
-          var coordinate = _step8.value;
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+          var coordinate = _step11.value;
           var x = coordinate.x - data.rect[0];
           var y = data.rect[3] - coordinate.y;
           points.push(x + "," + y);
         }
       } catch (err) {
-        _iterator8.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator8.f();
+        _iterator11.f();
       }
 
       points = points.join(" ");
@@ -19220,28 +19078,28 @@ var InkAnnotationElement = /*#__PURE__*/function (_AnnotationElement11) {
       var height = data.rect[3] - data.rect[1];
       var svg = this.svgFactory.create(width, height);
 
-      var _iterator9 = _createForOfIteratorHelper(data.inkLists),
-          _step9;
+      var _iterator12 = _createForOfIteratorHelper(data.inkLists),
+          _step12;
 
       try {
-        for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
-          var inkList = _step9.value;
+        for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
+          var inkList = _step12.value;
           var points = [];
 
-          var _iterator10 = _createForOfIteratorHelper(inkList),
-              _step10;
+          var _iterator13 = _createForOfIteratorHelper(inkList),
+              _step13;
 
           try {
-            for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
-              var coordinate = _step10.value;
+            for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
+              var coordinate = _step13.value;
               var x = coordinate.x - data.rect[0];
               var y = data.rect[3] - coordinate.y;
               points.push("".concat(x, ",").concat(y));
             }
           } catch (err) {
-            _iterator10.e(err);
+            _iterator13.e(err);
           } finally {
-            _iterator10.f();
+            _iterator13.f();
           }
 
           points = points.join(" ");
@@ -19256,9 +19114,9 @@ var InkAnnotationElement = /*#__PURE__*/function (_AnnotationElement11) {
           svg.appendChild(polyline);
         }
       } catch (err) {
-        _iterator9.e(err);
+        _iterator12.e(err);
       } finally {
-        _iterator9.f();
+        _iterator12.f();
       }
 
       this.container.append(svg);
@@ -19508,12 +19366,12 @@ var AnnotationLayer = /*#__PURE__*/function () {
       var sortedAnnotations = [],
           popupAnnotations = [];
 
-      var _iterator11 = _createForOfIteratorHelper(parameters.annotations),
-          _step11;
+      var _iterator14 = _createForOfIteratorHelper(parameters.annotations),
+          _step14;
 
       try {
-        for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
-          var _data = _step11.value;
+        for (_iterator14.s(); !(_step14 = _iterator14.n()).done;) {
+          var _data = _step14.value;
 
           if (!_data) {
             continue;
@@ -19527,9 +19385,9 @@ var AnnotationLayer = /*#__PURE__*/function () {
           sortedAnnotations.push(_data);
         }
       } catch (err) {
-        _iterator11.e(err);
+        _iterator14.e(err);
       } finally {
-        _iterator11.f();
+        _iterator14.f();
       }
 
       if (popupAnnotations.length) {
@@ -19564,18 +19422,18 @@ var AnnotationLayer = /*#__PURE__*/function () {
           }
 
           if (Array.isArray(rendered)) {
-            var _iterator12 = _createForOfIteratorHelper(rendered),
-                _step12;
+            var _iterator15 = _createForOfIteratorHelper(rendered),
+                _step15;
 
             try {
-              for (_iterator12.s(); !(_step12 = _iterator12.n()).done;) {
-                var renderedElement = _step12.value;
+              for (_iterator15.s(); !(_step15 = _iterator15.n()).done;) {
+                var renderedElement = _step15.value;
                 parameters.div.appendChild(renderedElement);
               }
             } catch (err) {
-              _iterator12.e(err);
+              _iterator15.e(err);
             } finally {
-              _iterator12.f();
+              _iterator15.f();
             }
           } else {
             if (element instanceof PopupAnnotationElement) {
@@ -19592,24 +19450,34 @@ var AnnotationLayer = /*#__PURE__*/function () {
     value: function update(parameters) {
       var transform = "matrix(".concat(parameters.viewport.transform.join(","), ")");
 
-      var _iterator13 = _createForOfIteratorHelper(parameters.annotations),
-          _step13;
+      var _iterator16 = _createForOfIteratorHelper(parameters.annotations),
+          _step16;
 
       try {
-        for (_iterator13.s(); !(_step13 = _iterator13.n()).done;) {
-          var data = _step13.value;
+        for (_iterator16.s(); !(_step16 = _iterator16.n()).done;) {
+          var data = _step16.value;
           var elements = parameters.div.querySelectorAll("[data-annotation-id=\"".concat(data.id, "\"]"));
 
           if (elements) {
-            elements.forEach(function (element) {
-              element.style.transform = transform;
-            });
+            var _iterator17 = _createForOfIteratorHelper(elements),
+                _step17;
+
+            try {
+              for (_iterator17.s(); !(_step17 = _iterator17.n()).done;) {
+                var element = _step17.value;
+                element.style.transform = transform;
+              }
+            } catch (err) {
+              _iterator17.e(err);
+            } finally {
+              _iterator17.f();
+            }
           }
         }
       } catch (err) {
-        _iterator13.e(err);
+        _iterator16.e(err);
       } finally {
-        _iterator13.f();
+        _iterator16.f();
       }
 
       parameters.div.hidden = false;
@@ -19622,7 +19490,7 @@ var AnnotationLayer = /*#__PURE__*/function () {
 exports.AnnotationLayer = AnnotationLayer;
 
 /***/ }),
-/* 139 */
+/* 126 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -19641,7 +19509,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
@@ -19762,7 +19630,7 @@ var ColorConverters = /*#__PURE__*/function () {
 exports.ColorConverters = ColorConverters;
 
 /***/ }),
-/* 140 */
+/* 127 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -19771,316 +19639,319 @@ exports.ColorConverters = ColorConverters;
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.renderTextLayer = void 0;
+exports.renderTextLayer = renderTextLayer;
 
 var _util = __w_pdfjs_require__(4);
 
-var renderTextLayer = function renderTextLayerClosure() {
-  var MAX_TEXT_DIVS_TO_RENDER = 100000;
-  var DEFAULT_FONT_SIZE = 30;
-  var DEFAULT_FONT_ASCENT = 0.8;
-  var ascentCache = new Map();
-  var NonWhitespaceRegexp = /\S/;
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-  function isAllWhitespace(str) {
-    return !NonWhitespaceRegexp.test(str);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var MAX_TEXT_DIVS_TO_RENDER = 100000;
+var DEFAULT_FONT_SIZE = 30;
+var DEFAULT_FONT_ASCENT = 0.8;
+var ascentCache = new Map();
+var AllWhitespaceRegexp = /^\s+$/g;
+
+function getAscent(fontFamily, ctx) {
+  var cachedAscent = ascentCache.get(fontFamily);
+
+  if (cachedAscent) {
+    return cachedAscent;
   }
 
-  function getAscent(fontFamily, ctx) {
-    var cachedAscent = ascentCache.get(fontFamily);
+  ctx.save();
+  ctx.font = "".concat(DEFAULT_FONT_SIZE, "px ").concat(fontFamily);
+  var metrics = ctx.measureText("");
+  var ascent = metrics.fontBoundingBoxAscent;
+  var descent = Math.abs(metrics.fontBoundingBoxDescent);
 
-    if (cachedAscent) {
-      return cachedAscent;
-    }
-
-    ctx.save();
-    ctx.font = "".concat(DEFAULT_FONT_SIZE, "px ").concat(fontFamily);
-    var metrics = ctx.measureText("");
-    var ascent = metrics.fontBoundingBoxAscent;
-    var descent = Math.abs(metrics.fontBoundingBoxDescent);
-
-    if (ascent) {
-      ctx.restore();
-      var ratio = ascent / (ascent + descent);
-      ascentCache.set(fontFamily, ratio);
-      return ratio;
-    }
-
-    ctx.strokeStyle = "red";
-    ctx.clearRect(0, 0, DEFAULT_FONT_SIZE, DEFAULT_FONT_SIZE);
-    ctx.strokeText("g", 0, 0);
-    var pixels = ctx.getImageData(0, 0, DEFAULT_FONT_SIZE, DEFAULT_FONT_SIZE).data;
-    descent = 0;
-
-    for (var i = pixels.length - 1 - 3; i >= 0; i -= 4) {
-      if (pixels[i] > 0) {
-        descent = Math.ceil(i / 4 / DEFAULT_FONT_SIZE);
-        break;
-      }
-    }
-
-    ctx.clearRect(0, 0, DEFAULT_FONT_SIZE, DEFAULT_FONT_SIZE);
-    ctx.strokeText("A", 0, DEFAULT_FONT_SIZE);
-    pixels = ctx.getImageData(0, 0, DEFAULT_FONT_SIZE, DEFAULT_FONT_SIZE).data;
-    ascent = 0;
-
-    for (var _i = 0, ii = pixels.length; _i < ii; _i += 4) {
-      if (pixels[_i] > 0) {
-        ascent = DEFAULT_FONT_SIZE - Math.floor(_i / 4 / DEFAULT_FONT_SIZE);
-        break;
-      }
-    }
-
+  if (ascent) {
     ctx.restore();
-
-    if (ascent) {
-      var _ratio = ascent / (ascent + descent);
-
-      ascentCache.set(fontFamily, _ratio);
-      return _ratio;
-    }
-
-    ascentCache.set(fontFamily, DEFAULT_FONT_ASCENT);
-    return DEFAULT_FONT_ASCENT;
+    var ratio = ascent / (ascent + descent);
+    ascentCache.set(fontFamily, ratio);
+    return ratio;
   }
 
-  function appendText(task, geom, styles, ctx) {
-    var textDiv = document.createElement("span");
-    var textDivProperties = {
-      angle: 0,
-      canvasWidth: 0,
-      isWhitespace: false,
-      originalTransform: null,
-      paddingBottom: 0,
-      paddingLeft: 0,
-      paddingRight: 0,
-      paddingTop: 0,
-      scale: 1
-    };
+  ctx.strokeStyle = "red";
+  ctx.clearRect(0, 0, DEFAULT_FONT_SIZE, DEFAULT_FONT_SIZE);
+  ctx.strokeText("g", 0, 0);
+  var pixels = ctx.getImageData(0, 0, DEFAULT_FONT_SIZE, DEFAULT_FONT_SIZE).data;
+  descent = 0;
 
-    task._textDivs.push(textDiv);
-
-    if (isAllWhitespace(geom.str)) {
-      textDivProperties.isWhitespace = true;
-
-      task._textDivProperties.set(textDiv, textDivProperties);
-
-      return;
+  for (var i = pixels.length - 1 - 3; i >= 0; i -= 4) {
+    if (pixels[i] > 0) {
+      descent = Math.ceil(i / 4 / DEFAULT_FONT_SIZE);
+      break;
     }
+  }
 
-    var tx = _util.Util.transform(task._viewport.transform, geom.transform);
+  ctx.clearRect(0, 0, DEFAULT_FONT_SIZE, DEFAULT_FONT_SIZE);
+  ctx.strokeText("A", 0, DEFAULT_FONT_SIZE);
+  pixels = ctx.getImageData(0, 0, DEFAULT_FONT_SIZE, DEFAULT_FONT_SIZE).data;
+  ascent = 0;
 
-    var angle = Math.atan2(tx[1], tx[0]);
-    var style = styles[geom.fontName];
+  for (var _i = 0, ii = pixels.length; _i < ii; _i += 4) {
+    if (pixels[_i] > 0) {
+      ascent = DEFAULT_FONT_SIZE - Math.floor(_i / 4 / DEFAULT_FONT_SIZE);
+      break;
+    }
+  }
 
+  ctx.restore();
+
+  if (ascent) {
+    var _ratio = ascent / (ascent + descent);
+
+    ascentCache.set(fontFamily, _ratio);
+    return _ratio;
+  }
+
+  ascentCache.set(fontFamily, DEFAULT_FONT_ASCENT);
+  return DEFAULT_FONT_ASCENT;
+}
+
+function appendText(task, geom, styles, ctx) {
+  var textDiv = document.createElement("span");
+  var textDivProperties = {
+    angle: 0,
+    canvasWidth: 0,
+    hasText: geom.str !== "",
+    hasEOL: geom.hasEOL,
+    originalTransform: null,
+    paddingBottom: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingTop: 0,
+    scale: 1
+  };
+
+  task._textDivs.push(textDiv);
+
+  var tx = _util.Util.transform(task._viewport.transform, geom.transform);
+
+  var angle = Math.atan2(tx[1], tx[0]);
+  var style = styles[geom.fontName];
+
+  if (style.vertical) {
+    angle += Math.PI / 2;
+  }
+
+  var fontHeight = Math.hypot(tx[2], tx[3]);
+  var fontAscent = fontHeight * getAscent(style.fontFamily, ctx);
+  var left, top;
+
+  if (angle === 0) {
+    left = tx[4];
+    top = tx[5] - fontAscent;
+  } else {
+    left = tx[4] + fontAscent * Math.sin(angle);
+    top = tx[5] - fontAscent * Math.cos(angle);
+  }
+
+  textDiv.style.left = "".concat(left, "px");
+  textDiv.style.top = "".concat(top, "px");
+  textDiv.style.fontSize = "".concat(fontHeight, "px");
+  textDiv.style.fontFamily = style.fontFamily;
+  textDiv.setAttribute("role", "presentation");
+  textDiv.textContent = geom.str;
+  textDiv.dir = geom.dir;
+
+  if (task._fontInspectorEnabled) {
+    textDiv.dataset.fontName = geom.fontName;
+  }
+
+  if (angle !== 0) {
+    textDivProperties.angle = angle * (180 / Math.PI);
+  }
+
+  var shouldScaleText = false;
+
+  if (geom.str.length > 1 || task._enhanceTextSelection && AllWhitespaceRegexp.test(geom.str)) {
+    shouldScaleText = true;
+  } else if (geom.transform[0] !== geom.transform[3]) {
+    var absScaleX = Math.abs(geom.transform[0]),
+        absScaleY = Math.abs(geom.transform[3]);
+
+    if (absScaleX !== absScaleY && Math.max(absScaleX, absScaleY) / Math.min(absScaleX, absScaleY) > 1.5) {
+      shouldScaleText = true;
+    }
+  }
+
+  if (shouldScaleText) {
     if (style.vertical) {
-      angle += Math.PI / 2;
-    }
-
-    var fontHeight = Math.hypot(tx[2], tx[3]);
-    var fontAscent = fontHeight * getAscent(style.fontFamily, ctx);
-    var left, top;
-
-    if (angle === 0) {
-      left = tx[4];
-      top = tx[5] - fontAscent;
+      textDivProperties.canvasWidth = geom.height * task._viewport.scale;
     } else {
-      left = tx[4] + fontAscent * Math.sin(angle);
-      top = tx[5] - fontAscent * Math.cos(angle);
+      textDivProperties.canvasWidth = geom.width * task._viewport.scale;
     }
+  }
 
-    textDiv.style.left = "".concat(left, "px");
-    textDiv.style.top = "".concat(top, "px");
-    textDiv.style.fontSize = "".concat(fontHeight, "px");
-    textDiv.style.fontFamily = style.fontFamily;
-    textDiv.textContent = geom.str;
-    textDiv.dir = geom.dir;
+  task._textDivProperties.set(textDiv, textDivProperties);
 
-    if (task._fontInspectorEnabled) {
-      textDiv.dataset.fontName = geom.fontName;
-    }
+  if (task._textContentStream) {
+    task._layoutText(textDiv);
+  }
+
+  if (task._enhanceTextSelection && textDivProperties.hasText) {
+    var angleCos = 1,
+        angleSin = 0;
 
     if (angle !== 0) {
-      textDivProperties.angle = angle * (180 / Math.PI);
+      angleCos = Math.cos(angle);
+      angleSin = Math.sin(angle);
     }
 
-    var shouldScaleText = false;
+    var divWidth = (style.vertical ? geom.height : geom.width) * task._viewport.scale;
+    var divHeight = fontHeight;
+    var m, b;
 
-    if (geom.str.length > 1) {
-      shouldScaleText = true;
-    } else if (geom.transform[0] !== geom.transform[3]) {
-      var absScaleX = Math.abs(geom.transform[0]),
-          absScaleY = Math.abs(geom.transform[3]);
-
-      if (absScaleX !== absScaleY && Math.max(absScaleX, absScaleY) / Math.min(absScaleX, absScaleY) > 1.5) {
-        shouldScaleText = true;
-      }
+    if (angle !== 0) {
+      m = [angleCos, angleSin, -angleSin, angleCos, left, top];
+      b = _util.Util.getAxialAlignedBoundingBox([0, 0, divWidth, divHeight], m);
+    } else {
+      b = [left, top, left + divWidth, top + divHeight];
     }
 
-    if (shouldScaleText) {
-      if (style.vertical) {
-        textDivProperties.canvasWidth = geom.height * task._viewport.scale;
-      } else {
-        textDivProperties.canvasWidth = geom.width * task._viewport.scale;
-      }
-    }
+    task._bounds.push({
+      left: b[0],
+      top: b[1],
+      right: b[2],
+      bottom: b[3],
+      div: textDiv,
+      size: [divWidth, divHeight],
+      m: m
+    });
+  }
+}
 
-    task._textDivProperties.set(textDiv, textDivProperties);
-
-    if (task._textContentStream) {
-      task._layoutText(textDiv);
-    }
-
-    if (task._enhanceTextSelection) {
-      var angleCos = 1,
-          angleSin = 0;
-
-      if (angle !== 0) {
-        angleCos = Math.cos(angle);
-        angleSin = Math.sin(angle);
-      }
-
-      var divWidth = (style.vertical ? geom.height : geom.width) * task._viewport.scale;
-      var divHeight = fontHeight;
-      var m, b;
-
-      if (angle !== 0) {
-        m = [angleCos, angleSin, -angleSin, angleCos, left, top];
-        b = _util.Util.getAxialAlignedBoundingBox([0, 0, divWidth, divHeight], m);
-      } else {
-        b = [left, top, left + divWidth, top + divHeight];
-      }
-
-      task._bounds.push({
-        left: b[0],
-        top: b[1],
-        right: b[2],
-        bottom: b[3],
-        div: textDiv,
-        size: [divWidth, divHeight],
-        m: m
-      });
-    }
+function render(task) {
+  if (task._canceled) {
+    return;
   }
 
-  function render(task) {
-    if (task._canceled) {
-      return;
-    }
+  var textDivs = task._textDivs;
+  var capability = task._capability;
+  var textDivsLength = textDivs.length;
 
-    var textDivs = task._textDivs;
-    var capability = task._capability;
-    var textDivsLength = textDivs.length;
-
-    if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
-      task._renderingDone = true;
-      capability.resolve();
-      return;
-    }
-
-    if (!task._textContentStream) {
-      for (var i = 0; i < textDivsLength; i++) {
-        task._layoutText(textDivs[i]);
-      }
-    }
-
+  if (textDivsLength > MAX_TEXT_DIVS_TO_RENDER) {
     task._renderingDone = true;
     capability.resolve();
+    return;
   }
 
-  function findPositiveMin(ts, offset, count) {
-    var result = 0;
-
-    for (var i = 0; i < count; i++) {
-      var t = ts[offset++];
-
-      if (t > 0) {
-        result = result ? Math.min(t, result) : t;
-      }
+  if (!task._textContentStream) {
+    for (var i = 0; i < textDivsLength; i++) {
+      task._layoutText(textDivs[i]);
     }
-
-    return result;
   }
 
-  function expand(task) {
-    var bounds = task._bounds;
-    var viewport = task._viewport;
-    var expanded = expandBounds(viewport.width, viewport.height, bounds);
+  task._renderingDone = true;
+  capability.resolve();
+}
 
-    var _loop = function _loop(i) {
-      var div = bounds[i].div;
+function findPositiveMin(ts, offset, count) {
+  var result = 0;
 
-      var divProperties = task._textDivProperties.get(div);
+  for (var i = 0; i < count; i++) {
+    var t = ts[offset++];
 
-      if (divProperties.angle === 0) {
-        divProperties.paddingLeft = bounds[i].left - expanded[i].left;
-        divProperties.paddingTop = bounds[i].top - expanded[i].top;
-        divProperties.paddingRight = expanded[i].right - bounds[i].right;
-        divProperties.paddingBottom = expanded[i].bottom - bounds[i].bottom;
+    if (t > 0) {
+      result = result ? Math.min(t, result) : t;
+    }
+  }
 
-        task._textDivProperties.set(div, divProperties);
+  return result;
+}
 
-        return "continue";
-      }
+function expand(task) {
+  var bounds = task._bounds;
+  var viewport = task._viewport;
+  var expanded = expandBounds(viewport.width, viewport.height, bounds);
 
-      var e = expanded[i],
-          b = bounds[i];
-      var m = b.m,
-          c = m[0],
-          s = m[1];
-      var points = [[0, 0], [0, b.size[1]], [b.size[0], 0], b.size];
-      var ts = new Float64Array(64);
-      points.forEach(function (p, j) {
-        var t = _util.Util.applyTransform(p, m);
+  for (var i = 0; i < expanded.length; i++) {
+    var div = bounds[i].div;
 
-        ts[j + 0] = c && (e.left - t[0]) / c;
-        ts[j + 4] = s && (e.top - t[1]) / s;
-        ts[j + 8] = c && (e.right - t[0]) / c;
-        ts[j + 12] = s && (e.bottom - t[1]) / s;
-        ts[j + 16] = s && (e.left - t[0]) / -s;
-        ts[j + 20] = c && (e.top - t[1]) / c;
-        ts[j + 24] = s && (e.right - t[0]) / -s;
-        ts[j + 28] = c && (e.bottom - t[1]) / c;
-        ts[j + 32] = c && (e.left - t[0]) / -c;
-        ts[j + 36] = s && (e.top - t[1]) / -s;
-        ts[j + 40] = c && (e.right - t[0]) / -c;
-        ts[j + 44] = s && (e.bottom - t[1]) / -s;
-        ts[j + 48] = s && (e.left - t[0]) / s;
-        ts[j + 52] = c && (e.top - t[1]) / -c;
-        ts[j + 56] = s && (e.right - t[0]) / s;
-        ts[j + 60] = c && (e.bottom - t[1]) / -c;
-      });
-      var boxScale = 1 + Math.min(Math.abs(c), Math.abs(s));
-      divProperties.paddingLeft = findPositiveMin(ts, 32, 16) / boxScale;
-      divProperties.paddingTop = findPositiveMin(ts, 48, 16) / boxScale;
-      divProperties.paddingRight = findPositiveMin(ts, 0, 16) / boxScale;
-      divProperties.paddingBottom = findPositiveMin(ts, 16, 16) / boxScale;
+    var divProperties = task._textDivProperties.get(div);
+
+    if (divProperties.angle === 0) {
+      divProperties.paddingLeft = bounds[i].left - expanded[i].left;
+      divProperties.paddingTop = bounds[i].top - expanded[i].top;
+      divProperties.paddingRight = expanded[i].right - bounds[i].right;
+      divProperties.paddingBottom = expanded[i].bottom - bounds[i].bottom;
 
       task._textDivProperties.set(div, divProperties);
-    };
 
-    for (var i = 0; i < expanded.length; i++) {
-      var _ret = _loop(i);
-
-      if (_ret === "continue") continue;
+      continue;
     }
-  }
 
-  function expandBounds(width, height, boxes) {
-    var bounds = boxes.map(function (box, i) {
-      return {
-        x1: box.left,
-        y1: box.top,
-        x2: box.right,
-        y2: box.bottom,
-        index: i,
-        x1New: undefined,
-        x2New: undefined
-      };
-    });
-    expandBoundsLTR(width, bounds);
-    var expanded = new Array(boxes.length);
-    bounds.forEach(function (b) {
+    var e = expanded[i],
+        b = bounds[i];
+    var m = b.m,
+        c = m[0],
+        s = m[1];
+    var points = [[0, 0], [0, b.size[1]], [b.size[0], 0], b.size];
+    var ts = new Float64Array(64);
+
+    for (var j = 0, jj = points.length; j < jj; j++) {
+      var t = _util.Util.applyTransform(points[j], m);
+
+      ts[j + 0] = c && (e.left - t[0]) / c;
+      ts[j + 4] = s && (e.top - t[1]) / s;
+      ts[j + 8] = c && (e.right - t[0]) / c;
+      ts[j + 12] = s && (e.bottom - t[1]) / s;
+      ts[j + 16] = s && (e.left - t[0]) / -s;
+      ts[j + 20] = c && (e.top - t[1]) / c;
+      ts[j + 24] = s && (e.right - t[0]) / -s;
+      ts[j + 28] = c && (e.bottom - t[1]) / c;
+      ts[j + 32] = c && (e.left - t[0]) / -c;
+      ts[j + 36] = s && (e.top - t[1]) / -s;
+      ts[j + 40] = c && (e.right - t[0]) / -c;
+      ts[j + 44] = s && (e.bottom - t[1]) / -s;
+      ts[j + 48] = s && (e.left - t[0]) / s;
+      ts[j + 52] = c && (e.top - t[1]) / -c;
+      ts[j + 56] = s && (e.right - t[0]) / s;
+      ts[j + 60] = c && (e.bottom - t[1]) / -c;
+    }
+
+    var boxScale = 1 + Math.min(Math.abs(c), Math.abs(s));
+    divProperties.paddingLeft = findPositiveMin(ts, 32, 16) / boxScale;
+    divProperties.paddingTop = findPositiveMin(ts, 48, 16) / boxScale;
+    divProperties.paddingRight = findPositiveMin(ts, 0, 16) / boxScale;
+    divProperties.paddingBottom = findPositiveMin(ts, 16, 16) / boxScale;
+
+    task._textDivProperties.set(div, divProperties);
+  }
+}
+
+function expandBounds(width, height, boxes) {
+  var bounds = boxes.map(function (box, i) {
+    return {
+      x1: box.left,
+      y1: box.top,
+      x2: box.right,
+      y2: box.bottom,
+      index: i,
+      x1New: undefined,
+      x2New: undefined
+    };
+  });
+  expandBoundsLTR(width, bounds);
+  var expanded = new Array(boxes.length);
+
+  var _iterator = _createForOfIteratorHelper(bounds),
+      _step;
+
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var b = _step.value;
       var i = b.index;
       expanded[i] = {
         left: b.x1New,
@@ -20088,46 +19959,70 @@ var renderTextLayer = function renderTextLayerClosure() {
         right: b.x2New,
         bottom: 0
       };
-    });
-    boxes.map(function (box, i) {
-      var e = expanded[i],
-          b = bounds[i];
-      b.x1 = box.top;
-      b.y1 = width - e.right;
-      b.x2 = box.bottom;
-      b.y2 = width - e.left;
-      b.index = i;
-      b.x1New = undefined;
-      b.x2New = undefined;
-    });
-    expandBoundsLTR(height, bounds);
-    bounds.forEach(function (b) {
-      var i = b.index;
-      expanded[i].top = b.x1New;
-      expanded[i].bottom = b.x2New;
-    });
-    return expanded;
+    }
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
   }
 
-  function expandBoundsLTR(width, bounds) {
-    bounds.sort(function (a, b) {
-      return a.x1 - b.x1 || a.index - b.index;
-    });
-    var fakeBoundary = {
-      x1: -Infinity,
-      y1: -Infinity,
-      x2: 0,
-      y2: Infinity,
-      index: -1,
-      x1New: 0,
-      x2New: 0
-    };
-    var horizon = [{
-      start: -Infinity,
-      end: Infinity,
-      boundary: fakeBoundary
-    }];
-    bounds.forEach(function (boundary) {
+  boxes.map(function (box, i) {
+    var e = expanded[i],
+        b = bounds[i];
+    b.x1 = box.top;
+    b.y1 = width - e.right;
+    b.x2 = box.bottom;
+    b.y2 = width - e.left;
+    b.index = i;
+    b.x1New = undefined;
+    b.x2New = undefined;
+  });
+  expandBoundsLTR(height, bounds);
+
+  var _iterator2 = _createForOfIteratorHelper(bounds),
+      _step2;
+
+  try {
+    for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+      var _b = _step2.value;
+      var _i2 = _b.index;
+      expanded[_i2].top = _b.x1New;
+      expanded[_i2].bottom = _b.x2New;
+    }
+  } catch (err) {
+    _iterator2.e(err);
+  } finally {
+    _iterator2.f();
+  }
+
+  return expanded;
+}
+
+function expandBoundsLTR(width, bounds) {
+  bounds.sort(function (a, b) {
+    return a.x1 - b.x1 || a.index - b.index;
+  });
+  var fakeBoundary = {
+    x1: -Infinity,
+    y1: -Infinity,
+    x2: 0,
+    y2: Infinity,
+    index: -1,
+    x1New: 0,
+    x2New: 0
+  };
+  var horizon = [{
+    start: -Infinity,
+    end: Infinity,
+    boundary: fakeBoundary
+  }];
+
+  var _iterator3 = _createForOfIteratorHelper(bounds),
+      _step3;
+
+  try {
+    for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+      var boundary = _step3.value;
       var i = 0;
 
       while (i < horizon.length && horizon[i].end <= boundary.y1) {
@@ -20140,22 +20035,24 @@ var renderTextLayer = function renderTextLayerClosure() {
         j--;
       }
 
-      var horizonPart, affectedBoundary;
-      var q,
-          k,
+      var _horizonPart = void 0,
+          _affectedBoundary = void 0;
+
+      var q = void 0,
+          k = void 0,
           maxXNew = -Infinity;
 
       for (q = i; q <= j; q++) {
-        horizonPart = horizon[q];
-        affectedBoundary = horizonPart.boundary;
+        _horizonPart = horizon[q];
+        _affectedBoundary = _horizonPart.boundary;
         var xNew = void 0;
 
-        if (affectedBoundary.x2 > boundary.x1) {
-          xNew = affectedBoundary.index > boundary.index ? affectedBoundary.x1New : boundary.x1;
-        } else if (affectedBoundary.x2New === undefined) {
-          xNew = (affectedBoundary.x2 + boundary.x1) / 2;
+        if (_affectedBoundary.x2 > boundary.x1) {
+          xNew = _affectedBoundary.index > boundary.index ? _affectedBoundary.x1New : boundary.x1;
+        } else if (_affectedBoundary.x2New === undefined) {
+          xNew = (_affectedBoundary.x2 + boundary.x1) / 2;
         } else {
-          xNew = affectedBoundary.x2New;
+          xNew = _affectedBoundary.x2New;
         }
 
         if (xNew > maxXNew) {
@@ -20166,19 +20063,19 @@ var renderTextLayer = function renderTextLayerClosure() {
       boundary.x1New = maxXNew;
 
       for (q = i; q <= j; q++) {
-        horizonPart = horizon[q];
-        affectedBoundary = horizonPart.boundary;
+        _horizonPart = horizon[q];
+        _affectedBoundary = _horizonPart.boundary;
 
-        if (affectedBoundary.x2New === undefined) {
-          if (affectedBoundary.x2 > boundary.x1) {
-            if (affectedBoundary.index > boundary.index) {
-              affectedBoundary.x2New = affectedBoundary.x2;
+        if (_affectedBoundary.x2New === undefined) {
+          if (_affectedBoundary.x2 > boundary.x1) {
+            if (_affectedBoundary.index > boundary.index) {
+              _affectedBoundary.x2New = _affectedBoundary.x2;
             }
           } else {
-            affectedBoundary.x2New = maxXNew;
+            _affectedBoundary.x2New = maxXNew;
           }
-        } else if (affectedBoundary.x2New > maxXNew) {
-          affectedBoundary.x2New = Math.max(maxXNew, affectedBoundary.x2);
+        } else if (_affectedBoundary.x2New > maxXNew) {
+          _affectedBoundary.x2New = Math.max(maxXNew, _affectedBoundary.x2);
         }
       }
 
@@ -20186,16 +20083,16 @@ var renderTextLayer = function renderTextLayerClosure() {
       var lastBoundary = null;
 
       for (q = i; q <= j; q++) {
-        horizonPart = horizon[q];
-        affectedBoundary = horizonPart.boundary;
-        var useBoundary = affectedBoundary.x2 > boundary.x2 ? affectedBoundary : boundary;
+        _horizonPart = horizon[q];
+        _affectedBoundary = _horizonPart.boundary;
+        var useBoundary = _affectedBoundary.x2 > boundary.x2 ? _affectedBoundary : boundary;
 
         if (lastBoundary === useBoundary) {
-          changedHorizon[changedHorizon.length - 1].end = horizonPart.end;
+          changedHorizon[changedHorizon.length - 1].end = _horizonPart.end;
         } else {
           changedHorizon.push({
-            start: horizonPart.start,
-            end: horizonPart.end,
+            start: _horizonPart.start,
+            end: _horizonPart.end,
             boundary: useBoundary
           });
           lastBoundary = useBoundary;
@@ -20221,43 +20118,51 @@ var renderTextLayer = function renderTextLayerClosure() {
       }
 
       for (q = i; q <= j; q++) {
-        horizonPart = horizon[q];
-        affectedBoundary = horizonPart.boundary;
+        _horizonPart = horizon[q];
+        _affectedBoundary = _horizonPart.boundary;
 
-        if (affectedBoundary.x2New !== undefined) {
+        if (_affectedBoundary.x2New !== undefined) {
           continue;
         }
 
         var used = false;
 
-        for (k = i - 1; !used && k >= 0 && horizon[k].start >= affectedBoundary.y1; k--) {
-          used = horizon[k].boundary === affectedBoundary;
+        for (k = i - 1; !used && k >= 0 && horizon[k].start >= _affectedBoundary.y1; k--) {
+          used = horizon[k].boundary === _affectedBoundary;
         }
 
-        for (k = j + 1; !used && k < horizon.length && horizon[k].end <= affectedBoundary.y2; k++) {
-          used = horizon[k].boundary === affectedBoundary;
+        for (k = j + 1; !used && k < horizon.length && horizon[k].end <= _affectedBoundary.y2; k++) {
+          used = horizon[k].boundary === _affectedBoundary;
         }
 
         for (k = 0; !used && k < changedHorizon.length; k++) {
-          used = changedHorizon[k].boundary === affectedBoundary;
+          used = changedHorizon[k].boundary === _affectedBoundary;
         }
 
         if (!used) {
-          affectedBoundary.x2New = maxXNew;
+          _affectedBoundary.x2New = maxXNew;
         }
       }
 
       Array.prototype.splice.apply(horizon, [i, j - i + 1].concat(changedHorizon));
-    });
-    horizon.forEach(function (horizonPart) {
-      var affectedBoundary = horizonPart.boundary;
-
-      if (affectedBoundary.x2New === undefined) {
-        affectedBoundary.x2New = Math.max(width, affectedBoundary.x2);
-      }
-    });
+    }
+  } catch (err) {
+    _iterator3.e(err);
+  } finally {
+    _iterator3.f();
   }
 
+  for (var _i3 = 0, _horizon = horizon; _i3 < _horizon.length; _i3++) {
+    var horizonPart = _horizon[_i3];
+    var affectedBoundary = horizonPart.boundary;
+
+    if (affectedBoundary.x2New === undefined) {
+      affectedBoundary.x2New = Math.max(width, affectedBoundary.x2);
+    }
+  }
+}
+
+var TextLayerRenderTask = /*#__PURE__*/function () {
   function TextLayerRenderTask(_ref) {
     var _globalThis$FontInspe,
         _this = this;
@@ -20269,6 +20174,9 @@ var renderTextLayer = function renderTextLayerClosure() {
         textDivs = _ref.textDivs,
         textContentItemsStr = _ref.textContentItemsStr,
         enhanceTextSelection = _ref.enhanceTextSelection;
+
+    _classCallCheck(this, TextLayerRenderTask);
+
     this._textContent = textContent;
     this._textContentStream = textContentStream;
     this._container = container;
@@ -20298,12 +20206,14 @@ var renderTextLayer = function renderTextLayerClosure() {
     })["catch"](function () {});
   }
 
-  TextLayerRenderTask.prototype = {
-    get promise() {
+  _createClass(TextLayerRenderTask, [{
+    key: "promise",
+    get: function get() {
       return this._capability.promise;
-    },
-
-    cancel: function TextLayer_cancel() {
+    }
+  }, {
+    key: "cancel",
+    value: function cancel() {
       this._canceled = true;
 
       if (this._reader) {
@@ -20318,24 +20228,43 @@ var renderTextLayer = function renderTextLayerClosure() {
       }
 
       this._capability.reject(new Error("TextLayer task cancelled."));
-    },
-    _processItems: function _processItems(items, styleCache) {
+    }
+  }, {
+    key: "_processItems",
+    value: function _processItems(items, styleCache) {
       for (var i = 0, len = items.length; i < len; i++) {
+        if (items[i].str === undefined) {
+          if (items[i].type === "beginMarkedContentProps" || items[i].type === "beginMarkedContent") {
+            var parent = this._container;
+            this._container = document.createElement("span");
+
+            this._container.classList.add("markedContent");
+
+            if (items[i].id !== null) {
+              this._container.setAttribute("id", "".concat(items[i].id));
+            }
+
+            parent.appendChild(this._container);
+          } else if (items[i].type === "endMarkedContent") {
+            this._container = this._container.parentNode;
+          }
+
+          continue;
+        }
+
         this._textContentItemsStr.push(items[i].str);
 
         appendText(this, items[i], styleCache, this._layoutTextCtx);
       }
-    },
-    _layoutText: function _layoutText(textDiv) {
+    }
+  }, {
+    key: "_layoutText",
+    value: function _layoutText(textDiv) {
       var textDivProperties = this._textDivProperties.get(textDiv);
-
-      if (textDivProperties.isWhitespace) {
-        return;
-      }
 
       var transform = "";
 
-      if (textDivProperties.canvasWidth !== 0) {
+      if (textDivProperties.canvasWidth !== 0 && textDivProperties.hasText) {
         var _textDiv$style = textDiv.style,
             fontSize = _textDiv$style.fontSize,
             fontFamily = _textDiv$style.fontFamily;
@@ -20367,13 +20296,23 @@ var renderTextLayer = function renderTextLayerClosure() {
         textDiv.style.transform = transform;
       }
 
-      this._textDivProperties.set(textDiv, textDivProperties);
+      if (textDivProperties.hasText) {
+        this._container.appendChild(textDiv);
+      }
 
-      this._container.appendChild(textDiv);
-    },
-    _render: function TextLayer_render(timeout) {
+      if (textDivProperties.hasEOL) {
+        var br = document.createElement("br");
+        br.setAttribute("role", "presentation");
+
+        this._container.appendChild(br);
+      }
+    }
+  }, {
+    key: "_render",
+    value: function _render() {
       var _this2 = this;
 
+      var timeout = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
       var capability = (0, _util.createPromiseCapability)();
       var styleCache = Object.create(null);
 
@@ -20429,8 +20368,12 @@ var renderTextLayer = function renderTextLayerClosure() {
           }, timeout);
         }
       }, this._capability.reject);
-    },
-    expandTextDivs: function TextLayer_expandTextDivs(expandDivs) {
+    }
+  }, {
+    key: "expandTextDivs",
+    value: function expandTextDivs() {
+      var expandDivs = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
       if (!this._enhanceTextSelection || !this._renderingDone) {
         return;
       }
@@ -20448,7 +20391,7 @@ var renderTextLayer = function renderTextLayerClosure() {
 
         var divProps = this._textDivProperties.get(div);
 
-        if (divProps.isWhitespace) {
+        if (!divProps.hasText) {
           continue;
         }
 
@@ -20497,31 +20440,29 @@ var renderTextLayer = function renderTextLayerClosure() {
         }
       }
     }
-  };
+  }]);
 
-  function renderTextLayer(renderParameters) {
-    var task = new TextLayerRenderTask({
-      textContent: renderParameters.textContent,
-      textContentStream: renderParameters.textContentStream,
-      container: renderParameters.container,
-      viewport: renderParameters.viewport,
-      textDivs: renderParameters.textDivs,
-      textContentItemsStr: renderParameters.textContentItemsStr,
-      enhanceTextSelection: renderParameters.enhanceTextSelection
-    });
-
-    task._render(renderParameters.timeout);
-
-    return task;
-  }
-
-  return renderTextLayer;
+  return TextLayerRenderTask;
 }();
 
-exports.renderTextLayer = renderTextLayer;
+function renderTextLayer(renderParameters) {
+  var task = new TextLayerRenderTask({
+    textContent: renderParameters.textContent,
+    textContentStream: renderParameters.textContentStream,
+    container: renderParameters.container,
+    viewport: renderParameters.viewport,
+    textDivs: renderParameters.textDivs,
+    textContentItemsStr: renderParameters.textContentItemsStr,
+    enhanceTextSelection: renderParameters.enhanceTextSelection
+  });
+
+  task._render(renderParameters.timeout);
+
+  return task;
+}
 
 /***/ }),
-/* 141 */
+/* 128 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -20542,7 +20483,7 @@ function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableTo
 
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
@@ -20550,24 +20491,26 @@ function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArra
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 var SVGGraphics = function SVGGraphics() {
-  throw new Error("Not implemented: SVGGraphics");
+  _classCallCheck(this, SVGGraphics);
+
+  (0, _util.unreachable)("Not implemented: SVGGraphics");
 };
 
 exports.SVGGraphics = SVGGraphics;
@@ -21913,9 +21856,21 @@ exports.SVGGraphics = SVGGraphics;
 
         if (current.activeClipUrl) {
           current.clipGroup = null;
-          this.extraStack.forEach(function (prev) {
-            prev.clipGroup = null;
-          });
+
+          var _iterator7 = _createForOfIteratorHelper(this.extraStack),
+              _step7;
+
+          try {
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+              var prev = _step7.value;
+              prev.clipGroup = null;
+            }
+          } catch (err) {
+            _iterator7.e(err);
+          } finally {
+            _iterator7.f();
+          }
+
           clipPath.setAttributeNS(null, "clip-path", current.activeClipUrl);
         }
 
@@ -21966,14 +21921,14 @@ exports.SVGGraphics = SVGGraphics;
     }, {
       key: "setGState",
       value: function setGState(states) {
-        var _iterator7 = _createForOfIteratorHelper(states),
-            _step7;
+        var _iterator8 = _createForOfIteratorHelper(states),
+            _step8;
 
         try {
-          for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
-            var _step7$value = _slicedToArray(_step7.value, 2),
-                key = _step7$value[0],
-                value = _step7$value[1];
+          for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+            var _step8$value = _slicedToArray(_step8.value, 2),
+                key = _step8$value[0],
+                value = _step8$value[1];
 
             switch (key) {
               case "LW":
@@ -22022,9 +21977,9 @@ exports.SVGGraphics = SVGGraphics;
             }
           }
         } catch (err) {
-          _iterator7.e(err);
+          _iterator8.e(err);
         } finally {
-          _iterator7.f();
+          _iterator8.f();
         }
       }
     }, {
@@ -22259,7 +22214,7 @@ exports.SVGGraphics = SVGGraphics;
 }
 
 /***/ }),
-/* 142 */
+/* 129 */
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -22274,13 +22229,15 @@ function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArra
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -22294,32 +22251,133 @@ var XfaLayer = /*#__PURE__*/function () {
   }
 
   _createClass(XfaLayer, null, [{
+    key: "setupStorage",
+    value: function setupStorage(html, fieldId, element, storage) {
+      var storedData = storage.getValue(fieldId, {
+        value: null
+      });
+
+      switch (element.name) {
+        case "textarea":
+          html.textContent = storedData.value !== null ? storedData.value : "";
+          html.addEventListener("input", function (event) {
+            storage.setValue(fieldId, {
+              value: event.target.value
+            });
+          });
+          break;
+
+        case "input":
+          if (storedData.value !== null) {
+            html.setAttribute("value", storedData.value);
+          }
+
+          if (element.attributes.type === "radio") {
+            html.addEventListener("change", function (event) {
+              var target = event.target;
+
+              var _iterator = _createForOfIteratorHelper(document.getElementsByName(target.name)),
+                  _step;
+
+              try {
+                for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                  var radio = _step.value;
+
+                  if (radio !== target) {
+                    var id = radio.id;
+                    storage.setValue(id.split("-")[0], {
+                      value: false
+                    });
+                  }
+                }
+              } catch (err) {
+                _iterator.e(err);
+              } finally {
+                _iterator.f();
+              }
+
+              storage.setValue(fieldId, {
+                value: target.checked
+              });
+            });
+          } else {
+            html.addEventListener("input", function (event) {
+              storage.setValue(fieldId, {
+                value: event.target.value
+              });
+            });
+          }
+
+          break;
+
+        case "select":
+          if (storedData.value !== null) {
+            var _iterator2 = _createForOfIteratorHelper(element.children),
+                _step2;
+
+            try {
+              for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+                var option = _step2.value;
+
+                if (option.attributes.value === storedData.value) {
+                  option.attributes.selected = true;
+                }
+              }
+            } catch (err) {
+              _iterator2.e(err);
+            } finally {
+              _iterator2.f();
+            }
+          }
+
+          html.addEventListener("input", function (event) {
+            var options = event.target.options;
+            var value = options.selectedIndex === -1 ? null : options[options.selectedIndex].value;
+            storage.setValue(fieldId, {
+              value: value
+            });
+          });
+          break;
+      }
+    }
+  }, {
     key: "setAttributes",
-    value: function setAttributes(html, attrs) {
-      for (var _i = 0, _Object$entries = Object.entries(attrs); _i < _Object$entries.length; _i++) {
+    value: function setAttributes(html, element, storage) {
+      var attributes = element.attributes;
+
+      for (var _i = 0, _Object$entries = Object.entries(attributes); _i < _Object$entries.length; _i++) {
         var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
             key = _Object$entries$_i[0],
             value = _Object$entries$_i[1];
 
-        if (value === null || value === undefined) {
+        if (value === null || value === undefined || key === "fieldId") {
           continue;
         }
 
         if (key !== "style") {
-          html.setAttribute(key, value);
+          if (key === "textContent") {
+            html.textContent = value;
+          } else {
+            html.setAttribute(key, value);
+          }
         } else {
           Object.assign(html.style, value);
         }
+      }
+
+      if (storage && attributes.fieldId !== undefined) {
+        this.setupStorage(html, attributes.fieldId, element, storage);
       }
     }
   }, {
     key: "render",
     value: function render(parameters) {
+      var storage = parameters.annotationStorage;
       var root = parameters.xfa;
       var rootHtml = document.createElement(root.name);
 
       if (root.attributes) {
-        XfaLayer.setAttributes(rootHtml, root.attributes);
+        this.setAttributes(rootHtml, root);
       }
 
       var stack = [[root, -1, rootHtml]];
@@ -22357,7 +22415,7 @@ var XfaLayer = /*#__PURE__*/function () {
         html.appendChild(childHtml);
 
         if (child.attributes) {
-          XfaLayer.setAttributes(childHtml, child.attributes);
+          this.setAttributes(childHtml, child, storage);
         }
 
         if (child.children && child.children.length > 0) {
@@ -22382,7 +22440,7 @@ var XfaLayer = /*#__PURE__*/function () {
 exports.XfaLayer = XfaLayer;
 
 /***/ }),
-/* 143 */
+/* 130 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -22399,7 +22457,7 @@ var _regenerator = _interopRequireDefault(__w_pdfjs_require__(2));
 
 var _util = __w_pdfjs_require__(4);
 
-var _network_utils = __w_pdfjs_require__(144);
+var _network_utils = __w_pdfjs_require__(131);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -22420,6 +22478,12 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -22504,11 +22568,19 @@ var PDFNodeStream = /*#__PURE__*/function () {
         this._fullRequestReader.cancel(reason);
       }
 
-      var readers = this._rangeRequestReaders.slice(0);
+      var _iterator = _createForOfIteratorHelper(this._rangeRequestReaders.slice(0)),
+          _step;
 
-      readers.forEach(function (reader) {
-        reader.cancel(reason);
-      });
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var reader = _step.value;
+          reader.cancel(reason);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
     }
   }]);
 
@@ -23031,7 +23103,7 @@ var PDFNodeStreamFsRangeReader = /*#__PURE__*/function (_BaseRangeReader2) {
 }(BaseRangeReader);
 
 /***/ }),
-/* 144 */
+/* 131 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -23047,7 +23119,7 @@ exports.validateResponseStatus = validateResponseStatus;
 
 var _util = __w_pdfjs_require__(4);
 
-var _content_disposition = __w_pdfjs_require__(145);
+var _content_disposition = __w_pdfjs_require__(132);
 
 var _display_utils = __w_pdfjs_require__(1);
 
@@ -23124,8 +23196,8 @@ function validateResponseStatus(status) {
 }
 
 /***/ }),
-/* 145 */
-/***/ ((__unused_webpack_module, exports) => {
+/* 132 */
+/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
 
@@ -23135,6 +23207,8 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports.getFilenameFromContentDispositionHeader = getFilenameFromContentDispositionHeader;
 
+var _util = __w_pdfjs_require__(4);
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -23143,7 +23217,7 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
@@ -23193,10 +23267,8 @@ function getFilenameFromContentDispositionHeader(contentDisposition) {
         var decoder = new TextDecoder(encoding, {
           fatal: true
         });
-        var bytes = Array.from(value, function (ch) {
-          return ch.charCodeAt(0) & 0xff;
-        });
-        value = decoder.decode(new Uint8Array(bytes));
+        var buffer = (0, _util.stringToBytes)(value);
+        value = decoder.decode(buffer);
         needsEncodingFixup = false;
       } catch (e) {
         if (/^utf-?8$/i.test(encoding)) {
@@ -23335,7 +23407,7 @@ function getFilenameFromContentDispositionHeader(contentDisposition) {
 }
 
 /***/ }),
-/* 146 */
+/* 133 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -23350,13 +23422,19 @@ var _regenerator = _interopRequireDefault(__w_pdfjs_require__(2));
 
 var _util = __w_pdfjs_require__(4);
 
-var _network_utils = __w_pdfjs_require__(144);
+var _network_utils = __w_pdfjs_require__(131);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -23606,11 +23684,19 @@ var PDFNetworkStream = /*#__PURE__*/function () {
         this._fullRequestReader.cancel(reason);
       }
 
-      var readers = this._rangeRequestReaders.slice(0);
+      var _iterator = _createForOfIteratorHelper(this._rangeRequestReaders.slice(0)),
+          _step;
 
-      readers.forEach(function (reader) {
-        reader.cancel(reason);
-      });
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var reader = _step.value;
+          reader.cancel(reason);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
     }
   }]);
 
@@ -23706,14 +23792,25 @@ var PDFNetworkStreamFullRequestReader = /*#__PURE__*/function () {
         return;
       }
 
-      this._requests.forEach(function (requestCapability) {
-        requestCapability.resolve({
-          value: undefined,
-          done: true
-        });
-      });
+      var _iterator2 = _createForOfIteratorHelper(this._requests),
+          _step2;
 
-      this._requests = [];
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var _requestCapability = _step2.value;
+
+          _requestCapability.resolve({
+            value: undefined,
+            done: true
+          });
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+
+      this._requests.length = 0;
     }
   }, {
     key: "_onError",
@@ -23724,12 +23821,22 @@ var PDFNetworkStreamFullRequestReader = /*#__PURE__*/function () {
 
       this._headersReceivedCapability.reject(exception);
 
-      this._requests.forEach(function (requestCapability) {
-        requestCapability.reject(exception);
-      });
+      var _iterator3 = _createForOfIteratorHelper(this._requests),
+          _step3;
 
-      this._requests = [];
-      this._cachedChunks = [];
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var requestCapability = _step3.value;
+          requestCapability.reject(exception);
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+
+      this._requests.length = 0;
+      this._cachedChunks.length = 0;
     }
   }, {
     key: "_onProgress",
@@ -23833,14 +23940,24 @@ var PDFNetworkStreamFullRequestReader = /*#__PURE__*/function () {
 
       this._headersReceivedCapability.reject(reason);
 
-      this._requests.forEach(function (requestCapability) {
-        requestCapability.resolve({
-          value: undefined,
-          done: true
-        });
-      });
+      var _iterator4 = _createForOfIteratorHelper(this._requests),
+          _step4;
 
-      this._requests = [];
+      try {
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var requestCapability = _step4.value;
+          requestCapability.resolve({
+            value: undefined,
+            done: true
+          });
+        }
+      } catch (err) {
+        _iterator4.e(err);
+      } finally {
+        _iterator4.f();
+      }
+
+      this._requests.length = 0;
 
       if (this._manager.isPendingRequest(this._fullRequestId)) {
         this._manager.abortRequest(this._fullRequestId);
@@ -23895,14 +24012,25 @@ var PDFNetworkStreamRangeRequestReader = /*#__PURE__*/function () {
 
       this._done = true;
 
-      this._requests.forEach(function (requestCapability) {
-        requestCapability.resolve({
-          value: undefined,
-          done: true
-        });
-      });
+      var _iterator5 = _createForOfIteratorHelper(this._requests),
+          _step5;
 
-      this._requests = [];
+      try {
+        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+          var _requestCapability2 = _step5.value;
+
+          _requestCapability2.resolve({
+            value: undefined,
+            done: true
+          });
+        }
+      } catch (err) {
+        _iterator5.e(err);
+      } finally {
+        _iterator5.f();
+      }
+
+      this._requests.length = 0;
 
       this._close();
     }
@@ -23978,14 +24106,24 @@ var PDFNetworkStreamRangeRequestReader = /*#__PURE__*/function () {
     value: function cancel(reason) {
       this._done = true;
 
-      this._requests.forEach(function (requestCapability) {
-        requestCapability.resolve({
-          value: undefined,
-          done: true
-        });
-      });
+      var _iterator6 = _createForOfIteratorHelper(this._requests),
+          _step6;
 
-      this._requests = [];
+      try {
+        for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+          var requestCapability = _step6.value;
+          requestCapability.resolve({
+            value: undefined,
+            done: true
+          });
+        }
+      } catch (err) {
+        _iterator6.e(err);
+      } finally {
+        _iterator6.f();
+      }
+
+      this._requests.length = 0;
 
       if (this._manager.isPendingRequest(this._requestId)) {
         this._manager.abortRequest(this._requestId);
@@ -23999,7 +24137,7 @@ var PDFNetworkStreamRangeRequestReader = /*#__PURE__*/function () {
 }();
 
 /***/ }),
-/* 147 */
+/* 134 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 "use strict";
@@ -24014,13 +24152,19 @@ var _regenerator = _interopRequireDefault(__w_pdfjs_require__(2));
 
 var _util = __w_pdfjs_require__(4);
 
-var _network_utils = __w_pdfjs_require__(144);
+var _network_utils = __w_pdfjs_require__(131);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -24102,11 +24246,19 @@ var PDFFetchStream = /*#__PURE__*/function () {
         this._fullRequestReader.cancel(reason);
       }
 
-      var readers = this._rangeRequestReaders.slice(0);
+      var _iterator = _createForOfIteratorHelper(this._rangeRequestReaders.slice(0)),
+          _step;
 
-      readers.forEach(function (reader) {
-        reader.cancel(reason);
-      });
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var reader = _step.value;
+          reader.cancel(reason);
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
     }
   }]);
 
@@ -24667,41 +24819,41 @@ Object.defineProperty(exports, "XfaLayer", ({
 
 var _display_utils = __w_pdfjs_require__(1);
 
-var _api = __w_pdfjs_require__(125);
+var _api = __w_pdfjs_require__(113);
 
 var _util = __w_pdfjs_require__(4);
 
-var _annotation_layer = __w_pdfjs_require__(138);
+var _annotation_layer = __w_pdfjs_require__(125);
 
-var _api_compatibility = __w_pdfjs_require__(129);
+var _api_compatibility = __w_pdfjs_require__(117);
 
-var _worker_options = __w_pdfjs_require__(132);
+var _worker_options = __w_pdfjs_require__(120);
 
-var _text_layer = __w_pdfjs_require__(140);
+var _text_layer = __w_pdfjs_require__(127);
 
-var _svg = __w_pdfjs_require__(141);
+var _svg = __w_pdfjs_require__(128);
 
-var _xfa_layer = __w_pdfjs_require__(142);
+var _xfa_layer = __w_pdfjs_require__(129);
 
-var pdfjsVersion = '2.8.335';
-var pdfjsBuild = '228adbf67';
+var pdfjsVersion = '2.9.359';
+var pdfjsBuild = 'e667c8cbc';
 {
   var _require = __w_pdfjs_require__(6),
       isNodeJS = _require.isNodeJS;
 
   if (isNodeJS) {
-    var PDFNodeStream = __w_pdfjs_require__(143).PDFNodeStream;
+    var PDFNodeStream = __w_pdfjs_require__(130).PDFNodeStream;
 
     (0, _api.setPDFNetworkStreamFactory)(function (params) {
       return new PDFNodeStream(params);
     });
   } else {
-    var PDFNetworkStream = __w_pdfjs_require__(146).PDFNetworkStream;
+    var PDFNetworkStream = __w_pdfjs_require__(133).PDFNetworkStream;
 
     var PDFFetchStream;
 
     if ((0, _display_utils.isFetchSupported)()) {
-      PDFFetchStream = __w_pdfjs_require__(147).PDFFetchStream;
+      PDFFetchStream = __w_pdfjs_require__(134).PDFFetchStream;
     }
 
     (0, _api.setPDFNetworkStreamFactory)(function (params) {

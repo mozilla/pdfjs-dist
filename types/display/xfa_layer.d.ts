@@ -1,5 +1,6 @@
 export class XfaLayer {
-    static setAttributes(html: any, attrs: any): void;
+    static setupStorage(html: any, fieldId: any, element: any, storage: any): void;
+    static setAttributes(html: any, element: any, storage: any): void;
     static render(parameters: any): void;
     /**
      * Update the xfa layer.

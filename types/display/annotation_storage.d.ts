@@ -17,10 +17,6 @@ export class AnnotationStorage {
      */
     public getValue(key: string, defaultValue: Object): Object;
     /**
-     * @deprecated
-     */
-    getOrCreateValue(key: any, defaultValue: any): any;
-    /**
      * Set the value for a given key
      *
      * @public

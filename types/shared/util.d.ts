@@ -412,6 +412,7 @@ export namespace UNSUPPORTED_FEATURES {
     const unknown: string;
     const forms: string;
     const javaScript: string;
+    const signatures: string;
     const smask: string;
     const shadingPattern: string;
     const font: string;
@@ -426,6 +427,7 @@ export namespace UNSUPPORTED_FEATURES {
     const errorOperatorList: string;
     const errorFontToUnicode: string;
     const errorFontLoadNative: string;
+    const errorFontBuildPath: string;
     const errorFontGetPath: string;
     const errorMarkedContent: string;
 }
