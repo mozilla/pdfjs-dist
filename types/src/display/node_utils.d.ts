@@ -4,3 +4,6 @@ export let NodeCanvasFactory: {
 export let NodeCMapReaderFactory: {
     new (): {};
 };
+export let NodeStandardFontDataFactory: {
+    new (): {};
+};

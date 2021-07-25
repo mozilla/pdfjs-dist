@@ -17,14 +17,16 @@ export class TilingPattern {
         canvas: any;
         scaleX: any;
         scaleY: any;
+        offsetX: any;
+        offsetY: any;
     };
     getSizeAndScale(step: any, realOutputSize: any, scale: any): {
         scale: any;
         size: number;
     };
-    clipBbox(graphics: any, bbox: any, x0: any, y0: any, x1: any, y1: any): void;
+    clipBbox(graphics: any, x0: any, y0: any, x1: any, y1: any): void;
     setFillAndStrokeStyleToContext(graphics: any, paintType: any, color: any): void;
-    getPattern(ctx: any, owner: any, shadingFill: any): any;
+    getPattern(ctx: any, owner: any, inverse: any, shadingFill?: boolean): any;
 }
 declare class RadialAxialShadingPattern extends BaseShadingPattern {
     constructor(IR: any);
@@ -36,6 +38,8 @@ declare class RadialAxialShadingPattern extends BaseShadingPattern {
     _r0: any;
     _r1: any;
     _matrix: any;
+    _patternCache: any;
+    _createGradient(ctx: any): any;
 }
 declare class MeshShadingPattern extends BaseShadingPattern {
     constructor(IR: any);

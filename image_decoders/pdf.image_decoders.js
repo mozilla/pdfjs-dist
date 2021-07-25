@@ -252,6 +252,7 @@ exports.StreamType = StreamType;
 const FontType = {
   UNKNOWN: "UNKNOWN",
   TYPE1: "TYPE1",
+  TYPE1STANDARD: "TYPE1STANDARD",
   TYPE1C: "TYPE1C",
   CIDFONTTYPE0: "CIDFONTTYPE0",
   CIDFONTTYPE0C: "CIDFONTTYPE0C",
@@ -1889,7 +1890,7 @@ function decodeHalftoneRegion(mmr, patterns, template, regionWidth, regionHeight
       patternIndex = 0;
 
       for (j = bitsPerValue - 1; j >= 0; j--) {
-        bit = grayScaleBitPlanes[j][mg][ng] ^ bit;
+        bit ^= grayScaleBitPlanes[j][mg][ng];
         patternIndex |= bit << j;
       }
 
@@ -3178,7 +3179,7 @@ exports.readUint16 = readUint16;
 exports.readUint32 = readUint32;
 exports.toRomanNumerals = toRomanNumerals;
 exports.validateCSSFont = validateCSSFont;
-exports.XRefParseException = exports.XRefEntryException = exports.MissingDataException = void 0;
+exports.XRefParseException = exports.XRefEntryException = exports.ParserEOFException = exports.MissingDataException = void 0;
 
 var _util = __w_pdfjs_require__(1);
 
@@ -3226,6 +3227,10 @@ class MissingDataException extends _util.BaseException {
 }
 
 exports.MissingDataException = MissingDataException;
+
+class ParserEOFException extends _util.BaseException {}
+
+exports.ParserEOFException = ParserEOFException;
 
 class XRefEntryException extends _util.BaseException {}
 
@@ -3749,25 +3754,8 @@ class Dict {
     dictArray,
     mergeSubDicts = false
   }) {
-    const mergedDict = new Dict(xref);
-
-    if (!mergeSubDicts) {
-      for (const dict of dictArray) {
-        if (!(dict instanceof Dict)) {
-          continue;
-        }
-
-        for (const [key, value] of Object.entries(dict._map)) {
-          if (mergedDict._map[key] === undefined) {
-            mergedDict._map[key] = value;
-          }
-        }
-      }
-
-      return mergedDict.size > 0 ? mergedDict : Dict.empty;
-    }
-
-    const properties = new Map();
+    const mergedDict = new Dict(xref),
+          properties = new Map();
 
     for (const dict of dictArray) {
       if (!(dict instanceof Dict)) {
@@ -3780,6 +3768,8 @@ class Dict {
         if (property === undefined) {
           property = [];
           properties.set(key, property);
+        } else if (!mergeSubDicts) {
+          continue;
         }
 
         property.push(value);
@@ -8597,7 +8587,7 @@ class Transform {
 class IrreversibleTransform extends Transform {
   filter(x, offset, length) {
     const len = length >> 1;
-    offset = offset | 0;
+    offset |= 0;
     let j, n, current, next;
     const alpha = -1.586134342059924;
     const beta = -0.052980118572961;
@@ -8683,7 +8673,7 @@ class IrreversibleTransform extends Transform {
 class ReversibleTransform extends Transform {
   filter(x, offset, length) {
     const len = length >> 1;
-    offset = offset | 0;
+    offset |= 0;
     let j, n;
 
     for (j = offset, n = len + 1; n--; j += 2) {
@@ -8773,8 +8763,8 @@ var _jpg = __w_pdfjs_require__(10);
 
 var _jpx = __w_pdfjs_require__(11);
 
-const pdfjsVersion = '2.9.359';
-const pdfjsBuild = 'e667c8cbc';
+const pdfjsVersion = '2.10.377';
+const pdfjsBuild = '156762c48';
 })();
 
 /******/ 	return __webpack_exports__;

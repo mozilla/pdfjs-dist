@@ -1,4 +1,8 @@
 export type TypedArray = Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array;
+export type RefProxy = {
+    num: number;
+    gen: number;
+};
 /**
  * Document initialization / loading parameters object.
  */
@@ -82,6 +86,33 @@ export type DocumentInitParameters = {
      */
     CMapReaderFactory?: Object | undefined;
     /**
+     * - When `true`, fonts that aren't
+     * embedded in the PDF document will fallback to a system font.
+     * The default value is `true` in web environments and `false` in Node.js;
+     * unless `disableFontFace === true` in which case this defaults to `false`
+     * regardless of the environment (to prevent completely broken fonts).
+     */
+    useSystemFonts?: boolean | undefined;
+    /**
+     * - The URL where the standard font
+     * files are located. Include the trailing slash.
+     */
+    standardFontDataUrl?: string | undefined;
+    /**
+     * - The factory that will be used
+     * when reading the standard font files. Providing a custom factory is useful
+     * for environments without Fetch API or `XMLHttpRequest` support, such as
+     * Node.js. The default value is {DOMStandardFontDataFactory}.
+     */
+    StandardFontDataFactory?: Object | undefined;
+    /**
+     * - Enable using the Fetch API in the
+     * worker-thread when reading CMap and standard font files. When `true`,
+     * the `CMapReaderFactory` and `StandardFontDataFactory` options are ignored.
+     * The default value is `true` in web environments and `false` in Node.js.
+     */
+    useWorkerFetch?: boolean | undefined;
+    /**
      * - Reject certain promises, e.g.
      * `getOperatorList`, `getTextContent`, and `RenderTask`, when the associated
      * PDF data cannot be successfully parsed, instead of attempting to recover
@@ -102,9 +133,10 @@ export type DocumentInitParameters = {
     isEvalSupported?: boolean | undefined;
     /**
      * - By default fonts are converted to
-     * OpenType fonts and loaded via `@font-face` rules. If disabled, fonts will
-     * be rendered using a built-in font renderer that constructs the glyphs with
-     * primitive path commands. The default value is `false`.
+     * OpenType fonts and loaded via the Font Loading API or `@font-face` rules.
+     * If disabled, fonts will be rendered using a built-in font renderer that
+     * constructs the glyphs with primitive path commands.
+     * The default value is `false` in web environments and `true` in Node.js.
      */
     disableFontFace?: boolean | undefined;
     /**
@@ -155,6 +187,16 @@ export type DocumentInitParameters = {
     pdfBug?: boolean | undefined;
 };
 export type IPDFStreamFactory = Function;
+export type OnProgressParameters = {
+    /**
+     * - Currently loaded number of bytes.
+     */
+    loaded: number;
+    /**
+     * - Total number of bytes in the PDF file.
+     */
+    total: number;
+};
 /**
  * The loading task controls the operations required to load a PDF document
  * (such as network requests) and provides a way to listen for completion,
@@ -179,8 +221,7 @@ export type PDFDocumentLoadingTask = {
     /**
      * - Callback to be able to monitor the
      * loading progress of the PDF file (necessary to implement e.g. a loading
-     * bar). The callback receives an {Object} with the properties `loaded`
-     * ({number}) and `total` ({number}) that indicate how many bytes are loaded.
+     * bar). The callback receives an {@link OnProgressParameters } argument.
      */
     onProgress?: Function | undefined;
     /**
@@ -296,6 +337,11 @@ export type TextItem = {
      * - Font name used by PDF.js for converted font.
      */
     fontName: string;
+    /**
+     * - Indicating if the text content is followed by a
+     * line-break.
+     */
+    hasEOL: boolean;
 };
 /**
  * Page text marked content part.
@@ -338,11 +384,11 @@ export type TextStyle = {
  */
 export type GetAnnotationsParameters = {
     /**
-     * - Determines the annotations that will be fetched,
+     * - Determines the annotations that are fetched,
      * can be either 'display' (viewable annotations) or 'print' (printable
      * annotations). If the parameter is omitted, all annotations are fetched.
      */
-    intent: string;
+    intent?: string | undefined;
 };
 /**
  * Page render parameters.
@@ -404,6 +450,16 @@ export type RenderParameters = {
      * states set.
      */
     optionalContentConfigPromise?: Promise<OptionalContentConfig> | undefined;
+};
+/**
+ * Page getOperatorList parameters.
+ */
+export type GetOperatorListParameters = {
+    /**
+     * - Rendering intent, can be 'display' or 'print'.
+     * The default value is 'display'.
+     */
+    intent?: string | undefined;
 };
 /**
  * Structure tree node. The root node will have a role "Root".
@@ -471,12 +527,20 @@ export const DefaultCanvasFactory: typeof DOMCanvasFactory | {
 export const DefaultCMapReaderFactory: typeof DOMCMapReaderFactory | {
     new (): {};
 };
+export const DefaultStandardFontDataFactory: typeof DOMStandardFontDataFactory | {
+    new (): {};
+};
 /**
  * @typedef { Int8Array | Uint8Array | Uint8ClampedArray |
  *            Int16Array | Uint16Array |
  *            Int32Array | Uint32Array | Float32Array |
  *            Float64Array
  * } TypedArray
+ */
+/**
+ * @typedef {Object} RefProxy
+ * @property {number} num
+ * @property {number} gen
  */
 /**
  * Document initialization / loading parameters object.
@@ -515,6 +579,21 @@ export const DefaultCMapReaderFactory: typeof DOMCMapReaderFactory | {
  *   reading built-in CMap files. Providing a custom factory is useful for
  *   environments without Fetch API or `XMLHttpRequest` support, such as
  *   Node.js. The default value is {DOMCMapReaderFactory}.
+ * @property {boolean} [useSystemFonts] - When `true`, fonts that aren't
+ *   embedded in the PDF document will fallback to a system font.
+ *   The default value is `true` in web environments and `false` in Node.js;
+ *   unless `disableFontFace === true` in which case this defaults to `false`
+ *   regardless of the environment (to prevent completely broken fonts).
+ * @property {string} [standardFontDataUrl] - The URL where the standard font
+ *   files are located. Include the trailing slash.
+ * @property {Object} [StandardFontDataFactory] - The factory that will be used
+ *   when reading the standard font files. Providing a custom factory is useful
+ *   for environments without Fetch API or `XMLHttpRequest` support, such as
+ *   Node.js. The default value is {DOMStandardFontDataFactory}.
+ * @property {boolean} [useWorkerFetch] - Enable using the Fetch API in the
+ *   worker-thread when reading CMap and standard font files. When `true`,
+ *   the `CMapReaderFactory` and `StandardFontDataFactory` options are ignored.
+ *   The default value is `true` in web environments and `false` in Node.js.
  * @property {boolean} [stopAtErrors] - Reject certain promises, e.g.
  *   `getOperatorList`, `getTextContent`, and `RenderTask`, when the associated
  *   PDF data cannot be successfully parsed, instead of attempting to recover
@@ -526,9 +605,10 @@ export const DefaultCMapReaderFactory: typeof DOMCMapReaderFactory | {
  *   as JavaScript. Primarily used to improve performance of font rendering, and
  *   when parsing PDF functions. The default value is `true`.
  * @property {boolean} [disableFontFace] - By default fonts are converted to
- *   OpenType fonts and loaded via `@font-face` rules. If disabled, fonts will
- *   be rendered using a built-in font renderer that constructs the glyphs with
- *   primitive path commands. The default value is `false`.
+ *   OpenType fonts and loaded via the Font Loading API or `@font-face` rules.
+ *   If disabled, fonts will be rendered using a built-in font renderer that
+ *   constructs the glyphs with primitive path commands.
+ *   The default value is `false` in web environments and `true` in Node.js.
  * @property {boolean} [fontExtraProperties] - Include additional properties,
  *   which are unused during rendering of PDF documents, when exporting the
  *   parsed font data from the worker-thread. This may be useful for debugging
@@ -624,13 +704,23 @@ export class PDFDocumentProxy {
      */
     get numPages(): number;
     /**
-     * @type {string} A (not guaranteed to be) unique ID to identify a PDF.
+     * @type {Array<string, string|null>} A (not guaranteed to be) unique ID to
+     *   identify the PDF document.
+     *   NOTE: The first element will always be defined for all PDF documents,
+     *   whereas the second element is only defined for *modified* PDF documents.
      */
-    get fingerprint(): string;
+    get fingerprints(): string[];
     /**
      * @type {boolean} True if only XFA form.
      */
     get isPureXfa(): boolean;
+    /**
+     * NOTE: This is (mostly) intended to support printing of XFA forms.
+     *
+     * @type {Object | null} An object representing a HTML tree structure
+     *   to render the XFA, or `null` when no XFA form exists.
+     */
+    get allXfaHtml(): Object | null;
     /**
      * @param {number} pageNumber - The page number to get. The first page is 1.
      * @returns {Promise<PDFPageProxy>} A promise that is resolved with
@@ -638,19 +728,11 @@ export class PDFDocumentProxy {
      */
     getPage(pageNumber: number): Promise<PDFPageProxy>;
     /**
-     * @typedef {Object} RefProxy
-     * @property {number} num
-     * @property {number} gen
-     */
-    /**
      * @param {RefProxy} ref - The page reference.
      * @returns {Promise<number>} A promise that is resolved with the page index,
      *   starting from zero, that is associated with the reference.
      */
-    getPageIndex(ref: {
-        num: number;
-        gen: number;
-    }): Promise<number>;
+    getPageIndex(ref: RefProxy): Promise<number>;
     /**
      * @returns {Promise<Object<string, Array<any>>>} A promise that is resolved
      *   with a mapping from named destinations to references.
@@ -852,8 +934,7 @@ export class PDFDocumentProxy {
     destroy(): any;
     /**
      * @type {DocumentInitParameters} A subset of the current
-     *   {DocumentInitParameters}, which are either needed in the viewer and/or
-     *   whose default values may be affected by the `apiCompatibilityParams`.
+     *   {DocumentInitParameters}, which are needed in the viewer.
      */
     get loadingParams(): DocumentInitParameters;
     /**
@@ -864,7 +945,7 @@ export class PDFDocumentProxy {
      * @returns {Promise<Uint8Array>} A promise that is resolved with a
      *   {Uint8Array} containing the full data of the saved document.
      */
-    saveDocument(...args: any[]): Promise<Uint8Array>;
+    saveDocument(): Promise<Uint8Array>;
     /**
      * @returns {Promise<Array<Object> | null>} A promise that is resolved with an
      *   {Array<Object>} containing /AcroForm field data for the JS sandbox,
@@ -928,7 +1009,8 @@ export class PDFDocumentProxy {
  * @property {number} width - Width in device space.
  * @property {number} height - Height in device space.
  * @property {string} fontName - Font name used by PDF.js for converted font.
- *
+ * @property {boolean} hasEOL - Indicating if the text content is followed by a
+ *   line-break.
  */
 /**
  * Page text marked content part.
@@ -952,7 +1034,7 @@ export class PDFDocumentProxy {
  * Page annotation parameters.
  *
  * @typedef {Object} GetAnnotationsParameters
- * @property {string} intent - Determines the annotations that will be fetched,
+ * @property {string} [intent] - Determines the annotations that are fetched,
  *   can be either 'display' (viewable annotations) or 'print' (printable
  *   annotations). If the parameter is omitted, all annotations are fetched.
  */
@@ -987,6 +1069,13 @@ export class PDFDocumentProxy {
  *   created from `PDFDocumentProxy.getOptionalContentConfig`. If `null`,
  *   the configuration will be fetched automatically with the default visibility
  *   states set.
+ */
+/**
+ * Page getOperatorList parameters.
+ *
+ * @typedef {Object} GetOperatorListParameters
+ * @property {string} [intent] - Rendering intent, can be 'display' or 'print'.
+ *   The default value is 'display'.
  */
 /**
  * Structure tree node. The root node will have a role "Root".
@@ -1039,10 +1128,9 @@ export class PDFPageProxy {
      */
     get rotate(): number;
     /**
-     * @type {Object} The reference that points to this page. It has `num` and
-     *   `gen` properties.
+     * @type {RefProxy | null} The reference that points to this page.
      */
-    get ref(): Object;
+    get ref(): RefProxy | null;
     /**
      * @type {number} The default size of units in 1/72nds of an inch.
      */
@@ -1065,7 +1153,7 @@ export class PDFPageProxy {
      */
     getAnnotations({ intent }?: GetAnnotationsParameters): Promise<Array<any>>;
     _annotationsPromise: any;
-    _annotationsIntent: string | undefined;
+    _annotationsIntent: any;
     /**
      * @returns {Promise<Object>} A promise that is resolved with an
      *   {Object} with JS actions.
@@ -1081,16 +1169,18 @@ export class PDFPageProxy {
     /**
      * Begins the process of rendering a page to the desired context.
      *
-     * @param {RenderParameters} params Page render parameters.
+     * @param {RenderParameters} params - Page render parameters.
      * @returns {RenderTask} An object that contains a promise that is
      *   resolved when the page finishes rendering.
      */
-    render({ canvasContext, viewport, intent, renderInteractiveForms, transform, imageLayer, canvasFactory, background, includeAnnotationStorage, optionalContentConfigPromise, }: RenderParameters, ...args: any[]): RenderTask;
+    render({ canvasContext, viewport, intent, renderInteractiveForms, transform, imageLayer, canvasFactory, background, includeAnnotationStorage, optionalContentConfigPromise, }: RenderParameters): RenderTask;
     /**
+     * @param {GetOperatorListParameters} params - Page getOperatorList
+     *   parameters.
      * @returns {Promise<PDFOperatorList>} A promise resolved with an
-     *   {@link PDFOperatorList} object that represents page's operator list.
+     *   {@link PDFOperatorList} object that represents the page's operator list.
      */
-    getOperatorList(): Promise<PDFOperatorList>;
+    getOperatorList({ intent }?: GetOperatorListParameters): Promise<PDFOperatorList>;
     /**
      * @param {getTextContentParameters} params - getTextContent parameters.
      * @returns {ReadableStream} Stream for reading text content chunks.
@@ -1114,7 +1204,6 @@ export class PDFPageProxy {
      */
     private _destroy;
     _jsActionsPromise: any;
-    _xfaPromise: any;
     _structTreePromise: any;
     /**
      * Cleans up resources allocated by the page.
@@ -1175,6 +1264,12 @@ import { PageViewport } from "./display_utils.js";
 import { OptionalContentConfig } from "./optional_content_config.js";
 import { DOMCanvasFactory } from "./display_utils.js";
 import { DOMCMapReaderFactory } from "./display_utils.js";
+import { DOMStandardFontDataFactory } from "./display_utils.js";
+/**
+ * @typedef {Object} OnProgressParameters
+ * @property {number} loaded - Currently loaded number of bytes.
+ * @property {number} total - Total number of bytes in the PDF file.
+ */
 /**
  * The loading task controls the operations required to load a PDF document
  * (such as network requests) and provides a way to listen for completion,
@@ -1189,8 +1284,7 @@ import { DOMCMapReaderFactory } from "./display_utils.js";
  *   {@link PasswordResponses}).
  * @property {function} [onProgress] - Callback to be able to monitor the
  *   loading progress of the PDF file (necessary to implement e.g. a loading
- *   bar). The callback receives an {Object} with the properties `loaded`
- *   ({number}) and `total` ({number}) that indicate how many bytes are loaded.
+ *   bar). The callback receives an {@link OnProgressParameters} argument.
  * @property {function} [onUnsupportedFeature] - Callback for when an
  *   unsupported feature is used in the PDF document. The callback receives an
  *   {@link UNSUPPORTED_FEATURES} argument.

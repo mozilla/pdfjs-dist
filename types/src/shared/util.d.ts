@@ -194,6 +194,7 @@ export const FONT_IDENTITY_MATRIX: number[];
 export namespace FontType {
     const UNKNOWN: string;
     const TYPE1: string;
+    const TYPE1STANDARD: string;
     const TYPE1C: string;
     const CIDFONTTYPE0: string;
     const CIDFONTTYPE0C: string;

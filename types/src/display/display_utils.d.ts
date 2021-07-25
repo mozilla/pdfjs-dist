@@ -73,26 +73,6 @@ export type PageViewportCloneParameters = {
  * @param {ExternalLinkParameters} params
  */
 export function addLinkAttributes(link: HTMLLinkElement, { url, target, rel, enabled }?: any): void;
-export class BaseCanvasFactory {
-    create(width: any, height: any): void;
-    reset(canvasAndContext: any, width: any, height: any): void;
-    destroy(canvasAndContext: any): void;
-}
-export class BaseCMapReaderFactory {
-    constructor({ baseUrl, isCompressed }: {
-        baseUrl?: any;
-        isCompressed?: boolean | undefined;
-    });
-    baseUrl: any;
-    isCompressed: boolean;
-    fetch({ name }: {
-        name: any;
-    }): Promise<any>;
-    /**
-     * @private
-     */
-    private _fetchData;
-}
 export const DEFAULT_LINK_REL: "noopener noreferrer nofollow";
 export function deprecated(details: any): void;
 export class DOMCanvasFactory extends BaseCanvasFactory {
@@ -103,9 +83,9 @@ export class DOMCanvasFactory extends BaseCanvasFactory {
 }
 export class DOMCMapReaderFactory extends BaseCMapReaderFactory {
 }
-export class DOMSVGFactory {
-    create(width: any, height: any): SVGElement;
-    createElement(type: any): any;
+export class DOMStandardFontDataFactory extends BaseStandardFontDataFactory {
+}
+export class DOMSVGFactory extends BaseSVGFactory {
 }
 /**
  * Gets the filename from a given URL.
@@ -121,8 +101,14 @@ export function getFilenameFromUrl(url: string): string;
  * @returns {string} Guessed PDF filename.
  */
 export function getPdfFilenameFromUrl(url: string, defaultFilename?: string): string;
+/**
+ * NOTE: This is (mostly) intended to support printing of XFA forms.
+ */
+export function getXfaPageViewport(xfaPage: any, { scale, rotation }: {
+    scale?: number | undefined;
+    rotation?: number | undefined;
+}): PageViewport;
 export function isDataScheme(url: any): boolean;
-export function isFetchSupported(): boolean;
 export function isPdfFile(filename: any): boolean;
 export function isValidFetchUrl(url: any, baseUrl: any): boolean;
 export namespace LinkTarget {
@@ -248,4 +234,8 @@ export class StatTimer {
     timeEnd(name: any): void;
     toString(): string;
 }
+import { BaseCanvasFactory } from "./base_factory.js";
+import { BaseCMapReaderFactory } from "./base_factory.js";
+import { BaseStandardFontDataFactory } from "./base_factory.js";
+import { BaseSVGFactory } from "./base_factory.js";
 export {};
