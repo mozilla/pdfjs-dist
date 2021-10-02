@@ -21,7 +21,7 @@ export class PDFDataTransportStream implements IPDFStream {
 }
 /** @implements {IPDFStreamReader} */
 declare class PDFDataTransportStreamReader implements IPDFStreamReader {
-    constructor(stream: any, queuedChunks: any, progressiveDone?: boolean, contentDispositionFilename?: any);
+    constructor(stream: any, queuedChunks: any, progressiveDone?: boolean, contentDispositionFilename?: null);
     _stream: any;
     _done: boolean;
     _filename: any;

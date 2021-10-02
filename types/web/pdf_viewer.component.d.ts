@@ -1,6 +1,8 @@
 import { AnnotationLayerBuilder } from "./annotation_layer_builder.js";
 import { DefaultAnnotationLayerFactory } from "./annotation_layer_builder.js";
+import { DefaultStructTreeLayerFactory } from "./struct_tree_layer_builder.js";
 import { DefaultTextLayerFactory } from "./text_layer_builder.js";
+import { DefaultXfaLayerFactory } from "./xfa_layer_builder.js";
 import { DownloadManager } from "./download_manager.js";
 import { EventBus } from "./ui_utils.js";
 import { GenericL10n } from "./genericl10n.js";
@@ -14,5 +16,7 @@ import { PDFSinglePageViewer } from "./pdf_single_page_viewer.js";
 import { PDFViewer } from "./pdf_viewer.js";
 import { ProgressBar } from "./ui_utils.js";
 import { SimpleLinkService } from "./pdf_link_service.js";
+import { StructTreeLayerBuilder } from "./struct_tree_layer_builder.js";
 import { TextLayerBuilder } from "./text_layer_builder.js";
-export { AnnotationLayerBuilder, DefaultAnnotationLayerFactory, DefaultTextLayerFactory, DownloadManager, EventBus, GenericL10n, NullL10n, PDFFindController, PDFHistory, PDFLinkService, PDFPageView, PDFScriptingManager, PDFSinglePageViewer, PDFViewer, ProgressBar, SimpleLinkService, TextLayerBuilder };
+import { XfaLayerBuilder } from "./xfa_layer_builder.js";
+export { AnnotationLayerBuilder, DefaultAnnotationLayerFactory, DefaultStructTreeLayerFactory, DefaultTextLayerFactory, DefaultXfaLayerFactory, DownloadManager, EventBus, GenericL10n, NullL10n, PDFFindController, PDFHistory, PDFLinkService, PDFPageView, PDFScriptingManager, PDFSinglePageViewer, PDFViewer, ProgressBar, SimpleLinkService, StructTreeLayerBuilder, TextLayerBuilder, XfaLayerBuilder };

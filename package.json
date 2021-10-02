@@ -1,6 +1,6 @@
 {
   "name": "pdfjs-dist",
-  "version": "2.10.377",
+  "version": "2.11.338",
   "main": "build/pdf.js",
   "types": "types/src/pdf.d.ts",
   "description": "Generic build of Mozilla's PDF.js library.",
@@ -13,7 +13,12 @@
   "bugs": "https://github.com/mozilla/pdf.js/issues",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "worker-loader": "^3.0.7"
+    "worker-loader": "^3.0.8"
+  },
+  "peerDependenciesMeta": {
+    "worker-loader": {
+      "optional": true
+    }
   },
   "browser": {
     "canvas": false,

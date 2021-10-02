@@ -47,15 +47,18 @@ export type PDFViewerOptions = {
      */
     textLayerMode?: number | undefined;
     /**
+     * - Controls if the annotation layer is
+     * created, and if interactive form elements or `AnnotationStorage`-data are
+     * being rendered. The constants from {@link AnnotationMode } should be used;
+     * see also {@link RenderParameters } and {@link GetOperatorListParameters }.
+     * The default value is `AnnotationMode.ENABLE_FORMS`.
+     */
+    annotationMode?: number | undefined;
+    /**
      * - Path for image resources, mainly
      * mainly for annotation icons. Include trailing slash.
      */
     imageResourcesPath?: string | undefined;
-    /**
-     * - Enables rendering of
-     * interactive form elements. The default value is `true`.
-     */
-    renderInteractiveForms?: boolean | undefined;
     /**
      * - Enables automatic rotation of
      * landscape pages upon printing. The default is `false`.
@@ -80,22 +83,15 @@ export type PDFViewerOptions = {
      * - Localization service.
      */
     l10n: any;
-    /**
-     * - Enable embedded script execution
-     * (also requires {scriptingManager} being set). The default value is `false`.
-     */
-    enableScripting?: boolean | undefined;
 };
 /**
  * Simple viewer control to display PDF content/pages.
- * @implements {IRenderableView}
  */
-export class BaseViewer implements IRenderableView {
+export class BaseViewer {
     /**
      * @param {PDFViewerOptions} options
      */
     constructor(options: PDFViewerOptions);
-    _name: string;
     container: HTMLDivElement;
     viewer: Element | null;
     eventBus: any;
@@ -104,17 +100,17 @@ export class BaseViewer implements IRenderableView {
     findController: any;
     _scriptingManager: any;
     removePageBorders: boolean;
-    textLayerMode: number | undefined;
+    textLayerMode: number;
+    _annotationMode: any;
     imageResourcesPath: string;
-    renderInteractiveForms: boolean;
     enablePrintAutoRotate: boolean;
     renderer: string;
     useOnlyCssZoom: boolean;
     maxCanvasPixels: number | undefined;
     l10n: any;
-    enableScripting: boolean;
     defaultRenderingQueue: boolean;
     renderingQueue: PDFRenderingQueue | undefined;
+    _doc: HTMLElement;
     scroll: {
         right: boolean;
         down: boolean;
@@ -131,6 +127,14 @@ export class BaseViewer implements IRenderableView {
      * @type {boolean} - True if all {PDFPageView} objects are initialized.
      */
     get pageViewsReady(): boolean;
+    /**
+     * @type {boolean}
+     */
+    get renderForms(): boolean;
+    /**
+     * @type {boolean}
+     */
+    get enableScripting(): boolean;
     /**
      * @param {number} val - The page number.
      */
@@ -223,8 +227,8 @@ export class BaseViewer implements IRenderableView {
     _scrollUpdate(): void;
     _scrollIntoView({ pageDiv, pageSpot, pageNumber }: {
         pageDiv: any;
-        pageSpot?: any;
-        pageNumber?: any;
+        pageSpot?: null | undefined;
+        pageNumber?: null | undefined;
     }): void;
     _setScaleUpdatePages(newScale: any, newValue: any, noScroll?: boolean, preset?: boolean): void;
     /**
@@ -346,9 +350,16 @@ export class BaseViewer implements IRenderableView {
      * @param {PageViewport} viewport
      * @param {boolean} enhanceTextSelection
      * @param {EventBus} eventBus
+     * @param {TextHighlighter} highlighter
      * @returns {TextLayerBuilder}
      */
-    createTextLayerBuilder(textLayerDiv: HTMLDivElement, pageIndex: number, viewport: any, enhanceTextSelection: boolean | undefined, eventBus: any): TextLayerBuilder;
+    createTextLayerBuilder(textLayerDiv: HTMLDivElement, pageIndex: number, viewport: any, enhanceTextSelection: boolean | undefined, eventBus: any, highlighter: TextHighlighter): TextLayerBuilder;
+    /**
+     * @param {number} pageIndex
+     * @param {EventBus} eventBus
+     * @returns {TextHighlighter}
+     */
+    createTextHighlighter(pageIndex: number, eventBus: any): TextHighlighter;
     /**
      * @param {HTMLDivElement} pageDiv
      * @param {PDFPage} pdfPage
@@ -356,14 +367,18 @@ export class BaseViewer implements IRenderableView {
      *   data in forms.
      * @param {string} [imageResourcesPath] - Path for image resources, mainly
      *   for annotation icons. Include trailing slash.
-     * @param {boolean} renderInteractiveForms
+     * @param {boolean} renderForms
      * @param {IL10n} l10n
      * @param {boolean} [enableScripting]
      * @param {Promise<boolean>} [hasJSActionsPromise]
      * @param {Object} [mouseState]
+     * @param {Promise<Object<string, Array<Object>> | null>}
+     *   [fieldObjectsPromise]
      * @returns {AnnotationLayerBuilder}
      */
-    createAnnotationLayerBuilder(pageDiv: HTMLDivElement, pdfPage: any, annotationStorage?: any, imageResourcesPath?: string | undefined, renderInteractiveForms?: boolean, l10n?: any, enableScripting?: boolean | undefined, hasJSActionsPromise?: Promise<boolean> | undefined, mouseState?: Object | undefined): AnnotationLayerBuilder;
+    createAnnotationLayerBuilder(pageDiv: HTMLDivElement, pdfPage: any, annotationStorage?: any, imageResourcesPath?: string | undefined, renderForms?: boolean, l10n?: any, enableScripting?: boolean | undefined, hasJSActionsPromise?: Promise<boolean> | undefined, mouseState?: Object | undefined, fieldObjectsPromise?: Promise<{
+        [x: string]: Object[];
+    } | null> | undefined): AnnotationLayerBuilder;
     /**
      * @param {HTMLDivElement} pageDiv
      * @param {PDFPage} pdfPage
@@ -406,7 +421,7 @@ export class BaseViewer implements IRenderableView {
      * @type {number} One of the values in {ScrollMode}.
      */
     get scrollMode(): number;
-    _updateScrollMode(pageNumber?: any): void;
+    _updateScrollMode(pageNumber?: null): void;
     /**
      * @param {number} mode - Group the pages in spreads, starting with odd- or
      *   even-number pages (unless `SpreadMode.NONE` is used).
@@ -417,7 +432,7 @@ export class BaseViewer implements IRenderableView {
      * @type {number} One of the values in {SpreadMode}.
      */
     get spreadMode(): number;
-    _updateSpreadMode(pageNumber?: any): void;
+    _updateSpreadMode(pageNumber?: null): void;
     /**
      * @private
      */
@@ -432,6 +447,16 @@ export class BaseViewer implements IRenderableView {
      * @returns {boolean} Whether navigation occured.
      */
     previousPage(): boolean;
+    /**
+     * Increase the current zoom level one, or more, times.
+     * @param {number} [steps] - Defaults to zooming once.
+     */
+    increaseScale(steps?: number | undefined): void;
+    /**
+     * Decrease the current zoom level one, or more, times.
+     * @param {number} [steps] - Defaults to zooming once.
+     */
+    decreaseScale(steps?: number | undefined): void;
 }
 import { PDFRenderingQueue } from "./pdf_rendering_queue.js";
 /**
@@ -453,10 +478,13 @@ import { PDFRenderingQueue } from "./pdf_rendering_queue.js";
  *   selection and searching is created, and if the improved text selection
  *   behaviour is enabled. The constants from {TextLayerMode} should be used.
  *   The default value is `TextLayerMode.ENABLE`.
+ * @property {number} [annotationMode] - Controls if the annotation layer is
+ *   created, and if interactive form elements or `AnnotationStorage`-data are
+ *   being rendered. The constants from {@link AnnotationMode} should be used;
+ *   see also {@link RenderParameters} and {@link GetOperatorListParameters}.
+ *   The default value is `AnnotationMode.ENABLE_FORMS`.
  * @property {string} [imageResourcesPath] - Path for image resources, mainly
  *   mainly for annotation icons. Include trailing slash.
- * @property {boolean} [renderInteractiveForms] - Enables rendering of
- *   interactive form elements. The default value is `true`.
  * @property {boolean} [enablePrintAutoRotate] - Enables automatic rotation of
  *   landscape pages upon printing. The default is `false`.
  * @property {string} renderer - 'canvas' or 'svg'. The default is 'canvas'.
@@ -466,8 +494,6 @@ import { PDFRenderingQueue } from "./pdf_rendering_queue.js";
  *   total pixels, i.e. width * height. Use -1 for no limit. The default value
  *   is 4096 * 4096 (16 mega-pixels).
  * @property {IL10n} l10n - Localization service.
- * @property {boolean} [enableScripting] - Enable embedded script execution
- *   (also requires {scriptingManager} being set). The default value is `false`.
  */
 declare function PDFPageViewBuffer(size: any): void;
 declare class PDFPageViewBuffer {
@@ -490,10 +516,13 @@ declare class PDFPageViewBuffer {
      *   selection and searching is created, and if the improved text selection
      *   behaviour is enabled. The constants from {TextLayerMode} should be used.
      *   The default value is `TextLayerMode.ENABLE`.
+     * @property {number} [annotationMode] - Controls if the annotation layer is
+     *   created, and if interactive form elements or `AnnotationStorage`-data are
+     *   being rendered. The constants from {@link AnnotationMode} should be used;
+     *   see also {@link RenderParameters} and {@link GetOperatorListParameters}.
+     *   The default value is `AnnotationMode.ENABLE_FORMS`.
      * @property {string} [imageResourcesPath] - Path for image resources, mainly
      *   mainly for annotation icons. Include trailing slash.
-     * @property {boolean} [renderInteractiveForms] - Enables rendering of
-     *   interactive form elements. The default value is `true`.
      * @property {boolean} [enablePrintAutoRotate] - Enables automatic rotation of
      *   landscape pages upon printing. The default is `false`.
      * @property {string} renderer - 'canvas' or 'svg'. The default is 'canvas'.
@@ -503,8 +532,6 @@ declare class PDFPageViewBuffer {
      *   total pixels, i.e. width * height. Use -1 for no limit. The default value
      *   is 4096 * 4096 (16 mega-pixels).
      * @property {IL10n} l10n - Localization service.
-     * @property {boolean} [enableScripting] - Enable embedded script execution
-     *   (also requires {scriptingManager} being set). The default value is `false`.
      */
     constructor(size: any);
     push: (view: any) => void;
@@ -518,6 +545,7 @@ declare class PDFPageViewBuffer {
     resize: (newSize: any, pagesToKeep: any) => void;
     has: (view: any) => boolean;
 }
+import { TextHighlighter } from "./text_highlighter.js";
 import { TextLayerBuilder } from "./text_layer_builder.js";
 import { AnnotationLayerBuilder } from "./annotation_layer_builder.js";
 import { XfaLayerBuilder } from "./xfa_layer_builder.js";

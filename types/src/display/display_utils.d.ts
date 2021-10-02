@@ -69,11 +69,10 @@ export type PageViewportCloneParameters = {
  */
 /**
  * Adds various attributes (href, title, target, rel) to hyperlinks.
- * @param {HTMLLinkElement} link - The link element.
+ * @param {HTMLAnchorElement} link - The link element.
  * @param {ExternalLinkParameters} params
  */
-export function addLinkAttributes(link: HTMLLinkElement, { url, target, rel, enabled }?: any): void;
-export const DEFAULT_LINK_REL: "noopener noreferrer nofollow";
+export function addLinkAttributes(link: HTMLAnchorElement, { url, target, rel, enabled }?: any): void;
 export function deprecated(details: any): void;
 export class DOMCanvasFactory extends BaseCanvasFactory {
     constructor({ ownerDocument }?: {
@@ -220,6 +219,10 @@ export class PDFDateString {
      * @returns {Date|null}
      */
     static toDateObject(input: string): Date | null;
+}
+export namespace PixelsPerInch {
+    const CSS: number;
+    const PDF: number;
 }
 declare const RenderingCancelledException_base: any;
 export class RenderingCancelledException extends RenderingCancelledException_base {

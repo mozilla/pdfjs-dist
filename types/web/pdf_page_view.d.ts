@@ -1,3 +1,4 @@
+export type IRenderableView = import("./interfaces").IRenderableView;
 export type PDFPageViewOptions = {
     /**
      * - The viewer element.
@@ -37,19 +38,23 @@ export type PDFPageViewOptions = {
      * The default value is `TextLayerMode.ENABLE`.
      */
     textLayerMode?: number | undefined;
+    /**
+     * - Controls if the annotation layer is
+     * created, and if interactive form elements or `AnnotationStorage`-data are
+     * being rendered. The constants from {@link AnnotationMode } should be used;
+     * see also {@link RenderParameters } and {@link GetOperatorListParameters }.
+     * The default value is `AnnotationMode.ENABLE_FORMS`.
+     */
+    annotationMode?: number | undefined;
     annotationLayerFactory: any;
     xfaLayerFactory: any;
     structTreeLayerFactory: any;
+    textHighlighterFactory?: Object | undefined;
     /**
      * - Path for image resources, mainly
      * for annotation icons. Include trailing slash.
      */
     imageResourcesPath?: string | undefined;
-    /**
-     * - Turns on rendering of
-     * interactive form elements. The default value is `true`.
-     */
-    renderInteractiveForms: boolean;
     /**
      * - 'canvas' or 'svg'. The default is 'canvas'.
      */
@@ -88,9 +93,9 @@ export class PDFPageView implements IRenderableView {
     pdfPageRotate: any;
     _optionalContentConfigPromise: Promise<any> | null;
     hasRestrictedScaling: boolean;
-    textLayerMode: number | undefined;
+    textLayerMode: number;
+    _annotationMode: any;
     imageResourcesPath: string;
-    renderInteractiveForms: boolean;
     useOnlyCssZoom: boolean;
     maxCanvasPixels: any;
     eventBus: any;
@@ -98,6 +103,7 @@ export class PDFPageView implements IRenderableView {
     textLayerFactory: any;
     annotationLayerFactory: any;
     xfaLayerFactory: any;
+    textHighlighter: any;
     structTreeLayerFactory: any;
     renderer: string;
     l10n: any;
@@ -110,9 +116,10 @@ export class PDFPageView implements IRenderableView {
     renderingState: number;
     resume: (() => void) | null;
     _renderError: any;
+    _isStandalone: boolean;
     annotationLayer: any;
     textLayer: any;
-    zoomLayer: (Node & ParentNode) | null;
+    zoomLayer: ParentNode | null;
     xfaLayer: any;
     structTreeLayer: any;
     div: HTMLDivElement;
@@ -126,6 +133,7 @@ export class PDFPageView implements IRenderableView {
      * @private
      */
     private _renderXfaLayer;
+    _buildXfaTextContentItems(textDivs: any): Promise<void>;
     /**
      * @private
      */
@@ -136,7 +144,11 @@ export class PDFPageView implements IRenderableView {
         keepXfaLayer?: boolean | undefined;
     }): void;
     loadingIconDiv: HTMLDivElement | undefined;
-    update(scale: any, rotation: any, optionalContentConfigPromise?: any): void;
+    update({ scale, rotation, optionalContentConfigPromise }: {
+        scale?: number | undefined;
+        rotation?: null | undefined;
+        optionalContentConfigPromise?: null | undefined;
+    }, ...args: any[]): void;
     /**
      * PLEASE NOTE: Most likely you want to use the `this.reset()` method,
      *              rather than calling this one directly.

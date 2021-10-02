@@ -1,3 +1,18 @@
+export type GetPageSizeInchesParameters = {
+    view: number[];
+    userUnit: number;
+    rotate: number;
+};
+export type PageSize = {
+    /**
+     * - In inches.
+     */
+    width: number;
+    /**
+     * - In inches.
+     */
+    height: number;
+};
 export type GetVisibleElementsParameters = {
     /**
      * - A container that can possibly scroll.
@@ -72,6 +87,11 @@ export function apiPageModeToSidebarView(mode: string): number;
  *                   the second one is a denominator.
  */
 export function approximateFraction(x: number): any[];
+/**
+ * NOTE: Only used to support various PDF viewer tests in `mozilla-central`.
+ */
+export class AutomationEventBus extends EventBus {
+}
 export const AutoPrintRegExp: RegExp;
 /**
  * Helper function for getVisibleElements.
@@ -95,17 +115,15 @@ export function backtrackBeforeAllVisibleElements(index: number, views: any[], t
  *                   or |items.length| if no such element exists.
  */
 export function binarySearchFirstItem(items: any, condition: any): number;
-export const CSS_UNITS: number;
 export const DEFAULT_SCALE: 1;
+export const DEFAULT_SCALE_DELTA: 1.1;
 export const DEFAULT_SCALE_VALUE: "auto";
 /**
  * Simple event bus for an application. Listeners are attached using the `on`
  * and `off` methods. To raise an event, the `dispatch` method shall be used.
  */
 export class EventBus {
-    constructor(options: any);
     _listeners: any;
-    _isInAutomation: boolean | undefined;
     /**
      * @param {string} eventName
      * @param {function} listener
@@ -118,15 +136,19 @@ export class EventBus {
      * @param {Object} [options]
      */
     off(eventName: string, listener: Function, options?: Object | undefined): void;
-    dispatch(eventName: any, ...args: any[]): void;
+    /**
+     * @param {string} eventName
+     * @param {Object} data
+     */
+    dispatch(eventName: string, data: Object): void;
     /**
      * @ignore
      */
-    _on(eventName: any, listener: any, options?: any): void;
+    _on(eventName: any, listener: any, options?: null): void;
     /**
      * @ignore
      */
-    _off(eventName: any, listener: any, options?: any): void;
+    _off(eventName: any, listener: any, options?: null): void;
 }
 /**
  * Get the active or focused element in current DOM.
@@ -145,13 +167,22 @@ export function getActiveOrFocusedElement(): Element;
  */
 export function getOutputScale(ctx: any): Object;
 /**
- * Gets the size of the specified page, converted from PDF units to inches.
- * @param {Object} An Object containing the properties: {Array} `view`,
- *   {number} `userUnit`, and {number} `rotate`.
- * @returns {Object} An Object containing the properties: {number} `width`
- *   and {number} `height`, given in inches.
+ * @typedef {Object} GetPageSizeInchesParameters
+ * @property {number[]} view
+ * @property {number} userUnit
+ * @property {number} rotate
  */
-export function getPageSizeInches({ view, userUnit, rotate }: Object): Object;
+/**
+ * @typedef {Object} PageSize
+ * @property {number} width - In inches.
+ * @property {number} height - In inches.
+ */
+/**
+ * Gets the size of the specified page, converted from PDF units to inches.
+ * @param {GetPageSizeInchesParameters} params
+ * @returns {PageSize}
+ */
+export function getPageSizeInches({ view, userUnit, rotate }: GetPageSizeInchesParameters): PageSize;
 /**
  * @typedef {Object} GetVisibleElementsParameters
  * @property {HTMLElement} scrollEl - A container that can possibly scroll.
@@ -206,9 +237,11 @@ export function noContextMenuHandler(evt: any): void;
 export function normalizeWheelEventDelta(evt: any): number;
 export function normalizeWheelEventDirection(evt: any): number;
 /**
- * Helper function to parse query string (e.g. ?param1=value&parm2=...).
+ * Helper function to parse query string (e.g. ?param1=value&param2=...).
+ * @param {string}
+ * @returns {Map}
  */
-export function parseQueryString(query: any): any;
+export function parseQueryString(query: any): Map<any, any>;
 export namespace PresentationModeState {
     const UNKNOWN: number;
     const NORMAL: number;
@@ -223,7 +256,7 @@ export class ProgressBar {
     });
     visible: boolean;
     div: Element | null;
-    bar: (Node & ParentNode) | null;
+    bar: ParentNode | null;
     height: any;
     width: any;
     units: any;

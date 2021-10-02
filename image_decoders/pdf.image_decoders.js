@@ -73,7 +73,7 @@ exports.stringToUTF8String = stringToUTF8String;
 exports.unreachable = unreachable;
 exports.utf8StringToString = utf8StringToString;
 exports.warn = warn;
-exports.VerbosityLevel = exports.Util = exports.UNSUPPORTED_FEATURES = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.PageActionEventType = exports.OPS = exports.MissingPDFException = exports.IsLittleEndianCached = exports.IsEvalSupportedCached = exports.InvalidPDFException = exports.ImageKind = exports.IDENTITY_MATRIX = exports.FormatError = exports.FontType = exports.FONT_IDENTITY_MATRIX = exports.DocumentActionEventType = exports.CMapCompressionType = exports.BaseException = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.AnnotationActionEventType = exports.AbortException = void 0;
+exports.VerbosityLevel = exports.Util = exports.UNSUPPORTED_FEATURES = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.TextRenderingMode = exports.StreamType = exports.RenderingIntentFlag = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.PageActionEventType = exports.OPS = exports.MissingPDFException = exports.IsLittleEndianCached = exports.IsEvalSupportedCached = exports.InvalidPDFException = exports.ImageKind = exports.IDENTITY_MATRIX = exports.FormatError = exports.FontType = exports.FONT_IDENTITY_MATRIX = exports.DocumentActionEventType = exports.CMapCompressionType = exports.BaseException = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMode = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.AnnotationActionEventType = exports.AbortException = void 0;
 
 __w_pdfjs_require__(2);
 
@@ -81,6 +81,23 @@ const IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 exports.IDENTITY_MATRIX = IDENTITY_MATRIX;
 const FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
 exports.FONT_IDENTITY_MATRIX = FONT_IDENTITY_MATRIX;
+const RenderingIntentFlag = {
+  ANY: 0x01,
+  DISPLAY: 0x02,
+  PRINT: 0x04,
+  ANNOTATIONS_FORMS: 0x10,
+  ANNOTATIONS_STORAGE: 0x20,
+  ANNOTATIONS_DISABLE: 0x40,
+  OPLIST: 0x100
+};
+exports.RenderingIntentFlag = RenderingIntentFlag;
+const AnnotationMode = {
+  DISABLE: 0,
+  ENABLE: 1,
+  ENABLE_FORMS: 2,
+  ENABLE_STORAGE: 3
+};
+exports.AnnotationMode = AnnotationMode;
 const PermissionFlag = {
   PRINT: 0x04,
   MODIFY_CONTENTS: 0x08,
@@ -391,7 +408,8 @@ const UNSUPPORTED_FEATURES = {
   errorFontLoadNative: "errorFontLoadNative",
   errorFontBuildPath: "errorFontBuildPath",
   errorFontGetPath: "errorFontGetPath",
-  errorMarkedContent: "errorMarkedContent"
+  errorMarkedContent: "errorMarkedContent",
+  errorContentSubStream: "errorContentSubStream"
 };
 exports.UNSUPPORTED_FEATURES = UNSUPPORTED_FEATURES;
 const PasswordResponses = {
@@ -468,12 +486,28 @@ function _isValidProtocol(url) {
   }
 }
 
-function createValidAbsoluteUrl(url, baseUrl) {
+function createValidAbsoluteUrl(url, baseUrl = null, options = null) {
   if (!url) {
     return null;
   }
 
   try {
+    if (options && typeof url === "string") {
+      if (options.addDefaultProtocol && url.startsWith("www.")) {
+        const dots = url.match(/\./g);
+
+        if (dots && dots.length >= 2) {
+          url = `http://${url}`;
+        }
+      }
+
+      if (options.tryConvertEncoding) {
+        try {
+          url = stringToUTF8String(url);
+        } catch (ex) {}
+      }
+    }
+
     const absoluteUrl = baseUrl ? new URL(url, baseUrl) : new URL(url);
 
     if (_isValidProtocol(absoluteUrl)) {
@@ -495,13 +529,13 @@ function shadow(obj, prop, value) {
 }
 
 const BaseException = function BaseExceptionClosure() {
-  function BaseException(message) {
+  function BaseException(message, name) {
     if (this.constructor === BaseException) {
       unreachable("Cannot initialize BaseException.");
     }
 
     this.message = message;
-    this.name = this.constructor.name;
+    this.name = name;
   }
 
   BaseException.prototype = new Error();
@@ -513,7 +547,7 @@ exports.BaseException = BaseException;
 
 class PasswordException extends BaseException {
   constructor(msg, code) {
-    super(msg);
+    super(msg, "PasswordException");
     this.code = code;
   }
 
@@ -523,7 +557,7 @@ exports.PasswordException = PasswordException;
 
 class UnknownErrorException extends BaseException {
   constructor(msg, details) {
-    super(msg);
+    super(msg, "UnknownErrorException");
     this.details = details;
   }
 
@@ -531,17 +565,27 @@ class UnknownErrorException extends BaseException {
 
 exports.UnknownErrorException = UnknownErrorException;
 
-class InvalidPDFException extends BaseException {}
+class InvalidPDFException extends BaseException {
+  constructor(msg) {
+    super(msg, "InvalidPDFException");
+  }
+
+}
 
 exports.InvalidPDFException = InvalidPDFException;
 
-class MissingPDFException extends BaseException {}
+class MissingPDFException extends BaseException {
+  constructor(msg) {
+    super(msg, "MissingPDFException");
+  }
+
+}
 
 exports.MissingPDFException = MissingPDFException;
 
 class UnexpectedResponseException extends BaseException {
   constructor(msg, status) {
-    super(msg);
+    super(msg, "UnexpectedResponseException");
     this.status = status;
   }
 
@@ -549,11 +593,21 @@ class UnexpectedResponseException extends BaseException {
 
 exports.UnexpectedResponseException = UnexpectedResponseException;
 
-class FormatError extends BaseException {}
+class FormatError extends BaseException {
+  constructor(msg) {
+    super(msg, "FormatError");
+  }
+
+}
 
 exports.FormatError = FormatError;
 
-class AbortException extends BaseException {}
+class AbortException extends BaseException {
+  constructor(msg) {
+    super(msg, "AbortException");
+  }
+
+}
 
 exports.AbortException = AbortException;
 const NullCharactersRegExp = /\x00/g;
@@ -978,7 +1032,7 @@ var _ccitt = __w_pdfjs_require__(9);
 
 class Jbig2Error extends _util.BaseException {
   constructor(msg) {
-    super(`JBIG2 error: ${msg}`);
+    super(`JBIG2 error: ${msg}`, "Jbig2Error");
   }
 
 }
@@ -3177,6 +3231,7 @@ exports.parseXFAPath = parseXFAPath;
 exports.readInt8 = readInt8;
 exports.readUint16 = readUint16;
 exports.readUint32 = readUint32;
+exports.recoverJsURL = recoverJsURL;
 exports.toRomanNumerals = toRomanNumerals;
 exports.validateCSSFont = validateCSSFont;
 exports.XRefParseException = exports.XRefEntryException = exports.ParserEOFException = exports.MissingDataException = void 0;
@@ -3219,7 +3274,7 @@ function getArrayLookupTableFactory(initializer) {
 
 class MissingDataException extends _util.BaseException {
   constructor(begin, end) {
-    super(`Missing data [${begin}, ${end})`);
+    super(`Missing data [${begin}, ${end})`, "MissingDataException");
     this.begin = begin;
     this.end = end;
   }
@@ -3228,15 +3283,30 @@ class MissingDataException extends _util.BaseException {
 
 exports.MissingDataException = MissingDataException;
 
-class ParserEOFException extends _util.BaseException {}
+class ParserEOFException extends _util.BaseException {
+  constructor(msg) {
+    super(msg, "ParserEOFException");
+  }
+
+}
 
 exports.ParserEOFException = ParserEOFException;
 
-class XRefEntryException extends _util.BaseException {}
+class XRefEntryException extends _util.BaseException {
+  constructor(msg) {
+    super(msg, "XRefEntryException");
+  }
+
+}
 
 exports.XRefEntryException = XRefEntryException;
 
-class XRefParseException extends _util.BaseException {}
+class XRefParseException extends _util.BaseException {
+  constructor(msg) {
+    super(msg, "XRefParseException");
+  }
+
+}
 
 exports.XRefParseException = XRefParseException;
 
@@ -3322,7 +3392,7 @@ function isWhiteSpace(ch) {
 }
 
 function parseXFAPath(path) {
-  const positionPattern = /(.+)\[([0-9]+)\]$/;
+  const positionPattern = /(.+)\[(\d+)\]$/;
   return path.split(".").map(component => {
     const m = component.match(positionPattern);
 
@@ -3540,7 +3610,7 @@ function validateCSSFont(cssFontInfo) {
     }
   } else {
     for (const ident of fontFamily.split(/[ \t]+/)) {
-      if (/^([0-9]|(-([0-9]|-)))/.test(ident) || !/^[a-zA-Z0-9\-_\\]+$/.test(ident)) {
+      if (/^(\d|(-(\d|-)))/.test(ident) || !/^[\w-\\]+$/.test(ident)) {
         (0, _util.warn)(`XFA - FontFamily contains some invalid <custom-ident>: ${fontFamily}.`);
         return false;
       }
@@ -3552,6 +3622,28 @@ function validateCSSFont(cssFontInfo) {
   const angle = parseFloat(italicAngle);
   cssFontInfo.italicAngle = isNaN(angle) || angle < -90 || angle > 90 ? DEFAULT_CSS_FONT_OBLIQUE : italicAngle.toString();
   return true;
+}
+
+function recoverJsURL(str) {
+  const URL_OPEN_METHODS = ["app.launchURL", "window.open", "xfa.host.gotoURL"];
+  const regex = new RegExp("^\\s*(" + URL_OPEN_METHODS.join("|").split(".").join("\\.") + ")\\((?:'|\")([^'\"]*)(?:'|\")(?:,\\s*(\\w+)\\)|\\))", "i");
+  const jsUrl = regex.exec(str);
+
+  if (jsUrl && jsUrl[2]) {
+    const url = jsUrl[2];
+    let newWindow = false;
+
+    if (jsUrl[3] === "true" && jsUrl[1] === "app.launchURL") {
+      newWindow = true;
+    }
+
+    return {
+      url,
+      newWindow
+    };
+  }
+
+  return null;
 }
 
 /***/ }),
@@ -3566,7 +3658,6 @@ Object.defineProperty(exports, "__esModule", ({
 exports.clearPrimitiveCaches = clearPrimitiveCaches;
 exports.isCmd = isCmd;
 exports.isDict = isDict;
-exports.isEOF = isEOF;
 exports.isName = isName;
 exports.isRef = isRef;
 exports.isRefsEqual = isRefsEqual;
@@ -3577,7 +3668,7 @@ var _util = __w_pdfjs_require__(1);
 
 var _base_stream = __w_pdfjs_require__(7);
 
-const EOF = {};
+const EOF = Symbol("EOF");
 exports.EOF = EOF;
 
 const Name = function NameClosure() {
@@ -3768,7 +3859,7 @@ class Dict {
         if (property === undefined) {
           property = [];
           properties.set(key, property);
-        } else if (!mergeSubDicts) {
+        } else if (!mergeSubDicts || !(value instanceof Dict)) {
           continue;
         }
 
@@ -3785,10 +3876,6 @@ class Dict {
       const subDict = new Dict(xref);
 
       for (const dict of values) {
-        if (!(dict instanceof Dict)) {
-          continue;
-        }
-
         for (const [key, value] of Object.entries(dict._map)) {
           if (subDict._map[key] === undefined) {
             subDict._map[key] = value;
@@ -3912,10 +3999,6 @@ class RefSetCache {
 }
 
 exports.RefSetCache = RefSetCache;
-
-function isEOF(v) {
-  return v === EOF;
-}
 
 function isName(v, name) {
   return v instanceof Name && (name === undefined || v.name === name);
@@ -5127,20 +5210,25 @@ var _core_utils = __w_pdfjs_require__(5);
 
 class JpegError extends _util.BaseException {
   constructor(msg) {
-    super(`JPEG error: ${msg}`);
+    super(`JPEG error: ${msg}`, "JpegError");
   }
 
 }
 
 class DNLMarkerError extends _util.BaseException {
   constructor(message, scanLines) {
-    super(message);
+    super(message, "DNLMarkerError");
     this.scanLines = scanLines;
   }
 
 }
 
-class EOIMarkerError extends _util.BaseException {}
+class EOIMarkerError extends _util.BaseException {
+  constructor(msg) {
+    super(msg, "EOIMarkerError");
+  }
+
+}
 
 const dctZigZag = new Uint8Array([0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63]);
 const dctCos1 = 4017;
@@ -6371,7 +6459,7 @@ var _arithmetic_decoder = __w_pdfjs_require__(8);
 
 class JpxError extends _util.BaseException {
   constructor(msg) {
-    super(`JPX error: ${msg}`);
+    super(`JPX error: ${msg}`, "JpxError");
   }
 
 }
@@ -7589,6 +7677,12 @@ function parseTilePackets(context, data, offset, dataLength) {
           zeroBitPlanesTree = new TagTree(width, height);
           precinct.inclusionTree = inclusionTree;
           precinct.zeroBitPlanesTree = zeroBitPlanesTree;
+
+          for (let l = 0; l < layerNumber; l++) {
+            if (readBits(1) !== 0) {
+              throw new JpxError("Invalid tag tree");
+            }
+          }
         }
 
         if (inclusionTree.reset(codeblockColumn, codeblockRow, layerNumber)) {
@@ -8763,8 +8857,8 @@ var _jpg = __w_pdfjs_require__(10);
 
 var _jpx = __w_pdfjs_require__(11);
 
-const pdfjsVersion = '2.10.377';
-const pdfjsBuild = '156762c48';
+const pdfjsVersion = '2.11.338';
+const pdfjsBuild = 'dedff3c98';
 })();
 
 /******/ 	return __webpack_exports__;

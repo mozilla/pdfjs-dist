@@ -11,10 +11,11 @@ export type AnnotationElementParameters = {
      * for annotation icons. Include trailing slash.
      */
     imageResourcesPath?: string | undefined;
-    renderInteractiveForms: boolean;
+    renderForms: boolean;
     svgFactory: Object;
     enableScripting?: boolean | undefined;
     hasJSActions?: boolean | undefined;
+    fieldObjects?: Object | undefined;
     mouseState?: Object | undefined;
 };
 export type AnnotationLayerParameters = {
@@ -29,7 +30,7 @@ export type AnnotationLayerParameters = {
      * for annotation icons. Include trailing slash.
      */
     imageResourcesPath?: string | undefined;
-    renderInteractiveForms: boolean;
+    renderForms: boolean;
     /**
      * - Enable embedded script execution.
      */
@@ -50,7 +51,7 @@ export type AnnotationLayerParameters = {
  * @property {DownloadManager} downloadManager
  * @property {string} [imageResourcesPath] - Path for image resources, mainly
  *   for annotation icons. Include trailing slash.
- * @property {boolean} renderInteractiveForms
+ * @property {boolean} renderForms
  * @property {boolean} [enableScripting] - Enable embedded script execution.
  * @property {boolean} [hasJSActions] - Some fields have JS actions.
  *   The default value is `false`.

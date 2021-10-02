@@ -12,7 +12,7 @@ export class BaseCanvasFactory {
 }
 export class BaseCMapReaderFactory {
     constructor({ baseUrl, isCompressed }: {
-        baseUrl?: any;
+        baseUrl?: null | undefined;
         isCompressed?: boolean | undefined;
     });
     baseUrl: any;
@@ -27,7 +27,7 @@ export class BaseCMapReaderFactory {
 }
 export class BaseStandardFontDataFactory {
     constructor({ baseUrl }: {
-        baseUrl?: any;
+        baseUrl?: null | undefined;
     });
     baseUrl: any;
     fetch({ filename }: {

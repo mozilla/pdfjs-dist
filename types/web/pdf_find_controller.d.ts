@@ -51,7 +51,7 @@ export class PDFFindController {
     _findTimeout: any;
     _highlightMatches: boolean | undefined;
     scrollMatchIntoView({ element, selectedLeft, pageIndex, matchIndex, }: {
-        element?: any;
+        element?: null | undefined;
         selectedLeft?: number | undefined;
         pageIndex?: number | undefined;
         matchIndex?: number | undefined;

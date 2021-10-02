@@ -1,4 +1,4 @@
-export function getShadingPattern(IR: any): RadialAxialShadingPattern | MeshShadingPattern | DummyShadingPattern;
+export function getShadingPattern(IR: any, cachedCanvasPatterns: any): RadialAxialShadingPattern | MeshShadingPattern | DummyShadingPattern;
 export class TilingPattern {
     static get MAX_PATTERN_SIZE(): any;
     constructor(IR: any, color: any, ctx: any, canvasGraphicsFactory: any, baseTransform: any);
@@ -29,7 +29,7 @@ export class TilingPattern {
     getPattern(ctx: any, owner: any, inverse: any, shadingFill?: boolean): any;
 }
 declare class RadialAxialShadingPattern extends BaseShadingPattern {
-    constructor(IR: any);
+    constructor(IR: any, cachedCanvasPatterns: any);
     _type: any;
     _bbox: any;
     _colorStops: any;
@@ -37,8 +37,8 @@ declare class RadialAxialShadingPattern extends BaseShadingPattern {
     _p1: any;
     _r0: any;
     _r1: any;
-    _matrix: any;
-    _patternCache: any;
+    matrix: any;
+    cachedCanvasPatterns: any;
     _createGradient(ctx: any): any;
 }
 declare class MeshShadingPattern extends BaseShadingPattern {
@@ -47,9 +47,9 @@ declare class MeshShadingPattern extends BaseShadingPattern {
     _colors: any;
     _figures: any;
     _bounds: any;
-    _matrix: any;
     _bbox: any;
     _background: any;
+    matrix: any;
     _createMeshCanvas(combinedScale: any, backgroundColor: any, cachedCanvases: any): {
         canvas: any;
         offsetX: number;

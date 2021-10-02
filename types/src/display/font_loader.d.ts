@@ -4,7 +4,7 @@ export class FontFaceObject {
         disableFontFace?: boolean | undefined;
         ignoreErrors?: boolean | undefined;
         onUnsupportedFeature: any;
-        fontRegistry?: any;
+        fontRegistry?: null | undefined;
     });
     compiledGlyphs: any;
     isEvalSupported: boolean;
@@ -12,7 +12,7 @@ export class FontFaceObject {
     ignoreErrors: boolean;
     _onUnsupportedFeature: any;
     fontRegistry: any;
-    createNativeFontFace(): any;
+    createNativeFontFace(): FontFace | null;
     createFontFaceRule(): string | null;
     getPathGenerator(objs: any, character: any): any;
 }

@@ -56,7 +56,7 @@ export type DocumentInitParameters = {
      * - The worker that will be used for loading and
      * parsing the PDF data.
      */
-    worker?: any;
+    worker?: PDFWorker | undefined;
     /**
      * - Controls the logging level; the constants
      * from {@link VerbosityLevel } should be used.
@@ -196,51 +196,6 @@ export type OnProgressParameters = {
      * - Total number of bytes in the PDF file.
      */
     total: number;
-};
-/**
- * The loading task controls the operations required to load a PDF document
- * (such as network requests) and provides a way to listen for completion,
- * after which individual pages can be rendered.
- */
-export type PDFDocumentLoadingTask = {
-    /**
-     * - Unique identifier for the document loading task.
-     */
-    docId: string;
-    /**
-     * - Whether the loading task is destroyed or not.
-     */
-    destroyed: boolean;
-    /**
-     * - Callback to request a password if a wrong
-     * or no password was provided. The callback receives two parameters: a
-     * function that should be called with the new password, and a reason (see
-     * {@link PasswordResponses }).
-     */
-    onPassword?: Function | undefined;
-    /**
-     * - Callback to be able to monitor the
-     * loading progress of the PDF file (necessary to implement e.g. a loading
-     * bar). The callback receives an {@link OnProgressParameters } argument.
-     */
-    onProgress?: Function | undefined;
-    /**
-     * - Callback for when an
-     * unsupported feature is used in the PDF document. The callback receives an
-     * {@link UNSUPPORTED_FEATURES } argument.
-     */
-    onUnsupportedFeature?: Function | undefined;
-    /**
-     * - Promise for document loading
-     * task completion.
-     */
-    promise: Promise<PDFDocumentProxy>;
-    /**
-     * - Abort all network requests and destroy
-     * the worker. Returns a promise that is resolved when destruction is
-     * completed.
-     */
-    destroy: Function;
 };
 /**
  * Page getViewport parameters.
@@ -385,8 +340,8 @@ export type TextStyle = {
 export type GetAnnotationsParameters = {
     /**
      * - Determines the annotations that are fetched,
-     * can be either 'display' (viewable annotations) or 'print' (printable
-     * annotations). If the parameter is omitted, all annotations are fetched.
+     * can be 'display' (viewable annotations), 'print' (printable annotations),
+     * or 'any' (all annotations). The default value is 'display'.
      */
     intent?: string | undefined;
 };
@@ -404,16 +359,25 @@ export type RenderParameters = {
      */
     viewport: PageViewport;
     /**
-     * - Rendering intent, can be 'display' or 'print'.
-     * The default value is 'display'.
+     * - Rendering intent, can be 'display', 'print',
+     * or 'any'. The default value is 'display'.
      */
     intent?: string | undefined;
     /**
-     * - Whether or not interactive
-     * form elements are rendered in the display layer. If so, we do not render
-     * them on the canvas as well. The default value is `false`.
+     * Controls which annotations are rendered
+     * onto the canvas, for annotations with appearance-data; the values from
+     * {@link AnnotationMode } should be used. The following values are supported:
+     * - `AnnotationMode.DISABLE`, which disables all annotations.
+     * - `AnnotationMode.ENABLE`, which includes all possible annotations (thus
+     * it also depends on the `intent`-option, see above).
+     * - `AnnotationMode.ENABLE_FORMS`, which excludes annotations that contain
+     * interactive form elements (those will be rendered in the display layer).
+     * - `AnnotationMode.ENABLE_STORAGE`, which includes all possible annotations
+     * (as above) but where interactive form elements are updated with data
+     * from the {@link AnnotationStorage }-instance; useful e.g. for printing.
+     * The default value is `AnnotationMode.ENABLE`.
      */
-    renderInteractiveForms?: boolean | undefined;
+    annotationMode?: number | undefined;
     /**
      * - Additional transform, applied just
      * before viewport transform.
@@ -438,12 +402,6 @@ export type RenderParameters = {
      */
     background?: string | Object | undefined;
     /**
-     * - Render stored interactive
-     * form element data, from the {@link AnnotationStorage }-instance, onto the
-     * canvas itself; useful e.g. for printing. The default value is `false`.
-     */
-    includeAnnotationStorage?: boolean | undefined;
-    /**
      * -
      * A promise that should resolve with an {@link OptionalContentConfig }created from `PDFDocumentProxy.getOptionalContentConfig`. If `null`,
      * the configuration will be fetched automatically with the default visibility
@@ -456,10 +414,25 @@ export type RenderParameters = {
  */
 export type GetOperatorListParameters = {
     /**
-     * - Rendering intent, can be 'display' or 'print'.
-     * The default value is 'display'.
+     * - Rendering intent, can be 'display', 'print',
+     * or 'any'. The default value is 'display'.
      */
     intent?: string | undefined;
+    /**
+     * Controls which annotations are included
+     * in the operatorList, for annotations with appearance-data; the values from
+     * {@link AnnotationMode } should be used. The following values are supported:
+     * - `AnnotationMode.DISABLE`, which disables all annotations.
+     * - `AnnotationMode.ENABLE`, which includes all possible annotations (thus
+     * it also depends on the `intent`-option, see above).
+     * - `AnnotationMode.ENABLE_FORMS`, which excludes annotations that contain
+     * interactive form elements (those will be rendered in the display layer).
+     * - `AnnotationMode.ENABLE_STORAGE`, which includes all possible annotations
+     * (as above) but where interactive form elements are updated with data
+     * from the {@link AnnotationStorage }-instance; useful e.g. for printing.
+     * The default value is `AnnotationMode.ENABLE`.
+     */
+    annotationMode?: number | undefined;
 };
 /**
  * Structure tree node. The root node will have a role "Root".
@@ -514,8 +487,8 @@ export type PDFWorkerParameters = {
      */
     port?: Object | undefined;
     /**
-     * - Controls the logging level; the
-     * constants from {@link VerbosityLevel } should be used.
+     * - Controls the logging level;
+     * the constants from {@link VerbosityLevel } should be used.
      */
     verbosity?: number | undefined;
 };
@@ -687,6 +660,63 @@ export class PDFDataRangeTransport {
     transportReady(): void;
     requestDataRange(begin: any, end: any): void;
     abort(): void;
+}
+/**
+ * @typedef {Object} OnProgressParameters
+ * @property {number} loaded - Currently loaded number of bytes.
+ * @property {number} total - Total number of bytes in the PDF file.
+ */
+/**
+ * The loading task controls the operations required to load a PDF document
+ * (such as network requests) and provides a way to listen for completion,
+ * after which individual pages can be rendered.
+ */
+export class PDFDocumentLoadingTask {
+    static get idCounters(): any;
+    _capability: import("../shared/util.js").PromiseCapability;
+    _transport: any;
+    _worker: any;
+    /**
+     * Unique identifier for the document loading task.
+     * @type {string}
+     */
+    docId: string;
+    /**
+     * Whether the loading task is destroyed or not.
+     * @type {boolean}
+     */
+    destroyed: boolean;
+    /**
+     * Callback to request a password if a wrong or no password was provided.
+     * The callback receives two parameters: a function that should be called
+     * with the new password, and a reason (see {@link PasswordResponses}).
+     * @type {function}
+     */
+    onPassword: Function;
+    /**
+     * Callback to be able to monitor the loading progress of the PDF file
+     * (necessary to implement e.g. a loading bar).
+     * The callback receives an {@link OnProgressParameters} argument.
+     * @type {function}
+     */
+    onProgress: Function;
+    /**
+     * Callback for when an unsupported feature is used in the PDF document.
+     * The callback receives an {@link UNSUPPORTED_FEATURES} argument.
+     * @type {function}
+     */
+    onUnsupportedFeature: Function;
+    /**
+     * Promise for document loading task completion.
+     * @type {Promise<PDFDocumentProxy>}
+     */
+    get promise(): Promise<PDFDocumentProxy>;
+    /**
+     * Abort all network requests and destroy the worker.
+     * @returns {Promise<void>} A promise that is resolved when destruction is
+     *   completed.
+     */
+    destroy(): Promise<void>;
 }
 /**
  * Proxy to a `PDFDocument` in the worker thread.
@@ -931,7 +961,7 @@ export class PDFDocumentProxy {
     /**
      * Destroys the current document instance and terminates the worker.
      */
-    destroy(): any;
+    destroy(): Promise<void>;
     /**
      * @type {DocumentInitParameters} A subset of the current
      *   {DocumentInitParameters}, which are needed in the viewer.
@@ -947,11 +977,13 @@ export class PDFDocumentProxy {
      */
     saveDocument(): Promise<Uint8Array>;
     /**
-     * @returns {Promise<Array<Object> | null>} A promise that is resolved with an
-     *   {Array<Object>} containing /AcroForm field data for the JS sandbox,
-     *   or `null` when no field data is present in the PDF file.
+     * @returns {Promise<Object<string, Array<Object>> | null>} A promise that is
+     *   resolved with an {Object} containing /AcroForm field data for the JS
+     *   sandbox, or `null` when no field data is present in the PDF file.
      */
-    getFieldObjects(): Promise<Array<Object> | null>;
+    getFieldObjects(): Promise<{
+        [x: string]: Array<Object>;
+    } | null>;
     /**
      * @returns {Promise<boolean>} A promise that is resolved with `true`
      *   if some /AcroForm fields have JavaScript actions.
@@ -1035,8 +1067,8 @@ export class PDFDocumentProxy {
  *
  * @typedef {Object} GetAnnotationsParameters
  * @property {string} [intent] - Determines the annotations that are fetched,
- *   can be either 'display' (viewable annotations) or 'print' (printable
- *   annotations). If the parameter is omitted, all annotations are fetched.
+ *   can be 'display' (viewable annotations), 'print' (printable annotations),
+ *   or 'any' (all annotations). The default value is 'display'.
  */
 /**
  * Page render parameters.
@@ -1045,11 +1077,20 @@ export class PDFDocumentProxy {
  * @property {Object} canvasContext - A 2D context of a DOM Canvas object.
  * @property {PageViewport} viewport - Rendering viewport obtained by calling
  *   the `PDFPageProxy.getViewport` method.
- * @property {string} [intent] - Rendering intent, can be 'display' or 'print'.
- *   The default value is 'display'.
- * @property {boolean} [renderInteractiveForms] - Whether or not interactive
- *   form elements are rendered in the display layer. If so, we do not render
- *   them on the canvas as well. The default value is `false`.
+ * @property {string} [intent] - Rendering intent, can be 'display', 'print',
+ *   or 'any'. The default value is 'display'.
+ * @property {number} [annotationMode] Controls which annotations are rendered
+ *   onto the canvas, for annotations with appearance-data; the values from
+ *   {@link AnnotationMode} should be used. The following values are supported:
+ *    - `AnnotationMode.DISABLE`, which disables all annotations.
+ *    - `AnnotationMode.ENABLE`, which includes all possible annotations (thus
+ *      it also depends on the `intent`-option, see above).
+ *    - `AnnotationMode.ENABLE_FORMS`, which excludes annotations that contain
+ *      interactive form elements (those will be rendered in the display layer).
+ *    - `AnnotationMode.ENABLE_STORAGE`, which includes all possible annotations
+ *      (as above) but where interactive form elements are updated with data
+ *      from the {@link AnnotationStorage}-instance; useful e.g. for printing.
+ *   The default value is `AnnotationMode.ENABLE`.
  * @property {Array<any>} [transform] - Additional transform, applied just
  *   before viewport transform.
  * @property {Object} [imageLayer] - An object that has `beginLayout`,
@@ -1061,9 +1102,6 @@ export class PDFDocumentProxy {
  *   <color> value, a `CanvasGradient` object (a linear or radial gradient) or
  *   a `CanvasPattern` object (a repetitive image). The default value is
  *   'rgb(255,255,255)'.
- * @property {boolean} [includeAnnotationStorage] - Render stored interactive
- *   form element data, from the {@link AnnotationStorage}-instance, onto the
- *   canvas itself; useful e.g. for printing. The default value is `false`.
  * @property {Promise<OptionalContentConfig>} [optionalContentConfigPromise] -
  *   A promise that should resolve with an {@link OptionalContentConfig}
  *   created from `PDFDocumentProxy.getOptionalContentConfig`. If `null`,
@@ -1074,8 +1112,20 @@ export class PDFDocumentProxy {
  * Page getOperatorList parameters.
  *
  * @typedef {Object} GetOperatorListParameters
- * @property {string} [intent] - Rendering intent, can be 'display' or 'print'.
- *   The default value is 'display'.
+ * @property {string} [intent] - Rendering intent, can be 'display', 'print',
+ *   or 'any'. The default value is 'display'.
+ * @property {number} [annotationMode] Controls which annotations are included
+ *   in the operatorList, for annotations with appearance-data; the values from
+ *   {@link AnnotationMode} should be used. The following values are supported:
+ *    - `AnnotationMode.DISABLE`, which disables all annotations.
+ *    - `AnnotationMode.ENABLE`, which includes all possible annotations (thus
+ *      it also depends on the `intent`-option, see above).
+ *    - `AnnotationMode.ENABLE_FORMS`, which excludes annotations that contain
+ *      interactive form elements (those will be rendered in the display layer).
+ *    - `AnnotationMode.ENABLE_STORAGE`, which includes all possible annotations
+ *      (as above) but where interactive form elements are updated with data
+ *      from the {@link AnnotationStorage}-instance; useful e.g. for printing.
+ *   The default value is `AnnotationMode.ENABLE`.
  */
 /**
  * Structure tree node. The root node will have a role "Root".
@@ -1118,6 +1168,7 @@ export class PDFPageProxy {
     cleanupAfterRender: boolean;
     pendingCleanup: boolean;
     _intentStates: Map<any, any>;
+    _annotationPromises: Map<any, any>;
     destroyed: boolean;
     /**
      * @type {number} Page number of the page. First page is 1.
@@ -1152,8 +1203,6 @@ export class PDFPageProxy {
      *   {Array} of the annotation objects.
      */
     getAnnotations({ intent }?: GetAnnotationsParameters): Promise<Array<any>>;
-    _annotationsPromise: any;
-    _annotationsIntent: any;
     /**
      * @returns {Promise<Object>} A promise that is resolved with an
      *   {Object} with JS actions.
@@ -1173,14 +1222,14 @@ export class PDFPageProxy {
      * @returns {RenderTask} An object that contains a promise that is
      *   resolved when the page finishes rendering.
      */
-    render({ canvasContext, viewport, intent, renderInteractiveForms, transform, imageLayer, canvasFactory, background, includeAnnotationStorage, optionalContentConfigPromise, }: RenderParameters): RenderTask;
+    render({ canvasContext, viewport, intent, annotationMode, transform, imageLayer, canvasFactory, background, optionalContentConfigPromise, }: RenderParameters, ...args: any[]): RenderTask;
     /**
      * @param {GetOperatorListParameters} params - Page getOperatorList
      *   parameters.
      * @returns {Promise<PDFOperatorList>} A promise resolved with an
      *   {@link PDFOperatorList} object that represents the page's operator list.
      */
-    getOperatorList({ intent }?: GetOperatorListParameters): Promise<PDFOperatorList>;
+    getOperatorList({ intent, annotationMode, }?: GetOperatorListParameters): Promise<PDFOperatorList>;
     /**
      * @param {getTextContentParameters} params - getTextContent parameters.
      * @returns {ReadableStream} Stream for reading text content chunks.
@@ -1240,14 +1289,87 @@ export class PDFPageProxy {
     get stats(): Object;
 }
 /**
- * @typedef {Object} PDFWorkerParameters
- * @property {string} [name] - The name of the worker.
- * @property {Object} [port] - The `workerPort` object.
- * @property {number} [verbosity] - Controls the logging level; the
- *   constants from {@link VerbosityLevel} should be used.
+ * PDF.js web worker abstraction that controls the instantiation of PDF
+ * documents. Message handlers are used to pass information from the main
+ * thread to the worker thread and vice versa. If the creation of a web
+ * worker is not possible, a "fake" worker will be used instead.
+ *
+ * @param {PDFWorkerParameters} params - The worker initialization parameters.
  */
-/** @type {any} */
-export const PDFWorker: any;
+export class PDFWorker {
+    static get _workerPorts(): any;
+    /**
+     * @param {PDFWorkerParameters} params - The worker initialization parameters.
+     */
+    static fromPort(params: PDFWorkerParameters): any;
+    /**
+     * The current `workerSrc`, when it exists.
+     * @type {string}
+     */
+    static get workerSrc(): string;
+    static get _mainThreadWorkerMessageHandler(): any;
+    static get _setupFakeWorkerGlobal(): any;
+    constructor({ name, port, verbosity, }?: {
+        name?: null | undefined;
+        port?: null | undefined;
+        verbosity?: number | undefined;
+    });
+    name: any;
+    destroyed: boolean;
+    postMessageTransfers: boolean;
+    verbosity: number;
+    _readyCapability: import("../shared/util.js").PromiseCapability;
+    _port: any;
+    _webWorker: Worker | null;
+    _messageHandler: MessageHandler | null;
+    /**
+     * Promise for worker initialization completion.
+     * @type {Promise<void>}
+     */
+    get promise(): Promise<void>;
+    /**
+     * The current `workerPort`, when it exists.
+     * @type {Worker}
+     */
+    get port(): Worker;
+    /**
+     * The current MessageHandler-instance.
+     * @type {MessageHandler}
+     */
+    get messageHandler(): MessageHandler;
+    _initializeFromPort(port: any): void;
+    _initialize(): void;
+    _setupFakeWorker(): void;
+    /**
+     * Destroys the worker instance.
+     */
+    destroy(): void;
+}
+/**
+ * Allows controlling of the rendering tasks.
+ */
+export class RenderTask {
+    constructor(internalRenderTask: any);
+    _internalRenderTask: any;
+    /**
+     * Callback for incremental rendering -- a function that will be called
+     * each time the rendering is paused.  To continue rendering call the
+     * function that is the first argument to the callback.
+     * @type {function}
+     */
+    onContinue: Function;
+    /**
+     * Promise for rendering task completion.
+     * @type {Promise<void>}
+     */
+    get promise(): Promise<void>;
+    /**
+     * Cancels the rendering task. If the task is currently rendering it will
+     * not be cancelled until graphics pauses with a timeout. The promise that
+     * this object extends will be rejected when cancelled.
+     */
+    cancel(): void;
+}
 /**
  * Sets the function that instantiates an {IPDFStream} as an alternative PDF
  * data transport.
@@ -1265,40 +1387,6 @@ import { OptionalContentConfig } from "./optional_content_config.js";
 import { DOMCanvasFactory } from "./display_utils.js";
 import { DOMCMapReaderFactory } from "./display_utils.js";
 import { DOMStandardFontDataFactory } from "./display_utils.js";
-/**
- * @typedef {Object} OnProgressParameters
- * @property {number} loaded - Currently loaded number of bytes.
- * @property {number} total - Total number of bytes in the PDF file.
- */
-/**
- * The loading task controls the operations required to load a PDF document
- * (such as network requests) and provides a way to listen for completion,
- * after which individual pages can be rendered.
- *
- * @typedef {Object} PDFDocumentLoadingTask
- * @property {string} docId - Unique identifier for the document loading task.
- * @property {boolean} destroyed - Whether the loading task is destroyed or not.
- * @property {function} [onPassword] - Callback to request a password if a wrong
- *   or no password was provided. The callback receives two parameters: a
- *   function that should be called with the new password, and a reason (see
- *   {@link PasswordResponses}).
- * @property {function} [onProgress] - Callback to be able to monitor the
- *   loading progress of the PDF file (necessary to implement e.g. a loading
- *   bar). The callback receives an {@link OnProgressParameters} argument.
- * @property {function} [onUnsupportedFeature] - Callback for when an
- *   unsupported feature is used in the PDF document. The callback receives an
- *   {@link UNSUPPORTED_FEATURES} argument.
- * @property {Promise<PDFDocumentProxy>} promise - Promise for document loading
- *   task completion.
- * @property {function} destroy - Abort all network requests and destroy
- *   the worker. Returns a promise that is resolved when destruction is
- *   completed.
- */
-/**
- * @type {any}
- * @ignore
- */
-declare const PDFDocumentLoadingTask: any;
 import { AnnotationStorage } from "./annotation_storage.js";
 import { info } from "../shared/util.js";
 import { Metadata } from "./metadata.js";
@@ -1324,7 +1412,7 @@ declare class PDFObjects {
      * object once the object is resolved. That means, if you call this method
      * and the object is already resolved, the callback gets called right away.
      */
-    get(objId: any, callback?: any): any;
+    get(objId: any, callback?: null): any;
     has(objId: any): any;
     /**
      * Resolves the object `objId` with optional `data`.
@@ -1332,29 +1420,5 @@ declare class PDFObjects {
     resolve(objId: any, data: any): void;
     clear(): void;
 }
-/**
- * Allows controlling of the rendering tasks.
- */
-declare class RenderTask {
-    constructor(internalRenderTask: any);
-    _internalRenderTask: any;
-    /**
-     * Callback for incremental rendering -- a function that will be called
-     * each time the rendering is paused.  To continue rendering call the
-     * function that is the first argument to the callback.
-     * @type {function}
-     */
-    onContinue: Function;
-    /**
-     * Promise for rendering task completion.
-     * @type {Promise<void>}
-     */
-    get promise(): Promise<void>;
-    /**
-     * Cancels the rendering task. If the task is currently rendering it will
-     * not be cancelled until graphics pauses with a timeout. The promise that
-     * this object extends will be rejected when cancelled.
-     */
-    cancel(): void;
-}
+import { MessageHandler } from "../shared/message_handler.js";
 export {};

@@ -1,3 +1,4 @@
+export type IPDFStructTreeLayerFactory = import("./interfaces").IPDFStructTreeLayerFactory;
 export type StructTreeLayerBuilderOptions = {
     pdfPage: any;
 };
