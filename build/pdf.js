@@ -2355,7 +2355,7 @@ class PDFPageProxy {
   }
 
   getJSActions() {
-    return this._jsActionsPromise ||= this._transport.getPageJSActions(this._pageIndex);
+    return this._jsActionsPromise || this._transport.getPageJSActions(this._pageIndex);
   }
 
   async getXfa() {
