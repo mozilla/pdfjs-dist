@@ -41,22 +41,6 @@ export type GetVisibleElementsParameters = {
      */
     rtl: boolean;
 };
-export type WaitOnEventOrTimeoutParameters = {
-    /**
-     * - The event target, can for example be:
-     * `window`, `document`, a DOM element, or an {EventBus} instance.
-     */
-    target: Object;
-    /**
-     * - The name of the event.
-     */
-    name: string;
-    /**
-     * - The delay, in milliseconds, after which the
-     * timeout occurs (if the event wasn't already dispatched).
-     */
-    delay: number;
-};
 /**
  * Promise that is resolved when DOM window becomes visible.
  */
@@ -67,9 +51,9 @@ export const animationStarted: Promise<any>;
  *       necessary Scroll/Spread modes (since SinglePage, TwoPageLeft,
  *       and TwoPageRight all suggests using non-continuous scrolling).
  * @param {string} mode - The API PageLayout value.
- * @returns {number} A value from {SpreadMode}.
+ * @returns {Object}
  */
-export function apiPageLayoutToSpreadMode(layout: any): number;
+export function apiPageLayoutToViewerModes(layout: any): Object;
 /**
  * Converts API PageMode values to the format used by `PDFSidebar`.
  * NOTE: There's also a "FullScreen" parameter which is not possible to support,
@@ -87,11 +71,6 @@ export function apiPageModeToSidebarView(mode: string): number;
  *                   the second one is a denominator.
  */
 export function approximateFraction(x: number): any[];
-/**
- * NOTE: Only used to support various PDF viewer tests in `mozilla-central`.
- */
-export class AutomationEventBus extends EventBus {
-}
 export const AutoPrintRegExp: RegExp;
 /**
  * Helper function for getVisibleElements.
@@ -118,38 +97,6 @@ export function binarySearchFirstItem(items: any, condition: any): number;
 export const DEFAULT_SCALE: 1;
 export const DEFAULT_SCALE_DELTA: 1.1;
 export const DEFAULT_SCALE_VALUE: "auto";
-/**
- * Simple event bus for an application. Listeners are attached using the `on`
- * and `off` methods. To raise an event, the `dispatch` method shall be used.
- */
-export class EventBus {
-    _listeners: any;
-    /**
-     * @param {string} eventName
-     * @param {function} listener
-     * @param {Object} [options]
-     */
-    on(eventName: string, listener: Function, options?: Object | undefined): void;
-    /**
-     * @param {string} eventName
-     * @param {function} listener
-     * @param {Object} [options]
-     */
-    off(eventName: string, listener: Function, options?: Object | undefined): void;
-    /**
-     * @param {string} eventName
-     * @param {Object} data
-     */
-    dispatch(eventName: string, data: Object): void;
-    /**
-     * @ignore
-     */
-    _on(eventName: any, listener: any, options?: null): void;
-    /**
-     * @ignore
-     */
-    _off(eventName: any, listener: any, options?: null): void;
-}
 /**
  * Get the active or focused element in current DOM.
  *
@@ -226,11 +173,6 @@ export const MAX_AUTO_SCALE: 1.25;
 export const MAX_SCALE: 10;
 export const MIN_SCALE: 0.1;
 /**
- * Moves all elements of an array that satisfy condition to the end of the
- * array, preserving the order of the rest.
- */
-export function moveToEndOfArray(arr: any, condition: any): void;
-/**
  * Event handler to suppress context menu.
  */
 export function noContextMenuHandler(evt: any): void;
@@ -273,6 +215,12 @@ export namespace RendererType {
     const CANVAS: string;
     const SVG: string;
 }
+export namespace RenderingStates {
+    const INITIAL: number;
+    const RUNNING: number;
+    const PAUSED: number;
+    const FINISHED: number;
+}
 export function roundToDivide(x: any, div: any): any;
 export const SCROLLBAR_PADDING: 40;
 /**
@@ -291,6 +239,7 @@ export namespace ScrollMode {
     export const VERTICAL: number;
     export const HORIZONTAL: number;
     export const WRAPPED: number;
+    export const PAGE: number;
 }
 export namespace SidebarView {
     const UNKNOWN_2: number;
@@ -316,27 +265,6 @@ export namespace TextLayerMode {
 }
 export const UNKNOWN_SCALE: 0;
 export const VERTICAL_PADDING: 5;
-/**
- * @typedef {Object} WaitOnEventOrTimeoutParameters
- * @property {Object} target - The event target, can for example be:
- *   `window`, `document`, a DOM element, or an {EventBus} instance.
- * @property {string} name - The name of the event.
- * @property {number} delay - The delay, in milliseconds, after which the
- *   timeout occurs (if the event wasn't already dispatched).
- */
-/**
- * Allows waiting for an event or a timeout, whichever occurs first.
- * Can be used to ensure that an action always occurs, even when an event
- * arrives late or not at all.
- *
- * @param {WaitOnEventOrTimeoutParameters}
- * @returns {Promise} A promise that is resolved with a {WaitOnType} value.
- */
-export function waitOnEventOrTimeout({ target, name, delay }: WaitOnEventOrTimeoutParameters): Promise<any>;
-export namespace WaitOnType {
-    const EVENT: string;
-    const TIMEOUT: string;
-}
 /**
  * Helper function to start monitoring the scroll event and converting them into
  * PDF.js friendly one: with scroll debounce and scroll direction.

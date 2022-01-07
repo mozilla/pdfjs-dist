@@ -1,9 +1,10 @@
+export type EventBus = import("./event_utils").EventBus;
 export type IPDFLinkService = import("./interfaces").IPDFLinkService;
 export type PDFLinkServiceOptions = {
     /**
      * - The application event bus.
      */
-    eventBus: any;
+    eventBus: EventBus;
     /**
      * - Specifies the `target` attribute
      * for external links. Must use one of the values from {LinkTarget}.
@@ -44,7 +45,7 @@ export class PDFLinkService implements IPDFLinkService {
      * @param {PDFLinkServiceOptions} options
      */
     constructor({ eventBus, externalLinkTarget, externalLinkRel, ignoreDestinationZoom, }?: PDFLinkServiceOptions);
-    eventBus: any;
+    eventBus: import("./event_utils").EventBus;
     externalLinkTarget: number;
     externalLinkRel: string;
     externalLinkEnabled: boolean;

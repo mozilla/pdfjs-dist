@@ -1,8 +1,9 @@
+export type EventBus = import("./event_utils").EventBus;
 export type PDFScriptingManagerOptions = {
     /**
      * - The application event bus.
      */
-    eventBus: any;
+    eventBus: EventBus;
     /**
      * - The path and filename of the scripting
      * bundle.
@@ -43,7 +44,7 @@ export class PDFScriptingManager {
     _scripting: any;
     _mouseState: any;
     _ready: boolean;
-    _eventBus: any;
+    _eventBus: import("./event_utils").EventBus;
     _sandboxBundleSrc: string;
     _scriptingFactory: Object;
     _docPropertiesLookup: Function;

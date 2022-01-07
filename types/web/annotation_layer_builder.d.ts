@@ -1,7 +1,11 @@
-export type IPDFAnnotationLayerFactory = import("./interfaces").IPDFAnnotationLayerFactory;
+export type PDFPageProxy = import("../src/display/api").PDFPageProxy;
+export type PageViewport = import("../src/display/display_utils").PageViewport;
+export type IDownloadManager = import("./interfaces").IDownloadManager;
+export type IL10n = import("./interfaces").IL10n;
+export type IPDFLinkService = import("./interfaces").IPDFLinkService;
 export type AnnotationLayerBuilderOptions = {
     pageDiv: HTMLDivElement;
-    pdfPage: any;
+    pdfPage: PDFPageProxy;
     annotationStorage?: any;
     /**
      * - Path for image resources, mainly
@@ -9,48 +13,50 @@ export type AnnotationLayerBuilderOptions = {
      */
     imageResourcesPath?: string | undefined;
     renderForms: boolean;
-    linkService: any;
-    downloadManager: any;
+    linkService: IPDFLinkService;
+    downloadManager: IDownloadManager;
     /**
      * - Localization service.
      */
-    l10n: any;
+    l10n: IL10n;
     enableScripting?: boolean | undefined;
     hasJSActionsPromise?: Promise<boolean> | undefined;
     fieldObjectsPromise?: Promise<{
         [x: string]: Object[];
     } | null> | undefined;
     mouseState?: Object | undefined;
+    annotationCanvasMap?: Map<string, HTMLCanvasElement> | undefined;
 };
 /**
  * @typedef {Object} AnnotationLayerBuilderOptions
  * @property {HTMLDivElement} pageDiv
- * @property {PDFPage} pdfPage
+ * @property {PDFPageProxy} pdfPage
  * @property {AnnotationStorage} [annotationStorage]
  * @property {string} [imageResourcesPath] - Path for image resources, mainly
  *   for annotation icons. Include trailing slash.
  * @property {boolean} renderForms
  * @property {IPDFLinkService} linkService
- * @property {DownloadManager} downloadManager
+ * @property {IDownloadManager} downloadManager
  * @property {IL10n} l10n - Localization service.
  * @property {boolean} [enableScripting]
  * @property {Promise<boolean>} [hasJSActionsPromise]
  * @property {Promise<Object<string, Array<Object>> | null>}
  *   [fieldObjectsPromise]
  * @property {Object} [mouseState]
+ * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap]
  */
 export class AnnotationLayerBuilder {
     /**
      * @param {AnnotationLayerBuilderOptions} options
      */
-    constructor({ pageDiv, pdfPage, linkService, downloadManager, annotationStorage, imageResourcesPath, renderForms, l10n, enableScripting, hasJSActionsPromise, fieldObjectsPromise, mouseState, }: AnnotationLayerBuilderOptions);
+    constructor({ pageDiv, pdfPage, linkService, downloadManager, annotationStorage, imageResourcesPath, renderForms, l10n, enableScripting, hasJSActionsPromise, fieldObjectsPromise, mouseState, annotationCanvasMap, }: AnnotationLayerBuilderOptions);
     pageDiv: HTMLDivElement;
-    pdfPage: any;
-    linkService: any;
-    downloadManager: any;
+    pdfPage: import("../src/display/api").PDFPageProxy;
+    linkService: import("./interfaces").IPDFLinkService;
+    downloadManager: import("./interfaces").IDownloadManager;
     imageResourcesPath: string;
     renderForms: boolean;
-    l10n: any;
+    l10n: import("./interfaces").IL10n;
     annotationStorage: any;
     enableScripting: boolean;
     _hasJSActionsPromise: Promise<boolean>;
@@ -58,6 +64,7 @@ export class AnnotationLayerBuilder {
         [x: string]: Object[];
     } | null>;
     _mouseState: Object;
+    _annotationCanvasMap: Map<string, HTMLCanvasElement>;
     div: HTMLDivElement | null;
     _cancelled: boolean;
     /**
@@ -66,30 +73,7 @@ export class AnnotationLayerBuilder {
      * @returns {Promise<void>} A promise that is resolved when rendering of the
      *   annotations is complete.
      */
-    render(viewport: any, intent?: string): Promise<void>;
+    render(viewport: PageViewport, intent?: string): Promise<void>;
     cancel(): void;
     hide(): void;
-}
-/**
- * @implements IPDFAnnotationLayerFactory
- */
-export class DefaultAnnotationLayerFactory implements IPDFAnnotationLayerFactory {
-    /**
-     * @param {HTMLDivElement} pageDiv
-     * @param {PDFPage} pdfPage
-     * @param {AnnotationStorage} [annotationStorage]
-     * @param {string} [imageResourcesPath] - Path for image resources, mainly
-     *   for annotation icons. Include trailing slash.
-     * @param {boolean} renderForms
-     * @param {IL10n} l10n
-     * @param {boolean} [enableScripting]
-     * @param {Promise<boolean>} [hasJSActionsPromise]
-     * @param {Object} [mouseState]
-     * @param {Promise<Object<string, Array<Object>> | null>}
-     *   [fieldObjectsPromise]
-     * @returns {AnnotationLayerBuilder}
-     */
-    createAnnotationLayerBuilder(pageDiv: HTMLDivElement, pdfPage: any, annotationStorage?: any, imageResourcesPath?: string | undefined, renderForms?: boolean, l10n?: any, enableScripting?: boolean | undefined, hasJSActionsPromise?: Promise<boolean> | undefined, mouseState?: Object | undefined, fieldObjectsPromise?: Promise<{
-        [x: string]: Object[];
-    } | null> | undefined): AnnotationLayerBuilder;
 }

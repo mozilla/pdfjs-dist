@@ -1,27 +1,17 @@
-export type IPDFStructTreeLayerFactory = import("./interfaces").IPDFStructTreeLayerFactory;
+export type PDFPageProxy = import("../src/display/api").PDFPageProxy;
 export type StructTreeLayerBuilderOptions = {
-    pdfPage: any;
+    pdfPage: PDFPageProxy;
 };
 /**
- * @implements IPDFStructTreeLayerFactory
- */
-export class DefaultStructTreeLayerFactory implements IPDFStructTreeLayerFactory {
-    /**
-     * @param {PDFPage} pdfPage
-     * @returns {StructTreeLayerBuilder}
-     */
-    createStructTreeLayerBuilder(pdfPage: any): StructTreeLayerBuilder;
-}
-/**
  * @typedef {Object} StructTreeLayerBuilderOptions
- * @property {PDFPage} pdfPage
+ * @property {PDFPageProxy} pdfPage
  */
 export class StructTreeLayerBuilder {
     /**
      * @param {StructTreeLayerBuilderOptions} options
      */
     constructor({ pdfPage }: StructTreeLayerBuilderOptions);
-    pdfPage: any;
+    pdfPage: import("../src/display/api").PDFPageProxy;
     render(structTree: any): HTMLSpanElement | null;
     _setAttributes(structElement: any, htmlElement: any): void;
     _walk(node: any): HTMLSpanElement | null;

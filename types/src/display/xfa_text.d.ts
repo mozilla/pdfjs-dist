@@ -8,7 +8,7 @@ export class XfaText {
      *
      * @returns {TextContent}
      */
-    static textContent(xfa: Object): any;
+    static textContent(xfa: Object): TextContent;
     /**
      * @param {string} name - DOM node name. (lower case)
      *

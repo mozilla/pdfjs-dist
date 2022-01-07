@@ -1,11 +1,14 @@
+export type IRenderableView = import("./interfaces").IRenderableView;
+export type PDFViewer = import("./pdf_viewer").PDFViewer;
+export type PDFThumbnailViewer = import("./pdf_thumbnail_viewer").PDFThumbnailViewer;
 /**
  * Controls rendering of the views for pages and thumbnails.
  */
 export class PDFRenderingQueue {
-    pdfViewer: any;
-    pdfThumbnailViewer: any;
+    pdfViewer: import("./pdf_viewer").PDFViewer | null;
+    pdfThumbnailViewer: import("./pdf_thumbnail_viewer").PDFThumbnailViewer | null;
     onIdle: any;
-    highestPriorityPage: any;
+    highestPriorityPage: string | null;
     /** @type {number} */
     idleTimeout: number;
     printing: boolean;
@@ -13,16 +16,16 @@ export class PDFRenderingQueue {
     /**
      * @param {PDFViewer} pdfViewer
      */
-    setViewer(pdfViewer: any): void;
+    setViewer(pdfViewer: PDFViewer): void;
     /**
      * @param {PDFThumbnailViewer} pdfThumbnailViewer
      */
-    setThumbnailViewer(pdfThumbnailViewer: any): void;
+    setThumbnailViewer(pdfThumbnailViewer: PDFThumbnailViewer): void;
     /**
      * @param {IRenderableView} view
      * @returns {boolean}
      */
-    isHighestPriority(view: any): boolean;
+    isHighestPriority(view: IRenderableView): boolean;
     /**
      * @returns {boolean}
      */
@@ -42,7 +45,7 @@ export class PDFRenderingQueue {
      * @param {IRenderableView} view
      * @returns {boolean}
      */
-    isViewFinished(view: any): boolean;
+    isViewFinished(view: IRenderableView): boolean;
     /**
      * Render a page or thumbnail view. This calls the appropriate function
      * based on the views state. If the view is already rendered it will return
@@ -50,11 +53,5 @@ export class PDFRenderingQueue {
      *
      * @param {IRenderableView} view
      */
-    renderView(view: any): boolean;
-}
-export namespace RenderingStates {
-    const INITIAL: number;
-    const RUNNING: number;
-    const PAUSED: number;
-    const FINISHED: number;
+    renderView(view: IRenderableView): boolean;
 }

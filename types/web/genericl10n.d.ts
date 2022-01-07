@@ -1,4 +1,8 @@
-export class GenericL10n {
+export type IL10n = import("./interfaces").IL10n;
+/**
+ * @implements {IL10n}
+ */
+export class GenericL10n implements IL10n {
     constructor(lang: any);
     _lang: any;
     _ready: Promise<any>;

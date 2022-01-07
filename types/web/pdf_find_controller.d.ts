@@ -1,12 +1,15 @@
+export type PDFDocumentProxy = import("../src/display/api").PDFDocumentProxy;
+export type EventBus = import("./event_utils").EventBus;
+export type IPDFLinkService = import("./interfaces").IPDFLinkService;
 export type PDFFindControllerOptions = {
     /**
      * - The navigation/linking service.
      */
-    linkService: any;
+    linkService: IPDFLinkService;
     /**
      * - The application event bus.
      */
-    eventBus: any;
+    eventBus: EventBus;
 };
 export namespace FindState {
     const FOUND: number;
@@ -27,8 +30,9 @@ export class PDFFindController {
      * @param {PDFFindControllerOptions} options
      */
     constructor({ linkService, eventBus }: PDFFindControllerOptions);
-    _linkService: any;
-    _eventBus: any;
+    _linkService: import("./interfaces").IPDFLinkService;
+    _eventBus: import("./event_utils").EventBus;
+    executeCommand: ((cmd: any, state: any) => void) | undefined;
     get highlightMatches(): boolean | undefined;
     get pageMatches(): any[] | undefined;
     get pageMatchesLength(): any[] | undefined;
@@ -43,9 +47,12 @@ export class PDFFindController {
      *
      * @param {PDFDocumentProxy} pdfDocument - The PDF document to search.
      */
-    setDocument(pdfDocument: any): void;
-    _pdfDocument: any;
-    executeCommand(cmd: any, state: any): void;
+    setDocument(pdfDocument: PDFDocumentProxy): void;
+    _pdfDocument: import("../src/display/api").PDFDocumentProxy | null | undefined;
+    /**
+     * @private
+     */
+    private _onFind;
     _dirtyMatch: boolean | undefined;
     _state: any;
     _findTimeout: any;
@@ -73,7 +80,7 @@ export class PDFFindController {
     _pageContents: any[] | undefined;
     _pageDiffs: any[] | undefined;
     _matchesCountTotal: number | undefined;
-    _pagesToSearch: any;
+    _pagesToSearch: number | null | undefined;
     _pendingFindMatches: Set<any> | undefined;
     _resumePageIdx: any;
     _firstPageCapability: any;
@@ -82,7 +89,7 @@ export class PDFFindController {
      */
     get _query(): string;
     _rawQuery: any;
-    _shouldDirtyMatch(cmd: any, state: any): boolean;
+    _shouldDirtyMatch(state: any): boolean;
     /**
      * Helper for multi-term search that fills the `matchesWithLength` array
      * and handles cases where one search term includes another search term (for
@@ -112,5 +119,5 @@ export class PDFFindController {
         total: number | undefined;
     };
     _updateUIResultsCount(): void;
-    _updateUIState(state: any, previous: any): void;
+    _updateUIState(state: any, previous?: boolean): void;
 }

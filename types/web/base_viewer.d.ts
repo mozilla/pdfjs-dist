@@ -1,3 +1,14 @@
+export type PDFDocumentProxy = import("../src/display/api").PDFDocumentProxy;
+export type PDFPageProxy = import("../src/display/api").PDFPageProxy;
+export type PageViewport = import("../src/display/display_utils").PageViewport;
+export type EventBus = import("./event_utils").EventBus;
+export type IDownloadManager = import("./interfaces").IDownloadManager;
+export type IL10n = import("./interfaces").IL10n;
+export type IPDFAnnotationLayerFactory = import("./interfaces").IPDFAnnotationLayerFactory;
+export type IPDFLinkService = import("./interfaces").IPDFLinkService;
+export type IPDFStructTreeLayerFactory = import("./interfaces").IPDFStructTreeLayerFactory;
+export type IPDFTextLayerFactory = import("./interfaces").IPDFTextLayerFactory;
+export type IPDFXfaLayerFactory = import("./interfaces").IPDFXfaLayerFactory;
 export type PDFViewerOptions = {
     /**
      * - The container for the viewer element.
@@ -10,16 +21,16 @@ export type PDFViewerOptions = {
     /**
      * - The application event bus.
      */
-    eventBus: any;
+    eventBus: EventBus;
     /**
      * - The navigation/linking service.
      */
-    linkService: any;
+    linkService: IPDFLinkService;
     /**
      * - The download manager
      * component.
      */
-    downloadManager?: any;
+    downloadManager?: import("./interfaces").IDownloadManager | undefined;
     /**
      * - The find controller
      * component.
@@ -82,32 +93,41 @@ export type PDFViewerOptions = {
     /**
      * - Localization service.
      */
-    l10n: any;
+    l10n: IL10n;
+    /**
+     * - Enables PDF document permissions,
+     * when they exist. The default value is `false`.
+     */
+    enablePermissions?: boolean | undefined;
 };
 /**
  * Simple viewer control to display PDF content/pages.
+ *
+ * @implements {IPDFAnnotationLayerFactory}
+ * @implements {IPDFStructTreeLayerFactory}
+ * @implements {IPDFTextLayerFactory}
+ * @implements {IPDFXfaLayerFactory}
  */
-export class BaseViewer {
+export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFStructTreeLayerFactory, IPDFTextLayerFactory, IPDFXfaLayerFactory {
     /**
      * @param {PDFViewerOptions} options
      */
     constructor(options: PDFViewerOptions);
     container: HTMLDivElement;
     viewer: Element | null;
-    eventBus: any;
-    linkService: any;
-    downloadManager: any;
+    eventBus: import("./event_utils").EventBus;
+    linkService: import("./interfaces").IPDFLinkService;
+    downloadManager: import("./interfaces").IDownloadManager | null;
     findController: any;
     _scriptingManager: any;
     removePageBorders: boolean;
     textLayerMode: number;
-    _annotationMode: any;
     imageResourcesPath: string;
     enablePrintAutoRotate: boolean;
     renderer: string;
     useOnlyCssZoom: boolean;
     maxCanvasPixels: number | undefined;
-    l10n: any;
+    l10n: import("./interfaces").IL10n;
     defaultRenderingQueue: boolean;
     renderingQueue: PDFRenderingQueue | undefined;
     _doc: HTMLElement;
@@ -187,19 +207,12 @@ export class BaseViewer {
     get onePageRendered(): any;
     get pagesPromise(): any;
     /**
-     * @private
+     * @param {PDFDocumentProxy} pdfDocument
      */
-    private get _viewerElement();
-    /**
-     * @private
-     */
-    private _onePageRenderedOrForceFetch;
-    /**
-     * @param pdfDocument {PDFDocument}
-     */
-    setDocument(pdfDocument: any): void;
-    pdfDocument: any;
-    _optionalContentConfigPromise: any;
+    setDocument(pdfDocument: PDFDocumentProxy): void;
+    pdfDocument: import("../src/display/api").PDFDocumentProxy | undefined;
+    _scrollMode: any;
+    _optionalContentConfigPromise: Promise<any> | null | undefined;
     /**
      * @param {Array|null} labels
      */
@@ -209,7 +222,6 @@ export class BaseViewer {
     _pages: any[] | undefined;
     _currentScale: any;
     _currentScaleValue: any;
-    _buffer: PDFPageViewBuffer | undefined;
     _location: {
         pageNumber: any;
         scale: any;
@@ -218,11 +230,10 @@ export class BaseViewer {
         rotation: any;
         pdfOpenParams: string;
     } | null | undefined;
-    _pagesRequests: WeakMap<object, any> | undefined;
     _firstPageCapability: any;
     _onePageRenderedCapability: any;
     _pagesCapability: any;
-    _scrollMode: any;
+    _previousScrollMode: any;
     _spreadMode: any;
     _scrollUpdate(): void;
     _scrollIntoView({ pageDiv, pageSpot, pageNumber }: {
@@ -283,11 +294,9 @@ export class BaseViewer {
         ignoreDestinationZoom?: boolean | undefined;
     }): void;
     _updateLocation(firstPage: any): void;
-    _updateHelper(visiblePages: any): void;
     update(): void;
     containsElement(element: any): boolean;
     focus(): void;
-    get _isScrollModeHorizontal(): boolean;
     get _isContainerRtl(): boolean;
     get isInPresentationMode(): boolean;
     get isChangingPresentationMode(): boolean;
@@ -295,14 +304,14 @@ export class BaseViewer {
     get isVerticalScrollbarEnabled(): boolean;
     /**
      * Helper method for `this._getVisiblePages`. Should only ever be used when
-     * the viewer can only display a single page at a time, for example in:
-     *  - `PDFSinglePageViewer`.
-     *  - `PDFViewer` with Presentation Mode active.
+     * the viewer can only display a single page at a time, for example:
+     *  - When PresentationMode is active.
      */
     _getCurrentVisiblePage(): {
         views: never[];
         first?: undefined;
         last?: undefined;
+        ids?: undefined;
     } | {
         first: {
             id: any;
@@ -322,6 +331,7 @@ export class BaseViewer {
             y: any;
             view: any;
         }[];
+        ids: Set<any>;
     };
     _getVisiblePages(): Object;
     /**
@@ -331,18 +341,12 @@ export class BaseViewer {
     /**
      * @param {number} pageNumber
      */
-    isPageCached(pageNumber: number): boolean;
+    isPageCached(pageNumber: number): any;
     cleanup(): void;
     /**
      * @private
      */
     private _cancelRendering;
-    /**
-     * @param {PDFPageView} pageView
-     * @returns {Promise} Returns a promise containing a {PDFPageProxy} object.
-     * @private
-     */
-    private _ensurePdfPageLoaded;
     forceRendering(currentlyVisiblePages: any): boolean;
     /**
      * @param {HTMLDivElement} textLayerDiv
@@ -353,16 +357,16 @@ export class BaseViewer {
      * @param {TextHighlighter} highlighter
      * @returns {TextLayerBuilder}
      */
-    createTextLayerBuilder(textLayerDiv: HTMLDivElement, pageIndex: number, viewport: any, enhanceTextSelection: boolean | undefined, eventBus: any, highlighter: TextHighlighter): TextLayerBuilder;
+    createTextLayerBuilder(textLayerDiv: HTMLDivElement, pageIndex: number, viewport: PageViewport, enhanceTextSelection: boolean | undefined, eventBus: EventBus, highlighter: TextHighlighter): TextLayerBuilder;
     /**
      * @param {number} pageIndex
      * @param {EventBus} eventBus
      * @returns {TextHighlighter}
      */
-    createTextHighlighter(pageIndex: number, eventBus: any): TextHighlighter;
+    createTextHighlighter(pageIndex: number, eventBus: EventBus): TextHighlighter;
     /**
      * @param {HTMLDivElement} pageDiv
-     * @param {PDFPage} pdfPage
+     * @param {PDFPageProxy} pdfPage
      * @param {AnnotationStorage} [annotationStorage] - Storage for annotation
      *   data in forms.
      * @param {string} [imageResourcesPath] - Path for image resources, mainly
@@ -374,24 +378,25 @@ export class BaseViewer {
      * @param {Object} [mouseState]
      * @param {Promise<Object<string, Array<Object>> | null>}
      *   [fieldObjectsPromise]
+     * @param {Map<string, HTMLCanvasElement>} [annotationCanvasMap]
      * @returns {AnnotationLayerBuilder}
      */
-    createAnnotationLayerBuilder(pageDiv: HTMLDivElement, pdfPage: any, annotationStorage?: any, imageResourcesPath?: string | undefined, renderForms?: boolean, l10n?: any, enableScripting?: boolean | undefined, hasJSActionsPromise?: Promise<boolean> | undefined, mouseState?: Object | undefined, fieldObjectsPromise?: Promise<{
+    createAnnotationLayerBuilder(pageDiv: HTMLDivElement, pdfPage: PDFPageProxy, annotationStorage?: any, imageResourcesPath?: string | undefined, renderForms?: boolean, l10n?: IL10n, enableScripting?: boolean | undefined, hasJSActionsPromise?: Promise<boolean> | undefined, mouseState?: Object | undefined, fieldObjectsPromise?: Promise<{
         [x: string]: Object[];
-    } | null> | undefined): AnnotationLayerBuilder;
+    } | null> | undefined, annotationCanvasMap?: Map<string, HTMLCanvasElement> | undefined): AnnotationLayerBuilder;
     /**
      * @param {HTMLDivElement} pageDiv
-     * @param {PDFPage} pdfPage
+     * @param {PDFPageProxy} pdfPage
      * @param {AnnotationStorage} [annotationStorage] - Storage for annotation
      *   data in forms.
      * @returns {XfaLayerBuilder}
      */
-    createXfaLayerBuilder(pageDiv: HTMLDivElement, pdfPage: any, annotationStorage?: any): XfaLayerBuilder;
+    createXfaLayerBuilder(pageDiv: HTMLDivElement, pdfPage: PDFPageProxy, annotationStorage?: any): XfaLayerBuilder;
     /**
-     * @param {PDFPage} pdfPage
+     * @param {PDFPageProxy} pdfPage
      * @returns {StructTreeLayerBuilder}
      */
-    createStructTreeLayerBuilder(pdfPage: any): StructTreeLayerBuilder;
+    createStructTreeLayerBuilder(pdfPage: PDFPageProxy): StructTreeLayerBuilder;
     /**
      * @type {boolean} Whether all pages of the PDF document have identical
      *   widths and heights.
@@ -457,15 +462,20 @@ export class BaseViewer {
      * @param {number} [steps] - Defaults to zooming once.
      */
     decreaseScale(steps?: number | undefined): void;
+    #private;
 }
-import { PDFRenderingQueue } from "./pdf_rendering_queue.js";
+export namespace PagesCountLimit {
+    const FORCE_SCROLL_MODE_PAGE: number;
+    const FORCE_LAZY_PAGE_INIT: number;
+    const PAUSE_EAGER_PAGE_INIT: number;
+}
 /**
  * @typedef {Object} PDFViewerOptions
  * @property {HTMLDivElement} container - The container for the viewer element.
  * @property {HTMLDivElement} [viewer] - The viewer element.
  * @property {EventBus} eventBus - The application event bus.
  * @property {IPDFLinkService} linkService - The navigation/linking service.
- * @property {DownloadManager} [downloadManager] - The download manager
+ * @property {IDownloadManager} [downloadManager] - The download manager
  *   component.
  * @property {PDFFindController} [findController] - The find controller
  *   component.
@@ -494,60 +504,27 @@ import { PDFRenderingQueue } from "./pdf_rendering_queue.js";
  *   total pixels, i.e. width * height. Use -1 for no limit. The default value
  *   is 4096 * 4096 (16 mega-pixels).
  * @property {IL10n} l10n - Localization service.
+ * @property {boolean} [enablePermissions] - Enables PDF document permissions,
+ *   when they exist. The default value is `false`.
  */
-declare function PDFPageViewBuffer(size: any): void;
-declare class PDFPageViewBuffer {
-    /**
-     * @typedef {Object} PDFViewerOptions
-     * @property {HTMLDivElement} container - The container for the viewer element.
-     * @property {HTMLDivElement} [viewer] - The viewer element.
-     * @property {EventBus} eventBus - The application event bus.
-     * @property {IPDFLinkService} linkService - The navigation/linking service.
-     * @property {DownloadManager} [downloadManager] - The download manager
-     *   component.
-     * @property {PDFFindController} [findController] - The find controller
-     *   component.
-     * @property {PDFScriptingManager} [scriptingManager] - The scripting manager
-     *   component.
-     * @property {PDFRenderingQueue} [renderingQueue] - The rendering queue object.
-     * @property {boolean} [removePageBorders] - Removes the border shadow around
-     *   the pages. The default value is `false`.
-     * @property {number} [textLayerMode] - Controls if the text layer used for
-     *   selection and searching is created, and if the improved text selection
-     *   behaviour is enabled. The constants from {TextLayerMode} should be used.
-     *   The default value is `TextLayerMode.ENABLE`.
-     * @property {number} [annotationMode] - Controls if the annotation layer is
-     *   created, and if interactive form elements or `AnnotationStorage`-data are
-     *   being rendered. The constants from {@link AnnotationMode} should be used;
-     *   see also {@link RenderParameters} and {@link GetOperatorListParameters}.
-     *   The default value is `AnnotationMode.ENABLE_FORMS`.
-     * @property {string} [imageResourcesPath] - Path for image resources, mainly
-     *   mainly for annotation icons. Include trailing slash.
-     * @property {boolean} [enablePrintAutoRotate] - Enables automatic rotation of
-     *   landscape pages upon printing. The default is `false`.
-     * @property {string} renderer - 'canvas' or 'svg'. The default is 'canvas'.
-     * @property {boolean} [useOnlyCssZoom] - Enables CSS only zooming. The default
-     *   value is `false`.
-     * @property {number} [maxCanvasPixels] - The maximum supported canvas size in
-     *   total pixels, i.e. width * height. Use -1 for no limit. The default value
-     *   is 4096 * 4096 (16 mega-pixels).
-     * @property {IL10n} l10n - Localization service.
-     */
+export class PDFPageViewBuffer {
     constructor(size: any);
-    push: (view: any) => void;
+    push(view: any): void;
     /**
-     * After calling resize, the size of the buffer will be newSize. The optional
-     * parameter pagesToKeep is, if present, an array of pages to push to the back
-     * of the buffer, delaying their destruction. The size of pagesToKeep has no
-     * impact on the final size of the buffer; if pagesToKeep has length larger
-     * than newSize, some of those pages will be destroyed anyway.
+     * After calling resize, the size of the buffer will be `newSize`.
+     * The optional parameter `idsToKeep` is, if present, a Set of page-ids to
+     * push to the back of the buffer, delaying their destruction. The size of
+     * `idsToKeep` has no impact on the final size of the buffer; if `idsToKeep`
+     * is larger than `newSize`, some of those pages will be destroyed anyway.
      */
-    resize: (newSize: any, pagesToKeep: any) => void;
-    has: (view: any) => boolean;
+    resize(newSize: any, idsToKeep?: null): void;
+    has(view: any): boolean;
+    [Symbol.iterator](): IterableIterator<any>;
+    #private;
 }
+import { PDFRenderingQueue } from "./pdf_rendering_queue.js";
 import { TextHighlighter } from "./text_highlighter.js";
 import { TextLayerBuilder } from "./text_layer_builder.js";
 import { AnnotationLayerBuilder } from "./annotation_layer_builder.js";
 import { XfaLayerBuilder } from "./xfa_layer_builder.js";
 import { StructTreeLayerBuilder } from "./struct_tree_layer_builder.js";
-export {};

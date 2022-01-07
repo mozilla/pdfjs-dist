@@ -1,4 +1,6 @@
-export type IPDFTextLayerFactory = import("./interfaces").IPDFTextLayerFactory;
+export type PageViewport = import("../src/display/display_utils").PageViewport;
+export type EventBus = import("./event_utils").EventBus;
+export type TextHighlighter = import("./text_highlighter").TextHighlighter;
 export type TextLayerBuilderOptions = {
     /**
      * - The text layer container.
@@ -7,7 +9,7 @@ export type TextLayerBuilderOptions = {
     /**
      * - The application event bus.
      */
-    eventBus: any;
+    eventBus: EventBus;
     /**
      * - The page index.
      */
@@ -15,33 +17,18 @@ export type TextLayerBuilderOptions = {
     /**
      * - The viewport of the text layer.
      */
-    viewport: any;
+    viewport: PageViewport;
     /**
      * - Optional object that will handle
      * highlighting text from the find controller.
      */
-    highlighter: any;
+    highlighter: TextHighlighter;
     /**
      * - Option to turn on improved
      * text selection.
      */
     enhanceTextSelection: boolean;
 };
-/**
- * @implements IPDFTextLayerFactory
- */
-export class DefaultTextLayerFactory implements IPDFTextLayerFactory {
-    /**
-     * @param {HTMLDivElement} textLayerDiv
-     * @param {number} pageIndex
-     * @param {PageViewport} viewport
-     * @param {boolean} enhanceTextSelection
-     * @param {EventBus} eventBus
-     * @param {TextHighlighter} highlighter
-     * @returns {TextLayerBuilder}
-     */
-    createTextLayerBuilder(textLayerDiv: HTMLDivElement, pageIndex: number, viewport: any, enhanceTextSelection: boolean | undefined, eventBus: any, highlighter: any): TextLayerBuilder;
-}
 /**
  * @typedef {Object} TextLayerBuilderOptions
  * @property {HTMLDivElement} textLayerDiv - The text layer container.

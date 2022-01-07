@@ -1,4 +1,8 @@
-export class DownloadManager {
+export type IDownloadManager = import("./interfaces").IDownloadManager;
+/**
+ * @implements {IDownloadManager}
+ */
+export class DownloadManager implements IDownloadManager {
     _openBlobUrls: WeakMap<object, any>;
     downloadUrl(url: any, filename: any): void;
     downloadData(data: any, filename: any, contentType: any): void;

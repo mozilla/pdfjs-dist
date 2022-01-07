@@ -1,3 +1,42 @@
+export type PDFPageProxy = import("../src/display/api").PDFPageProxy;
+export type PageViewport = import("../src/display/display_utils").PageViewport;
+export type AnnotationLayerBuilder = import("./annotation_layer_builder").AnnotationLayerBuilder;
+export type EventBus = import("./event_utils").EventBus;
+export type StructTreeLayerBuilder = any;
+export type TextHighlighter = import("./text_highlighter").TextHighlighter;
+export type TextLayerBuilder = import("./text_layer_builder").TextLayerBuilder;
+export type RenderingStates = any;
+export type XfaLayerBuilder = import("./xfa_layer_builder").XfaLayerBuilder;
+/**
+ * @interface
+ */
+export class IDownloadManager {
+    /**
+     * @param {string} url
+     * @param {string} filename
+     */
+    downloadUrl(url: string, filename: string): void;
+    /**
+     * @param {Uint8Array} data
+     * @param {string} filename
+     * @param {string} [contentType]
+     */
+    downloadData(data: Uint8Array, filename: string, contentType?: string | undefined): void;
+    /**
+     * @param {HTMLElement} element
+     * @param {Uint8Array} data
+     * @param {string} filename
+     * @returns {boolean} Indicating if the data was opened.
+     */
+    openOrDownloadData(element: HTMLElement, data: Uint8Array, filename: string): boolean;
+    /**
+     * @param {Blob} blob
+     * @param {string} url
+     * @param {string} filename
+     * @param {string} [sourceEventType]
+     */
+    download(blob: Blob, url: string, filename: string, sourceEventType?: string | undefined): void;
+}
 /**
  * @interface
  */
@@ -15,11 +54,11 @@ export class IL10n {
      * property bag. If the key was not found, translation falls back to the
      * fallback text.
      * @param {string} key
-     * @param {object} args
-     * @param {string} fallback
+     * @param {Object | null} [args]
+     * @param {string} [fallback]
      * @returns {Promise<string>}
      */
-    get(key: string, args: object, fallback: string): Promise<string>;
+    get(key: string, args?: Object | null | undefined, fallback?: string | undefined): Promise<string>;
     /**
      * Translates HTML element.
      * @param {HTMLElement} element
@@ -33,7 +72,7 @@ export class IL10n {
 export class IPDFAnnotationLayerFactory {
     /**
      * @param {HTMLDivElement} pageDiv
-     * @param {PDFPage} pdfPage
+     * @param {PDFPageProxy} pdfPage
      * @param {AnnotationStorage} [annotationStorage] - Storage for annotation
      *   data in forms.
      * @param {string} [imageResourcesPath] - Path for image resources, mainly
@@ -45,12 +84,23 @@ export class IPDFAnnotationLayerFactory {
      * @param {Object} [mouseState]
      * @param {Promise<Object<string, Array<Object>> | null>}
      *   [fieldObjectsPromise]
+     * @param {Map<string, HTMLCanvasElement>} [annotationCanvasMap] - Map some
+     *   annotation ids with canvases used to render them.
      * @returns {AnnotationLayerBuilder}
      */
-    createAnnotationLayerBuilder(pageDiv: HTMLDivElement, pdfPage: any, annotationStorage?: any, imageResourcesPath?: string | undefined, renderForms?: boolean, l10n?: IL10n, enableScripting?: boolean | undefined, hasJSActionsPromise?: Promise<boolean> | undefined, mouseState?: Object | undefined, fieldObjectsPromise?: Promise<{
+    createAnnotationLayerBuilder(pageDiv: HTMLDivElement, pdfPage: PDFPageProxy, annotationStorage?: any, imageResourcesPath?: string | undefined, renderForms?: boolean, l10n?: IL10n, enableScripting?: boolean | undefined, hasJSActionsPromise?: Promise<boolean> | undefined, mouseState?: Object | undefined, fieldObjectsPromise?: Promise<{
         [x: string]: Object[];
-    } | null> | undefined): any;
+    } | null> | undefined, annotationCanvasMap?: Map<string, HTMLCanvasElement> | undefined): AnnotationLayerBuilder;
 }
+/** @typedef {import("../src/display/api").PDFPageProxy} PDFPageProxy */
+/** @typedef {import("../src/display/display_utils").PageViewport} PageViewport */
+/** @typedef {import("./annotation_layer_builder").AnnotationLayerBuilder} AnnotationLayerBuilder */
+/** @typedef {import("./event_utils").EventBus} EventBus */
+/** @typedef {import("./struct_tree_builder").StructTreeLayerBuilder} StructTreeLayerBuilder */
+/** @typedef {import("./text_highlighter").TextHighlighter} TextHighlighter */
+/** @typedef {import("./text_layer_builder").TextLayerBuilder} TextLayerBuilder */
+/** @typedef {import("./ui_utils").RenderingStates} RenderingStates */
+/** @typedef {import("./xfa_layer_builder").XfaLayerBuilder} XfaLayerBuilder */
 /**
  * @interface
  */
@@ -134,10 +184,10 @@ export class IPDFLinkService {
  */
 export class IPDFStructTreeLayerFactory {
     /**
-     * @param {PDFPage} pdfPage
+     * @param {PDFPageProxy} pdfPage
      * @returns {StructTreeLayerBuilder}
      */
-    createStructTreeLayerBuilder(pdfPage: any): any;
+    createStructTreeLayerBuilder(pdfPage: PDFPageProxy): any;
 }
 /**
  * @interface
@@ -152,7 +202,7 @@ export class IPDFTextLayerFactory {
      * @param {TextHighlighter} highlighter
      * @returns {TextLayerBuilder}
      */
-    createTextLayerBuilder(textLayerDiv: HTMLDivElement, pageIndex: number, viewport: any, enhanceTextSelection: boolean | undefined, eventBus: any, highlighter: any): any;
+    createTextLayerBuilder(textLayerDiv: HTMLDivElement, pageIndex: number, viewport: PageViewport, enhanceTextSelection: boolean | undefined, eventBus: EventBus, highlighter: TextHighlighter): TextLayerBuilder;
 }
 /**
  * @interface
@@ -160,12 +210,12 @@ export class IPDFTextLayerFactory {
 export class IPDFXfaLayerFactory {
     /**
      * @param {HTMLDivElement} pageDiv
-     * @param {PDFPage} pdfPage
+     * @param {PDFPageProxy} pdfPage
      * @param {AnnotationStorage} [annotationStorage]
      * @param {Object} [xfaHtml]
      * @returns {XfaLayerBuilder}
      */
-    createXfaLayerBuilder(pageDiv: HTMLDivElement, pdfPage: any, annotationStorage?: any, xfaHtml?: Object | undefined): any;
+    createXfaLayerBuilder(pageDiv: HTMLDivElement, pdfPage: PDFPageProxy, annotationStorage?: any, xfaHtml?: Object | undefined): XfaLayerBuilder;
 }
 /**
  * @interface

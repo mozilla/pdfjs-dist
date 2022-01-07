@@ -408,6 +408,11 @@ export type RenderParameters = {
      * states set.
      */
     optionalContentConfigPromise?: Promise<OptionalContentConfig> | undefined;
+    /**
+     * - Map some
+     * annotation ids with canvases used to render them.
+     */
+    annotationCanvasMap?: Map<string, HTMLCanvasElement> | undefined;
 };
 /**
  * Page getOperatorList parameters.
@@ -623,7 +628,7 @@ export const DefaultStandardFontDataFactory: typeof DOMStandardFontDataFactory |
 export function getDocument(src: string | URL | TypedArray | PDFDataRangeTransport | DocumentInitParameters): PDFDocumentLoadingTask;
 export class LoopbackPort {
     _listeners: any[];
-    _deferred: Promise<undefined>;
+    _deferred: Promise<void>;
     postMessage(obj: any, transfers: any): void;
     addEventListener(name: any, listener: any): void;
     removeEventListener(name: any, listener: any): void;
@@ -740,6 +745,37 @@ export class PDFDocumentProxy {
      *   whereas the second element is only defined for *modified* PDF documents.
      */
     get fingerprints(): string[];
+    /**
+     * @typedef {Object} PDFDocumentStats
+     * @property {Object<string, boolean>} streamTypes - Used stream types in the
+     *   document (an item is set to true if specific stream ID was used in the
+     *   document).
+     * @property {Object<string, boolean>} fontTypes - Used font types in the
+     *   document (an item is set to true if specific font ID was used in the
+     *   document).
+     */
+    /**
+     * @type {PDFDocumentStats | null} The current statistics about document
+     *   structures, or `null` when no statistics exists.
+     */
+    get stats(): {
+        /**
+         * - Used stream types in the
+         * document (an item is set to true if specific stream ID was used in the
+         * document).
+         */
+        streamTypes: {
+            [x: string]: boolean;
+        };
+        /**
+         * - Used font types in the
+         * document (an item is set to true if specific font ID was used in the
+         * document).
+         */
+        fontTypes: {
+            [x: string]: boolean;
+        };
+    } | null;
     /**
      * @type {boolean} True if only XFA form.
      */
@@ -914,38 +950,6 @@ export class PDFDocumentProxy {
         length: number;
     }>;
     /**
-     * @typedef {Object} PDFDocumentStats
-     * @property {Object<string, boolean>} streamTypes - Used stream types in the
-     *   document (an item is set to true if specific stream ID was used in the
-     *   document).
-     * @property {Object<string, boolean>} fontTypes - Used font types in the
-     *   document (an item is set to true if specific font ID was used in the
-     *   document).
-     */
-    /**
-     * @returns {Promise<PDFDocumentStats>} A promise this is resolved with
-     *   current statistics about document structures (see
-     *   {@link PDFDocumentStats}).
-     */
-    getStats(): Promise<{
-        /**
-         * - Used stream types in the
-         * document (an item is set to true if specific stream ID was used in the
-         * document).
-         */
-        streamTypes: {
-            [x: string]: boolean;
-        };
-        /**
-         * - Used font types in the
-         * document (an item is set to true if specific font ID was used in the
-         * document).
-         */
-        fontTypes: {
-            [x: string]: boolean;
-        };
-    }>;
-    /**
      * Cleans up resources allocated by the document on both the main and worker
      * threads.
      *
@@ -1107,6 +1111,8 @@ export class PDFDocumentProxy {
  *   created from `PDFDocumentProxy.getOptionalContentConfig`. If `null`,
  *   the configuration will be fetched automatically with the default visibility
  *   states set.
+ * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap] - Map some
+ *   annotation ids with canvases used to render them.
  */
 /**
  * Page getOperatorList parameters.
@@ -1222,7 +1228,7 @@ export class PDFPageProxy {
      * @returns {RenderTask} An object that contains a promise that is
      *   resolved when the page finishes rendering.
      */
-    render({ canvasContext, viewport, intent, annotationMode, transform, imageLayer, canvasFactory, background, optionalContentConfigPromise, }: RenderParameters, ...args: any[]): RenderTask;
+    render({ canvasContext, viewport, intent, annotationMode, transform, imageLayer, canvasFactory, background, optionalContentConfigPromise, annotationCanvasMap, }: RenderParameters, ...args: any[]): RenderTask;
     /**
      * @param {GetOperatorListParameters} params - Page getOperatorList
      *   parameters.
@@ -1316,7 +1322,6 @@ export class PDFWorker {
     });
     name: any;
     destroyed: boolean;
-    postMessageTransfers: boolean;
     verbosity: number;
     _readyCapability: import("../shared/util.js").PromiseCapability;
     _port: any;

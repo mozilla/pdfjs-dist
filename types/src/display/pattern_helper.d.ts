@@ -1,4 +1,9 @@
-export function getShadingPattern(IR: any, cachedCanvasPatterns: any): RadialAxialShadingPattern | MeshShadingPattern | DummyShadingPattern;
+export function getShadingPattern(IR: any): RadialAxialShadingPattern | MeshShadingPattern | DummyShadingPattern;
+export namespace PathType {
+    const FILL: string;
+    const STROKE: string;
+    const SHADING: string;
+}
 export class TilingPattern {
     static get MAX_PATTERN_SIZE(): any;
     constructor(IR: any, color: any, ctx: any, canvasGraphicsFactory: any, baseTransform: any);
@@ -26,10 +31,10 @@ export class TilingPattern {
     };
     clipBbox(graphics: any, x0: any, y0: any, x1: any, y1: any): void;
     setFillAndStrokeStyleToContext(graphics: any, paintType: any, color: any): void;
-    getPattern(ctx: any, owner: any, inverse: any, shadingFill?: boolean): any;
+    getPattern(ctx: any, owner: any, inverse: any, pathType: any): any;
 }
 declare class RadialAxialShadingPattern extends BaseShadingPattern {
-    constructor(IR: any, cachedCanvasPatterns: any);
+    constructor(IR: any);
     _type: any;
     _bbox: any;
     _colorStops: any;
@@ -38,7 +43,6 @@ declare class RadialAxialShadingPattern extends BaseShadingPattern {
     _r0: any;
     _r1: any;
     matrix: any;
-    cachedCanvasPatterns: any;
     _createGradient(ctx: any): any;
 }
 declare class MeshShadingPattern extends BaseShadingPattern {
