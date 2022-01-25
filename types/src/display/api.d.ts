@@ -1417,7 +1417,7 @@ declare class PDFObjects {
      * object once the object is resolved. That means, if you call this method
      * and the object is already resolved, the callback gets called right away.
      */
-    get(objId: any, callback?: null): any;
+    get(objId: any, callback?: any): any;
     has(objId: any): any;
     /**
      * Resolves the object `objId` with optional `data`.
