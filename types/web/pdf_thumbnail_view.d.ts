@@ -110,7 +110,7 @@ export class PDFThumbnailView implements IRenderableView {
  * @property {IL10n} l10n - Localization service.
  */
 export class TempImageFactory {
-    static "__#4@#tempCanvas": null;
+    static "__#6@#tempCanvas": null;
     static getCanvas(width: any, height: any): (HTMLCanvasElement | CanvasRenderingContext2D | null)[];
     static destroyCanvas(): void;
 }

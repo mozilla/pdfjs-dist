@@ -1,4 +1,3 @@
-export type ExternalLinkParameters = any;
 export type PageViewportParameters = {
     /**
      * - The xMin, yMin, xMax and
@@ -56,23 +55,6 @@ export type PageViewportCloneParameters = {
      */
     dontFlip?: boolean | undefined;
 };
-/**
- * @typedef ExternalLinkParameters
- * @typedef {Object} ExternalLinkParameters
- * @property {string} url - An absolute URL.
- * @property {LinkTarget} [target] - The link target. The default value is
- *   `LinkTarget.NONE`.
- * @property {string} [rel] - The link relationship. The default value is
- *   `DEFAULT_LINK_REL`.
- * @property {boolean} [enabled] - Whether the link should be enabled. The
- *   default value is true.
- */
-/**
- * Adds various attributes (href, title, target, rel) to hyperlinks.
- * @param {HTMLAnchorElement} link - The link element.
- * @param {ExternalLinkParameters} params
- */
-export function addLinkAttributes(link: HTMLAnchorElement, { url, target, rel, enabled }?: any): void;
 export function deprecated(details: any): void;
 export class DOMCanvasFactory extends BaseCanvasFactory {
     constructor({ ownerDocument }?: {
@@ -110,13 +92,6 @@ export function getXfaPageViewport(xfaPage: any, { scale, rotation }: {
 export function isDataScheme(url: any): boolean;
 export function isPdfFile(filename: any): boolean;
 export function isValidFetchUrl(url: any, baseUrl: any): boolean;
-export namespace LinkTarget {
-    const NONE: number;
-    const SELF: number;
-    const BLANK: number;
-    const PARENT: number;
-    const TOP: number;
-}
 /**
  * @param {string} src
  * @param {boolean} [removeScriptElement]
@@ -220,9 +195,10 @@ export class PDFDateString {
      */
     static toDateObject(input: string): Date | null;
 }
-export namespace PixelsPerInch {
-    const CSS: number;
-    const PDF: number;
+export class PixelsPerInch {
+    static CSS: number;
+    static PDF: number;
+    static PDF_TO_CSS_UNITS: number;
 }
 declare const RenderingCancelledException_base: any;
 export class RenderingCancelledException extends RenderingCancelledException_base {

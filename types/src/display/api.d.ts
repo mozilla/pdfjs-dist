@@ -231,11 +231,6 @@ export type GetViewportParameters = {
  */
 export type getTextContentParameters = {
     /**
-     * - Replaces all occurrences of
-     * whitespace with standard spaces (0x20). The default value is `false`.
-     */
-    normalizeWhitespace: boolean;
-    /**
      * - Do not attempt to combine
      * same line {@link TextItem }'s. The default value is `false`.
      */
@@ -1018,8 +1013,6 @@ export class PDFDocumentProxy {
  * Page getTextContent parameters.
  *
  * @typedef {Object} getTextContentParameters
- * @property {boolean} normalizeWhitespace - Replaces all occurrences of
- *   whitespace with standard spaces (0x20). The default value is `false`.
  * @property {boolean} disableCombineTextItems - Do not attempt to combine
  *   same line {@link TextItem}'s. The default value is `false`.
  * @property {boolean} [includeMarkedContent] - When true include marked
@@ -1169,7 +1162,8 @@ export class PDFPageProxy {
     _transport: any;
     _stats: StatTimer | null;
     _pdfBug: boolean;
-    commonObjs: any;
+    /** @type {PDFObjects} */
+    commonObjs: PDFObjects;
     objs: PDFObjects;
     cleanupAfterRender: boolean;
     pendingCleanup: boolean;
@@ -1237,11 +1231,17 @@ export class PDFPageProxy {
      */
     getOperatorList({ intent, annotationMode, }?: GetOperatorListParameters): Promise<PDFOperatorList>;
     /**
+     * NOTE: All occurrences of whitespace will be replaced by
+     * standard spaces (0x20).
+     *
      * @param {getTextContentParameters} params - getTextContent parameters.
      * @returns {ReadableStream} Stream for reading text content chunks.
      */
-    streamTextContent({ normalizeWhitespace, disableCombineTextItems, includeMarkedContent, }?: getTextContentParameters): ReadableStream;
+    streamTextContent({ disableCombineTextItems, includeMarkedContent, }?: getTextContentParameters): ReadableStream;
     /**
+     * NOTE: All occurrences of whitespace will be replaced by
+     * standard spaces (0x20).
+     *
      * @param {getTextContentParameters} params - getTextContent parameters.
      * @returns {Promise<TextContent>} A promise that is resolved with a
      *   {@link TextContent} object that represents the page's text content.
@@ -1400,15 +1400,8 @@ import { StatTimer } from "./display_utils.js";
  * A PDF document and page is built of many objects. E.g. there are objects for
  * fonts, images, rendering code, etc. These objects may get processed inside of
  * a worker. This class implements some basic methods to manage these objects.
- * @ignore
  */
 declare class PDFObjects {
-    _objs: any;
-    /**
-     * Ensures there is an object defined for `objId`.
-     * @private
-     */
-    private _ensureObj;
     /**
      * If called *without* callback, this returns the data of `objId` but the
      * object needs to be resolved. If it isn't, this method throws.
@@ -1416,14 +1409,26 @@ declare class PDFObjects {
      * If called *with* a callback, the callback is called with the data of the
      * object once the object is resolved. That means, if you call this method
      * and the object is already resolved, the callback gets called right away.
+     *
+     * @param {string} objId
+     * @param {function} [callback]
+     * @returns {any}
      */
-    get(objId: any, callback?: null): any;
-    has(objId: any): any;
+    get(objId: string, callback?: Function | undefined): any;
+    /**
+     * @param {string} objId
+     * @returns {boolean}
+     */
+    has(objId: string): boolean;
     /**
      * Resolves the object `objId` with optional `data`.
+     *
+     * @param {string} objId
+     * @param {any} [data]
      */
-    resolve(objId: any, data: any): void;
+    resolve(objId: string, data?: any): void;
     clear(): void;
+    #private;
 }
 import { MessageHandler } from "../shared/message_handler.js";
 export {};

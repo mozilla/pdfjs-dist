@@ -164,7 +164,6 @@ export namespace CMapCompressionType {
     export const BINARY: number;
     export const STREAM: number;
 }
-export function createObjectURL(data: any, contentType?: string, forceDataSchema?: boolean): string;
 /**
  * Promise Capability object.
  *
@@ -238,12 +237,9 @@ export class InvalidPDFException extends InvalidPDFException_base {
 export function isArrayBuffer(v: any): boolean;
 export function isArrayEqual(arr1: any, arr2: any): boolean;
 export function isAscii(str: any): boolean;
-export function isBool(v: any): boolean;
 export namespace IsEvalSupportedCached { }
 export namespace IsLittleEndianCached { }
-export function isNum(v: any): boolean;
 export function isSameOrigin(baseUrl: any, otherUrl: any): boolean;
-export function isString(v: any): boolean;
 declare const MissingPDFException_base: any;
 export class MissingPDFException extends MissingPDFException_base {
     [x: string]: any;
@@ -370,10 +366,6 @@ export namespace PermissionFlag {
     export const ASSEMBLE: number;
     export const PRINT_HIGH_QUALITY: number;
 }
-/**
- * @param {string} str
- */
-export function removeNullCharacters(str: string, replaceInvisible?: boolean): string;
 export namespace RenderingIntentFlag {
     export const ANY: number;
     export const DISPLAY: number;

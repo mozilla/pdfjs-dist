@@ -79,6 +79,7 @@ export class PDFFindController {
     _extractTextPromises: any[] | undefined;
     _pageContents: any[] | undefined;
     _pageDiffs: any[] | undefined;
+    _hasDiacritics: any[] | undefined;
     _matchesCountTotal: number | undefined;
     _pagesToSearch: number | null | undefined;
     _pendingFindMatches: Set<any> | undefined;
@@ -91,19 +92,12 @@ export class PDFFindController {
     _rawQuery: any;
     _shouldDirtyMatch(state: any): boolean;
     /**
-     * Helper for multi-term search that fills the `matchesWithLength` array
-     * and handles cases where one search term includes another search term (for
-     * example, "tamed tame" or "this is"). It looks for intersecting terms in
-     * the `matches` and keeps elements with a longer match length.
-     */
-    _prepareMatches(matchesWithLength: any, matches: any, matchesLength: any): void;
-    /**
      * Determine if the search query constitutes a "whole word", by comparing the
      * first/last character type with the preceding/following character type.
      */
     _isEntireWord(content: any, startIdx: any, length: any): boolean;
-    _calculatePhraseMatch(query: any, pageIndex: any, pageContent: any, pageDiffs: any, entireWord: any): void;
-    _calculateWordMatch(query: any, pageIndex: any, pageContent: any, pageDiffs: any, entireWord: any): void;
+    _calculateRegExpMatch(query: any, entireWord: any, pageIndex: any, pageContent: any): void;
+    _convertToRegExpString(query: any, hasDiacritics: any): any[];
     _calculateMatch(pageIndex: any): void;
     _extractText(): void;
     _updatePage(index: any): void;

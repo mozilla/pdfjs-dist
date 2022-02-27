@@ -59,6 +59,7 @@ export class CanvasGraphics {
     setRenderingIntent(intent: any): void;
     setFlatness(flatness: any): void;
     setGState(states: any): void;
+    get inSMaskMode(): boolean;
     checkSMaskState(): void;
     /**
      * Soft mask mode takes the current main drawing canvas and replaces it with
