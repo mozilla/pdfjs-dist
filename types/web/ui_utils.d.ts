@@ -201,25 +201,18 @@ export namespace PresentationModeState {
     const FULLSCREEN: number;
 }
 export class ProgressBar {
-    constructor(id: any, { height, width, units }?: {
-        height: any;
-        width: any;
-        units: any;
-    });
+    constructor(id: any, ...args: any[]);
     visible: boolean;
     div: Element | null;
     bar: ParentNode | null;
-    height: any;
-    width: any;
-    units: any;
     set percent(arg: any);
     get percent(): any;
-    _updateBar(): void;
     _indeterminate: boolean | undefined;
     _percent: any;
     setWidth(viewer: any): void;
     hide(): void;
     show(): void;
+    #private;
 }
 /**
  * @param {string} str

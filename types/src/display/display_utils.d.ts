@@ -61,12 +61,31 @@ export class DOMCanvasFactory extends BaseCanvasFactory {
         ownerDocument?: Document | undefined;
     });
     _document: Document;
+    /**
+     * @ignore
+     */
+    _createCanvas(width: any, height: any): HTMLCanvasElement;
 }
 export class DOMCMapReaderFactory extends BaseCMapReaderFactory {
+    /**
+     * @ignore
+     */
+    _fetchData(url: any, compressionType: any): Promise<{
+        cMapData: any;
+        compressionType: any;
+    }>;
 }
 export class DOMStandardFontDataFactory extends BaseStandardFontDataFactory {
+    /**
+     * @ignore
+     */
+    _fetchData(url: any): Promise<any>;
 }
 export class DOMSVGFactory extends BaseSVGFactory {
+    /**
+     * @ignore
+     */
+    _createSVG(type: any): any;
 }
 /**
  * Gets the filename from a given URL.

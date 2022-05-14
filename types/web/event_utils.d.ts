@@ -18,6 +18,7 @@ export type WaitOnEventOrTimeoutParameters = {
  * NOTE: Only used to support various PDF viewer tests in `mozilla-central`.
  */
 export class AutomationEventBus extends EventBus {
+    dispatch(eventName: any, data: any): void;
 }
 /**
  * Simple event bus for an application. Listeners are attached using the `on`

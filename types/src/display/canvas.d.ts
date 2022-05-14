@@ -1,5 +1,5 @@
 export class CanvasGraphics {
-    constructor(canvasCtx: any, commonObjs: any, objs: any, canvasFactory: any, imageLayer: any, optionalContentConfig: any, annotationCanvasMap: any);
+    constructor(canvasCtx: any, commonObjs: any, objs: any, canvasFactory: any, imageLayer: any, optionalContentConfig: any, annotationCanvasMap: any, pageColors: any);
     ctx: any;
     current: CanvasExtraState;
     stateStack: any[];
@@ -29,16 +29,21 @@ export class CanvasGraphics {
     viewportScale: number;
     outputScaleX: number;
     outputScaleY: number;
+    backgroundColor: any;
+    foregroundColor: any;
+    _cachedScaleForStroking: number[] | null;
     _cachedGetSinglePixelWidth: number | null;
+    _cachedBitmapsMap: Map<any, any>;
+    getObject(data: any, fallback?: null): any;
     beginDrawing({ transform, viewport, transparency, background, }: {
         transform: any;
         viewport: any;
         transparency?: boolean | undefined;
         background?: null | undefined;
     }): void;
+    selectColor: ((r: any, g: any, b: any) => any) | undefined;
     compositeCtx: any;
     transparentCanvas: any;
-    _combinedScaleFactor: number | undefined;
     executeOperatorList(operatorList: any, executionStartIdx: any, continueCallback: any, stepper: any): any;
     endDrawing(): void;
     _scaleImage(img: any, inverseTransform: any): {
@@ -76,7 +81,7 @@ export class CanvasGraphics {
     save(): void;
     restore(): void;
     transform(a: any, b: any, c: any, d: any, e: any, f: any): void;
-    constructPath(ops: any, args: any): void;
+    constructPath(ops: any, args: any, minMax: any): void;
     closePath(): void;
     stroke(consumePath: any): void;
     closeStroke(): void;
@@ -102,7 +107,7 @@ export class CanvasGraphics {
     setLeadingMoveText(x: any, y: any): void;
     setTextMatrix(a: any, b: any, c: any, d: any, e: any, f: any): void;
     nextLine(): void;
-    paintChar(character: any, x: any, y: any, patternTransform: any, resetLineWidthToOne: any): void;
+    paintChar(character: any, x: any, y: any, patternTransform: any): void;
     pendingTextPaths: any[] | undefined;
     get isFontSubpixelAAEnabled(): any;
     showText(glyphs: any): void;
@@ -128,7 +133,7 @@ export class CanvasGraphics {
     annotationCanvas: any;
     endAnnotation(): void;
     paintImageMaskXObject(img: any): void;
-    paintImageMaskXObjectRepeat(imgData: any, scaleX: any, skewX: number | undefined, skewY: number | undefined, scaleY: any, positions: any): void;
+    paintImageMaskXObjectRepeat(img: any, scaleX: any, skewX: number | undefined, skewY: number | undefined, scaleY: any, positions: any): void;
     paintImageMaskXObjectGroup(images: any): void;
     paintImageXObject(objId: any): void;
     paintImageXObjectRepeat(objId: any, scaleX: any, scaleY: any, positions: any): void;
@@ -144,6 +149,8 @@ export class CanvasGraphics {
     endCompat(): void;
     consumePath(clipBox: any): void;
     getSinglePixelWidth(): number;
+    getScaleForStroking(): number[];
+    rescaleAndStroke(saveRestore: any): void;
     getCanvasPosition(x: any, y: any): any[];
     isContentVisible(): boolean;
 }
@@ -180,18 +187,22 @@ declare class CanvasExtraState {
     minY: any;
     maxX: any;
     maxY: any;
-    updateCurvePathMinMax(transform: any, x0: any, y0: any, x1: any, y1: any, x2: any, y2: any, x3: any, y3: any): void;
+    updateRectMinMax(transform: any, rect: any): void;
+    updateScalingPathMinMax(transform: any, minMax: any): void;
+    updateCurvePathMinMax(transform: any, x0: any, y0: any, x1: any, y1: any, x2: any, y2: any, x3: any, y3: any, minMax: any): void;
     getPathBoundingBox(pathType?: string, transform?: null): any[];
     updateClipFromPath(): void;
+    isEmptyClip(): boolean;
     startNewPathAndClipBox(box: any): void;
     clipBox: any;
-    getClippedPathBoundingBox(pathType?: string, transform?: null): any[] | null;
+    getClippedPathBoundingBox(pathType?: string, transform?: null): number[] | null;
 }
 declare class CachedCanvases {
     constructor(canvasFactory: any);
     canvasFactory: any;
     cache: any;
     getCanvas(id: any, width: any, height: any, trackTransform: any): any;
+    delete(id: any): void;
     clear(): void;
 }
 export {};

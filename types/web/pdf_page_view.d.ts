@@ -80,6 +80,12 @@ export type PDFPageViewOptions = {
      */
     maxCanvasPixels?: number | undefined;
     /**
+     * - Overwrites background and foreground colors
+     * with user defined ones in order to improve readability in high contrast
+     * mode.
+     */
+    pageColors?: Object | undefined;
+    /**
      * - Localization service.
      */
     l10n: IL10n;
@@ -106,6 +112,7 @@ export class PDFPageView implements IRenderableView {
     imageResourcesPath: string;
     useOnlyCssZoom: boolean;
     maxCanvasPixels: any;
+    pageColors: Object | null;
     eventBus: import("./event_utils").EventBus;
     renderingQueue: import("./pdf_rendering_queue").PDFRenderingQueue;
     textLayerFactory: import("./interfaces").IPDFTextLayerFactory;
@@ -157,7 +164,7 @@ export class PDFPageView implements IRenderableView {
         scale?: number | undefined;
         rotation?: null | undefined;
         optionalContentConfigPromise?: null | undefined;
-    }, ...args: any[]): void;
+    }): void;
     /**
      * PLEASE NOTE: Most likely you want to use the `this.reset()` method,
      *              rather than calling this one directly.

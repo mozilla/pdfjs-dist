@@ -1,7 +1,9 @@
 export class PDFSinglePageViewer extends BaseViewer {
-    #private;
+    set scrollMode(arg: any);
+    _updateScrollMode(): void;
+    set spreadMode(arg: any);
+    _updateSpreadMode(): void;
 }
 export class PDFViewer extends BaseViewer {
-    #private;
 }
 import { BaseViewer } from "./base_viewer.js";

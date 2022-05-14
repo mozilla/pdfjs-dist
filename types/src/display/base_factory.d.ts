@@ -6,9 +6,9 @@ export class BaseCanvasFactory {
     reset(canvasAndContext: any, width: any, height: any): void;
     destroy(canvasAndContext: any): void;
     /**
-     * @private
+     * @ignore
      */
-    private _createCanvas;
+    _createCanvas(width: any, height: any): void;
 }
 export class BaseCMapReaderFactory {
     constructor({ baseUrl, isCompressed }: {
@@ -21,9 +21,9 @@ export class BaseCMapReaderFactory {
         name: any;
     }): Promise<any>;
     /**
-     * @private
+     * @ignore
      */
-    private _fetchData;
+    _fetchData(url: any, compressionType: any): void;
 }
 export class BaseStandardFontDataFactory {
     constructor({ baseUrl }: {
@@ -34,15 +34,15 @@ export class BaseStandardFontDataFactory {
         filename: any;
     }): Promise<any>;
     /**
-     * @private
+     * @ignore
      */
-    private _fetchData;
+    _fetchData(url: any): void;
 }
 export class BaseSVGFactory {
     create(width: any, height: any): void;
     createElement(type: any): void;
     /**
-     * @private
+     * @ignore
      */
-    private _createSVG;
+    _createSVG(type: any): void;
 }

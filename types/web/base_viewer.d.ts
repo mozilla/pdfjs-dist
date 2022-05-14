@@ -99,6 +99,12 @@ export type PDFViewerOptions = {
      * when they exist. The default value is `false`.
      */
     enablePermissions?: boolean | undefined;
+    /**
+     * - Overwrites background and foreground colors
+     * with user defined ones in order to improve readability in high contrast
+     * mode.
+     */
+    pageColors?: Object | undefined;
 };
 /**
  * Simple viewer control to display PDF content/pages.
@@ -128,6 +134,7 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFStructTreeLay
     useOnlyCssZoom: boolean;
     maxCanvasPixels: number | undefined;
     l10n: import("./interfaces").IL10n;
+    pageColors: Object | null;
     defaultRenderingQueue: boolean;
     renderingQueue: PDFRenderingQueue | undefined;
     _doc: HTMLElement;
@@ -236,11 +243,6 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFStructTreeLay
     _previousScrollMode: any;
     _spreadMode: any;
     _scrollUpdate(): void;
-    _scrollIntoView({ pageDiv, pageSpot, pageNumber }: {
-        pageDiv: any;
-        pageSpot?: null | undefined;
-        pageNumber?: null | undefined;
-    }): void;
     _setScaleUpdatePages(newScale: any, newValue: any, noScroll?: boolean, preset?: boolean): void;
     /**
      * @private
@@ -248,18 +250,13 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFStructTreeLay
     private get _pageWidthScaleFactor();
     _setScale(value: any, noScroll?: boolean): void;
     /**
-     * Refreshes page view: scrolls to the current page and updates the scale.
-     * @private
-     */
-    private _resetCurrentPageView;
-    /**
      * @param {string} label - The page label.
      * @returns {number|null} The page number corresponding to the page label,
      *   or `null` when no page labels exist and/or the input is invalid.
      */
     pageLabelToPageNumber(label: string): number | null;
     /**
-     * @typedef ScrollPageIntoViewParameters
+     * @typedef {Object} ScrollPageIntoViewParameters
      * @property {number} pageNumber - The page number.
      * @property {Array} [destArray] - The original PDF destination array, in the
      *   format: <page-ref> </XYZ|/FitXXX> <args..>
@@ -302,37 +299,6 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFStructTreeLay
     get isChangingPresentationMode(): boolean;
     get isHorizontalScrollbarEnabled(): boolean;
     get isVerticalScrollbarEnabled(): boolean;
-    /**
-     * Helper method for `this._getVisiblePages`. Should only ever be used when
-     * the viewer can only display a single page at a time, for example:
-     *  - When PresentationMode is active.
-     */
-    _getCurrentVisiblePage(): {
-        views: never[];
-        first?: undefined;
-        last?: undefined;
-        ids?: undefined;
-    } | {
-        first: {
-            id: any;
-            x: any;
-            y: any;
-            view: any;
-        };
-        last: {
-            id: any;
-            x: any;
-            y: any;
-            view: any;
-        };
-        views: {
-            id: any;
-            x: any;
-            y: any;
-            view: any;
-        }[];
-        ids: Set<any>;
-    };
     _getVisiblePages(): Object;
     /**
      * @param {number} pageNumber
@@ -462,6 +428,7 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFStructTreeLay
      * @param {number} [steps] - Defaults to zooming once.
      */
     decreaseScale(steps?: number | undefined): void;
+    updateContainerHeightCss(): void;
     #private;
 }
 export namespace PagesCountLimit {
@@ -506,6 +473,9 @@ export namespace PagesCountLimit {
  * @property {IL10n} l10n - Localization service.
  * @property {boolean} [enablePermissions] - Enables PDF document permissions,
  *   when they exist. The default value is `false`.
+ * @property {Object} [pageColors] - Overwrites background and foreground colors
+ *   with user defined ones in order to improve readability in high contrast
+ *   mode.
  */
 export class PDFPageViewBuffer {
     constructor(size: any);

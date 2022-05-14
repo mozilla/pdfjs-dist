@@ -79,6 +79,6 @@ export class AnnotationLayer {
      * @memberof AnnotationLayer
      */
     public static update(parameters: AnnotationLayerParameters): void;
-    static "__#4@#setAnnotationCanvasMap"(div: any, annotationCanvasMap: any): void;
+    static "__#9@#setAnnotationCanvasMap"(div: any, annotationCanvasMap: any): void;
 }
 import { AnnotationStorage } from "./annotation_storage.js";

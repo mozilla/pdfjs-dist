@@ -13,24 +13,25 @@ export type TextLayerRenderParameters = {
      */
     textContentStream?: ReadableStream<any> | undefined;
     /**
-     * - HTML element that will contain text runs.
+     * - The DOM node that will contain the
+     * text runs.
      */
-    container: HTMLElement;
+    container: DocumentFragment;
     /**
      * - The target
      * viewport to properly layout the text runs.
      */
     viewport: import("./display_utils").PageViewport;
     /**
-     * - HTML elements that are correspond
-     * to the text items of the textContent input. This is output and shall be
-     * initially be set to empty array.
+     * - HTML elements that correspond to
+     * the text items of the textContent input.
+     * This is output and shall initially be set to an empty array.
      */
     textDivs?: HTMLElement[] | undefined;
     /**
      * - Strings that correspond to
-     * the `str` property of the text items of textContent input. This is output
-     * and shall be initially be set to empty array.
+     * the `str` property of the text items of the textContent input.
+     * This is output and shall initially be set to an empty array.
      */
     textContentItemsStr?: string[] | undefined;
     /**

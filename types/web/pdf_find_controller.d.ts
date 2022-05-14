@@ -32,7 +32,6 @@ export class PDFFindController {
     constructor({ linkService, eventBus }: PDFFindControllerOptions);
     _linkService: import("./interfaces").IPDFLinkService;
     _eventBus: import("./event_utils").EventBus;
-    executeCommand: ((cmd: any, state: any) => void) | undefined;
     get highlightMatches(): boolean | undefined;
     get pageMatches(): any[] | undefined;
     get pageMatchesLength(): any[] | undefined;
@@ -49,10 +48,6 @@ export class PDFFindController {
      */
     setDocument(pdfDocument: PDFDocumentProxy): void;
     _pdfDocument: import("../src/display/api").PDFDocumentProxy | null | undefined;
-    /**
-     * @private
-     */
-    private _onFind;
     _dirtyMatch: boolean | undefined;
     _state: any;
     _findTimeout: any;
@@ -64,7 +59,6 @@ export class PDFFindController {
         matchIndex?: number | undefined;
     }): void;
     _scrollMatches: boolean | undefined;
-    _reset(): void;
     _pageMatches: any[] | undefined;
     _pageMatchesLength: any[] | undefined;
     _selected: {
@@ -85,33 +79,6 @@ export class PDFFindController {
     _pendingFindMatches: Set<any> | undefined;
     _resumePageIdx: any;
     _firstPageCapability: any;
-    /**
-     * @type {string} The (current) normalized search query.
-     */
-    get _query(): string;
     _rawQuery: any;
-    _shouldDirtyMatch(state: any): boolean;
-    /**
-     * Determine if the search query constitutes a "whole word", by comparing the
-     * first/last character type with the preceding/following character type.
-     */
-    _isEntireWord(content: any, startIdx: any, length: any): boolean;
-    _calculateRegExpMatch(query: any, entireWord: any, pageIndex: any, pageContent: any): void;
-    _convertToRegExpString(query: any, hasDiacritics: any): any[];
-    _calculateMatch(pageIndex: any): void;
-    _extractText(): void;
-    _updatePage(index: any): void;
-    _updateAllPages(): void;
-    _nextMatch(): void;
-    _matchesReady(matches: any): boolean;
-    _nextPageMatch(): void;
-    _advanceOffsetPage(previous: any): void;
-    _updateMatch(found?: boolean): void;
-    _onFindBarClose(evt: any): void;
-    _requestMatchesCount(): {
-        current: number;
-        total: number | undefined;
-    };
-    _updateUIResultsCount(): void;
-    _updateUIState(state: any, previous?: boolean): void;
+    #private;
 }

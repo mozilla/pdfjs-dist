@@ -3,7 +3,6 @@
  */
 export class AnnotationStorage {
     _storage: Map<any, any>;
-    _timeStamp: number;
     _modified: boolean;
     onSetModified: any;
     onResetModified: any;
@@ -17,6 +16,15 @@ export class AnnotationStorage {
      * @returns {Object}
      */
     public getValue(key: string, defaultValue: Object): Object;
+    /**
+     * Get the value for a given key.
+     *
+     * @public
+     * @memberof AnnotationStorage
+     * @param {string} key
+     * @returns {Object}
+     */
+    public getRawValue(key: string): Object;
     /**
      * Set the value for a given key
      *
@@ -42,5 +50,5 @@ export class AnnotationStorage {
      * PLEASE NOTE: Only intended for usage within the API itself.
      * @ignore
      */
-    get lastModified(): string;
+    get hash(): string;
 }

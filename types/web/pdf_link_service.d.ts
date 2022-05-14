@@ -1,4 +1,30 @@
-export type ExternalLinkParameters = any;
+export type ExternalLinkParameters = {
+    /**
+     * - An absolute URL.
+     */
+    url: string;
+    /**
+     * - The link target. The default value is
+     * `LinkTarget.NONE`.
+     */
+    target?: {
+        NONE: number;
+        SELF: number;
+        BLANK: number;
+        PARENT: number;
+        TOP: number;
+    } | undefined;
+    /**
+     * - The link relationship. The default value is
+     * `DEFAULT_LINK_REL`.
+     */
+    rel?: string | undefined;
+    /**
+     * - Whether the link should be enabled. The
+     * default value is true.
+     */
+    enabled?: boolean | undefined;
+};
 export type EventBus = import("./event_utils").EventBus;
 export type IPDFLinkService = import("./interfaces").IPDFLinkService;
 export type PDFLinkServiceOptions = {
@@ -49,7 +75,7 @@ export namespace LinkTarget {
  * @implements {IPDFLinkService}
  */
 export class PDFLinkService implements IPDFLinkService {
-    static "__#5@#isValidExplicitDestination"(dest: any): boolean;
+    static "__#10@#isValidExplicitDestination"(dest: any): boolean;
     /**
      * @param {PDFLinkServiceOptions} options
      */

@@ -60,7 +60,6 @@ export class PDFHistory {
         }) => void;
         pageHide: () => void;
     } | null;
-    _isViewerInPresentationMode: boolean;
     _isPagesLoaded: boolean;
     /**
      * Initialize the history for the PDF document, using either the current

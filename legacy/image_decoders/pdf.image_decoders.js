@@ -1,6 +1,6 @@
 /**
  * @licstart The following is the entire license notice for the
- * Javascript code in this page
+ * JavaScript code in this page
  *
  * Copyright 2022 Mozilla Foundation
  *
@@ -17,7 +17,7 @@
  * limitations under the License.
  *
  * @licend The above is the entire license notice for the
- * Javascript code in this page
+ * JavaScript code in this page
  */
 
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -29,7 +29,7 @@
 		exports["pdfjs-dist/image_decoders/pdf.image_decoders"] = factory();
 	else
 		root["pdfjs-dist/image_decoders/pdf.image_decoders"] = root.pdfjsImageDecoders = factory();
-})(this, function() {
+})(this, () => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ([
@@ -42,7 +42,7 @@ return /******/ (() => { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
-exports.VerbosityLevel = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.UNSUPPORTED_FEATURES = exports.TextRenderingMode = exports.StreamType = exports.RenderingIntentFlag = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.PageActionEventType = exports.OPS = exports.MissingPDFException = exports.IsLittleEndianCached = exports.IsEvalSupportedCached = exports.InvalidPDFException = exports.ImageKind = exports.IDENTITY_MATRIX = exports.FormatError = exports.FontType = exports.FONT_IDENTITY_MATRIX = exports.DocumentActionEventType = exports.CMapCompressionType = exports.BaseException = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMode = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.AnnotationActionEventType = exports.AbortException = void 0;
+exports.VerbosityLevel = exports.Util = exports.UnknownErrorException = exports.UnexpectedResponseException = exports.UNSUPPORTED_FEATURES = exports.TextRenderingMode = exports.StreamType = exports.RenderingIntentFlag = exports.PermissionFlag = exports.PasswordResponses = exports.PasswordException = exports.PageActionEventType = exports.OPS = exports.MissingPDFException = exports.InvalidPDFException = exports.ImageKind = exports.IDENTITY_MATRIX = exports.FormatError = exports.FontType = exports.FeatureTest = exports.FONT_IDENTITY_MATRIX = exports.DocumentActionEventType = exports.CMapCompressionType = exports.BaseException = exports.AnnotationType = exports.AnnotationStateModelType = exports.AnnotationReviewState = exports.AnnotationReplyType = exports.AnnotationMode = exports.AnnotationMarkedState = exports.AnnotationFlag = exports.AnnotationFieldFlag = exports.AnnotationBorderStyleType = exports.AnnotationActionEventType = exports.AbortException = void 0;
 exports.arrayByteLength = arrayByteLength;
 exports.arraysToBytes = arraysToBytes;
 exports.assert = assert;
@@ -56,7 +56,6 @@ exports.info = info;
 exports.isArrayBuffer = isArrayBuffer;
 exports.isArrayEqual = isArrayEqual;
 exports.isAscii = isAscii;
-exports.isSameOrigin = isSameOrigin;
 exports.objectFromMap = objectFromMap;
 exports.objectSize = objectSize;
 exports.setVerbosityLevel = setVerbosityLevel;
@@ -490,23 +489,6 @@ function assert(cond, msg) {
   }
 }
 
-function isSameOrigin(baseUrl, otherUrl) {
-  var base;
-
-  try {
-    base = new URL(baseUrl);
-
-    if (!base.origin || base.origin === "null") {
-      return false;
-    }
-  } catch (e) {
-    return false;
-  }
-
-  var other = new URL(otherUrl, base);
-  return base.origin === other.origin;
-}
-
 function _isValidProtocol(url) {
   if (!url) {
     return false;
@@ -834,14 +816,6 @@ function isLittleEndian() {
   return view32[0] === 1;
 }
 
-var IsLittleEndianCached = {
-  get value() {
-    return shadow(this, "value", isLittleEndian());
-  }
-
-};
-exports.IsLittleEndianCached = IsLittleEndianCached;
-
 function isEvalSupported() {
   try {
     new Function("");
@@ -851,13 +825,32 @@ function isEvalSupported() {
   }
 }
 
-var IsEvalSupportedCached = {
-  get value() {
-    return shadow(this, "value", isEvalSupported());
+var FeatureTest = /*#__PURE__*/function () {
+  function FeatureTest() {
+    _classCallCheck(this, FeatureTest);
   }
 
-};
-exports.IsEvalSupportedCached = IsEvalSupportedCached;
+  _createClass(FeatureTest, null, [{
+    key: "isLittleEndian",
+    get: function get() {
+      return shadow(this, "isLittleEndian", isLittleEndian());
+    }
+  }, {
+    key: "isEvalSupported",
+    get: function get() {
+      return shadow(this, "isEvalSupported", isEvalSupported());
+    }
+  }, {
+    key: "isOffscreenCanvasSupported",
+    get: function get() {
+      return shadow(this, "isOffscreenCanvasSupported", typeof OffscreenCanvas !== "undefined");
+    }
+  }]);
+
+  return FeatureTest;
+}();
+
+exports.FeatureTest = FeatureTest;
 
 var hexNumbers = _toConsumableArray(Array(256).keys()).map(function (n) {
   return n.toString(16).padStart(2, "0");
@@ -872,6 +865,61 @@ var Util = /*#__PURE__*/function () {
     key: "makeHexColor",
     value: function makeHexColor(r, g, b) {
       return "#".concat(hexNumbers[r]).concat(hexNumbers[g]).concat(hexNumbers[b]);
+    }
+  }, {
+    key: "scaleMinMax",
+    value: function scaleMinMax(transform, minMax) {
+      var temp;
+
+      if (transform[0]) {
+        if (transform[0] < 0) {
+          temp = minMax[0];
+          minMax[0] = minMax[1];
+          minMax[1] = temp;
+        }
+
+        minMax[0] *= transform[0];
+        minMax[1] *= transform[0];
+
+        if (transform[3] < 0) {
+          temp = minMax[2];
+          minMax[2] = minMax[3];
+          minMax[3] = temp;
+        }
+
+        minMax[2] *= transform[3];
+        minMax[3] *= transform[3];
+      } else {
+        temp = minMax[0];
+        minMax[0] = minMax[2];
+        minMax[2] = temp;
+        temp = minMax[1];
+        minMax[1] = minMax[3];
+        minMax[3] = temp;
+
+        if (transform[1] < 0) {
+          temp = minMax[2];
+          minMax[2] = minMax[3];
+          minMax[3] = temp;
+        }
+
+        minMax[2] *= transform[1];
+        minMax[3] *= transform[1];
+
+        if (transform[2] < 0) {
+          temp = minMax[0];
+          minMax[0] = minMax[1];
+          minMax[1] = temp;
+        }
+
+        minMax[0] *= transform[2];
+        minMax[1] *= transform[2];
+      }
+
+      minMax[0] += transform[4];
+      minMax[1] += transform[4];
+      minMax[2] += transform[5];
+      minMax[3] += transform[5];
     }
   }, {
     key: "transform",
@@ -947,31 +995,21 @@ var Util = /*#__PURE__*/function () {
   }, {
     key: "intersect",
     value: function intersect(rect1, rect2) {
-      function compare(a, b) {
-        return a - b;
-      }
+      var xLow = Math.max(Math.min(rect1[0], rect1[2]), Math.min(rect2[0], rect2[2]));
+      var xHigh = Math.min(Math.max(rect1[0], rect1[2]), Math.max(rect2[0], rect2[2]));
 
-      var orderedX = [rect1[0], rect1[2], rect2[0], rect2[2]].sort(compare);
-      var orderedY = [rect1[1], rect1[3], rect2[1], rect2[3]].sort(compare);
-      var result = [];
-      rect1 = Util.normalizeRect(rect1);
-      rect2 = Util.normalizeRect(rect2);
-
-      if (orderedX[0] === rect1[0] && orderedX[1] === rect2[0] || orderedX[0] === rect2[0] && orderedX[1] === rect1[0]) {
-        result[0] = orderedX[1];
-        result[2] = orderedX[2];
-      } else {
+      if (xLow > xHigh) {
         return null;
       }
 
-      if (orderedY[0] === rect1[1] && orderedY[1] === rect2[1] || orderedY[0] === rect2[1] && orderedY[1] === rect1[1]) {
-        result[1] = orderedY[1];
-        result[3] = orderedY[2];
-      } else {
+      var yLow = Math.max(Math.min(rect1[1], rect1[3]), Math.min(rect2[1], rect2[3]));
+      var yHigh = Math.min(Math.max(rect1[1], rect1[3]), Math.max(rect2[1], rect2[3]));
+
+      if (yLow > yHigh) {
         return null;
       }
 
-      return result;
+      return [xLow, yLow, xHigh, yHigh];
     }
   }, {
     key: "bezierBoundingBox",
@@ -1204,7 +1242,7 @@ if (!globalThis._pdfjsCompatibilityChecked) {
       return;
     }
 
-    globalThis.DOMMatrix = __w_pdfjs_require__(4);
+    globalThis.DOMMatrix = require("dommatrix/dist/dommatrix.js");
   })();
 
   (function checkPromise() {})();
@@ -1238,573 +1276,6 @@ exports.isNodeJS = isNodeJS;
 
 /***/ }),
 /* 4 */
-/***/ ((module, exports, __w_pdfjs_require__) => {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;
-
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-(function (global, factory) {
-  ( false ? 0 : _typeof(exports)) === 'object' && "object" !== 'undefined' ? module.exports = factory() :  true ? !(__WEBPACK_AMD_DEFINE_FACTORY__ = (factory),
-		__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-		(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __w_pdfjs_require__, exports, module)) :
-		__WEBPACK_AMD_DEFINE_FACTORY__),
-		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : (0);
-})(void 0, function () {
-  'use strict';
-
-  function fromArray(array) {
-    var m = new CSSMatrix();
-    var a = Array.from(array);
-
-    if (!a.every(function (n) {
-      return !Number.isNaN(n);
-    })) {
-      throw TypeError("CSSMatrix: \"" + array + "\" must only have numbers.");
-    }
-
-    if (a.length === 16) {
-      var m11 = a[0];
-      var m12 = a[1];
-      var m13 = a[2];
-      var m14 = a[3];
-      var m21 = a[4];
-      var m22 = a[5];
-      var m23 = a[6];
-      var m24 = a[7];
-      var m31 = a[8];
-      var m32 = a[9];
-      var m33 = a[10];
-      var m34 = a[11];
-      var m41 = a[12];
-      var m42 = a[13];
-      var m43 = a[14];
-      var m44 = a[15];
-      m.m11 = m11;
-      m.a = m11;
-      m.m21 = m21;
-      m.c = m21;
-      m.m31 = m31;
-      m.m41 = m41;
-      m.e = m41;
-      m.m12 = m12;
-      m.b = m12;
-      m.m22 = m22;
-      m.d = m22;
-      m.m32 = m32;
-      m.m42 = m42;
-      m.f = m42;
-      m.m13 = m13;
-      m.m23 = m23;
-      m.m33 = m33;
-      m.m43 = m43;
-      m.m14 = m14;
-      m.m24 = m24;
-      m.m34 = m34;
-      m.m44 = m44;
-    } else if (a.length === 6) {
-      var M11 = a[0];
-      var M12 = a[1];
-      var M21 = a[2];
-      var M22 = a[3];
-      var M41 = a[4];
-      var M42 = a[5];
-      m.m11 = M11;
-      m.a = M11;
-      m.m12 = M12;
-      m.b = M12;
-      m.m21 = M21;
-      m.c = M21;
-      m.m22 = M22;
-      m.d = M22;
-      m.m41 = M41;
-      m.e = M41;
-      m.m42 = M42;
-      m.f = M42;
-    } else {
-      throw new TypeError('CSSMatrix: expecting an Array of 6/16 values.');
-    }
-
-    return m;
-  }
-
-  function fromMatrix(m) {
-    var keys = Object.keys(new CSSMatrix());
-
-    if (_typeof(m) === 'object' && keys.every(function (k) {
-      return k in m;
-    })) {
-      return fromArray([m.m11, m.m12, m.m13, m.m14, m.m21, m.m22, m.m23, m.m24, m.m31, m.m32, m.m33, m.m34, m.m41, m.m42, m.m43, m.m44]);
-    }
-
-    throw TypeError("CSSMatrix: \"" + m + "\" is not a DOMMatrix / CSSMatrix / JSON compatible object.");
-  }
-
-  function fromString(source) {
-    if (typeof source !== 'string') {
-      throw TypeError("CSSMatrix: \"" + source + "\" is not a string.");
-    }
-
-    var str = String(source).replace(/\s/g, '');
-    var m = new CSSMatrix();
-    var invalidStringError = "CSSMatrix: invalid transform string \"" + source + "\"";
-    str.split(')').filter(function (f) {
-      return f;
-    }).forEach(function (tf) {
-      var ref = tf.split('(');
-      var prop = ref[0];
-      var value = ref[1];
-
-      if (!value) {
-        throw TypeError(invalidStringError);
-      }
-
-      var components = value.split(',').map(function (n) {
-        return n.includes('rad') ? parseFloat(n) * (180 / Math.PI) : parseFloat(n);
-      });
-      var x = components[0];
-      var y = components[1];
-      var z = components[2];
-      var a = components[3];
-      var xyz = [x, y, z];
-      var xyza = [x, y, z, a];
-
-      if (prop === 'perspective' && x && [y, z].every(function (n) {
-        return n === undefined;
-      })) {
-        m.m34 = -1 / x;
-      } else if (prop.includes('matrix') && [6, 16].includes(components.length) && components.every(function (n) {
-        return !Number.isNaN(+n);
-      })) {
-        var values = components.map(function (n) {
-          return Math.abs(n) < 1e-6 ? 0 : n;
-        });
-        m = m.multiply(fromArray(values));
-      } else if (prop === 'translate3d' && xyz.every(function (n) {
-        return !Number.isNaN(+n);
-      })) {
-        m = m.translate(x, y, z);
-      } else if (prop === 'translate' && x && z === undefined) {
-        m = m.translate(x, y || 0, 0);
-      } else if (prop === 'rotate3d' && xyza.every(function (n) {
-        return !Number.isNaN(+n);
-      }) && a) {
-        m = m.rotateAxisAngle(x, y, z, a);
-      } else if (prop === 'rotate' && x && [y, z].every(function (n) {
-        return n === undefined;
-      })) {
-        m = m.rotate(0, 0, x);
-      } else if (prop === 'scale3d' && xyz.every(function (n) {
-        return !Number.isNaN(+n);
-      }) && xyz.some(function (n) {
-        return n !== 1;
-      })) {
-        m = m.scale(x, y, z);
-      } else if (prop === 'scale' && !Number.isNaN(x) && x !== 1 && z === undefined) {
-        var nosy = Number.isNaN(+y);
-        var sy = nosy ? x : y;
-        m = m.scale(x, sy, 1);
-      } else if (prop === 'skew' && x && z === undefined) {
-        m = m.skewX(x);
-        m = y ? m.skewY(y) : m;
-      } else if (/[XYZ]/.test(prop) && x && [y, z].every(function (n) {
-        return n === undefined;
-      }) && ['translate', 'rotate', 'scale', 'skew'].some(function (p) {
-        return prop.includes(p);
-      })) {
-        if (['skewX', 'skewY'].includes(prop)) {
-          m = m[prop](x);
-        } else {
-          var fn = prop.replace(/[XYZ]/, '');
-          var axis = prop.replace(fn, '');
-          var idx = ['X', 'Y', 'Z'].indexOf(axis);
-          var axeValues = [idx === 0 ? x : 0, idx === 1 ? x : 0, idx === 2 ? x : 0];
-          m = m[fn].apply(m, axeValues);
-        }
-      } else {
-        throw TypeError(invalidStringError);
-      }
-    });
-    return m;
-  }
-
-  function Translate(x, y, z) {
-    var m = new CSSMatrix();
-    m.m41 = x;
-    m.e = x;
-    m.m42 = y;
-    m.f = y;
-    m.m43 = z;
-    return m;
-  }
-
-  function Rotate(rx, ry, rz) {
-    var m = new CSSMatrix();
-    var degToRad = Math.PI / 180;
-    var radX = rx * degToRad;
-    var radY = ry * degToRad;
-    var radZ = rz * degToRad;
-    var cosx = Math.cos(radX);
-    var sinx = -Math.sin(radX);
-    var cosy = Math.cos(radY);
-    var siny = -Math.sin(radY);
-    var cosz = Math.cos(radZ);
-    var sinz = -Math.sin(radZ);
-    var m11 = cosy * cosz;
-    var m12 = -cosy * sinz;
-    m.m11 = m11;
-    m.a = m11;
-    m.m12 = m12;
-    m.b = m12;
-    m.m13 = siny;
-    var m21 = sinx * siny * cosz + cosx * sinz;
-    m.m21 = m21;
-    m.c = m21;
-    var m22 = cosx * cosz - sinx * siny * sinz;
-    m.m22 = m22;
-    m.d = m22;
-    m.m23 = -sinx * cosy;
-    m.m31 = sinx * sinz - cosx * siny * cosz;
-    m.m32 = sinx * cosz + cosx * siny * sinz;
-    m.m33 = cosx * cosy;
-    return m;
-  }
-
-  function RotateAxisAngle(x, y, z, alpha) {
-    var m = new CSSMatrix();
-    var angle = alpha * (Math.PI / 360);
-    var sinA = Math.sin(angle);
-    var cosA = Math.cos(angle);
-    var sinA2 = sinA * sinA;
-    var length = Math.sqrt(x * x + y * y + z * z);
-    var X = x;
-    var Y = y;
-    var Z = z;
-
-    if (length === 0) {
-      X = 0;
-      Y = 0;
-      Z = 1;
-    } else {
-      X /= length;
-      Y /= length;
-      Z /= length;
-    }
-
-    var x2 = X * X;
-    var y2 = Y * Y;
-    var z2 = Z * Z;
-    var m11 = 1 - 2 * (y2 + z2) * sinA2;
-    m.m11 = m11;
-    m.a = m11;
-    var m12 = 2 * (X * Y * sinA2 + Z * sinA * cosA);
-    m.m12 = m12;
-    m.b = m12;
-    m.m13 = 2 * (X * Z * sinA2 - Y * sinA * cosA);
-    var m21 = 2 * (Y * X * sinA2 - Z * sinA * cosA);
-    m.m21 = m21;
-    m.c = m21;
-    var m22 = 1 - 2 * (z2 + x2) * sinA2;
-    m.m22 = m22;
-    m.d = m22;
-    m.m23 = 2 * (Y * Z * sinA2 + X * sinA * cosA);
-    m.m31 = 2 * (Z * X * sinA2 + Y * sinA * cosA);
-    m.m32 = 2 * (Z * Y * sinA2 - X * sinA * cosA);
-    m.m33 = 1 - 2 * (x2 + y2) * sinA2;
-    return m;
-  }
-
-  function Scale(x, y, z) {
-    var m = new CSSMatrix();
-    m.m11 = x;
-    m.a = x;
-    m.m22 = y;
-    m.d = y;
-    m.m33 = z;
-    return m;
-  }
-
-  function SkewX(angle) {
-    var m = new CSSMatrix();
-    var radA = angle * Math.PI / 180;
-    var t = Math.tan(radA);
-    m.m21 = t;
-    m.c = t;
-    return m;
-  }
-
-  function SkewY(angle) {
-    var m = new CSSMatrix();
-    var radA = angle * Math.PI / 180;
-    var t = Math.tan(radA);
-    m.m12 = t;
-    m.b = t;
-    return m;
-  }
-
-  function Multiply(m1, m2) {
-    var m11 = m2.m11 * m1.m11 + m2.m12 * m1.m21 + m2.m13 * m1.m31 + m2.m14 * m1.m41;
-    var m12 = m2.m11 * m1.m12 + m2.m12 * m1.m22 + m2.m13 * m1.m32 + m2.m14 * m1.m42;
-    var m13 = m2.m11 * m1.m13 + m2.m12 * m1.m23 + m2.m13 * m1.m33 + m2.m14 * m1.m43;
-    var m14 = m2.m11 * m1.m14 + m2.m12 * m1.m24 + m2.m13 * m1.m34 + m2.m14 * m1.m44;
-    var m21 = m2.m21 * m1.m11 + m2.m22 * m1.m21 + m2.m23 * m1.m31 + m2.m24 * m1.m41;
-    var m22 = m2.m21 * m1.m12 + m2.m22 * m1.m22 + m2.m23 * m1.m32 + m2.m24 * m1.m42;
-    var m23 = m2.m21 * m1.m13 + m2.m22 * m1.m23 + m2.m23 * m1.m33 + m2.m24 * m1.m43;
-    var m24 = m2.m21 * m1.m14 + m2.m22 * m1.m24 + m2.m23 * m1.m34 + m2.m24 * m1.m44;
-    var m31 = m2.m31 * m1.m11 + m2.m32 * m1.m21 + m2.m33 * m1.m31 + m2.m34 * m1.m41;
-    var m32 = m2.m31 * m1.m12 + m2.m32 * m1.m22 + m2.m33 * m1.m32 + m2.m34 * m1.m42;
-    var m33 = m2.m31 * m1.m13 + m2.m32 * m1.m23 + m2.m33 * m1.m33 + m2.m34 * m1.m43;
-    var m34 = m2.m31 * m1.m14 + m2.m32 * m1.m24 + m2.m33 * m1.m34 + m2.m34 * m1.m44;
-    var m41 = m2.m41 * m1.m11 + m2.m42 * m1.m21 + m2.m43 * m1.m31 + m2.m44 * m1.m41;
-    var m42 = m2.m41 * m1.m12 + m2.m42 * m1.m22 + m2.m43 * m1.m32 + m2.m44 * m1.m42;
-    var m43 = m2.m41 * m1.m13 + m2.m42 * m1.m23 + m2.m43 * m1.m33 + m2.m44 * m1.m43;
-    var m44 = m2.m41 * m1.m14 + m2.m42 * m1.m24 + m2.m43 * m1.m34 + m2.m44 * m1.m44;
-    return fromArray([m11, m12, m13, m14, m21, m22, m23, m24, m31, m32, m33, m34, m41, m42, m43, m44]);
-  }
-
-  var CSSMatrix = function CSSMatrix() {
-    var args = [],
-        len = arguments.length;
-
-    while (len--) {
-      args[len] = arguments[len];
-    }
-
-    var m = this;
-    m.a = 1;
-    m.b = 0;
-    m.c = 0;
-    m.d = 1;
-    m.e = 0;
-    m.f = 0;
-    m.m11 = 1;
-    m.m12 = 0;
-    m.m13 = 0;
-    m.m14 = 0;
-    m.m21 = 0;
-    m.m22 = 1;
-    m.m23 = 0;
-    m.m24 = 0;
-    m.m31 = 0;
-    m.m32 = 0;
-    m.m33 = 1;
-    m.m34 = 0;
-    m.m41 = 0;
-    m.m42 = 0;
-    m.m43 = 0;
-    m.m44 = 1;
-
-    if (args && args.length) {
-      var ARGS = [16, 6].some(function (l) {
-        return l === args.length;
-      }) ? args : args[0];
-      return m.setMatrixValue(ARGS);
-    }
-
-    return m;
-  };
-
-  var prototypeAccessors = {
-    isIdentity: {
-      configurable: true
-    },
-    is2D: {
-      configurable: true
-    }
-  };
-
-  prototypeAccessors.isIdentity.set = function (value) {
-    this.isIdentity = value;
-  };
-
-  prototypeAccessors.isIdentity.get = function () {
-    var m = this;
-    return m.m11 === 1 && m.m12 === 0 && m.m13 === 0 && m.m14 === 0 && m.m21 === 0 && m.m22 === 1 && m.m23 === 0 && m.m24 === 0 && m.m31 === 0 && m.m32 === 0 && m.m33 === 1 && m.m34 === 0 && m.m41 === 0 && m.m42 === 0 && m.m43 === 0 && m.m44 === 1;
-  };
-
-  prototypeAccessors.is2D.get = function () {
-    var m = this;
-    return m.m31 === 0 && m.m32 === 0 && m.m33 === 1 && m.m34 === 0 && m.m43 === 0 && m.m44 === 1;
-  };
-
-  prototypeAccessors.is2D.set = function (value) {
-    this.is2D = value;
-  };
-
-  CSSMatrix.prototype.setMatrixValue = function setMatrixValue(source) {
-    var m = this;
-
-    if ([Array, Float64Array, Float32Array].some(function (a) {
-      return source instanceof a;
-    })) {
-      return fromArray(source);
-    }
-
-    if (typeof source === 'string' && source.length && source !== 'none') {
-      return fromString(source);
-    }
-
-    if (_typeof(source) === 'object') {
-      return fromMatrix(source);
-    }
-
-    return m;
-  };
-
-  CSSMatrix.prototype.toArray = function toArray() {
-    var m = this;
-    var pow = Math.pow(10, 6);
-    var result;
-
-    if (m.is2D) {
-      result = [m.a, m.b, m.c, m.d, m.e, m.f];
-    } else {
-      result = [m.m11, m.m12, m.m13, m.m14, m.m21, m.m22, m.m23, m.m24, m.m31, m.m32, m.m33, m.m34, m.m41, m.m42, m.m43, m.m44];
-    }
-
-    return result.map(function (n) {
-      return Math.abs(n) < 1e-6 ? 0 : (n * pow >> 0) / pow;
-    });
-  };
-
-  CSSMatrix.prototype.toString = function toString() {
-    var m = this;
-    var values = m.toArray();
-    var type = m.is2D ? 'matrix' : 'matrix3d';
-    return type + "(" + values + ")";
-  };
-
-  CSSMatrix.prototype.toJSON = function toJSON() {
-    var m = this;
-    var is2D = m.is2D;
-    var isIdentity = m.isIdentity;
-    return Object.assign({}, m, {
-      is2D: is2D,
-      isIdentity: isIdentity
-    });
-  };
-
-  CSSMatrix.prototype.multiply = function multiply(m2) {
-    return Multiply(this, m2);
-  };
-
-  CSSMatrix.prototype.translate = function translate(x, y, z) {
-    var X = x;
-    var Y = y;
-    var Z = z;
-
-    if (Z === undefined) {
-      Z = 0;
-    }
-
-    if (Y === undefined) {
-      Y = 0;
-    }
-
-    return Multiply(this, Translate(X, Y, Z));
-  };
-
-  CSSMatrix.prototype.scale = function scale(x, y, z) {
-    var X = x;
-    var Y = y;
-    var Z = z;
-
-    if (Y === undefined) {
-      Y = x;
-    }
-
-    if (Z === undefined) {
-      Z = 1;
-    }
-
-    return Multiply(this, Scale(X, Y, Z));
-  };
-
-  CSSMatrix.prototype.rotate = function rotate(rx, ry, rz) {
-    var RX = rx;
-    var RY = ry;
-    var RZ = rz;
-
-    if (RY === undefined) {
-      RY = 0;
-    }
-
-    if (RZ === undefined) {
-      RZ = RX;
-      RX = 0;
-    }
-
-    return Multiply(this, Rotate(RX, RY, RZ));
-  };
-
-  CSSMatrix.prototype.rotateAxisAngle = function rotateAxisAngle(x, y, z, angle) {
-    if ([x, y, z, angle].some(function (n) {
-      return Number.isNaN(n);
-    })) {
-      throw new TypeError('CSSMatrix: expecting 4 values');
-    }
-
-    return Multiply(this, RotateAxisAngle(x, y, z, angle));
-  };
-
-  CSSMatrix.prototype.skewX = function skewX(angle) {
-    return Multiply(this, SkewX(angle));
-  };
-
-  CSSMatrix.prototype.skewY = function skewY(angle) {
-    return Multiply(this, SkewY(angle));
-  };
-
-  CSSMatrix.prototype.transformPoint = function transformPoint(v) {
-    var M = this;
-    var m = Translate(v.x, v.y, v.z);
-    m.m44 = v.w || 1;
-    m = M.multiply(m);
-    return {
-      x: m.m41,
-      y: m.m42,
-      z: m.m43,
-      w: m.m44
-    };
-  };
-
-  CSSMatrix.prototype.transform = function transform(t) {
-    var m = this;
-    var x = m.m11 * t.x + m.m12 * t.y + m.m13 * t.z + m.m14 * t.w;
-    var y = m.m21 * t.x + m.m22 * t.y + m.m23 * t.z + m.m24 * t.w;
-    var z = m.m31 * t.x + m.m32 * t.y + m.m33 * t.z + m.m34 * t.w;
-    var w = m.m41 * t.x + m.m42 * t.y + m.m43 * t.z + m.m44 * t.w;
-    return {
-      x: x / w,
-      y: y / w,
-      z: z / w,
-      w: w
-    };
-  };
-
-  Object.defineProperties(CSSMatrix.prototype, prototypeAccessors);
-  Object.assign(CSSMatrix, {
-    Translate: Translate,
-    Rotate: Rotate,
-    RotateAxisAngle: RotateAxisAngle,
-    Scale: Scale,
-    SkewX: SkewX,
-    SkewY: SkewY,
-    Multiply: Multiply,
-    fromArray: fromArray,
-    fromMatrix: fromMatrix,
-    fromString: fromString
-  });
-  var version = "0.0.24";
-  var Version = version;
-  Object.assign(CSSMatrix, {
-    Version: Version
-  });
-  return CSSMatrix;
-});
-
-/***/ }),
-/* 5 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -1818,11 +1289,11 @@ exports.Jbig2Image = void 0;
 
 var _util = __w_pdfjs_require__(1);
 
-var _core_utils = __w_pdfjs_require__(6);
+var _core_utils = __w_pdfjs_require__(5);
 
-var _arithmetic_decoder = __w_pdfjs_require__(11);
+var _arithmetic_decoder = __w_pdfjs_require__(10);
 
-var _ccitt = __w_pdfjs_require__(12);
+var _ccitt = __w_pdfjs_require__(11);
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
@@ -3298,9 +2769,7 @@ var SimpleSegmentVisitor = /*#__PURE__*/function () {
       var buffer = new Uint8ClampedArray(rowSize * info.height);
 
       if (info.defaultPixelValue) {
-        for (var i = 0, ii = buffer.length; i < ii; i++) {
-          buffer[i] = 0xff;
-        }
+        buffer.fill(0xff);
       }
 
       this.buffer = buffer;
@@ -4101,7 +3570,7 @@ var Jbig2Image = /*#__PURE__*/function () {
 exports.Jbig2Image = Jbig2Image;
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -4130,9 +3599,9 @@ exports.validateCSSFont = validateCSSFont;
 
 var _util = __w_pdfjs_require__(1);
 
-var _primitives = __w_pdfjs_require__(7);
+var _primitives = __w_pdfjs_require__(6);
 
-var _base_stream = __w_pdfjs_require__(10);
+var _base_stream = __w_pdfjs_require__(9);
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -4709,7 +4178,7 @@ function recoverJsURL(str) {
 }
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -4724,7 +4193,7 @@ exports.isDict = isDict;
 exports.isName = isName;
 exports.isRefsEqual = isRefsEqual;
 
-var _regenerator = _interopRequireDefault(__w_pdfjs_require__(8));
+var _regenerator = _interopRequireDefault(__w_pdfjs_require__(7));
 
 var _util = __w_pdfjs_require__(1);
 
@@ -5127,7 +4596,7 @@ var Ref = function RefClosure() {
 
 exports.Ref = Ref;
 
-var RefSet = /*#__PURE__*/function () {
+var RefSet = /*#__PURE__*/function (_Symbol$iterator) {
   function RefSet() {
     var parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
@@ -5152,21 +4621,9 @@ var RefSet = /*#__PURE__*/function () {
       this._set["delete"](ref.toString());
     }
   }, {
-    key: "forEach",
-    value: function forEach(callback) {
-      var _iterator4 = _createForOfIteratorHelper(this._set.values()),
-          _step4;
-
-      try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-          var ref = _step4.value;
-          callback(ref);
-        }
-      } catch (err) {
-        _iterator4.e(err);
-      } finally {
-        _iterator4.f();
-      }
+    key: _Symbol$iterator,
+    value: function value() {
+      return this._set.values();
     }
   }, {
     key: "clear",
@@ -5176,11 +4633,11 @@ var RefSet = /*#__PURE__*/function () {
   }]);
 
   return RefSet;
-}();
+}(Symbol.iterator);
 
 exports.RefSet = RefSet;
 
-var RefSetCache = /*#__PURE__*/function () {
+var RefSetCache = /*#__PURE__*/function (_Symbol$iterator2) {
   function RefSetCache() {
     _classCallCheck(this, RefSetCache);
 
@@ -5213,21 +4670,9 @@ var RefSetCache = /*#__PURE__*/function () {
       this._map.set(ref.toString(), this.get(aliasRef));
     }
   }, {
-    key: "forEach",
-    value: function forEach(callback) {
-      var _iterator5 = _createForOfIteratorHelper(this._map.values()),
-          _step5;
-
-      try {
-        for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-          var value = _step5.value;
-          callback(value);
-        }
-      } catch (err) {
-        _iterator5.e(err);
-      } finally {
-        _iterator5.f();
-      }
+    key: _Symbol$iterator2,
+    value: function value() {
+      return this._map.values();
     }
   }, {
     key: "clear",
@@ -5237,7 +4682,7 @@ var RefSetCache = /*#__PURE__*/function () {
   }]);
 
   return RefSetCache;
-}();
+}(Symbol.iterator);
 
 exports.RefSetCache = RefSetCache;
 
@@ -5266,15 +4711,15 @@ function clearPrimitiveCaches() {
 }
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 
 
-module.exports = __w_pdfjs_require__(9);
+module.exports = __w_pdfjs_require__(8);
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ ((module, __unused_webpack_exports, __w_pdfjs_require__) => {
 
 /* module decorator */ module = __w_pdfjs_require__.nmd(module);
@@ -5869,7 +5314,7 @@ try {
 }
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -5919,7 +5364,6 @@ var BaseStream = /*#__PURE__*/function () {
   }, {
     key: "getBytes",
     value: function getBytes(length) {
-      var forceClamped = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       (0, _util.unreachable)("Abstract method `getBytes` called");
     }
   }, {
@@ -5936,8 +5380,7 @@ var BaseStream = /*#__PURE__*/function () {
   }, {
     key: "peekBytes",
     value: function peekBytes(length) {
-      var forceClamped = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-      var bytes = this.getBytes(length, forceClamped);
+      var bytes = this.getBytes(length);
       this.pos -= bytes.length;
       return bytes;
     }
@@ -5970,7 +5413,7 @@ var BaseStream = /*#__PURE__*/function () {
   }, {
     key: "getString",
     value: function getString(length) {
-      return (0, _util.bytesToString)(this.getBytes(length, false));
+      return (0, _util.bytesToString)(this.getBytes(length));
     }
   }, {
     key: "skip",
@@ -6006,7 +5449,7 @@ var BaseStream = /*#__PURE__*/function () {
 exports.BaseStream = BaseStream;
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -6373,7 +5816,7 @@ var ArithmeticDecoder = /*#__PURE__*/function () {
 exports.ArithmeticDecoder = ArithmeticDecoder;
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -7100,7 +6543,7 @@ var CCITTFaxDecoder = /*#__PURE__*/function () {
 exports.CCITTFaxDecoder = CCITTFaxDecoder;
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -7112,7 +6555,7 @@ exports.JpegImage = void 0;
 
 var _util = __w_pdfjs_require__(1);
 
-var _core_utils = __w_pdfjs_require__(6);
+var _core_utils = __w_pdfjs_require__(5);
 
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
@@ -8418,7 +7861,7 @@ var JpegImage = /*#__PURE__*/function () {
 exports.JpegImage = JpegImage;
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -8432,9 +7875,9 @@ exports.JpxImage = void 0;
 
 var _util = __w_pdfjs_require__(1);
 
-var _core_utils = __w_pdfjs_require__(6);
+var _core_utils = __w_pdfjs_require__(5);
 
-var _arithmetic_decoder = __w_pdfjs_require__(11);
+var _arithmetic_decoder = __w_pdfjs_require__(10);
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
@@ -10953,14 +10396,14 @@ Object.defineProperty(exports, "setVerbosityLevel", ({
 
 var _util = __w_pdfjs_require__(1);
 
-var _jbig = __w_pdfjs_require__(5);
+var _jbig = __w_pdfjs_require__(4);
 
-var _jpg = __w_pdfjs_require__(13);
+var _jpg = __w_pdfjs_require__(12);
 
-var _jpx = __w_pdfjs_require__(14);
+var _jpx = __w_pdfjs_require__(13);
 
-var pdfjsVersion = '2.13.216';
-var pdfjsBuild = '399a0ec60';
+var pdfjsVersion = '2.14.305';
+var pdfjsBuild = 'eaaa8b4ad';
 })();
 
 /******/ 	return __webpack_exports__;
