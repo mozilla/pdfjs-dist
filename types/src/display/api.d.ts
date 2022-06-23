@@ -16,7 +16,7 @@ export type DocumentInitParameters = {
      * typed arrays (Uint8Array) to improve the memory usage. If PDF data is
      * BASE64-encoded, use `atob()` to convert it to a binary string first.
      */
-    data?: string | number[] | TypedArray | undefined;
+    data?: string | number[] | TypedArray | ArrayBuffer | undefined;
     /**
      * - Basic authentication headers.
      */
