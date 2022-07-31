@@ -84,19 +84,10 @@ export const AutoPrintRegExp: RegExp;
  *   `views`, although sometimes it goes back one row further.)
  */
 export function backtrackBeforeAllVisibleElements(index: number, views: any[], top: number): number;
-/**
- * Use binary search to find the index of the first item in a given array which
- * passes a given condition. The items are expected to be sorted in the sense
- * that if the condition is true for one item in the array, then it is also true
- * for all following items.
- *
- * @returns {number} Index of the first array element to pass the test,
- *                   or |items.length| if no such element exists.
- */
-export function binarySearchFirstItem(items: any, condition: any, start?: number): number;
 export const DEFAULT_SCALE: 1;
 export const DEFAULT_SCALE_DELTA: 1.1;
 export const DEFAULT_SCALE_VALUE: "auto";
+export const docStyle: CSSStyleDeclaration | null;
 /**
  * Get the active or focused element in current DOM.
  *
@@ -202,13 +193,8 @@ export namespace PresentationModeState {
 }
 export class ProgressBar {
     constructor(id: any, ...args: any[]);
-    visible: boolean;
-    div: Element | null;
-    bar: ParentNode | null;
-    set percent(arg: any);
-    get percent(): any;
-    _indeterminate: boolean | undefined;
-    _percent: any;
+    set percent(arg: number);
+    get percent(): number;
     setWidth(viewer: any): void;
     hide(): void;
     show(): void;
@@ -219,10 +205,10 @@ export class ProgressBar {
  * @param {boolean} [replaceInvisible]
  */
 export function removeNullCharacters(str: string, replaceInvisible?: boolean | undefined): string;
-export namespace RendererType {
-    const CANVAS: string;
-    const SVG: string;
-}
+export const RendererType: {
+    CANVAS: string;
+    SVG: string;
+} | null;
 export namespace RenderingStates {
     const INITIAL: number;
     const RUNNING: number;

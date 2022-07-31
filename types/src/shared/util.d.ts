@@ -50,6 +50,21 @@ export namespace AnnotationBorderStyleType {
     const INSET: number;
     const UNDERLINE: number;
 }
+export namespace AnnotationEditorParamsType {
+    const FREETEXT_SIZE: number;
+    const FREETEXT_COLOR: number;
+    const FREETEXT_OPACITY: number;
+    const INK_COLOR: number;
+    const INK_THICKNESS: number;
+    const INK_OPACITY: number;
+}
+export const AnnotationEditorPrefix: "pdfjs_internal_editor_";
+export namespace AnnotationEditorType {
+    const DISABLE: number;
+    const NONE: number;
+    const FREETEXT: number;
+    const INK: number;
+}
 export namespace AnnotationFieldFlag {
     const READONLY: number;
     const REQUIRED: number;
@@ -89,21 +104,23 @@ export namespace AnnotationMarkedState {
     const UNMARKED: string;
 }
 export namespace AnnotationMode {
-    const DISABLE: number;
-    const ENABLE: number;
-    const ENABLE_FORMS: number;
-    const ENABLE_STORAGE: number;
+    const DISABLE_1: number;
+    export { DISABLE_1 as DISABLE };
+    export const ENABLE: number;
+    export const ENABLE_FORMS: number;
+    export const ENABLE_STORAGE: number;
 }
 export namespace AnnotationReplyType {
     const GROUP: string;
     const REPLY: string;
 }
 export namespace AnnotationReviewState {
-    const ACCEPTED: string;
-    const REJECTED: string;
-    const CANCELLED: string;
-    const COMPLETED: string;
-    const NONE: string;
+    export const ACCEPTED: string;
+    export const REJECTED: string;
+    export const CANCELLED: string;
+    export const COMPLETED: string;
+    const NONE_1: string;
+    export { NONE_1 as NONE };
 }
 export namespace AnnotationStateModelType {
     const MARKED_1: string;
@@ -113,7 +130,8 @@ export namespace AnnotationStateModelType {
 export namespace AnnotationType {
     export const TEXT: number;
     export const LINK: number;
-    export const FREETEXT: number;
+    const FREETEXT_1: number;
+    export { FREETEXT_1 as FREETEXT };
     export const LINE: number;
     export const SQUARE: number;
     export const CIRCLE: number;
@@ -126,7 +144,8 @@ export namespace AnnotationType {
     export const STRIKEOUT: number;
     export const STAMP: number;
     export const CARET: number;
-    export const INK: number;
+    const INK_1: number;
+    export { INK_1 as INK };
     export const POPUP: number;
     export const FILEATTACHMENT: number;
     export const SOUND: number;
@@ -159,8 +178,8 @@ export function assert(cond: any, msg: any): void;
 export const BaseException: any;
 export function bytesToString(bytes: any): string;
 export namespace CMapCompressionType {
-    const NONE_1: number;
-    export { NONE_1 as NONE };
+    const NONE_2: number;
+    export { NONE_2 as NONE };
     export const BINARY: number;
     export const STREAM: number;
 }
@@ -242,6 +261,8 @@ export class InvalidPDFException extends InvalidPDFException_base {
 export function isArrayBuffer(v: any): boolean;
 export function isArrayEqual(arr1: any, arr2: any): boolean;
 export function isAscii(str: any): boolean;
+export const LINE_DESCENT_FACTOR: 0.35;
+export const LINE_FACTOR: 1.35;
 declare const MissingPDFException_base: any;
 export class MissingPDFException extends MissingPDFException_base {
     [x: string]: any;

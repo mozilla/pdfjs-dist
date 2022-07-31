@@ -55,6 +55,16 @@ export type PageViewportCloneParameters = {
      */
     dontFlip?: boolean | undefined;
 };
+/**
+ * Use binary search to find the index of the first item in a given array which
+ * passes a given condition. The items are expected to be sorted in the sense
+ * that if the condition is true for one item in the array, then it is also true
+ * for all following items.
+ *
+ * @returns {number} Index of the first array element to pass the test,
+ *                   or |items.length| if no such element exists.
+ */
+export function binarySearchFirstItem(items: any, condition: any, start?: number): number;
 export function deprecated(details: any): void;
 export class DOMCanvasFactory extends BaseCanvasFactory {
     constructor({ ownerDocument }?: {
@@ -87,6 +97,7 @@ export class DOMSVGFactory extends BaseSVGFactory {
      */
     _createSVG(type: any): any;
 }
+export function getColorValues(colors: any): void;
 /**
  * Gets the filename from a given URL.
  * @param {string} url
@@ -101,6 +112,7 @@ export function getFilenameFromUrl(url: string): string;
  * @returns {string} Guessed PDF filename.
  */
 export function getPdfFilenameFromUrl(url: string, defaultFilename?: string): string;
+export function getRGB(color: any): any;
 /**
  * NOTE: This is (mostly) intended to support printing of XFA forms.
  */

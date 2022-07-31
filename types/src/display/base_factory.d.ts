@@ -39,7 +39,7 @@ export class BaseStandardFontDataFactory {
     _fetchData(url: any): void;
 }
 export class BaseSVGFactory {
-    create(width: any, height: any): void;
+    create(width: any, height: any, skipDimensions?: boolean): void;
     createElement(type: any): void;
     /**
      * @ignore

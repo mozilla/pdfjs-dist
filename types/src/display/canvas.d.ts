@@ -3,7 +3,7 @@ export class CanvasGraphics {
     ctx: any;
     current: CanvasExtraState;
     stateStack: any[];
-    pendingClip: {} | null;
+    pendingClip: {} | {} | null;
     pendingEOFill: boolean;
     res: any;
     xobjs: any;
@@ -127,8 +127,6 @@ export class CanvasGraphics {
     paintFormXObjectEnd(): void;
     beginGroup(group: any): void;
     endGroup(group: any): void;
-    beginAnnotations(): void;
-    endAnnotations(): void;
     beginAnnotation(id: any, rect: any, transform: any, matrix: any, hasOwnCanvas: any): void;
     annotationCanvas: any;
     endAnnotation(): void;
@@ -153,6 +151,7 @@ export class CanvasGraphics {
     rescaleAndStroke(saveRestore: any): void;
     getCanvasPosition(x: any, y: any): any[];
     isContentVisible(): boolean;
+    #private;
 }
 declare class CanvasExtraState {
     constructor(width: any, height: any);

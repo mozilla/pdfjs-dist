@@ -13,10 +13,10 @@ export type TextLayerRenderParameters = {
      */
     textContentStream?: ReadableStream<any> | undefined;
     /**
-     * - The DOM node that will contain the
-     * text runs.
+     * - The DOM node that
+     * will contain the text runs.
      */
-    container: DocumentFragment;
+    container: DocumentFragment | HTMLElement;
     /**
      * - The target
      * viewport to properly layout the text runs.
@@ -50,7 +50,7 @@ export type TextLayerRenderParameters = {
  * @returns {TextLayerRenderTask}
  */
 export function renderTextLayer(renderParameters: TextLayerRenderParameters): TextLayerRenderTask;
-declare class TextLayerRenderTask {
+export class TextLayerRenderTask {
     constructor({ textContent, textContentStream, container, viewport, textDivs, textContentItemsStr, enhanceTextSelection, }: {
         textContent: any;
         textContentStream: any;
@@ -79,6 +79,7 @@ declare class TextLayerRenderTask {
     _capability: import("../shared/util.js").PromiseCapability;
     _renderTimer: any;
     _bounds: any[];
+    _devicePixelRatio: number;
     /**
      * Promise for textLayer rendering task completion.
      * @type {Promise<void>}
@@ -105,4 +106,3 @@ declare class TextLayerRenderTask {
      */
     expandTextDivs(expandDivs?: boolean | undefined): void;
 }
-export {};

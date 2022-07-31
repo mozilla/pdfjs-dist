@@ -417,6 +417,7 @@ export type RenderParameters = {
      * annotation ids with canvases used to render them.
      */
     annotationCanvasMap?: Map<string, HTMLCanvasElement> | undefined;
+    printAnnotationStorage?: PrintAnnotationStorage | undefined;
 };
 /**
  * Page getOperatorList parameters.
@@ -442,6 +443,7 @@ export type GetOperatorListParameters = {
      * The default value is `AnnotationMode.ENABLE`.
      */
     annotationMode?: number | undefined;
+    printAnnotationStorage?: PrintAnnotationStorage | undefined;
 };
 /**
  * Structure tree node. The root node will have a role "Root".
@@ -675,7 +677,7 @@ export class PDFDataRangeTransport {
  * after which individual pages can be rendered.
  */
 export class PDFDocumentLoadingTask {
-    static "__#2@#docId": number;
+    static "__#16@#docId": number;
     _capability: import("../shared/util.js").PromiseCapability;
     _transport: any;
     _worker: any;
@@ -935,10 +937,10 @@ export class PDFDocumentProxy {
         Suspects: boolean;
     } | null>;
     /**
-     * @returns {Promise<TypedArray>} A promise that is resolved with a
-     *   {TypedArray} that has the raw data from the PDF.
+     * @returns {Promise<Uint8Array>} A promise that is resolved with a
+     *   {Uint8Array} that has the raw data from the PDF.
      */
-    getData(): Promise<TypedArray>;
+    getData(): Promise<Uint8Array>;
     /**
      * @returns {Promise<{ length: number }>} A promise that is resolved when the
      *   document's data is loaded. It is resolved with an {Object} that contains
@@ -1115,6 +1117,7 @@ export class PDFDocumentProxy {
  *   states set.
  * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap] - Map some
  *   annotation ids with canvases used to render them.
+ * @property {PrintAnnotationStorage} [printAnnotationStorage]
  */
 /**
  * Page getOperatorList parameters.
@@ -1134,6 +1137,7 @@ export class PDFDocumentProxy {
  *      (as above) but where interactive form elements are updated with data
  *      from the {@link AnnotationStorage}-instance; useful e.g. for printing.
  *   The default value is `AnnotationMode.ENABLE`.
+ * @property {PrintAnnotationStorage} [printAnnotationStorage]
  */
 /**
  * Structure tree node. The root node will have a role "Root".
@@ -1232,14 +1236,14 @@ export class PDFPageProxy {
      * @returns {RenderTask} An object that contains a promise that is
      *   resolved when the page finishes rendering.
      */
-    render({ canvasContext, viewport, intent, annotationMode, transform, imageLayer, canvasFactory, background, optionalContentConfigPromise, annotationCanvasMap, pageColors, }: RenderParameters, ...args: any[]): RenderTask;
+    render({ canvasContext, viewport, intent, annotationMode, transform, imageLayer, canvasFactory, background, optionalContentConfigPromise, annotationCanvasMap, pageColors, printAnnotationStorage, }: RenderParameters, ...args: any[]): RenderTask;
     /**
      * @param {GetOperatorListParameters} params - Page getOperatorList
      *   parameters.
      * @returns {Promise<PDFOperatorList>} A promise resolved with an
      *   {@link PDFOperatorList} object that represents the page's operator list.
      */
-    getOperatorList({ intent, annotationMode, }?: GetOperatorListParameters): Promise<PDFOperatorList>;
+    getOperatorList({ intent, annotationMode, printAnnotationStorage, }?: GetOperatorListParameters): Promise<PDFOperatorList>;
     /**
      * NOTE: All occurrences of whitespace will be replaced by
      * standard spaces (0x20).
@@ -1313,7 +1317,7 @@ export class PDFPageProxy {
  * @param {PDFWorkerParameters} params - The worker initialization parameters.
  */
 export class PDFWorker {
-    static "__#3@#workerPorts": WeakMap<object, any>;
+    static "__#17@#workerPorts": WeakMap<object, any>;
     /**
      * @param {PDFWorkerParameters} params - The worker initialization parameters.
      */
@@ -1370,7 +1374,6 @@ export namespace PDFWorkerUtil {
  */
 export class RenderTask {
     constructor(internalRenderTask: any);
-    _internalRenderTask: any;
     /**
      * Callback for incremental rendering -- a function that will be called
      * each time the rendering is paused.  To continue rendering call the
@@ -1389,6 +1392,12 @@ export class RenderTask {
      * this object extends will be rejected when cancelled.
      */
     cancel(): void;
+    /**
+     * Whether form fields are rendered separately from the main operatorList.
+     * @type {boolean}
+     */
+    get separateAnnots(): boolean;
+    #private;
 }
 /**
  * Sets the function that instantiates an {IPDFStream} as an alternative PDF
@@ -1404,6 +1413,7 @@ export function setPDFNetworkStreamFactory(pdfNetworkStreamFactory: IPDFStreamFa
 export const version: string;
 import { PageViewport } from "./display_utils.js";
 import { OptionalContentConfig } from "./optional_content_config.js";
+import { PrintAnnotationStorage } from "./annotation_storage.js";
 import { DOMCanvasFactory } from "./display_utils.js";
 import { DOMCMapReaderFactory } from "./display_utils.js";
 import { DOMStandardFontDataFactory } from "./display_utils.js";

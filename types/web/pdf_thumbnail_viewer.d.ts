@@ -25,6 +25,12 @@ export type PDFThumbnailViewerOptions = {
      * - Localization service.
      */
     l10n: IL10n;
+    /**
+     * - Overwrites background and foreground colors
+     * with user defined ones in order to improve readability in high contrast
+     * mode.
+     */
+    pageColors?: Object | undefined;
 };
 /**
  * @typedef {Object} PDFThumbnailViewerOptions
@@ -34,6 +40,9 @@ export type PDFThumbnailViewerOptions = {
  * @property {IPDFLinkService} linkService - The navigation/linking service.
  * @property {PDFRenderingQueue} renderingQueue - The rendering queue object.
  * @property {IL10n} l10n - Localization service.
+ * @property {Object} [pageColors] - Overwrites background and foreground colors
+ *   with user defined ones in order to improve readability in high contrast
+ *   mode.
  */
 /**
  * Viewer control to display thumbnails for pages in a PDF document.
@@ -42,11 +51,12 @@ export class PDFThumbnailViewer {
     /**
      * @param {PDFThumbnailViewerOptions} options
      */
-    constructor({ container, eventBus, linkService, renderingQueue, l10n }: PDFThumbnailViewerOptions);
+    constructor({ container, eventBus, linkService, renderingQueue, l10n, pageColors, }: PDFThumbnailViewerOptions);
     container: HTMLDivElement;
     linkService: import("./interfaces").IPDFLinkService;
     renderingQueue: import("./pdf_rendering_queue").PDFRenderingQueue;
     l10n: import("./interfaces").IL10n;
+    pageColors: Object | null;
     scroll: {
         right: boolean;
         down: boolean;
@@ -54,7 +64,6 @@ export class PDFThumbnailViewer {
         lastY: any;
         _eventHandler: (evt: any) => void;
     };
-    _setImageDisabled: boolean;
     /**
      * @private
      */
@@ -76,7 +85,6 @@ export class PDFThumbnailViewer {
     private _resetView;
     _thumbnails: any[] | undefined;
     _pageLabels: any[] | null | undefined;
-    _optionalContentConfigPromise: Promise<import("../src/display/optional_content_config.js").OptionalContentConfig> | null | undefined;
     /**
      * @param {PDFDocumentProxy} pdfDocument
      */

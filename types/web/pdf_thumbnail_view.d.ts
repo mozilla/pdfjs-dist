@@ -29,11 +29,16 @@ export type PDFThumbnailViewOptions = {
      * - The rendering queue object.
      */
     renderingQueue: PDFRenderingQueue;
-    checkSetImageDisabled: Function;
     /**
      * - Localization service.
      */
     l10n: IL10n;
+    /**
+     * - Overwrites background and foreground colors
+     * with user defined ones in order to improve readability in high contrast
+     * mode.
+     */
+    pageColors?: Object | undefined;
 };
 /**
  * @implements {IRenderableView}
@@ -42,7 +47,7 @@ export class PDFThumbnailView implements IRenderableView {
     /**
      * @param {PDFThumbnailViewOptions} options
      */
-    constructor({ container, id, defaultViewport, optionalContentConfigPromise, linkService, renderingQueue, checkSetImageDisabled, l10n, }: PDFThumbnailViewOptions);
+    constructor({ container, id, defaultViewport, optionalContentConfigPromise, linkService, renderingQueue, l10n, pageColors, }: PDFThumbnailViewOptions);
     id: number;
     renderingId: string;
     pageLabel: string | null;
@@ -51,12 +56,12 @@ export class PDFThumbnailView implements IRenderableView {
     viewport: PageViewport;
     pdfPageRotate: any;
     _optionalContentConfigPromise: Promise<OptionalContentConfig> | null;
+    pageColors: Object | null;
     linkService: import("./interfaces").IPDFLinkService;
     renderingQueue: import("./pdf_rendering_queue").PDFRenderingQueue;
     renderTask: any;
     renderingState: number;
     resume: (() => void) | null;
-    _checkSetImageDisabled: Function;
     canvasWidth: number;
     canvasHeight: number;
     scale: number;
@@ -106,11 +111,13 @@ export class PDFThumbnailView implements IRenderableView {
  *   The default value is `null`.
  * @property {IPDFLinkService} linkService - The navigation/linking service.
  * @property {PDFRenderingQueue} renderingQueue - The rendering queue object.
- * @property {function} checkSetImageDisabled
  * @property {IL10n} l10n - Localization service.
+ * @property {Object} [pageColors] - Overwrites background and foreground colors
+ *   with user defined ones in order to improve readability in high contrast
+ *   mode.
  */
 export class TempImageFactory {
-    static "__#11@#tempCanvas": null;
+    static "__#27@#tempCanvas": null;
     static getCanvas(width: any, height: any): (HTMLCanvasElement | CanvasRenderingContext2D | null)[];
     static destroyCanvas(): void;
 }
