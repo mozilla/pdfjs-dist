@@ -84,6 +84,16 @@ export const AutoPrintRegExp: RegExp;
  *   `views`, although sometimes it goes back one row further.)
  */
 export function backtrackBeforeAllVisibleElements(index: number, views: any[], top: number): number;
+/**
+ * Use binary search to find the index of the first item in a given array which
+ * passes a given condition. The items are expected to be sorted in the sense
+ * that if the condition is true for one item in the array, then it is also true
+ * for all following items.
+ *
+ * @returns {number} Index of the first array element to pass the test,
+ *                   or |items.length| if no such element exists.
+ */
+export function binarySearchFirstItem(items: any, condition: any, start?: number): number;
 export const DEFAULT_SCALE: 1;
 export const DEFAULT_SCALE_DELTA: 1.1;
 export const DEFAULT_SCALE_VALUE: "auto";

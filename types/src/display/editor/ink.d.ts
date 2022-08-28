@@ -6,6 +6,7 @@ export class InkEditor extends AnnotationEditor {
     static _defaultOpacity: number;
     static _defaultThickness: number;
     static _l10nPromise: any;
+    static _type: string;
     static initialize(l10n: any): void;
     static updateDefaultParams(type: any, value: any): void;
     static get defaultPropertiesToUpdate(): any[][];

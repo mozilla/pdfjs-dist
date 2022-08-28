@@ -25,7 +25,7 @@ export type PDFPageViewOptions = {
     /**
      * - The page scale display.
      */
-    scale: number;
+    scale?: number | undefined;
     /**
      * - The page viewport.
      */
@@ -39,8 +39,8 @@ export type PDFPageViewOptions = {
     /**
      * - The rendering queue object.
      */
-    renderingQueue: PDFRenderingQueue;
-    textLayerFactory: IPDFTextLayerFactory;
+    renderingQueue?: import("./pdf_rendering_queue").PDFRenderingQueue | undefined;
+    textLayerFactory?: import("./interfaces").IPDFTextLayerFactory | undefined;
     /**
      * - Controls if the text layer used for
      * selection and searching is created, and if the improved text selection
@@ -56,10 +56,10 @@ export type PDFPageViewOptions = {
      * The default value is `AnnotationMode.ENABLE_FORMS`.
      */
     annotationMode?: number | undefined;
-    annotationLayerFactory: IPDFAnnotationLayerFactory;
-    annotationEditorLayerFactory: IPDFAnnotationEditorLayerFactory;
-    xfaLayerFactory: IPDFXfaLayerFactory;
-    structTreeLayerFactory: IPDFStructTreeLayerFactory;
+    annotationLayerFactory?: import("./interfaces").IPDFAnnotationLayerFactory | undefined;
+    annotationEditorLayerFactory?: import("./interfaces").IPDFAnnotationEditorLayerFactory | undefined;
+    xfaLayerFactory?: import("./interfaces").IPDFXfaLayerFactory | undefined;
+    structTreeLayerFactory?: import("./interfaces").IPDFStructTreeLayerFactory | undefined;
     textHighlighterFactory?: Object | undefined;
     /**
      * - Path for image resources, mainly
@@ -86,7 +86,7 @@ export type PDFPageViewOptions = {
     /**
      * - Localization service.
      */
-    l10n: IL10n;
+    l10n?: import("./interfaces").IL10n | undefined;
 };
 /**
  * @implements {IRenderableView}
@@ -112,15 +112,20 @@ export class PDFPageView implements IRenderableView {
     maxCanvasPixels: any;
     pageColors: Object | null;
     eventBus: import("./event_utils").EventBus;
-    renderingQueue: import("./pdf_rendering_queue").PDFRenderingQueue;
-    textLayerFactory: import("./interfaces").IPDFTextLayerFactory;
-    annotationLayerFactory: import("./interfaces").IPDFAnnotationLayerFactory;
-    annotationEditorLayerFactory: import("./interfaces").IPDFAnnotationEditorLayerFactory;
-    xfaLayerFactory: import("./interfaces").IPDFXfaLayerFactory;
+    renderingQueue: import("./pdf_rendering_queue").PDFRenderingQueue | undefined;
+    textLayerFactory: import("./interfaces").IPDFTextLayerFactory | undefined;
+    annotationLayerFactory: import("./interfaces").IPDFAnnotationLayerFactory | undefined;
+    annotationEditorLayerFactory: import("./interfaces").IPDFAnnotationEditorLayerFactory | undefined;
+    xfaLayerFactory: import("./interfaces").IPDFXfaLayerFactory | undefined;
     textHighlighter: any;
-    structTreeLayerFactory: import("./interfaces").IPDFStructTreeLayerFactory;
+    structTreeLayerFactory: import("./interfaces").IPDFStructTreeLayerFactory | undefined;
     renderer: any;
-    l10n: import("./interfaces").IL10n;
+    l10n: {
+        getLanguage(): Promise<string>;
+        getDirection(): Promise<string>;
+        get(key: any, args?: null, fallback?: any): Promise<any>;
+        translate(element: any): Promise<void>;
+    };
     paintTask: {
         promise: any;
         onRenderContinue(cont: any): void;
@@ -137,7 +142,7 @@ export class PDFPageView implements IRenderableView {
     annotationEditorLayer: any;
     textLayer: import("./text_layer_builder.js").TextLayerBuilder | null;
     zoomLayer: ParentNode | null;
-    xfaLayer: import("./xfa_layer_builder.js").XfaLayerBuilder | null;
+    xfaLayer: any;
     structTreeLayer: any;
     div: HTMLDivElement;
     setPdfPage(pdfPage: any): void;

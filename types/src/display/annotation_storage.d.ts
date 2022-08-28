@@ -11,6 +11,7 @@ export class AnnotationStorage {
     _modified: boolean;
     onSetModified: any;
     onResetModified: any;
+    onAnnotationEditor: any;
     /**
      * Get the value for a given key if it exists, or return the default value.
      *
@@ -34,7 +35,7 @@ export class AnnotationStorage {
      * Remove a value from the storage.
      * @param {string} key
      */
-    removeKey(key: string): void;
+    remove(key: string): void;
     /**
      * Set the value for a given key
      *

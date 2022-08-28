@@ -1,6 +1,7 @@
 export type PageViewport = import("../src/display/display_utils").PageViewport;
 export type EventBus = import("./event_utils").EventBus;
 export type TextHighlighter = import("./text_highlighter").TextHighlighter;
+export type TextAccessibilityManager = import("./text_accessibility.js").TextAccessibilityManager;
 export type TextLayerBuilderOptions = {
     /**
      * - The text layer container.
@@ -28,6 +29,7 @@ export type TextLayerBuilderOptions = {
      * text selection.
      */
     enhanceTextSelection: boolean;
+    accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
 };
 /**
  * @typedef {Object} TextLayerBuilderOptions
@@ -39,6 +41,7 @@ export type TextLayerBuilderOptions = {
  *   highlighting text from the find controller.
  * @property {boolean} enhanceTextSelection - Option to turn on improved
  *   text selection.
+ * @property {TextAccessibilityManager} [accessibilityManager]
  */
 /**
  * The text layer builder provides text selection functionality for the PDF.
@@ -46,13 +49,14 @@ export type TextLayerBuilderOptions = {
  * contain text that matches the PDF text they are overlaying.
  */
 export class TextLayerBuilder {
-    constructor({ textLayerDiv, eventBus, pageIndex, viewport, highlighter, enhanceTextSelection, }: {
+    constructor({ textLayerDiv, eventBus, pageIndex, viewport, highlighter, enhanceTextSelection, accessibilityManager, }: {
         textLayerDiv: any;
         eventBus: any;
         pageIndex: any;
         viewport: any;
         highlighter?: null | undefined;
         enhanceTextSelection?: boolean | undefined;
+        accessibilityManager?: null | undefined;
     });
     textLayerDiv: any;
     eventBus: any;
@@ -66,6 +70,7 @@ export class TextLayerBuilder {
     textLayerRenderTask: any;
     highlighter: any;
     enhanceTextSelection: boolean;
+    accessibilityManager: any;
     /**
      * @private
      */

@@ -1,6 +1,7 @@
 export type AnnotationEditor = import("./editor.js").AnnotationEditor;
 export type AnnotationEditorUIManager = import("./tools.js").AnnotationEditorUIManager;
 export type AnnotationStorage = import("../annotation_storage.js").AnnotationStorage;
+export type TextAccessibilityManager = any;
 export type IL10n = any;
 export type AnnotationEditorLayerOptions = {
     mode: Object;
@@ -8,6 +9,7 @@ export type AnnotationEditorLayerOptions = {
     uiManager: AnnotationEditorUIManager;
     enabled: boolean;
     annotationStorage: AnnotationStorage;
+    accessibilityManager?: any;
     pageIndex: number;
     l10n: any;
 };
@@ -18,6 +20,7 @@ export type AnnotationEditorLayerOptions = {
  * @property {AnnotationEditorUIManager} uiManager
  * @property {boolean} enabled
  * @property {AnnotationStorage} annotationStorage
+ * @property {TextAccessibilityManager} [accessibilityManager]
  * @property {number} pageIndex
  * @property {IL10n} l10n
  */
@@ -27,22 +30,12 @@ export type AnnotationEditorLayerOptions = {
 export class AnnotationEditorLayer {
     static _initialized: boolean;
     /**
-     * Compare the positions of two elements, it must correspond to
-     * the visual ordering.
-     *
-     * @param {HTMLElement} e1
-     * @param {HTMLElement} e2
-     * @returns {number}
-     */
-    static "__#3@#compareElementPositions"(e1: HTMLElement, e2: HTMLElement): number;
-    /**
      * @param {AnnotationEditorLayerOptions} options
      */
     constructor(options: AnnotationEditorLayerOptions);
     annotationStorage: import("../annotation_storage.js").AnnotationStorage;
     pageIndex: number;
     div: HTMLDivElement;
-    get textLayerElements(): any;
     /**
      * Update the toolbar if it's required to reflect the tool currently used.
      * @param {number} mode
@@ -88,30 +81,11 @@ export class AnnotationEditorLayer {
      */
     remove(editor: AnnotationEditor): void;
     /**
-     * Function called when the text layer has finished rendering.
-     */
-    onTextLayerRendered(): void;
-    /**
-     * Remove an aria-owns id from a node in the text layer.
-     * @param {AnnotationEditor} editor
-     */
-    removePointerInTextLayer(editor: AnnotationEditor): void;
-    /**
-     * Find the text node which is the nearest and add an aria-owns attribute
-     * in order to correctly position this editor in the text flow.
-     * @param {AnnotationEditor} editor
-     */
-    addPointerInTextLayer(editor: AnnotationEditor): void;
-    /**
-     * Move a div in the DOM in order to respect the visual order.
-     * @param {HTMLDivElement} div
-     */
-    moveDivInDOM(editor: any): void;
-    /**
      * Add a new editor in the current view.
      * @param {AnnotationEditor} editor
      */
     add(editor: AnnotationEditor): void;
+    moveEditorInDOM(editor: any): void;
     /**
      * Add an editor in the annotation storage.
      * @param {AnnotationEditor} editor

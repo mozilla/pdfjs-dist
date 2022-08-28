@@ -2619,7 +2619,7 @@ class SimpleSegmentVisitor {
   }
 
   onImmediateLosslessGenericRegion() {
-    this.onImmediateGenericRegion.apply(this, arguments);
+    this.onImmediateGenericRegion(...arguments);
   }
 
   onSymbolDictionary(dictionary, currentSegment, referredSegments, data, start, end) {
@@ -2677,7 +2677,7 @@ class SimpleSegmentVisitor {
   }
 
   onImmediateLosslessTextRegion() {
-    this.onImmediateTextRegion.apply(this, arguments);
+    this.onImmediateTextRegion(...arguments);
   }
 
   onPatternDictionary(dictionary, currentSegment, data, start, end) {
@@ -2700,7 +2700,7 @@ class SimpleSegmentVisitor {
   }
 
   onImmediateLosslessHalftoneRegion() {
-    this.onImmediateHalftoneRegion.apply(this, arguments);
+    this.onImmediateHalftoneRegion(...arguments);
   }
 
   onTables(currentSegment, data, start, end) {
@@ -9028,8 +9028,8 @@ var _jpg = __w_pdfjs_require__(10);
 
 var _jpx = __w_pdfjs_require__(11);
 
-const pdfjsVersion = '2.15.349';
-const pdfjsBuild = 'b8aa9c622';
+const pdfjsVersion = '2.16.105';
+const pdfjsBuild = '172ccdbe5';
 })();
 
 /******/ 	return __webpack_exports__;

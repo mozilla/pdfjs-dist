@@ -3,6 +3,7 @@ export type PageViewport = import("../src/display/display_utils").PageViewport;
 export type IDownloadManager = import("./interfaces").IDownloadManager;
 export type IL10n = import("./interfaces").IL10n;
 export type IPDFLinkService = import("./interfaces").IPDFLinkService;
+export type TextAccessibilityManager = any;
 export type AnnotationLayerBuilderOptions = {
     pageDiv: HTMLDivElement;
     pdfPage: PDFPageProxy;
@@ -26,6 +27,7 @@ export type AnnotationLayerBuilderOptions = {
     } | null> | undefined;
     mouseState?: Object | undefined;
     annotationCanvasMap?: Map<string, HTMLCanvasElement> | undefined;
+    accessibilityManager: any;
 };
 /**
  * @typedef {Object} AnnotationLayerBuilderOptions
@@ -44,12 +46,13 @@ export type AnnotationLayerBuilderOptions = {
  *   [fieldObjectsPromise]
  * @property {Object} [mouseState]
  * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap]
+ * @property {TextAccessibilityManager} accessibilityManager
  */
 export class AnnotationLayerBuilder {
     /**
      * @param {AnnotationLayerBuilderOptions} options
      */
-    constructor({ pageDiv, pdfPage, linkService, downloadManager, annotationStorage, imageResourcesPath, renderForms, l10n, enableScripting, hasJSActionsPromise, fieldObjectsPromise, mouseState, annotationCanvasMap, }: AnnotationLayerBuilderOptions);
+    constructor({ pageDiv, pdfPage, linkService, downloadManager, annotationStorage, imageResourcesPath, renderForms, l10n, enableScripting, hasJSActionsPromise, fieldObjectsPromise, mouseState, annotationCanvasMap, accessibilityManager, }: AnnotationLayerBuilderOptions);
     pageDiv: HTMLDivElement;
     pdfPage: import("../src/display/api").PDFPageProxy;
     linkService: import("./interfaces").IPDFLinkService;
@@ -65,6 +68,7 @@ export class AnnotationLayerBuilder {
     } | null>;
     _mouseState: Object;
     _annotationCanvasMap: Map<string, HTMLCanvasElement>;
+    _accessibilityManager: any;
     div: HTMLDivElement | null;
     _cancelled: boolean;
     /**

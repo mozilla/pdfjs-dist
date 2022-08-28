@@ -306,7 +306,6 @@
 
 .annotationLayer .popup {
   position: absolute;
-  z-index: 200;
   max-width: calc(180px * var(--scale-factor));
   background-color: rgba(255, 255, 153, 1);
   box-shadow: 0 calc(2px * var(--scale-factor)) calc(5px * var(--scale-factor))
@@ -366,6 +365,23 @@
   position: absolute;
   width: 100%;
   height: 100%;
+}
+
+.annotationLayer .annotationTextContent {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  color: transparent;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  pointer-events: none;
+}
+
+.annotationLayer .annotationTextContent span {
+  width: 100%;
+  display: inline-block;
 }
 
 
@@ -707,11 +723,11 @@
 
 
 :root {
-  --focus-outline: solid 2px red;
+  --focus-outline: solid 2px blue;
   --hover-outline: dashed 2px blue;
   --freetext-line-height: 1.35;
   --freetext-padding: 2px;
-  --editorInk-editing-cursor: url(images/toolbarButton-editorInk.svg) 0 16;
+  --editorInk-editing-cursor: pointer;
 }
 
 @media (forced-colors: active) {

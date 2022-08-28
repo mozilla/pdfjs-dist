@@ -15,9 +15,6 @@ export class AnnotationEditorUIManager {
     onPageChanging({ pageNumber }: {
         pageNumber: any;
     }): void;
-    onTextLayerRendered({ pageNumber }: {
-        pageNumber: any;
-    }): void;
     focusMainContainer(): void;
     /**
      * Keydown callback.

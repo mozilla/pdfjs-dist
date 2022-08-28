@@ -9,6 +9,7 @@ export class FreeTextEditor extends AnnotationEditor {
     static _defaultColor: null;
     static _defaultFontSize: number;
     static _keyboardManager: KeyboardManager;
+    static _type: string;
     static initialize(l10n: any): void;
     static updateDefaultParams(type: any, value: any): void;
     static get defaultPropertiesToUpdate(): any[][];

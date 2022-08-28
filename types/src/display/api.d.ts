@@ -1,4 +1,5 @@
 export type TypedArray = Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array;
+export type BinaryData = TypedArray | ArrayBuffer | Array<number> | string;
 export type RefProxy = {
     num: number;
     gen: number;
@@ -12,11 +13,11 @@ export type DocumentInitParameters = {
      */
     url?: string | URL | undefined;
     /**
-     * - Binary PDF data. Use
-     * typed arrays (Uint8Array) to improve the memory usage. If PDF data is
+     * - Binary PDF data.
+     * Use typed arrays (Uint8Array) to improve the memory usage. If PDF data is
      * BASE64-encoded, use `atob()` to convert it to a binary string first.
      */
-    data?: string | number[] | TypedArray | undefined;
+    data?: BinaryData | undefined;
     /**
      * - Basic authentication headers.
      */
@@ -186,6 +187,7 @@ export type DocumentInitParameters = {
      */
     pdfBug?: boolean | undefined;
 };
+export type GetDocumentParameters = string | URL | TypedArray | ArrayBuffer | PDFDataRangeTransport | DocumentInitParameters;
 export type IPDFStreamFactory = Function;
 export type OnProgressParameters = {
     /**
@@ -516,6 +518,9 @@ export let DefaultStandardFontDataFactory: typeof DOMStandardFontDataFactory;
  * } TypedArray
  */
 /**
+ * @typedef { TypedArray | ArrayBuffer | Array<number> | string } BinaryData
+ */
+/**
  * @typedef {Object} RefProxy
  * @property {number} num
  * @property {number} gen
@@ -524,10 +529,10 @@ export let DefaultStandardFontDataFactory: typeof DOMStandardFontDataFactory;
  * Document initialization / loading parameters object.
  *
  * @typedef {Object} DocumentInitParameters
- * @property {string|URL} [url] - The URL of the PDF.
- * @property {TypedArray|Array<number>|string} [data] - Binary PDF data. Use
- *    typed arrays (Uint8Array) to improve the memory usage. If PDF data is
- *    BASE64-encoded, use `atob()` to convert it to a binary string first.
+ * @property {string | URL} [url] - The URL of the PDF.
+ * @property {BinaryData} [data] - Binary PDF data.
+ *   Use typed arrays (Uint8Array) to improve the memory usage. If PDF data is
+ *   BASE64-encoded, use `atob()` to convert it to a binary string first.
  * @property {Object} [httpHeaders] - Basic authentication headers.
  * @property {boolean} [withCredentials] - Indicates whether or not
  *   cross-site Access-Control requests should be made using credentials such
@@ -614,18 +619,23 @@ export let DefaultStandardFontDataFactory: typeof DOMStandardFontDataFactory;
  *   (see `web/debugger.js`). The default value is `false`.
  */
 /**
+ * @typedef { string | URL | TypedArray | ArrayBuffer |
+ *            PDFDataRangeTransport | DocumentInitParameters
+ * } GetDocumentParameters
+ */
+/**
  * This is the main entry point for loading a PDF and interacting with it.
  *
  * NOTE: If a URL is used to fetch the PDF data a standard Fetch API call (or
  * XHR as fallback) is used, which means it must follow same origin rules,
  * e.g. no cross-domain requests without CORS.
  *
- * @param {string|URL|TypedArray|PDFDataRangeTransport|DocumentInitParameters}
+ * @param {GetDocumentParameters}
  *   src - Can be a URL where a PDF file is located, a typed array (Uint8Array)
  *         already populated with data, or a parameter object.
  * @returns {PDFDocumentLoadingTask}
  */
-export function getDocument(src: string | URL | TypedArray | PDFDataRangeTransport | DocumentInitParameters): PDFDocumentLoadingTask;
+export function getDocument(src: GetDocumentParameters): PDFDocumentLoadingTask;
 export class LoopbackPort {
     _listeners: any[];
     _deferred: Promise<void>;

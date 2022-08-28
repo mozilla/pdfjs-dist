@@ -149,7 +149,6 @@ export class CanvasGraphics {
     getSinglePixelWidth(): number;
     getScaleForStroking(): number[];
     rescaleAndStroke(saveRestore: any): void;
-    getCanvasPosition(x: any, y: any): any[];
     isContentVisible(): boolean;
     #private;
 }
@@ -200,7 +199,7 @@ declare class CachedCanvases {
     constructor(canvasFactory: any);
     canvasFactory: any;
     cache: any;
-    getCanvas(id: any, width: any, height: any, trackTransform: any): any;
+    getCanvas(id: any, width: any, height: any): any;
     delete(id: any): void;
     clear(): void;
 }

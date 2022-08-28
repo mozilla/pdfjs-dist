@@ -10,6 +10,7 @@ export type IPDFLinkService = import("./interfaces").IPDFLinkService;
 export type IPDFStructTreeLayerFactory = import("./interfaces").IPDFStructTreeLayerFactory;
 export type IPDFTextLayerFactory = import("./interfaces").IPDFTextLayerFactory;
 export type IPDFXfaLayerFactory = import("./interfaces").IPDFXfaLayerFactory;
+export type TextAccessibilityManager = import("./text_accessibility.js").TextAccessibilityManager;
 export type PDFViewerOptions = {
     /**
      * - The container for the viewer element.
@@ -325,18 +326,20 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdi
      * @property {boolean} [enhanceTextSelection]
      * @property {EventBus} eventBus
      * @property {TextHighlighter} highlighter
+     * @property {TextAccessibilityManager} [accessibilityManager]
      */
     /**
      * @param {CreateTextLayerBuilderParameters}
      * @returns {TextLayerBuilder}
      */
-    createTextLayerBuilder({ textLayerDiv, pageIndex, viewport, enhanceTextSelection, eventBus, highlighter, }: {
+    createTextLayerBuilder({ textLayerDiv, pageIndex, viewport, enhanceTextSelection, eventBus, highlighter, accessibilityManager, }: {
         textLayerDiv: HTMLDivElement;
         pageIndex: number;
         viewport: PageViewport;
         enhanceTextSelection?: boolean | undefined;
         eventBus: EventBus;
         highlighter: TextHighlighter;
+        accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
     }): TextLayerBuilder;
     /**
      * @typedef {Object} CreateTextHighlighterParameters
@@ -368,12 +371,13 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdi
      *   [fieldObjectsPromise]
      * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap] - Map some
      *   annotation ids with canvases used to render them.
+     * @property {TextAccessibilityManager} [accessibilityManager]
      */
     /**
      * @param {CreateAnnotationLayerBuilderParameters}
      * @returns {AnnotationLayerBuilder}
      */
-    createAnnotationLayerBuilder({ pageDiv, pdfPage, annotationStorage, imageResourcesPath, renderForms, l10n, enableScripting, hasJSActionsPromise, mouseState, fieldObjectsPromise, annotationCanvasMap, }: {
+    createAnnotationLayerBuilder({ pageDiv, pdfPage, annotationStorage, imageResourcesPath, renderForms, l10n, enableScripting, hasJSActionsPromise, mouseState, fieldObjectsPromise, annotationCanvasMap, accessibilityManager, }: {
         pageDiv: HTMLDivElement;
         pdfPage: PDFPageProxy;
         /**
@@ -399,6 +403,7 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdi
          * annotation ids with canvases used to render them.
          */
         annotationCanvasMap?: Map<string, HTMLCanvasElement> | undefined;
+        accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
     }): AnnotationLayerBuilder;
     /**
      * @typedef {Object} CreateAnnotationEditorLayerBuilderParameters
@@ -407,22 +412,26 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdi
      * @property {PDFPageProxy} pdfPage
      * @property {IL10n} l10n
      * @property {AnnotationStorage} [annotationStorage] - Storage for annotation
+     * @property {TextAccessibilityManager} [accessibilityManager]
      *   data in forms.
      */
     /**
      * @param {CreateAnnotationEditorLayerBuilderParameters}
      * @returns {AnnotationEditorLayerBuilder}
      */
-    createAnnotationEditorLayerBuilder({ uiManager, pageDiv, pdfPage, l10n, annotationStorage, }: {
+    createAnnotationEditorLayerBuilder({ uiManager, pageDiv, pdfPage, accessibilityManager, l10n, annotationStorage, }: {
         uiManager?: any;
         pageDiv: HTMLDivElement;
         pdfPage: PDFPageProxy;
         l10n: IL10n;
         /**
          * - Storage for annotation
-         * data in forms.
          */
         annotationStorage?: any;
+        /**
+         * data in forms.
+         */
+        accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
     }): AnnotationEditorLayerBuilder;
     /**
      * @typedef {Object} CreateXfaLayerBuilderParameters
@@ -530,6 +539,7 @@ export class BaseViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdi
      */
     get annotationEditorMode(): number;
     set annotationEditorParams(arg: any);
+    refresh(): void;
     #private;
 }
 export namespace PagesCountLimit {

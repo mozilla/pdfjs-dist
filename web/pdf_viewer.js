@@ -70,7 +70,8 @@ class DefaultAnnotationLayerFactory {
     hasJSActionsPromise = null,
     mouseState = null,
     fieldObjectsPromise = null,
-    annotationCanvasMap = null
+    annotationCanvasMap = null,
+    accessibilityManager = null
   }) {
     return new _annotation_layer_builder.AnnotationLayerBuilder({
       pageDiv,
@@ -84,7 +85,8 @@ class DefaultAnnotationLayerFactory {
       hasJSActionsPromise,
       fieldObjectsPromise,
       mouseState,
-      annotationCanvasMap
+      annotationCanvasMap,
+      accessibilityManager
     });
   }
 
@@ -97,6 +99,7 @@ class DefaultAnnotationEditorLayerFactory {
     uiManager = null,
     pageDiv,
     pdfPage,
+    accessibilityManager = null,
     l10n,
     annotationStorage = null
   }) {
@@ -104,6 +107,7 @@ class DefaultAnnotationEditorLayerFactory {
       uiManager,
       pageDiv,
       pdfPage,
+      accessibilityManager,
       l10n,
       annotationStorage
     });
@@ -133,7 +137,8 @@ class DefaultTextLayerFactory {
     viewport,
     enhanceTextSelection = false,
     eventBus,
-    highlighter
+    highlighter,
+    accessibilityManager = null
   }) {
     return new _text_layer_builder.TextLayerBuilder({
       textLayerDiv,
@@ -141,7 +146,8 @@ class DefaultTextLayerFactory {
       viewport,
       enhanceTextSelection,
       eventBus,
-      highlighter
+      highlighter,
+      accessibilityManager
     });
   }
 
@@ -189,6 +195,7 @@ class AnnotationEditorLayerBuilder {
     this.pageDiv = options.pageDiv;
     this.pdfPage = options.pdfPage;
     this.annotationStorage = options.annotationStorage || null;
+    this.accessibilityManager = options.accessibilityManager;
     this.l10n = options.l10n || _l10n_utils.NullL10n;
     this.annotationEditorLayer = null;
     this.div = null;
@@ -225,6 +232,7 @@ class AnnotationEditorLayerBuilder {
       uiManager: this.#uiManager,
       div: this.div,
       annotationStorage: this.annotationStorage,
+      accessibilityManager: this.accessibilityManager,
       pageIndex: this.pdfPage._pageIndex,
       l10n: this.l10n,
       viewport: clonedViewport
@@ -450,7 +458,8 @@ class AnnotationLayerBuilder {
     hasJSActionsPromise = null,
     fieldObjectsPromise = null,
     mouseState = null,
-    annotationCanvasMap = null
+    annotationCanvasMap = null,
+    accessibilityManager = null
   }) {
     this.pageDiv = pageDiv;
     this.pdfPage = pdfPage;
@@ -465,6 +474,7 @@ class AnnotationLayerBuilder {
     this._fieldObjectsPromise = fieldObjectsPromise;
     this._mouseState = mouseState;
     this._annotationCanvasMap = annotationCanvasMap;
+    this._accessibilityManager = accessibilityManager;
     this.div = null;
     this._cancelled = false;
   }
@@ -494,7 +504,8 @@ class AnnotationLayerBuilder {
       hasJSActions,
       fieldObjects,
       mouseState: this._mouseState,
-      annotationCanvasMap: this._annotationCanvasMap
+      annotationCanvasMap: this._annotationCanvasMap,
+      accessibilityManager: this._accessibilityManager
     };
 
     if (this.div) {
@@ -1062,7 +1073,7 @@ exports.SimpleLinkService = SimpleLinkService;
 
 /***/ }),
 /* 7 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+/***/ ((__unused_webpack_module, exports) => {
 
 
 
@@ -1074,6 +1085,7 @@ exports.apiPageLayoutToViewerModes = apiPageLayoutToViewerModes;
 exports.apiPageModeToSidebarView = apiPageModeToSidebarView;
 exports.approximateFraction = approximateFraction;
 exports.backtrackBeforeAllVisibleElements = backtrackBeforeAllVisibleElements;
+exports.binarySearchFirstItem = binarySearchFirstItem;
 exports.docStyle = void 0;
 exports.getActiveOrFocusedElement = getActiveOrFocusedElement;
 exports.getPageSizeInches = getPageSizeInches;
@@ -1090,9 +1102,6 @@ exports.removeNullCharacters = removeNullCharacters;
 exports.roundToDivide = roundToDivide;
 exports.scrollIntoView = scrollIntoView;
 exports.watchScroll = watchScroll;
-
-var _pdfjsLib = __w_pdfjs_require__(3);
-
 const DEFAULT_SCALE_VALUE = "auto";
 exports.DEFAULT_SCALE_VALUE = DEFAULT_SCALE_VALUE;
 const DEFAULT_SCALE = 1.0;
@@ -1279,6 +1288,32 @@ function removeNullCharacters(str, replaceInvisible = false) {
   return str.replace(NullCharactersRegExp, "");
 }
 
+function binarySearchFirstItem(items, condition, start = 0) {
+  let minIndex = start;
+  let maxIndex = items.length - 1;
+
+  if (maxIndex < 0 || !condition(items[maxIndex])) {
+    return items.length;
+  }
+
+  if (condition(items[minIndex])) {
+    return minIndex;
+  }
+
+  while (minIndex < maxIndex) {
+    const currentIndex = minIndex + maxIndex >> 1;
+    const currentItem = items[currentIndex];
+
+    if (condition(currentItem)) {
+      maxIndex = currentIndex;
+    } else {
+      minIndex = currentIndex + 1;
+    }
+  }
+
+  return minIndex;
+}
+
 function approximateFraction(x) {
   if (Math.floor(x) === x) {
     return [x, 1];
@@ -1401,7 +1436,7 @@ function getVisibleElements({
   const visible = [],
         ids = new Set(),
         numViews = views.length;
-  let firstVisibleElementInd = (0, _pdfjsLib.binarySearchFirstItem)(views, horizontal ? isElementNextAfterViewHorizontally : isElementBottomAfterViewTop);
+  let firstVisibleElementInd = binarySearchFirstItem(views, horizontal ? isElementNextAfterViewHorizontally : isElementBottomAfterViewTop);
 
   if (firstVisibleElementInd > 0 && firstVisibleElementInd < numViews && !horizontal) {
     firstVisibleElementInd = backtrackBeforeAllVisibleElements(firstVisibleElementInd, views, top);
@@ -1800,7 +1835,8 @@ class TextLayerBuilder {
     pageIndex,
     viewport,
     highlighter = null,
-    enhanceTextSelection = false
+    enhanceTextSelection = false,
+    accessibilityManager = null
   }) {
     this.textLayerDiv = textLayerDiv;
     this.eventBus = eventBus;
@@ -1814,6 +1850,7 @@ class TextLayerBuilder {
     this.textLayerRenderTask = null;
     this.highlighter = highlighter;
     this.enhanceTextSelection = enhanceTextSelection;
+    this.accessibilityManager = accessibilityManager;
 
     this._bindMouse();
   }
@@ -1842,6 +1879,7 @@ class TextLayerBuilder {
     this.cancel();
     this.textDivs.length = 0;
     this.highlighter?.setTextMapping(this.textDivs, this.textContentItemsStr);
+    this.accessibilityManager?.setTextMapping(this.textDivs);
     const textLayerFrag = document.createDocumentFragment();
     this.textLayerRenderTask = (0, _pdfjsLib.renderTextLayer)({
       textContent: this.textContent,
@@ -1859,6 +1897,7 @@ class TextLayerBuilder {
       this._finishRendering();
 
       this.highlighter?.enable();
+      this.accessibilityManager?.enable();
     }, function (reason) {});
   }
 
@@ -1869,6 +1908,7 @@ class TextLayerBuilder {
     }
 
     this.highlighter?.disable();
+    this.accessibilityManager?.disable();
   }
 
   setTextContentStream(readableStream) {
@@ -2096,19 +2136,17 @@ var _annotation_editor_layer_builder = __w_pdfjs_require__(2);
 
 var _annotation_layer_builder = __w_pdfjs_require__(5);
 
-var _app_options = __w_pdfjs_require__(13);
-
 var _l10n_utils = __w_pdfjs_require__(4);
 
-var _pdf_page_view = __w_pdfjs_require__(14);
+var _pdf_page_view = __w_pdfjs_require__(13);
 
-var _pdf_rendering_queue = __w_pdfjs_require__(15);
+var _pdf_rendering_queue = __w_pdfjs_require__(16);
 
 var _pdf_link_service = __w_pdfjs_require__(6);
 
 var _struct_tree_layer_builder = __w_pdfjs_require__(8);
 
-var _text_highlighter = __w_pdfjs_require__(16);
+var _text_highlighter = __w_pdfjs_require__(17);
 
 var _text_layer_builder = __w_pdfjs_require__(9);
 
@@ -2122,7 +2160,6 @@ const PagesCountLimit = {
   PAUSE_EAGER_PAGE_INIT: 250
 };
 exports.PagesCountLimit = PagesCountLimit;
-const ANNOTATION_EDITOR_MODE = _app_options.compatibilityParams.annotationEditorMode ?? _pdfjsLib.AnnotationEditorType.DISABLE;
 
 function isValidAnnotationEditorMode(mode) {
   return Object.values(_pdfjsLib.AnnotationEditorType).includes(mode) && mode !== _pdfjsLib.AnnotationEditorType.DISABLE;
@@ -2208,7 +2245,7 @@ class BaseViewer {
       throw new Error("Cannot initialize BaseViewer.");
     }
 
-    const viewerVersion = '2.15.349';
+    const viewerVersion = '2.16.105';
 
     if (_pdfjsLib.version !== viewerVersion) {
       throw new Error(`The API version "${_pdfjsLib.version}" does not match the Viewer version "${viewerVersion}".`);
@@ -2233,7 +2270,7 @@ class BaseViewer {
     this.removePageBorders = options.removePageBorders || false;
     this.textLayerMode = options.textLayerMode ?? _ui_utils.TextLayerMode.ENABLE;
     this.#annotationMode = options.annotationMode ?? _pdfjsLib.AnnotationMode.ENABLE_FORMS;
-    this.#annotationEditorMode = options.annotationEditorMode ?? ANNOTATION_EDITOR_MODE;
+    this.#annotationEditorMode = options.annotationEditorMode ?? _pdfjsLib.AnnotationEditorType.DISABLE;
     this.imageResourcesPath = options.imageResourcesPath || "";
     this.enablePrintAutoRotate = options.enablePrintAutoRotate || false;
     this.renderer = options.renderer || _ui_utils.RendererType.CANVAS;
@@ -2610,10 +2647,6 @@ class BaseViewer {
         if (isPureXfa) {
           console.warn("Warning: XFA-editing is not implemented.");
         } else if (isValidAnnotationEditorMode(mode)) {
-          this.eventBus.dispatch("annotationeditormodechanged", {
-            source: this,
-            mode
-          });
           this.#annotationEditorUIManager = new _pdfjsLib.AnnotationEditorUIManager(this.container, this.eventBus);
 
           if (mode !== _pdfjsLib.AnnotationEditorType.NONE) {
@@ -2682,6 +2715,13 @@ class BaseViewer {
 
         if (this._scriptingManager) {
           this._scriptingManager.setDocument(pdfDocument);
+        }
+
+        if (this.#annotationEditorUIManager) {
+          this.eventBus.dispatch("annotationeditormodechanged", {
+            source: this,
+            mode: this.#annotationEditorMode
+          });
         }
 
         if (pdfDocument.loadingParams.disableAutoFetch || pagesCount > PagesCountLimit.FORCE_LAZY_PAGE_INIT) {
@@ -3403,7 +3443,8 @@ class BaseViewer {
     viewport,
     enhanceTextSelection = false,
     eventBus,
-    highlighter
+    highlighter,
+    accessibilityManager = null
   }) {
     return new _text_layer_builder.TextLayerBuilder({
       textLayerDiv,
@@ -3411,7 +3452,8 @@ class BaseViewer {
       pageIndex,
       viewport,
       enhanceTextSelection: this.isInPresentationMode ? false : enhanceTextSelection,
-      highlighter
+      highlighter,
+      accessibilityManager
     });
   }
 
@@ -3437,7 +3479,8 @@ class BaseViewer {
     hasJSActionsPromise = this.pdfDocument?.hasJSActions(),
     mouseState = this._scriptingManager?.mouseState,
     fieldObjectsPromise = this.pdfDocument?.getFieldObjects(),
-    annotationCanvasMap = null
+    annotationCanvasMap = null,
+    accessibilityManager = null
   }) {
     return new _annotation_layer_builder.AnnotationLayerBuilder({
       pageDiv,
@@ -3452,7 +3495,8 @@ class BaseViewer {
       hasJSActionsPromise,
       mouseState,
       fieldObjectsPromise,
-      annotationCanvasMap
+      annotationCanvasMap,
+      accessibilityManager
     });
   }
 
@@ -3460,6 +3504,7 @@ class BaseViewer {
     uiManager = this.#annotationEditorUIManager,
     pageDiv,
     pdfPage,
+    accessibilityManager = null,
     l10n,
     annotationStorage = this.pdfDocument?.annotationStorage
   }) {
@@ -3468,6 +3513,7 @@ class BaseViewer {
       pageDiv,
       pdfPage,
       annotationStorage,
+      accessibilityManager,
       l10n
     });
   }
@@ -3922,322 +3968,26 @@ class BaseViewer {
     this.#annotationEditorUIManager.updateParams(type, value);
   }
 
+  refresh() {
+    if (!this.pdfDocument) {
+      return;
+    }
+
+    const updateArgs = {};
+
+    for (const pageView of this._pages) {
+      pageView.update(updateArgs);
+    }
+
+    this.update();
+  }
+
 }
 
 exports.BaseViewer = BaseViewer;
 
 /***/ }),
 /* 13 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports.compatibilityParams = exports.OptionKind = exports.AppOptions = void 0;
-const compatibilityParams = Object.create(null);
-exports.compatibilityParams = compatibilityParams;
-{
-  const userAgent = navigator.userAgent || "";
-  const platform = navigator.platform || "";
-  const maxTouchPoints = navigator.maxTouchPoints || 1;
-  const isAndroid = /Android/.test(userAgent);
-  const isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent) || platform === "MacIntel" && maxTouchPoints > 1;
-
-  (function checkCanvasSizeLimitation() {
-    if (isIOS || isAndroid) {
-      compatibilityParams.maxCanvasPixels = 5242880;
-    }
-  })();
-
-  (function checkResizeObserver() {
-    if (typeof ResizeObserver === "undefined") {
-      compatibilityParams.annotationEditorMode = -1;
-    }
-  })();
-}
-const OptionKind = {
-  VIEWER: 0x02,
-  API: 0x04,
-  WORKER: 0x08,
-  PREFERENCE: 0x80
-};
-exports.OptionKind = OptionKind;
-const defaultOptions = {
-  annotationEditorMode: {
-    value: -1,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  annotationMode: {
-    value: 2,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  cursorToolOnLoad: {
-    value: 0,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  defaultZoomValue: {
-    value: "",
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  disableHistory: {
-    value: false,
-    kind: OptionKind.VIEWER
-  },
-  disablePageLabels: {
-    value: false,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  enablePermissions: {
-    value: false,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  enablePrintAutoRotate: {
-    value: true,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  enableScripting: {
-    value: true,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  externalLinkRel: {
-    value: "noopener noreferrer nofollow",
-    kind: OptionKind.VIEWER
-  },
-  externalLinkTarget: {
-    value: 0,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  historyUpdateUrl: {
-    value: false,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  ignoreDestinationZoom: {
-    value: false,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  imageResourcesPath: {
-    value: "./images/",
-    kind: OptionKind.VIEWER
-  },
-  maxCanvasPixels: {
-    value: 16777216,
-    kind: OptionKind.VIEWER
-  },
-  forcePageColors: {
-    value: false,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  pageColorsBackground: {
-    value: "Canvas",
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  pageColorsForeground: {
-    value: "CanvasText",
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  pdfBugEnabled: {
-    value: false,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  printResolution: {
-    value: 150,
-    kind: OptionKind.VIEWER
-  },
-  sidebarViewOnLoad: {
-    value: -1,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  scrollModeOnLoad: {
-    value: -1,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  spreadModeOnLoad: {
-    value: -1,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  textLayerMode: {
-    value: 1,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  useOnlyCssZoom: {
-    value: false,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  viewerCssTheme: {
-    value: 0,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  viewOnLoad: {
-    value: 0,
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  },
-  cMapPacked: {
-    value: true,
-    kind: OptionKind.API
-  },
-  cMapUrl: {
-    value: "../web/cmaps/",
-    kind: OptionKind.API
-  },
-  disableAutoFetch: {
-    value: false,
-    kind: OptionKind.API + OptionKind.PREFERENCE
-  },
-  disableFontFace: {
-    value: false,
-    kind: OptionKind.API + OptionKind.PREFERENCE
-  },
-  disableRange: {
-    value: false,
-    kind: OptionKind.API + OptionKind.PREFERENCE
-  },
-  disableStream: {
-    value: false,
-    kind: OptionKind.API + OptionKind.PREFERENCE
-  },
-  docBaseUrl: {
-    value: "",
-    kind: OptionKind.API
-  },
-  enableXfa: {
-    value: true,
-    kind: OptionKind.API + OptionKind.PREFERENCE
-  },
-  fontExtraProperties: {
-    value: false,
-    kind: OptionKind.API
-  },
-  isEvalSupported: {
-    value: true,
-    kind: OptionKind.API
-  },
-  maxImageSize: {
-    value: -1,
-    kind: OptionKind.API
-  },
-  pdfBug: {
-    value: false,
-    kind: OptionKind.API
-  },
-  standardFontDataUrl: {
-    value: "../web/standard_fonts/",
-    kind: OptionKind.API
-  },
-  verbosity: {
-    value: 1,
-    kind: OptionKind.API
-  },
-  workerPort: {
-    value: null,
-    kind: OptionKind.WORKER
-  },
-  workerSrc: {
-    value: "../build/pdf.worker.js",
-    kind: OptionKind.WORKER
-  }
-};
-{
-  defaultOptions.defaultUrl = {
-    value: "compressed.tracemonkey-pldi-09.pdf",
-    kind: OptionKind.VIEWER
-  };
-  defaultOptions.disablePreferences = {
-    value: false,
-    kind: OptionKind.VIEWER
-  };
-  defaultOptions.locale = {
-    value: navigator.language || "en-US",
-    kind: OptionKind.VIEWER
-  };
-  defaultOptions.renderer = {
-    value: "canvas",
-    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
-  };
-  defaultOptions.sandboxBundleSrc = {
-    value: "../build/pdf.sandbox.js",
-    kind: OptionKind.VIEWER
-  };
-}
-const userOptions = Object.create(null);
-
-class AppOptions {
-  constructor() {
-    throw new Error("Cannot initialize AppOptions.");
-  }
-
-  static get(name) {
-    const userOption = userOptions[name];
-
-    if (userOption !== undefined) {
-      return userOption;
-    }
-
-    const defaultOption = defaultOptions[name];
-
-    if (defaultOption !== undefined) {
-      return compatibilityParams[name] ?? defaultOption.value;
-    }
-
-    return undefined;
-  }
-
-  static getAll(kind = null) {
-    const options = Object.create(null);
-
-    for (const name in defaultOptions) {
-      const defaultOption = defaultOptions[name];
-
-      if (kind) {
-        if ((kind & defaultOption.kind) === 0) {
-          continue;
-        }
-
-        if (kind === OptionKind.PREFERENCE) {
-          const value = defaultOption.value,
-                valueType = typeof value;
-
-          if (valueType === "boolean" || valueType === "string" || valueType === "number" && Number.isInteger(value)) {
-            options[name] = value;
-            continue;
-          }
-
-          throw new Error(`Invalid type for preference: ${name}`);
-        }
-      }
-
-      const userOption = userOptions[name];
-      options[name] = userOption !== undefined ? userOption : compatibilityParams[name] ?? defaultOption.value;
-    }
-
-    return options;
-  }
-
-  static set(name, value) {
-    userOptions[name] = value;
-  }
-
-  static setAll(options) {
-    for (const name in options) {
-      userOptions[name] = options[name];
-    }
-  }
-
-  static remove(name) {
-    delete userOptions[name];
-  }
-
-  static _hasUserOptions() {
-    return Object.keys(userOptions).length > 0;
-  }
-
-}
-
-exports.AppOptions = AppOptions;
-
-/***/ }),
-/* 14 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -4251,9 +4001,11 @@ var _pdfjsLib = __w_pdfjs_require__(3);
 
 var _ui_utils = __w_pdfjs_require__(7);
 
-var _app_options = __w_pdfjs_require__(13);
+var _app_options = __w_pdfjs_require__(14);
 
 var _l10n_utils = __w_pdfjs_require__(4);
+
+var _text_accessibility = __w_pdfjs_require__(15);
 
 const MAX_CANVAS_PIXELS = _app_options.compatibilityParams.maxCanvasPixels || 16777216;
 
@@ -4365,6 +4117,7 @@ class PDFPageView {
     try {
       await this.annotationLayer.render(this.viewport, "display");
     } catch (ex) {
+      console.error(`_renderAnnotationLayer: "${ex}".`);
       error = ex;
     } finally {
       this.eventBus.dispatch("annotationlayerrendered", {
@@ -4381,6 +4134,7 @@ class PDFPageView {
     try {
       await this.annotationEditorLayer.render(this.viewport, "display");
     } catch (ex) {
+      console.error(`_renderAnnotationEditorLayer: "${ex}".`);
       error = ex;
     } finally {
       this.eventBus.dispatch("annotationeditorlayerrendered", {
@@ -4401,6 +4155,7 @@ class PDFPageView {
         this._buildXfaTextContentItems(result.textDivs);
       }
     } catch (ex) {
+      console.error(`_renderXfaLayer: "${ex}".`);
       error = ex;
     } finally {
       this.eventBus.dispatch("xfalayerrendered", {
@@ -4791,6 +4546,7 @@ class PDFPageView {
     let textLayer = null;
 
     if (this.textLayerMode !== _ui_utils.TextLayerMode.DISABLE && this.textLayerFactory) {
+      this._accessibilityManager ||= new _text_accessibility.TextAccessibilityManager();
       const textLayerDiv = document.createElement("div");
       textLayerDiv.className = "textLayer";
       textLayerDiv.style.width = canvasWrapper.style.width;
@@ -4808,7 +4564,8 @@ class PDFPageView {
         viewport: this.viewport,
         enhanceTextSelection: this.textLayerMode === _ui_utils.TextLayerMode.ENABLE_ENHANCE,
         eventBus: this.eventBus,
-        highlighter: this.textHighlighter
+        highlighter: this.textHighlighter,
+        accessibilityManager: this._accessibilityManager
       });
     }
 
@@ -4822,7 +4579,8 @@ class PDFPageView {
         imageResourcesPath: this.imageResourcesPath,
         renderForms: this.#annotationMode === _pdfjsLib.AnnotationMode.ENABLE_FORMS,
         l10n: this.l10n,
-        annotationCanvasMap: this._annotationCanvasMap
+        annotationCanvasMap: this._annotationCanvasMap,
+        accessibilityManager: this._accessibilityManager
       });
     }
 
@@ -4902,7 +4660,8 @@ class PDFPageView {
               this.annotationEditorLayer ||= this.annotationEditorLayerFactory.createAnnotationEditorLayerBuilder({
                 pageDiv: div,
                 pdfPage,
-                l10n: this.l10n
+                l10n: this.l10n,
+                accessibilityManager: this._accessibilityManager
               });
 
               this._renderAnnotationEditorLayer();
@@ -4915,12 +4674,10 @@ class PDFPageView {
     });
 
     if (this.xfaLayerFactory) {
-      if (!this.xfaLayer) {
-        this.xfaLayer = this.xfaLayerFactory.createXfaLayerBuilder({
-          pageDiv: div,
-          pdfPage
-        });
-      }
+      this.xfaLayer ||= this.xfaLayerFactory.createXfaLayerBuilder({
+        pageDiv: div,
+        pdfPage
+      });
 
       this._renderXfaLayer();
     }
@@ -5136,7 +4893,516 @@ class PDFPageView {
 exports.PDFPageView = PDFPageView;
 
 /***/ }),
+/* 14 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.compatibilityParams = exports.OptionKind = exports.AppOptions = void 0;
+const compatibilityParams = Object.create(null);
+exports.compatibilityParams = compatibilityParams;
+{
+  const userAgent = navigator.userAgent || "";
+  const platform = navigator.platform || "";
+  const maxTouchPoints = navigator.maxTouchPoints || 1;
+  const isAndroid = /Android/.test(userAgent);
+  const isIOS = /\b(iPad|iPhone|iPod)(?=;)/.test(userAgent) || platform === "MacIntel" && maxTouchPoints > 1;
+
+  (function checkCanvasSizeLimitation() {
+    if (isIOS || isAndroid) {
+      compatibilityParams.maxCanvasPixels = 5242880;
+    }
+  })();
+}
+const OptionKind = {
+  VIEWER: 0x02,
+  API: 0x04,
+  WORKER: 0x08,
+  PREFERENCE: 0x80
+};
+exports.OptionKind = OptionKind;
+const defaultOptions = {
+  annotationEditorMode: {
+    value: -1,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  annotationMode: {
+    value: 2,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  cursorToolOnLoad: {
+    value: 0,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  defaultZoomValue: {
+    value: "",
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  disableHistory: {
+    value: false,
+    kind: OptionKind.VIEWER
+  },
+  disablePageLabels: {
+    value: false,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  enablePermissions: {
+    value: false,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  enablePrintAutoRotate: {
+    value: true,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  enableScripting: {
+    value: true,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  externalLinkRel: {
+    value: "noopener noreferrer nofollow",
+    kind: OptionKind.VIEWER
+  },
+  externalLinkTarget: {
+    value: 0,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  historyUpdateUrl: {
+    value: false,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  ignoreDestinationZoom: {
+    value: false,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  imageResourcesPath: {
+    value: "./images/",
+    kind: OptionKind.VIEWER
+  },
+  maxCanvasPixels: {
+    value: 16777216,
+    kind: OptionKind.VIEWER
+  },
+  forcePageColors: {
+    value: false,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  pageColorsBackground: {
+    value: "Canvas",
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  pageColorsForeground: {
+    value: "CanvasText",
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  pdfBugEnabled: {
+    value: false,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  printResolution: {
+    value: 150,
+    kind: OptionKind.VIEWER
+  },
+  sidebarViewOnLoad: {
+    value: -1,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  scrollModeOnLoad: {
+    value: -1,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  spreadModeOnLoad: {
+    value: -1,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  textLayerMode: {
+    value: 1,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  useOnlyCssZoom: {
+    value: false,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  viewerCssTheme: {
+    value: 0,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  viewOnLoad: {
+    value: 0,
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  },
+  cMapPacked: {
+    value: true,
+    kind: OptionKind.API
+  },
+  cMapUrl: {
+    value: "../web/cmaps/",
+    kind: OptionKind.API
+  },
+  disableAutoFetch: {
+    value: false,
+    kind: OptionKind.API + OptionKind.PREFERENCE
+  },
+  disableFontFace: {
+    value: false,
+    kind: OptionKind.API + OptionKind.PREFERENCE
+  },
+  disableRange: {
+    value: false,
+    kind: OptionKind.API + OptionKind.PREFERENCE
+  },
+  disableStream: {
+    value: false,
+    kind: OptionKind.API + OptionKind.PREFERENCE
+  },
+  docBaseUrl: {
+    value: "",
+    kind: OptionKind.API
+  },
+  enableXfa: {
+    value: true,
+    kind: OptionKind.API + OptionKind.PREFERENCE
+  },
+  fontExtraProperties: {
+    value: false,
+    kind: OptionKind.API
+  },
+  isEvalSupported: {
+    value: true,
+    kind: OptionKind.API
+  },
+  maxImageSize: {
+    value: -1,
+    kind: OptionKind.API
+  },
+  pdfBug: {
+    value: false,
+    kind: OptionKind.API
+  },
+  standardFontDataUrl: {
+    value: "../web/standard_fonts/",
+    kind: OptionKind.API
+  },
+  verbosity: {
+    value: 1,
+    kind: OptionKind.API
+  },
+  workerPort: {
+    value: null,
+    kind: OptionKind.WORKER
+  },
+  workerSrc: {
+    value: "../build/pdf.worker.js",
+    kind: OptionKind.WORKER
+  }
+};
+{
+  defaultOptions.defaultUrl = {
+    value: "compressed.tracemonkey-pldi-09.pdf",
+    kind: OptionKind.VIEWER
+  };
+  defaultOptions.disablePreferences = {
+    value: false,
+    kind: OptionKind.VIEWER
+  };
+  defaultOptions.locale = {
+    value: navigator.language || "en-US",
+    kind: OptionKind.VIEWER
+  };
+  defaultOptions.renderer = {
+    value: "canvas",
+    kind: OptionKind.VIEWER + OptionKind.PREFERENCE
+  };
+  defaultOptions.sandboxBundleSrc = {
+    value: "../build/pdf.sandbox.js",
+    kind: OptionKind.VIEWER
+  };
+}
+const userOptions = Object.create(null);
+
+class AppOptions {
+  constructor() {
+    throw new Error("Cannot initialize AppOptions.");
+  }
+
+  static get(name) {
+    const userOption = userOptions[name];
+
+    if (userOption !== undefined) {
+      return userOption;
+    }
+
+    const defaultOption = defaultOptions[name];
+
+    if (defaultOption !== undefined) {
+      return compatibilityParams[name] ?? defaultOption.value;
+    }
+
+    return undefined;
+  }
+
+  static getAll(kind = null) {
+    const options = Object.create(null);
+
+    for (const name in defaultOptions) {
+      const defaultOption = defaultOptions[name];
+
+      if (kind) {
+        if ((kind & defaultOption.kind) === 0) {
+          continue;
+        }
+
+        if (kind === OptionKind.PREFERENCE) {
+          const value = defaultOption.value,
+                valueType = typeof value;
+
+          if (valueType === "boolean" || valueType === "string" || valueType === "number" && Number.isInteger(value)) {
+            options[name] = value;
+            continue;
+          }
+
+          throw new Error(`Invalid type for preference: ${name}`);
+        }
+      }
+
+      const userOption = userOptions[name];
+      options[name] = userOption !== undefined ? userOption : compatibilityParams[name] ?? defaultOption.value;
+    }
+
+    return options;
+  }
+
+  static set(name, value) {
+    userOptions[name] = value;
+  }
+
+  static setAll(options) {
+    for (const name in options) {
+      userOptions[name] = options[name];
+    }
+  }
+
+  static remove(name) {
+    delete userOptions[name];
+  }
+
+  static _hasUserOptions() {
+    return Object.keys(userOptions).length > 0;
+  }
+
+}
+
+exports.AppOptions = AppOptions;
+
+/***/ }),
 /* 15 */
+/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.TextAccessibilityManager = void 0;
+
+var _ui_utils = __w_pdfjs_require__(7);
+
+class TextAccessibilityManager {
+  #enabled = false;
+  #textChildren = null;
+  #textNodes = new Map();
+  #waitingElements = new Map();
+
+  setTextMapping(textDivs) {
+    this.#textChildren = textDivs;
+  }
+
+  static #compareElementPositions(e1, e2) {
+    const rect1 = e1.getBoundingClientRect();
+    const rect2 = e2.getBoundingClientRect();
+
+    if (rect1.width === 0 && rect1.height === 0) {
+      return +1;
+    }
+
+    if (rect2.width === 0 && rect2.height === 0) {
+      return -1;
+    }
+
+    const top1 = rect1.y;
+    const bot1 = rect1.y + rect1.height;
+    const mid1 = rect1.y + rect1.height / 2;
+    const top2 = rect2.y;
+    const bot2 = rect2.y + rect2.height;
+    const mid2 = rect2.y + rect2.height / 2;
+
+    if (mid1 <= top2 && mid2 >= bot1) {
+      return -1;
+    }
+
+    if (mid2 <= top1 && mid1 >= bot2) {
+      return +1;
+    }
+
+    const centerX1 = rect1.x + rect1.width / 2;
+    const centerX2 = rect2.x + rect2.width / 2;
+    return centerX1 - centerX2;
+  }
+
+  enable() {
+    if (this.#enabled) {
+      throw new Error("TextAccessibilityManager is already enabled.");
+    }
+
+    if (!this.#textChildren) {
+      throw new Error("Text divs and strings have not been set.");
+    }
+
+    this.#enabled = true;
+    this.#textChildren = this.#textChildren.slice();
+    this.#textChildren.sort(TextAccessibilityManager.#compareElementPositions);
+
+    if (this.#textNodes.size > 0) {
+      const textChildren = this.#textChildren;
+
+      for (const [id, nodeIndex] of this.#textNodes) {
+        const element = document.getElementById(id);
+
+        if (!element) {
+          this.#textNodes.delete(id);
+          continue;
+        }
+
+        this.#addIdToAriaOwns(id, textChildren[nodeIndex]);
+      }
+    }
+
+    for (const [element, isRemovable] of this.#waitingElements) {
+      this.addPointerInTextLayer(element, isRemovable);
+    }
+
+    this.#waitingElements.clear();
+  }
+
+  disable() {
+    if (!this.#enabled) {
+      return;
+    }
+
+    this.#waitingElements.clear();
+    this.#textChildren = null;
+    this.#enabled = false;
+  }
+
+  removePointerInTextLayer(element) {
+    if (!this.#enabled) {
+      this.#waitingElements.delete(element);
+      return;
+    }
+
+    const children = this.#textChildren;
+
+    if (!children || children.length === 0) {
+      return;
+    }
+
+    const {
+      id
+    } = element;
+    const nodeIndex = this.#textNodes.get(id);
+
+    if (nodeIndex === undefined) {
+      return;
+    }
+
+    const node = children[nodeIndex];
+    this.#textNodes.delete(id);
+    let owns = node.getAttribute("aria-owns");
+
+    if (owns?.includes(id)) {
+      owns = owns.split(" ").filter(x => x !== id).join(" ");
+
+      if (owns) {
+        node.setAttribute("aria-owns", owns);
+      } else {
+        node.removeAttribute("aria-owns");
+        node.setAttribute("role", "presentation");
+      }
+    }
+  }
+
+  #addIdToAriaOwns(id, node) {
+    const owns = node.getAttribute("aria-owns");
+
+    if (!owns?.includes(id)) {
+      node.setAttribute("aria-owns", owns ? `${owns} ${id}` : id);
+    }
+
+    node.removeAttribute("role");
+  }
+
+  addPointerInTextLayer(element, isRemovable) {
+    const {
+      id
+    } = element;
+
+    if (!id) {
+      return;
+    }
+
+    if (!this.#enabled) {
+      this.#waitingElements.set(element, isRemovable);
+      return;
+    }
+
+    if (isRemovable) {
+      this.removePointerInTextLayer(element);
+    }
+
+    const children = this.#textChildren;
+
+    if (!children || children.length === 0) {
+      return;
+    }
+
+    const index = (0, _ui_utils.binarySearchFirstItem)(children, node => TextAccessibilityManager.#compareElementPositions(element, node) < 0);
+    const nodeIndex = Math.max(0, index - 1);
+    this.#addIdToAriaOwns(id, children[nodeIndex]);
+    this.#textNodes.set(id, nodeIndex);
+  }
+
+  moveElementInDOM(container, element, contentElement, isRemovable) {
+    this.addPointerInTextLayer(contentElement, isRemovable);
+
+    if (!container.hasChildNodes()) {
+      container.append(element);
+      return;
+    }
+
+    const children = Array.from(container.childNodes).filter(node => node !== element);
+
+    if (children.length === 0) {
+      return;
+    }
+
+    const elementToCompare = contentElement || element;
+    const index = (0, _ui_utils.binarySearchFirstItem)(children, node => TextAccessibilityManager.#compareElementPositions(elementToCompare, node) < 0);
+
+    if (index === 0) {
+      children[0].before(element);
+    } else {
+      children[index - 1].after(element);
+    }
+  }
+
+}
+
+exports.TextAccessibilityManager = TextAccessibilityManager;
+
+/***/ }),
+/* 16 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -5298,7 +5564,7 @@ class PDFRenderingQueue {
 exports.PDFRenderingQueue = PDFRenderingQueue;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -5571,7 +5837,7 @@ class TextHighlighter {
 exports.TextHighlighter = TextHighlighter;
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -5668,7 +5934,7 @@ class DownloadManager {
 exports.DownloadManager = DownloadManager;
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -5813,7 +6079,7 @@ class AutomationEventBus extends EventBus {
 exports.AutomationEventBus = AutomationEventBus;
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -5823,7 +6089,7 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports.GenericL10n = void 0;
 
-__w_pdfjs_require__(20);
+__w_pdfjs_require__(21);
 
 var _l10n_utils = __w_pdfjs_require__(4);
 
@@ -5864,7 +6130,7 @@ class GenericL10n {
 exports.GenericL10n = GenericL10n;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (() => {
 
 
@@ -6686,7 +6952,7 @@ document.webL10n = function (window, document, undefined) {
 }(window, document);
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -6696,11 +6962,11 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports.PDFFindController = exports.FindState = void 0;
 
+var _ui_utils = __w_pdfjs_require__(7);
+
 var _pdfjsLib = __w_pdfjs_require__(3);
 
-var _pdf_find_utils = __w_pdfjs_require__(22);
-
-var _ui_utils = __w_pdfjs_require__(7);
+var _pdf_find_utils = __w_pdfjs_require__(23);
 
 const FindState = {
   FOUND: 0,
@@ -6876,13 +7142,13 @@ function getOriginalIndex(diffs, pos, len) {
 
   const start = pos;
   const end = pos + len;
-  let i = (0, _pdfjsLib.binarySearchFirstItem)(diffs, x => x[0] >= start);
+  let i = (0, _ui_utils.binarySearchFirstItem)(diffs, x => x[0] >= start);
 
   if (diffs[i][0] > start) {
     --i;
   }
 
-  let j = (0, _pdfjsLib.binarySearchFirstItem)(diffs, x => x[0] >= end, i);
+  let j = (0, _ui_utils.binarySearchFirstItem)(diffs, x => x[0] >= end, i);
 
   if (diffs[j][0] > end) {
     --j;
@@ -7500,7 +7766,7 @@ class PDFFindController {
 exports.PDFFindController = PDFFindController;
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -7595,7 +7861,7 @@ function getCharacterType(charCode) {
 }
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -7609,7 +7875,7 @@ exports.isDestHashesEqual = isDestHashesEqual;
 
 var _ui_utils = __w_pdfjs_require__(7);
 
-var _event_utils = __w_pdfjs_require__(18);
+var _event_utils = __w_pdfjs_require__(19);
 
 const HASH_CHANGE_TIMEOUT = 1000;
 const POSITION_UPDATED_THRESHOLD = 50;
@@ -8204,7 +8470,7 @@ function isDestArraysEqual(firstDest, secondDest) {
 }
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -8643,7 +8909,7 @@ class PDFScriptingManager {
 
     const {
       docPropertiesLookup
-    } = __w_pdfjs_require__(25);
+    } = __w_pdfjs_require__(26);
 
     return docPropertiesLookup(this._pdfDocument);
   }
@@ -8663,7 +8929,7 @@ class PDFScriptingManager {
 
     const {
       GenericScripting
-    } = __w_pdfjs_require__(25);
+    } = __w_pdfjs_require__(26);
 
     return new GenericScripting(this._sandboxBundleSrc);
   }
@@ -8715,7 +8981,7 @@ class PDFScriptingManager {
 exports.PDFScriptingManager = PDFScriptingManager;
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
@@ -8927,10 +9193,28 @@ Object.defineProperty(exports, "ProgressBar", ({
     return _ui_utils.ProgressBar;
   }
 }));
+Object.defineProperty(exports, "RenderingStates", ({
+  enumerable: true,
+  get: function () {
+    return _ui_utils.RenderingStates;
+  }
+}));
+Object.defineProperty(exports, "ScrollMode", ({
+  enumerable: true,
+  get: function () {
+    return _ui_utils.ScrollMode;
+  }
+}));
 Object.defineProperty(exports, "SimpleLinkService", ({
   enumerable: true,
   get: function () {
     return _pdf_link_service.SimpleLinkService;
+  }
+}));
+Object.defineProperty(exports, "SpreadMode", ({
+  enumerable: true,
+  get: function () {
+    return _ui_utils.SpreadMode;
   }
 }));
 Object.defineProperty(exports, "StructTreeLayerBuilder", ({
@@ -8968,21 +9252,21 @@ var _pdf_viewer = __w_pdfjs_require__(11);
 
 var _annotation_layer_builder = __w_pdfjs_require__(5);
 
-var _download_manager = __w_pdfjs_require__(17);
+var _download_manager = __w_pdfjs_require__(18);
 
-var _event_utils = __w_pdfjs_require__(18);
+var _event_utils = __w_pdfjs_require__(19);
 
-var _genericl10n = __w_pdfjs_require__(19);
+var _genericl10n = __w_pdfjs_require__(20);
 
 var _l10n_utils = __w_pdfjs_require__(4);
 
-var _pdf_find_controller = __w_pdfjs_require__(21);
+var _pdf_find_controller = __w_pdfjs_require__(22);
 
-var _pdf_history = __w_pdfjs_require__(23);
+var _pdf_history = __w_pdfjs_require__(24);
 
-var _pdf_page_view = __w_pdfjs_require__(14);
+var _pdf_page_view = __w_pdfjs_require__(13);
 
-var _pdf_scripting_manager = __w_pdfjs_require__(24);
+var _pdf_scripting_manager = __w_pdfjs_require__(25);
 
 var _struct_tree_layer_builder = __w_pdfjs_require__(8);
 
@@ -8990,8 +9274,8 @@ var _text_layer_builder = __w_pdfjs_require__(9);
 
 var _xfa_layer_builder = __w_pdfjs_require__(10);
 
-const pdfjsVersion = '2.15.349';
-const pdfjsBuild = 'b8aa9c622';
+const pdfjsVersion = '2.16.105';
+const pdfjsBuild = '172ccdbe5';
 })();
 
 /******/ 	return __webpack_exports__;

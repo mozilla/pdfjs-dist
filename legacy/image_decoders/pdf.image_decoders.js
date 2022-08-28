@@ -71,59 +71,15 @@ exports.warn = warn;
 
 __w_pdfjs_require__(2);
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-var IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
+const IDENTITY_MATRIX = [1, 0, 0, 1, 0, 0];
 exports.IDENTITY_MATRIX = IDENTITY_MATRIX;
-var FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
+const FONT_IDENTITY_MATRIX = [0.001, 0, 0, 0.001, 0, 0];
 exports.FONT_IDENTITY_MATRIX = FONT_IDENTITY_MATRIX;
-var LINE_FACTOR = 1.35;
+const LINE_FACTOR = 1.35;
 exports.LINE_FACTOR = LINE_FACTOR;
-var LINE_DESCENT_FACTOR = 0.35;
+const LINE_DESCENT_FACTOR = 0.35;
 exports.LINE_DESCENT_FACTOR = LINE_DESCENT_FACTOR;
-var RenderingIntentFlag = {
+const RenderingIntentFlag = {
   ANY: 0x01,
   DISPLAY: 0x02,
   PRINT: 0x04,
@@ -133,23 +89,23 @@ var RenderingIntentFlag = {
   OPLIST: 0x100
 };
 exports.RenderingIntentFlag = RenderingIntentFlag;
-var AnnotationMode = {
+const AnnotationMode = {
   DISABLE: 0,
   ENABLE: 1,
   ENABLE_FORMS: 2,
   ENABLE_STORAGE: 3
 };
 exports.AnnotationMode = AnnotationMode;
-var AnnotationEditorPrefix = "pdfjs_internal_editor_";
+const AnnotationEditorPrefix = "pdfjs_internal_editor_";
 exports.AnnotationEditorPrefix = AnnotationEditorPrefix;
-var AnnotationEditorType = {
+const AnnotationEditorType = {
   DISABLE: -1,
   NONE: 0,
   FREETEXT: 3,
   INK: 15
 };
 exports.AnnotationEditorType = AnnotationEditorType;
-var AnnotationEditorParamsType = {
+const AnnotationEditorParamsType = {
   FREETEXT_SIZE: 1,
   FREETEXT_COLOR: 2,
   FREETEXT_OPACITY: 3,
@@ -158,7 +114,7 @@ var AnnotationEditorParamsType = {
   INK_OPACITY: 13
 };
 exports.AnnotationEditorParamsType = AnnotationEditorParamsType;
-var PermissionFlag = {
+const PermissionFlag = {
   PRINT: 0x04,
   MODIFY_CONTENTS: 0x08,
   COPY: 0x10,
@@ -169,7 +125,7 @@ var PermissionFlag = {
   PRINT_HIGH_QUALITY: 0x800
 };
 exports.PermissionFlag = PermissionFlag;
-var TextRenderingMode = {
+const TextRenderingMode = {
   FILL: 0,
   STROKE: 1,
   FILL_STROKE: 2,
@@ -182,13 +138,13 @@ var TextRenderingMode = {
   ADD_TO_PATH_FLAG: 4
 };
 exports.TextRenderingMode = TextRenderingMode;
-var ImageKind = {
+const ImageKind = {
   GRAYSCALE_1BPP: 1,
   RGB_24BPP: 2,
   RGBA_32BPP: 3
 };
 exports.ImageKind = ImageKind;
-var AnnotationType = {
+const AnnotationType = {
   TEXT: 1,
   LINK: 2,
   FREETEXT: 3,
@@ -217,17 +173,17 @@ var AnnotationType = {
   REDACT: 26
 };
 exports.AnnotationType = AnnotationType;
-var AnnotationStateModelType = {
+const AnnotationStateModelType = {
   MARKED: "Marked",
   REVIEW: "Review"
 };
 exports.AnnotationStateModelType = AnnotationStateModelType;
-var AnnotationMarkedState = {
+const AnnotationMarkedState = {
   MARKED: "Marked",
   UNMARKED: "Unmarked"
 };
 exports.AnnotationMarkedState = AnnotationMarkedState;
-var AnnotationReviewState = {
+const AnnotationReviewState = {
   ACCEPTED: "Accepted",
   REJECTED: "Rejected",
   CANCELLED: "Cancelled",
@@ -235,12 +191,12 @@ var AnnotationReviewState = {
   NONE: "None"
 };
 exports.AnnotationReviewState = AnnotationReviewState;
-var AnnotationReplyType = {
+const AnnotationReplyType = {
   GROUP: "Group",
   REPLY: "R"
 };
 exports.AnnotationReplyType = AnnotationReplyType;
-var AnnotationFlag = {
+const AnnotationFlag = {
   INVISIBLE: 0x01,
   HIDDEN: 0x02,
   PRINT: 0x04,
@@ -253,7 +209,7 @@ var AnnotationFlag = {
   LOCKEDCONTENTS: 0x200
 };
 exports.AnnotationFlag = AnnotationFlag;
-var AnnotationFieldFlag = {
+const AnnotationFieldFlag = {
   READONLY: 0x0000001,
   REQUIRED: 0x0000002,
   NOEXPORT: 0x0000004,
@@ -275,7 +231,7 @@ var AnnotationFieldFlag = {
   COMMITONSELCHANGE: 0x4000000
 };
 exports.AnnotationFieldFlag = AnnotationFieldFlag;
-var AnnotationBorderStyleType = {
+const AnnotationBorderStyleType = {
   SOLID: 1,
   DASHED: 2,
   BEVELED: 3,
@@ -283,7 +239,7 @@ var AnnotationBorderStyleType = {
   UNDERLINE: 5
 };
 exports.AnnotationBorderStyleType = AnnotationBorderStyleType;
-var AnnotationActionEventType = {
+const AnnotationActionEventType = {
   E: "Mouse Enter",
   X: "Mouse Exit",
   D: "Mouse Down",
@@ -300,7 +256,7 @@ var AnnotationActionEventType = {
   C: "Calculate"
 };
 exports.AnnotationActionEventType = AnnotationActionEventType;
-var DocumentActionEventType = {
+const DocumentActionEventType = {
   WC: "WillClose",
   WS: "WillSave",
   DS: "DidSave",
@@ -308,12 +264,12 @@ var DocumentActionEventType = {
   DP: "DidPrint"
 };
 exports.DocumentActionEventType = DocumentActionEventType;
-var PageActionEventType = {
+const PageActionEventType = {
   O: "PageOpen",
   C: "PageClose"
 };
 exports.PageActionEventType = PageActionEventType;
-var StreamType = {
+const StreamType = {
   UNKNOWN: "UNKNOWN",
   FLATE: "FLATE",
   LZW: "LZW",
@@ -326,7 +282,7 @@ var StreamType = {
   RLX: "RLX"
 };
 exports.StreamType = StreamType;
-var FontType = {
+const FontType = {
   UNKNOWN: "UNKNOWN",
   TYPE1: "TYPE1",
   TYPE1STANDARD: "TYPE1STANDARD",
@@ -341,19 +297,19 @@ var FontType = {
   MMTYPE1: "MMTYPE1"
 };
 exports.FontType = FontType;
-var VerbosityLevel = {
+const VerbosityLevel = {
   ERRORS: 0,
   WARNINGS: 1,
   INFOS: 5
 };
 exports.VerbosityLevel = VerbosityLevel;
-var CMapCompressionType = {
+const CMapCompressionType = {
   NONE: 0,
   BINARY: 1,
   STREAM: 2
 };
 exports.CMapCompressionType = CMapCompressionType;
-var OPS = {
+const OPS = {
   dependency: 1,
   setLineWidth: 2,
   setLineCap: 3,
@@ -447,7 +403,7 @@ var OPS = {
   constructPath: 91
 };
 exports.OPS = OPS;
-var UNSUPPORTED_FEATURES = {
+const UNSUPPORTED_FEATURES = {
   unknown: "unknown",
   forms: "forms",
   javaScript: "javaScript",
@@ -472,12 +428,12 @@ var UNSUPPORTED_FEATURES = {
   errorContentSubStream: "errorContentSubStream"
 };
 exports.UNSUPPORTED_FEATURES = UNSUPPORTED_FEATURES;
-var PasswordResponses = {
+const PasswordResponses = {
   NEED_PASSWORD: 1,
   INCORRECT_PASSWORD: 2
 };
 exports.PasswordResponses = PasswordResponses;
-var verbosity = VerbosityLevel.WARNINGS;
+let verbosity = VerbosityLevel.WARNINGS;
 
 function setVerbosityLevel(level) {
   if (Number.isInteger(level)) {
@@ -491,13 +447,13 @@ function getVerbosityLevel() {
 
 function info(msg) {
   if (verbosity >= VerbosityLevel.INFOS) {
-    console.log("Info: ".concat(msg));
+    console.log(`Info: ${msg}`);
   }
 }
 
 function warn(msg) {
   if (verbosity >= VerbosityLevel.WARNINGS) {
-    console.log("Warning: ".concat(msg));
+    console.log(`Warning: ${msg}`);
   }
 }
 
@@ -530,8 +486,8 @@ function _isValidProtocol(url) {
 }
 
 function createValidAbsoluteUrl(url) {
-  var baseUrl = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  let baseUrl = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
   if (!url) {
     return null;
@@ -540,10 +496,10 @@ function createValidAbsoluteUrl(url) {
   try {
     if (options && typeof url === "string") {
       if (options.addDefaultProtocol && url.startsWith("www.")) {
-        var dots = url.match(/\./g);
+        const dots = url.match(/\./g);
 
         if (dots && dots.length >= 2) {
-          url = "http://".concat(url);
+          url = `http://${url}`;
         }
       }
 
@@ -554,7 +510,7 @@ function createValidAbsoluteUrl(url) {
       }
     }
 
-    var absoluteUrl = baseUrl ? new URL(url, baseUrl) : new URL(url);
+    const absoluteUrl = baseUrl ? new URL(url, baseUrl) : new URL(url);
 
     if (_isValidProtocol(absoluteUrl)) {
       return absoluteUrl;
@@ -566,7 +522,7 @@ function createValidAbsoluteUrl(url) {
 
 function shadow(obj, prop, value) {
   Object.defineProperty(obj, prop, {
-    value: value,
+    value,
     enumerable: true,
     configurable: true,
     writable: false
@@ -574,7 +530,7 @@ function shadow(obj, prop, value) {
   return value;
 }
 
-var BaseException = function BaseExceptionClosure() {
+const BaseException = function BaseExceptionClosure() {
   function BaseException(message, name) {
     if (this.constructor === BaseException) {
       unreachable("Cannot initialize BaseException.");
@@ -591,147 +547,89 @@ var BaseException = function BaseExceptionClosure() {
 
 exports.BaseException = BaseException;
 
-var PasswordException = /*#__PURE__*/function (_BaseException) {
-  _inherits(PasswordException, _BaseException);
-
-  var _super = _createSuper(PasswordException);
-
-  function PasswordException(msg, code) {
-    var _this;
-
-    _classCallCheck(this, PasswordException);
-
-    _this = _super.call(this, msg, "PasswordException");
-    _this.code = code;
-    return _this;
+class PasswordException extends BaseException {
+  constructor(msg, code) {
+    super(msg, "PasswordException");
+    this.code = code;
   }
 
-  return _createClass(PasswordException);
-}(BaseException);
+}
 
 exports.PasswordException = PasswordException;
 
-var UnknownErrorException = /*#__PURE__*/function (_BaseException2) {
-  _inherits(UnknownErrorException, _BaseException2);
-
-  var _super2 = _createSuper(UnknownErrorException);
-
-  function UnknownErrorException(msg, details) {
-    var _this2;
-
-    _classCallCheck(this, UnknownErrorException);
-
-    _this2 = _super2.call(this, msg, "UnknownErrorException");
-    _this2.details = details;
-    return _this2;
+class UnknownErrorException extends BaseException {
+  constructor(msg, details) {
+    super(msg, "UnknownErrorException");
+    this.details = details;
   }
 
-  return _createClass(UnknownErrorException);
-}(BaseException);
+}
 
 exports.UnknownErrorException = UnknownErrorException;
 
-var InvalidPDFException = /*#__PURE__*/function (_BaseException3) {
-  _inherits(InvalidPDFException, _BaseException3);
-
-  var _super3 = _createSuper(InvalidPDFException);
-
-  function InvalidPDFException(msg) {
-    _classCallCheck(this, InvalidPDFException);
-
-    return _super3.call(this, msg, "InvalidPDFException");
+class InvalidPDFException extends BaseException {
+  constructor(msg) {
+    super(msg, "InvalidPDFException");
   }
 
-  return _createClass(InvalidPDFException);
-}(BaseException);
+}
 
 exports.InvalidPDFException = InvalidPDFException;
 
-var MissingPDFException = /*#__PURE__*/function (_BaseException4) {
-  _inherits(MissingPDFException, _BaseException4);
-
-  var _super4 = _createSuper(MissingPDFException);
-
-  function MissingPDFException(msg) {
-    _classCallCheck(this, MissingPDFException);
-
-    return _super4.call(this, msg, "MissingPDFException");
+class MissingPDFException extends BaseException {
+  constructor(msg) {
+    super(msg, "MissingPDFException");
   }
 
-  return _createClass(MissingPDFException);
-}(BaseException);
+}
 
 exports.MissingPDFException = MissingPDFException;
 
-var UnexpectedResponseException = /*#__PURE__*/function (_BaseException5) {
-  _inherits(UnexpectedResponseException, _BaseException5);
-
-  var _super5 = _createSuper(UnexpectedResponseException);
-
-  function UnexpectedResponseException(msg, status) {
-    var _this3;
-
-    _classCallCheck(this, UnexpectedResponseException);
-
-    _this3 = _super5.call(this, msg, "UnexpectedResponseException");
-    _this3.status = status;
-    return _this3;
+class UnexpectedResponseException extends BaseException {
+  constructor(msg, status) {
+    super(msg, "UnexpectedResponseException");
+    this.status = status;
   }
 
-  return _createClass(UnexpectedResponseException);
-}(BaseException);
+}
 
 exports.UnexpectedResponseException = UnexpectedResponseException;
 
-var FormatError = /*#__PURE__*/function (_BaseException6) {
-  _inherits(FormatError, _BaseException6);
-
-  var _super6 = _createSuper(FormatError);
-
-  function FormatError(msg) {
-    _classCallCheck(this, FormatError);
-
-    return _super6.call(this, msg, "FormatError");
+class FormatError extends BaseException {
+  constructor(msg) {
+    super(msg, "FormatError");
   }
 
-  return _createClass(FormatError);
-}(BaseException);
+}
 
 exports.FormatError = FormatError;
 
-var AbortException = /*#__PURE__*/function (_BaseException7) {
-  _inherits(AbortException, _BaseException7);
-
-  var _super7 = _createSuper(AbortException);
-
-  function AbortException(msg) {
-    _classCallCheck(this, AbortException);
-
-    return _super7.call(this, msg, "AbortException");
+class AbortException extends BaseException {
+  constructor(msg) {
+    super(msg, "AbortException");
   }
 
-  return _createClass(AbortException);
-}(BaseException);
+}
 
 exports.AbortException = AbortException;
 
 function bytesToString(bytes) {
-  if (_typeof(bytes) !== "object" || bytes === null || bytes.length === undefined) {
+  if (typeof bytes !== "object" || bytes === null || bytes.length === undefined) {
     unreachable("Invalid argument for bytesToString");
   }
 
-  var length = bytes.length;
-  var MAX_ARGUMENT_COUNT = 8192;
+  const length = bytes.length;
+  const MAX_ARGUMENT_COUNT = 8192;
 
   if (length < MAX_ARGUMENT_COUNT) {
     return String.fromCharCode.apply(null, bytes);
   }
 
-  var strBuf = [];
+  const strBuf = [];
 
-  for (var i = 0; i < length; i += MAX_ARGUMENT_COUNT) {
-    var chunkEnd = Math.min(i + MAX_ARGUMENT_COUNT, length);
-    var chunk = bytes.subarray(i, chunkEnd);
+  for (let i = 0; i < length; i += MAX_ARGUMENT_COUNT) {
+    const chunkEnd = Math.min(i + MAX_ARGUMENT_COUNT, length);
+    const chunk = bytes.subarray(i, chunkEnd);
     strBuf.push(String.fromCharCode.apply(null, chunk));
   }
 
@@ -743,10 +641,10 @@ function stringToBytes(str) {
     unreachable("Invalid argument for stringToBytes");
   }
 
-  var length = str.length;
-  var bytes = new Uint8Array(length);
+  const length = str.length;
+  const bytes = new Uint8Array(length);
 
-  for (var i = 0; i < length; ++i) {
+  for (let i = 0; i < length; ++i) {
     bytes[i] = str.charCodeAt(i) & 0xff;
   }
 
@@ -766,23 +664,23 @@ function arrayByteLength(arr) {
 }
 
 function arraysToBytes(arr) {
-  var length = arr.length;
+  const length = arr.length;
 
   if (length === 1 && arr[0] instanceof Uint8Array) {
     return arr[0];
   }
 
-  var resultLength = 0;
+  let resultLength = 0;
 
-  for (var i = 0; i < length; i++) {
+  for (let i = 0; i < length; i++) {
     resultLength += arrayByteLength(arr[i]);
   }
 
-  var pos = 0;
-  var data = new Uint8Array(resultLength);
+  let pos = 0;
+  const data = new Uint8Array(resultLength);
 
-  for (var _i = 0; _i < length; _i++) {
-    var item = arr[_i];
+  for (let i = 0; i < length; i++) {
+    let item = arr[i];
 
     if (!(item instanceof Uint8Array)) {
       if (typeof item === "string") {
@@ -792,7 +690,7 @@ function arraysToBytes(arr) {
       }
     }
 
-    var itemLength = item.byteLength;
+    const itemLength = item.byteLength;
     data.set(item, pos);
     pos += itemLength;
   }
@@ -809,32 +707,19 @@ function objectSize(obj) {
 }
 
 function objectFromMap(map) {
-  var obj = Object.create(null);
+  const obj = Object.create(null);
 
-  var _iterator = _createForOfIteratorHelper(map),
-      _step;
-
-  try {
-    for (_iterator.s(); !(_step = _iterator.n()).done;) {
-      var _step$value = _slicedToArray(_step.value, 2),
-          key = _step$value[0],
-          value = _step$value[1];
-
-      obj[key] = value;
-    }
-  } catch (err) {
-    _iterator.e(err);
-  } finally {
-    _iterator.f();
+  for (const [key, value] of map) {
+    obj[key] = value;
   }
 
   return obj;
 }
 
 function isLittleEndian() {
-  var buffer8 = new Uint8Array(4);
+  const buffer8 = new Uint8Array(4);
   buffer8[0] = 1;
-  var view32 = new Uint32Array(buffer8.buffer, 0, 1);
+  const view32 = new Uint32Array(buffer8.buffer, 0, 1);
   return view32[0] === 1;
 }
 
@@ -847,273 +732,241 @@ function isEvalSupported() {
   }
 }
 
-var FeatureTest = /*#__PURE__*/function () {
-  function FeatureTest() {
-    _classCallCheck(this, FeatureTest);
+class FeatureTest {
+  static get isLittleEndian() {
+    return shadow(this, "isLittleEndian", isLittleEndian());
   }
 
-  _createClass(FeatureTest, null, [{
-    key: "isLittleEndian",
-    get: function get() {
-      return shadow(this, "isLittleEndian", isLittleEndian());
-    }
-  }, {
-    key: "isEvalSupported",
-    get: function get() {
-      return shadow(this, "isEvalSupported", isEvalSupported());
-    }
-  }, {
-    key: "isOffscreenCanvasSupported",
-    get: function get() {
-      return shadow(this, "isOffscreenCanvasSupported", typeof OffscreenCanvas !== "undefined");
-    }
-  }]);
+  static get isEvalSupported() {
+    return shadow(this, "isEvalSupported", isEvalSupported());
+  }
 
-  return FeatureTest;
-}();
+  static get isOffscreenCanvasSupported() {
+    return shadow(this, "isOffscreenCanvasSupported", typeof OffscreenCanvas !== "undefined");
+  }
+
+}
 
 exports.FeatureTest = FeatureTest;
+const hexNumbers = [...Array(256).keys()].map(n => n.toString(16).padStart(2, "0"));
 
-var hexNumbers = _toConsumableArray(Array(256).keys()).map(function (n) {
-  return n.toString(16).padStart(2, "0");
-});
-
-var Util = /*#__PURE__*/function () {
-  function Util() {
-    _classCallCheck(this, Util);
+class Util {
+  static makeHexColor(r, g, b) {
+    return `#${hexNumbers[r]}${hexNumbers[g]}${hexNumbers[b]}`;
   }
 
-  _createClass(Util, null, [{
-    key: "makeHexColor",
-    value: function makeHexColor(r, g, b) {
-      return "#".concat(hexNumbers[r]).concat(hexNumbers[g]).concat(hexNumbers[b]);
-    }
-  }, {
-    key: "scaleMinMax",
-    value: function scaleMinMax(transform, minMax) {
-      var temp;
+  static scaleMinMax(transform, minMax) {
+    let temp;
 
-      if (transform[0]) {
-        if (transform[0] < 0) {
-          temp = minMax[0];
-          minMax[0] = minMax[1];
-          minMax[1] = temp;
-        }
-
-        minMax[0] *= transform[0];
-        minMax[1] *= transform[0];
-
-        if (transform[3] < 0) {
-          temp = minMax[2];
-          minMax[2] = minMax[3];
-          minMax[3] = temp;
-        }
-
-        minMax[2] *= transform[3];
-        minMax[3] *= transform[3];
-      } else {
+    if (transform[0]) {
+      if (transform[0] < 0) {
         temp = minMax[0];
-        minMax[0] = minMax[2];
-        minMax[2] = temp;
-        temp = minMax[1];
-        minMax[1] = minMax[3];
+        minMax[0] = minMax[1];
+        minMax[1] = temp;
+      }
+
+      minMax[0] *= transform[0];
+      minMax[1] *= transform[0];
+
+      if (transform[3] < 0) {
+        temp = minMax[2];
+        minMax[2] = minMax[3];
         minMax[3] = temp;
-
-        if (transform[1] < 0) {
-          temp = minMax[2];
-          minMax[2] = minMax[3];
-          minMax[3] = temp;
-        }
-
-        minMax[2] *= transform[1];
-        minMax[3] *= transform[1];
-
-        if (transform[2] < 0) {
-          temp = minMax[0];
-          minMax[0] = minMax[1];
-          minMax[1] = temp;
-        }
-
-        minMax[0] *= transform[2];
-        minMax[1] *= transform[2];
       }
 
-      minMax[0] += transform[4];
-      minMax[1] += transform[4];
-      minMax[2] += transform[5];
-      minMax[3] += transform[5];
-    }
-  }, {
-    key: "transform",
-    value: function transform(m1, m2) {
-      return [m1[0] * m2[0] + m1[2] * m2[1], m1[1] * m2[0] + m1[3] * m2[1], m1[0] * m2[2] + m1[2] * m2[3], m1[1] * m2[2] + m1[3] * m2[3], m1[0] * m2[4] + m1[2] * m2[5] + m1[4], m1[1] * m2[4] + m1[3] * m2[5] + m1[5]];
-    }
-  }, {
-    key: "applyTransform",
-    value: function applyTransform(p, m) {
-      var xt = p[0] * m[0] + p[1] * m[2] + m[4];
-      var yt = p[0] * m[1] + p[1] * m[3] + m[5];
-      return [xt, yt];
-    }
-  }, {
-    key: "applyInverseTransform",
-    value: function applyInverseTransform(p, m) {
-      var d = m[0] * m[3] - m[1] * m[2];
-      var xt = (p[0] * m[3] - p[1] * m[2] + m[2] * m[5] - m[4] * m[3]) / d;
-      var yt = (-p[0] * m[1] + p[1] * m[0] + m[4] * m[1] - m[5] * m[0]) / d;
-      return [xt, yt];
-    }
-  }, {
-    key: "getAxialAlignedBoundingBox",
-    value: function getAxialAlignedBoundingBox(r, m) {
-      var p1 = Util.applyTransform(r, m);
-      var p2 = Util.applyTransform(r.slice(2, 4), m);
-      var p3 = Util.applyTransform([r[0], r[3]], m);
-      var p4 = Util.applyTransform([r[2], r[1]], m);
-      return [Math.min(p1[0], p2[0], p3[0], p4[0]), Math.min(p1[1], p2[1], p3[1], p4[1]), Math.max(p1[0], p2[0], p3[0], p4[0]), Math.max(p1[1], p2[1], p3[1], p4[1])];
-    }
-  }, {
-    key: "inverseTransform",
-    value: function inverseTransform(m) {
-      var d = m[0] * m[3] - m[1] * m[2];
-      return [m[3] / d, -m[1] / d, -m[2] / d, m[0] / d, (m[2] * m[5] - m[4] * m[3]) / d, (m[4] * m[1] - m[5] * m[0]) / d];
-    }
-  }, {
-    key: "apply3dTransform",
-    value: function apply3dTransform(m, v) {
-      return [m[0] * v[0] + m[1] * v[1] + m[2] * v[2], m[3] * v[0] + m[4] * v[1] + m[5] * v[2], m[6] * v[0] + m[7] * v[1] + m[8] * v[2]];
-    }
-  }, {
-    key: "singularValueDecompose2dScale",
-    value: function singularValueDecompose2dScale(m) {
-      var transpose = [m[0], m[2], m[1], m[3]];
-      var a = m[0] * transpose[0] + m[1] * transpose[2];
-      var b = m[0] * transpose[1] + m[1] * transpose[3];
-      var c = m[2] * transpose[0] + m[3] * transpose[2];
-      var d = m[2] * transpose[1] + m[3] * transpose[3];
-      var first = (a + d) / 2;
-      var second = Math.sqrt(Math.pow(a + d, 2) - 4 * (a * d - c * b)) / 2;
-      var sx = first + second || 1;
-      var sy = first - second || 1;
-      return [Math.sqrt(sx), Math.sqrt(sy)];
-    }
-  }, {
-    key: "normalizeRect",
-    value: function normalizeRect(rect) {
-      var r = rect.slice(0);
+      minMax[2] *= transform[3];
+      minMax[3] *= transform[3];
+    } else {
+      temp = minMax[0];
+      minMax[0] = minMax[2];
+      minMax[2] = temp;
+      temp = minMax[1];
+      minMax[1] = minMax[3];
+      minMax[3] = temp;
 
-      if (rect[0] > rect[2]) {
-        r[0] = rect[2];
-        r[2] = rect[0];
+      if (transform[1] < 0) {
+        temp = minMax[2];
+        minMax[2] = minMax[3];
+        minMax[3] = temp;
       }
 
-      if (rect[1] > rect[3]) {
-        r[1] = rect[3];
-        r[3] = rect[1];
+      minMax[2] *= transform[1];
+      minMax[3] *= transform[1];
+
+      if (transform[2] < 0) {
+        temp = minMax[0];
+        minMax[0] = minMax[1];
+        minMax[1] = temp;
       }
 
-      return r;
+      minMax[0] *= transform[2];
+      minMax[1] *= transform[2];
     }
-  }, {
-    key: "intersect",
-    value: function intersect(rect1, rect2) {
-      var xLow = Math.max(Math.min(rect1[0], rect1[2]), Math.min(rect2[0], rect2[2]));
-      var xHigh = Math.min(Math.max(rect1[0], rect1[2]), Math.max(rect2[0], rect2[2]));
 
-      if (xLow > xHigh) {
-        return null;
-      }
+    minMax[0] += transform[4];
+    minMax[1] += transform[4];
+    minMax[2] += transform[5];
+    minMax[3] += transform[5];
+  }
 
-      var yLow = Math.max(Math.min(rect1[1], rect1[3]), Math.min(rect2[1], rect2[3]));
-      var yHigh = Math.min(Math.max(rect1[1], rect1[3]), Math.max(rect2[1], rect2[3]));
+  static transform(m1, m2) {
+    return [m1[0] * m2[0] + m1[2] * m2[1], m1[1] * m2[0] + m1[3] * m2[1], m1[0] * m2[2] + m1[2] * m2[3], m1[1] * m2[2] + m1[3] * m2[3], m1[0] * m2[4] + m1[2] * m2[5] + m1[4], m1[1] * m2[4] + m1[3] * m2[5] + m1[5]];
+  }
 
-      if (yLow > yHigh) {
-        return null;
-      }
+  static applyTransform(p, m) {
+    const xt = p[0] * m[0] + p[1] * m[2] + m[4];
+    const yt = p[0] * m[1] + p[1] * m[3] + m[5];
+    return [xt, yt];
+  }
 
-      return [xLow, yLow, xHigh, yHigh];
+  static applyInverseTransform(p, m) {
+    const d = m[0] * m[3] - m[1] * m[2];
+    const xt = (p[0] * m[3] - p[1] * m[2] + m[2] * m[5] - m[4] * m[3]) / d;
+    const yt = (-p[0] * m[1] + p[1] * m[0] + m[4] * m[1] - m[5] * m[0]) / d;
+    return [xt, yt];
+  }
+
+  static getAxialAlignedBoundingBox(r, m) {
+    const p1 = Util.applyTransform(r, m);
+    const p2 = Util.applyTransform(r.slice(2, 4), m);
+    const p3 = Util.applyTransform([r[0], r[3]], m);
+    const p4 = Util.applyTransform([r[2], r[1]], m);
+    return [Math.min(p1[0], p2[0], p3[0], p4[0]), Math.min(p1[1], p2[1], p3[1], p4[1]), Math.max(p1[0], p2[0], p3[0], p4[0]), Math.max(p1[1], p2[1], p3[1], p4[1])];
+  }
+
+  static inverseTransform(m) {
+    const d = m[0] * m[3] - m[1] * m[2];
+    return [m[3] / d, -m[1] / d, -m[2] / d, m[0] / d, (m[2] * m[5] - m[4] * m[3]) / d, (m[4] * m[1] - m[5] * m[0]) / d];
+  }
+
+  static apply3dTransform(m, v) {
+    return [m[0] * v[0] + m[1] * v[1] + m[2] * v[2], m[3] * v[0] + m[4] * v[1] + m[5] * v[2], m[6] * v[0] + m[7] * v[1] + m[8] * v[2]];
+  }
+
+  static singularValueDecompose2dScale(m) {
+    const transpose = [m[0], m[2], m[1], m[3]];
+    const a = m[0] * transpose[0] + m[1] * transpose[2];
+    const b = m[0] * transpose[1] + m[1] * transpose[3];
+    const c = m[2] * transpose[0] + m[3] * transpose[2];
+    const d = m[2] * transpose[1] + m[3] * transpose[3];
+    const first = (a + d) / 2;
+    const second = Math.sqrt((a + d) ** 2 - 4 * (a * d - c * b)) / 2;
+    const sx = first + second || 1;
+    const sy = first - second || 1;
+    return [Math.sqrt(sx), Math.sqrt(sy)];
+  }
+
+  static normalizeRect(rect) {
+    const r = rect.slice(0);
+
+    if (rect[0] > rect[2]) {
+      r[0] = rect[2];
+      r[2] = rect[0];
     }
-  }, {
-    key: "bezierBoundingBox",
-    value: function bezierBoundingBox(x0, y0, x1, y1, x2, y2, x3, y3) {
-      var tvalues = [],
+
+    if (rect[1] > rect[3]) {
+      r[1] = rect[3];
+      r[3] = rect[1];
+    }
+
+    return r;
+  }
+
+  static intersect(rect1, rect2) {
+    const xLow = Math.max(Math.min(rect1[0], rect1[2]), Math.min(rect2[0], rect2[2]));
+    const xHigh = Math.min(Math.max(rect1[0], rect1[2]), Math.max(rect2[0], rect2[2]));
+
+    if (xLow > xHigh) {
+      return null;
+    }
+
+    const yLow = Math.max(Math.min(rect1[1], rect1[3]), Math.min(rect2[1], rect2[3]));
+    const yHigh = Math.min(Math.max(rect1[1], rect1[3]), Math.max(rect2[1], rect2[3]));
+
+    if (yLow > yHigh) {
+      return null;
+    }
+
+    return [xLow, yLow, xHigh, yHigh];
+  }
+
+  static bezierBoundingBox(x0, y0, x1, y1, x2, y2, x3, y3) {
+    const tvalues = [],
           bounds = [[], []];
-      var a, b, c, t, t1, t2, b2ac, sqrtb2ac;
+    let a, b, c, t, t1, t2, b2ac, sqrtb2ac;
 
-      for (var i = 0; i < 2; ++i) {
-        if (i === 0) {
-          b = 6 * x0 - 12 * x1 + 6 * x2;
-          a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
-          c = 3 * x1 - 3 * x0;
-        } else {
-          b = 6 * y0 - 12 * y1 + 6 * y2;
-          a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
-          c = 3 * y1 - 3 * y0;
-        }
+    for (let i = 0; i < 2; ++i) {
+      if (i === 0) {
+        b = 6 * x0 - 12 * x1 + 6 * x2;
+        a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
+        c = 3 * x1 - 3 * x0;
+      } else {
+        b = 6 * y0 - 12 * y1 + 6 * y2;
+        a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
+        c = 3 * y1 - 3 * y0;
+      }
 
-        if (Math.abs(a) < 1e-12) {
-          if (Math.abs(b) < 1e-12) {
-            continue;
-          }
-
-          t = -c / b;
-
-          if (0 < t && t < 1) {
-            tvalues.push(t);
-          }
-
+      if (Math.abs(a) < 1e-12) {
+        if (Math.abs(b) < 1e-12) {
           continue;
         }
 
-        b2ac = b * b - 4 * c * a;
-        sqrtb2ac = Math.sqrt(b2ac);
+        t = -c / b;
 
-        if (b2ac < 0) {
-          continue;
+        if (0 < t && t < 1) {
+          tvalues.push(t);
         }
 
-        t1 = (-b + sqrtb2ac) / (2 * a);
-
-        if (0 < t1 && t1 < 1) {
-          tvalues.push(t1);
-        }
-
-        t2 = (-b - sqrtb2ac) / (2 * a);
-
-        if (0 < t2 && t2 < 1) {
-          tvalues.push(t2);
-        }
+        continue;
       }
 
-      var j = tvalues.length,
-          mt;
-      var jlen = j;
+      b2ac = b * b - 4 * c * a;
+      sqrtb2ac = Math.sqrt(b2ac);
 
-      while (j--) {
-        t = tvalues[j];
-        mt = 1 - t;
-        bounds[0][j] = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
-        bounds[1][j] = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
+      if (b2ac < 0) {
+        continue;
       }
 
-      bounds[0][jlen] = x0;
-      bounds[1][jlen] = y0;
-      bounds[0][jlen + 1] = x3;
-      bounds[1][jlen + 1] = y3;
-      bounds[0].length = bounds[1].length = jlen + 2;
-      return [Math.min.apply(Math, _toConsumableArray(bounds[0])), Math.min.apply(Math, _toConsumableArray(bounds[1])), Math.max.apply(Math, _toConsumableArray(bounds[0])), Math.max.apply(Math, _toConsumableArray(bounds[1]))];
+      t1 = (-b + sqrtb2ac) / (2 * a);
+
+      if (0 < t1 && t1 < 1) {
+        tvalues.push(t1);
+      }
+
+      t2 = (-b - sqrtb2ac) / (2 * a);
+
+      if (0 < t2 && t2 < 1) {
+        tvalues.push(t2);
+      }
     }
-  }]);
 
-  return Util;
-}();
+    let j = tvalues.length,
+        mt;
+    const jlen = j;
+
+    while (j--) {
+      t = tvalues[j];
+      mt = 1 - t;
+      bounds[0][j] = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
+      bounds[1][j] = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
+    }
+
+    bounds[0][jlen] = x0;
+    bounds[1][jlen] = y0;
+    bounds[0][jlen + 1] = x3;
+    bounds[1][jlen + 1] = y3;
+    bounds[0].length = bounds[1].length = jlen + 2;
+    return [Math.min(...bounds[0]), Math.min(...bounds[1]), Math.max(...bounds[0]), Math.max(...bounds[1])];
+  }
+
+}
 
 exports.Util = Util;
-var PDFStringTranslateTable = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2d8, 0x2c7, 0x2c6, 0x2d9, 0x2dd, 0x2db, 0x2da, 0x2dc, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2022, 0x2020, 0x2021, 0x2026, 0x2014, 0x2013, 0x192, 0x2044, 0x2039, 0x203a, 0x2212, 0x2030, 0x201e, 0x201c, 0x201d, 0x2018, 0x2019, 0x201a, 0x2122, 0xfb01, 0xfb02, 0x141, 0x152, 0x160, 0x178, 0x17d, 0x131, 0x142, 0x153, 0x161, 0x17e, 0, 0x20ac];
+const PDFStringTranslateTable = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2d8, 0x2c7, 0x2c6, 0x2d9, 0x2dd, 0x2db, 0x2da, 0x2dc, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2022, 0x2020, 0x2021, 0x2026, 0x2014, 0x2013, 0x192, 0x2044, 0x2039, 0x203a, 0x2212, 0x2030, 0x201e, 0x201c, 0x201d, 0x2018, 0x2019, 0x201a, 0x2122, 0xfb01, 0xfb02, 0x141, 0x152, 0x160, 0x178, 0x17d, 0x131, 0x142, 0x153, 0x161, 0x17e, 0, 0x20ac];
 
 function stringToPDFString(str) {
   if (str[0] >= "\xEF") {
-    var encoding;
+    let encoding;
 
     if (str[0] === "\xFE" && str[1] === "\xFF") {
       encoding = "utf-16be";
@@ -1125,21 +978,21 @@ function stringToPDFString(str) {
 
     if (encoding) {
       try {
-        var decoder = new TextDecoder(encoding, {
+        const decoder = new TextDecoder(encoding, {
           fatal: true
         });
-        var buffer = stringToBytes(str);
+        const buffer = stringToBytes(str);
         return decoder.decode(buffer);
       } catch (ex) {
-        warn("stringToPDFString: \"".concat(ex, "\"."));
+        warn(`stringToPDFString: "${ex}".`);
       }
     }
   }
 
-  var strBuf = [];
+  const strBuf = [];
 
-  for (var i = 0, ii = str.length; i < ii; i++) {
-    var code = PDFStringTranslateTable[str.charCodeAt(i)];
+  for (let i = 0, ii = str.length; i < ii; i++) {
+    const code = PDFStringTranslateTable[str.charCodeAt(i)];
     strBuf.push(code ? String.fromCharCode(code) : str.charAt(i));
   }
 
@@ -1147,14 +1000,14 @@ function stringToPDFString(str) {
 }
 
 function escapeString(str) {
-  return str.replace(/([()\\\n\r])/g, function (match) {
+  return str.replace(/([()\\\n\r])/g, match => {
     if (match === "\n") {
       return "\\n";
     } else if (match === "\r") {
       return "\\r";
     }
 
-    return "\\".concat(match);
+    return `\\${match}`;
   });
 }
 
@@ -1163,12 +1016,11 @@ function isAscii(str) {
 }
 
 function stringToUTF16BEString(str) {
-  var buf = ["\xFE\xFF"];
+  const buf = ["\xFE\xFF"];
 
-  for (var i = 0, ii = str.length; i < ii; i++) {
-    var _char = str.charCodeAt(i);
-
-    buf.push(String.fromCharCode(_char >> 8 & 0xff), String.fromCharCode(_char & 0xff));
+  for (let i = 0, ii = str.length; i < ii; i++) {
+    const char = str.charCodeAt(i);
+    buf.push(String.fromCharCode(char >> 8 & 0xff), String.fromCharCode(char & 0xff));
   }
 
   return buf.join("");
@@ -1183,7 +1035,7 @@ function utf8StringToString(str) {
 }
 
 function isArrayBuffer(v) {
-  return _typeof(v) === "object" && v !== null && v.byteLength !== undefined;
+  return typeof v === "object" && v !== null && v.byteLength !== undefined;
 }
 
 function isArrayEqual(arr1, arr2) {
@@ -1191,7 +1043,7 @@ function isArrayEqual(arr1, arr2) {
     return false;
   }
 
-  for (var i = 0, ii = arr1.length; i < ii; i++) {
+  for (let i = 0, ii = arr1.length; i < ii; i++) {
     if (arr1[i] !== arr2[i]) {
       return false;
     }
@@ -1201,18 +1053,19 @@ function isArrayEqual(arr1, arr2) {
 }
 
 function getModificationDate() {
-  var date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date();
-  var buffer = [date.getUTCFullYear().toString(), (date.getUTCMonth() + 1).toString().padStart(2, "0"), date.getUTCDate().toString().padStart(2, "0"), date.getUTCHours().toString().padStart(2, "0"), date.getUTCMinutes().toString().padStart(2, "0"), date.getUTCSeconds().toString().padStart(2, "0")];
+  let date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date();
+  const buffer = [date.getUTCFullYear().toString(), (date.getUTCMonth() + 1).toString().padStart(2, "0"), date.getUTCDate().toString().padStart(2, "0"), date.getUTCHours().toString().padStart(2, "0"), date.getUTCMinutes().toString().padStart(2, "0"), date.getUTCSeconds().toString().padStart(2, "0")];
   return buffer.join("");
 }
 
 function createPromiseCapability() {
-  var capability = Object.create(null);
-  var isSettled = false;
+  const capability = Object.create(null);
+  let isSettled = false;
   Object.defineProperty(capability, "settled", {
-    get: function get() {
+    get() {
       return isSettled;
     }
+
   });
   capability.promise = new Promise(function (resolve, reject) {
     capability.resolve = function (data) {
@@ -1306,10 +1159,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports.isNodeJS = void 0;
-
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-var isNodeJS = (typeof process === "undefined" ? "undefined" : _typeof(process)) === "object" && process + "" === "[object process]" && !process.versions.nw && !(process.versions.electron && process.type && process.type !== "browser");
+const isNodeJS = typeof process === "object" && process + "" === "[object process]" && !process.versions.nw && !(process.versions.electron && process.type && process.type !== "browser");
 exports.isNodeJS = isNodeJS;
 
 /***/ }),
@@ -1798,10 +1648,10 @@ var store = __w_pdfjs_require__(38);
 (module.exports = function (key, value) {
  return store[key] || (store[key] = value !== undefined ? value : {});
 })('versions', []).push({
- version: '3.23.5',
+ version: '3.24.1',
  mode: IS_PURE ? 'pure' : 'global',
  copyright: '© 2014-2022 Denis Pushkarev (zloirock.ru)',
- license: 'https://github.com/zloirock/core-js/blob/v3.23.5/LICENSE',
+ license: 'https://github.com/zloirock/core-js/blob/v3.24.1/LICENSE',
  source: 'https://github.com/zloirock/core-js'
 });
 
@@ -2887,8 +2737,6 @@ module.exports = function (argument) {
 "use strict";
 
 
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
 Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
@@ -2902,108 +2750,52 @@ var _arithmetic_decoder = __w_pdfjs_require__(90);
 
 var _ccitt = __w_pdfjs_require__(91);
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-var Jbig2Error = /*#__PURE__*/function (_BaseException) {
-  _inherits(Jbig2Error, _BaseException);
-
-  var _super = _createSuper(Jbig2Error);
-
-  function Jbig2Error(msg) {
-    _classCallCheck(this, Jbig2Error);
-
-    return _super.call(this, "JBIG2 error: ".concat(msg), "Jbig2Error");
+class Jbig2Error extends _util.BaseException {
+  constructor(msg) {
+    super(`JBIG2 error: ${msg}`, "Jbig2Error");
   }
 
-  return _createClass(Jbig2Error);
-}(_util.BaseException);
+}
 
-var ContextCache = /*#__PURE__*/function () {
-  function ContextCache() {
-    _classCallCheck(this, ContextCache);
-  }
-
-  _createClass(ContextCache, [{
-    key: "getContexts",
-    value: function getContexts(id) {
-      if (id in this) {
-        return this[id];
-      }
-
-      return this[id] = new Int8Array(1 << 16);
+class ContextCache {
+  getContexts(id) {
+    if (id in this) {
+      return this[id];
     }
-  }]);
 
-  return ContextCache;
-}();
+    return this[id] = new Int8Array(1 << 16);
+  }
 
-var DecodingContext = /*#__PURE__*/function () {
-  function DecodingContext(data, start, end) {
-    _classCallCheck(this, DecodingContext);
+}
 
+class DecodingContext {
+  constructor(data, start, end) {
     this.data = data;
     this.start = start;
     this.end = end;
   }
 
-  _createClass(DecodingContext, [{
-    key: "decoder",
-    get: function get() {
-      var decoder = new _arithmetic_decoder.ArithmeticDecoder(this.data, this.start, this.end);
-      return (0, _util.shadow)(this, "decoder", decoder);
-    }
-  }, {
-    key: "contextCache",
-    get: function get() {
-      var cache = new ContextCache();
-      return (0, _util.shadow)(this, "contextCache", cache);
-    }
-  }]);
+  get decoder() {
+    const decoder = new _arithmetic_decoder.ArithmeticDecoder(this.data, this.start, this.end);
+    return (0, _util.shadow)(this, "decoder", decoder);
+  }
 
-  return DecodingContext;
-}();
+  get contextCache() {
+    const cache = new ContextCache();
+    return (0, _util.shadow)(this, "contextCache", cache);
+  }
+
+}
 
 function decodeInteger(contextCache, procedure, decoder) {
-  var contexts = contextCache.getContexts(procedure);
-  var prev = 1;
+  const contexts = contextCache.getContexts(procedure);
+  let prev = 1;
 
   function readBits(length) {
-    var v = 0;
+    let v = 0;
 
-    for (var i = 0; i < length; i++) {
-      var bit = decoder.readBit(contexts, prev);
+    for (let i = 0; i < length; i++) {
+      const bit = decoder.readBit(contexts, prev);
       prev = prev < 256 ? prev << 1 | bit : (prev << 1 | bit) & 511 | 256;
       v = v << 1 | bit;
     }
@@ -3011,8 +2803,8 @@ function decodeInteger(contextCache, procedure, decoder) {
     return v >>> 0;
   }
 
-  var sign = readBits(1);
-  var value = readBits(1) ? readBits(1) ? readBits(1) ? readBits(1) ? readBits(1) ? readBits(32) + 4436 : readBits(12) + 340 : readBits(8) + 84 : readBits(6) + 20 : readBits(4) + 4 : readBits(2);
+  const sign = readBits(1);
+  const value = readBits(1) ? readBits(1) ? readBits(1) ? readBits(1) ? readBits(1) ? readBits(32) + 4436 : readBits(12) + 340 : readBits(8) + 84 : readBits(6) + 20 : readBits(4) + 4 : readBits(2);
 
   if (sign === 0) {
     return value;
@@ -3024,11 +2816,11 @@ function decodeInteger(contextCache, procedure, decoder) {
 }
 
 function decodeIAID(contextCache, decoder, codeLength) {
-  var contexts = contextCache.getContexts("IAID");
-  var prev = 1;
+  const contexts = contextCache.getContexts("IAID");
+  let prev = 1;
 
-  for (var i = 0; i < codeLength; i++) {
-    var bit = decoder.readBit(contexts, prev);
+  for (let i = 0; i < codeLength; i++) {
+    const bit = decoder.readBit(contexts, prev);
     prev = prev << 1 | bit;
   }
 
@@ -3039,8 +2831,8 @@ function decodeIAID(contextCache, decoder, codeLength) {
   return prev & 0x7fffffff;
 }
 
-var SegmentTypes = ["SymbolDictionary", null, null, null, "IntermediateTextRegion", null, "ImmediateTextRegion", "ImmediateLosslessTextRegion", null, null, null, null, null, null, null, null, "PatternDictionary", null, null, null, "IntermediateHalftoneRegion", null, "ImmediateHalftoneRegion", "ImmediateLosslessHalftoneRegion", null, null, null, null, null, null, null, null, null, null, null, null, "IntermediateGenericRegion", null, "ImmediateGenericRegion", "ImmediateLosslessGenericRegion", "IntermediateGenericRefinementRegion", null, "ImmediateGenericRefinementRegion", "ImmediateLosslessGenericRefinementRegion", null, null, null, null, "PageInformation", "EndOfPage", "EndOfStripe", "EndOfFile", "Profiles", "Tables", null, null, null, null, null, null, null, null, "Extension"];
-var CodingTemplates = [[{
+const SegmentTypes = ["SymbolDictionary", null, null, null, "IntermediateTextRegion", null, "ImmediateTextRegion", "ImmediateLosslessTextRegion", null, null, null, null, null, null, null, null, "PatternDictionary", null, null, null, "IntermediateHalftoneRegion", null, "ImmediateHalftoneRegion", "ImmediateLosslessHalftoneRegion", null, null, null, null, null, null, null, null, null, null, null, null, "IntermediateGenericRegion", null, "ImmediateGenericRegion", "ImmediateLosslessGenericRegion", "IntermediateGenericRefinementRegion", null, "ImmediateGenericRefinementRegion", "ImmediateLosslessGenericRefinementRegion", null, null, null, null, "PageInformation", "EndOfPage", "EndOfStripe", "EndOfFile", "Profiles", "Tables", null, null, null, null, null, null, null, null, "Extension"];
+const CodingTemplates = [[{
   x: -1,
   y: -2
 }, {
@@ -3167,7 +2959,7 @@ var CodingTemplates = [[{
   x: -1,
   y: 0
 }]];
-var RefinementTemplates = [{
+const RefinementTemplates = [{
   coding: [{
     x: 0,
     y: -1
@@ -3237,15 +3029,15 @@ var RefinementTemplates = [{
     y: 1
   }]
 }];
-var ReusedContexts = [0x9b25, 0x0795, 0x00e5, 0x0195];
-var RefinementReusedContexts = [0x0020, 0x0008];
+const ReusedContexts = [0x9b25, 0x0795, 0x00e5, 0x0195];
+const RefinementReusedContexts = [0x0020, 0x0008];
 
 function decodeBitmapTemplate0(width, height, decodingContext) {
-  var decoder = decodingContext.decoder;
-  var contexts = decodingContext.contextCache.getContexts("GB");
-  var bitmap = [];
-  var contextLabel, i, j, pixel, row, row1, row2;
-  var OLD_PIXEL_MASK = 0x7bf7;
+  const decoder = decodingContext.decoder;
+  const contexts = decodingContext.contextCache.getContexts("GB");
+  const bitmap = [];
+  let contextLabel, i, j, pixel, row, row1, row2;
+  const OLD_PIXEL_MASK = 0x7bf7;
 
   for (i = 0; i < height; i++) {
     row = bitmap[i] = new Uint8Array(width);
@@ -3264,7 +3056,7 @@ function decodeBitmapTemplate0(width, height, decodingContext) {
 
 function decodeBitmap(mmr, width, height, templateIndex, prediction, skip, at, decodingContext) {
   if (mmr) {
-    var input = new Reader(decodingContext.data, decodingContext.start, decodingContext.end);
+    const input = new Reader(decodingContext.data, decodingContext.start, decodingContext.end);
     return decodeMMRBitmap(input, width, height, false);
   }
 
@@ -3272,20 +3064,20 @@ function decodeBitmap(mmr, width, height, templateIndex, prediction, skip, at, d
     return decodeBitmapTemplate0(width, height, decodingContext);
   }
 
-  var useskip = !!skip;
-  var template = CodingTemplates[templateIndex].concat(at);
+  const useskip = !!skip;
+  const template = CodingTemplates[templateIndex].concat(at);
   template.sort(function (a, b) {
     return a.y - b.y || a.x - b.x;
   });
-  var templateLength = template.length;
-  var templateX = new Int8Array(templateLength);
-  var templateY = new Int8Array(templateLength);
-  var changingTemplateEntries = [];
-  var reuseMask = 0,
+  const templateLength = template.length;
+  const templateX = new Int8Array(templateLength);
+  const templateY = new Int8Array(templateLength);
+  const changingTemplateEntries = [];
+  let reuseMask = 0,
       minX = 0,
       maxX = 0,
       minY = 0;
-  var c, k;
+  let c, k;
 
   for (k = 0; k < templateLength; k++) {
     templateX[k] = template[k].x;
@@ -3301,10 +3093,10 @@ function decodeBitmap(mmr, width, height, templateIndex, prediction, skip, at, d
     }
   }
 
-  var changingEntriesLength = changingTemplateEntries.length;
-  var changingTemplateX = new Int8Array(changingEntriesLength);
-  var changingTemplateY = new Int8Array(changingEntriesLength);
-  var changingTemplateBit = new Uint16Array(changingEntriesLength);
+  const changingEntriesLength = changingTemplateEntries.length;
+  const changingTemplateX = new Int8Array(changingEntriesLength);
+  const changingTemplateY = new Int8Array(changingEntriesLength);
+  const changingTemplateBit = new Uint16Array(changingEntriesLength);
 
   for (c = 0; c < changingEntriesLength; c++) {
     k = changingTemplateEntries[c];
@@ -3313,15 +3105,15 @@ function decodeBitmap(mmr, width, height, templateIndex, prediction, skip, at, d
     changingTemplateBit[c] = 1 << templateLength - 1 - k;
   }
 
-  var sbb_left = -minX;
-  var sbb_top = -minY;
-  var sbb_right = width - maxX;
-  var pseudoPixelContext = ReusedContexts[templateIndex];
-  var row = new Uint8Array(width);
-  var bitmap = [];
-  var decoder = decodingContext.decoder;
-  var contexts = decodingContext.contextCache.getContexts("GB");
-  var ltp = 0,
+  const sbb_left = -minX;
+  const sbb_top = -minY;
+  const sbb_right = width - maxX;
+  const pseudoPixelContext = ReusedContexts[templateIndex];
+  let row = new Uint8Array(width);
+  const bitmap = [];
+  const decoder = decodingContext.decoder;
+  const contexts = decodingContext.contextCache.getContexts("GB");
+  let ltp = 0,
       j,
       i0,
       j0,
@@ -3329,9 +3121,9 @@ function decodeBitmap(mmr, width, height, templateIndex, prediction, skip, at, d
       bit,
       shift;
 
-  for (var i = 0; i < height; i++) {
+  for (let i = 0; i < height; i++) {
     if (prediction) {
-      var sltp = decoder.readBit(contexts, pseudoPixelContext);
+      const sltp = decoder.readBit(contexts, pseudoPixelContext);
       ltp ^= sltp;
 
       if (ltp) {
@@ -3383,7 +3175,7 @@ function decodeBitmap(mmr, width, height, templateIndex, prediction, skip, at, d
         }
       }
 
-      var pixel = decoder.readBit(contexts, contextLabel);
+      const pixel = decoder.readBit(contexts, contextLabel);
       row[j] = pixel;
     }
   }
@@ -3392,48 +3184,48 @@ function decodeBitmap(mmr, width, height, templateIndex, prediction, skip, at, d
 }
 
 function decodeRefinement(width, height, templateIndex, referenceBitmap, offsetX, offsetY, prediction, at, decodingContext) {
-  var codingTemplate = RefinementTemplates[templateIndex].coding;
+  let codingTemplate = RefinementTemplates[templateIndex].coding;
 
   if (templateIndex === 0) {
     codingTemplate = codingTemplate.concat([at[0]]);
   }
 
-  var codingTemplateLength = codingTemplate.length;
-  var codingTemplateX = new Int32Array(codingTemplateLength);
-  var codingTemplateY = new Int32Array(codingTemplateLength);
-  var k;
+  const codingTemplateLength = codingTemplate.length;
+  const codingTemplateX = new Int32Array(codingTemplateLength);
+  const codingTemplateY = new Int32Array(codingTemplateLength);
+  let k;
 
   for (k = 0; k < codingTemplateLength; k++) {
     codingTemplateX[k] = codingTemplate[k].x;
     codingTemplateY[k] = codingTemplate[k].y;
   }
 
-  var referenceTemplate = RefinementTemplates[templateIndex].reference;
+  let referenceTemplate = RefinementTemplates[templateIndex].reference;
 
   if (templateIndex === 0) {
     referenceTemplate = referenceTemplate.concat([at[1]]);
   }
 
-  var referenceTemplateLength = referenceTemplate.length;
-  var referenceTemplateX = new Int32Array(referenceTemplateLength);
-  var referenceTemplateY = new Int32Array(referenceTemplateLength);
+  const referenceTemplateLength = referenceTemplate.length;
+  const referenceTemplateX = new Int32Array(referenceTemplateLength);
+  const referenceTemplateY = new Int32Array(referenceTemplateLength);
 
   for (k = 0; k < referenceTemplateLength; k++) {
     referenceTemplateX[k] = referenceTemplate[k].x;
     referenceTemplateY[k] = referenceTemplate[k].y;
   }
 
-  var referenceWidth = referenceBitmap[0].length;
-  var referenceHeight = referenceBitmap.length;
-  var pseudoPixelContext = RefinementReusedContexts[templateIndex];
-  var bitmap = [];
-  var decoder = decodingContext.decoder;
-  var contexts = decodingContext.contextCache.getContexts("GR");
-  var ltp = 0;
+  const referenceWidth = referenceBitmap[0].length;
+  const referenceHeight = referenceBitmap.length;
+  const pseudoPixelContext = RefinementReusedContexts[templateIndex];
+  const bitmap = [];
+  const decoder = decodingContext.decoder;
+  const contexts = decodingContext.contextCache.getContexts("GR");
+  let ltp = 0;
 
-  for (var i = 0; i < height; i++) {
+  for (let i = 0; i < height; i++) {
     if (prediction) {
-      var sltp = decoder.readBit(contexts, pseudoPixelContext);
+      const sltp = decoder.readBit(contexts, pseudoPixelContext);
       ltp ^= sltp;
 
       if (ltp) {
@@ -3441,13 +3233,12 @@ function decodeRefinement(width, height, templateIndex, referenceBitmap, offsetX
       }
     }
 
-    var row = new Uint8Array(width);
+    const row = new Uint8Array(width);
     bitmap.push(row);
 
-    for (var j = 0; j < width; j++) {
-      var i0 = void 0,
-          j0 = void 0;
-      var contextLabel = 0;
+    for (let j = 0; j < width; j++) {
+      let i0, j0;
+      let contextLabel = 0;
 
       for (k = 0; k < codingTemplateLength; k++) {
         i0 = i + codingTemplateY[k];
@@ -3471,7 +3262,7 @@ function decodeRefinement(width, height, templateIndex, referenceBitmap, offsetX
         }
       }
 
-      var pixel = decoder.readBit(contexts, contextLabel);
+      const pixel = decoder.readBit(contexts, contextLabel);
       row[j] = pixel;
     }
   }
@@ -3484,12 +3275,12 @@ function decodeSymbolDictionary(huffman, refinement, symbols, numberOfNewSymbols
     throw new Jbig2Error("symbol refinement with Huffman is not supported");
   }
 
-  var newSymbols = [];
-  var currentHeight = 0;
-  var symbolCodeLength = (0, _core_utils.log2)(symbols.length + numberOfNewSymbols);
-  var decoder = decodingContext.decoder;
-  var contextCache = decodingContext.contextCache;
-  var tableB1, symbolWidths;
+  const newSymbols = [];
+  let currentHeight = 0;
+  let symbolCodeLength = (0, _core_utils.log2)(symbols.length + numberOfNewSymbols);
+  const decoder = decodingContext.decoder;
+  const contextCache = decodingContext.contextCache;
+  let tableB1, symbolWidths;
 
   if (huffman) {
     tableB1 = getStandardTable(1);
@@ -3498,14 +3289,14 @@ function decodeSymbolDictionary(huffman, refinement, symbols, numberOfNewSymbols
   }
 
   while (newSymbols.length < numberOfNewSymbols) {
-    var deltaHeight = huffman ? huffmanTables.tableDeltaHeight.decode(huffmanInput) : decodeInteger(contextCache, "IADH", decoder);
+    const deltaHeight = huffman ? huffmanTables.tableDeltaHeight.decode(huffmanInput) : decodeInteger(contextCache, "IADH", decoder);
     currentHeight += deltaHeight;
-    var currentWidth = 0,
+    let currentWidth = 0,
         totalWidth = 0;
-    var firstSymbol = huffman ? symbolWidths.length : 0;
+    const firstSymbol = huffman ? symbolWidths.length : 0;
 
     while (true) {
-      var deltaWidth = huffman ? huffmanTables.tableDeltaWidth.decode(huffmanInput) : decodeInteger(contextCache, "IADW", decoder);
+      const deltaWidth = huffman ? huffmanTables.tableDeltaWidth.decode(huffmanInput) : decodeInteger(contextCache, "IADW", decoder);
 
       if (deltaWidth === null) {
         break;
@@ -3513,18 +3304,18 @@ function decodeSymbolDictionary(huffman, refinement, symbols, numberOfNewSymbols
 
       currentWidth += deltaWidth;
       totalWidth += currentWidth;
-      var bitmap = void 0;
+      let bitmap;
 
       if (refinement) {
-        var numberOfInstances = decodeInteger(contextCache, "IAAI", decoder);
+        const numberOfInstances = decodeInteger(contextCache, "IAAI", decoder);
 
         if (numberOfInstances > 1) {
           bitmap = decodeTextRegion(huffman, refinement, currentWidth, currentHeight, 0, numberOfInstances, 1, symbols.concat(newSymbols), symbolCodeLength, 0, 0, 1, 0, huffmanTables, refinementTemplateIndex, refinementAt, decodingContext, 0, huffmanInput);
         } else {
-          var symbolId = decodeIAID(contextCache, decoder, symbolCodeLength);
-          var rdx = decodeInteger(contextCache, "IARDX", decoder);
-          var rdy = decodeInteger(contextCache, "IARDY", decoder);
-          var symbol = symbolId < symbols.length ? symbols[symbolId] : newSymbols[symbolId - symbols.length];
+          const symbolId = decodeIAID(contextCache, decoder, symbolCodeLength);
+          const rdx = decodeInteger(contextCache, "IARDX", decoder);
+          const rdy = decodeInteger(contextCache, "IARDY", decoder);
+          const symbol = symbolId < symbols.length ? symbols[symbolId] : newSymbols[symbolId - symbols.length];
           bitmap = decodeRefinement(currentWidth, currentHeight, refinementTemplateIndex, symbol, rdx, rdy, false, refinementAt, decodingContext);
         }
 
@@ -3538,35 +3329,35 @@ function decodeSymbolDictionary(huffman, refinement, symbols, numberOfNewSymbols
     }
 
     if (huffman && !refinement) {
-      var bitmapSize = huffmanTables.tableBitmapSize.decode(huffmanInput);
+      const bitmapSize = huffmanTables.tableBitmapSize.decode(huffmanInput);
       huffmanInput.byteAlign();
-      var collectiveBitmap = void 0;
+      let collectiveBitmap;
 
       if (bitmapSize === 0) {
         collectiveBitmap = readUncompressedBitmap(huffmanInput, totalWidth, currentHeight);
       } else {
-        var originalEnd = huffmanInput.end;
-        var bitmapEnd = huffmanInput.position + bitmapSize;
+        const originalEnd = huffmanInput.end;
+        const bitmapEnd = huffmanInput.position + bitmapSize;
         huffmanInput.end = bitmapEnd;
         collectiveBitmap = decodeMMRBitmap(huffmanInput, totalWidth, currentHeight, false);
         huffmanInput.end = originalEnd;
         huffmanInput.position = bitmapEnd;
       }
 
-      var numberOfSymbolsDecoded = symbolWidths.length;
+      const numberOfSymbolsDecoded = symbolWidths.length;
 
       if (firstSymbol === numberOfSymbolsDecoded - 1) {
         newSymbols.push(collectiveBitmap);
       } else {
-        var _i = void 0,
-            y = void 0,
+        let i,
+            y,
             xMin = 0,
-            xMax = void 0,
-            bitmapWidth = void 0,
-            symbolBitmap = void 0;
+            xMax,
+            bitmapWidth,
+            symbolBitmap;
 
-        for (_i = firstSymbol; _i < numberOfSymbolsDecoded; _i++) {
-          bitmapWidth = symbolWidths[_i];
+        for (i = firstSymbol; i < numberOfSymbolsDecoded; i++) {
+          bitmapWidth = symbolWidths[i];
           xMax = xMin + bitmapWidth;
           symbolBitmap = [];
 
@@ -3581,15 +3372,15 @@ function decodeSymbolDictionary(huffman, refinement, symbols, numberOfNewSymbols
     }
   }
 
-  var exportedSymbols = [],
-      flags = [];
-  var currentFlag = false,
+  const exportedSymbols = [],
+        flags = [];
+  let currentFlag = false,
       i,
       ii;
-  var totalSymbolsLength = symbols.length + numberOfNewSymbols;
+  const totalSymbolsLength = symbols.length + numberOfNewSymbols;
 
   while (flags.length < totalSymbolsLength) {
-    var runLength = huffman ? tableB1.decode(huffmanInput) : decodeInteger(contextCache, "IAEX", decoder);
+    let runLength = huffman ? tableB1.decode(huffmanInput) : decodeInteger(contextCache, "IAEX", decoder);
 
     while (runLength--) {
       flags.push(currentFlag);
@@ -3604,7 +3395,7 @@ function decodeSymbolDictionary(huffman, refinement, symbols, numberOfNewSymbols
     }
   }
 
-  for (var j = 0; j < numberOfNewSymbols; i++, j++) {
+  for (let j = 0; j < numberOfNewSymbols; i++, j++) {
     if (flags[i]) {
       exportedSymbols.push(newSymbols[j]);
     }
@@ -3618,14 +3409,14 @@ function decodeTextRegion(huffman, refinement, width, height, defaultPixelValue,
     throw new Jbig2Error("refinement with Huffman is not supported");
   }
 
-  var bitmap = [];
-  var i, row;
+  const bitmap = [];
+  let i, row;
 
   for (i = 0; i < height; i++) {
     row = new Uint8Array(width);
 
     if (defaultPixelValue) {
-      for (var j = 0; j < width; j++) {
+      for (let j = 0; j < width; j++) {
         row[j] = defaultPixelValue;
       }
     }
@@ -3633,48 +3424,46 @@ function decodeTextRegion(huffman, refinement, width, height, defaultPixelValue,
     bitmap.push(row);
   }
 
-  var decoder = decodingContext.decoder;
-  var contextCache = decodingContext.contextCache;
-  var stripT = huffman ? -huffmanTables.tableDeltaT.decode(huffmanInput) : -decodeInteger(contextCache, "IADT", decoder);
-  var firstS = 0;
+  const decoder = decodingContext.decoder;
+  const contextCache = decodingContext.contextCache;
+  let stripT = huffman ? -huffmanTables.tableDeltaT.decode(huffmanInput) : -decodeInteger(contextCache, "IADT", decoder);
+  let firstS = 0;
   i = 0;
 
   while (i < numberOfSymbolInstances) {
-    var deltaT = huffman ? huffmanTables.tableDeltaT.decode(huffmanInput) : decodeInteger(contextCache, "IADT", decoder);
+    const deltaT = huffman ? huffmanTables.tableDeltaT.decode(huffmanInput) : decodeInteger(contextCache, "IADT", decoder);
     stripT += deltaT;
-    var deltaFirstS = huffman ? huffmanTables.tableFirstS.decode(huffmanInput) : decodeInteger(contextCache, "IAFS", decoder);
+    const deltaFirstS = huffman ? huffmanTables.tableFirstS.decode(huffmanInput) : decodeInteger(contextCache, "IAFS", decoder);
     firstS += deltaFirstS;
-    var currentS = firstS;
+    let currentS = firstS;
 
     do {
-      var currentT = 0;
+      let currentT = 0;
 
       if (stripSize > 1) {
         currentT = huffman ? huffmanInput.readBits(logStripSize) : decodeInteger(contextCache, "IAIT", decoder);
       }
 
-      var t = stripSize * stripT + currentT;
-      var symbolId = huffman ? huffmanTables.symbolIDTable.decode(huffmanInput) : decodeIAID(contextCache, decoder, symbolCodeLength);
-      var applyRefinement = refinement && (huffman ? huffmanInput.readBit() : decodeInteger(contextCache, "IARI", decoder));
-      var symbolBitmap = inputSymbols[symbolId];
-      var symbolWidth = symbolBitmap[0].length;
-      var symbolHeight = symbolBitmap.length;
+      const t = stripSize * stripT + currentT;
+      const symbolId = huffman ? huffmanTables.symbolIDTable.decode(huffmanInput) : decodeIAID(contextCache, decoder, symbolCodeLength);
+      const applyRefinement = refinement && (huffman ? huffmanInput.readBit() : decodeInteger(contextCache, "IARI", decoder));
+      let symbolBitmap = inputSymbols[symbolId];
+      let symbolWidth = symbolBitmap[0].length;
+      let symbolHeight = symbolBitmap.length;
 
       if (applyRefinement) {
-        var rdw = decodeInteger(contextCache, "IARDW", decoder);
-        var rdh = decodeInteger(contextCache, "IARDH", decoder);
-        var rdx = decodeInteger(contextCache, "IARDX", decoder);
-        var rdy = decodeInteger(contextCache, "IARDY", decoder);
+        const rdw = decodeInteger(contextCache, "IARDW", decoder);
+        const rdh = decodeInteger(contextCache, "IARDH", decoder);
+        const rdx = decodeInteger(contextCache, "IARDX", decoder);
+        const rdy = decodeInteger(contextCache, "IARDY", decoder);
         symbolWidth += rdw;
         symbolHeight += rdh;
         symbolBitmap = decodeRefinement(symbolWidth, symbolHeight, refinementTemplateIndex, symbolBitmap, (rdw >> 1) + rdx, (rdh >> 1) + rdy, false, refinementAt, decodingContext);
       }
 
-      var offsetT = t - (referenceCorner & 1 ? 0 : symbolHeight - 1);
-      var offsetS = currentS - (referenceCorner & 2 ? symbolWidth - 1 : 0);
-      var s2 = void 0,
-          t2 = void 0,
-          symbolRow = void 0;
+      const offsetT = t - (referenceCorner & 1 ? 0 : symbolHeight - 1);
+      const offsetS = currentS - (referenceCorner & 2 ? symbolWidth - 1 : 0);
+      let s2, t2, symbolRow;
 
       if (transposed) {
         for (s2 = 0; s2 < symbolHeight; s2++) {
@@ -3685,7 +3474,7 @@ function decodeTextRegion(huffman, refinement, width, height, defaultPixelValue,
           }
 
           symbolRow = symbolBitmap[s2];
-          var maxWidth = Math.min(width - offsetT, symbolWidth);
+          const maxWidth = Math.min(width - offsetT, symbolWidth);
 
           switch (combinationOperator) {
             case 0:
@@ -3703,7 +3492,7 @@ function decodeTextRegion(huffman, refinement, width, height, defaultPixelValue,
               break;
 
             default:
-              throw new Jbig2Error("operator ".concat(combinationOperator, " is not supported"));
+              throw new Jbig2Error(`operator ${combinationOperator} is not supported`);
           }
         }
 
@@ -3734,7 +3523,7 @@ function decodeTextRegion(huffman, refinement, width, height, defaultPixelValue,
               break;
 
             default:
-              throw new Jbig2Error("operator ".concat(combinationOperator, " is not supported"));
+              throw new Jbig2Error(`operator ${combinationOperator} is not supported`);
           }
         }
 
@@ -3742,7 +3531,7 @@ function decodeTextRegion(huffman, refinement, width, height, defaultPixelValue,
       }
 
       i++;
-      var deltaS = huffman ? huffmanTables.tableDeltaS.decode(huffmanInput) : decodeInteger(contextCache, "IADS", decoder);
+      const deltaS = huffman ? huffmanTables.tableDeltaS.decode(huffmanInput) : decodeInteger(contextCache, "IADS", decoder);
 
       if (deltaS === null) {
         break;
@@ -3756,7 +3545,7 @@ function decodeTextRegion(huffman, refinement, width, height, defaultPixelValue,
 }
 
 function decodePatternDictionary(mmr, patternWidth, patternHeight, maxPatternIndex, template, decodingContext) {
-  var at = [];
+  const at = [];
 
   if (!mmr) {
     at.push({
@@ -3778,16 +3567,16 @@ function decodePatternDictionary(mmr, patternWidth, patternHeight, maxPatternInd
     }
   }
 
-  var collectiveWidth = (maxPatternIndex + 1) * patternWidth;
-  var collectiveBitmap = decodeBitmap(mmr, collectiveWidth, patternHeight, template, false, null, at, decodingContext);
-  var patterns = [];
+  const collectiveWidth = (maxPatternIndex + 1) * patternWidth;
+  const collectiveBitmap = decodeBitmap(mmr, collectiveWidth, patternHeight, template, false, null, at, decodingContext);
+  const patterns = [];
 
-  for (var i = 0; i <= maxPatternIndex; i++) {
-    var patternBitmap = [];
-    var xMin = patternWidth * i;
-    var xMax = xMin + patternWidth;
+  for (let i = 0; i <= maxPatternIndex; i++) {
+    const patternBitmap = [];
+    const xMin = patternWidth * i;
+    const xMax = xMin + patternWidth;
 
-    for (var y = 0; y < patternHeight; y++) {
+    for (let y = 0; y < patternHeight; y++) {
       patternBitmap.push(collectiveBitmap[y].subarray(xMin, xMax));
     }
 
@@ -3798,18 +3587,18 @@ function decodePatternDictionary(mmr, patternWidth, patternHeight, maxPatternInd
 }
 
 function decodeHalftoneRegion(mmr, patterns, template, regionWidth, regionHeight, defaultPixelValue, enableSkip, combinationOperator, gridWidth, gridHeight, gridOffsetX, gridOffsetY, gridVectorX, gridVectorY, decodingContext) {
-  var skip = null;
+  const skip = null;
 
   if (enableSkip) {
     throw new Jbig2Error("skip is not supported");
   }
 
   if (combinationOperator !== 0) {
-    throw new Jbig2Error("operator \"".concat(combinationOperator, "\" is not supported in halftone region"));
+    throw new Jbig2Error(`operator "${combinationOperator}" is not supported in halftone region`);
   }
 
-  var regionBitmap = [];
-  var i, j, row;
+  const regionBitmap = [];
+  let i, j, row;
 
   for (i = 0; i < regionHeight; i++) {
     row = new Uint8Array(regionWidth);
@@ -3823,12 +3612,12 @@ function decodeHalftoneRegion(mmr, patterns, template, regionWidth, regionHeight
     regionBitmap.push(row);
   }
 
-  var numberOfPatterns = patterns.length;
-  var pattern0 = patterns[0];
-  var patternWidth = pattern0[0].length,
-      patternHeight = pattern0.length;
-  var bitsPerValue = (0, _core_utils.log2)(numberOfPatterns);
-  var at = [];
+  const numberOfPatterns = patterns.length;
+  const pattern0 = patterns[0];
+  const patternWidth = pattern0[0].length,
+        patternHeight = pattern0.length;
+  const bitsPerValue = (0, _core_utils.log2)(numberOfPatterns);
+  const at = [];
 
   if (!mmr) {
     at.push({
@@ -3850,8 +3639,8 @@ function decodeHalftoneRegion(mmr, patterns, template, regionWidth, regionHeight
     }
   }
 
-  var grayScaleBitPlanes = [];
-  var mmrInput, bitmap;
+  const grayScaleBitPlanes = [];
+  let mmrInput, bitmap;
 
   if (mmr) {
     mmrInput = new Reader(decodingContext.data, decodingContext.start, decodingContext.end);
@@ -3867,7 +3656,7 @@ function decodeHalftoneRegion(mmr, patterns, template, regionWidth, regionHeight
     grayScaleBitPlanes[i] = bitmap;
   }
 
-  var mg, ng, bit, patternIndex, patternBitmap, x, y, patternRow, regionRow;
+  let mg, ng, bit, patternIndex, patternBitmap, x, y, patternRow, regionRow;
 
   for (mg = 0; mg < gridHeight; mg++) {
     for (ng = 0; ng < gridWidth; ng++) {
@@ -3893,8 +3682,7 @@ function decodeHalftoneRegion(mmr, patterns, template, regionWidth, regionHeight
           }
         }
       } else {
-        var regionX = void 0,
-            regionY = void 0;
+        let regionX, regionY;
 
         for (i = 0; i < patternHeight; i++) {
           regionY = y + i;
@@ -3922,10 +3710,10 @@ function decodeHalftoneRegion(mmr, patterns, template, regionWidth, regionHeight
 }
 
 function readSegmentHeader(data, start) {
-  var segmentHeader = {};
+  const segmentHeader = {};
   segmentHeader.number = (0, _core_utils.readUint32)(data, start);
-  var flags = data[start + 4];
-  var segmentType = flags & 0x3f;
+  const flags = data[start + 4];
+  const segmentType = flags & 0x3f;
 
   if (!SegmentTypes[segmentType]) {
     throw new Jbig2Error("invalid segment type: " + segmentType);
@@ -3934,16 +3722,16 @@ function readSegmentHeader(data, start) {
   segmentHeader.type = segmentType;
   segmentHeader.typeName = SegmentTypes[segmentType];
   segmentHeader.deferredNonRetain = !!(flags & 0x80);
-  var pageAssociationFieldSize = !!(flags & 0x40);
-  var referredFlags = data[start + 5];
-  var referredToCount = referredFlags >> 5 & 7;
-  var retainBits = [referredFlags & 31];
-  var position = start + 6;
+  const pageAssociationFieldSize = !!(flags & 0x40);
+  const referredFlags = data[start + 5];
+  let referredToCount = referredFlags >> 5 & 7;
+  const retainBits = [referredFlags & 31];
+  let position = start + 6;
 
   if (referredFlags === 7) {
     referredToCount = (0, _core_utils.readUint32)(data, position - 1) & 0x1fffffff;
     position += 3;
-    var bytes = referredToCount + 7 >> 3;
+    let bytes = referredToCount + 7 >> 3;
     retainBits[0] = data[position++];
 
     while (--bytes > 0) {
@@ -3954,7 +3742,7 @@ function readSegmentHeader(data, start) {
   }
 
   segmentHeader.retainBits = retainBits;
-  var referredToSegmentNumberSize = 4;
+  let referredToSegmentNumberSize = 4;
 
   if (segmentHeader.number <= 256) {
     referredToSegmentNumberSize = 1;
@@ -3962,11 +3750,11 @@ function readSegmentHeader(data, start) {
     referredToSegmentNumberSize = 2;
   }
 
-  var referredTo = [];
-  var i, ii;
+  const referredTo = [];
+  let i, ii;
 
   for (i = 0; i < referredToCount; i++) {
-    var number = void 0;
+    let number;
 
     if (referredToSegmentNumberSize === 1) {
       number = data[position];
@@ -3994,11 +3782,11 @@ function readSegmentHeader(data, start) {
 
   if (segmentHeader.length === 0xffffffff) {
     if (segmentType === 38) {
-      var genericRegionInfo = readRegionSegmentInformation(data, position);
-      var genericRegionSegmentFlags = data[position + RegionSegmentInformationFieldLength];
-      var genericRegionMmr = !!(genericRegionSegmentFlags & 1);
-      var searchPatternLength = 6;
-      var searchPattern = new Uint8Array(searchPatternLength);
+      const genericRegionInfo = readRegionSegmentInformation(data, position);
+      const genericRegionSegmentFlags = data[position + RegionSegmentInformationFieldLength];
+      const genericRegionMmr = !!(genericRegionSegmentFlags & 1);
+      const searchPatternLength = 6;
+      const searchPattern = new Uint8Array(searchPatternLength);
 
       if (!genericRegionMmr) {
         searchPattern[0] = 0xff;
@@ -4011,7 +3799,7 @@ function readSegmentHeader(data, start) {
       searchPattern[5] = genericRegionInfo.height & 0xff;
 
       for (i = position, ii = data.length; i < ii; i++) {
-        var j = 0;
+        let j = 0;
 
         while (j < searchPatternLength && searchPattern[j] === data[i + j]) {
           j++;
@@ -4036,15 +3824,15 @@ function readSegmentHeader(data, start) {
 }
 
 function readSegments(header, data, start, end) {
-  var segments = [];
-  var position = start;
+  const segments = [];
+  let position = start;
 
   while (position < end) {
-    var segmentHeader = readSegmentHeader(data, position);
+    const segmentHeader = readSegmentHeader(data, position);
     position = segmentHeader.headerEnd;
-    var segment = {
+    const segment = {
       header: segmentHeader,
-      data: data
+      data
     };
 
     if (!header.randomAccess) {
@@ -4061,7 +3849,7 @@ function readSegments(header, data, start, end) {
   }
 
   if (header.randomAccess) {
-    for (var i = 0, ii = segments.length; i < ii; i++) {
+    for (let i = 0, ii = segments.length; i < ii; i++) {
       segments[i].start = position;
       position += segments[i].header.length;
       segments[i].end = position;
@@ -4081,19 +3869,19 @@ function readRegionSegmentInformation(data, start) {
   };
 }
 
-var RegionSegmentInformationFieldLength = 17;
+const RegionSegmentInformationFieldLength = 17;
 
 function processSegment(segment, visitor) {
-  var header = segment.header;
-  var data = segment.data,
-      end = segment.end;
-  var position = segment.start;
-  var args, at, i, atLength;
+  const header = segment.header;
+  const data = segment.data,
+        end = segment.end;
+  let position = segment.start;
+  let args, at, i, atLength;
 
   switch (header.type) {
     case 0:
-      var dictionary = {};
-      var dictionaryFlags = (0, _core_utils.readUint16)(data, position);
+      const dictionary = {};
+      const dictionaryFlags = (0, _core_utils.readUint16)(data, position);
       dictionary.huffman = !!(dictionaryFlags & 1);
       dictionary.refinement = !!(dictionaryFlags & 2);
       dictionary.huffmanDHSelector = dictionaryFlags >> 2 & 3;
@@ -4144,10 +3932,10 @@ function processSegment(segment, visitor) {
 
     case 6:
     case 7:
-      var textRegion = {};
+      const textRegion = {};
       textRegion.info = readRegionSegmentInformation(data, position);
       position += RegionSegmentInformationFieldLength;
-      var textRegionSegmentFlags = (0, _core_utils.readUint16)(data, position);
+      const textRegionSegmentFlags = (0, _core_utils.readUint16)(data, position);
       position += 2;
       textRegion.huffman = !!(textRegionSegmentFlags & 1);
       textRegion.refinement = !!(textRegionSegmentFlags & 2);
@@ -4161,7 +3949,7 @@ function processSegment(segment, visitor) {
       textRegion.refinementTemplate = textRegionSegmentFlags >> 15 & 1;
 
       if (textRegion.huffman) {
-        var textRegionHuffmanFlags = (0, _core_utils.readUint16)(data, position);
+        const textRegionHuffmanFlags = (0, _core_utils.readUint16)(data, position);
         position += 2;
         textRegion.huffmanFS = textRegionHuffmanFlags & 3;
         textRegion.huffmanDS = textRegionHuffmanFlags >> 2 & 3;
@@ -4193,8 +3981,8 @@ function processSegment(segment, visitor) {
       break;
 
     case 16:
-      var patternDictionary = {};
-      var patternDictionaryFlags = data[position++];
+      const patternDictionary = {};
+      const patternDictionaryFlags = data[position++];
       patternDictionary.mmr = !!(patternDictionaryFlags & 1);
       patternDictionary.template = patternDictionaryFlags >> 1 & 3;
       patternDictionary.patternWidth = data[position++];
@@ -4206,10 +3994,10 @@ function processSegment(segment, visitor) {
 
     case 22:
     case 23:
-      var halftoneRegion = {};
+      const halftoneRegion = {};
       halftoneRegion.info = readRegionSegmentInformation(data, position);
       position += RegionSegmentInformationFieldLength;
-      var halftoneRegionFlags = data[position++];
+      const halftoneRegionFlags = data[position++];
       halftoneRegion.mmr = !!(halftoneRegionFlags & 1);
       halftoneRegion.template = halftoneRegionFlags >> 1 & 3;
       halftoneRegion.enableSkip = !!(halftoneRegionFlags & 8);
@@ -4232,10 +4020,10 @@ function processSegment(segment, visitor) {
 
     case 38:
     case 39:
-      var genericRegion = {};
+      const genericRegion = {};
       genericRegion.info = readRegionSegmentInformation(data, position);
       position += RegionSegmentInformationFieldLength;
-      var genericRegionSegmentFlags = data[position++];
+      const genericRegionSegmentFlags = data[position++];
       genericRegion.mmr = !!(genericRegionSegmentFlags & 1);
       genericRegion.template = genericRegionSegmentFlags >> 1 & 3;
       genericRegion.prediction = !!(genericRegionSegmentFlags & 8);
@@ -4259,7 +4047,7 @@ function processSegment(segment, visitor) {
       break;
 
     case 48:
-      var pageInfo = {
+      const pageInfo = {
         width: (0, _core_utils.readUint32)(data, position),
         height: (0, _core_utils.readUint32)(data, position + 4),
         resolutionX: (0, _core_utils.readUint32)(data, position + 8),
@@ -4270,7 +4058,7 @@ function processSegment(segment, visitor) {
         delete pageInfo.height;
       }
 
-      var pageSegmentFlags = data[position + 16];
+      const pageSegmentFlags = data[position + 16];
       (0, _core_utils.readUint16)(data, position + 17);
       pageInfo.lossless = !!(pageSegmentFlags & 1);
       pageInfo.refinement = !!(pageSegmentFlags & 2);
@@ -4298,10 +4086,10 @@ function processSegment(segment, visitor) {
       break;
 
     default:
-      throw new Jbig2Error("segment type ".concat(header.typeName, "(").concat(header.type, ") is not implemented"));
+      throw new Jbig2Error(`segment type ${header.typeName}(${header.type}) is not implemented`);
   }
 
-  var callbackName = "on" + header.typeName;
+  const callbackName = "on" + header.typeName;
 
   if (callbackName in visitor) {
     visitor[callbackName].apply(visitor, args);
@@ -4309,17 +4097,17 @@ function processSegment(segment, visitor) {
 }
 
 function processSegments(segments, visitor) {
-  for (var i = 0, ii = segments.length; i < ii; i++) {
+  for (let i = 0, ii = segments.length; i < ii; i++) {
     processSegment(segments[i], visitor);
   }
 }
 
 function parseJbig2Chunks(chunks) {
-  var visitor = new SimpleSegmentVisitor();
+  const visitor = new SimpleSegmentVisitor();
 
-  for (var i = 0, ii = chunks.length; i < ii; i++) {
-    var chunk = chunks[i];
-    var segments = readSegments({}, chunk.data, chunk.start, chunk.end);
+  for (let i = 0, ii = chunks.length; i < ii; i++) {
+    const chunk = chunks[i];
+    const segments = readSegments({}, chunk.data, chunk.start, chunk.end);
     processSegments(segments, visitor);
   }
 
@@ -4327,16 +4115,16 @@ function parseJbig2Chunks(chunks) {
 }
 
 function parseJbig2(data) {
-  var end = data.length;
-  var position = 0;
+  const end = data.length;
+  let position = 0;
 
   if (data[position] !== 0x97 || data[position + 1] !== 0x4a || data[position + 2] !== 0x42 || data[position + 3] !== 0x32 || data[position + 4] !== 0x0d || data[position + 5] !== 0x0a || data[position + 6] !== 0x1a || data[position + 7] !== 0x0a) {
     throw new Jbig2Error("parseJbig2 - invalid header.");
   }
 
-  var header = Object.create(null);
+  const header = Object.create(null);
   position += 8;
-  var flags = data[position++];
+  const flags = data[position++];
   header.randomAccess = !(flags & 1);
 
   if (!(flags & 2)) {
@@ -4344,22 +4132,23 @@ function parseJbig2(data) {
     position += 4;
   }
 
-  var segments = readSegments(header, data, position, end);
-  var visitor = new SimpleSegmentVisitor();
+  const segments = readSegments(header, data, position, end);
+  const visitor = new SimpleSegmentVisitor();
   processSegments(segments, visitor);
-  var _visitor$currentPageI = visitor.currentPageInfo,
-      width = _visitor$currentPageI.width,
-      height = _visitor$currentPageI.height;
-  var bitPacked = visitor.buffer;
-  var imgData = new Uint8ClampedArray(width * height);
-  var q = 0,
+  const {
+    width,
+    height
+  } = visitor.currentPageInfo;
+  const bitPacked = visitor.buffer;
+  const imgData = new Uint8ClampedArray(width * height);
+  let q = 0,
       k = 0;
 
-  for (var i = 0; i < height; i++) {
-    var mask = 0,
-        buffer = void 0;
+  for (let i = 0; i < height; i++) {
+    let mask = 0,
+        buffer;
 
-    for (var j = 0; j < width; j++) {
+    for (let j = 0; j < width; j++) {
       if (!mask) {
         mask = 128;
         buffer = bitPacked[k++];
@@ -4371,254 +4160,215 @@ function parseJbig2(data) {
   }
 
   return {
-    imgData: imgData,
-    width: width,
-    height: height
+    imgData,
+    width,
+    height
   };
 }
 
-var SimpleSegmentVisitor = /*#__PURE__*/function () {
-  function SimpleSegmentVisitor() {
-    _classCallCheck(this, SimpleSegmentVisitor);
+class SimpleSegmentVisitor {
+  onPageInformation(info) {
+    this.currentPageInfo = info;
+    const rowSize = info.width + 7 >> 3;
+    const buffer = new Uint8ClampedArray(rowSize * info.height);
+
+    if (info.defaultPixelValue) {
+      buffer.fill(0xff);
+    }
+
+    this.buffer = buffer;
   }
 
-  _createClass(SimpleSegmentVisitor, [{
-    key: "onPageInformation",
-    value: function onPageInformation(info) {
-      this.currentPageInfo = info;
-      var rowSize = info.width + 7 >> 3;
-      var buffer = new Uint8ClampedArray(rowSize * info.height);
-
-      if (info.defaultPixelValue) {
-        buffer.fill(0xff);
-      }
-
-      this.buffer = buffer;
-    }
-  }, {
-    key: "drawBitmap",
-    value: function drawBitmap(regionInfo, bitmap) {
-      var pageInfo = this.currentPageInfo;
-      var width = regionInfo.width,
+  drawBitmap(regionInfo, bitmap) {
+    const pageInfo = this.currentPageInfo;
+    const width = regionInfo.width,
           height = regionInfo.height;
-      var rowSize = pageInfo.width + 7 >> 3;
-      var combinationOperator = pageInfo.combinationOperatorOverride ? regionInfo.combinationOperator : pageInfo.combinationOperator;
-      var buffer = this.buffer;
-      var mask0 = 128 >> (regionInfo.x & 7);
-      var offset0 = regionInfo.y * rowSize + (regionInfo.x >> 3);
-      var i, j, mask, offset;
+    const rowSize = pageInfo.width + 7 >> 3;
+    const combinationOperator = pageInfo.combinationOperatorOverride ? regionInfo.combinationOperator : pageInfo.combinationOperator;
+    const buffer = this.buffer;
+    const mask0 = 128 >> (regionInfo.x & 7);
+    let offset0 = regionInfo.y * rowSize + (regionInfo.x >> 3);
+    let i, j, mask, offset;
 
-      switch (combinationOperator) {
-        case 0:
-          for (i = 0; i < height; i++) {
-            mask = mask0;
-            offset = offset0;
+    switch (combinationOperator) {
+      case 0:
+        for (i = 0; i < height; i++) {
+          mask = mask0;
+          offset = offset0;
 
-            for (j = 0; j < width; j++) {
-              if (bitmap[i][j]) {
-                buffer[offset] |= mask;
-              }
-
-              mask >>= 1;
-
-              if (!mask) {
-                mask = 128;
-                offset++;
-              }
+          for (j = 0; j < width; j++) {
+            if (bitmap[i][j]) {
+              buffer[offset] |= mask;
             }
 
-            offset0 += rowSize;
+            mask >>= 1;
+
+            if (!mask) {
+              mask = 128;
+              offset++;
+            }
           }
 
-          break;
+          offset0 += rowSize;
+        }
 
-        case 2:
-          for (i = 0; i < height; i++) {
-            mask = mask0;
-            offset = offset0;
+        break;
 
-            for (j = 0; j < width; j++) {
-              if (bitmap[i][j]) {
-                buffer[offset] ^= mask;
-              }
+      case 2:
+        for (i = 0; i < height; i++) {
+          mask = mask0;
+          offset = offset0;
 
-              mask >>= 1;
-
-              if (!mask) {
-                mask = 128;
-                offset++;
-              }
+          for (j = 0; j < width; j++) {
+            if (bitmap[i][j]) {
+              buffer[offset] ^= mask;
             }
 
-            offset0 += rowSize;
+            mask >>= 1;
+
+            if (!mask) {
+              mask = 128;
+              offset++;
+            }
           }
 
-          break;
-
-        default:
-          throw new Jbig2Error("operator ".concat(combinationOperator, " is not supported"));
-      }
-    }
-  }, {
-    key: "onImmediateGenericRegion",
-    value: function onImmediateGenericRegion(region, data, start, end) {
-      var regionInfo = region.info;
-      var decodingContext = new DecodingContext(data, start, end);
-      var bitmap = decodeBitmap(region.mmr, regionInfo.width, regionInfo.height, region.template, region.prediction, null, region.at, decodingContext);
-      this.drawBitmap(regionInfo, bitmap);
-    }
-  }, {
-    key: "onImmediateLosslessGenericRegion",
-    value: function onImmediateLosslessGenericRegion() {
-      this.onImmediateGenericRegion.apply(this, arguments);
-    }
-  }, {
-    key: "onSymbolDictionary",
-    value: function onSymbolDictionary(dictionary, currentSegment, referredSegments, data, start, end) {
-      var huffmanTables, huffmanInput;
-
-      if (dictionary.huffman) {
-        huffmanTables = getSymbolDictionaryHuffmanTables(dictionary, referredSegments, this.customTables);
-        huffmanInput = new Reader(data, start, end);
-      }
-
-      var symbols = this.symbols;
-
-      if (!symbols) {
-        this.symbols = symbols = {};
-      }
-
-      var inputSymbols = [];
-
-      var _iterator = _createForOfIteratorHelper(referredSegments),
-          _step;
-
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var referredSegment = _step.value;
-          var referredSymbols = symbols[referredSegment];
-
-          if (referredSymbols) {
-            inputSymbols.push.apply(inputSymbols, _toConsumableArray(referredSymbols));
-          }
+          offset0 += rowSize;
         }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
 
-      var decodingContext = new DecodingContext(data, start, end);
-      symbols[currentSegment] = decodeSymbolDictionary(dictionary.huffman, dictionary.refinement, inputSymbols, dictionary.numberOfNewSymbols, dictionary.numberOfExportedSymbols, huffmanTables, dictionary.template, dictionary.at, dictionary.refinementTemplate, dictionary.refinementAt, decodingContext, huffmanInput);
+        break;
+
+      default:
+        throw new Jbig2Error(`operator ${combinationOperator} is not supported`);
     }
-  }, {
-    key: "onImmediateTextRegion",
-    value: function onImmediateTextRegion(region, referredSegments, data, start, end) {
-      var regionInfo = region.info;
-      var huffmanTables, huffmanInput;
-      var symbols = this.symbols;
-      var inputSymbols = [];
-
-      var _iterator2 = _createForOfIteratorHelper(referredSegments),
-          _step2;
-
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var referredSegment = _step2.value;
-          var referredSymbols = symbols[referredSegment];
-
-          if (referredSymbols) {
-            inputSymbols.push.apply(inputSymbols, _toConsumableArray(referredSymbols));
-          }
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-
-      var symbolCodeLength = (0, _core_utils.log2)(inputSymbols.length);
-
-      if (region.huffman) {
-        huffmanInput = new Reader(data, start, end);
-        huffmanTables = getTextRegionHuffmanTables(region, referredSegments, this.customTables, inputSymbols.length, huffmanInput);
-      }
-
-      var decodingContext = new DecodingContext(data, start, end);
-      var bitmap = decodeTextRegion(region.huffman, region.refinement, regionInfo.width, regionInfo.height, region.defaultPixelValue, region.numberOfSymbolInstances, region.stripSize, inputSymbols, symbolCodeLength, region.transposed, region.dsOffset, region.referenceCorner, region.combinationOperator, huffmanTables, region.refinementTemplate, region.refinementAt, decodingContext, region.logStripSize, huffmanInput);
-      this.drawBitmap(regionInfo, bitmap);
-    }
-  }, {
-    key: "onImmediateLosslessTextRegion",
-    value: function onImmediateLosslessTextRegion() {
-      this.onImmediateTextRegion.apply(this, arguments);
-    }
-  }, {
-    key: "onPatternDictionary",
-    value: function onPatternDictionary(dictionary, currentSegment, data, start, end) {
-      var patterns = this.patterns;
-
-      if (!patterns) {
-        this.patterns = patterns = {};
-      }
-
-      var decodingContext = new DecodingContext(data, start, end);
-      patterns[currentSegment] = decodePatternDictionary(dictionary.mmr, dictionary.patternWidth, dictionary.patternHeight, dictionary.maxPatternIndex, dictionary.template, decodingContext);
-    }
-  }, {
-    key: "onImmediateHalftoneRegion",
-    value: function onImmediateHalftoneRegion(region, referredSegments, data, start, end) {
-      var patterns = this.patterns[referredSegments[0]];
-      var regionInfo = region.info;
-      var decodingContext = new DecodingContext(data, start, end);
-      var bitmap = decodeHalftoneRegion(region.mmr, patterns, region.template, regionInfo.width, regionInfo.height, region.defaultPixelValue, region.enableSkip, region.combinationOperator, region.gridWidth, region.gridHeight, region.gridOffsetX, region.gridOffsetY, region.gridVectorX, region.gridVectorY, decodingContext);
-      this.drawBitmap(regionInfo, bitmap);
-    }
-  }, {
-    key: "onImmediateLosslessHalftoneRegion",
-    value: function onImmediateLosslessHalftoneRegion() {
-      this.onImmediateHalftoneRegion.apply(this, arguments);
-    }
-  }, {
-    key: "onTables",
-    value: function onTables(currentSegment, data, start, end) {
-      var customTables = this.customTables;
-
-      if (!customTables) {
-        this.customTables = customTables = {};
-      }
-
-      customTables[currentSegment] = decodeTablesSegment(data, start, end);
-    }
-  }]);
-
-  return SimpleSegmentVisitor;
-}();
-
-var HuffmanLine = /*#__PURE__*/_createClass(function HuffmanLine(lineData) {
-  _classCallCheck(this, HuffmanLine);
-
-  if (lineData.length === 2) {
-    this.isOOB = true;
-    this.rangeLow = 0;
-    this.prefixLength = lineData[0];
-    this.rangeLength = 0;
-    this.prefixCode = lineData[1];
-    this.isLowerRange = false;
-  } else {
-    this.isOOB = false;
-    this.rangeLow = lineData[0];
-    this.prefixLength = lineData[1];
-    this.rangeLength = lineData[2];
-    this.prefixCode = lineData[3];
-    this.isLowerRange = lineData[4] === "lower";
   }
-});
 
-var HuffmanTreeNode = /*#__PURE__*/function () {
-  function HuffmanTreeNode(line) {
-    _classCallCheck(this, HuffmanTreeNode);
+  onImmediateGenericRegion(region, data, start, end) {
+    const regionInfo = region.info;
+    const decodingContext = new DecodingContext(data, start, end);
+    const bitmap = decodeBitmap(region.mmr, regionInfo.width, regionInfo.height, region.template, region.prediction, null, region.at, decodingContext);
+    this.drawBitmap(regionInfo, bitmap);
+  }
 
+  onImmediateLosslessGenericRegion() {
+    this.onImmediateGenericRegion(...arguments);
+  }
+
+  onSymbolDictionary(dictionary, currentSegment, referredSegments, data, start, end) {
+    let huffmanTables, huffmanInput;
+
+    if (dictionary.huffman) {
+      huffmanTables = getSymbolDictionaryHuffmanTables(dictionary, referredSegments, this.customTables);
+      huffmanInput = new Reader(data, start, end);
+    }
+
+    let symbols = this.symbols;
+
+    if (!symbols) {
+      this.symbols = symbols = {};
+    }
+
+    const inputSymbols = [];
+
+    for (const referredSegment of referredSegments) {
+      const referredSymbols = symbols[referredSegment];
+
+      if (referredSymbols) {
+        inputSymbols.push(...referredSymbols);
+      }
+    }
+
+    const decodingContext = new DecodingContext(data, start, end);
+    symbols[currentSegment] = decodeSymbolDictionary(dictionary.huffman, dictionary.refinement, inputSymbols, dictionary.numberOfNewSymbols, dictionary.numberOfExportedSymbols, huffmanTables, dictionary.template, dictionary.at, dictionary.refinementTemplate, dictionary.refinementAt, decodingContext, huffmanInput);
+  }
+
+  onImmediateTextRegion(region, referredSegments, data, start, end) {
+    const regionInfo = region.info;
+    let huffmanTables, huffmanInput;
+    const symbols = this.symbols;
+    const inputSymbols = [];
+
+    for (const referredSegment of referredSegments) {
+      const referredSymbols = symbols[referredSegment];
+
+      if (referredSymbols) {
+        inputSymbols.push(...referredSymbols);
+      }
+    }
+
+    const symbolCodeLength = (0, _core_utils.log2)(inputSymbols.length);
+
+    if (region.huffman) {
+      huffmanInput = new Reader(data, start, end);
+      huffmanTables = getTextRegionHuffmanTables(region, referredSegments, this.customTables, inputSymbols.length, huffmanInput);
+    }
+
+    const decodingContext = new DecodingContext(data, start, end);
+    const bitmap = decodeTextRegion(region.huffman, region.refinement, regionInfo.width, regionInfo.height, region.defaultPixelValue, region.numberOfSymbolInstances, region.stripSize, inputSymbols, symbolCodeLength, region.transposed, region.dsOffset, region.referenceCorner, region.combinationOperator, huffmanTables, region.refinementTemplate, region.refinementAt, decodingContext, region.logStripSize, huffmanInput);
+    this.drawBitmap(regionInfo, bitmap);
+  }
+
+  onImmediateLosslessTextRegion() {
+    this.onImmediateTextRegion(...arguments);
+  }
+
+  onPatternDictionary(dictionary, currentSegment, data, start, end) {
+    let patterns = this.patterns;
+
+    if (!patterns) {
+      this.patterns = patterns = {};
+    }
+
+    const decodingContext = new DecodingContext(data, start, end);
+    patterns[currentSegment] = decodePatternDictionary(dictionary.mmr, dictionary.patternWidth, dictionary.patternHeight, dictionary.maxPatternIndex, dictionary.template, decodingContext);
+  }
+
+  onImmediateHalftoneRegion(region, referredSegments, data, start, end) {
+    const patterns = this.patterns[referredSegments[0]];
+    const regionInfo = region.info;
+    const decodingContext = new DecodingContext(data, start, end);
+    const bitmap = decodeHalftoneRegion(region.mmr, patterns, region.template, regionInfo.width, regionInfo.height, region.defaultPixelValue, region.enableSkip, region.combinationOperator, region.gridWidth, region.gridHeight, region.gridOffsetX, region.gridOffsetY, region.gridVectorX, region.gridVectorY, decodingContext);
+    this.drawBitmap(regionInfo, bitmap);
+  }
+
+  onImmediateLosslessHalftoneRegion() {
+    this.onImmediateHalftoneRegion(...arguments);
+  }
+
+  onTables(currentSegment, data, start, end) {
+    let customTables = this.customTables;
+
+    if (!customTables) {
+      this.customTables = customTables = {};
+    }
+
+    customTables[currentSegment] = decodeTablesSegment(data, start, end);
+  }
+
+}
+
+class HuffmanLine {
+  constructor(lineData) {
+    if (lineData.length === 2) {
+      this.isOOB = true;
+      this.rangeLow = 0;
+      this.prefixLength = lineData[0];
+      this.rangeLength = 0;
+      this.prefixCode = lineData[1];
+      this.isLowerRange = false;
+    } else {
+      this.isOOB = false;
+      this.rangeLow = lineData[0];
+      this.prefixLength = lineData[1];
+      this.rangeLength = lineData[2];
+      this.prefixCode = lineData[3];
+      this.isLowerRange = lineData[4] === "lower";
+    }
+  }
+
+}
+
+class HuffmanTreeNode {
+  constructor(line) {
     this.children = [];
 
     if (line) {
@@ -4632,60 +4382,53 @@ var HuffmanTreeNode = /*#__PURE__*/function () {
     }
   }
 
-  _createClass(HuffmanTreeNode, [{
-    key: "buildTree",
-    value: function buildTree(line, shift) {
-      var bit = line.prefixCode >> shift & 1;
+  buildTree(line, shift) {
+    const bit = line.prefixCode >> shift & 1;
 
-      if (shift <= 0) {
-        this.children[bit] = new HuffmanTreeNode(line);
-      } else {
-        var node = this.children[bit];
-
-        if (!node) {
-          this.children[bit] = node = new HuffmanTreeNode(null);
-        }
-
-        node.buildTree(line, shift - 1);
-      }
-    }
-  }, {
-    key: "decodeNode",
-    value: function decodeNode(reader) {
-      if (this.isLeaf) {
-        if (this.isOOB) {
-          return null;
-        }
-
-        var htOffset = reader.readBits(this.rangeLength);
-        return this.rangeLow + (this.isLowerRange ? -htOffset : htOffset);
-      }
-
-      var node = this.children[reader.readBit()];
+    if (shift <= 0) {
+      this.children[bit] = new HuffmanTreeNode(line);
+    } else {
+      let node = this.children[bit];
 
       if (!node) {
-        throw new Jbig2Error("invalid Huffman data");
+        this.children[bit] = node = new HuffmanTreeNode(null);
       }
 
-      return node.decodeNode(reader);
+      node.buildTree(line, shift - 1);
     }
-  }]);
+  }
 
-  return HuffmanTreeNode;
-}();
+  decodeNode(reader) {
+    if (this.isLeaf) {
+      if (this.isOOB) {
+        return null;
+      }
 
-var HuffmanTable = /*#__PURE__*/function () {
-  function HuffmanTable(lines, prefixCodesDone) {
-    _classCallCheck(this, HuffmanTable);
+      const htOffset = reader.readBits(this.rangeLength);
+      return this.rangeLow + (this.isLowerRange ? -htOffset : htOffset);
+    }
 
+    const node = this.children[reader.readBit()];
+
+    if (!node) {
+      throw new Jbig2Error("invalid Huffman data");
+    }
+
+    return node.decodeNode(reader);
+  }
+
+}
+
+class HuffmanTable {
+  constructor(lines, prefixCodesDone) {
     if (!prefixCodesDone) {
       this.assignPrefixCodes(lines);
     }
 
     this.rootNode = new HuffmanTreeNode(null);
 
-    for (var i = 0, ii = lines.length; i < ii; i++) {
-      var line = lines[i];
+    for (let i = 0, ii = lines.length; i < ii; i++) {
+      const line = lines[i];
 
       if (line.prefixLength > 0) {
         this.rootNode.buildTree(line, line.prefixLength - 1);
@@ -4693,67 +4436,62 @@ var HuffmanTable = /*#__PURE__*/function () {
     }
   }
 
-  _createClass(HuffmanTable, [{
-    key: "decode",
-    value: function decode(reader) {
-      return this.rootNode.decodeNode(reader);
+  decode(reader) {
+    return this.rootNode.decodeNode(reader);
+  }
+
+  assignPrefixCodes(lines) {
+    const linesLength = lines.length;
+    let prefixLengthMax = 0;
+
+    for (let i = 0; i < linesLength; i++) {
+      prefixLengthMax = Math.max(prefixLengthMax, lines[i].prefixLength);
     }
-  }, {
-    key: "assignPrefixCodes",
-    value: function assignPrefixCodes(lines) {
-      var linesLength = lines.length;
-      var prefixLengthMax = 0;
 
-      for (var i = 0; i < linesLength; i++) {
-        prefixLengthMax = Math.max(prefixLengthMax, lines[i].prefixLength);
-      }
+    const histogram = new Uint32Array(prefixLengthMax + 1);
 
-      var histogram = new Uint32Array(prefixLengthMax + 1);
+    for (let i = 0; i < linesLength; i++) {
+      histogram[lines[i].prefixLength]++;
+    }
 
-      for (var _i2 = 0; _i2 < linesLength; _i2++) {
-        histogram[lines[_i2].prefixLength]++;
-      }
+    let currentLength = 1,
+        firstCode = 0,
+        currentCode,
+        currentTemp,
+        line;
+    histogram[0] = 0;
 
-      var currentLength = 1,
-          firstCode = 0,
-          currentCode,
-          currentTemp,
-          line;
-      histogram[0] = 0;
+    while (currentLength <= prefixLengthMax) {
+      firstCode = firstCode + histogram[currentLength - 1] << 1;
+      currentCode = firstCode;
+      currentTemp = 0;
 
-      while (currentLength <= prefixLengthMax) {
-        firstCode = firstCode + histogram[currentLength - 1] << 1;
-        currentCode = firstCode;
-        currentTemp = 0;
+      while (currentTemp < linesLength) {
+        line = lines[currentTemp];
 
-        while (currentTemp < linesLength) {
-          line = lines[currentTemp];
-
-          if (line.prefixLength === currentLength) {
-            line.prefixCode = currentCode;
-            currentCode++;
-          }
-
-          currentTemp++;
+        if (line.prefixLength === currentLength) {
+          line.prefixCode = currentCode;
+          currentCode++;
         }
 
-        currentLength++;
+        currentTemp++;
       }
-    }
-  }]);
 
-  return HuffmanTable;
-}();
+      currentLength++;
+    }
+  }
+
+}
 
 function decodeTablesSegment(data, start, end) {
-  var flags = data[start];
-  var lowestValue = (0, _core_utils.readUint32)(data, start + 1) & 0xffffffff;
-  var highestValue = (0, _core_utils.readUint32)(data, start + 5) & 0xffffffff;
-  var reader = new Reader(data, start + 9, end);
-  var prefixSizeBits = (flags >> 1 & 7) + 1;
-  var rangeSizeBits = (flags >> 4 & 7) + 1;
-  var lines = [];
-  var prefixLength,
+  const flags = data[start];
+  const lowestValue = (0, _core_utils.readUint32)(data, start + 1) & 0xffffffff;
+  const highestValue = (0, _core_utils.readUint32)(data, start + 5) & 0xffffffff;
+  const reader = new Reader(data, start + 9, end);
+  const prefixSizeBits = (flags >> 1 & 7) + 1;
+  const rangeSizeBits = (flags >> 4 & 7) + 1;
+  const lines = [];
+  let prefixLength,
       rangeLength,
       currentRangeLow = lowestValue;
 
@@ -4777,16 +4515,16 @@ function decodeTablesSegment(data, start, end) {
   return new HuffmanTable(lines, false);
 }
 
-var standardTablesCache = {};
+const standardTablesCache = {};
 
 function getStandardTable(number) {
-  var table = standardTablesCache[number];
+  let table = standardTablesCache[number];
 
   if (table) {
     return table;
   }
 
-  var lines;
+  let lines;
 
   switch (number) {
     case 1:
@@ -4850,10 +4588,10 @@ function getStandardTable(number) {
       break;
 
     default:
-      throw new Jbig2Error("standard table B.".concat(number, " does not exist"));
+      throw new Jbig2Error(`standard table B.${number} does not exist`);
   }
 
-  for (var i = 0, ii = lines.length; i < ii; i++) {
+  for (let i = 0, ii = lines.length; i < ii; i++) {
     lines[i] = new HuffmanLine(lines[i]);
   }
 
@@ -4862,10 +4600,8 @@ function getStandardTable(number) {
   return table;
 }
 
-var Reader = /*#__PURE__*/function () {
-  function Reader(data, start, end) {
-    _classCallCheck(this, Reader);
-
+class Reader {
+  constructor(data, start, end) {
     this.data = data;
     this.start = start;
     this.end = end;
@@ -4874,58 +4610,51 @@ var Reader = /*#__PURE__*/function () {
     this.currentByte = 0;
   }
 
-  _createClass(Reader, [{
-    key: "readBit",
-    value: function readBit() {
-      if (this.shift < 0) {
-        if (this.position >= this.end) {
-          throw new Jbig2Error("end of data while reading bit");
-        }
-
-        this.currentByte = this.data[this.position++];
-        this.shift = 7;
-      }
-
-      var bit = this.currentByte >> this.shift & 1;
-      this.shift--;
-      return bit;
-    }
-  }, {
-    key: "readBits",
-    value: function readBits(numBits) {
-      var result = 0,
-          i;
-
-      for (i = numBits - 1; i >= 0; i--) {
-        result |= this.readBit() << i;
-      }
-
-      return result;
-    }
-  }, {
-    key: "byteAlign",
-    value: function byteAlign() {
-      this.shift = -1;
-    }
-  }, {
-    key: "next",
-    value: function next() {
+  readBit() {
+    if (this.shift < 0) {
       if (this.position >= this.end) {
-        return -1;
+        throw new Jbig2Error("end of data while reading bit");
       }
 
-      return this.data[this.position++];
+      this.currentByte = this.data[this.position++];
+      this.shift = 7;
     }
-  }]);
 
-  return Reader;
-}();
+    const bit = this.currentByte >> this.shift & 1;
+    this.shift--;
+    return bit;
+  }
+
+  readBits(numBits) {
+    let result = 0,
+        i;
+
+    for (i = numBits - 1; i >= 0; i--) {
+      result |= this.readBit() << i;
+    }
+
+    return result;
+  }
+
+  byteAlign() {
+    this.shift = -1;
+  }
+
+  next() {
+    if (this.position >= this.end) {
+      return -1;
+    }
+
+    return this.data[this.position++];
+  }
+
+}
 
 function getCustomHuffmanTable(index, referredTo, customTables) {
-  var currentIndex = 0;
+  let currentIndex = 0;
 
-  for (var i = 0, ii = referredTo.length; i < ii; i++) {
-    var table = customTables[referredTo[i]];
+  for (let i = 0, ii = referredTo.length; i < ii; i++) {
+    const table = customTables[referredTo[i]];
 
     if (table) {
       if (index === currentIndex) {
@@ -4940,32 +4669,30 @@ function getCustomHuffmanTable(index, referredTo, customTables) {
 }
 
 function getTextRegionHuffmanTables(textRegion, referredTo, customTables, numberOfSymbols, reader) {
-  var codes = [];
+  const codes = [];
 
-  for (var i = 0; i <= 34; i++) {
-    var codeLength = reader.readBits(4);
+  for (let i = 0; i <= 34; i++) {
+    const codeLength = reader.readBits(4);
     codes.push(new HuffmanLine([i, codeLength, 0, 0]));
   }
 
-  var runCodesTable = new HuffmanTable(codes, false);
+  const runCodesTable = new HuffmanTable(codes, false);
   codes.length = 0;
 
-  for (var _i3 = 0; _i3 < numberOfSymbols;) {
-    var _codeLength = runCodesTable.decode(reader);
+  for (let i = 0; i < numberOfSymbols;) {
+    const codeLength = runCodesTable.decode(reader);
 
-    if (_codeLength >= 32) {
-      var repeatedLength = void 0,
-          numberOfRepeats = void 0,
-          j = void 0;
+    if (codeLength >= 32) {
+      let repeatedLength, numberOfRepeats, j;
 
-      switch (_codeLength) {
+      switch (codeLength) {
         case 32:
-          if (_i3 === 0) {
+          if (i === 0) {
             throw new Jbig2Error("no previous value in symbol ID table");
           }
 
           numberOfRepeats = reader.readBits(2) + 3;
-          repeatedLength = codes[_i3 - 1].prefixLength;
+          repeatedLength = codes[i - 1].prefixLength;
           break;
 
         case 33:
@@ -4983,18 +4710,18 @@ function getTextRegionHuffmanTables(textRegion, referredTo, customTables, number
       }
 
       for (j = 0; j < numberOfRepeats; j++) {
-        codes.push(new HuffmanLine([_i3, repeatedLength, 0, 0]));
-        _i3++;
+        codes.push(new HuffmanLine([i, repeatedLength, 0, 0]));
+        i++;
       }
     } else {
-      codes.push(new HuffmanLine([_i3, _codeLength, 0, 0]));
-      _i3++;
+      codes.push(new HuffmanLine([i, codeLength, 0, 0]));
+      i++;
     }
   }
 
   reader.byteAlign();
-  var symbolIDTable = new HuffmanTable(codes, false);
-  var customIndex = 0,
+  const symbolIDTable = new HuffmanTable(codes, false);
+  let customIndex = 0,
       tableFirstS,
       tableDeltaS,
       tableDeltaT;
@@ -5051,15 +4778,15 @@ function getTextRegionHuffmanTables(textRegion, referredTo, customTables, number
   }
 
   return {
-    symbolIDTable: symbolIDTable,
-    tableFirstS: tableFirstS,
-    tableDeltaS: tableDeltaS,
-    tableDeltaT: tableDeltaT
+    symbolIDTable,
+    tableFirstS,
+    tableDeltaS,
+    tableDeltaT
   };
 }
 
 function getSymbolDictionaryHuffmanTables(dictionary, referredTo, customTables) {
-  var customIndex = 0,
+  let customIndex = 0,
       tableDeltaHeight,
       tableDeltaWidth;
 
@@ -5093,7 +4820,7 @@ function getSymbolDictionaryHuffmanTables(dictionary, referredTo, customTables) 
       throw new Jbig2Error("invalid Huffman DW selector");
   }
 
-  var tableBitmapSize, tableAggregateInstances;
+  let tableBitmapSize, tableAggregateInstances;
 
   if (dictionary.bitmapSizeSelector) {
     tableBitmapSize = getCustomHuffmanTable(customIndex, referredTo, customTables);
@@ -5109,21 +4836,21 @@ function getSymbolDictionaryHuffmanTables(dictionary, referredTo, customTables) 
   }
 
   return {
-    tableDeltaHeight: tableDeltaHeight,
-    tableDeltaWidth: tableDeltaWidth,
-    tableBitmapSize: tableBitmapSize,
-    tableAggregateInstances: tableAggregateInstances
+    tableDeltaHeight,
+    tableDeltaWidth,
+    tableBitmapSize,
+    tableAggregateInstances
   };
 }
 
 function readUncompressedBitmap(reader, width, height) {
-  var bitmap = [];
+  const bitmap = [];
 
-  for (var y = 0; y < height; y++) {
-    var row = new Uint8Array(width);
+  for (let y = 0; y < height; y++) {
+    const row = new Uint8Array(width);
     bitmap.push(row);
 
-    for (var x = 0; x < width; x++) {
+    for (let x = 0; x < width; x++) {
       row[x] = reader.readBit();
     }
 
@@ -5134,24 +4861,24 @@ function readUncompressedBitmap(reader, width, height) {
 }
 
 function decodeMMRBitmap(input, width, height, endOfBlock) {
-  var params = {
+  const params = {
     K: -1,
     Columns: width,
     Rows: height,
     BlackIs1: true,
     EndOfBlock: endOfBlock
   };
-  var decoder = new _ccitt.CCITTFaxDecoder(input, params);
-  var bitmap = [];
-  var currentByte,
+  const decoder = new _ccitt.CCITTFaxDecoder(input, params);
+  const bitmap = [];
+  let currentByte,
       eof = false;
 
-  for (var y = 0; y < height; y++) {
-    var row = new Uint8Array(width);
+  for (let y = 0; y < height; y++) {
+    const row = new Uint8Array(width);
     bitmap.push(row);
-    var shift = -1;
+    let shift = -1;
 
-    for (var x = 0; x < width; x++) {
+    for (let x = 0; x < width; x++) {
       if (shift < 0) {
         currentByte = decoder.readNextChar();
 
@@ -5169,9 +4896,9 @@ function decodeMMRBitmap(input, width, height, endOfBlock) {
   }
 
   if (endOfBlock && !eof) {
-    var lookForEOFLimit = 5;
+    const lookForEOFLimit = 5;
 
-    for (var i = 0; i < lookForEOFLimit; i++) {
+    for (let i = 0; i < lookForEOFLimit; i++) {
       if (decoder.readNextChar() === -1) {
         break;
       }
@@ -5181,32 +4908,23 @@ function decodeMMRBitmap(input, width, height, endOfBlock) {
   return bitmap;
 }
 
-var Jbig2Image = /*#__PURE__*/function () {
-  function Jbig2Image() {
-    _classCallCheck(this, Jbig2Image);
+class Jbig2Image {
+  parseChunks(chunks) {
+    return parseJbig2Chunks(chunks);
   }
 
-  _createClass(Jbig2Image, [{
-    key: "parseChunks",
-    value: function parseChunks(chunks) {
-      return parseJbig2Chunks(chunks);
-    }
-  }, {
-    key: "parse",
-    value: function parse(data) {
-      var _parseJbig = parseJbig2(data),
-          imgData = _parseJbig.imgData,
-          width = _parseJbig.width,
-          height = _parseJbig.height;
+  parse(data) {
+    const {
+      imgData,
+      width,
+      height
+    } = parseJbig2(data);
+    this.width = width;
+    this.height = height;
+    return imgData;
+  }
 
-      this.width = width;
-      this.height = height;
-      return imgData;
-    }
-  }]);
-
-  return Jbig2Image;
-}();
+}
 
 exports.Jbig2Image = Jbig2Image;
 
@@ -5216,8 +4934,6 @@ exports.Jbig2Image = Jbig2Image;
 
 "use strict";
 
-
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", ({
   value: true
@@ -5247,42 +4963,8 @@ var _primitives = __w_pdfjs_require__(88);
 
 var _base_stream = __w_pdfjs_require__(89);
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 function getLookupTableFactory(initializer) {
-  var lookup;
+  let lookup;
   return function () {
     if (initializer) {
       lookup = Object.create(null);
@@ -5295,14 +4977,14 @@ function getLookupTableFactory(initializer) {
 }
 
 function getArrayLookupTableFactory(initializer) {
-  var lookup;
+  let lookup;
   return function () {
     if (initializer) {
-      var arr = initializer();
+      let arr = initializer();
       initializer = null;
       lookup = Object.create(null);
 
-      for (var i = 0, ii = arr.length; i < ii; i += 2) {
+      for (let i = 0, ii = arr.length; i < ii; i += 2) {
         lookup[arr[i]] = arr[i + 1];
       }
 
@@ -5313,168 +4995,109 @@ function getArrayLookupTableFactory(initializer) {
   };
 }
 
-var MissingDataException = /*#__PURE__*/function (_BaseException) {
-  _inherits(MissingDataException, _BaseException);
-
-  var _super = _createSuper(MissingDataException);
-
-  function MissingDataException(begin, end) {
-    var _this;
-
-    _classCallCheck(this, MissingDataException);
-
-    _this = _super.call(this, "Missing data [".concat(begin, ", ").concat(end, ")"), "MissingDataException");
-    _this.begin = begin;
-    _this.end = end;
-    return _this;
+class MissingDataException extends _util.BaseException {
+  constructor(begin, end) {
+    super(`Missing data [${begin}, ${end})`, "MissingDataException");
+    this.begin = begin;
+    this.end = end;
   }
 
-  return _createClass(MissingDataException);
-}(_util.BaseException);
+}
 
 exports.MissingDataException = MissingDataException;
 
-var ParserEOFException = /*#__PURE__*/function (_BaseException2) {
-  _inherits(ParserEOFException, _BaseException2);
-
-  var _super2 = _createSuper(ParserEOFException);
-
-  function ParserEOFException(msg) {
-    _classCallCheck(this, ParserEOFException);
-
-    return _super2.call(this, msg, "ParserEOFException");
+class ParserEOFException extends _util.BaseException {
+  constructor(msg) {
+    super(msg, "ParserEOFException");
   }
 
-  return _createClass(ParserEOFException);
-}(_util.BaseException);
+}
 
 exports.ParserEOFException = ParserEOFException;
 
-var XRefEntryException = /*#__PURE__*/function (_BaseException3) {
-  _inherits(XRefEntryException, _BaseException3);
-
-  var _super3 = _createSuper(XRefEntryException);
-
-  function XRefEntryException(msg) {
-    _classCallCheck(this, XRefEntryException);
-
-    return _super3.call(this, msg, "XRefEntryException");
+class XRefEntryException extends _util.BaseException {
+  constructor(msg) {
+    super(msg, "XRefEntryException");
   }
 
-  return _createClass(XRefEntryException);
-}(_util.BaseException);
+}
 
 exports.XRefEntryException = XRefEntryException;
 
-var XRefParseException = /*#__PURE__*/function (_BaseException4) {
-  _inherits(XRefParseException, _BaseException4);
-
-  var _super4 = _createSuper(XRefParseException);
-
-  function XRefParseException(msg) {
-    _classCallCheck(this, XRefParseException);
-
-    return _super4.call(this, msg, "XRefParseException");
+class XRefParseException extends _util.BaseException {
+  constructor(msg) {
+    super(msg, "XRefParseException");
   }
 
-  return _createClass(XRefParseException);
-}(_util.BaseException);
+}
 
 exports.XRefParseException = XRefParseException;
 
-var DocStats = /*#__PURE__*/function () {
-  function DocStats(handler) {
-    _classCallCheck(this, DocStats);
-
+class DocStats {
+  constructor(handler) {
     this._handler = handler;
     this._streamTypes = new Set();
     this._fontTypes = new Set();
   }
 
-  _createClass(DocStats, [{
-    key: "_send",
-    value: function _send() {
-      var streamTypes = Object.create(null),
+  _send() {
+    const streamTypes = Object.create(null),
           fontTypes = Object.create(null);
 
-      var _iterator = _createForOfIteratorHelper(this._streamTypes),
-          _step;
-
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var type = _step.value;
-          streamTypes[type] = true;
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-
-      var _iterator2 = _createForOfIteratorHelper(this._fontTypes),
-          _step2;
-
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var _type = _step2.value;
-          fontTypes[_type] = true;
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-
-      this._handler.send("DocStats", {
-        streamTypes: streamTypes,
-        fontTypes: fontTypes
-      });
+    for (const type of this._streamTypes) {
+      streamTypes[type] = true;
     }
-  }, {
-    key: "addStreamType",
-    value: function addStreamType(type) {
-      if (this._streamTypes.has(type)) {
-        return;
-      }
 
-      this._streamTypes.add(type);
-
-      this._send();
+    for (const type of this._fontTypes) {
+      fontTypes[type] = true;
     }
-  }, {
-    key: "addFontType",
-    value: function addFontType(type) {
-      if (this._fontTypes.has(type)) {
-        return;
-      }
 
-      this._fontTypes.add(type);
+    this._handler.send("DocStats", {
+      streamTypes,
+      fontTypes
+    });
+  }
 
-      this._send();
+  addStreamType(type) {
+    if (this._streamTypes.has(type)) {
+      return;
     }
-  }]);
 
-  return DocStats;
-}();
+    this._streamTypes.add(type);
+
+    this._send();
+  }
+
+  addFontType(type) {
+    if (this._fontTypes.has(type)) {
+      return;
+    }
+
+    this._fontTypes.add(type);
+
+    this._send();
+  }
+
+}
 
 exports.DocStats = DocStats;
 
 function getInheritableProperty(_ref) {
-  var dict = _ref.dict,
-      key = _ref.key,
-      _ref$getArray = _ref.getArray,
-      getArray = _ref$getArray === void 0 ? false : _ref$getArray,
-      _ref$stopWhenFound = _ref.stopWhenFound,
-      stopWhenFound = _ref$stopWhenFound === void 0 ? true : _ref$stopWhenFound;
-  var values;
-  var visited = new _primitives.RefSet();
+  let {
+    dict,
+    key,
+    getArray = false,
+    stopWhenFound = true
+  } = _ref;
+  let values;
+  const visited = new _primitives.RefSet();
 
   while (dict instanceof _primitives.Dict && !(dict.objId && visited.has(dict.objId))) {
     if (dict.objId) {
       visited.put(dict.objId);
     }
 
-    var value = getArray ? dict.getArray(key) : dict.get(key);
+    const value = getArray ? dict.getArray(key) : dict.get(key);
 
     if (value !== undefined) {
       if (stopWhenFound) {
@@ -5494,13 +5117,13 @@ function getInheritableProperty(_ref) {
   return values;
 }
 
-var ROMAN_NUMBER_MAP = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM", "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC", "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
+const ROMAN_NUMBER_MAP = ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM", "", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC", "", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"];
 
 function toRomanNumerals(number) {
-  var lowerCase = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+  let lowerCase = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
   (0, _util.assert)(Number.isInteger(number) && number > 0, "The number should be a positive integer.");
-  var romanBuf = [];
-  var pos;
+  const romanBuf = [];
+  let pos;
 
   while (number >= 1000) {
     number -= 1000;
@@ -5514,7 +5137,7 @@ function toRomanNumerals(number) {
   number %= 10;
   romanBuf.push(ROMAN_NUMBER_MAP[10 + pos]);
   romanBuf.push(ROMAN_NUMBER_MAP[20 + number]);
-  var romanStr = romanBuf.join("");
+  const romanStr = romanBuf.join("");
   return lowerCase ? romanStr.toLowerCase() : romanStr;
 }
 
@@ -5543,9 +5166,9 @@ function isWhiteSpace(ch) {
 }
 
 function parseXFAPath(path) {
-  var positionPattern = /(.+)\[(\d+)\]$/;
-  return path.split(".").map(function (component) {
-    var m = component.match(positionPattern);
+  const positionPattern = /(.+)\[(\d+)\]$/;
+  return path.split(".").map(component => {
+    const m = component.match(positionPattern);
 
     if (m) {
       return {
@@ -5562,18 +5185,18 @@ function parseXFAPath(path) {
 }
 
 function escapePDFName(str) {
-  var buffer = [];
-  var start = 0;
+  const buffer = [];
+  let start = 0;
 
-  for (var i = 0, ii = str.length; i < ii; i++) {
-    var _char = str.charCodeAt(i);
+  for (let i = 0, ii = str.length; i < ii; i++) {
+    const char = str.charCodeAt(i);
 
-    if (_char < 0x21 || _char > 0x7e || _char === 0x23 || _char === 0x28 || _char === 0x29 || _char === 0x3c || _char === 0x3e || _char === 0x5b || _char === 0x5d || _char === 0x7b || _char === 0x7d || _char === 0x2f || _char === 0x25) {
+    if (char < 0x21 || char > 0x7e || char === 0x23 || char === 0x28 || char === 0x29 || char === 0x3c || char === 0x3e || char === 0x5b || char === 0x5d || char === 0x7b || char === 0x7d || char === 0x2f || char === 0x25) {
       if (start < i) {
         buffer.push(str.substring(start, i));
       }
 
-      buffer.push("#".concat(_char.toString(16)));
+      buffer.push(`#${char.toString(16)}`);
       start = i + 1;
     }
   }
@@ -5594,7 +5217,7 @@ function _collectJS(entry, xref, list, parents) {
     return;
   }
 
-  var parent = null;
+  let parent = null;
 
   if (entry instanceof _primitives.Ref) {
     if (parents.has(entry)) {
@@ -5607,24 +5230,13 @@ function _collectJS(entry, xref, list, parents) {
   }
 
   if (Array.isArray(entry)) {
-    var _iterator3 = _createForOfIteratorHelper(entry),
-        _step3;
-
-    try {
-      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-        var element = _step3.value;
-
-        _collectJS(element, xref, list, parents);
-      }
-    } catch (err) {
-      _iterator3.e(err);
-    } finally {
-      _iterator3.f();
+    for (const element of entry) {
+      _collectJS(element, xref, list, parents);
     }
   } else if (entry instanceof _primitives.Dict) {
     if ((0, _primitives.isName)(entry.get("S"), "JavaScript")) {
-      var js = entry.get("JS");
-      var code;
+      const js = entry.get("JS");
+      let code;
 
       if (js instanceof _base_stream.BaseStream) {
         code = js.getString();
@@ -5648,69 +5260,57 @@ function _collectJS(entry, xref, list, parents) {
 }
 
 function collectActions(xref, dict, eventType) {
-  var actions = Object.create(null);
-  var additionalActionsDicts = getInheritableProperty({
-    dict: dict,
+  const actions = Object.create(null);
+  const additionalActionsDicts = getInheritableProperty({
+    dict,
     key: "AA",
     stopWhenFound: false
   });
 
   if (additionalActionsDicts) {
-    for (var i = additionalActionsDicts.length - 1; i >= 0; i--) {
-      var additionalActions = additionalActionsDicts[i];
+    for (let i = additionalActionsDicts.length - 1; i >= 0; i--) {
+      const additionalActions = additionalActionsDicts[i];
 
       if (!(additionalActions instanceof _primitives.Dict)) {
         continue;
       }
 
-      var _iterator4 = _createForOfIteratorHelper(additionalActions.getKeys()),
-          _step4;
+      for (const key of additionalActions.getKeys()) {
+        const action = eventType[key];
 
-      try {
-        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-          var key = _step4.value;
-          var action = eventType[key];
-
-          if (!action) {
-            continue;
-          }
-
-          var actionDict = additionalActions.getRaw(key);
-          var parents = new _primitives.RefSet();
-          var list = [];
-
-          _collectJS(actionDict, xref, list, parents);
-
-          if (list.length > 0) {
-            actions[action] = list;
-          }
+        if (!action) {
+          continue;
         }
-      } catch (err) {
-        _iterator4.e(err);
-      } finally {
-        _iterator4.f();
+
+        const actionDict = additionalActions.getRaw(key);
+        const parents = new _primitives.RefSet();
+        const list = [];
+
+        _collectJS(actionDict, xref, list, parents);
+
+        if (list.length > 0) {
+          actions[action] = list;
+        }
       }
     }
   }
 
   if (dict.has("A")) {
-    var _actionDict = dict.get("A");
+    const actionDict = dict.get("A");
+    const parents = new _primitives.RefSet();
+    const list = [];
 
-    var _parents = new _primitives.RefSet();
+    _collectJS(actionDict, xref, list, parents);
 
-    var _list = [];
-
-    _collectJS(_actionDict, xref, _list, _parents);
-
-    if (_list.length > 0) {
-      actions.Action = _list;
+    if (list.length > 0) {
+      actions.Action = list;
     }
   }
 
   return (0, _util.objectSize)(actions) > 0 ? actions : null;
 }
 
-var XMLEntities = {
+const XMLEntities = {
   0x3c: "&lt;",
   0x3e: "&gt;",
   0x26: "&amp;",
@@ -5719,14 +5319,14 @@ var XMLEntities = {
 };
 
 function encodeToXmlString(str) {
-  var buffer = [];
-  var start = 0;
+  const buffer = [];
+  let start = 0;
 
-  for (var i = 0, ii = str.length; i < ii; i++) {
-    var _char2 = str.codePointAt(i);
+  for (let i = 0, ii = str.length; i < ii; i++) {
+    const char = str.codePointAt(i);
 
-    if (0x20 <= _char2 && _char2 <= 0x7e) {
-      var entity = XMLEntities[_char2];
+    if (0x20 <= char && char <= 0x7e) {
+      const entity = XMLEntities[char];
 
       if (entity) {
         if (start < i) {
@@ -5741,9 +5341,9 @@ function encodeToXmlString(str) {
         buffer.push(str.substring(start, i));
       }
 
-      buffer.push("&#x".concat(_char2.toString(16).toUpperCase(), ";"));
+      buffer.push(`&#x${char.toString(16).toUpperCase()};`);
 
-      if (_char2 > 0xd7ff && (_char2 < 0xe000 || _char2 > 0xfffd)) {
+      if (char > 0xd7ff && (char < 0xe000 || char > 0xfffd)) {
         i++;
       }
 
@@ -5763,66 +5363,57 @@ function encodeToXmlString(str) {
 }
 
 function validateCSSFont(cssFontInfo) {
-  var DEFAULT_CSS_FONT_OBLIQUE = "14";
-  var DEFAULT_CSS_FONT_WEIGHT = "400";
-  var CSS_FONT_WEIGHT_VALUES = new Set(["100", "200", "300", "400", "500", "600", "700", "800", "900", "1000", "normal", "bold", "bolder", "lighter"]);
-  var fontFamily = cssFontInfo.fontFamily,
-      fontWeight = cssFontInfo.fontWeight,
-      italicAngle = cssFontInfo.italicAngle;
+  const DEFAULT_CSS_FONT_OBLIQUE = "14";
+  const DEFAULT_CSS_FONT_WEIGHT = "400";
+  const CSS_FONT_WEIGHT_VALUES = new Set(["100", "200", "300", "400", "500", "600", "700", "800", "900", "1000", "normal", "bold", "bolder", "lighter"]);
+  const {
+    fontFamily,
+    fontWeight,
+    italicAngle
+  } = cssFontInfo;
 
   if (/^".*"$/.test(fontFamily)) {
     if (/[^\\]"/.test(fontFamily.slice(1, fontFamily.length - 1))) {
-      (0, _util.warn)("XFA - FontFamily contains some unescaped \": ".concat(fontFamily, "."));
+      (0, _util.warn)(`XFA - FontFamily contains some unescaped ": ${fontFamily}.`);
       return false;
     }
   } else if (/^'.*'$/.test(fontFamily)) {
     if (/[^\\]'/.test(fontFamily.slice(1, fontFamily.length - 1))) {
-      (0, _util.warn)("XFA - FontFamily contains some unescaped ': ".concat(fontFamily, "."));
+      (0, _util.warn)(`XFA - FontFamily contains some unescaped ': ${fontFamily}.`);
       return false;
     }
   } else {
-    var _iterator5 = _createForOfIteratorHelper(fontFamily.split(/[ \t]+/)),
-        _step5;
-
-    try {
-      for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-        var ident = _step5.value;
-
-        if (/^(\d|(-(\d|-)))/.test(ident) || !/^[\w-\\]+$/.test(ident)) {
-          (0, _util.warn)("XFA - FontFamily contains some invalid <custom-ident>: ".concat(fontFamily, "."));
-          return false;
-        }
+    for (const ident of fontFamily.split(/[ \t]+/)) {
+      if (/^(\d|(-(\d|-)))/.test(ident) || !/^[\w-\\]+$/.test(ident)) {
+        (0, _util.warn)(`XFA - FontFamily contains some invalid <custom-ident>: ${fontFamily}.`);
+        return false;
       }
-    } catch (err) {
-      _iterator5.e(err);
-    } finally {
-      _iterator5.f();
     }
   }
 
-  var weight = fontWeight ? fontWeight.toString() : "";
+  const weight = fontWeight ? fontWeight.toString() : "";
   cssFontInfo.fontWeight = CSS_FONT_WEIGHT_VALUES.has(weight) ? weight : DEFAULT_CSS_FONT_WEIGHT;
-  var angle = parseFloat(italicAngle);
+  const angle = parseFloat(italicAngle);
   cssFontInfo.italicAngle = isNaN(angle) || angle < -90 || angle > 90 ? DEFAULT_CSS_FONT_OBLIQUE : italicAngle.toString();
   return true;
 }
 
 function recoverJsURL(str) {
-  var URL_OPEN_METHODS = ["app.launchURL", "window.open", "xfa.host.gotoURL"];
-  var regex = new RegExp("^\\s*(" + URL_OPEN_METHODS.join("|").split(".").join("\\.") + ")\\((?:'|\")([^'\"]*)(?:'|\")(?:,\\s*(\\w+)\\)|\\))", "i");
-  var jsUrl = regex.exec(str);
+  const URL_OPEN_METHODS = ["app.launchURL", "window.open", "xfa.host.gotoURL"];
+  const regex = new RegExp("^\\s*(" + URL_OPEN_METHODS.join("|").split(".").join("\\.") + ")\\((?:'|\")([^'\"]*)(?:'|\")(?:,\\s*(\\w+)\\)|\\))", "i");
+  const jsUrl = regex.exec(str);
 
   if (jsUrl && jsUrl[2]) {
-    var url = jsUrl[2];
-    var newWindow = false;
+    const url = jsUrl[2];
+    let newWindow = false;
 
     if (jsUrl[3] === "true" && jsUrl[1] === "app.launchURL") {
       newWindow = true;
     }
 
     return {
-      url: url,
-      newWindow: newWindow
+      url,
+      newWindow
     };
   }
 
@@ -5834,7 +5425,7 @@ function numberToString(value) {
     return value.toString();
   }
 
-  var roundedValue = Math.round(value * 100);
+  const roundedValue = Math.round(value * 100);
 
   if (roundedValue % 100 === 0) {
     return (roundedValue / 100).toString();
@@ -5852,34 +5443,21 @@ function getNewAnnotationsMap(annotationStorage) {
     return null;
   }
 
-  var newAnnotationsByPage = new Map();
+  const newAnnotationsByPage = new Map();
 
-  var _iterator6 = _createForOfIteratorHelper(annotationStorage),
-      _step6;
-
-  try {
-    for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
-      var _step6$value = _slicedToArray(_step6.value, 2),
-          key = _step6$value[0],
-          value = _step6$value[1];
-
-      if (!key.startsWith(_util.AnnotationEditorPrefix)) {
-        continue;
-      }
-
-      var annotations = newAnnotationsByPage.get(value.pageIndex);
-
-      if (!annotations) {
-        annotations = [];
-        newAnnotationsByPage.set(value.pageIndex, annotations);
-      }
-
-      annotations.push(value);
+  for (const [key, value] of annotationStorage) {
+    if (!key.startsWith(_util.AnnotationEditorPrefix)) {
+      continue;
     }
-  } catch (err) {
-    _iterator6.e(err);
-  } finally {
-    _iterator6.f();
+
+    let annotations = newAnnotationsByPage.get(value.pageIndex);
+
+    if (!annotations) {
+      annotations = [];
+      newAnnotationsByPage.set(value.pageIndex, annotations);
+    }
+
+    annotations.push(value);
   }
 
   return newAnnotationsByPage.size > 0 ? newAnnotationsByPage : null;
@@ -5891,8 +5469,6 @@ function getNewAnnotationsMap(annotationStorage) {
 
 "use strict";
 
-
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", ({
   value: true
@@ -5906,107 +5482,64 @@ exports.isRefsEqual = isRefsEqual;
 
 var _util = __w_pdfjs_require__(1);
 
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _regeneratorRuntime() { "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */ _regeneratorRuntime = function _regeneratorRuntime() { return exports; }; var exports = {}, Op = Object.prototype, hasOwn = Op.hasOwnProperty, $Symbol = "function" == typeof Symbol ? Symbol : {}, iteratorSymbol = $Symbol.iterator || "@@iterator", asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator", toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag"; function define(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: !0, configurable: !0, writable: !0 }), obj[key]; } try { define({}, ""); } catch (err) { define = function define(obj, key, value) { return obj[key] = value; }; } function wrap(innerFn, outerFn, self, tryLocsList) { var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator, generator = Object.create(protoGenerator.prototype), context = new Context(tryLocsList || []); return generator._invoke = function (innerFn, self, context) { var state = "suspendedStart"; return function (method, arg) { if ("executing" === state) throw new Error("Generator is already running"); if ("completed" === state) { if ("throw" === method) throw arg; return doneResult(); } for (context.method = method, context.arg = arg;;) { var delegate = context.delegate; if (delegate) { var delegateResult = maybeInvokeDelegate(delegate, context); if (delegateResult) { if (delegateResult === ContinueSentinel) continue; return delegateResult; } } if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) { if ("suspendedStart" === state) throw state = "completed", context.arg; context.dispatchException(context.arg); } else "return" === context.method && context.abrupt("return", context.arg); state = "executing"; var record = tryCatch(innerFn, self, context); if ("normal" === record.type) { if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue; return { value: record.arg, done: context.done }; } "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg); } }; }(innerFn, self, context), generator; } function tryCatch(fn, obj, arg) { try { return { type: "normal", arg: fn.call(obj, arg) }; } catch (err) { return { type: "throw", arg: err }; } } exports.wrap = wrap; var ContinueSentinel = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} var IteratorPrototype = {}; define(IteratorPrototype, iteratorSymbol, function () { return this; }); var getProto = Object.getPrototypeOf, NativeIteratorPrototype = getProto && getProto(getProto(values([]))); NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype); var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype); function defineIteratorMethods(prototype) { ["next", "throw", "return"].forEach(function (method) { define(prototype, method, function (arg) { return this._invoke(method, arg); }); }); } function AsyncIterator(generator, PromiseImpl) { function invoke(method, arg, resolve, reject) { var record = tryCatch(generator[method], generator, arg); if ("throw" !== record.type) { var result = record.arg, value = result.value; return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) { invoke("next", value, resolve, reject); }, function (err) { invoke("throw", err, resolve, reject); }) : PromiseImpl.resolve(value).then(function (unwrapped) { result.value = unwrapped, resolve(result); }, function (error) { return invoke("throw", error, resolve, reject); }); } reject(record.arg); } var previousPromise; this._invoke = function (method, arg) { function callInvokeWithMethodAndArg() { return new PromiseImpl(function (resolve, reject) { invoke(method, arg, resolve, reject); }); } return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg(); }; } function maybeInvokeDelegate(delegate, context) { var method = delegate.iterator[context.method]; if (undefined === method) { if (context.delegate = null, "throw" === context.method) { if (delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method)) return ContinueSentinel; context.method = "throw", context.arg = new TypeError("The iterator does not provide a 'throw' method"); } return ContinueSentinel; } var record = tryCatch(method, delegate.iterator, context.arg); if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel; var info = record.arg; return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel); } function pushTryEntry(locs) { var entry = { tryLoc: locs[0] }; 1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry); } function resetTryEntry(entry) { var record = entry.completion || {}; record.type = "normal", delete record.arg, entry.completion = record; } function Context(tryLocsList) { this.tryEntries = [{ tryLoc: "root" }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0); } function values(iterable) { if (iterable) { var iteratorMethod = iterable[iteratorSymbol]; if (iteratorMethod) return iteratorMethod.call(iterable); if ("function" == typeof iterable.next) return iterable; if (!isNaN(iterable.length)) { var i = -1, next = function next() { for (; ++i < iterable.length;) { if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next; } return next.value = undefined, next.done = !0, next; }; return next.next = next; } } return { next: doneResult }; } function doneResult() { return { value: undefined, done: !0 }; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, define(Gp, "constructor", GeneratorFunctionPrototype), define(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) { var ctor = "function" == typeof genFun && genFun.constructor; return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name)); }, exports.mark = function (genFun) { return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun; }, exports.awrap = function (arg) { return { __await: arg }; }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () { return this; }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) { void 0 === PromiseImpl && (PromiseImpl = Promise); var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl); return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) { return result.done ? result.value : iter.next(); }); }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () { return this; }), define(Gp, "toString", function () { return "[object Generator]"; }), exports.keys = function (object) { var keys = []; for (var key in object) { keys.push(key); } return keys.reverse(), function next() { for (; keys.length;) { var key = keys.pop(); if (key in object) return next.value = key, next.done = !1, next; } return next.done = !0, next; }; }, exports.values = values, Context.prototype = { constructor: Context, reset: function reset(skipTempReset) { if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) { "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined); } }, stop: function stop() { this.done = !0; var rootRecord = this.tryEntries[0].completion; if ("throw" === rootRecord.type) throw rootRecord.arg; return this.rval; }, dispatchException: function dispatchException(exception) { if (this.done) throw exception; var context = this; function handle(loc, caught) { return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught; } for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i], record = entry.completion; if ("root" === entry.tryLoc) return handle("end"); if (entry.tryLoc <= this.prev) { var hasCatch = hasOwn.call(entry, "catchLoc"), hasFinally = hasOwn.call(entry, "finallyLoc"); if (hasCatch && hasFinally) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } else if (hasCatch) { if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0); } else { if (!hasFinally) throw new Error("try statement without catch or finally"); if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc); } } } }, abrupt: function abrupt(type, arg) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) { var finallyEntry = entry; break; } } finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null); var record = finallyEntry ? finallyEntry.completion : {}; return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record); }, complete: function complete(record, afterLoc) { if ("throw" === record.type) throw record.arg; return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel; }, finish: function finish(finallyLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel; } }, "catch": function _catch(tryLoc) { for (var i = this.tryEntries.length - 1; i >= 0; --i) { var entry = this.tryEntries[i]; if (entry.tryLoc === tryLoc) { var record = entry.completion; if ("throw" === record.type) { var thrown = record.arg; resetTryEntry(entry); } return thrown; } } throw new Error("illegal catch attempt"); }, delegateYield: function delegateYield(iterable, resultName, nextLoc) { return this.delegate = { iterator: values(iterable), resultName: resultName, nextLoc: nextLoc }, "next" === this.method && (this.arg = undefined), ContinueSentinel; } }, exports; }
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-var CIRCULAR_REF = Symbol("CIRCULAR_REF");
+const CIRCULAR_REF = Symbol("CIRCULAR_REF");
 exports.CIRCULAR_REF = CIRCULAR_REF;
-var EOF = Symbol("EOF");
+const EOF = Symbol("EOF");
 exports.EOF = EOF;
 
-var Name = function NameClosure() {
-  var nameCache = Object.create(null);
+const Name = function NameClosure() {
+  let nameCache = Object.create(null);
 
-  var Name = /*#__PURE__*/function () {
-    function Name(name) {
-      _classCallCheck(this, Name);
-
+  class Name {
+    constructor(name) {
       this.name = name;
     }
 
-    _createClass(Name, null, [{
-      key: "get",
-      value: function get(name) {
-        return nameCache[name] || (nameCache[name] = new Name(name));
-      }
-    }, {
-      key: "_clearCache",
-      value: function _clearCache() {
-        nameCache = Object.create(null);
-      }
-    }]);
+    static get(name) {
+      return nameCache[name] || (nameCache[name] = new Name(name));
+    }
 
-    return Name;
-  }();
+    static _clearCache() {
+      nameCache = Object.create(null);
+    }
+
+  }
 
   return Name;
 }();
 
 exports.Name = Name;
 
-var Cmd = function CmdClosure() {
-  var cmdCache = Object.create(null);
+const Cmd = function CmdClosure() {
+  let cmdCache = Object.create(null);
 
-  var Cmd = /*#__PURE__*/function () {
-    function Cmd(cmd) {
-      _classCallCheck(this, Cmd);
-
+  class Cmd {
+    constructor(cmd) {
       this.cmd = cmd;
     }
 
-    _createClass(Cmd, null, [{
-      key: "get",
-      value: function get(cmd) {
-        return cmdCache[cmd] || (cmdCache[cmd] = new Cmd(cmd));
-      }
-    }, {
-      key: "_clearCache",
-      value: function _clearCache() {
-        cmdCache = Object.create(null);
-      }
-    }]);
+    static get(cmd) {
+      return cmdCache[cmd] || (cmdCache[cmd] = new Cmd(cmd));
+    }
 
-    return Cmd;
-  }();
+    static _clearCache() {
+      cmdCache = Object.create(null);
+    }
+
+  }
 
   return Cmd;
 }();
 
 exports.Cmd = Cmd;
 
-var nonSerializable = function nonSerializableClosure() {
+const nonSerializable = function nonSerializableClosure() {
   return nonSerializable;
 };
 
-var Dict = /*#__PURE__*/function () {
-  function Dict() {
-    var xref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-    _classCallCheck(this, Dict);
-
+class Dict {
+  constructor() {
+    let xref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     this._map = Object.create(null);
     this.xref = xref;
     this.objId = null;
@@ -6014,381 +5547,268 @@ var Dict = /*#__PURE__*/function () {
     this.__nonSerializable__ = nonSerializable;
   }
 
-  _createClass(Dict, [{
-    key: "assignXref",
-    value: function assignXref(newXref) {
-      this.xref = newXref;
-    }
-  }, {
-    key: "size",
-    get: function get() {
-      return Object.keys(this._map).length;
-    }
-  }, {
-    key: "get",
-    value: function get(key1, key2, key3) {
-      var value = this._map[key1];
+  assignXref(newXref) {
+    this.xref = newXref;
+  }
 
-      if (value === undefined && key2 !== undefined) {
-        value = this._map[key2];
+  get size() {
+    return Object.keys(this._map).length;
+  }
 
-        if (value === undefined && key3 !== undefined) {
-          value = this._map[key3];
+  get(key1, key2, key3) {
+    let value = this._map[key1];
+
+    if (value === undefined && key2 !== undefined) {
+      value = this._map[key2];
+
+      if (value === undefined && key3 !== undefined) {
+        value = this._map[key3];
+      }
+    }
+
+    if (value instanceof Ref && this.xref) {
+      return this.xref.fetch(value, this.suppressEncryption);
+    }
+
+    return value;
+  }
+
+  async getAsync(key1, key2, key3) {
+    let value = this._map[key1];
+
+    if (value === undefined && key2 !== undefined) {
+      value = this._map[key2];
+
+      if (value === undefined && key3 !== undefined) {
+        value = this._map[key3];
+      }
+    }
+
+    if (value instanceof Ref && this.xref) {
+      return this.xref.fetchAsync(value, this.suppressEncryption);
+    }
+
+    return value;
+  }
+
+  getArray(key1, key2, key3) {
+    let value = this._map[key1];
+
+    if (value === undefined && key2 !== undefined) {
+      value = this._map[key2];
+
+      if (value === undefined && key3 !== undefined) {
+        value = this._map[key3];
+      }
+    }
+
+    if (value instanceof Ref && this.xref) {
+      value = this.xref.fetch(value, this.suppressEncryption);
+    }
+
+    if (Array.isArray(value)) {
+      value = value.slice();
+
+      for (let i = 0, ii = value.length; i < ii; i++) {
+        if (value[i] instanceof Ref && this.xref) {
+          value[i] = this.xref.fetch(value[i], this.suppressEncryption);
         }
       }
-
-      if (value instanceof Ref && this.xref) {
-        return this.xref.fetch(value, this.suppressEncryption);
-      }
-
-      return value;
     }
-  }, {
-    key: "getAsync",
-    value: function () {
-      var _getAsync = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(key1, key2, key3) {
-        var value;
-        return _regeneratorRuntime().wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                value = this._map[key1];
 
-                if (value === undefined && key2 !== undefined) {
-                  value = this._map[key2];
+    return value;
+  }
 
-                  if (value === undefined && key3 !== undefined) {
-                    value = this._map[key3];
-                  }
-                }
+  getRaw(key) {
+    return this._map[key];
+  }
 
-                if (!(value instanceof Ref && this.xref)) {
-                  _context.next = 4;
-                  break;
-                }
+  getKeys() {
+    return Object.keys(this._map);
+  }
 
-                return _context.abrupt("return", this.xref.fetchAsync(value, this.suppressEncryption));
+  getRawValues() {
+    return Object.values(this._map);
+  }
 
-              case 4:
-                return _context.abrupt("return", value);
+  set(key, value) {
+    this._map[key] = value;
+  }
 
-              case 5:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
+  has(key) {
+    return this._map[key] !== undefined;
+  }
 
-      function getAsync(_x, _x2, _x3) {
-        return _getAsync.apply(this, arguments);
-      }
-
-      return getAsync;
-    }()
-  }, {
-    key: "getArray",
-    value: function getArray(key1, key2, key3) {
-      var value = this._map[key1];
-
-      if (value === undefined && key2 !== undefined) {
-        value = this._map[key2];
-
-        if (value === undefined && key3 !== undefined) {
-          value = this._map[key3];
-        }
-      }
-
-      if (value instanceof Ref && this.xref) {
-        value = this.xref.fetch(value, this.suppressEncryption);
-      }
-
-      if (Array.isArray(value)) {
-        value = value.slice();
-
-        for (var i = 0, ii = value.length; i < ii; i++) {
-          if (value[i] instanceof Ref && this.xref) {
-            value[i] = this.xref.fetch(value[i], this.suppressEncryption);
-          }
-        }
-      }
-
-      return value;
+  forEach(callback) {
+    for (const key in this._map) {
+      callback(key, this.get(key));
     }
-  }, {
-    key: "getRaw",
-    value: function getRaw(key) {
-      return this._map[key];
-    }
-  }, {
-    key: "getKeys",
-    value: function getKeys() {
-      return Object.keys(this._map);
-    }
-  }, {
-    key: "getRawValues",
-    value: function getRawValues() {
-      return Object.values(this._map);
-    }
-  }, {
-    key: "set",
-    value: function set(key, value) {
-      this._map[key] = value;
-    }
-  }, {
-    key: "has",
-    value: function has(key) {
-      return this._map[key] !== undefined;
-    }
-  }, {
-    key: "forEach",
-    value: function forEach(callback) {
-      for (var key in this._map) {
-        callback(key, this.get(key));
-      }
-    }
-  }], [{
-    key: "empty",
-    get: function get() {
-      var emptyDict = new Dict(null);
+  }
 
-      emptyDict.set = function (key, value) {
-        (0, _util.unreachable)("Should not call `set` on the empty dictionary.");
-      };
+  static get empty() {
+    const emptyDict = new Dict(null);
 
-      return (0, _util.shadow)(this, "empty", emptyDict);
-    }
-  }, {
-    key: "merge",
-    value: function merge(_ref) {
-      var xref = _ref.xref,
-          dictArray = _ref.dictArray,
-          _ref$mergeSubDicts = _ref.mergeSubDicts,
-          mergeSubDicts = _ref$mergeSubDicts === void 0 ? false : _ref$mergeSubDicts;
-      var mergedDict = new Dict(xref),
+    emptyDict.set = (key, value) => {
+      (0, _util.unreachable)("Should not call `set` on the empty dictionary.");
+    };
+
+    return (0, _util.shadow)(this, "empty", emptyDict);
+  }
+
+  static merge(_ref) {
+    let {
+      xref,
+      dictArray,
+      mergeSubDicts = false
+    } = _ref;
+    const mergedDict = new Dict(xref),
           properties = new Map();
 
-      var _iterator = _createForOfIteratorHelper(dictArray),
-          _step;
-
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var dict = _step.value;
-
-          if (!(dict instanceof Dict)) {
-            continue;
-          }
-
-          for (var _i = 0, _Object$entries = Object.entries(dict._map); _i < _Object$entries.length; _i++) {
-            var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
-                key = _Object$entries$_i[0],
-                value = _Object$entries$_i[1];
-
-            var property = properties.get(key);
-
-            if (property === undefined) {
-              property = [];
-              properties.set(key, property);
-            } else if (!mergeSubDicts || !(value instanceof Dict)) {
-              continue;
-            }
-
-            property.push(value);
-          }
-        }
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
+    for (const dict of dictArray) {
+      if (!(dict instanceof Dict)) {
+        continue;
       }
 
-      var _iterator2 = _createForOfIteratorHelper(properties),
-          _step2;
+      for (const [key, value] of Object.entries(dict._map)) {
+        let property = properties.get(key);
 
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var _step2$value = _slicedToArray(_step2.value, 2),
-              name = _step2$value[0],
-              values = _step2$value[1];
-
-          if (values.length === 1 || !(values[0] instanceof Dict)) {
-            mergedDict._map[name] = values[0];
-            continue;
-          }
-
-          var subDict = new Dict(xref);
-
-          var _iterator3 = _createForOfIteratorHelper(values),
-              _step3;
-
-          try {
-            for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-              var _dict = _step3.value;
-
-              for (var _i2 = 0, _Object$entries2 = Object.entries(_dict._map); _i2 < _Object$entries2.length; _i2++) {
-                var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2),
-                    _key = _Object$entries2$_i[0],
-                    _value = _Object$entries2$_i[1];
-
-                if (subDict._map[_key] === undefined) {
-                  subDict._map[_key] = _value;
-                }
-              }
-            }
-          } catch (err) {
-            _iterator3.e(err);
-          } finally {
-            _iterator3.f();
-          }
-
-          if (subDict.size > 0) {
-            mergedDict._map[name] = subDict;
-          }
+        if (property === undefined) {
+          property = [];
+          properties.set(key, property);
+        } else if (!mergeSubDicts || !(value instanceof Dict)) {
+          continue;
         }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
 
-      properties.clear();
-      return mergedDict.size > 0 ? mergedDict : Dict.empty;
+        property.push(value);
+      }
     }
-  }]);
 
-  return Dict;
-}();
+    for (const [name, values] of properties) {
+      if (values.length === 1 || !(values[0] instanceof Dict)) {
+        mergedDict._map[name] = values[0];
+        continue;
+      }
+
+      const subDict = new Dict(xref);
+
+      for (const dict of values) {
+        for (const [key, value] of Object.entries(dict._map)) {
+          if (subDict._map[key] === undefined) {
+            subDict._map[key] = value;
+          }
+        }
+      }
+
+      if (subDict.size > 0) {
+        mergedDict._map[name] = subDict;
+      }
+    }
+
+    properties.clear();
+    return mergedDict.size > 0 ? mergedDict : Dict.empty;
+  }
+
+}
 
 exports.Dict = Dict;
 
-var Ref = function RefClosure() {
-  var refCache = Object.create(null);
+const Ref = function RefClosure() {
+  let refCache = Object.create(null);
 
-  var Ref = /*#__PURE__*/function () {
-    function Ref(num, gen) {
-      _classCallCheck(this, Ref);
-
+  class Ref {
+    constructor(num, gen) {
       this.num = num;
       this.gen = gen;
     }
 
-    _createClass(Ref, [{
-      key: "toString",
-      value: function toString() {
-        if (this.gen === 0) {
-          return "".concat(this.num, "R");
-        }
+    toString() {
+      if (this.gen === 0) {
+        return `${this.num}R`;
+      }
 
-        return "".concat(this.num, "R").concat(this.gen);
-      }
-    }], [{
-      key: "get",
-      value: function get(num, gen) {
-        var key = gen === 0 ? "".concat(num, "R") : "".concat(num, "R").concat(gen);
-        return refCache[key] || (refCache[key] = new Ref(num, gen));
-      }
-    }, {
-      key: "_clearCache",
-      value: function _clearCache() {
-        refCache = Object.create(null);
-      }
-    }]);
+      return `${this.num}R${this.gen}`;
+    }
 
-    return Ref;
-  }();
+    static get(num, gen) {
+      const key = gen === 0 ? `${num}R` : `${num}R${gen}`;
+      return refCache[key] || (refCache[key] = new Ref(num, gen));
+    }
+
+    static _clearCache() {
+      refCache = Object.create(null);
+    }
+
+  }
 
   return Ref;
 }();
 
 exports.Ref = Ref;
 
-var RefSet = /*#__PURE__*/function (_Symbol$iterator) {
-  function RefSet() {
-    var parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-    _classCallCheck(this, RefSet);
-
+class RefSet {
+  constructor() {
+    let parent = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     this._set = new Set(parent && parent._set);
   }
 
-  _createClass(RefSet, [{
-    key: "has",
-    value: function has(ref) {
-      return this._set.has(ref.toString());
-    }
-  }, {
-    key: "put",
-    value: function put(ref) {
-      this._set.add(ref.toString());
-    }
-  }, {
-    key: "remove",
-    value: function remove(ref) {
-      this._set["delete"](ref.toString());
-    }
-  }, {
-    key: _Symbol$iterator,
-    value: function value() {
-      return this._set.values();
-    }
-  }, {
-    key: "clear",
-    value: function clear() {
-      this._set.clear();
-    }
-  }]);
+  has(ref) {
+    return this._set.has(ref.toString());
+  }
 
-  return RefSet;
-}(Symbol.iterator);
+  put(ref) {
+    this._set.add(ref.toString());
+  }
+
+  remove(ref) {
+    this._set.delete(ref.toString());
+  }
+
+  [Symbol.iterator]() {
+    return this._set.values();
+  }
+
+  clear() {
+    this._set.clear();
+  }
+
+}
 
 exports.RefSet = RefSet;
 
-var RefSetCache = /*#__PURE__*/function (_Symbol$iterator2) {
-  function RefSetCache() {
-    _classCallCheck(this, RefSetCache);
-
+class RefSetCache {
+  constructor() {
     this._map = new Map();
   }
 
-  _createClass(RefSetCache, [{
-    key: "size",
-    get: function get() {
-      return this._map.size;
-    }
-  }, {
-    key: "get",
-    value: function get(ref) {
-      return this._map.get(ref.toString());
-    }
-  }, {
-    key: "has",
-    value: function has(ref) {
-      return this._map.has(ref.toString());
-    }
-  }, {
-    key: "put",
-    value: function put(ref, obj) {
-      this._map.set(ref.toString(), obj);
-    }
-  }, {
-    key: "putAlias",
-    value: function putAlias(ref, aliasRef) {
-      this._map.set(ref.toString(), this.get(aliasRef));
-    }
-  }, {
-    key: _Symbol$iterator2,
-    value: function value() {
-      return this._map.values();
-    }
-  }, {
-    key: "clear",
-    value: function clear() {
-      this._map.clear();
-    }
-  }]);
+  get size() {
+    return this._map.size;
+  }
 
-  return RefSetCache;
-}(Symbol.iterator);
+  get(ref) {
+    return this._map.get(ref.toString());
+  }
+
+  has(ref) {
+    return this._map.has(ref.toString());
+  }
+
+  put(ref, obj) {
+    this._map.set(ref.toString(), obj);
+  }
+
+  putAlias(ref, aliasRef) {
+    this._map.set(ref.toString(), this.get(aliasRef));
+  }
+
+  [Symbol.iterator]() {
+    return this._map.values();
+  }
+
+  clear() {
+    this._map.clear();
+  }
+
+}
 
 exports.RefSetCache = RefSetCache;
 
@@ -6430,125 +5850,98 @@ exports.BaseStream = void 0;
 
 var _util = __w_pdfjs_require__(1);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-var BaseStream = /*#__PURE__*/function () {
-  function BaseStream() {
-    _classCallCheck(this, BaseStream);
-
+class BaseStream {
+  constructor() {
     if (this.constructor === BaseStream) {
       (0, _util.unreachable)("Cannot initialize BaseStream.");
     }
   }
 
-  _createClass(BaseStream, [{
-    key: "length",
-    get: function get() {
-      (0, _util.unreachable)("Abstract getter `length` accessed");
-    }
-  }, {
-    key: "isEmpty",
-    get: function get() {
-      (0, _util.unreachable)("Abstract getter `isEmpty` accessed");
-    }
-  }, {
-    key: "isDataLoaded",
-    get: function get() {
-      return (0, _util.shadow)(this, "isDataLoaded", true);
-    }
-  }, {
-    key: "getByte",
-    value: function getByte() {
-      (0, _util.unreachable)("Abstract method `getByte` called");
-    }
-  }, {
-    key: "getBytes",
-    value: function getBytes(length) {
-      (0, _util.unreachable)("Abstract method `getBytes` called");
-    }
-  }, {
-    key: "peekByte",
-    value: function peekByte() {
-      var peekedByte = this.getByte();
+  get length() {
+    (0, _util.unreachable)("Abstract getter `length` accessed");
+  }
 
-      if (peekedByte !== -1) {
-        this.pos--;
-      }
+  get isEmpty() {
+    (0, _util.unreachable)("Abstract getter `isEmpty` accessed");
+  }
 
-      return peekedByte;
-    }
-  }, {
-    key: "peekBytes",
-    value: function peekBytes(length) {
-      var bytes = this.getBytes(length);
-      this.pos -= bytes.length;
-      return bytes;
-    }
-  }, {
-    key: "getUint16",
-    value: function getUint16() {
-      var b0 = this.getByte();
-      var b1 = this.getByte();
+  get isDataLoaded() {
+    return (0, _util.shadow)(this, "isDataLoaded", true);
+  }
 
-      if (b0 === -1 || b1 === -1) {
-        return -1;
-      }
+  getByte() {
+    (0, _util.unreachable)("Abstract method `getByte` called");
+  }
 
-      return (b0 << 8) + b1;
-    }
-  }, {
-    key: "getInt32",
-    value: function getInt32() {
-      var b0 = this.getByte();
-      var b1 = this.getByte();
-      var b2 = this.getByte();
-      var b3 = this.getByte();
-      return (b0 << 24) + (b1 << 16) + (b2 << 8) + b3;
-    }
-  }, {
-    key: "getByteRange",
-    value: function getByteRange(begin, end) {
-      (0, _util.unreachable)("Abstract method `getByteRange` called");
-    }
-  }, {
-    key: "getString",
-    value: function getString(length) {
-      return (0, _util.bytesToString)(this.getBytes(length));
-    }
-  }, {
-    key: "skip",
-    value: function skip(n) {
-      this.pos += n || 1;
-    }
-  }, {
-    key: "reset",
-    value: function reset() {
-      (0, _util.unreachable)("Abstract method `reset` called");
-    }
-  }, {
-    key: "moveStart",
-    value: function moveStart() {
-      (0, _util.unreachable)("Abstract method `moveStart` called");
-    }
-  }, {
-    key: "makeSubStream",
-    value: function makeSubStream(start, length) {
-      var dict = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-      (0, _util.unreachable)("Abstract method `makeSubStream` called");
-    }
-  }, {
-    key: "getBaseStreams",
-    value: function getBaseStreams() {
-      return null;
-    }
-  }]);
+  getBytes(length) {
+    (0, _util.unreachable)("Abstract method `getBytes` called");
+  }
 
-  return BaseStream;
-}();
+  peekByte() {
+    const peekedByte = this.getByte();
+
+    if (peekedByte !== -1) {
+      this.pos--;
+    }
+
+    return peekedByte;
+  }
+
+  peekBytes(length) {
+    const bytes = this.getBytes(length);
+    this.pos -= bytes.length;
+    return bytes;
+  }
+
+  getUint16() {
+    const b0 = this.getByte();
+    const b1 = this.getByte();
+
+    if (b0 === -1 || b1 === -1) {
+      return -1;
+    }
+
+    return (b0 << 8) + b1;
+  }
+
+  getInt32() {
+    const b0 = this.getByte();
+    const b1 = this.getByte();
+    const b2 = this.getByte();
+    const b3 = this.getByte();
+    return (b0 << 24) + (b1 << 16) + (b2 << 8) + b3;
+  }
+
+  getByteRange(begin, end) {
+    (0, _util.unreachable)("Abstract method `getByteRange` called");
+  }
+
+  getString(length) {
+    return (0, _util.bytesToString)(this.getBytes(length));
+  }
+
+  skip(n) {
+    this.pos += n || 1;
+  }
+
+  reset() {
+    (0, _util.unreachable)("Abstract method `reset` called");
+  }
+
+  moveStart() {
+    (0, _util.unreachable)("Abstract method `moveStart` called");
+  }
+
+  makeSubStream(start, length) {
+    let dict = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    (0, _util.unreachable)("Abstract method `makeSubStream` called");
+  }
+
+  getBaseStreams() {
+    return null;
+  }
+
+}
 
 exports.BaseStream = BaseStream;
 
@@ -6563,14 +5956,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports.ArithmeticDecoder = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-var QeTable = [{
+const QeTable = [{
   qe: 0x5601,
   nmps: 1,
   nlps: 1,
@@ -6807,10 +6193,8 @@ var QeTable = [{
   switchFlag: 0
 }];
 
-var ArithmeticDecoder = /*#__PURE__*/function () {
-  function ArithmeticDecoder(data, start, end) {
-    _classCallCheck(this, ArithmeticDecoder);
-
+class ArithmeticDecoder {
+  constructor(data, start, end) {
     this.data = data;
     this.bp = start;
     this.dataEnd = end;
@@ -6823,100 +6207,95 @@ var ArithmeticDecoder = /*#__PURE__*/function () {
     this.a = 0x8000;
   }
 
-  _createClass(ArithmeticDecoder, [{
-    key: "byteIn",
-    value: function byteIn() {
-      var data = this.data;
-      var bp = this.bp;
+  byteIn() {
+    const data = this.data;
+    let bp = this.bp;
 
-      if (data[bp] === 0xff) {
-        if (data[bp + 1] > 0x8f) {
-          this.clow += 0xff00;
-          this.ct = 8;
-        } else {
-          bp++;
-          this.clow += data[bp] << 9;
-          this.ct = 7;
-          this.bp = bp;
-        }
+    if (data[bp] === 0xff) {
+      if (data[bp + 1] > 0x8f) {
+        this.clow += 0xff00;
+        this.ct = 8;
       } else {
         bp++;
-        this.clow += bp < this.dataEnd ? data[bp] << 8 : 0xff00;
-        this.ct = 8;
+        this.clow += data[bp] << 9;
+        this.ct = 7;
         this.bp = bp;
       }
-
-      if (this.clow > 0xffff) {
-        this.chigh += this.clow >> 16;
-        this.clow &= 0xffff;
-      }
+    } else {
+      bp++;
+      this.clow += bp < this.dataEnd ? data[bp] << 8 : 0xff00;
+      this.ct = 8;
+      this.bp = bp;
     }
-  }, {
-    key: "readBit",
-    value: function readBit(contexts, pos) {
-      var cx_index = contexts[pos] >> 1,
-          cx_mps = contexts[pos] & 1;
-      var qeTableIcx = QeTable[cx_index];
-      var qeIcx = qeTableIcx.qe;
-      var d;
-      var a = this.a - qeIcx;
 
-      if (this.chigh < qeIcx) {
-        if (a < qeIcx) {
-          a = qeIcx;
-          d = cx_mps;
-          cx_index = qeTableIcx.nmps;
-        } else {
-          a = qeIcx;
-          d = 1 ^ cx_mps;
+    if (this.clow > 0xffff) {
+      this.chigh += this.clow >> 16;
+      this.clow &= 0xffff;
+    }
+  }
 
-          if (qeTableIcx.switchFlag === 1) {
-            cx_mps = d;
-          }
+  readBit(contexts, pos) {
+    let cx_index = contexts[pos] >> 1,
+        cx_mps = contexts[pos] & 1;
+    const qeTableIcx = QeTable[cx_index];
+    const qeIcx = qeTableIcx.qe;
+    let d;
+    let a = this.a - qeIcx;
 
-          cx_index = qeTableIcx.nlps;
-        }
+    if (this.chigh < qeIcx) {
+      if (a < qeIcx) {
+        a = qeIcx;
+        d = cx_mps;
+        cx_index = qeTableIcx.nmps;
       } else {
-        this.chigh -= qeIcx;
+        a = qeIcx;
+        d = 1 ^ cx_mps;
 
-        if ((a & 0x8000) !== 0) {
-          this.a = a;
-          return cx_mps;
+        if (qeTableIcx.switchFlag === 1) {
+          cx_mps = d;
         }
 
-        if (a < qeIcx) {
-          d = 1 ^ cx_mps;
+        cx_index = qeTableIcx.nlps;
+      }
+    } else {
+      this.chigh -= qeIcx;
 
-          if (qeTableIcx.switchFlag === 1) {
-            cx_mps = d;
-          }
-
-          cx_index = qeTableIcx.nlps;
-        } else {
-          d = cx_mps;
-          cx_index = qeTableIcx.nmps;
-        }
+      if ((a & 0x8000) !== 0) {
+        this.a = a;
+        return cx_mps;
       }
 
-      do {
-        if (this.ct === 0) {
-          this.byteIn();
+      if (a < qeIcx) {
+        d = 1 ^ cx_mps;
+
+        if (qeTableIcx.switchFlag === 1) {
+          cx_mps = d;
         }
 
-        a <<= 1;
-        this.chigh = this.chigh << 1 & 0xffff | this.clow >> 15 & 1;
-        this.clow = this.clow << 1 & 0xffff;
-        this.ct--;
-      } while ((a & 0x8000) === 0);
-
-      this.a = a;
-      contexts[pos] = cx_index << 1 | cx_mps;
-      return d;
+        cx_index = qeTableIcx.nlps;
+      } else {
+        d = cx_mps;
+        cx_index = qeTableIcx.nmps;
+      }
     }
-  }]);
 
-  return ArithmeticDecoder;
-}();
+    do {
+      if (this.ct === 0) {
+        this.byteIn();
+      }
+
+      a <<= 1;
+      this.chigh = this.chigh << 1 & 0xffff | this.clow >> 15 & 1;
+      this.clow = this.clow << 1 & 0xffff;
+      this.ct--;
+    } while ((a & 0x8000) === 0);
+
+    this.a = a;
+    contexts[pos] = cx_index << 1 | cx_mps;
+    return d;
+  }
+
+}
 
 exports.ArithmeticDecoder = ArithmeticDecoder;
 
@@ -6934,35 +6313,27 @@ exports.CCITTFaxDecoder = void 0;
 
 var _util = __w_pdfjs_require__(1);
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+const ccittEOL = -2;
+const ccittEOF = -1;
+const twoDimPass = 0;
+const twoDimHoriz = 1;
+const twoDimVert0 = 2;
+const twoDimVertR1 = 3;
+const twoDimVertL1 = 4;
+const twoDimVertR2 = 5;
+const twoDimVertL2 = 6;
+const twoDimVertR3 = 7;
+const twoDimVertL3 = 8;
+const twoDimTable = [[-1, -1], [-1, -1], [7, twoDimVertL3], [7, twoDimVertR3], [6, twoDimVertL2], [6, twoDimVertL2], [6, twoDimVertR2], [6, twoDimVertR2], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0]];
+const whiteTable1 = [[-1, -1], [12, ccittEOL], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [11, 1792], [11, 1792], [12, 1984], [12, 2048], [12, 2112], [12, 2176], [12, 2240], [12, 2304], [11, 1856], [11, 1856], [11, 1920], [11, 1920], [12, 2368], [12, 2432], [12, 2496], [12, 2560]];
+const whiteTable2 = [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [8, 29], [8, 29], [8, 30], [8, 30], [8, 45], [8, 45], [8, 46], [8, 46], [7, 22], [7, 22], [7, 22], [7, 22], [7, 23], [7, 23], [7, 23], [7, 23], [8, 47], [8, 47], [8, 48], [8, 48], [6, 13], [6, 13], [6, 13], [6, 13], [6, 13], [6, 13], [6, 13], [6, 13], [7, 20], [7, 20], [7, 20], [7, 20], [8, 33], [8, 33], [8, 34], [8, 34], [8, 35], [8, 35], [8, 36], [8, 36], [8, 37], [8, 37], [8, 38], [8, 38], [7, 19], [7, 19], [7, 19], [7, 19], [8, 31], [8, 31], [8, 32], [8, 32], [6, 1], [6, 1], [6, 1], [6, 1], [6, 1], [6, 1], [6, 1], [6, 1], [6, 12], [6, 12], [6, 12], [6, 12], [6, 12], [6, 12], [6, 12], [6, 12], [8, 53], [8, 53], [8, 54], [8, 54], [7, 26], [7, 26], [7, 26], [7, 26], [8, 39], [8, 39], [8, 40], [8, 40], [8, 41], [8, 41], [8, 42], [8, 42], [8, 43], [8, 43], [8, 44], [8, 44], [7, 21], [7, 21], [7, 21], [7, 21], [7, 28], [7, 28], [7, 28], [7, 28], [8, 61], [8, 61], [8, 62], [8, 62], [8, 63], [8, 63], [8, 0], [8, 0], [8, 320], [8, 320], [8, 384], [8, 384], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [7, 27], [7, 27], [7, 27], [7, 27], [8, 59], [8, 59], [8, 60], [8, 60], [9, 1472], [9, 1536], [9, 1600], [9, 1728], [7, 18], [7, 18], [7, 18], [7, 18], [7, 24], [7, 24], [7, 24], [7, 24], [8, 49], [8, 49], [8, 50], [8, 50], [8, 51], [8, 51], [8, 52], [8, 52], [7, 25], [7, 25], [7, 25], [7, 25], [8, 55], [8, 55], [8, 56], [8, 56], [8, 57], [8, 57], [8, 58], [8, 58], [6, 192], [6, 192], [6, 192], [6, 192], [6, 192], [6, 192], [6, 192], [6, 192], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [8, 448], [8, 448], [8, 512], [8, 512], [9, 704], [9, 768], [8, 640], [8, 640], [8, 576], [8, 576], [9, 832], [9, 896], [9, 960], [9, 1024], [9, 1088], [9, 1152], [9, 1216], [9, 1280], [9, 1344], [9, 1408], [7, 256], [7, 256], [7, 256], [7, 256], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [6, 16], [6, 16], [6, 16], [6, 16], [6, 16], [6, 16], [6, 16], [6, 16], [6, 17], [6, 17], [6, 17], [6, 17], [6, 17], [6, 17], [6, 17], [6, 17], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [6, 14], [6, 14], [6, 14], [6, 14], [6, 14], [6, 14], [6, 14], [6, 14], [6, 15], [6, 15], [6, 15], [6, 15], [6, 15], [6, 15], [6, 15], [6, 15], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7]];
+const blackTable1 = [[-1, -1], [-1, -1], [12, ccittEOL], [12, ccittEOL], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [11, 1792], [11, 1792], [11, 1792], [11, 1792], [12, 1984], [12, 1984], [12, 2048], [12, 2048], [12, 2112], [12, 2112], [12, 2176], [12, 2176], [12, 2240], [12, 2240], [12, 2304], [12, 2304], [11, 1856], [11, 1856], [11, 1856], [11, 1856], [11, 1920], [11, 1920], [11, 1920], [11, 1920], [12, 2368], [12, 2368], [12, 2432], [12, 2432], [12, 2496], [12, 2496], [12, 2560], [12, 2560], [10, 18], [10, 18], [10, 18], [10, 18], [10, 18], [10, 18], [10, 18], [10, 18], [12, 52], [12, 52], [13, 640], [13, 704], [13, 768], [13, 832], [12, 55], [12, 55], [12, 56], [12, 56], [13, 1280], [13, 1344], [13, 1408], [13, 1472], [12, 59], [12, 59], [12, 60], [12, 60], [13, 1536], [13, 1600], [11, 24], [11, 24], [11, 24], [11, 24], [11, 25], [11, 25], [11, 25], [11, 25], [13, 1664], [13, 1728], [12, 320], [12, 320], [12, 384], [12, 384], [12, 448], [12, 448], [13, 512], [13, 576], [12, 53], [12, 53], [12, 54], [12, 54], [13, 896], [13, 960], [13, 1024], [13, 1088], [13, 1152], [13, 1216], [10, 64], [10, 64], [10, 64], [10, 64], [10, 64], [10, 64], [10, 64], [10, 64]];
+const blackTable2 = [[8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [11, 23], [11, 23], [12, 50], [12, 51], [12, 44], [12, 45], [12, 46], [12, 47], [12, 57], [12, 58], [12, 61], [12, 256], [10, 16], [10, 16], [10, 16], [10, 16], [10, 17], [10, 17], [10, 17], [10, 17], [12, 48], [12, 49], [12, 62], [12, 63], [12, 30], [12, 31], [12, 32], [12, 33], [12, 40], [12, 41], [11, 22], [11, 22], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [9, 15], [9, 15], [9, 15], [9, 15], [9, 15], [9, 15], [9, 15], [9, 15], [12, 128], [12, 192], [12, 26], [12, 27], [12, 28], [12, 29], [11, 19], [11, 19], [11, 20], [11, 20], [12, 34], [12, 35], [12, 36], [12, 37], [12, 38], [12, 39], [11, 21], [11, 21], [12, 42], [12, 43], [10, 0], [10, 0], [10, 0], [10, 0], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12]];
+const blackTable3 = [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [6, 9], [6, 8], [5, 7], [5, 7], [4, 6], [4, 6], [4, 6], [4, 6], [4, 5], [4, 5], [4, 5], [4, 5], [3, 1], [3, 1], [3, 1], [3, 1], [3, 1], [3, 1], [3, 1], [3, 1], [3, 4], [3, 4], [3, 4], [3, 4], [3, 4], [3, 4], [3, 4], [3, 4], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2]];
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-var ccittEOL = -2;
-var ccittEOF = -1;
-var twoDimPass = 0;
-var twoDimHoriz = 1;
-var twoDimVert0 = 2;
-var twoDimVertR1 = 3;
-var twoDimVertL1 = 4;
-var twoDimVertR2 = 5;
-var twoDimVertL2 = 6;
-var twoDimVertR3 = 7;
-var twoDimVertL3 = 8;
-var twoDimTable = [[-1, -1], [-1, -1], [7, twoDimVertL3], [7, twoDimVertR3], [6, twoDimVertL2], [6, twoDimVertL2], [6, twoDimVertR2], [6, twoDimVertR2], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [4, twoDimPass], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimHoriz], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertL1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [3, twoDimVertR1], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0], [1, twoDimVert0]];
-var whiteTable1 = [[-1, -1], [12, ccittEOL], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [11, 1792], [11, 1792], [12, 1984], [12, 2048], [12, 2112], [12, 2176], [12, 2240], [12, 2304], [11, 1856], [11, 1856], [11, 1920], [11, 1920], [12, 2368], [12, 2432], [12, 2496], [12, 2560]];
-var whiteTable2 = [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [8, 29], [8, 29], [8, 30], [8, 30], [8, 45], [8, 45], [8, 46], [8, 46], [7, 22], [7, 22], [7, 22], [7, 22], [7, 23], [7, 23], [7, 23], [7, 23], [8, 47], [8, 47], [8, 48], [8, 48], [6, 13], [6, 13], [6, 13], [6, 13], [6, 13], [6, 13], [6, 13], [6, 13], [7, 20], [7, 20], [7, 20], [7, 20], [8, 33], [8, 33], [8, 34], [8, 34], [8, 35], [8, 35], [8, 36], [8, 36], [8, 37], [8, 37], [8, 38], [8, 38], [7, 19], [7, 19], [7, 19], [7, 19], [8, 31], [8, 31], [8, 32], [8, 32], [6, 1], [6, 1], [6, 1], [6, 1], [6, 1], [6, 1], [6, 1], [6, 1], [6, 12], [6, 12], [6, 12], [6, 12], [6, 12], [6, 12], [6, 12], [6, 12], [8, 53], [8, 53], [8, 54], [8, 54], [7, 26], [7, 26], [7, 26], [7, 26], [8, 39], [8, 39], [8, 40], [8, 40], [8, 41], [8, 41], [8, 42], [8, 42], [8, 43], [8, 43], [8, 44], [8, 44], [7, 21], [7, 21], [7, 21], [7, 21], [7, 28], [7, 28], [7, 28], [7, 28], [8, 61], [8, 61], [8, 62], [8, 62], [8, 63], [8, 63], [8, 0], [8, 0], [8, 320], [8, 320], [8, 384], [8, 384], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 10], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [5, 11], [7, 27], [7, 27], [7, 27], [7, 27], [8, 59], [8, 59], [8, 60], [8, 60], [9, 1472], [9, 1536], [9, 1600], [9, 1728], [7, 18], [7, 18], [7, 18], [7, 18], [7, 24], [7, 24], [7, 24], [7, 24], [8, 49], [8, 49], [8, 50], [8, 50], [8, 51], [8, 51], [8, 52], [8, 52], [7, 25], [7, 25], [7, 25], [7, 25], [8, 55], [8, 55], [8, 56], [8, 56], [8, 57], [8, 57], [8, 58], [8, 58], [6, 192], [6, 192], [6, 192], [6, 192], [6, 192], [6, 192], [6, 192], [6, 192], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [6, 1664], [8, 448], [8, 448], [8, 512], [8, 512], [9, 704], [9, 768], [8, 640], [8, 640], [8, 576], [8, 576], [9, 832], [9, 896], [9, 960], [9, 1024], [9, 1088], [9, 1152], [9, 1216], [9, 1280], [9, 1344], [9, 1408], [7, 256], [7, 256], [7, 256], [7, 256], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 2], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [4, 3], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 128], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 8], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [5, 9], [6, 16], [6, 16], [6, 16], [6, 16], [6, 16], [6, 16], [6, 16], [6, 16], [6, 17], [6, 17], [6, 17], [6, 17], [6, 17], [6, 17], [6, 17], [6, 17], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 4], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [4, 5], [6, 14], [6, 14], [6, 14], [6, 14], [6, 14], [6, 14], [6, 14], [6, 14], [6, 15], [6, 15], [6, 15], [6, 15], [6, 15], [6, 15], [6, 15], [6, 15], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [5, 64], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 6], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7], [4, 7]];
-var blackTable1 = [[-1, -1], [-1, -1], [12, ccittEOL], [12, ccittEOL], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [-1, -1], [11, 1792], [11, 1792], [11, 1792], [11, 1792], [12, 1984], [12, 1984], [12, 2048], [12, 2048], [12, 2112], [12, 2112], [12, 2176], [12, 2176], [12, 2240], [12, 2240], [12, 2304], [12, 2304], [11, 1856], [11, 1856], [11, 1856], [11, 1856], [11, 1920], [11, 1920], [11, 1920], [11, 1920], [12, 2368], [12, 2368], [12, 2432], [12, 2432], [12, 2496], [12, 2496], [12, 2560], [12, 2560], [10, 18], [10, 18], [10, 18], [10, 18], [10, 18], [10, 18], [10, 18], [10, 18], [12, 52], [12, 52], [13, 640], [13, 704], [13, 768], [13, 832], [12, 55], [12, 55], [12, 56], [12, 56], [13, 1280], [13, 1344], [13, 1408], [13, 1472], [12, 59], [12, 59], [12, 60], [12, 60], [13, 1536], [13, 1600], [11, 24], [11, 24], [11, 24], [11, 24], [11, 25], [11, 25], [11, 25], [11, 25], [13, 1664], [13, 1728], [12, 320], [12, 320], [12, 384], [12, 384], [12, 448], [12, 448], [13, 512], [13, 576], [12, 53], [12, 53], [12, 54], [12, 54], [13, 896], [13, 960], [13, 1024], [13, 1088], [13, 1152], [13, 1216], [10, 64], [10, 64], [10, 64], [10, 64], [10, 64], [10, 64], [10, 64], [10, 64]];
-var blackTable2 = [[8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [8, 13], [11, 23], [11, 23], [12, 50], [12, 51], [12, 44], [12, 45], [12, 46], [12, 47], [12, 57], [12, 58], [12, 61], [12, 256], [10, 16], [10, 16], [10, 16], [10, 16], [10, 17], [10, 17], [10, 17], [10, 17], [12, 48], [12, 49], [12, 62], [12, 63], [12, 30], [12, 31], [12, 32], [12, 33], [12, 40], [12, 41], [11, 22], [11, 22], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [8, 14], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 10], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [7, 11], [9, 15], [9, 15], [9, 15], [9, 15], [9, 15], [9, 15], [9, 15], [9, 15], [12, 128], [12, 192], [12, 26], [12, 27], [12, 28], [12, 29], [11, 19], [11, 19], [11, 20], [11, 20], [12, 34], [12, 35], [12, 36], [12, 37], [12, 38], [12, 39], [11, 21], [11, 21], [12, 42], [12, 43], [10, 0], [10, 0], [10, 0], [10, 0], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12], [7, 12]];
-var blackTable3 = [[-1, -1], [-1, -1], [-1, -1], [-1, -1], [6, 9], [6, 8], [5, 7], [5, 7], [4, 6], [4, 6], [4, 6], [4, 6], [4, 5], [4, 5], [4, 5], [4, 5], [3, 1], [3, 1], [3, 1], [3, 1], [3, 1], [3, 1], [3, 1], [3, 1], [3, 4], [3, 4], [3, 4], [3, 4], [3, 4], [3, 4], [3, 4], [3, 4], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2], [2, 2]];
-
-var CCITTFaxDecoder = /*#__PURE__*/function () {
-  function CCITTFaxDecoder(source) {
-    var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
-    _classCallCheck(this, CCITTFaxDecoder);
+class CCITTFaxDecoder {
+  constructor(source) {
+    let options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     if (!source || typeof source.next !== "function") {
       throw new Error('CCITTFaxDecoder - invalid "source" parameter.');
@@ -6975,7 +6346,7 @@ var CCITTFaxDecoder = /*#__PURE__*/function () {
     this.byteAlign = options.EncodedByteAlign || false;
     this.columns = options.Columns || 1728;
     this.rows = options.Rows || 0;
-    var eoblock = options.EndOfBlock;
+    let eoblock = options.EndOfBlock;
 
     if (eoblock === null || eoblock === undefined) {
       eoblock = true;
@@ -6993,7 +6364,7 @@ var CCITTFaxDecoder = /*#__PURE__*/function () {
     this.inputBuf = 0;
     this.outputBits = 0;
     this.rowsDone = false;
-    var code1;
+    let code1;
 
     while ((code1 = this._lookBits(12)) === 0) {
       this._eatBits(1);
@@ -7010,641 +6381,629 @@ var CCITTFaxDecoder = /*#__PURE__*/function () {
     }
   }
 
-  _createClass(CCITTFaxDecoder, [{
-    key: "readNextChar",
-    value: function readNextChar() {
+  readNextChar() {
+    if (this.eof) {
+      return -1;
+    }
+
+    const refLine = this.refLine;
+    const codingLine = this.codingLine;
+    const columns = this.columns;
+    let refPos, blackPixels, bits, i;
+
+    if (this.outputBits === 0) {
+      if (this.rowsDone) {
+        this.eof = true;
+      }
+
       if (this.eof) {
         return -1;
       }
 
-      var refLine = this.refLine;
-      var codingLine = this.codingLine;
-      var columns = this.columns;
-      var refPos, blackPixels, bits, i;
+      this.err = false;
+      let code1, code2, code3;
 
-      if (this.outputBits === 0) {
-        if (this.rowsDone) {
-          this.eof = true;
+      if (this.nextLine2D) {
+        for (i = 0; codingLine[i] < columns; ++i) {
+          refLine[i] = codingLine[i];
         }
 
-        if (this.eof) {
-          return -1;
-        }
+        refLine[i++] = columns;
+        refLine[i] = columns;
+        codingLine[0] = 0;
+        this.codingPos = 0;
+        refPos = 0;
+        blackPixels = 0;
 
-        this.err = false;
-        var code1, code2, code3;
+        while (codingLine[this.codingPos] < columns) {
+          code1 = this._getTwoDimCode();
 
-        if (this.nextLine2D) {
-          for (i = 0; codingLine[i] < columns; ++i) {
-            refLine[i] = codingLine[i];
-          }
+          switch (code1) {
+            case twoDimPass:
+              this._addPixels(refLine[refPos + 1], blackPixels);
 
-          refLine[i++] = columns;
-          refLine[i] = columns;
-          codingLine[0] = 0;
-          this.codingPos = 0;
-          refPos = 0;
-          blackPixels = 0;
+              if (refLine[refPos + 1] < columns) {
+                refPos += 2;
+              }
 
-          while (codingLine[this.codingPos] < columns) {
-            code1 = this._getTwoDimCode();
+              break;
 
-            switch (code1) {
-              case twoDimPass:
-                this._addPixels(refLine[refPos + 1], blackPixels);
+            case twoDimHoriz:
+              code1 = code2 = 0;
 
-                if (refLine[refPos + 1] < columns) {
+              if (blackPixels) {
+                do {
+                  code1 += code3 = this._getBlackCode();
+                } while (code3 >= 64);
+
+                do {
+                  code2 += code3 = this._getWhiteCode();
+                } while (code3 >= 64);
+              } else {
+                do {
+                  code1 += code3 = this._getWhiteCode();
+                } while (code3 >= 64);
+
+                do {
+                  code2 += code3 = this._getBlackCode();
+                } while (code3 >= 64);
+              }
+
+              this._addPixels(codingLine[this.codingPos] + code1, blackPixels);
+
+              if (codingLine[this.codingPos] < columns) {
+                this._addPixels(codingLine[this.codingPos] + code2, blackPixels ^ 1);
+              }
+
+              while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
+                refPos += 2;
+              }
+
+              break;
+
+            case twoDimVertR3:
+              this._addPixels(refLine[refPos] + 3, blackPixels);
+
+              blackPixels ^= 1;
+
+              if (codingLine[this.codingPos] < columns) {
+                ++refPos;
+
+                while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
                   refPos += 2;
                 }
+              }
 
-                break;
+              break;
 
-              case twoDimHoriz:
-                code1 = code2 = 0;
+            case twoDimVertR2:
+              this._addPixels(refLine[refPos] + 2, blackPixels);
 
-                if (blackPixels) {
-                  do {
-                    code1 += code3 = this._getBlackCode();
-                  } while (code3 >= 64);
+              blackPixels ^= 1;
 
-                  do {
-                    code2 += code3 = this._getWhiteCode();
-                  } while (code3 >= 64);
-                } else {
-                  do {
-                    code1 += code3 = this._getWhiteCode();
-                  } while (code3 >= 64);
+              if (codingLine[this.codingPos] < columns) {
+                ++refPos;
 
-                  do {
-                    code2 += code3 = this._getBlackCode();
-                  } while (code3 >= 64);
+                while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
+                  refPos += 2;
                 }
+              }
 
-                this._addPixels(codingLine[this.codingPos] + code1, blackPixels);
+              break;
 
-                if (codingLine[this.codingPos] < columns) {
-                  this._addPixels(codingLine[this.codingPos] + code2, blackPixels ^ 1);
+            case twoDimVertR1:
+              this._addPixels(refLine[refPos] + 1, blackPixels);
+
+              blackPixels ^= 1;
+
+              if (codingLine[this.codingPos] < columns) {
+                ++refPos;
+
+                while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
+                  refPos += 2;
+                }
+              }
+
+              break;
+
+            case twoDimVert0:
+              this._addPixels(refLine[refPos], blackPixels);
+
+              blackPixels ^= 1;
+
+              if (codingLine[this.codingPos] < columns) {
+                ++refPos;
+
+                while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
+                  refPos += 2;
+                }
+              }
+
+              break;
+
+            case twoDimVertL3:
+              this._addPixelsNeg(refLine[refPos] - 3, blackPixels);
+
+              blackPixels ^= 1;
+
+              if (codingLine[this.codingPos] < columns) {
+                if (refPos > 0) {
+                  --refPos;
+                } else {
+                  ++refPos;
                 }
 
                 while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
                   refPos += 2;
                 }
+              }
 
-                break;
+              break;
 
-              case twoDimVertR3:
-                this._addPixels(refLine[refPos] + 3, blackPixels);
+            case twoDimVertL2:
+              this._addPixelsNeg(refLine[refPos] - 2, blackPixels);
 
-                blackPixels ^= 1;
+              blackPixels ^= 1;
 
-                if (codingLine[this.codingPos] < columns) {
+              if (codingLine[this.codingPos] < columns) {
+                if (refPos > 0) {
+                  --refPos;
+                } else {
                   ++refPos;
-
-                  while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
-                    refPos += 2;
-                  }
                 }
 
-                break;
+                while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
+                  refPos += 2;
+                }
+              }
 
-              case twoDimVertR2:
-                this._addPixels(refLine[refPos] + 2, blackPixels);
+              break;
 
-                blackPixels ^= 1;
+            case twoDimVertL1:
+              this._addPixelsNeg(refLine[refPos] - 1, blackPixels);
 
-                if (codingLine[this.codingPos] < columns) {
+              blackPixels ^= 1;
+
+              if (codingLine[this.codingPos] < columns) {
+                if (refPos > 0) {
+                  --refPos;
+                } else {
                   ++refPos;
-
-                  while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
-                    refPos += 2;
-                  }
                 }
 
-                break;
-
-              case twoDimVertR1:
-                this._addPixels(refLine[refPos] + 1, blackPixels);
-
-                blackPixels ^= 1;
-
-                if (codingLine[this.codingPos] < columns) {
-                  ++refPos;
-
-                  while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
-                    refPos += 2;
-                  }
+                while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
+                  refPos += 2;
                 }
+              }
 
-                break;
+              break;
 
-              case twoDimVert0:
-                this._addPixels(refLine[refPos], blackPixels);
+            case ccittEOF:
+              this._addPixels(columns, 0);
 
-                blackPixels ^= 1;
+              this.eof = true;
+              break;
 
-                if (codingLine[this.codingPos] < columns) {
-                  ++refPos;
+            default:
+              (0, _util.info)("bad 2d code");
 
-                  while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
-                    refPos += 2;
-                  }
-                }
+              this._addPixels(columns, 0);
 
-                break;
-
-              case twoDimVertL3:
-                this._addPixelsNeg(refLine[refPos] - 3, blackPixels);
-
-                blackPixels ^= 1;
-
-                if (codingLine[this.codingPos] < columns) {
-                  if (refPos > 0) {
-                    --refPos;
-                  } else {
-                    ++refPos;
-                  }
-
-                  while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
-                    refPos += 2;
-                  }
-                }
-
-                break;
-
-              case twoDimVertL2:
-                this._addPixelsNeg(refLine[refPos] - 2, blackPixels);
-
-                blackPixels ^= 1;
-
-                if (codingLine[this.codingPos] < columns) {
-                  if (refPos > 0) {
-                    --refPos;
-                  } else {
-                    ++refPos;
-                  }
-
-                  while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
-                    refPos += 2;
-                  }
-                }
-
-                break;
-
-              case twoDimVertL1:
-                this._addPixelsNeg(refLine[refPos] - 1, blackPixels);
-
-                blackPixels ^= 1;
-
-                if (codingLine[this.codingPos] < columns) {
-                  if (refPos > 0) {
-                    --refPos;
-                  } else {
-                    ++refPos;
-                  }
-
-                  while (refLine[refPos] <= codingLine[this.codingPos] && refLine[refPos] < columns) {
-                    refPos += 2;
-                  }
-                }
-
-                break;
-
-              case ccittEOF:
-                this._addPixels(columns, 0);
-
-                this.eof = true;
-                break;
-
-              default:
-                (0, _util.info)("bad 2d code");
-
-                this._addPixels(columns, 0);
-
-                this.err = true;
-            }
-          }
-        } else {
-          codingLine[0] = 0;
-          this.codingPos = 0;
-          blackPixels = 0;
-
-          while (codingLine[this.codingPos] < columns) {
-            code1 = 0;
-
-            if (blackPixels) {
-              do {
-                code1 += code3 = this._getBlackCode();
-              } while (code3 >= 64);
-            } else {
-              do {
-                code1 += code3 = this._getWhiteCode();
-              } while (code3 >= 64);
-            }
-
-            this._addPixels(codingLine[this.codingPos] + code1, blackPixels);
-
-            blackPixels ^= 1;
+              this.err = true;
           }
         }
+      } else {
+        codingLine[0] = 0;
+        this.codingPos = 0;
+        blackPixels = 0;
 
-        var gotEOL = false;
+        while (codingLine[this.codingPos] < columns) {
+          code1 = 0;
 
-        if (this.byteAlign) {
-          this.inputBits &= ~7;
-        }
-
-        if (!this.eoblock && this.row === this.rows - 1) {
-          this.rowsDone = true;
-        } else {
-          code1 = this._lookBits(12);
-
-          if (this.eoline) {
-            while (code1 !== ccittEOF && code1 !== 1) {
-              this._eatBits(1);
-
-              code1 = this._lookBits(12);
-            }
+          if (blackPixels) {
+            do {
+              code1 += code3 = this._getBlackCode();
+            } while (code3 >= 64);
           } else {
-            while (code1 === 0) {
-              this._eatBits(1);
-
-              code1 = this._lookBits(12);
-            }
+            do {
+              code1 += code3 = this._getWhiteCode();
+            } while (code3 >= 64);
           }
 
-          if (code1 === 1) {
-            this._eatBits(12);
+          this._addPixels(codingLine[this.codingPos] + code1, blackPixels);
 
-            gotEOL = true;
-          } else if (code1 === ccittEOF) {
-            this.eof = true;
+          blackPixels ^= 1;
+        }
+      }
+
+      let gotEOL = false;
+
+      if (this.byteAlign) {
+        this.inputBits &= ~7;
+      }
+
+      if (!this.eoblock && this.row === this.rows - 1) {
+        this.rowsDone = true;
+      } else {
+        code1 = this._lookBits(12);
+
+        if (this.eoline) {
+          while (code1 !== ccittEOF && code1 !== 1) {
+            this._eatBits(1);
+
+            code1 = this._lookBits(12);
+          }
+        } else {
+          while (code1 === 0) {
+            this._eatBits(1);
+
+            code1 = this._lookBits(12);
           }
         }
 
-        if (!this.eof && this.encoding > 0 && !this.rowsDone) {
-          this.nextLine2D = !this._lookBits(1);
+        if (code1 === 1) {
+          this._eatBits(12);
+
+          gotEOL = true;
+        } else if (code1 === ccittEOF) {
+          this.eof = true;
+        }
+      }
+
+      if (!this.eof && this.encoding > 0 && !this.rowsDone) {
+        this.nextLine2D = !this._lookBits(1);
+
+        this._eatBits(1);
+      }
+
+      if (this.eoblock && gotEOL && this.byteAlign) {
+        code1 = this._lookBits(12);
+
+        if (code1 === 1) {
+          this._eatBits(12);
+
+          if (this.encoding > 0) {
+            this._lookBits(1);
+
+            this._eatBits(1);
+          }
+
+          if (this.encoding >= 0) {
+            for (i = 0; i < 4; ++i) {
+              code1 = this._lookBits(12);
+
+              if (code1 !== 1) {
+                (0, _util.info)("bad rtc code: " + code1);
+              }
+
+              this._eatBits(12);
+
+              if (this.encoding > 0) {
+                this._lookBits(1);
+
+                this._eatBits(1);
+              }
+            }
+          }
+
+          this.eof = true;
+        }
+      } else if (this.err && this.eoline) {
+        while (true) {
+          code1 = this._lookBits(13);
+
+          if (code1 === ccittEOF) {
+            this.eof = true;
+            return -1;
+          }
+
+          if (code1 >> 1 === 1) {
+            break;
+          }
 
           this._eatBits(1);
         }
 
-        if (this.eoblock && gotEOL && this.byteAlign) {
-          code1 = this._lookBits(12);
+        this._eatBits(12);
 
-          if (code1 === 1) {
-            this._eatBits(12);
+        if (this.encoding > 0) {
+          this._eatBits(1);
 
-            if (this.encoding > 0) {
-              this._lookBits(1);
-
-              this._eatBits(1);
-            }
-
-            if (this.encoding >= 0) {
-              for (i = 0; i < 4; ++i) {
-                code1 = this._lookBits(12);
-
-                if (code1 !== 1) {
-                  (0, _util.info)("bad rtc code: " + code1);
-                }
-
-                this._eatBits(12);
-
-                if (this.encoding > 0) {
-                  this._lookBits(1);
-
-                  this._eatBits(1);
-                }
-              }
-            }
-
-            this.eof = true;
-          }
-        } else if (this.err && this.eoline) {
-          while (true) {
-            code1 = this._lookBits(13);
-
-            if (code1 === ccittEOF) {
-              this.eof = true;
-              return -1;
-            }
-
-            if (code1 >> 1 === 1) {
-              break;
-            }
-
-            this._eatBits(1);
-          }
-
-          this._eatBits(12);
-
-          if (this.encoding > 0) {
-            this._eatBits(1);
-
-            this.nextLine2D = !(code1 & 1);
-          }
+          this.nextLine2D = !(code1 & 1);
         }
-
-        if (codingLine[0] > 0) {
-          this.outputBits = codingLine[this.codingPos = 0];
-        } else {
-          this.outputBits = codingLine[this.codingPos = 1];
-        }
-
-        this.row++;
       }
 
-      var c;
-
-      if (this.outputBits >= 8) {
-        c = this.codingPos & 1 ? 0 : 0xff;
-        this.outputBits -= 8;
-
-        if (this.outputBits === 0 && codingLine[this.codingPos] < columns) {
-          this.codingPos++;
-          this.outputBits = codingLine[this.codingPos] - codingLine[this.codingPos - 1];
-        }
+      if (codingLine[0] > 0) {
+        this.outputBits = codingLine[this.codingPos = 0];
       } else {
-        bits = 8;
-        c = 0;
+        this.outputBits = codingLine[this.codingPos = 1];
+      }
 
-        do {
-          if (typeof this.outputBits !== "number") {
-            throw new _util.FormatError('Invalid /CCITTFaxDecode data, "outputBits" must be a number.');
+      this.row++;
+    }
+
+    let c;
+
+    if (this.outputBits >= 8) {
+      c = this.codingPos & 1 ? 0 : 0xff;
+      this.outputBits -= 8;
+
+      if (this.outputBits === 0 && codingLine[this.codingPos] < columns) {
+        this.codingPos++;
+        this.outputBits = codingLine[this.codingPos] - codingLine[this.codingPos - 1];
+      }
+    } else {
+      bits = 8;
+      c = 0;
+
+      do {
+        if (typeof this.outputBits !== "number") {
+          throw new _util.FormatError('Invalid /CCITTFaxDecode data, "outputBits" must be a number.');
+        }
+
+        if (this.outputBits > bits) {
+          c <<= bits;
+
+          if (!(this.codingPos & 1)) {
+            c |= 0xff >> 8 - bits;
           }
 
-          if (this.outputBits > bits) {
+          this.outputBits -= bits;
+          bits = 0;
+        } else {
+          c <<= this.outputBits;
+
+          if (!(this.codingPos & 1)) {
+            c |= 0xff >> 8 - this.outputBits;
+          }
+
+          bits -= this.outputBits;
+          this.outputBits = 0;
+
+          if (codingLine[this.codingPos] < columns) {
+            this.codingPos++;
+            this.outputBits = codingLine[this.codingPos] - codingLine[this.codingPos - 1];
+          } else if (bits > 0) {
             c <<= bits;
-
-            if (!(this.codingPos & 1)) {
-              c |= 0xff >> 8 - bits;
-            }
-
-            this.outputBits -= bits;
             bits = 0;
-          } else {
-            c <<= this.outputBits;
-
-            if (!(this.codingPos & 1)) {
-              c |= 0xff >> 8 - this.outputBits;
-            }
-
-            bits -= this.outputBits;
-            this.outputBits = 0;
-
-            if (codingLine[this.codingPos] < columns) {
-              this.codingPos++;
-              this.outputBits = codingLine[this.codingPos] - codingLine[this.codingPos - 1];
-            } else if (bits > 0) {
-              c <<= bits;
-              bits = 0;
-            }
-          }
-        } while (bits);
-      }
-
-      if (this.black) {
-        c ^= 0xff;
-      }
-
-      return c;
-    }
-  }, {
-    key: "_addPixels",
-    value: function _addPixels(a1, blackPixels) {
-      var codingLine = this.codingLine;
-      var codingPos = this.codingPos;
-
-      if (a1 > codingLine[codingPos]) {
-        if (a1 > this.columns) {
-          (0, _util.info)("row is wrong length");
-          this.err = true;
-          a1 = this.columns;
-        }
-
-        if (codingPos & 1 ^ blackPixels) {
-          ++codingPos;
-        }
-
-        codingLine[codingPos] = a1;
-      }
-
-      this.codingPos = codingPos;
-    }
-  }, {
-    key: "_addPixelsNeg",
-    value: function _addPixelsNeg(a1, blackPixels) {
-      var codingLine = this.codingLine;
-      var codingPos = this.codingPos;
-
-      if (a1 > codingLine[codingPos]) {
-        if (a1 > this.columns) {
-          (0, _util.info)("row is wrong length");
-          this.err = true;
-          a1 = this.columns;
-        }
-
-        if (codingPos & 1 ^ blackPixels) {
-          ++codingPos;
-        }
-
-        codingLine[codingPos] = a1;
-      } else if (a1 < codingLine[codingPos]) {
-        if (a1 < 0) {
-          (0, _util.info)("invalid code");
-          this.err = true;
-          a1 = 0;
-        }
-
-        while (codingPos > 0 && a1 < codingLine[codingPos - 1]) {
-          --codingPos;
-        }
-
-        codingLine[codingPos] = a1;
-      }
-
-      this.codingPos = codingPos;
-    }
-  }, {
-    key: "_findTableCode",
-    value: function _findTableCode(start, end, table, limit) {
-      var limitValue = limit || 0;
-
-      for (var i = start; i <= end; ++i) {
-        var code = this._lookBits(i);
-
-        if (code === ccittEOF) {
-          return [true, 1, false];
-        }
-
-        if (i < end) {
-          code <<= end - i;
-        }
-
-        if (!limitValue || code >= limitValue) {
-          var p = table[code - limitValue];
-
-          if (p[0] === i) {
-            this._eatBits(i);
-
-            return [true, p[1], true];
           }
         }
+      } while (bits);
+    }
+
+    if (this.black) {
+      c ^= 0xff;
+    }
+
+    return c;
+  }
+
+  _addPixels(a1, blackPixels) {
+    const codingLine = this.codingLine;
+    let codingPos = this.codingPos;
+
+    if (a1 > codingLine[codingPos]) {
+      if (a1 > this.columns) {
+        (0, _util.info)("row is wrong length");
+        this.err = true;
+        a1 = this.columns;
       }
 
-      return [false, 0, false];
+      if (codingPos & 1 ^ blackPixels) {
+        ++codingPos;
+      }
+
+      codingLine[codingPos] = a1;
     }
-  }, {
-    key: "_getTwoDimCode",
-    value: function _getTwoDimCode() {
-      var code = 0;
-      var p;
 
-      if (this.eoblock) {
-        code = this._lookBits(7);
-        p = twoDimTable[code];
+    this.codingPos = codingPos;
+  }
 
-        if (p && p[0] > 0) {
-          this._eatBits(p[0]);
+  _addPixelsNeg(a1, blackPixels) {
+    const codingLine = this.codingLine;
+    let codingPos = this.codingPos;
 
-          return p[1];
+    if (a1 > codingLine[codingPos]) {
+      if (a1 > this.columns) {
+        (0, _util.info)("row is wrong length");
+        this.err = true;
+        a1 = this.columns;
+      }
+
+      if (codingPos & 1 ^ blackPixels) {
+        ++codingPos;
+      }
+
+      codingLine[codingPos] = a1;
+    } else if (a1 < codingLine[codingPos]) {
+      if (a1 < 0) {
+        (0, _util.info)("invalid code");
+        this.err = true;
+        a1 = 0;
+      }
+
+      while (codingPos > 0 && a1 < codingLine[codingPos - 1]) {
+        --codingPos;
+      }
+
+      codingLine[codingPos] = a1;
+    }
+
+    this.codingPos = codingPos;
+  }
+
+  _findTableCode(start, end, table, limit) {
+    const limitValue = limit || 0;
+
+    for (let i = start; i <= end; ++i) {
+      let code = this._lookBits(i);
+
+      if (code === ccittEOF) {
+        return [true, 1, false];
+      }
+
+      if (i < end) {
+        code <<= end - i;
+      }
+
+      if (!limitValue || code >= limitValue) {
+        const p = table[code - limitValue];
+
+        if (p[0] === i) {
+          this._eatBits(i);
+
+          return [true, p[1], true];
         }
+      }
+    }
+
+    return [false, 0, false];
+  }
+
+  _getTwoDimCode() {
+    let code = 0;
+    let p;
+
+    if (this.eoblock) {
+      code = this._lookBits(7);
+      p = twoDimTable[code];
+
+      if (p && p[0] > 0) {
+        this._eatBits(p[0]);
+
+        return p[1];
+      }
+    } else {
+      const result = this._findTableCode(1, 7, twoDimTable);
+
+      if (result[0] && result[2]) {
+        return result[1];
+      }
+    }
+
+    (0, _util.info)("Bad two dim code");
+    return ccittEOF;
+  }
+
+  _getWhiteCode() {
+    let code = 0;
+    let p;
+
+    if (this.eoblock) {
+      code = this._lookBits(12);
+
+      if (code === ccittEOF) {
+        return 1;
+      }
+
+      if (code >> 5 === 0) {
+        p = whiteTable1[code];
       } else {
-        var result = this._findTableCode(1, 7, twoDimTable);
-
-        if (result[0] && result[2]) {
-          return result[1];
-        }
+        p = whiteTable2[code >> 3];
       }
 
-      (0, _util.info)("Bad two dim code");
-      return ccittEOF;
+      if (p[0] > 0) {
+        this._eatBits(p[0]);
+
+        return p[1];
+      }
+    } else {
+      let result = this._findTableCode(1, 9, whiteTable2);
+
+      if (result[0]) {
+        return result[1];
+      }
+
+      result = this._findTableCode(11, 12, whiteTable1);
+
+      if (result[0]) {
+        return result[1];
+      }
     }
-  }, {
-    key: "_getWhiteCode",
-    value: function _getWhiteCode() {
-      var code = 0;
-      var p;
 
-      if (this.eoblock) {
-        code = this._lookBits(12);
+    (0, _util.info)("bad white code");
 
-        if (code === ccittEOF) {
-          return 1;
-        }
+    this._eatBits(1);
 
-        if (code >> 5 === 0) {
-          p = whiteTable1[code];
-        } else {
-          p = whiteTable2[code >> 3];
-        }
+    return 1;
+  }
 
-        if (p[0] > 0) {
-          this._eatBits(p[0]);
+  _getBlackCode() {
+    let code, p;
 
-          return p[1];
-        }
+    if (this.eoblock) {
+      code = this._lookBits(13);
+
+      if (code === ccittEOF) {
+        return 1;
+      }
+
+      if (code >> 7 === 0) {
+        p = blackTable1[code];
+      } else if (code >> 9 === 0 && code >> 7 !== 0) {
+        p = blackTable2[(code >> 1) - 64];
       } else {
-        var result = this._findTableCode(1, 9, whiteTable2);
-
-        if (result[0]) {
-          return result[1];
-        }
-
-        result = this._findTableCode(11, 12, whiteTable1);
-
-        if (result[0]) {
-          return result[1];
-        }
+        p = blackTable3[code >> 7];
       }
 
-      (0, _util.info)("bad white code");
+      if (p[0] > 0) {
+        this._eatBits(p[0]);
 
-      this._eatBits(1);
+        return p[1];
+      }
+    } else {
+      let result = this._findTableCode(2, 6, blackTable3);
 
-      return 1;
-    }
-  }, {
-    key: "_getBlackCode",
-    value: function _getBlackCode() {
-      var code, p;
-
-      if (this.eoblock) {
-        code = this._lookBits(13);
-
-        if (code === ccittEOF) {
-          return 1;
-        }
-
-        if (code >> 7 === 0) {
-          p = blackTable1[code];
-        } else if (code >> 9 === 0 && code >> 7 !== 0) {
-          p = blackTable2[(code >> 1) - 64];
-        } else {
-          p = blackTable3[code >> 7];
-        }
-
-        if (p[0] > 0) {
-          this._eatBits(p[0]);
-
-          return p[1];
-        }
-      } else {
-        var result = this._findTableCode(2, 6, blackTable3);
-
-        if (result[0]) {
-          return result[1];
-        }
-
-        result = this._findTableCode(7, 12, blackTable2, 64);
-
-        if (result[0]) {
-          return result[1];
-        }
-
-        result = this._findTableCode(10, 13, blackTable1);
-
-        if (result[0]) {
-          return result[1];
-        }
+      if (result[0]) {
+        return result[1];
       }
 
-      (0, _util.info)("bad black code");
+      result = this._findTableCode(7, 12, blackTable2, 64);
 
-      this._eatBits(1);
+      if (result[0]) {
+        return result[1];
+      }
 
-      return 1;
+      result = this._findTableCode(10, 13, blackTable1);
+
+      if (result[0]) {
+        return result[1];
+      }
     }
-  }, {
-    key: "_lookBits",
-    value: function _lookBits(n) {
-      var c;
 
-      while (this.inputBits < n) {
-        if ((c = this.source.next()) === -1) {
-          if (this.inputBits === 0) {
-            return ccittEOF;
-          }
+    (0, _util.info)("bad black code");
 
-          return this.inputBuf << n - this.inputBits & 0xffff >> 16 - n;
+    this._eatBits(1);
+
+    return 1;
+  }
+
+  _lookBits(n) {
+    let c;
+
+    while (this.inputBits < n) {
+      if ((c = this.source.next()) === -1) {
+        if (this.inputBits === 0) {
+          return ccittEOF;
         }
 
-        this.inputBuf = this.inputBuf << 8 | c;
-        this.inputBits += 8;
+        return this.inputBuf << n - this.inputBits & 0xffff >> 16 - n;
       }
 
-      return this.inputBuf >> this.inputBits - n & 0xffff >> 16 - n;
+      this.inputBuf = this.inputBuf << 8 | c;
+      this.inputBits += 8;
     }
-  }, {
-    key: "_eatBits",
-    value: function _eatBits(n) {
-      if ((this.inputBits -= n) < 0) {
-        this.inputBits = 0;
-      }
-    }
-  }]);
 
-  return CCITTFaxDecoder;
-}();
+    return this.inputBuf >> this.inputBits - n & 0xffff >> 16 - n;
+  }
+
+  _eatBits(n) {
+    if ((this.inputBits -= n) < 0) {
+      this.inputBits = 0;
+    }
+  }
+
+}
 
 exports.CCITTFaxDecoder = CCITTFaxDecoder;
 
@@ -7664,86 +7023,40 @@ var _util = __w_pdfjs_require__(1);
 
 var _core_utils = __w_pdfjs_require__(87);
 
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-var JpegError = /*#__PURE__*/function (_BaseException) {
-  _inherits(JpegError, _BaseException);
-
-  var _super = _createSuper(JpegError);
-
-  function JpegError(msg) {
-    _classCallCheck(this, JpegError);
-
-    return _super.call(this, "JPEG error: ".concat(msg), "JpegError");
+class JpegError extends _util.BaseException {
+  constructor(msg) {
+    super(`JPEG error: ${msg}`, "JpegError");
   }
 
-  return _createClass(JpegError);
-}(_util.BaseException);
+}
 
-var DNLMarkerError = /*#__PURE__*/function (_BaseException2) {
-  _inherits(DNLMarkerError, _BaseException2);
-
-  var _super2 = _createSuper(DNLMarkerError);
-
-  function DNLMarkerError(message, scanLines) {
-    var _this;
-
-    _classCallCheck(this, DNLMarkerError);
-
-    _this = _super2.call(this, message, "DNLMarkerError");
-    _this.scanLines = scanLines;
-    return _this;
+class DNLMarkerError extends _util.BaseException {
+  constructor(message, scanLines) {
+    super(message, "DNLMarkerError");
+    this.scanLines = scanLines;
   }
 
-  return _createClass(DNLMarkerError);
-}(_util.BaseException);
+}
 
-var EOIMarkerError = /*#__PURE__*/function (_BaseException3) {
-  _inherits(EOIMarkerError, _BaseException3);
-
-  var _super3 = _createSuper(EOIMarkerError);
-
-  function EOIMarkerError(msg) {
-    _classCallCheck(this, EOIMarkerError);
-
-    return _super3.call(this, msg, "EOIMarkerError");
+class EOIMarkerError extends _util.BaseException {
+  constructor(msg) {
+    super(msg, "EOIMarkerError");
   }
 
-  return _createClass(EOIMarkerError);
-}(_util.BaseException);
+}
 
-var dctZigZag = new Uint8Array([0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63]);
-var dctCos1 = 4017;
-var dctSin1 = 799;
-var dctCos3 = 3406;
-var dctSin3 = 2276;
-var dctCos6 = 1567;
-var dctSin6 = 3784;
-var dctSqrt2 = 5793;
-var dctSqrt1d2 = 2896;
+const dctZigZag = new Uint8Array([0, 1, 8, 16, 9, 2, 3, 10, 17, 24, 32, 25, 18, 11, 4, 5, 12, 19, 26, 33, 40, 48, 41, 34, 27, 20, 13, 6, 7, 14, 21, 28, 35, 42, 49, 56, 57, 50, 43, 36, 29, 22, 15, 23, 30, 37, 44, 51, 58, 59, 52, 45, 38, 31, 39, 46, 53, 60, 61, 54, 47, 55, 62, 63]);
+const dctCos1 = 4017;
+const dctSin1 = 799;
+const dctCos3 = 3406;
+const dctSin3 = 2276;
+const dctCos6 = 1567;
+const dctSin6 = 3784;
+const dctSqrt2 = 5793;
+const dctSqrt1d2 = 2896;
 
 function buildHuffmanTable(codeLengths, values) {
-  var k = 0,
+  let k = 0,
       i,
       j,
       length = 16;
@@ -7752,11 +7065,11 @@ function buildHuffmanTable(codeLengths, values) {
     length--;
   }
 
-  var code = [{
+  const code = [{
     children: [],
     index: 0
   }];
-  var p = code[0],
+  let p = code[0],
       q;
 
   for (i = 0; i < length; i++) {
@@ -7801,11 +7114,11 @@ function getBlockBufferOffset(component, row, col) {
 }
 
 function decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successivePrev, successive) {
-  var parseDNLMarker = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : false;
-  var mcusPerLine = frame.mcusPerLine;
-  var progressive = frame.progressive;
-  var startOffset = offset;
-  var bitsData = 0,
+  let parseDNLMarker = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : false;
+  const mcusPerLine = frame.mcusPerLine;
+  const progressive = frame.progressive;
+  const startOffset = offset;
+  let bitsData = 0,
       bitsCount = 0;
 
   function readBit() {
@@ -7817,12 +7130,12 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
     bitsData = data[offset++];
 
     if (bitsData === 0xff) {
-      var nextByte = data[offset++];
+      const nextByte = data[offset++];
 
       if (nextByte) {
         if (nextByte === 0xdc && parseDNLMarker) {
           offset += 2;
-          var scanLines = (0, _core_utils.readUint16)(data, offset);
+          const scanLines = (0, _core_utils.readUint16)(data, offset);
           offset += 2;
 
           if (scanLines > 0 && scanLines !== frame.scanLines) {
@@ -7830,7 +7143,7 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
           }
         } else if (nextByte === 0xd9) {
           if (parseDNLMarker) {
-            var maybeScanLines = blockRow * (frame.precision === 8 ? 8 : 0);
+            const maybeScanLines = blockRow * (frame.precision === 8 ? 8 : 0);
 
             if (maybeScanLines > 0 && Math.round(frame.scanLines / maybeScanLines) >= 10) {
               throw new DNLMarkerError("Found EOI marker (0xFFD9) while parsing scan data, " + "possibly caused by incorrect `scanLines` parameter", maybeScanLines);
@@ -7840,7 +7153,7 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
           throw new EOIMarkerError("Found EOI marker (0xFFD9) while parsing scan data");
         }
 
-        throw new JpegError("unexpected marker ".concat((bitsData << 8 | nextByte).toString(16)));
+        throw new JpegError(`unexpected marker ${(bitsData << 8 | nextByte).toString(16)}`);
       }
     }
 
@@ -7849,12 +7162,12 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
   }
 
   function decodeHuffman(tree) {
-    var node = tree;
+    let node = tree;
 
     while (true) {
       node = node[readBit()];
 
-      switch (_typeof(node)) {
+      switch (typeof node) {
         case "number":
           return node;
 
@@ -7867,7 +7180,7 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
   }
 
   function receive(length) {
-    var n = 0;
+    let n = 0;
 
     while (length > 0) {
       n = n << 1 | readBit();
@@ -7882,7 +7195,7 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
       return readBit() === 1 ? 1 : -1;
     }
 
-    var n = receive(length);
+    const n = receive(length);
 
     if (n >= 1 << length - 1) {
       return n;
@@ -7892,15 +7205,15 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
   }
 
   function decodeBaseline(component, blockOffset) {
-    var t = decodeHuffman(component.huffmanTableDC);
-    var diff = t === 0 ? 0 : receiveAndExtend(t);
+    const t = decodeHuffman(component.huffmanTableDC);
+    const diff = t === 0 ? 0 : receiveAndExtend(t);
     component.blockData[blockOffset] = component.pred += diff;
-    var k = 1;
+    let k = 1;
 
     while (k < 64) {
-      var rs = decodeHuffman(component.huffmanTableAC);
-      var s = rs & 15,
-          r = rs >> 4;
+      const rs = decodeHuffman(component.huffmanTableAC);
+      const s = rs & 15,
+            r = rs >> 4;
 
       if (s === 0) {
         if (r < 15) {
@@ -7912,15 +7225,15 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
       }
 
       k += r;
-      var z = dctZigZag[k];
+      const z = dctZigZag[k];
       component.blockData[blockOffset + z] = receiveAndExtend(s);
       k++;
     }
   }
 
   function decodeDCFirst(component, blockOffset) {
-    var t = decodeHuffman(component.huffmanTableDC);
-    var diff = t === 0 ? 0 : receiveAndExtend(t) << successive;
+    const t = decodeHuffman(component.huffmanTableDC);
+    const diff = t === 0 ? 0 : receiveAndExtend(t) << successive;
     component.blockData[blockOffset] = component.pred += diff;
   }
 
@@ -7928,7 +7241,7 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
     component.blockData[blockOffset] |= readBit() << successive;
   }
 
-  var eobrun = 0;
+  let eobrun = 0;
 
   function decodeACFirst(component, blockOffset) {
     if (eobrun > 0) {
@@ -7936,13 +7249,13 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
       return;
     }
 
-    var k = spectralStart;
-    var e = spectralEnd;
+    let k = spectralStart;
+    const e = spectralEnd;
 
     while (k <= e) {
-      var rs = decodeHuffman(component.huffmanTableAC);
-      var s = rs & 15,
-          r = rs >> 4;
+      const rs = decodeHuffman(component.huffmanTableAC);
+      const s = rs & 15,
+            r = rs >> 4;
 
       if (s === 0) {
         if (r < 15) {
@@ -7955,25 +7268,25 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
       }
 
       k += r;
-      var z = dctZigZag[k];
+      const z = dctZigZag[k];
       component.blockData[blockOffset + z] = receiveAndExtend(s) * (1 << successive);
       k++;
     }
   }
 
-  var successiveACState = 0,
+  let successiveACState = 0,
       successiveACNextValue;
 
   function decodeACSuccessive(component, blockOffset) {
-    var k = spectralStart;
-    var e = spectralEnd;
-    var r = 0;
-    var s;
-    var rs;
+    let k = spectralStart;
+    const e = spectralEnd;
+    let r = 0;
+    let s;
+    let rs;
 
     while (k <= e) {
-      var offsetZ = blockOffset + dctZigZag[k];
-      var sign = component.blockData[offsetZ] < 0 ? -1 : 1;
+      const offsetZ = blockOffset + dctZigZag[k];
+      const sign = component.blockData[offsetZ] < 0 ? -1 : 1;
 
       switch (successiveACState) {
         case 0:
@@ -8044,27 +7357,27 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
     }
   }
 
-  var blockRow = 0;
+  let blockRow = 0;
 
   function decodeMcu(component, decode, mcu, row, col) {
-    var mcuRow = mcu / mcusPerLine | 0;
-    var mcuCol = mcu % mcusPerLine;
+    const mcuRow = mcu / mcusPerLine | 0;
+    const mcuCol = mcu % mcusPerLine;
     blockRow = mcuRow * component.v + row;
-    var blockCol = mcuCol * component.h + col;
-    var blockOffset = getBlockBufferOffset(component, blockRow, blockCol);
+    const blockCol = mcuCol * component.h + col;
+    const blockOffset = getBlockBufferOffset(component, blockRow, blockCol);
     decode(component, blockOffset);
   }
 
   function decodeBlock(component, decode, mcu) {
     blockRow = mcu / component.blocksPerLine | 0;
-    var blockCol = mcu % component.blocksPerLine;
-    var blockOffset = getBlockBufferOffset(component, blockRow, blockCol);
+    const blockCol = mcu % component.blocksPerLine;
+    const blockOffset = getBlockBufferOffset(component, blockRow, blockCol);
     decode(component, blockOffset);
   }
 
-  var componentsLength = components.length;
-  var component, i, j, k, n;
-  var decodeFn;
+  const componentsLength = components.length;
+  let component, i, j, k, n;
+  let decodeFn;
 
   if (progressive) {
     if (spectralStart === 0) {
@@ -8076,9 +7389,9 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
     decodeFn = decodeBaseline;
   }
 
-  var mcu = 0,
+  let mcu = 0,
       fileMarker;
-  var mcuExpected;
+  let mcuExpected;
 
   if (componentsLength === 1) {
     mcuExpected = components[0].blocksPerLine * components[0].blocksPerColumn;
@@ -8086,10 +7399,10 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
     mcuExpected = mcusPerLine * frame.mcusPerColumn;
   }
 
-  var h, v;
+  let h, v;
 
   while (mcu <= mcuExpected) {
-    var mcuToRead = resetInterval ? Math.min(mcuExpected - mcu, resetInterval) : mcuExpected;
+    const mcuToRead = resetInterval ? Math.min(mcuExpected - mcu, resetInterval) : mcuExpected;
 
     if (mcuToRead > 0) {
       for (i = 0; i < componentsLength; i++) {
@@ -8132,8 +7445,8 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
     }
 
     if (fileMarker.invalid) {
-      var partialMsg = mcuToRead > 0 ? "unexpected" : "excessive";
-      (0, _util.warn)("decodeScan - ".concat(partialMsg, " MCU data, current marker is: ").concat(fileMarker.invalid));
+      const partialMsg = mcuToRead > 0 ? "unexpected" : "excessive";
+      (0, _util.warn)(`decodeScan - ${partialMsg} MCU data, current marker is: ${fileMarker.invalid}`);
       offset = fileMarker.offset;
     }
 
@@ -8148,17 +7461,17 @@ function decodeScan(data, offset, frame, components, resetInterval, spectralStar
 }
 
 function quantizeAndInverse(component, blockBufferOffset, p) {
-  var qt = component.quantizationTable,
-      blockData = component.blockData;
-  var v0, v1, v2, v3, v4, v5, v6, v7;
-  var p0, p1, p2, p3, p4, p5, p6, p7;
-  var t;
+  const qt = component.quantizationTable,
+        blockData = component.blockData;
+  let v0, v1, v2, v3, v4, v5, v6, v7;
+  let p0, p1, p2, p3, p4, p5, p6, p7;
+  let t;
 
   if (!qt) {
     throw new JpegError("missing required Quantization Table.");
   }
 
-  for (var row = 0; row < 64; row += 8) {
+  for (let row = 0; row < 64; row += 8) {
     p0 = blockData[blockBufferOffset + row];
     p1 = blockData[blockBufferOffset + row + 1];
     p2 = blockData[blockBufferOffset + row + 2];
@@ -8226,7 +7539,7 @@ function quantizeAndInverse(component, blockBufferOffset, p) {
     p[row + 4] = v3 - v4;
   }
 
-  for (var col = 0; col < 8; ++col) {
+  for (let col = 0; col < 8; ++col) {
     p0 = p[col];
     p1 = p[col + 8];
     p2 = p[col + 16];
@@ -8370,13 +7683,13 @@ function quantizeAndInverse(component, blockBufferOffset, p) {
 }
 
 function buildComponentData(frame, component) {
-  var blocksPerLine = component.blocksPerLine;
-  var blocksPerColumn = component.blocksPerColumn;
-  var computationBuffer = new Int16Array(64);
+  const blocksPerLine = component.blocksPerLine;
+  const blocksPerColumn = component.blocksPerColumn;
+  const computationBuffer = new Int16Array(64);
 
-  for (var blockRow = 0; blockRow < blocksPerColumn; blockRow++) {
-    for (var blockCol = 0; blockCol < blocksPerLine; blockCol++) {
-      var offset = getBlockBufferOffset(component, blockRow, blockCol);
+  for (let blockRow = 0; blockRow < blocksPerColumn; blockRow++) {
+    for (let blockCol = 0; blockCol < blocksPerLine; blockCol++) {
+      const offset = getBlockBufferOffset(component, blockRow, blockCol);
       quantizeAndInverse(component, offset, computationBuffer);
     }
   }
@@ -8385,15 +7698,15 @@ function buildComponentData(frame, component) {
 }
 
 function findNextFileMarker(data, currentPos) {
-  var startPos = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : currentPos;
-  var maxPos = data.length - 1;
-  var newPos = startPos < currentPos ? startPos : currentPos;
+  let startPos = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : currentPos;
+  const maxPos = data.length - 1;
+  let newPos = startPos < currentPos ? startPos : currentPos;
 
   if (currentPos >= maxPos) {
     return null;
   }
 
-  var currentMarker = (0, _core_utils.readUint16)(data, currentPos);
+  const currentMarker = (0, _core_utils.readUint16)(data, currentPos);
 
   if (currentMarker >= 0xffc0 && currentMarker <= 0xfffe) {
     return {
@@ -8403,7 +7716,7 @@ function findNextFileMarker(data, currentPos) {
     };
   }
 
-  var newMarker = (0, _core_utils.readUint16)(data, newPos);
+  let newMarker = (0, _core_utils.readUint16)(data, newPos);
 
   while (!(newMarker >= 0xffc0 && newMarker <= 0xfffe)) {
     if (++newPos >= maxPos) {
@@ -8420,550 +7733,533 @@ function findNextFileMarker(data, currentPos) {
   };
 }
 
-var JpegImage = /*#__PURE__*/function () {
-  function JpegImage() {
-    var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-        _ref$decodeTransform = _ref.decodeTransform,
-        decodeTransform = _ref$decodeTransform === void 0 ? null : _ref$decodeTransform,
-        _ref$colorTransform = _ref.colorTransform,
-        colorTransform = _ref$colorTransform === void 0 ? -1 : _ref$colorTransform;
-
-    _classCallCheck(this, JpegImage);
-
+class JpegImage {
+  constructor() {
+    let {
+      decodeTransform = null,
+      colorTransform = -1
+    } = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     this._decodeTransform = decodeTransform;
     this._colorTransform = colorTransform;
   }
 
-  _createClass(JpegImage, [{
-    key: "parse",
-    value: function parse(data) {
-      var _ref2 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-          _ref2$dnlScanLines = _ref2.dnlScanLines,
-          dnlScanLines = _ref2$dnlScanLines === void 0 ? null : _ref2$dnlScanLines;
+  parse(data) {
+    let {
+      dnlScanLines = null
+    } = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-      function readDataBlock() {
-        var length = (0, _core_utils.readUint16)(data, offset);
-        offset += 2;
-        var endOffset = offset + length - 2;
-        var fileMarker = findNextFileMarker(data, endOffset, offset);
-
-        if (fileMarker && fileMarker.invalid) {
-          (0, _util.warn)("readDataBlock - incorrect length, current marker is: " + fileMarker.invalid);
-          endOffset = fileMarker.offset;
-        }
-
-        var array = data.subarray(offset, endOffset);
-        offset += array.length;
-        return array;
-      }
-
-      function prepareComponents(frame) {
-        var mcusPerLine = Math.ceil(frame.samplesPerLine / 8 / frame.maxH);
-        var mcusPerColumn = Math.ceil(frame.scanLines / 8 / frame.maxV);
-
-        for (var i = 0, ii = frame.components.length; i < ii; i++) {
-          var component = frame.components[i];
-          var blocksPerLine = Math.ceil(Math.ceil(frame.samplesPerLine / 8) * component.h / frame.maxH);
-          var blocksPerColumn = Math.ceil(Math.ceil(frame.scanLines / 8) * component.v / frame.maxV);
-          var blocksPerLineForMcu = mcusPerLine * component.h;
-          var blocksPerColumnForMcu = mcusPerColumn * component.v;
-          var blocksBufferSize = 64 * blocksPerColumnForMcu * (blocksPerLineForMcu + 1);
-          component.blockData = new Int16Array(blocksBufferSize);
-          component.blocksPerLine = blocksPerLine;
-          component.blocksPerColumn = blocksPerColumn;
-        }
-
-        frame.mcusPerLine = mcusPerLine;
-        frame.mcusPerColumn = mcusPerColumn;
-      }
-
-      var offset = 0;
-      var jfif = null;
-      var adobe = null;
-      var frame, resetInterval;
-      var numSOSMarkers = 0;
-      var quantizationTables = [];
-      var huffmanTablesAC = [],
-          huffmanTablesDC = [];
-      var fileMarker = (0, _core_utils.readUint16)(data, offset);
+    function readDataBlock() {
+      const length = (0, _core_utils.readUint16)(data, offset);
       offset += 2;
+      let endOffset = offset + length - 2;
+      const fileMarker = findNextFileMarker(data, endOffset, offset);
 
-      if (fileMarker !== 0xffd8) {
-        throw new JpegError("SOI not found");
+      if (fileMarker && fileMarker.invalid) {
+        (0, _util.warn)("readDataBlock - incorrect length, current marker is: " + fileMarker.invalid);
+        endOffset = fileMarker.offset;
+      }
+
+      const array = data.subarray(offset, endOffset);
+      offset += array.length;
+      return array;
+    }
+
+    function prepareComponents(frame) {
+      const mcusPerLine = Math.ceil(frame.samplesPerLine / 8 / frame.maxH);
+      const mcusPerColumn = Math.ceil(frame.scanLines / 8 / frame.maxV);
+
+      for (let i = 0, ii = frame.components.length; i < ii; i++) {
+        const component = frame.components[i];
+        const blocksPerLine = Math.ceil(Math.ceil(frame.samplesPerLine / 8) * component.h / frame.maxH);
+        const blocksPerColumn = Math.ceil(Math.ceil(frame.scanLines / 8) * component.v / frame.maxV);
+        const blocksPerLineForMcu = mcusPerLine * component.h;
+        const blocksPerColumnForMcu = mcusPerColumn * component.v;
+        const blocksBufferSize = 64 * blocksPerColumnForMcu * (blocksPerLineForMcu + 1);
+        component.blockData = new Int16Array(blocksBufferSize);
+        component.blocksPerLine = blocksPerLine;
+        component.blocksPerColumn = blocksPerColumn;
+      }
+
+      frame.mcusPerLine = mcusPerLine;
+      frame.mcusPerColumn = mcusPerColumn;
+    }
+
+    let offset = 0;
+    let jfif = null;
+    let adobe = null;
+    let frame, resetInterval;
+    let numSOSMarkers = 0;
+    const quantizationTables = [];
+    const huffmanTablesAC = [],
+          huffmanTablesDC = [];
+    let fileMarker = (0, _core_utils.readUint16)(data, offset);
+    offset += 2;
+
+    if (fileMarker !== 0xffd8) {
+      throw new JpegError("SOI not found");
+    }
+
+    fileMarker = (0, _core_utils.readUint16)(data, offset);
+    offset += 2;
+
+    markerLoop: while (fileMarker !== 0xffd9) {
+      let i, j, l;
+
+      switch (fileMarker) {
+        case 0xffe0:
+        case 0xffe1:
+        case 0xffe2:
+        case 0xffe3:
+        case 0xffe4:
+        case 0xffe5:
+        case 0xffe6:
+        case 0xffe7:
+        case 0xffe8:
+        case 0xffe9:
+        case 0xffea:
+        case 0xffeb:
+        case 0xffec:
+        case 0xffed:
+        case 0xffee:
+        case 0xffef:
+        case 0xfffe:
+          const appData = readDataBlock();
+
+          if (fileMarker === 0xffe0) {
+            if (appData[0] === 0x4a && appData[1] === 0x46 && appData[2] === 0x49 && appData[3] === 0x46 && appData[4] === 0) {
+              jfif = {
+                version: {
+                  major: appData[5],
+                  minor: appData[6]
+                },
+                densityUnits: appData[7],
+                xDensity: appData[8] << 8 | appData[9],
+                yDensity: appData[10] << 8 | appData[11],
+                thumbWidth: appData[12],
+                thumbHeight: appData[13],
+                thumbData: appData.subarray(14, 14 + 3 * appData[12] * appData[13])
+              };
+            }
+          }
+
+          if (fileMarker === 0xffee) {
+            if (appData[0] === 0x41 && appData[1] === 0x64 && appData[2] === 0x6f && appData[3] === 0x62 && appData[4] === 0x65) {
+              adobe = {
+                version: appData[5] << 8 | appData[6],
+                flags0: appData[7] << 8 | appData[8],
+                flags1: appData[9] << 8 | appData[10],
+                transformCode: appData[11]
+              };
+            }
+          }
+
+          break;
+
+        case 0xffdb:
+          const quantizationTablesLength = (0, _core_utils.readUint16)(data, offset);
+          offset += 2;
+          const quantizationTablesEnd = quantizationTablesLength + offset - 2;
+          let z;
+
+          while (offset < quantizationTablesEnd) {
+            const quantizationTableSpec = data[offset++];
+            const tableData = new Uint16Array(64);
+
+            if (quantizationTableSpec >> 4 === 0) {
+              for (j = 0; j < 64; j++) {
+                z = dctZigZag[j];
+                tableData[z] = data[offset++];
+              }
+            } else if (quantizationTableSpec >> 4 === 1) {
+              for (j = 0; j < 64; j++) {
+                z = dctZigZag[j];
+                tableData[z] = (0, _core_utils.readUint16)(data, offset);
+                offset += 2;
+              }
+            } else {
+              throw new JpegError("DQT - invalid table spec");
+            }
+
+            quantizationTables[quantizationTableSpec & 15] = tableData;
+          }
+
+          break;
+
+        case 0xffc0:
+        case 0xffc1:
+        case 0xffc2:
+          if (frame) {
+            throw new JpegError("Only single frame JPEGs supported");
+          }
+
+          offset += 2;
+          frame = {};
+          frame.extended = fileMarker === 0xffc1;
+          frame.progressive = fileMarker === 0xffc2;
+          frame.precision = data[offset++];
+          const sofScanLines = (0, _core_utils.readUint16)(data, offset);
+          offset += 2;
+          frame.scanLines = dnlScanLines || sofScanLines;
+          frame.samplesPerLine = (0, _core_utils.readUint16)(data, offset);
+          offset += 2;
+          frame.components = [];
+          frame.componentIds = {};
+          const componentsCount = data[offset++];
+          let maxH = 0,
+              maxV = 0;
+
+          for (i = 0; i < componentsCount; i++) {
+            const componentId = data[offset];
+            const h = data[offset + 1] >> 4;
+            const v = data[offset + 1] & 15;
+
+            if (maxH < h) {
+              maxH = h;
+            }
+
+            if (maxV < v) {
+              maxV = v;
+            }
+
+            const qId = data[offset + 2];
+            l = frame.components.push({
+              h,
+              v,
+              quantizationId: qId,
+              quantizationTable: null
+            });
+            frame.componentIds[componentId] = l - 1;
+            offset += 3;
+          }
+
+          frame.maxH = maxH;
+          frame.maxV = maxV;
+          prepareComponents(frame);
+          break;
+
+        case 0xffc4:
+          const huffmanLength = (0, _core_utils.readUint16)(data, offset);
+          offset += 2;
+
+          for (i = 2; i < huffmanLength;) {
+            const huffmanTableSpec = data[offset++];
+            const codeLengths = new Uint8Array(16);
+            let codeLengthSum = 0;
+
+            for (j = 0; j < 16; j++, offset++) {
+              codeLengthSum += codeLengths[j] = data[offset];
+            }
+
+            const huffmanValues = new Uint8Array(codeLengthSum);
+
+            for (j = 0; j < codeLengthSum; j++, offset++) {
+              huffmanValues[j] = data[offset];
+            }
+
+            i += 17 + codeLengthSum;
+            (huffmanTableSpec >> 4 === 0 ? huffmanTablesDC : huffmanTablesAC)[huffmanTableSpec & 15] = buildHuffmanTable(codeLengths, huffmanValues);
+          }
+
+          break;
+
+        case 0xffdd:
+          offset += 2;
+          resetInterval = (0, _core_utils.readUint16)(data, offset);
+          offset += 2;
+          break;
+
+        case 0xffda:
+          const parseDNLMarker = ++numSOSMarkers === 1 && !dnlScanLines;
+          offset += 2;
+          const selectorsCount = data[offset++],
+                components = [];
+
+          for (i = 0; i < selectorsCount; i++) {
+            const index = data[offset++];
+            const componentIndex = frame.componentIds[index];
+            const component = frame.components[componentIndex];
+            component.index = index;
+            const tableSpec = data[offset++];
+            component.huffmanTableDC = huffmanTablesDC[tableSpec >> 4];
+            component.huffmanTableAC = huffmanTablesAC[tableSpec & 15];
+            components.push(component);
+          }
+
+          const spectralStart = data[offset++],
+                spectralEnd = data[offset++],
+                successiveApproximation = data[offset++];
+
+          try {
+            const processed = decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successiveApproximation >> 4, successiveApproximation & 15, parseDNLMarker);
+            offset += processed;
+          } catch (ex) {
+            if (ex instanceof DNLMarkerError) {
+              (0, _util.warn)(`${ex.message} -- attempting to re-parse the JPEG image.`);
+              return this.parse(data, {
+                dnlScanLines: ex.scanLines
+              });
+            } else if (ex instanceof EOIMarkerError) {
+              (0, _util.warn)(`${ex.message} -- ignoring the rest of the image data.`);
+              break markerLoop;
+            }
+
+            throw ex;
+          }
+
+          break;
+
+        case 0xffdc:
+          offset += 4;
+          break;
+
+        case 0xffff:
+          if (data[offset] !== 0xff) {
+            offset--;
+          }
+
+          break;
+
+        default:
+          const nextFileMarker = findNextFileMarker(data, offset - 2, offset - 3);
+
+          if (nextFileMarker && nextFileMarker.invalid) {
+            (0, _util.warn)("JpegImage.parse - unexpected data, current marker is: " + nextFileMarker.invalid);
+            offset = nextFileMarker.offset;
+            break;
+          }
+
+          if (!nextFileMarker || offset >= data.length - 1) {
+            (0, _util.warn)("JpegImage.parse - reached the end of the image data " + "without finding an EOI marker (0xFFD9).");
+            break markerLoop;
+          }
+
+          throw new JpegError("JpegImage.parse - unknown marker: " + fileMarker.toString(16));
       }
 
       fileMarker = (0, _core_utils.readUint16)(data, offset);
       offset += 2;
-
-      markerLoop: while (fileMarker !== 0xffd9) {
-        var i = void 0,
-            j = void 0,
-            l = void 0;
-
-        switch (fileMarker) {
-          case 0xffe0:
-          case 0xffe1:
-          case 0xffe2:
-          case 0xffe3:
-          case 0xffe4:
-          case 0xffe5:
-          case 0xffe6:
-          case 0xffe7:
-          case 0xffe8:
-          case 0xffe9:
-          case 0xffea:
-          case 0xffeb:
-          case 0xffec:
-          case 0xffed:
-          case 0xffee:
-          case 0xffef:
-          case 0xfffe:
-            var appData = readDataBlock();
-
-            if (fileMarker === 0xffe0) {
-              if (appData[0] === 0x4a && appData[1] === 0x46 && appData[2] === 0x49 && appData[3] === 0x46 && appData[4] === 0) {
-                jfif = {
-                  version: {
-                    major: appData[5],
-                    minor: appData[6]
-                  },
-                  densityUnits: appData[7],
-                  xDensity: appData[8] << 8 | appData[9],
-                  yDensity: appData[10] << 8 | appData[11],
-                  thumbWidth: appData[12],
-                  thumbHeight: appData[13],
-                  thumbData: appData.subarray(14, 14 + 3 * appData[12] * appData[13])
-                };
-              }
-            }
-
-            if (fileMarker === 0xffee) {
-              if (appData[0] === 0x41 && appData[1] === 0x64 && appData[2] === 0x6f && appData[3] === 0x62 && appData[4] === 0x65) {
-                adobe = {
-                  version: appData[5] << 8 | appData[6],
-                  flags0: appData[7] << 8 | appData[8],
-                  flags1: appData[9] << 8 | appData[10],
-                  transformCode: appData[11]
-                };
-              }
-            }
-
-            break;
-
-          case 0xffdb:
-            var quantizationTablesLength = (0, _core_utils.readUint16)(data, offset);
-            offset += 2;
-            var quantizationTablesEnd = quantizationTablesLength + offset - 2;
-            var z = void 0;
-
-            while (offset < quantizationTablesEnd) {
-              var quantizationTableSpec = data[offset++];
-              var tableData = new Uint16Array(64);
-
-              if (quantizationTableSpec >> 4 === 0) {
-                for (j = 0; j < 64; j++) {
-                  z = dctZigZag[j];
-                  tableData[z] = data[offset++];
-                }
-              } else if (quantizationTableSpec >> 4 === 1) {
-                for (j = 0; j < 64; j++) {
-                  z = dctZigZag[j];
-                  tableData[z] = (0, _core_utils.readUint16)(data, offset);
-                  offset += 2;
-                }
-              } else {
-                throw new JpegError("DQT - invalid table spec");
-              }
-
-              quantizationTables[quantizationTableSpec & 15] = tableData;
-            }
-
-            break;
-
-          case 0xffc0:
-          case 0xffc1:
-          case 0xffc2:
-            if (frame) {
-              throw new JpegError("Only single frame JPEGs supported");
-            }
-
-            offset += 2;
-            frame = {};
-            frame.extended = fileMarker === 0xffc1;
-            frame.progressive = fileMarker === 0xffc2;
-            frame.precision = data[offset++];
-            var sofScanLines = (0, _core_utils.readUint16)(data, offset);
-            offset += 2;
-            frame.scanLines = dnlScanLines || sofScanLines;
-            frame.samplesPerLine = (0, _core_utils.readUint16)(data, offset);
-            offset += 2;
-            frame.components = [];
-            frame.componentIds = {};
-            var componentsCount = data[offset++];
-            var maxH = 0,
-                maxV = 0;
-
-            for (i = 0; i < componentsCount; i++) {
-              var componentId = data[offset];
-              var h = data[offset + 1] >> 4;
-              var v = data[offset + 1] & 15;
-
-              if (maxH < h) {
-                maxH = h;
-              }
-
-              if (maxV < v) {
-                maxV = v;
-              }
-
-              var qId = data[offset + 2];
-              l = frame.components.push({
-                h: h,
-                v: v,
-                quantizationId: qId,
-                quantizationTable: null
-              });
-              frame.componentIds[componentId] = l - 1;
-              offset += 3;
-            }
-
-            frame.maxH = maxH;
-            frame.maxV = maxV;
-            prepareComponents(frame);
-            break;
-
-          case 0xffc4:
-            var huffmanLength = (0, _core_utils.readUint16)(data, offset);
-            offset += 2;
-
-            for (i = 2; i < huffmanLength;) {
-              var huffmanTableSpec = data[offset++];
-              var codeLengths = new Uint8Array(16);
-              var codeLengthSum = 0;
-
-              for (j = 0; j < 16; j++, offset++) {
-                codeLengthSum += codeLengths[j] = data[offset];
-              }
-
-              var huffmanValues = new Uint8Array(codeLengthSum);
-
-              for (j = 0; j < codeLengthSum; j++, offset++) {
-                huffmanValues[j] = data[offset];
-              }
-
-              i += 17 + codeLengthSum;
-              (huffmanTableSpec >> 4 === 0 ? huffmanTablesDC : huffmanTablesAC)[huffmanTableSpec & 15] = buildHuffmanTable(codeLengths, huffmanValues);
-            }
-
-            break;
-
-          case 0xffdd:
-            offset += 2;
-            resetInterval = (0, _core_utils.readUint16)(data, offset);
-            offset += 2;
-            break;
-
-          case 0xffda:
-            var parseDNLMarker = ++numSOSMarkers === 1 && !dnlScanLines;
-            offset += 2;
-            var selectorsCount = data[offset++],
-                components = [];
-
-            for (i = 0; i < selectorsCount; i++) {
-              var index = data[offset++];
-              var componentIndex = frame.componentIds[index];
-              var component = frame.components[componentIndex];
-              component.index = index;
-              var tableSpec = data[offset++];
-              component.huffmanTableDC = huffmanTablesDC[tableSpec >> 4];
-              component.huffmanTableAC = huffmanTablesAC[tableSpec & 15];
-              components.push(component);
-            }
-
-            var spectralStart = data[offset++],
-                spectralEnd = data[offset++],
-                successiveApproximation = data[offset++];
-
-            try {
-              var processed = decodeScan(data, offset, frame, components, resetInterval, spectralStart, spectralEnd, successiveApproximation >> 4, successiveApproximation & 15, parseDNLMarker);
-              offset += processed;
-            } catch (ex) {
-              if (ex instanceof DNLMarkerError) {
-                (0, _util.warn)("".concat(ex.message, " -- attempting to re-parse the JPEG image."));
-                return this.parse(data, {
-                  dnlScanLines: ex.scanLines
-                });
-              } else if (ex instanceof EOIMarkerError) {
-                (0, _util.warn)("".concat(ex.message, " -- ignoring the rest of the image data."));
-                break markerLoop;
-              }
-
-              throw ex;
-            }
-
-            break;
-
-          case 0xffdc:
-            offset += 4;
-            break;
-
-          case 0xffff:
-            if (data[offset] !== 0xff) {
-              offset--;
-            }
-
-            break;
-
-          default:
-            var nextFileMarker = findNextFileMarker(data, offset - 2, offset - 3);
-
-            if (nextFileMarker && nextFileMarker.invalid) {
-              (0, _util.warn)("JpegImage.parse - unexpected data, current marker is: " + nextFileMarker.invalid);
-              offset = nextFileMarker.offset;
-              break;
-            }
-
-            if (!nextFileMarker || offset >= data.length - 1) {
-              (0, _util.warn)("JpegImage.parse - reached the end of the image data " + "without finding an EOI marker (0xFFD9).");
-              break markerLoop;
-            }
-
-            throw new JpegError("JpegImage.parse - unknown marker: " + fileMarker.toString(16));
-        }
-
-        fileMarker = (0, _core_utils.readUint16)(data, offset);
-        offset += 2;
-      }
-
-      this.width = frame.samplesPerLine;
-      this.height = frame.scanLines;
-      this.jfif = jfif;
-      this.adobe = adobe;
-      this.components = [];
-
-      for (var _i = 0, ii = frame.components.length; _i < ii; _i++) {
-        var _component = frame.components[_i];
-        var quantizationTable = quantizationTables[_component.quantizationId];
-
-        if (quantizationTable) {
-          _component.quantizationTable = quantizationTable;
-        }
-
-        this.components.push({
-          index: _component.index,
-          output: buildComponentData(frame, _component),
-          scaleX: _component.h / frame.maxH,
-          scaleY: _component.v / frame.maxV,
-          blocksPerLine: _component.blocksPerLine,
-          blocksPerColumn: _component.blocksPerColumn
-        });
-      }
-
-      this.numComponents = this.components.length;
-      return undefined;
     }
-  }, {
-    key: "_getLinearizedBlockData",
-    value: function _getLinearizedBlockData(width, height) {
-      var isSourcePDF = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      var scaleX = this.width / width,
+
+    this.width = frame.samplesPerLine;
+    this.height = frame.scanLines;
+    this.jfif = jfif;
+    this.adobe = adobe;
+    this.components = [];
+
+    for (let i = 0, ii = frame.components.length; i < ii; i++) {
+      const component = frame.components[i];
+      const quantizationTable = quantizationTables[component.quantizationId];
+
+      if (quantizationTable) {
+        component.quantizationTable = quantizationTable;
+      }
+
+      this.components.push({
+        index: component.index,
+        output: buildComponentData(frame, component),
+        scaleX: component.h / frame.maxH,
+        scaleY: component.v / frame.maxV,
+        blocksPerLine: component.blocksPerLine,
+        blocksPerColumn: component.blocksPerColumn
+      });
+    }
+
+    this.numComponents = this.components.length;
+    return undefined;
+  }
+
+  _getLinearizedBlockData(width, height) {
+    let isSourcePDF = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    const scaleX = this.width / width,
           scaleY = this.height / height;
-      var component, componentScaleX, componentScaleY, blocksPerScanline;
-      var x, y, i, j, k;
-      var index;
-      var offset = 0;
-      var output;
-      var numComponents = this.components.length;
-      var dataLength = width * height * numComponents;
-      var data = new Uint8ClampedArray(dataLength);
-      var xScaleBlockOffset = new Uint32Array(width);
-      var mask3LSB = 0xfffffff8;
-      var lastComponentScaleX;
+    let component, componentScaleX, componentScaleY, blocksPerScanline;
+    let x, y, i, j, k;
+    let index;
+    let offset = 0;
+    let output;
+    const numComponents = this.components.length;
+    const dataLength = width * height * numComponents;
+    const data = new Uint8ClampedArray(dataLength);
+    const xScaleBlockOffset = new Uint32Array(width);
+    const mask3LSB = 0xfffffff8;
+    let lastComponentScaleX;
 
-      for (i = 0; i < numComponents; i++) {
-        component = this.components[i];
-        componentScaleX = component.scaleX * scaleX;
-        componentScaleY = component.scaleY * scaleY;
-        offset = i;
-        output = component.output;
-        blocksPerScanline = component.blocksPerLine + 1 << 3;
+    for (i = 0; i < numComponents; i++) {
+      component = this.components[i];
+      componentScaleX = component.scaleX * scaleX;
+      componentScaleY = component.scaleY * scaleY;
+      offset = i;
+      output = component.output;
+      blocksPerScanline = component.blocksPerLine + 1 << 3;
 
-        if (componentScaleX !== lastComponentScaleX) {
-          for (x = 0; x < width; x++) {
-            j = 0 | x * componentScaleX;
-            xScaleBlockOffset[x] = (j & mask3LSB) << 3 | j & 7;
-          }
-
-          lastComponentScaleX = componentScaleX;
+      if (componentScaleX !== lastComponentScaleX) {
+        for (x = 0; x < width; x++) {
+          j = 0 | x * componentScaleX;
+          xScaleBlockOffset[x] = (j & mask3LSB) << 3 | j & 7;
         }
 
-        for (y = 0; y < height; y++) {
-          j = 0 | y * componentScaleY;
-          index = blocksPerScanline * (j & mask3LSB) | (j & 7) << 3;
+        lastComponentScaleX = componentScaleX;
+      }
 
-          for (x = 0; x < width; x++) {
-            data[offset] = output[index + xScaleBlockOffset[x]];
-            offset += numComponents;
-          }
+      for (y = 0; y < height; y++) {
+        j = 0 | y * componentScaleY;
+        index = blocksPerScanline * (j & mask3LSB) | (j & 7) << 3;
+
+        for (x = 0; x < width; x++) {
+          data[offset] = output[index + xScaleBlockOffset[x]];
+          offset += numComponents;
         }
       }
+    }
 
-      var transform = this._decodeTransform;
+    let transform = this._decodeTransform;
 
-      if (!isSourcePDF && numComponents === 4 && !transform) {
-        transform = new Int32Array([-256, 255, -256, 255, -256, 255, -256, 255]);
-      }
+    if (!isSourcePDF && numComponents === 4 && !transform) {
+      transform = new Int32Array([-256, 255, -256, 255, -256, 255, -256, 255]);
+    }
 
-      if (transform) {
-        for (i = 0; i < dataLength;) {
-          for (j = 0, k = 0; j < numComponents; j++, i++, k += 2) {
-            data[i] = (data[i] * transform[k] >> 8) + transform[k + 1];
-          }
+    if (transform) {
+      for (i = 0; i < dataLength;) {
+        for (j = 0, k = 0; j < numComponents; j++, i++, k += 2) {
+          data[i] = (data[i] * transform[k] >> 8) + transform[k + 1];
         }
       }
-
-      return data;
     }
-  }, {
-    key: "_isColorConversionNeeded",
-    get: function get() {
-      if (this.adobe) {
-        return !!this.adobe.transformCode;
+
+    return data;
+  }
+
+  get _isColorConversionNeeded() {
+    if (this.adobe) {
+      return !!this.adobe.transformCode;
+    }
+
+    if (this.numComponents === 3) {
+      if (this._colorTransform === 0) {
+        return false;
+      } else if (this.components[0].index === 0x52 && this.components[1].index === 0x47 && this.components[2].index === 0x42) {
+        return false;
       }
 
-      if (this.numComponents === 3) {
-        if (this._colorTransform === 0) {
-          return false;
-        } else if (this.components[0].index === 0x52 && this.components[1].index === 0x47 && this.components[2].index === 0x42) {
-          return false;
+      return true;
+    }
+
+    if (this._colorTransform === 1) {
+      return true;
+    }
+
+    return false;
+  }
+
+  _convertYccToRgb(data) {
+    let Y, Cb, Cr;
+
+    for (let i = 0, length = data.length; i < length; i += 3) {
+      Y = data[i];
+      Cb = data[i + 1];
+      Cr = data[i + 2];
+      data[i] = Y - 179.456 + 1.402 * Cr;
+      data[i + 1] = Y + 135.459 - 0.344 * Cb - 0.714 * Cr;
+      data[i + 2] = Y - 226.816 + 1.772 * Cb;
+    }
+
+    return data;
+  }
+
+  _convertYcckToRgb(data) {
+    let Y, Cb, Cr, k;
+    let offset = 0;
+
+    for (let i = 0, length = data.length; i < length; i += 4) {
+      Y = data[i];
+      Cb = data[i + 1];
+      Cr = data[i + 2];
+      k = data[i + 3];
+      data[offset++] = -122.67195406894 + Cb * (-6.60635669420364e-5 * Cb + 0.000437130475926232 * Cr - 5.4080610064599e-5 * Y + 0.00048449797120281 * k - 0.154362151871126) + Cr * (-0.000957964378445773 * Cr + 0.000817076911346625 * Y - 0.00477271405408747 * k + 1.53380253221734) + Y * (0.000961250184130688 * Y - 0.00266257332283933 * k + 0.48357088451265) + k * (-0.000336197177618394 * k + 0.484791561490776);
+      data[offset++] = 107.268039397724 + Cb * (2.19927104525741e-5 * Cb - 0.000640992018297945 * Cr + 0.000659397001245577 * Y + 0.000426105652938837 * k - 0.176491792462875) + Cr * (-0.000778269941513683 * Cr + 0.00130872261408275 * Y + 0.000770482631801132 * k - 0.151051492775562) + Y * (0.00126935368114843 * Y - 0.00265090189010898 * k + 0.25802910206845) + k * (-0.000318913117588328 * k - 0.213742400323665);
+      data[offset++] = -20.810012546947 + Cb * (-0.000570115196973677 * Cb - 2.63409051004589e-5 * Cr + 0.0020741088115012 * Y - 0.00288260236853442 * k + 0.814272968359295) + Cr * (-1.53496057440975e-5 * Cr - 0.000132689043961446 * Y + 0.000560833691242812 * k - 0.195152027534049) + Y * (0.00174418132927582 * Y - 0.00255243321439347 * k + 0.116935020465145) + k * (-0.000343531996510555 * k + 0.24165260232407);
+    }
+
+    return data.subarray(0, offset);
+  }
+
+  _convertYcckToCmyk(data) {
+    let Y, Cb, Cr;
+
+    for (let i = 0, length = data.length; i < length; i += 4) {
+      Y = data[i];
+      Cb = data[i + 1];
+      Cr = data[i + 2];
+      data[i] = 434.456 - Y - 1.402 * Cr;
+      data[i + 1] = 119.541 - Y + 0.344 * Cb + 0.714 * Cr;
+      data[i + 2] = 481.816 - Y - 1.772 * Cb;
+    }
+
+    return data;
+  }
+
+  _convertCmykToRgb(data) {
+    let c, m, y, k;
+    let offset = 0;
+
+    for (let i = 0, length = data.length; i < length; i += 4) {
+      c = data[i];
+      m = data[i + 1];
+      y = data[i + 2];
+      k = data[i + 3];
+      data[offset++] = 255 + c * (-0.00006747147073602441 * c + 0.0008379262121013727 * m + 0.0002894718188643294 * y + 0.003264231057537806 * k - 1.1185611867203937) + m * (0.000026374107616089405 * m - 0.00008626949158638572 * y - 0.0002748769067499491 * k - 0.02155688794978967) + y * (-0.00003878099212869363 * y - 0.0003267808279485286 * k + 0.0686742238595345) - k * (0.0003361971776183937 * k + 0.7430659151342254);
+      data[offset++] = 255 + c * (0.00013596372813588848 * c + 0.000924537132573585 * m + 0.00010567359618683593 * y + 0.0004791864687436512 * k - 0.3109689587515875) + m * (-0.00023545346108370344 * m + 0.0002702845253534714 * y + 0.0020200308977307156 * k - 0.7488052167015494) + y * (0.00006834815998235662 * y + 0.00015168452363460973 * k - 0.09751927774728933) - k * (0.0003189131175883281 * k + 0.7364883807733168);
+      data[offset++] = 255 + c * (0.000013598650411385307 * c + 0.00012423956175490851 * m + 0.0004751985097583589 * y - 0.0000036729317476630422 * k - 0.05562186980264034) + m * (0.00016141380598724676 * m + 0.0009692239130725186 * y + 0.0007782692450036253 * k - 0.44015232367526463) + y * (5.068882914068769e-7 * y + 0.0017778369011375071 * k - 0.7591454649749609) - k * (0.0003435319965105553 * k + 0.7063770186160144);
+    }
+
+    return data.subarray(0, offset);
+  }
+
+  getData(_ref) {
+    let {
+      width,
+      height,
+      forceRGB = false,
+      isSourcePDF = false
+    } = _ref;
+
+    if (this.numComponents > 4) {
+      throw new JpegError("Unsupported color mode");
+    }
+
+    const data = this._getLinearizedBlockData(width, height, isSourcePDF);
+
+    if (this.numComponents === 1 && forceRGB) {
+      const dataLength = data.length;
+      const rgbData = new Uint8ClampedArray(dataLength * 3);
+      let offset = 0;
+
+      for (let i = 0; i < dataLength; i++) {
+        const grayColor = data[i];
+        rgbData[offset++] = grayColor;
+        rgbData[offset++] = grayColor;
+        rgbData[offset++] = grayColor;
+      }
+
+      return rgbData;
+    } else if (this.numComponents === 3 && this._isColorConversionNeeded) {
+      return this._convertYccToRgb(data);
+    } else if (this.numComponents === 4) {
+      if (this._isColorConversionNeeded) {
+        if (forceRGB) {
+          return this._convertYcckToRgb(data);
         }
 
-        return true;
+        return this._convertYcckToCmyk(data);
+      } else if (forceRGB) {
+        return this._convertCmykToRgb(data);
       }
-
-      if (this._colorTransform === 1) {
-        return true;
-      }
-
-      return false;
     }
-  }, {
-    key: "_convertYccToRgb",
-    value: function _convertYccToRgb(data) {
-      var Y, Cb, Cr;
 
-      for (var i = 0, length = data.length; i < length; i += 3) {
-        Y = data[i];
-        Cb = data[i + 1];
-        Cr = data[i + 2];
-        data[i] = Y - 179.456 + 1.402 * Cr;
-        data[i + 1] = Y + 135.459 - 0.344 * Cb - 0.714 * Cr;
-        data[i + 2] = Y - 226.816 + 1.772 * Cb;
-      }
+    return data;
+  }
 
-      return data;
-    }
-  }, {
-    key: "_convertYcckToRgb",
-    value: function _convertYcckToRgb(data) {
-      var Y, Cb, Cr, k;
-      var offset = 0;
-
-      for (var i = 0, length = data.length; i < length; i += 4) {
-        Y = data[i];
-        Cb = data[i + 1];
-        Cr = data[i + 2];
-        k = data[i + 3];
-        data[offset++] = -122.67195406894 + Cb * (-6.60635669420364e-5 * Cb + 0.000437130475926232 * Cr - 5.4080610064599e-5 * Y + 0.00048449797120281 * k - 0.154362151871126) + Cr * (-0.000957964378445773 * Cr + 0.000817076911346625 * Y - 0.00477271405408747 * k + 1.53380253221734) + Y * (0.000961250184130688 * Y - 0.00266257332283933 * k + 0.48357088451265) + k * (-0.000336197177618394 * k + 0.484791561490776);
-        data[offset++] = 107.268039397724 + Cb * (2.19927104525741e-5 * Cb - 0.000640992018297945 * Cr + 0.000659397001245577 * Y + 0.000426105652938837 * k - 0.176491792462875) + Cr * (-0.000778269941513683 * Cr + 0.00130872261408275 * Y + 0.000770482631801132 * k - 0.151051492775562) + Y * (0.00126935368114843 * Y - 0.00265090189010898 * k + 0.25802910206845) + k * (-0.000318913117588328 * k - 0.213742400323665);
-        data[offset++] = -20.810012546947 + Cb * (-0.000570115196973677 * Cb - 2.63409051004589e-5 * Cr + 0.0020741088115012 * Y - 0.00288260236853442 * k + 0.814272968359295) + Cr * (-1.53496057440975e-5 * Cr - 0.000132689043961446 * Y + 0.000560833691242812 * k - 0.195152027534049) + Y * (0.00174418132927582 * Y - 0.00255243321439347 * k + 0.116935020465145) + k * (-0.000343531996510555 * k + 0.24165260232407);
-      }
-
-      return data.subarray(0, offset);
-    }
-  }, {
-    key: "_convertYcckToCmyk",
-    value: function _convertYcckToCmyk(data) {
-      var Y, Cb, Cr;
-
-      for (var i = 0, length = data.length; i < length; i += 4) {
-        Y = data[i];
-        Cb = data[i + 1];
-        Cr = data[i + 2];
-        data[i] = 434.456 - Y - 1.402 * Cr;
-        data[i + 1] = 119.541 - Y + 0.344 * Cb + 0.714 * Cr;
-        data[i + 2] = 481.816 - Y - 1.772 * Cb;
-      }
-
-      return data;
-    }
-  }, {
-    key: "_convertCmykToRgb",
-    value: function _convertCmykToRgb(data) {
-      var c, m, y, k;
-      var offset = 0;
-
-      for (var i = 0, length = data.length; i < length; i += 4) {
-        c = data[i];
-        m = data[i + 1];
-        y = data[i + 2];
-        k = data[i + 3];
-        data[offset++] = 255 + c * (-0.00006747147073602441 * c + 0.0008379262121013727 * m + 0.0002894718188643294 * y + 0.003264231057537806 * k - 1.1185611867203937) + m * (0.000026374107616089405 * m - 0.00008626949158638572 * y - 0.0002748769067499491 * k - 0.02155688794978967) + y * (-0.00003878099212869363 * y - 0.0003267808279485286 * k + 0.0686742238595345) - k * (0.0003361971776183937 * k + 0.7430659151342254);
-        data[offset++] = 255 + c * (0.00013596372813588848 * c + 0.000924537132573585 * m + 0.00010567359618683593 * y + 0.0004791864687436512 * k - 0.3109689587515875) + m * (-0.00023545346108370344 * m + 0.0002702845253534714 * y + 0.0020200308977307156 * k - 0.7488052167015494) + y * (0.00006834815998235662 * y + 0.00015168452363460973 * k - 0.09751927774728933) - k * (0.0003189131175883281 * k + 0.7364883807733168);
-        data[offset++] = 255 + c * (0.000013598650411385307 * c + 0.00012423956175490851 * m + 0.0004751985097583589 * y - 0.0000036729317476630422 * k - 0.05562186980264034) + m * (0.00016141380598724676 * m + 0.0009692239130725186 * y + 0.0007782692450036253 * k - 0.44015232367526463) + y * (5.068882914068769e-7 * y + 0.0017778369011375071 * k - 0.7591454649749609) - k * (0.0003435319965105553 * k + 0.7063770186160144);
-      }
-
-      return data.subarray(0, offset);
-    }
-  }, {
-    key: "getData",
-    value: function getData(_ref3) {
-      var width = _ref3.width,
-          height = _ref3.height,
-          _ref3$forceRGB = _ref3.forceRGB,
-          forceRGB = _ref3$forceRGB === void 0 ? false : _ref3$forceRGB,
-          _ref3$isSourcePDF = _ref3.isSourcePDF,
-          isSourcePDF = _ref3$isSourcePDF === void 0 ? false : _ref3$isSourcePDF;
-
-      if (this.numComponents > 4) {
-        throw new JpegError("Unsupported color mode");
-      }
-
-      var data = this._getLinearizedBlockData(width, height, isSourcePDF);
-
-      if (this.numComponents === 1 && forceRGB) {
-        var dataLength = data.length;
-        var rgbData = new Uint8ClampedArray(dataLength * 3);
-        var offset = 0;
-
-        for (var i = 0; i < dataLength; i++) {
-          var grayColor = data[i];
-          rgbData[offset++] = grayColor;
-          rgbData[offset++] = grayColor;
-          rgbData[offset++] = grayColor;
-        }
-
-        return rgbData;
-      } else if (this.numComponents === 3 && this._isColorConversionNeeded) {
-        return this._convertYccToRgb(data);
-      } else if (this.numComponents === 4) {
-        if (this._isColorConversionNeeded) {
-          if (forceRGB) {
-            return this._convertYcckToRgb(data);
-          }
-
-          return this._convertYcckToCmyk(data);
-        } else if (forceRGB) {
-          return this._convertCmykToRgb(data);
-        }
-      }
-
-      return data;
-    }
-  }]);
-
-  return JpegImage;
-}();
+}
 
 exports.JpegImage = JpegImage;
 
@@ -8973,8 +8269,6 @@ exports.JpegImage = JpegImage;
 
 "use strict";
 
-
-function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 
 Object.defineProperty(exports, "__esModule", ({
   value: true
@@ -8987,494 +8281,459 @@ var _core_utils = __w_pdfjs_require__(87);
 
 var _arithmetic_decoder = __w_pdfjs_require__(90);
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-var JpxError = /*#__PURE__*/function (_BaseException) {
-  _inherits(JpxError, _BaseException);
-
-  var _super = _createSuper(JpxError);
-
-  function JpxError(msg) {
-    _classCallCheck(this, JpxError);
-
-    return _super.call(this, "JPX error: ".concat(msg), "JpxError");
+class JpxError extends _util.BaseException {
+  constructor(msg) {
+    super(`JPX error: ${msg}`, "JpxError");
   }
 
-  return _createClass(JpxError);
-}(_util.BaseException);
+}
 
-var SubbandsGainLog2 = {
+const SubbandsGainLog2 = {
   LL: 0,
   LH: 1,
   HL: 1,
   HH: 2
 };
 
-var JpxImage = /*#__PURE__*/function () {
-  function JpxImage() {
-    _classCallCheck(this, JpxImage);
-
+class JpxImage {
+  constructor() {
     this.failOnCorruptedImage = false;
   }
 
-  _createClass(JpxImage, [{
-    key: "parse",
-    value: function parse(data) {
-      var head = (0, _core_utils.readUint16)(data, 0);
+  parse(data) {
+    const head = (0, _core_utils.readUint16)(data, 0);
 
-      if (head === 0xff4f) {
-        this.parseCodestream(data, 0, data.length);
+    if (head === 0xff4f) {
+      this.parseCodestream(data, 0, data.length);
+      return;
+    }
+
+    const length = data.length;
+    let position = 0;
+
+    while (position < length) {
+      let headerSize = 8;
+      let lbox = (0, _core_utils.readUint32)(data, position);
+      const tbox = (0, _core_utils.readUint32)(data, position + 4);
+      position += headerSize;
+
+      if (lbox === 1) {
+        lbox = (0, _core_utils.readUint32)(data, position) * 4294967296 + (0, _core_utils.readUint32)(data, position + 4);
+        position += 8;
+        headerSize += 8;
+      }
+
+      if (lbox === 0) {
+        lbox = length - position + headerSize;
+      }
+
+      if (lbox < headerSize) {
+        throw new JpxError("Invalid box field size");
+      }
+
+      const dataLength = lbox - headerSize;
+      let jumpDataLength = true;
+
+      switch (tbox) {
+        case 0x6a703268:
+          jumpDataLength = false;
+          break;
+
+        case 0x636f6c72:
+          const method = data[position];
+
+          if (method === 1) {
+            const colorspace = (0, _core_utils.readUint32)(data, position + 3);
+
+            switch (colorspace) {
+              case 16:
+              case 17:
+              case 18:
+                break;
+
+              default:
+                (0, _util.warn)("Unknown colorspace " + colorspace);
+                break;
+            }
+          } else if (method === 2) {
+            (0, _util.info)("ICC profile not supported");
+          }
+
+          break;
+
+        case 0x6a703263:
+          this.parseCodestream(data, position, position + dataLength);
+          break;
+
+        case 0x6a502020:
+          if ((0, _core_utils.readUint32)(data, position) !== 0x0d0a870a) {
+            (0, _util.warn)("Invalid JP2 signature");
+          }
+
+          break;
+
+        case 0x6a501a1a:
+        case 0x66747970:
+        case 0x72726571:
+        case 0x72657320:
+        case 0x69686472:
+          break;
+
+        default:
+          const headerType = String.fromCharCode(tbox >> 24 & 0xff, tbox >> 16 & 0xff, tbox >> 8 & 0xff, tbox & 0xff);
+          (0, _util.warn)(`Unsupported header type ${tbox} (${headerType}).`);
+          break;
+      }
+
+      if (jumpDataLength) {
+        position += dataLength;
+      }
+    }
+  }
+
+  parseImageProperties(stream) {
+    let newByte = stream.getByte();
+
+    while (newByte >= 0) {
+      const oldByte = newByte;
+      newByte = stream.getByte();
+      const code = oldByte << 8 | newByte;
+
+      if (code === 0xff51) {
+        stream.skip(4);
+        const Xsiz = stream.getInt32() >>> 0;
+        const Ysiz = stream.getInt32() >>> 0;
+        const XOsiz = stream.getInt32() >>> 0;
+        const YOsiz = stream.getInt32() >>> 0;
+        stream.skip(16);
+        const Csiz = stream.getUint16();
+        this.width = Xsiz - XOsiz;
+        this.height = Ysiz - YOsiz;
+        this.componentsCount = Csiz;
+        this.bitsPerComponent = 8;
         return;
       }
+    }
 
-      var length = data.length;
-      var position = 0;
+    throw new JpxError("No size marker found in JPX stream");
+  }
 
-      while (position < length) {
-        var headerSize = 8;
-        var lbox = (0, _core_utils.readUint32)(data, position);
-        var tbox = (0, _core_utils.readUint32)(data, position + 4);
-        position += headerSize;
+  parseCodestream(data, start, end) {
+    const context = {};
+    let doNotRecover = false;
 
-        if (lbox === 1) {
-          lbox = (0, _core_utils.readUint32)(data, position) * 4294967296 + (0, _core_utils.readUint32)(data, position + 4);
-          position += 8;
-          headerSize += 8;
-        }
+    try {
+      let position = start;
 
-        if (lbox === 0) {
-          lbox = length - position + headerSize;
-        }
+      while (position + 1 < end) {
+        const code = (0, _core_utils.readUint16)(data, position);
+        position += 2;
+        let length = 0,
+            j,
+            sqcd,
+            spqcds,
+            spqcdSize,
+            scalarExpounded,
+            tile;
 
-        if (lbox < headerSize) {
-          throw new JpxError("Invalid box field size");
-        }
-
-        var dataLength = lbox - headerSize;
-        var jumpDataLength = true;
-
-        switch (tbox) {
-          case 0x6a703268:
-            jumpDataLength = false;
+        switch (code) {
+          case 0xff4f:
+            context.mainHeader = true;
             break;
 
-          case 0x636f6c72:
-            var method = data[position];
+          case 0xffd9:
+            break;
 
-            if (method === 1) {
-              var colorspace = (0, _core_utils.readUint32)(data, position + 3);
+          case 0xff51:
+            length = (0, _core_utils.readUint16)(data, position);
+            const siz = {};
+            siz.Xsiz = (0, _core_utils.readUint32)(data, position + 4);
+            siz.Ysiz = (0, _core_utils.readUint32)(data, position + 8);
+            siz.XOsiz = (0, _core_utils.readUint32)(data, position + 12);
+            siz.YOsiz = (0, _core_utils.readUint32)(data, position + 16);
+            siz.XTsiz = (0, _core_utils.readUint32)(data, position + 20);
+            siz.YTsiz = (0, _core_utils.readUint32)(data, position + 24);
+            siz.XTOsiz = (0, _core_utils.readUint32)(data, position + 28);
+            siz.YTOsiz = (0, _core_utils.readUint32)(data, position + 32);
+            const componentsCount = (0, _core_utils.readUint16)(data, position + 36);
+            siz.Csiz = componentsCount;
+            const components = [];
+            j = position + 38;
 
-              switch (colorspace) {
-                case 16:
-                case 17:
-                case 18:
-                  break;
-
-                default:
-                  (0, _util.warn)("Unknown colorspace " + colorspace);
-                  break;
-              }
-            } else if (method === 2) {
-              (0, _util.info)("ICC profile not supported");
+            for (let i = 0; i < componentsCount; i++) {
+              const component = {
+                precision: (data[j] & 0x7f) + 1,
+                isSigned: !!(data[j] & 0x80),
+                XRsiz: data[j + 1],
+                YRsiz: data[j + 2]
+              };
+              j += 3;
+              calculateComponentDimensions(component, siz);
+              components.push(component);
             }
 
+            context.SIZ = siz;
+            context.components = components;
+            calculateTileGrids(context, components);
+            context.QCC = [];
+            context.COC = [];
             break;
 
-          case 0x6a703263:
-            this.parseCodestream(data, position, position + dataLength);
-            break;
+          case 0xff5c:
+            length = (0, _core_utils.readUint16)(data, position);
+            const qcd = {};
+            j = position + 2;
+            sqcd = data[j++];
 
-          case 0x6a502020:
-            if ((0, _core_utils.readUint32)(data, position) !== 0x0d0a870a) {
-              (0, _util.warn)("Invalid JP2 signature");
+            switch (sqcd & 0x1f) {
+              case 0:
+                spqcdSize = 8;
+                scalarExpounded = true;
+                break;
+
+              case 1:
+                spqcdSize = 16;
+                scalarExpounded = false;
+                break;
+
+              case 2:
+                spqcdSize = 16;
+                scalarExpounded = true;
+                break;
+
+              default:
+                throw new Error("Invalid SQcd value " + sqcd);
             }
 
-            break;
+            qcd.noQuantization = spqcdSize === 8;
+            qcd.scalarExpounded = scalarExpounded;
+            qcd.guardBits = sqcd >> 5;
+            spqcds = [];
 
-          case 0x6a501a1a:
-          case 0x66747970:
-          case 0x72726571:
-          case 0x72657320:
-          case 0x69686472:
-            break;
+            while (j < length + position) {
+              const spqcd = {};
 
-          default:
-            var headerType = String.fromCharCode(tbox >> 24 & 0xff, tbox >> 16 & 0xff, tbox >> 8 & 0xff, tbox & 0xff);
-            (0, _util.warn)("Unsupported header type ".concat(tbox, " (").concat(headerType, ")."));
-            break;
-        }
-
-        if (jumpDataLength) {
-          position += dataLength;
-        }
-      }
-    }
-  }, {
-    key: "parseImageProperties",
-    value: function parseImageProperties(stream) {
-      var newByte = stream.getByte();
-
-      while (newByte >= 0) {
-        var oldByte = newByte;
-        newByte = stream.getByte();
-        var code = oldByte << 8 | newByte;
-
-        if (code === 0xff51) {
-          stream.skip(4);
-          var Xsiz = stream.getInt32() >>> 0;
-          var Ysiz = stream.getInt32() >>> 0;
-          var XOsiz = stream.getInt32() >>> 0;
-          var YOsiz = stream.getInt32() >>> 0;
-          stream.skip(16);
-          var Csiz = stream.getUint16();
-          this.width = Xsiz - XOsiz;
-          this.height = Ysiz - YOsiz;
-          this.componentsCount = Csiz;
-          this.bitsPerComponent = 8;
-          return;
-        }
-      }
-
-      throw new JpxError("No size marker found in JPX stream");
-    }
-  }, {
-    key: "parseCodestream",
-    value: function parseCodestream(data, start, end) {
-      var context = {};
-      var doNotRecover = false;
-
-      try {
-        var position = start;
-
-        while (position + 1 < end) {
-          var code = (0, _core_utils.readUint16)(data, position);
-          position += 2;
-          var length = 0,
-              j = void 0,
-              sqcd = void 0,
-              spqcds = void 0,
-              spqcdSize = void 0,
-              scalarExpounded = void 0,
-              tile = void 0;
-
-          switch (code) {
-            case 0xff4f:
-              context.mainHeader = true;
-              break;
-
-            case 0xffd9:
-              break;
-
-            case 0xff51:
-              length = (0, _core_utils.readUint16)(data, position);
-              var siz = {};
-              siz.Xsiz = (0, _core_utils.readUint32)(data, position + 4);
-              siz.Ysiz = (0, _core_utils.readUint32)(data, position + 8);
-              siz.XOsiz = (0, _core_utils.readUint32)(data, position + 12);
-              siz.YOsiz = (0, _core_utils.readUint32)(data, position + 16);
-              siz.XTsiz = (0, _core_utils.readUint32)(data, position + 20);
-              siz.YTsiz = (0, _core_utils.readUint32)(data, position + 24);
-              siz.XTOsiz = (0, _core_utils.readUint32)(data, position + 28);
-              siz.YTOsiz = (0, _core_utils.readUint32)(data, position + 32);
-              var componentsCount = (0, _core_utils.readUint16)(data, position + 36);
-              siz.Csiz = componentsCount;
-              var components = [];
-              j = position + 38;
-
-              for (var i = 0; i < componentsCount; i++) {
-                var component = {
-                  precision: (data[j] & 0x7f) + 1,
-                  isSigned: !!(data[j] & 0x80),
-                  XRsiz: data[j + 1],
-                  YRsiz: data[j + 2]
-                };
-                j += 3;
-                calculateComponentDimensions(component, siz);
-                components.push(component);
-              }
-
-              context.SIZ = siz;
-              context.components = components;
-              calculateTileGrids(context, components);
-              context.QCC = [];
-              context.COC = [];
-              break;
-
-            case 0xff5c:
-              length = (0, _core_utils.readUint16)(data, position);
-              var qcd = {};
-              j = position + 2;
-              sqcd = data[j++];
-
-              switch (sqcd & 0x1f) {
-                case 0:
-                  spqcdSize = 8;
-                  scalarExpounded = true;
-                  break;
-
-                case 1:
-                  spqcdSize = 16;
-                  scalarExpounded = false;
-                  break;
-
-                case 2:
-                  spqcdSize = 16;
-                  scalarExpounded = true;
-                  break;
-
-                default:
-                  throw new Error("Invalid SQcd value " + sqcd);
-              }
-
-              qcd.noQuantization = spqcdSize === 8;
-              qcd.scalarExpounded = scalarExpounded;
-              qcd.guardBits = sqcd >> 5;
-              spqcds = [];
-
-              while (j < length + position) {
-                var spqcd = {};
-
-                if (spqcdSize === 8) {
-                  spqcd.epsilon = data[j++] >> 3;
-                  spqcd.mu = 0;
-                } else {
-                  spqcd.epsilon = data[j] >> 3;
-                  spqcd.mu = (data[j] & 0x7) << 8 | data[j + 1];
-                  j += 2;
-                }
-
-                spqcds.push(spqcd);
-              }
-
-              qcd.SPqcds = spqcds;
-
-              if (context.mainHeader) {
-                context.QCD = qcd;
+              if (spqcdSize === 8) {
+                spqcd.epsilon = data[j++] >> 3;
+                spqcd.mu = 0;
               } else {
-                context.currentTile.QCD = qcd;
-                context.currentTile.QCC = [];
-              }
-
-              break;
-
-            case 0xff5d:
-              length = (0, _core_utils.readUint16)(data, position);
-              var qcc = {};
-              j = position + 2;
-              var cqcc = void 0;
-
-              if (context.SIZ.Csiz < 257) {
-                cqcc = data[j++];
-              } else {
-                cqcc = (0, _core_utils.readUint16)(data, j);
+                spqcd.epsilon = data[j] >> 3;
+                spqcd.mu = (data[j] & 0x7) << 8 | data[j + 1];
                 j += 2;
               }
 
-              sqcd = data[j++];
+              spqcds.push(spqcd);
+            }
 
-              switch (sqcd & 0x1f) {
-                case 0:
-                  spqcdSize = 8;
-                  scalarExpounded = true;
-                  break;
+            qcd.SPqcds = spqcds;
 
-                case 1:
-                  spqcdSize = 16;
-                  scalarExpounded = false;
-                  break;
+            if (context.mainHeader) {
+              context.QCD = qcd;
+            } else {
+              context.currentTile.QCD = qcd;
+              context.currentTile.QCC = [];
+            }
 
-                case 2:
-                  spqcdSize = 16;
-                  scalarExpounded = true;
-                  break;
+            break;
 
-                default:
-                  throw new Error("Invalid SQcd value " + sqcd);
+          case 0xff5d:
+            length = (0, _core_utils.readUint16)(data, position);
+            const qcc = {};
+            j = position + 2;
+            let cqcc;
+
+            if (context.SIZ.Csiz < 257) {
+              cqcc = data[j++];
+            } else {
+              cqcc = (0, _core_utils.readUint16)(data, j);
+              j += 2;
+            }
+
+            sqcd = data[j++];
+
+            switch (sqcd & 0x1f) {
+              case 0:
+                spqcdSize = 8;
+                scalarExpounded = true;
+                break;
+
+              case 1:
+                spqcdSize = 16;
+                scalarExpounded = false;
+                break;
+
+              case 2:
+                spqcdSize = 16;
+                scalarExpounded = true;
+                break;
+
+              default:
+                throw new Error("Invalid SQcd value " + sqcd);
+            }
+
+            qcc.noQuantization = spqcdSize === 8;
+            qcc.scalarExpounded = scalarExpounded;
+            qcc.guardBits = sqcd >> 5;
+            spqcds = [];
+
+            while (j < length + position) {
+              const spqcd = {};
+
+              if (spqcdSize === 8) {
+                spqcd.epsilon = data[j++] >> 3;
+                spqcd.mu = 0;
+              } else {
+                spqcd.epsilon = data[j] >> 3;
+                spqcd.mu = (data[j] & 0x7) << 8 | data[j + 1];
+                j += 2;
               }
 
-              qcc.noQuantization = spqcdSize === 8;
-              qcc.scalarExpounded = scalarExpounded;
-              qcc.guardBits = sqcd >> 5;
-              spqcds = [];
+              spqcds.push(spqcd);
+            }
+
+            qcc.SPqcds = spqcds;
+
+            if (context.mainHeader) {
+              context.QCC[cqcc] = qcc;
+            } else {
+              context.currentTile.QCC[cqcc] = qcc;
+            }
+
+            break;
+
+          case 0xff52:
+            length = (0, _core_utils.readUint16)(data, position);
+            const cod = {};
+            j = position + 2;
+            const scod = data[j++];
+            cod.entropyCoderWithCustomPrecincts = !!(scod & 1);
+            cod.sopMarkerUsed = !!(scod & 2);
+            cod.ephMarkerUsed = !!(scod & 4);
+            cod.progressionOrder = data[j++];
+            cod.layersCount = (0, _core_utils.readUint16)(data, j);
+            j += 2;
+            cod.multipleComponentTransform = data[j++];
+            cod.decompositionLevelsCount = data[j++];
+            cod.xcb = (data[j++] & 0xf) + 2;
+            cod.ycb = (data[j++] & 0xf) + 2;
+            const blockStyle = data[j++];
+            cod.selectiveArithmeticCodingBypass = !!(blockStyle & 1);
+            cod.resetContextProbabilities = !!(blockStyle & 2);
+            cod.terminationOnEachCodingPass = !!(blockStyle & 4);
+            cod.verticallyStripe = !!(blockStyle & 8);
+            cod.predictableTermination = !!(blockStyle & 16);
+            cod.segmentationSymbolUsed = !!(blockStyle & 32);
+            cod.reversibleTransformation = data[j++];
+
+            if (cod.entropyCoderWithCustomPrecincts) {
+              const precinctsSizes = [];
 
               while (j < length + position) {
-                var _spqcd = {};
-
-                if (spqcdSize === 8) {
-                  _spqcd.epsilon = data[j++] >> 3;
-                  _spqcd.mu = 0;
-                } else {
-                  _spqcd.epsilon = data[j] >> 3;
-                  _spqcd.mu = (data[j] & 0x7) << 8 | data[j + 1];
-                  j += 2;
-                }
-
-                spqcds.push(_spqcd);
+                const precinctsSize = data[j++];
+                precinctsSizes.push({
+                  PPx: precinctsSize & 0xf,
+                  PPy: precinctsSize >> 4
+                });
               }
 
-              qcc.SPqcds = spqcds;
+              cod.precinctsSizes = precinctsSizes;
+            }
 
-              if (context.mainHeader) {
-                context.QCC[cqcc] = qcc;
-              } else {
-                context.currentTile.QCC[cqcc] = qcc;
-              }
+            const unsupported = [];
 
-              break;
+            if (cod.selectiveArithmeticCodingBypass) {
+              unsupported.push("selectiveArithmeticCodingBypass");
+            }
 
-            case 0xff52:
-              length = (0, _core_utils.readUint16)(data, position);
-              var cod = {};
-              j = position + 2;
-              var scod = data[j++];
-              cod.entropyCoderWithCustomPrecincts = !!(scod & 1);
-              cod.sopMarkerUsed = !!(scod & 2);
-              cod.ephMarkerUsed = !!(scod & 4);
-              cod.progressionOrder = data[j++];
-              cod.layersCount = (0, _core_utils.readUint16)(data, j);
-              j += 2;
-              cod.multipleComponentTransform = data[j++];
-              cod.decompositionLevelsCount = data[j++];
-              cod.xcb = (data[j++] & 0xf) + 2;
-              cod.ycb = (data[j++] & 0xf) + 2;
-              var blockStyle = data[j++];
-              cod.selectiveArithmeticCodingBypass = !!(blockStyle & 1);
-              cod.resetContextProbabilities = !!(blockStyle & 2);
-              cod.terminationOnEachCodingPass = !!(blockStyle & 4);
-              cod.verticallyStripe = !!(blockStyle & 8);
-              cod.predictableTermination = !!(blockStyle & 16);
-              cod.segmentationSymbolUsed = !!(blockStyle & 32);
-              cod.reversibleTransformation = data[j++];
+            if (cod.terminationOnEachCodingPass) {
+              unsupported.push("terminationOnEachCodingPass");
+            }
 
-              if (cod.entropyCoderWithCustomPrecincts) {
-                var precinctsSizes = [];
+            if (cod.verticallyStripe) {
+              unsupported.push("verticallyStripe");
+            }
 
-                while (j < length + position) {
-                  var precinctsSize = data[j++];
-                  precinctsSizes.push({
-                    PPx: precinctsSize & 0xf,
-                    PPy: precinctsSize >> 4
-                  });
-                }
+            if (cod.predictableTermination) {
+              unsupported.push("predictableTermination");
+            }
 
-                cod.precinctsSizes = precinctsSizes;
-              }
+            if (unsupported.length > 0) {
+              doNotRecover = true;
+              (0, _util.warn)(`JPX: Unsupported COD options (${unsupported.join(", ")}).`);
+            }
 
-              var unsupported = [];
+            if (context.mainHeader) {
+              context.COD = cod;
+            } else {
+              context.currentTile.COD = cod;
+              context.currentTile.COC = [];
+            }
 
-              if (cod.selectiveArithmeticCodingBypass) {
-                unsupported.push("selectiveArithmeticCodingBypass");
-              }
+            break;
 
-              if (cod.terminationOnEachCodingPass) {
-                unsupported.push("terminationOnEachCodingPass");
-              }
+          case 0xff90:
+            length = (0, _core_utils.readUint16)(data, position);
+            tile = {};
+            tile.index = (0, _core_utils.readUint16)(data, position + 2);
+            tile.length = (0, _core_utils.readUint32)(data, position + 4);
+            tile.dataEnd = tile.length + position - 2;
+            tile.partIndex = data[position + 8];
+            tile.partsCount = data[position + 9];
+            context.mainHeader = false;
 
-              if (cod.verticallyStripe) {
-                unsupported.push("verticallyStripe");
-              }
+            if (tile.partIndex === 0) {
+              tile.COD = context.COD;
+              tile.COC = context.COC.slice(0);
+              tile.QCD = context.QCD;
+              tile.QCC = context.QCC.slice(0);
+            }
 
-              if (cod.predictableTermination) {
-                unsupported.push("predictableTermination");
-              }
+            context.currentTile = tile;
+            break;
 
-              if (unsupported.length > 0) {
-                doNotRecover = true;
-                (0, _util.warn)("JPX: Unsupported COD options (".concat(unsupported.join(", "), ")."));
-              }
+          case 0xff93:
+            tile = context.currentTile;
 
-              if (context.mainHeader) {
-                context.COD = cod;
-              } else {
-                context.currentTile.COD = cod;
-                context.currentTile.COC = [];
-              }
+            if (tile.partIndex === 0) {
+              initializeTile(context, tile.index);
+              buildPackets(context);
+            }
 
-              break;
+            length = tile.dataEnd - position;
+            parseTilePackets(context, data, position, length);
+            break;
 
-            case 0xff90:
-              length = (0, _core_utils.readUint16)(data, position);
-              tile = {};
-              tile.index = (0, _core_utils.readUint16)(data, position + 2);
-              tile.length = (0, _core_utils.readUint32)(data, position + 4);
-              tile.dataEnd = tile.length + position - 2;
-              tile.partIndex = data[position + 8];
-              tile.partsCount = data[position + 9];
-              context.mainHeader = false;
+          case 0xff53:
+            (0, _util.warn)("JPX: Codestream code 0xFF53 (COC) is not implemented.");
 
-              if (tile.partIndex === 0) {
-                tile.COD = context.COD;
-                tile.COC = context.COC.slice(0);
-                tile.QCD = context.QCD;
-                tile.QCC = context.QCC.slice(0);
-              }
+          case 0xff55:
+          case 0xff57:
+          case 0xff58:
+          case 0xff64:
+            length = (0, _core_utils.readUint16)(data, position);
+            break;
 
-              context.currentTile = tile;
-              break;
-
-            case 0xff93:
-              tile = context.currentTile;
-
-              if (tile.partIndex === 0) {
-                initializeTile(context, tile.index);
-                buildPackets(context);
-              }
-
-              length = tile.dataEnd - position;
-              parseTilePackets(context, data, position, length);
-              break;
-
-            case 0xff53:
-              (0, _util.warn)("JPX: Codestream code 0xFF53 (COC) is not implemented.");
-
-            case 0xff55:
-            case 0xff57:
-            case 0xff58:
-            case 0xff64:
-              length = (0, _core_utils.readUint16)(data, position);
-              break;
-
-            default:
-              throw new Error("Unknown codestream code: " + code.toString(16));
-          }
-
-          position += length;
+          default:
+            throw new Error("Unknown codestream code: " + code.toString(16));
         }
-      } catch (e) {
-        if (doNotRecover || this.failOnCorruptedImage) {
-          throw new JpxError(e.message);
-        } else {
-          (0, _util.warn)("JPX: Trying to recover from: \"".concat(e.message, "\"."));
-        }
+
+        position += length;
       }
-
-      this.tiles = transformComponents(context);
-      this.width = context.SIZ.Xsiz - context.SIZ.XOsiz;
-      this.height = context.SIZ.Ysiz - context.SIZ.YOsiz;
-      this.componentsCount = context.SIZ.Csiz;
+    } catch (e) {
+      if (doNotRecover || this.failOnCorruptedImage) {
+        throw new JpxError(e.message);
+      } else {
+        (0, _util.warn)(`JPX: Trying to recover from: "${e.message}".`);
+      }
     }
-  }]);
 
-  return JpxImage;
-}();
+    this.tiles = transformComponents(context);
+    this.width = context.SIZ.Xsiz - context.SIZ.XOsiz;
+    this.height = context.SIZ.Ysiz - context.SIZ.YOsiz;
+    this.componentsCount = context.SIZ.Csiz;
+  }
+
+}
 
 exports.JpxImage = JpxImage;
 
@@ -9488,14 +8747,14 @@ function calculateComponentDimensions(component, siz) {
 }
 
 function calculateTileGrids(context, components) {
-  var siz = context.SIZ;
-  var tiles = [];
-  var tile;
-  var numXtiles = Math.ceil((siz.Xsiz - siz.XTOsiz) / siz.XTsiz);
-  var numYtiles = Math.ceil((siz.Ysiz - siz.YTOsiz) / siz.YTsiz);
+  const siz = context.SIZ;
+  const tiles = [];
+  let tile;
+  const numXtiles = Math.ceil((siz.Xsiz - siz.XTOsiz) / siz.XTsiz);
+  const numYtiles = Math.ceil((siz.Ysiz - siz.YTOsiz) / siz.YTsiz);
 
-  for (var q = 0; q < numYtiles; q++) {
-    for (var p = 0; p < numXtiles; p++) {
+  for (let q = 0; q < numYtiles; q++) {
+    for (let p = 0; p < numXtiles; p++) {
       tile = {};
       tile.tx0 = Math.max(siz.XTOsiz + p * siz.XTsiz, siz.XOsiz);
       tile.ty0 = Math.max(siz.YTOsiz + q * siz.YTsiz, siz.YOsiz);
@@ -9509,13 +8768,13 @@ function calculateTileGrids(context, components) {
   }
 
   context.tiles = tiles;
-  var componentsCount = siz.Csiz;
+  const componentsCount = siz.Csiz;
 
-  for (var i = 0, ii = componentsCount; i < ii; i++) {
-    var component = components[i];
+  for (let i = 0, ii = componentsCount; i < ii; i++) {
+    const component = components[i];
 
-    for (var j = 0, jj = tiles.length; j < jj; j++) {
-      var tileComponent = {};
+    for (let j = 0, jj = tiles.length; j < jj; j++) {
+      const tileComponent = {};
       tile = tiles[j];
       tileComponent.tcx0 = Math.ceil(tile.tx0 / component.XRsiz);
       tileComponent.tcy0 = Math.ceil(tile.ty0 / component.YRsiz);
@@ -9529,8 +8788,8 @@ function calculateTileGrids(context, components) {
 }
 
 function getBlocksDimensions(context, component, r) {
-  var codOrCoc = component.codingStyleParameters;
-  var result = {};
+  const codOrCoc = component.codingStyleParameters;
+  const result = {};
 
   if (!codOrCoc.entropyCoderWithCustomPrecincts) {
     result.PPx = 15;
@@ -9546,38 +8805,38 @@ function getBlocksDimensions(context, component, r) {
 }
 
 function buildPrecincts(context, resolution, dimensions) {
-  var precinctWidth = 1 << dimensions.PPx;
-  var precinctHeight = 1 << dimensions.PPy;
-  var isZeroRes = resolution.resLevel === 0;
-  var precinctWidthInSubband = 1 << dimensions.PPx + (isZeroRes ? 0 : -1);
-  var precinctHeightInSubband = 1 << dimensions.PPy + (isZeroRes ? 0 : -1);
-  var numprecinctswide = resolution.trx1 > resolution.trx0 ? Math.ceil(resolution.trx1 / precinctWidth) - Math.floor(resolution.trx0 / precinctWidth) : 0;
-  var numprecinctshigh = resolution.try1 > resolution.try0 ? Math.ceil(resolution.try1 / precinctHeight) - Math.floor(resolution.try0 / precinctHeight) : 0;
-  var numprecincts = numprecinctswide * numprecinctshigh;
+  const precinctWidth = 1 << dimensions.PPx;
+  const precinctHeight = 1 << dimensions.PPy;
+  const isZeroRes = resolution.resLevel === 0;
+  const precinctWidthInSubband = 1 << dimensions.PPx + (isZeroRes ? 0 : -1);
+  const precinctHeightInSubband = 1 << dimensions.PPy + (isZeroRes ? 0 : -1);
+  const numprecinctswide = resolution.trx1 > resolution.trx0 ? Math.ceil(resolution.trx1 / precinctWidth) - Math.floor(resolution.trx0 / precinctWidth) : 0;
+  const numprecinctshigh = resolution.try1 > resolution.try0 ? Math.ceil(resolution.try1 / precinctHeight) - Math.floor(resolution.try0 / precinctHeight) : 0;
+  const numprecincts = numprecinctswide * numprecinctshigh;
   resolution.precinctParameters = {
-    precinctWidth: precinctWidth,
-    precinctHeight: precinctHeight,
-    numprecinctswide: numprecinctswide,
-    numprecinctshigh: numprecinctshigh,
-    numprecincts: numprecincts,
-    precinctWidthInSubband: precinctWidthInSubband,
-    precinctHeightInSubband: precinctHeightInSubband
+    precinctWidth,
+    precinctHeight,
+    numprecinctswide,
+    numprecinctshigh,
+    numprecincts,
+    precinctWidthInSubband,
+    precinctHeightInSubband
   };
 }
 
 function buildCodeblocks(context, subband, dimensions) {
-  var xcb_ = dimensions.xcb_;
-  var ycb_ = dimensions.ycb_;
-  var codeblockWidth = 1 << xcb_;
-  var codeblockHeight = 1 << ycb_;
-  var cbx0 = subband.tbx0 >> xcb_;
-  var cby0 = subband.tby0 >> ycb_;
-  var cbx1 = subband.tbx1 + codeblockWidth - 1 >> xcb_;
-  var cby1 = subband.tby1 + codeblockHeight - 1 >> ycb_;
-  var precinctParameters = subband.resolution.precinctParameters;
-  var codeblocks = [];
-  var precincts = [];
-  var i, j, codeblock, precinctNumber;
+  const xcb_ = dimensions.xcb_;
+  const ycb_ = dimensions.ycb_;
+  const codeblockWidth = 1 << xcb_;
+  const codeblockHeight = 1 << ycb_;
+  const cbx0 = subband.tbx0 >> xcb_;
+  const cby0 = subband.tby0 >> ycb_;
+  const cbx1 = subband.tbx1 + codeblockWidth - 1 >> xcb_;
+  const cby1 = subband.tby1 + codeblockHeight - 1 >> ycb_;
+  const precinctParameters = subband.resolution.precinctParameters;
+  const codeblocks = [];
+  const precincts = [];
+  let i, j, codeblock, precinctNumber;
 
   for (j = cby0; j < cby1; j++) {
     for (i = cbx0; i < cbx1; i++) {
@@ -9593,8 +8852,8 @@ function buildCodeblocks(context, subband, dimensions) {
       codeblock.tby0_ = Math.max(subband.tby0, codeblock.tby0);
       codeblock.tbx1_ = Math.min(subband.tbx1, codeblock.tbx1);
       codeblock.tby1_ = Math.min(subband.tby1, codeblock.tby1);
-      var pi = Math.floor((codeblock.tbx0_ - subband.tbx0) / precinctParameters.precinctWidthInSubband);
-      var pj = Math.floor((codeblock.tby0_ - subband.tby0) / precinctParameters.precinctHeightInSubband);
+      const pi = Math.floor((codeblock.tbx0_ - subband.tbx0) / precinctParameters.precinctWidthInSubband);
+      const pj = Math.floor((codeblock.tby0_ - subband.tby0) / precinctParameters.precinctHeightInSubband);
       precinctNumber = pi + pj * precinctParameters.numprecinctswide;
       codeblock.precinctNumber = precinctNumber;
       codeblock.subbandType = subband.type;
@@ -9605,7 +8864,7 @@ function buildCodeblocks(context, subband, dimensions) {
       }
 
       codeblocks.push(codeblock);
-      var precinct = precincts[precinctNumber];
+      let precinct = precincts[precinctNumber];
 
       if (precinct !== undefined) {
         if (i < precinct.cbxMin) {
@@ -9643,15 +8902,15 @@ function buildCodeblocks(context, subband, dimensions) {
 }
 
 function createPacket(resolution, precinctNumber, layerNumber) {
-  var precinctCodeblocks = [];
-  var subbands = resolution.subbands;
+  const precinctCodeblocks = [];
+  const subbands = resolution.subbands;
 
-  for (var i = 0, ii = subbands.length; i < ii; i++) {
-    var subband = subbands[i];
-    var codeblocks = subband.codeblocks;
+  for (let i = 0, ii = subbands.length; i < ii; i++) {
+    const subband = subbands[i];
+    const codeblocks = subband.codeblocks;
 
-    for (var j = 0, jj = codeblocks.length; j < jj; j++) {
-      var codeblock = codeblocks[j];
+    for (let j = 0, jj = codeblocks.length; j < jj; j++) {
+      const codeblock = codeblocks[j];
 
       if (codeblock.precinctNumber !== precinctNumber) {
         continue;
@@ -9662,24 +8921,24 @@ function createPacket(resolution, precinctNumber, layerNumber) {
   }
 
   return {
-    layerNumber: layerNumber,
+    layerNumber,
     codeblocks: precinctCodeblocks
   };
 }
 
 function LayerResolutionComponentPositionIterator(context) {
-  var siz = context.SIZ;
-  var tileIndex = context.currentTile.index;
-  var tile = context.tiles[tileIndex];
-  var layersCount = tile.codingStyleDefaultParameters.layersCount;
-  var componentsCount = siz.Csiz;
-  var maxDecompositionLevelsCount = 0;
+  const siz = context.SIZ;
+  const tileIndex = context.currentTile.index;
+  const tile = context.tiles[tileIndex];
+  const layersCount = tile.codingStyleDefaultParameters.layersCount;
+  const componentsCount = siz.Csiz;
+  let maxDecompositionLevelsCount = 0;
 
-  for (var q = 0; q < componentsCount; q++) {
+  for (let q = 0; q < componentsCount; q++) {
     maxDecompositionLevelsCount = Math.max(maxDecompositionLevelsCount, tile.components[q].codingStyleParameters.decompositionLevelsCount);
   }
 
-  var l = 0,
+  let l = 0,
       r = 0,
       i = 0,
       k = 0;
@@ -9688,17 +8947,17 @@ function LayerResolutionComponentPositionIterator(context) {
     for (; l < layersCount; l++) {
       for (; r <= maxDecompositionLevelsCount; r++) {
         for (; i < componentsCount; i++) {
-          var component = tile.components[i];
+          const component = tile.components[i];
 
           if (r > component.codingStyleParameters.decompositionLevelsCount) {
             continue;
           }
 
-          var resolution = component.resolutions[r];
-          var numprecincts = resolution.precinctParameters.numprecincts;
+          const resolution = component.resolutions[r];
+          const numprecincts = resolution.precinctParameters.numprecincts;
 
           for (; k < numprecincts;) {
-            var packet = createPacket(resolution, k, l);
+            const packet = createPacket(resolution, k, l);
             k++;
             return packet;
           }
@@ -9717,18 +8976,18 @@ function LayerResolutionComponentPositionIterator(context) {
 }
 
 function ResolutionLayerComponentPositionIterator(context) {
-  var siz = context.SIZ;
-  var tileIndex = context.currentTile.index;
-  var tile = context.tiles[tileIndex];
-  var layersCount = tile.codingStyleDefaultParameters.layersCount;
-  var componentsCount = siz.Csiz;
-  var maxDecompositionLevelsCount = 0;
+  const siz = context.SIZ;
+  const tileIndex = context.currentTile.index;
+  const tile = context.tiles[tileIndex];
+  const layersCount = tile.codingStyleDefaultParameters.layersCount;
+  const componentsCount = siz.Csiz;
+  let maxDecompositionLevelsCount = 0;
 
-  for (var q = 0; q < componentsCount; q++) {
+  for (let q = 0; q < componentsCount; q++) {
     maxDecompositionLevelsCount = Math.max(maxDecompositionLevelsCount, tile.components[q].codingStyleParameters.decompositionLevelsCount);
   }
 
-  var r = 0,
+  let r = 0,
       l = 0,
       i = 0,
       k = 0;
@@ -9737,17 +8996,17 @@ function ResolutionLayerComponentPositionIterator(context) {
     for (; r <= maxDecompositionLevelsCount; r++) {
       for (; l < layersCount; l++) {
         for (; i < componentsCount; i++) {
-          var component = tile.components[i];
+          const component = tile.components[i];
 
           if (r > component.codingStyleParameters.decompositionLevelsCount) {
             continue;
           }
 
-          var resolution = component.resolutions[r];
-          var numprecincts = resolution.precinctParameters.numprecincts;
+          const resolution = component.resolutions[r];
+          const numprecincts = resolution.precinctParameters.numprecincts;
 
           for (; k < numprecincts;) {
-            var packet = createPacket(resolution, k, l);
+            const packet = createPacket(resolution, k, l);
             k++;
             return packet;
           }
@@ -9766,26 +9025,26 @@ function ResolutionLayerComponentPositionIterator(context) {
 }
 
 function ResolutionPositionComponentLayerIterator(context) {
-  var siz = context.SIZ;
-  var tileIndex = context.currentTile.index;
-  var tile = context.tiles[tileIndex];
-  var layersCount = tile.codingStyleDefaultParameters.layersCount;
-  var componentsCount = siz.Csiz;
-  var l, r, c, p;
-  var maxDecompositionLevelsCount = 0;
+  const siz = context.SIZ;
+  const tileIndex = context.currentTile.index;
+  const tile = context.tiles[tileIndex];
+  const layersCount = tile.codingStyleDefaultParameters.layersCount;
+  const componentsCount = siz.Csiz;
+  let l, r, c, p;
+  let maxDecompositionLevelsCount = 0;
 
   for (c = 0; c < componentsCount; c++) {
-    var component = tile.components[c];
+    const component = tile.components[c];
     maxDecompositionLevelsCount = Math.max(maxDecompositionLevelsCount, component.codingStyleParameters.decompositionLevelsCount);
   }
 
-  var maxNumPrecinctsInLevel = new Int32Array(maxDecompositionLevelsCount + 1);
+  const maxNumPrecinctsInLevel = new Int32Array(maxDecompositionLevelsCount + 1);
 
   for (r = 0; r <= maxDecompositionLevelsCount; ++r) {
-    var maxNumPrecincts = 0;
+    let maxNumPrecincts = 0;
 
     for (c = 0; c < componentsCount; ++c) {
-      var resolutions = tile.components[c].resolutions;
+      const resolutions = tile.components[c].resolutions;
 
       if (r < resolutions.length) {
         maxNumPrecincts = Math.max(maxNumPrecincts, resolutions[r].precinctParameters.numprecincts);
@@ -9804,21 +9063,21 @@ function ResolutionPositionComponentLayerIterator(context) {
     for (; r <= maxDecompositionLevelsCount; r++) {
       for (; p < maxNumPrecinctsInLevel[r]; p++) {
         for (; c < componentsCount; c++) {
-          var _component = tile.components[c];
+          const component = tile.components[c];
 
-          if (r > _component.codingStyleParameters.decompositionLevelsCount) {
+          if (r > component.codingStyleParameters.decompositionLevelsCount) {
             continue;
           }
 
-          var resolution = _component.resolutions[r];
-          var numprecincts = resolution.precinctParameters.numprecincts;
+          const resolution = component.resolutions[r];
+          const numprecincts = resolution.precinctParameters.numprecincts;
 
           if (p >= numprecincts) {
             continue;
           }
 
           for (; l < layersCount;) {
-            var packet = createPacket(resolution, p, l);
+            const packet = createPacket(resolution, p, l);
             l++;
             return packet;
           }
@@ -9837,14 +9096,14 @@ function ResolutionPositionComponentLayerIterator(context) {
 }
 
 function PositionComponentResolutionLayerIterator(context) {
-  var siz = context.SIZ;
-  var tileIndex = context.currentTile.index;
-  var tile = context.tiles[tileIndex];
-  var layersCount = tile.codingStyleDefaultParameters.layersCount;
-  var componentsCount = siz.Csiz;
-  var precinctsSizes = getPrecinctSizesInImageScale(tile);
-  var precinctsIterationSizes = precinctsSizes;
-  var l = 0,
+  const siz = context.SIZ;
+  const tileIndex = context.currentTile.index;
+  const tile = context.tiles[tileIndex];
+  const layersCount = tile.codingStyleDefaultParameters.layersCount;
+  const componentsCount = siz.Csiz;
+  const precinctsSizes = getPrecinctSizesInImageScale(tile);
+  const precinctsIterationSizes = precinctsSizes;
+  let l = 0,
       r = 0,
       c = 0,
       px = 0,
@@ -9854,20 +9113,20 @@ function PositionComponentResolutionLayerIterator(context) {
     for (; py < precinctsIterationSizes.maxNumHigh; py++) {
       for (; px < precinctsIterationSizes.maxNumWide; px++) {
         for (; c < componentsCount; c++) {
-          var component = tile.components[c];
-          var decompositionLevelsCount = component.codingStyleParameters.decompositionLevelsCount;
+          const component = tile.components[c];
+          const decompositionLevelsCount = component.codingStyleParameters.decompositionLevelsCount;
 
           for (; r <= decompositionLevelsCount; r++) {
-            var resolution = component.resolutions[r];
-            var sizeInImageScale = precinctsSizes.components[c].resolutions[r];
-            var k = getPrecinctIndexIfExist(px, py, sizeInImageScale, precinctsIterationSizes, resolution);
+            const resolution = component.resolutions[r];
+            const sizeInImageScale = precinctsSizes.components[c].resolutions[r];
+            const k = getPrecinctIndexIfExist(px, py, sizeInImageScale, precinctsIterationSizes, resolution);
 
             if (k === null) {
               continue;
             }
 
             for (; l < layersCount;) {
-              var packet = createPacket(resolution, k, l);
+              const packet = createPacket(resolution, k, l);
               l++;
               return packet;
             }
@@ -9889,13 +9148,13 @@ function PositionComponentResolutionLayerIterator(context) {
 }
 
 function ComponentPositionResolutionLayerIterator(context) {
-  var siz = context.SIZ;
-  var tileIndex = context.currentTile.index;
-  var tile = context.tiles[tileIndex];
-  var layersCount = tile.codingStyleDefaultParameters.layersCount;
-  var componentsCount = siz.Csiz;
-  var precinctsSizes = getPrecinctSizesInImageScale(tile);
-  var l = 0,
+  const siz = context.SIZ;
+  const tileIndex = context.currentTile.index;
+  const tile = context.tiles[tileIndex];
+  const layersCount = tile.codingStyleDefaultParameters.layersCount;
+  const componentsCount = siz.Csiz;
+  const precinctsSizes = getPrecinctSizesInImageScale(tile);
+  let l = 0,
       r = 0,
       c = 0,
       px = 0,
@@ -9903,23 +9162,23 @@ function ComponentPositionResolutionLayerIterator(context) {
 
   this.nextPacket = function JpxImage_nextPacket() {
     for (; c < componentsCount; ++c) {
-      var component = tile.components[c];
-      var precinctsIterationSizes = precinctsSizes.components[c];
-      var decompositionLevelsCount = component.codingStyleParameters.decompositionLevelsCount;
+      const component = tile.components[c];
+      const precinctsIterationSizes = precinctsSizes.components[c];
+      const decompositionLevelsCount = component.codingStyleParameters.decompositionLevelsCount;
 
       for (; py < precinctsIterationSizes.maxNumHigh; py++) {
         for (; px < precinctsIterationSizes.maxNumWide; px++) {
           for (; r <= decompositionLevelsCount; r++) {
-            var resolution = component.resolutions[r];
-            var sizeInImageScale = precinctsIterationSizes.resolutions[r];
-            var k = getPrecinctIndexIfExist(px, py, sizeInImageScale, precinctsIterationSizes, resolution);
+            const resolution = component.resolutions[r];
+            const sizeInImageScale = precinctsIterationSizes.resolutions[r];
+            const k = getPrecinctIndexIfExist(px, py, sizeInImageScale, precinctsIterationSizes, resolution);
 
             if (k === null) {
               continue;
             }
 
             for (; l < layersCount;) {
-              var packet = createPacket(resolution, k, l);
+              const packet = createPacket(resolution, k, l);
               l++;
               return packet;
             }
@@ -9941,39 +9200,39 @@ function ComponentPositionResolutionLayerIterator(context) {
 }
 
 function getPrecinctIndexIfExist(pxIndex, pyIndex, sizeInImageScale, precinctIterationSizes, resolution) {
-  var posX = pxIndex * precinctIterationSizes.minWidth;
-  var posY = pyIndex * precinctIterationSizes.minHeight;
+  const posX = pxIndex * precinctIterationSizes.minWidth;
+  const posY = pyIndex * precinctIterationSizes.minHeight;
 
   if (posX % sizeInImageScale.width !== 0 || posY % sizeInImageScale.height !== 0) {
     return null;
   }
 
-  var startPrecinctRowIndex = posY / sizeInImageScale.width * resolution.precinctParameters.numprecinctswide;
+  const startPrecinctRowIndex = posY / sizeInImageScale.width * resolution.precinctParameters.numprecinctswide;
   return posX / sizeInImageScale.height + startPrecinctRowIndex;
 }
 
 function getPrecinctSizesInImageScale(tile) {
-  var componentsCount = tile.components.length;
-  var minWidth = Number.MAX_VALUE;
-  var minHeight = Number.MAX_VALUE;
-  var maxNumWide = 0;
-  var maxNumHigh = 0;
-  var sizePerComponent = new Array(componentsCount);
+  const componentsCount = tile.components.length;
+  let minWidth = Number.MAX_VALUE;
+  let minHeight = Number.MAX_VALUE;
+  let maxNumWide = 0;
+  let maxNumHigh = 0;
+  const sizePerComponent = new Array(componentsCount);
 
-  for (var c = 0; c < componentsCount; c++) {
-    var component = tile.components[c];
-    var decompositionLevelsCount = component.codingStyleParameters.decompositionLevelsCount;
-    var sizePerResolution = new Array(decompositionLevelsCount + 1);
-    var minWidthCurrentComponent = Number.MAX_VALUE;
-    var minHeightCurrentComponent = Number.MAX_VALUE;
-    var maxNumWideCurrentComponent = 0;
-    var maxNumHighCurrentComponent = 0;
-    var scale = 1;
+  for (let c = 0; c < componentsCount; c++) {
+    const component = tile.components[c];
+    const decompositionLevelsCount = component.codingStyleParameters.decompositionLevelsCount;
+    const sizePerResolution = new Array(decompositionLevelsCount + 1);
+    let minWidthCurrentComponent = Number.MAX_VALUE;
+    let minHeightCurrentComponent = Number.MAX_VALUE;
+    let maxNumWideCurrentComponent = 0;
+    let maxNumHighCurrentComponent = 0;
+    let scale = 1;
 
-    for (var r = decompositionLevelsCount; r >= 0; --r) {
-      var resolution = component.resolutions[r];
-      var widthCurrentResolution = scale * resolution.precinctParameters.precinctWidth;
-      var heightCurrentResolution = scale * resolution.precinctParameters.precinctHeight;
+    for (let r = decompositionLevelsCount; r >= 0; --r) {
+      const resolution = component.resolutions[r];
+      const widthCurrentResolution = scale * resolution.precinctParameters.precinctWidth;
+      const heightCurrentResolution = scale * resolution.precinctParameters.precinctHeight;
       minWidthCurrentComponent = Math.min(minWidthCurrentComponent, widthCurrentResolution);
       minHeightCurrentComponent = Math.min(minHeightCurrentComponent, heightCurrentResolution);
       maxNumWideCurrentComponent = Math.max(maxNumWideCurrentComponent, resolution.precinctParameters.numprecinctswide);
@@ -10000,29 +9259,29 @@ function getPrecinctSizesInImageScale(tile) {
 
   return {
     components: sizePerComponent,
-    minWidth: minWidth,
-    minHeight: minHeight,
-    maxNumWide: maxNumWide,
-    maxNumHigh: maxNumHigh
+    minWidth,
+    minHeight,
+    maxNumWide,
+    maxNumHigh
   };
 }
 
 function buildPackets(context) {
-  var siz = context.SIZ;
-  var tileIndex = context.currentTile.index;
-  var tile = context.tiles[tileIndex];
-  var componentsCount = siz.Csiz;
+  const siz = context.SIZ;
+  const tileIndex = context.currentTile.index;
+  const tile = context.tiles[tileIndex];
+  const componentsCount = siz.Csiz;
 
-  for (var c = 0; c < componentsCount; c++) {
-    var component = tile.components[c];
-    var decompositionLevelsCount = component.codingStyleParameters.decompositionLevelsCount;
-    var resolutions = [];
-    var subbands = [];
+  for (let c = 0; c < componentsCount; c++) {
+    const component = tile.components[c];
+    const decompositionLevelsCount = component.codingStyleParameters.decompositionLevelsCount;
+    const resolutions = [];
+    const subbands = [];
 
-    for (var r = 0; r <= decompositionLevelsCount; r++) {
-      var blocksDimensions = getBlocksDimensions(context, component, r);
-      var resolution = {};
-      var scale = 1 << decompositionLevelsCount - r;
+    for (let r = 0; r <= decompositionLevelsCount; r++) {
+      const blocksDimensions = getBlocksDimensions(context, component, r);
+      const resolution = {};
+      const scale = 1 << decompositionLevelsCount - r;
       resolution.trx0 = Math.ceil(component.tcx0 / scale);
       resolution.try0 = Math.ceil(component.tcy0 / scale);
       resolution.trx1 = Math.ceil(component.tcx1 / scale);
@@ -10030,7 +9289,7 @@ function buildPackets(context) {
       resolution.resLevel = r;
       buildPrecincts(context, resolution, blocksDimensions);
       resolutions.push(resolution);
-      var subband = void 0;
+      let subband;
 
       if (r === 0) {
         subband = {};
@@ -10044,8 +9303,8 @@ function buildPackets(context) {
         subbands.push(subband);
         resolution.subbands = [subband];
       } else {
-        var bscale = 1 << decompositionLevelsCount - r + 1;
-        var resolutionSubbands = [];
+        const bscale = 1 << decompositionLevelsCount - r + 1;
+        const resolutionSubbands = [];
         subband = {};
         subband.type = "HL";
         subband.tbx0 = Math.ceil(component.tcx0 / bscale - 0.5);
@@ -10084,7 +9343,7 @@ function buildPackets(context) {
     component.subbands = subbands;
   }
 
-  var progressionOrder = tile.codingStyleDefaultParameters.progressionOrder;
+  const progressionOrder = tile.codingStyleDefaultParameters.progressionOrder;
 
   switch (progressionOrder) {
     case 0:
@@ -10108,19 +9367,19 @@ function buildPackets(context) {
       break;
 
     default:
-      throw new JpxError("Unsupported progression order ".concat(progressionOrder));
+      throw new JpxError(`Unsupported progression order ${progressionOrder}`);
   }
 }
 
 function parseTilePackets(context, data, offset, dataLength) {
-  var position = 0;
-  var buffer,
+  let position = 0;
+  let buffer,
       bufferSize = 0,
       skipNextBit = false;
 
   function readBits(count) {
     while (bufferSize < count) {
-      var b = data[offset + position];
+      const b = data[offset + position];
       position++;
 
       if (skipNextBit) {
@@ -10175,7 +9434,7 @@ function parseTilePackets(context, data, offset, dataLength) {
       return 2;
     }
 
-    var value = readBits(2);
+    let value = readBits(2);
 
     if (value < 3) {
       return value + 3;
@@ -10191,11 +9450,11 @@ function parseTilePackets(context, data, offset, dataLength) {
     return value + 37;
   }
 
-  var tileIndex = context.currentTile.index;
-  var tile = context.tiles[tileIndex];
-  var sopMarkerUsed = context.COD.sopMarkerUsed;
-  var ephMarkerUsed = context.COD.ephMarkerUsed;
-  var packetsIterator = tile.packetsIterator;
+  const tileIndex = context.currentTile.index;
+  const tile = context.tiles[tileIndex];
+  const sopMarkerUsed = context.COD.sopMarkerUsed;
+  const ephMarkerUsed = context.COD.ephMarkerUsed;
+  const packetsIterator = tile.packetsIterator;
 
   while (position < dataLength) {
     alignToByte();
@@ -10204,43 +9463,42 @@ function parseTilePackets(context, data, offset, dataLength) {
       skipBytes(4);
     }
 
-    var packet = packetsIterator.nextPacket();
+    const packet = packetsIterator.nextPacket();
 
     if (!readBits(1)) {
       continue;
     }
 
-    var layerNumber = packet.layerNumber,
-        queue = [];
-    var codeblock = void 0;
+    const layerNumber = packet.layerNumber,
+          queue = [];
+    let codeblock;
 
-    for (var i = 0, ii = packet.codeblocks.length; i < ii; i++) {
+    for (let i = 0, ii = packet.codeblocks.length; i < ii; i++) {
       codeblock = packet.codeblocks[i];
-      var precinct = codeblock.precinct;
-      var codeblockColumn = codeblock.cbx - precinct.cbxMin;
-      var codeblockRow = codeblock.cby - precinct.cbyMin;
-      var codeblockIncluded = false;
-      var firstTimeInclusion = false;
-      var valueReady = void 0,
-          zeroBitPlanesTree = void 0;
+      let precinct = codeblock.precinct;
+      const codeblockColumn = codeblock.cbx - precinct.cbxMin;
+      const codeblockRow = codeblock.cby - precinct.cbyMin;
+      let codeblockIncluded = false;
+      let firstTimeInclusion = false;
+      let valueReady, zeroBitPlanesTree;
 
       if (codeblock.included !== undefined) {
         codeblockIncluded = !!readBits(1);
       } else {
         precinct = codeblock.precinct;
-        var inclusionTree = void 0;
+        let inclusionTree;
 
         if (precinct.inclusionTree !== undefined) {
           inclusionTree = precinct.inclusionTree;
         } else {
-          var width = precinct.cbxMax - precinct.cbxMin + 1;
-          var height = precinct.cbyMax - precinct.cbyMin + 1;
+          const width = precinct.cbxMax - precinct.cbxMin + 1;
+          const height = precinct.cbyMax - precinct.cbyMin + 1;
           inclusionTree = new InclusionTree(width, height, layerNumber);
           zeroBitPlanesTree = new TagTree(width, height);
           precinct.inclusionTree = inclusionTree;
           precinct.zeroBitPlanesTree = zeroBitPlanesTree;
 
-          for (var l = 0; l < layerNumber; l++) {
+          for (let l = 0; l < layerNumber; l++) {
             if (readBits(1) !== 0) {
               throw new JpxError("Invalid tag tree");
             }
@@ -10288,18 +9546,18 @@ function parseTilePackets(context, data, offset, dataLength) {
         codeblock.zeroBitPlanes = zeroBitPlanesTree.value;
       }
 
-      var codingpasses = readCodingpasses();
+      const codingpasses = readCodingpasses();
 
       while (readBits(1)) {
         codeblock.Lblock++;
       }
 
-      var codingpassesLog2 = (0, _core_utils.log2)(codingpasses);
-      var bits = (codingpasses < 1 << codingpassesLog2 ? codingpassesLog2 - 1 : codingpassesLog2) + codeblock.Lblock;
-      var codedDataLength = readBits(bits);
+      const codingpassesLog2 = (0, _core_utils.log2)(codingpasses);
+      const bits = (codingpasses < 1 << codingpassesLog2 ? codingpassesLog2 - 1 : codingpassesLog2) + codeblock.Lblock;
+      const codedDataLength = readBits(bits);
       queue.push({
-        codeblock: codeblock,
-        codingpasses: codingpasses,
+        codeblock,
+        codingpasses,
         dataLength: codedDataLength
       });
     }
@@ -10311,7 +9569,7 @@ function parseTilePackets(context, data, offset, dataLength) {
     }
 
     while (queue.length > 0) {
-      var packetItem = queue.shift();
+      const packetItem = queue.shift();
       codeblock = packetItem.codeblock;
 
       if (codeblock.data === undefined) {
@@ -10319,7 +9577,7 @@ function parseTilePackets(context, data, offset, dataLength) {
       }
 
       codeblock.data.push({
-        data: data,
+        data,
         start: offset + position,
         end: offset + position + packetItem.dataLength,
         codingpasses: packetItem.codingpasses
@@ -10332,17 +9590,17 @@ function parseTilePackets(context, data, offset, dataLength) {
 }
 
 function copyCoefficients(coefficients, levelWidth, levelHeight, subband, delta, mb, reversible, segmentationSymbolUsed, resetContextProbabilities) {
-  var x0 = subband.tbx0;
-  var y0 = subband.tby0;
-  var width = subband.tbx1 - subband.tbx0;
-  var codeblocks = subband.codeblocks;
-  var right = subband.type.charAt(0) === "H" ? 1 : 0;
-  var bottom = subband.type.charAt(1) === "H" ? levelWidth : 0;
+  const x0 = subband.tbx0;
+  const y0 = subband.tby0;
+  const width = subband.tbx1 - subband.tbx0;
+  const codeblocks = subband.codeblocks;
+  const right = subband.type.charAt(0) === "H" ? 1 : 0;
+  const bottom = subband.type.charAt(1) === "H" ? levelWidth : 0;
 
-  for (var i = 0, ii = codeblocks.length; i < ii; ++i) {
-    var codeblock = codeblocks[i];
-    var blockWidth = codeblock.tbx1_ - codeblock.tbx0_;
-    var blockHeight = codeblock.tby1_ - codeblock.tby0_;
+  for (let i = 0, ii = codeblocks.length; i < ii; ++i) {
+    const codeblock = codeblocks[i];
+    const blockWidth = codeblock.tbx1_ - codeblock.tbx0_;
+    const blockHeight = codeblock.tby1_ - codeblock.tby0_;
 
     if (blockWidth === 0 || blockHeight === 0) {
       continue;
@@ -10352,14 +9610,12 @@ function copyCoefficients(coefficients, levelWidth, levelHeight, subband, delta,
       continue;
     }
 
-    var bitModel = new BitModel(blockWidth, blockHeight, codeblock.subbandType, codeblock.zeroBitPlanes, mb);
-    var currentCodingpassType = 2;
-    var data = codeblock.data;
-    var totalLength = 0,
+    const bitModel = new BitModel(blockWidth, blockHeight, codeblock.subbandType, codeblock.zeroBitPlanes, mb);
+    let currentCodingpassType = 2;
+    const data = codeblock.data;
+    let totalLength = 0,
         codingpasses = 0;
-    var j = void 0,
-        jj = void 0,
-        dataItem = void 0;
+    let j, jj, dataItem;
 
     for (j = 0, jj = data.length; j < jj; j++) {
       dataItem = data[j];
@@ -10367,17 +9623,17 @@ function copyCoefficients(coefficients, levelWidth, levelHeight, subband, delta,
       codingpasses += dataItem.codingpasses;
     }
 
-    var encodedData = new Uint8Array(totalLength);
-    var position = 0;
+    const encodedData = new Uint8Array(totalLength);
+    let position = 0;
 
     for (j = 0, jj = data.length; j < jj; j++) {
       dataItem = data[j];
-      var chunk = dataItem.data.subarray(dataItem.start, dataItem.end);
+      const chunk = dataItem.data.subarray(dataItem.start, dataItem.end);
       encodedData.set(chunk, position);
       position += chunk.length;
     }
 
-    var decoder = new _arithmetic_decoder.ArithmeticDecoder(encodedData, 0, totalLength);
+    const decoder = new _arithmetic_decoder.ArithmeticDecoder(encodedData, 0, totalLength);
     bitModel.setDecoder(decoder);
 
     for (j = 0; j < codingpasses; j++) {
@@ -10407,20 +9663,18 @@ function copyCoefficients(coefficients, levelWidth, levelHeight, subband, delta,
       currentCodingpassType = (currentCodingpassType + 1) % 3;
     }
 
-    var offset = codeblock.tbx0_ - x0 + (codeblock.tby0_ - y0) * width;
-    var sign = bitModel.coefficentsSign;
-    var magnitude = bitModel.coefficentsMagnitude;
-    var bitsDecoded = bitModel.bitsDecoded;
-    var magnitudeCorrection = reversible ? 0 : 0.5;
-    var k = void 0,
-        n = void 0,
-        nb = void 0;
+    let offset = codeblock.tbx0_ - x0 + (codeblock.tby0_ - y0) * width;
+    const sign = bitModel.coefficentsSign;
+    const magnitude = bitModel.coefficentsMagnitude;
+    const bitsDecoded = bitModel.bitsDecoded;
+    const magnitudeCorrection = reversible ? 0 : 0.5;
+    let k, n, nb;
     position = 0;
-    var interleave = subband.type !== "LL";
+    const interleave = subband.type !== "LL";
 
     for (j = 0; j < blockHeight; j++) {
-      var row = offset / width | 0;
-      var levelOffset = 2 * row * (levelWidth - width) + right + bottom;
+      const row = offset / width | 0;
+      const levelOffset = 2 * row * (levelWidth - width) + right + bottom;
 
       for (k = 0; k < blockWidth; k++) {
         n = magnitude[position];
@@ -10433,7 +9687,7 @@ function copyCoefficients(coefficients, levelWidth, levelHeight, subband, delta,
           }
 
           nb = bitsDecoded[position];
-          var pos = interleave ? levelOffset + (offset << 1) : offset;
+          const pos = interleave ? levelOffset + (offset << 1) : offset;
 
           if (reversible && nb >= mb) {
             coefficients[pos] = n;
@@ -10452,30 +9706,29 @@ function copyCoefficients(coefficients, levelWidth, levelHeight, subband, delta,
 }
 
 function transformTile(context, tile, c) {
-  var component = tile.components[c];
-  var codingStyleParameters = component.codingStyleParameters;
-  var quantizationParameters = component.quantizationParameters;
-  var decompositionLevelsCount = codingStyleParameters.decompositionLevelsCount;
-  var spqcds = quantizationParameters.SPqcds;
-  var scalarExpounded = quantizationParameters.scalarExpounded;
-  var guardBits = quantizationParameters.guardBits;
-  var segmentationSymbolUsed = codingStyleParameters.segmentationSymbolUsed;
-  var resetContextProbabilities = codingStyleParameters.resetContextProbabilities;
-  var precision = context.components[c].precision;
-  var reversible = codingStyleParameters.reversibleTransformation;
-  var transform = reversible ? new ReversibleTransform() : new IrreversibleTransform();
-  var subbandCoefficients = [];
-  var b = 0;
+  const component = tile.components[c];
+  const codingStyleParameters = component.codingStyleParameters;
+  const quantizationParameters = component.quantizationParameters;
+  const decompositionLevelsCount = codingStyleParameters.decompositionLevelsCount;
+  const spqcds = quantizationParameters.SPqcds;
+  const scalarExpounded = quantizationParameters.scalarExpounded;
+  const guardBits = quantizationParameters.guardBits;
+  const segmentationSymbolUsed = codingStyleParameters.segmentationSymbolUsed;
+  const resetContextProbabilities = codingStyleParameters.resetContextProbabilities;
+  const precision = context.components[c].precision;
+  const reversible = codingStyleParameters.reversibleTransformation;
+  const transform = reversible ? new ReversibleTransform() : new IrreversibleTransform();
+  const subbandCoefficients = [];
+  let b = 0;
 
-  for (var i = 0; i <= decompositionLevelsCount; i++) {
-    var resolution = component.resolutions[i];
-    var width = resolution.trx1 - resolution.trx0;
-    var height = resolution.try1 - resolution.try0;
-    var coefficients = new Float32Array(width * height);
+  for (let i = 0; i <= decompositionLevelsCount; i++) {
+    const resolution = component.resolutions[i];
+    const width = resolution.trx1 - resolution.trx0;
+    const height = resolution.try1 - resolution.try0;
+    const coefficients = new Float32Array(width * height);
 
-    for (var j = 0, jj = resolution.subbands.length; j < jj; j++) {
-      var mu = void 0,
-          epsilon = void 0;
+    for (let j = 0, jj = resolution.subbands.length; j < jj; j++) {
+      let mu, epsilon;
 
       if (!scalarExpounded) {
         mu = spqcds[0].mu;
@@ -10486,21 +9739,21 @@ function transformTile(context, tile, c) {
         b++;
       }
 
-      var subband = resolution.subbands[j];
-      var gainLog2 = SubbandsGainLog2[subband.type];
-      var delta = reversible ? 1 : Math.pow(2, precision + gainLog2 - epsilon) * (1 + mu / 2048);
-      var mb = guardBits + epsilon - 1;
+      const subband = resolution.subbands[j];
+      const gainLog2 = SubbandsGainLog2[subband.type];
+      const delta = reversible ? 1 : 2 ** (precision + gainLog2 - epsilon) * (1 + mu / 2048);
+      const mb = guardBits + epsilon - 1;
       copyCoefficients(coefficients, width, height, subband, delta, mb, reversible, segmentationSymbolUsed, resetContextProbabilities);
     }
 
     subbandCoefficients.push({
-      width: width,
-      height: height,
+      width,
+      height,
       items: coefficients
     });
   }
 
-  var result = transform.calculate(subbandCoefficients, component.tcx0, component.tcy0);
+  const result = transform.calculate(subbandCoefficients, component.tcx0, component.tcy0);
   return {
     left: component.tcx0,
     top: component.tcy0,
@@ -10511,47 +9764,46 @@ function transformTile(context, tile, c) {
 }
 
 function transformComponents(context) {
-  var siz = context.SIZ;
-  var components = context.components;
-  var componentsCount = siz.Csiz;
-  var resultImages = [];
+  const siz = context.SIZ;
+  const components = context.components;
+  const componentsCount = siz.Csiz;
+  const resultImages = [];
 
-  for (var i = 0, ii = context.tiles.length; i < ii; i++) {
-    var tile = context.tiles[i];
-    var transformedTiles = [];
+  for (let i = 0, ii = context.tiles.length; i < ii; i++) {
+    const tile = context.tiles[i];
+    const transformedTiles = [];
 
-    for (var c = 0; c < componentsCount; c++) {
+    for (let c = 0; c < componentsCount; c++) {
       transformedTiles[c] = transformTile(context, tile, c);
     }
 
-    var tile0 = transformedTiles[0];
-    var out = new Uint8ClampedArray(tile0.items.length * componentsCount);
-    var result = {
+    const tile0 = transformedTiles[0];
+    const out = new Uint8ClampedArray(tile0.items.length * componentsCount);
+    const result = {
       left: tile0.left,
       top: tile0.top,
       width: tile0.width,
       height: tile0.height,
       items: out
     };
-    var shift = void 0,
-        offset = void 0;
-    var pos = 0,
-        j = void 0,
-        jj = void 0,
-        y0 = void 0,
-        y1 = void 0,
-        y2 = void 0;
+    let shift, offset;
+    let pos = 0,
+        j,
+        jj,
+        y0,
+        y1,
+        y2;
 
     if (tile.codingStyleDefaultParameters.multipleComponentTransform) {
-      var fourComponents = componentsCount === 4;
-      var y0items = transformedTiles[0].items;
-      var y1items = transformedTiles[1].items;
-      var y2items = transformedTiles[2].items;
-      var y3items = fourComponents ? transformedTiles[3].items : null;
+      const fourComponents = componentsCount === 4;
+      const y0items = transformedTiles[0].items;
+      const y1items = transformedTiles[1].items;
+      const y2items = transformedTiles[2].items;
+      const y3items = fourComponents ? transformedTiles[3].items : null;
       shift = components[0].precision - 8;
       offset = (128 << shift) + 0.5;
-      var component0 = tile.components[0];
-      var alpha01 = componentsCount - 3;
+      const component0 = tile.components[0];
+      const alpha01 = componentsCount - 3;
       jj = y0items.length;
 
       if (!component0.codingStyleParameters.reversibleTransformation) {
@@ -10568,7 +9820,7 @@ function transformComponents(context) {
           y0 = y0items[j] + offset;
           y1 = y1items[j];
           y2 = y2items[j];
-          var g = y0 - (y2 + y1 >> 2);
+          const g = y0 - (y2 + y1 >> 2);
           out[pos++] = g + y2 >> shift;
           out[pos++] = g >> shift;
           out[pos++] = g + y1 >> shift;
@@ -10581,12 +9833,12 @@ function transformComponents(context) {
         }
       }
     } else {
-      for (var _c = 0; _c < componentsCount; _c++) {
-        var items = transformedTiles[_c].items;
-        shift = components[_c].precision - 8;
+      for (let c = 0; c < componentsCount; c++) {
+        const items = transformedTiles[c].items;
+        shift = components[c].precision - 8;
         offset = (128 << shift) + 0.5;
 
-        for (pos = _c, j = 0, jj = items.length; j < jj; j++) {
+        for (pos = c, j = 0, jj = items.length; j < jj; j++) {
           out[pos] = items[j] + offset >> shift;
           pos += componentsCount;
         }
@@ -10600,32 +9852,30 @@ function transformComponents(context) {
 }
 
 function initializeTile(context, tileIndex) {
-  var siz = context.SIZ;
-  var componentsCount = siz.Csiz;
-  var tile = context.tiles[tileIndex];
+  const siz = context.SIZ;
+  const componentsCount = siz.Csiz;
+  const tile = context.tiles[tileIndex];
 
-  for (var c = 0; c < componentsCount; c++) {
-    var component = tile.components[c];
-    var qcdOrQcc = context.currentTile.QCC[c] !== undefined ? context.currentTile.QCC[c] : context.currentTile.QCD;
+  for (let c = 0; c < componentsCount; c++) {
+    const component = tile.components[c];
+    const qcdOrQcc = context.currentTile.QCC[c] !== undefined ? context.currentTile.QCC[c] : context.currentTile.QCD;
     component.quantizationParameters = qcdOrQcc;
-    var codOrCoc = context.currentTile.COC[c] !== undefined ? context.currentTile.COC[c] : context.currentTile.COD;
+    const codOrCoc = context.currentTile.COC[c] !== undefined ? context.currentTile.COC[c] : context.currentTile.COD;
     component.codingStyleParameters = codOrCoc;
   }
 
   tile.codingStyleDefaultParameters = context.currentTile.COD;
 }
 
-var TagTree = /*#__PURE__*/function () {
-  function TagTree(width, height) {
-    _classCallCheck(this, TagTree);
-
-    var levelsLength = (0, _core_utils.log2)(Math.max(width, height)) + 1;
+class TagTree {
+  constructor(width, height) {
+    const levelsLength = (0, _core_utils.log2)(Math.max(width, height)) + 1;
     this.levels = [];
 
-    for (var i = 0; i < levelsLength; i++) {
-      var level = {
-        width: width,
-        height: height,
+    for (let i = 0; i < levelsLength; i++) {
+      const level = {
+        width,
+        height,
         items: []
       };
       this.levels.push(level);
@@ -10634,81 +9884,73 @@ var TagTree = /*#__PURE__*/function () {
     }
   }
 
-  _createClass(TagTree, [{
-    key: "reset",
-    value: function reset(i, j) {
-      var currentLevel = 0,
-          value = 0,
-          level;
+  reset(i, j) {
+    let currentLevel = 0,
+        value = 0,
+        level;
 
-      while (currentLevel < this.levels.length) {
-        level = this.levels[currentLevel];
-        var index = i + j * level.width;
+    while (currentLevel < this.levels.length) {
+      level = this.levels[currentLevel];
+      const index = i + j * level.width;
 
-        if (level.items[index] !== undefined) {
-          value = level.items[index];
-          break;
-        }
-
-        level.index = index;
-        i >>= 1;
-        j >>= 1;
-        currentLevel++;
+      if (level.items[index] !== undefined) {
+        value = level.items[index];
+        break;
       }
 
-      currentLevel--;
-      level = this.levels[currentLevel];
-      level.items[level.index] = value;
-      this.currentLevel = currentLevel;
-      delete this.value;
+      level.index = index;
+      i >>= 1;
+      j >>= 1;
+      currentLevel++;
     }
-  }, {
-    key: "incrementValue",
-    value: function incrementValue() {
-      var level = this.levels[this.currentLevel];
-      level.items[level.index]++;
+
+    currentLevel--;
+    level = this.levels[currentLevel];
+    level.items[level.index] = value;
+    this.currentLevel = currentLevel;
+    delete this.value;
+  }
+
+  incrementValue() {
+    const level = this.levels[this.currentLevel];
+    level.items[level.index]++;
+  }
+
+  nextLevel() {
+    let currentLevel = this.currentLevel;
+    let level = this.levels[currentLevel];
+    const value = level.items[level.index];
+    currentLevel--;
+
+    if (currentLevel < 0) {
+      this.value = value;
+      return false;
     }
-  }, {
-    key: "nextLevel",
-    value: function nextLevel() {
-      var currentLevel = this.currentLevel;
-      var level = this.levels[currentLevel];
-      var value = level.items[level.index];
-      currentLevel--;
 
-      if (currentLevel < 0) {
-        this.value = value;
-        return false;
-      }
+    this.currentLevel = currentLevel;
+    level = this.levels[currentLevel];
+    level.items[level.index] = value;
+    return true;
+  }
 
-      this.currentLevel = currentLevel;
-      level = this.levels[currentLevel];
-      level.items[level.index] = value;
-      return true;
-    }
-  }]);
+}
 
-  return TagTree;
-}();
-
-var InclusionTree = /*#__PURE__*/function () {
-  function InclusionTree(width, height, defaultValue) {
-    _classCallCheck(this, InclusionTree);
-
-    var levelsLength = (0, _core_utils.log2)(Math.max(width, height)) + 1;
+class InclusionTree {
+  constructor(width, height, defaultValue) {
+    const levelsLength = (0, _core_utils.log2)(Math.max(width, height)) + 1;
     this.levels = [];
 
-    for (var i = 0; i < levelsLength; i++) {
-      var items = new Uint8Array(width * height);
+    for (let i = 0; i < levelsLength; i++) {
+      const items = new Uint8Array(width * height);
 
-      for (var j = 0, jj = items.length; j < jj; j++) {
+      for (let j = 0, jj = items.length; j < jj; j++) {
         items[j] = defaultValue;
       }
 
-      var level = {
-        width: width,
-        height: height,
-        items: items
+      const level = {
+        width,
+        height,
+        items
       };
       this.levels.push(level);
       width = Math.ceil(width / 2);
@@ -10716,91 +9958,82 @@ var InclusionTree = /*#__PURE__*/function () {
     }
   }
 
-  _createClass(InclusionTree, [{
-    key: "reset",
-    value: function reset(i, j, stopValue) {
-      var currentLevel = 0;
+  reset(i, j, stopValue) {
+    let currentLevel = 0;
 
-      while (currentLevel < this.levels.length) {
-        var level = this.levels[currentLevel];
-        var index = i + j * level.width;
-        level.index = index;
-        var value = level.items[index];
+    while (currentLevel < this.levels.length) {
+      const level = this.levels[currentLevel];
+      const index = i + j * level.width;
+      level.index = index;
+      const value = level.items[index];
 
-        if (value === 0xff) {
-          break;
-        }
-
-        if (value > stopValue) {
-          this.currentLevel = currentLevel;
-          this.propagateValues();
-          return false;
-        }
-
-        i >>= 1;
-        j >>= 1;
-        currentLevel++;
+      if (value === 0xff) {
+        break;
       }
 
-      this.currentLevel = currentLevel - 1;
-      return true;
-    }
-  }, {
-    key: "incrementValue",
-    value: function incrementValue(stopValue) {
-      var level = this.levels[this.currentLevel];
-      level.items[level.index] = stopValue + 1;
-      this.propagateValues();
-    }
-  }, {
-    key: "propagateValues",
-    value: function propagateValues() {
-      var levelIndex = this.currentLevel;
-      var level = this.levels[levelIndex];
-      var currentValue = level.items[level.index];
-
-      while (--levelIndex >= 0) {
-        level = this.levels[levelIndex];
-        level.items[level.index] = currentValue;
-      }
-    }
-  }, {
-    key: "nextLevel",
-    value: function nextLevel() {
-      var currentLevel = this.currentLevel;
-      var level = this.levels[currentLevel];
-      var value = level.items[level.index];
-      level.items[level.index] = 0xff;
-      currentLevel--;
-
-      if (currentLevel < 0) {
+      if (value > stopValue) {
+        this.currentLevel = currentLevel;
+        this.propagateValues();
         return false;
       }
 
-      this.currentLevel = currentLevel;
-      level = this.levels[currentLevel];
-      level.items[level.index] = value;
-      return true;
+      i >>= 1;
+      j >>= 1;
+      currentLevel++;
     }
-  }]);
 
-  return InclusionTree;
-}();
+    this.currentLevel = currentLevel - 1;
+    return true;
+  }
 
-var BitModel = function BitModelClosure() {
-  var UNIFORM_CONTEXT = 17;
-  var RUNLENGTH_CONTEXT = 18;
-  var LLAndLHContextsLabel = new Uint8Array([0, 5, 8, 0, 3, 7, 8, 0, 4, 7, 8, 0, 0, 0, 0, 0, 1, 6, 8, 0, 3, 7, 8, 0, 4, 7, 8, 0, 0, 0, 0, 0, 2, 6, 8, 0, 3, 7, 8, 0, 4, 7, 8, 0, 0, 0, 0, 0, 2, 6, 8, 0, 3, 7, 8, 0, 4, 7, 8, 0, 0, 0, 0, 0, 2, 6, 8, 0, 3, 7, 8, 0, 4, 7, 8]);
-  var HLContextLabel = new Uint8Array([0, 3, 4, 0, 5, 7, 7, 0, 8, 8, 8, 0, 0, 0, 0, 0, 1, 3, 4, 0, 6, 7, 7, 0, 8, 8, 8, 0, 0, 0, 0, 0, 2, 3, 4, 0, 6, 7, 7, 0, 8, 8, 8, 0, 0, 0, 0, 0, 2, 3, 4, 0, 6, 7, 7, 0, 8, 8, 8, 0, 0, 0, 0, 0, 2, 3, 4, 0, 6, 7, 7, 0, 8, 8, 8]);
-  var HHContextLabel = new Uint8Array([0, 1, 2, 0, 1, 2, 2, 0, 2, 2, 2, 0, 0, 0, 0, 0, 3, 4, 5, 0, 4, 5, 5, 0, 5, 5, 5, 0, 0, 0, 0, 0, 6, 7, 7, 0, 7, 7, 7, 0, 7, 7, 7, 0, 0, 0, 0, 0, 8, 8, 8, 0, 8, 8, 8, 0, 8, 8, 8, 0, 0, 0, 0, 0, 8, 8, 8, 0, 8, 8, 8, 0, 8, 8, 8]);
+  incrementValue(stopValue) {
+    const level = this.levels[this.currentLevel];
+    level.items[level.index] = stopValue + 1;
+    this.propagateValues();
+  }
 
-  var BitModel = /*#__PURE__*/function () {
-    function BitModel(width, height, subband, zeroBitPlanes, mb) {
-      _classCallCheck(this, BitModel);
+  propagateValues() {
+    let levelIndex = this.currentLevel;
+    let level = this.levels[levelIndex];
+    const currentValue = level.items[level.index];
 
+    while (--levelIndex >= 0) {
+      level = this.levels[levelIndex];
+      level.items[level.index] = currentValue;
+    }
+  }
+
+  nextLevel() {
+    let currentLevel = this.currentLevel;
+    let level = this.levels[currentLevel];
+    const value = level.items[level.index];
+    level.items[level.index] = 0xff;
+    currentLevel--;
+
+    if (currentLevel < 0) {
+      return false;
+    }
+
+    this.currentLevel = currentLevel;
+    level = this.levels[currentLevel];
+    level.items[level.index] = value;
+    return true;
+  }
+
+}
+
+const BitModel = function BitModelClosure() {
+  const UNIFORM_CONTEXT = 17;
+  const RUNLENGTH_CONTEXT = 18;
+  const LLAndLHContextsLabel = new Uint8Array([0, 5, 8, 0, 3, 7, 8, 0, 4, 7, 8, 0, 0, 0, 0, 0, 1, 6, 8, 0, 3, 7, 8, 0, 4, 7, 8, 0, 0, 0, 0, 0, 2, 6, 8, 0, 3, 7, 8, 0, 4, 7, 8, 0, 0, 0, 0, 0, 2, 6, 8, 0, 3, 7, 8, 0, 4, 7, 8, 0, 0, 0, 0, 0, 2, 6, 8, 0, 3, 7, 8, 0, 4, 7, 8]);
+  const HLContextLabel = new Uint8Array([0, 3, 4, 0, 5, 7, 7, 0, 8, 8, 8, 0, 0, 0, 0, 0, 1, 3, 4, 0, 6, 7, 7, 0, 8, 8, 8, 0, 0, 0, 0, 0, 2, 3, 4, 0, 6, 7, 7, 0, 8, 8, 8, 0, 0, 0, 0, 0, 2, 3, 4, 0, 6, 7, 7, 0, 8, 8, 8, 0, 0, 0, 0, 0, 2, 3, 4, 0, 6, 7, 7, 0, 8, 8, 8]);
+  const HHContextLabel = new Uint8Array([0, 1, 2, 0, 1, 2, 2, 0, 2, 2, 2, 0, 0, 0, 0, 0, 3, 4, 5, 0, 4, 5, 5, 0, 5, 5, 5, 0, 0, 0, 0, 0, 6, 7, 7, 0, 7, 7, 7, 0, 7, 7, 7, 0, 0, 0, 0, 0, 8, 8, 8, 0, 8, 8, 8, 0, 8, 8, 8, 0, 0, 0, 0, 0, 8, 8, 8, 0, 8, 8, 8, 0, 8, 8, 8]);
+
+  class BitModel {
+    constructor(width, height, subband, zeroBitPlanes, mb) {
       this.width = width;
       this.height = height;
-      var contextLabelTable;
+      let contextLabelTable;
 
       if (subband === "HH") {
         contextLabelTable = HHContextLabel;
@@ -10811,10 +10044,10 @@ var BitModel = function BitModelClosure() {
       }
 
       this.contextLabelTable = contextLabelTable;
-      var coefficientCount = width * height;
+      const coefficientCount = width * height;
       this.neighborsSignificance = new Uint8Array(coefficientCount);
       this.coefficentsSign = new Uint8Array(coefficientCount);
-      var coefficentsMagnitude;
+      let coefficentsMagnitude;
 
       if (mb > 14) {
         coefficentsMagnitude = new Uint32Array(coefficientCount);
@@ -10826,10 +10059,10 @@ var BitModel = function BitModelClosure() {
 
       this.coefficentsMagnitude = coefficentsMagnitude;
       this.processingFlags = new Uint8Array(coefficientCount);
-      var bitsDecoded = new Uint8Array(coefficientCount);
+      const bitsDecoded = new Uint8Array(coefficientCount);
 
       if (zeroBitPlanes !== 0) {
-        for (var i = 0; i < coefficientCount; i++) {
+        for (let i = 0; i < coefficientCount; i++) {
           bitsDecoded[i] = zeroBitPlanes;
         }
       }
@@ -10838,588 +10071,540 @@ var BitModel = function BitModelClosure() {
       this.reset();
     }
 
-    _createClass(BitModel, [{
-      key: "setDecoder",
-      value: function setDecoder(decoder) {
-        this.decoder = decoder;
-      }
-    }, {
-      key: "reset",
-      value: function reset() {
-        this.contexts = new Int8Array(19);
-        this.contexts[0] = 4 << 1 | 0;
-        this.contexts[UNIFORM_CONTEXT] = 46 << 1 | 0;
-        this.contexts[RUNLENGTH_CONTEXT] = 3 << 1 | 0;
-      }
-    }, {
-      key: "setNeighborsSignificance",
-      value: function setNeighborsSignificance(row, column, index) {
-        var neighborsSignificance = this.neighborsSignificance;
-        var width = this.width,
+    setDecoder(decoder) {
+      this.decoder = decoder;
+    }
+
+    reset() {
+      this.contexts = new Int8Array(19);
+      this.contexts[0] = 4 << 1 | 0;
+      this.contexts[UNIFORM_CONTEXT] = 46 << 1 | 0;
+      this.contexts[RUNLENGTH_CONTEXT] = 3 << 1 | 0;
+    }
+
+    setNeighborsSignificance(row, column, index) {
+      const neighborsSignificance = this.neighborsSignificance;
+      const width = this.width,
             height = this.height;
-        var left = column > 0;
-        var right = column + 1 < width;
-        var i;
+      const left = column > 0;
+      const right = column + 1 < width;
+      let i;
 
-        if (row > 0) {
-          i = index - width;
-
-          if (left) {
-            neighborsSignificance[i - 1] += 0x10;
-          }
-
-          if (right) {
-            neighborsSignificance[i + 1] += 0x10;
-          }
-
-          neighborsSignificance[i] += 0x04;
-        }
-
-        if (row + 1 < height) {
-          i = index + width;
-
-          if (left) {
-            neighborsSignificance[i - 1] += 0x10;
-          }
-
-          if (right) {
-            neighborsSignificance[i + 1] += 0x10;
-          }
-
-          neighborsSignificance[i] += 0x04;
-        }
+      if (row > 0) {
+        i = index - width;
 
         if (left) {
-          neighborsSignificance[index - 1] += 0x01;
+          neighborsSignificance[i - 1] += 0x10;
         }
 
         if (right) {
-          neighborsSignificance[index + 1] += 0x01;
+          neighborsSignificance[i + 1] += 0x10;
         }
 
-        neighborsSignificance[index] |= 0x80;
+        neighborsSignificance[i] += 0x04;
       }
-    }, {
-      key: "runSignificancePropagationPass",
-      value: function runSignificancePropagationPass() {
-        var decoder = this.decoder;
-        var width = this.width,
+
+      if (row + 1 < height) {
+        i = index + width;
+
+        if (left) {
+          neighborsSignificance[i - 1] += 0x10;
+        }
+
+        if (right) {
+          neighborsSignificance[i + 1] += 0x10;
+        }
+
+        neighborsSignificance[i] += 0x04;
+      }
+
+      if (left) {
+        neighborsSignificance[index - 1] += 0x01;
+      }
+
+      if (right) {
+        neighborsSignificance[index + 1] += 0x01;
+      }
+
+      neighborsSignificance[index] |= 0x80;
+    }
+
+    runSignificancePropagationPass() {
+      const decoder = this.decoder;
+      const width = this.width,
             height = this.height;
-        var coefficentsMagnitude = this.coefficentsMagnitude;
-        var coefficentsSign = this.coefficentsSign;
-        var neighborsSignificance = this.neighborsSignificance;
-        var processingFlags = this.processingFlags;
-        var contexts = this.contexts;
-        var labels = this.contextLabelTable;
-        var bitsDecoded = this.bitsDecoded;
-        var processedInverseMask = ~1;
-        var processedMask = 1;
-        var firstMagnitudeBitMask = 2;
+      const coefficentsMagnitude = this.coefficentsMagnitude;
+      const coefficentsSign = this.coefficentsSign;
+      const neighborsSignificance = this.neighborsSignificance;
+      const processingFlags = this.processingFlags;
+      const contexts = this.contexts;
+      const labels = this.contextLabelTable;
+      const bitsDecoded = this.bitsDecoded;
+      const processedInverseMask = ~1;
+      const processedMask = 1;
+      const firstMagnitudeBitMask = 2;
 
-        for (var i0 = 0; i0 < height; i0 += 4) {
-          for (var j = 0; j < width; j++) {
-            var index = i0 * width + j;
+      for (let i0 = 0; i0 < height; i0 += 4) {
+        for (let j = 0; j < width; j++) {
+          let index = i0 * width + j;
 
-            for (var i1 = 0; i1 < 4; i1++, index += width) {
-              var i = i0 + i1;
+          for (let i1 = 0; i1 < 4; i1++, index += width) {
+            const i = i0 + i1;
 
-              if (i >= height) {
-                break;
-              }
-
-              processingFlags[index] &= processedInverseMask;
-
-              if (coefficentsMagnitude[index] || !neighborsSignificance[index]) {
-                continue;
-              }
-
-              var contextLabel = labels[neighborsSignificance[index]];
-              var decision = decoder.readBit(contexts, contextLabel);
-
-              if (decision) {
-                var sign = this.decodeSignBit(i, j, index);
-                coefficentsSign[index] = sign;
-                coefficentsMagnitude[index] = 1;
-                this.setNeighborsSignificance(i, j, index);
-                processingFlags[index] |= firstMagnitudeBitMask;
-              }
-
-              bitsDecoded[index]++;
-              processingFlags[index] |= processedMask;
+            if (i >= height) {
+              break;
             }
+
+            processingFlags[index] &= processedInverseMask;
+
+            if (coefficentsMagnitude[index] || !neighborsSignificance[index]) {
+              continue;
+            }
+
+            const contextLabel = labels[neighborsSignificance[index]];
+            const decision = decoder.readBit(contexts, contextLabel);
+
+            if (decision) {
+              const sign = this.decodeSignBit(i, j, index);
+              coefficentsSign[index] = sign;
+              coefficentsMagnitude[index] = 1;
+              this.setNeighborsSignificance(i, j, index);
+              processingFlags[index] |= firstMagnitudeBitMask;
+            }
+
+            bitsDecoded[index]++;
+            processingFlags[index] |= processedMask;
           }
         }
       }
-    }, {
-      key: "decodeSignBit",
-      value: function decodeSignBit(row, column, index) {
-        var width = this.width,
+    }
+
+    decodeSignBit(row, column, index) {
+      const width = this.width,
             height = this.height;
-        var coefficentsMagnitude = this.coefficentsMagnitude;
-        var coefficentsSign = this.coefficentsSign;
-        var contribution, sign0, sign1, significance1;
-        var contextLabel, decoded;
-        significance1 = column > 0 && coefficentsMagnitude[index - 1] !== 0;
+      const coefficentsMagnitude = this.coefficentsMagnitude;
+      const coefficentsSign = this.coefficentsSign;
+      let contribution, sign0, sign1, significance1;
+      let contextLabel, decoded;
+      significance1 = column > 0 && coefficentsMagnitude[index - 1] !== 0;
 
-        if (column + 1 < width && coefficentsMagnitude[index + 1] !== 0) {
-          sign1 = coefficentsSign[index + 1];
+      if (column + 1 < width && coefficentsMagnitude[index + 1] !== 0) {
+        sign1 = coefficentsSign[index + 1];
 
-          if (significance1) {
-            sign0 = coefficentsSign[index - 1];
-            contribution = 1 - sign1 - sign0;
-          } else {
-            contribution = 1 - sign1 - sign1;
-          }
-        } else if (significance1) {
+        if (significance1) {
           sign0 = coefficentsSign[index - 1];
-          contribution = 1 - sign0 - sign0;
+          contribution = 1 - sign1 - sign0;
         } else {
-          contribution = 0;
+          contribution = 1 - sign1 - sign1;
         }
+      } else if (significance1) {
+        sign0 = coefficentsSign[index - 1];
+        contribution = 1 - sign0 - sign0;
+      } else {
+        contribution = 0;
+      }
 
-        var horizontalContribution = 3 * contribution;
-        significance1 = row > 0 && coefficentsMagnitude[index - width] !== 0;
+      const horizontalContribution = 3 * contribution;
+      significance1 = row > 0 && coefficentsMagnitude[index - width] !== 0;
 
-        if (row + 1 < height && coefficentsMagnitude[index + width] !== 0) {
-          sign1 = coefficentsSign[index + width];
+      if (row + 1 < height && coefficentsMagnitude[index + width] !== 0) {
+        sign1 = coefficentsSign[index + width];
 
-          if (significance1) {
-            sign0 = coefficentsSign[index - width];
-            contribution = 1 - sign1 - sign0 + horizontalContribution;
-          } else {
-            contribution = 1 - sign1 - sign1 + horizontalContribution;
-          }
-        } else if (significance1) {
+        if (significance1) {
           sign0 = coefficentsSign[index - width];
-          contribution = 1 - sign0 - sign0 + horizontalContribution;
+          contribution = 1 - sign1 - sign0 + horizontalContribution;
         } else {
-          contribution = horizontalContribution;
+          contribution = 1 - sign1 - sign1 + horizontalContribution;
         }
-
-        if (contribution >= 0) {
-          contextLabel = 9 + contribution;
-          decoded = this.decoder.readBit(this.contexts, contextLabel);
-        } else {
-          contextLabel = 9 - contribution;
-          decoded = this.decoder.readBit(this.contexts, contextLabel) ^ 1;
-        }
-
-        return decoded;
+      } else if (significance1) {
+        sign0 = coefficentsSign[index - width];
+        contribution = 1 - sign0 - sign0 + horizontalContribution;
+      } else {
+        contribution = horizontalContribution;
       }
-    }, {
-      key: "runMagnitudeRefinementPass",
-      value: function runMagnitudeRefinementPass() {
-        var decoder = this.decoder;
-        var width = this.width,
+
+      if (contribution >= 0) {
+        contextLabel = 9 + contribution;
+        decoded = this.decoder.readBit(this.contexts, contextLabel);
+      } else {
+        contextLabel = 9 - contribution;
+        decoded = this.decoder.readBit(this.contexts, contextLabel) ^ 1;
+      }
+
+      return decoded;
+    }
+
+    runMagnitudeRefinementPass() {
+      const decoder = this.decoder;
+      const width = this.width,
             height = this.height;
-        var coefficentsMagnitude = this.coefficentsMagnitude;
-        var neighborsSignificance = this.neighborsSignificance;
-        var contexts = this.contexts;
-        var bitsDecoded = this.bitsDecoded;
-        var processingFlags = this.processingFlags;
-        var processedMask = 1;
-        var firstMagnitudeBitMask = 2;
-        var length = width * height;
-        var width4 = width * 4;
+      const coefficentsMagnitude = this.coefficentsMagnitude;
+      const neighborsSignificance = this.neighborsSignificance;
+      const contexts = this.contexts;
+      const bitsDecoded = this.bitsDecoded;
+      const processingFlags = this.processingFlags;
+      const processedMask = 1;
+      const firstMagnitudeBitMask = 2;
+      const length = width * height;
+      const width4 = width * 4;
 
-        for (var index0 = 0, indexNext; index0 < length; index0 = indexNext) {
-          indexNext = Math.min(length, index0 + width4);
+      for (let index0 = 0, indexNext; index0 < length; index0 = indexNext) {
+        indexNext = Math.min(length, index0 + width4);
 
-          for (var j = 0; j < width; j++) {
-            for (var index = index0 + j; index < indexNext; index += width) {
-              if (!coefficentsMagnitude[index] || (processingFlags[index] & processedMask) !== 0) {
-                continue;
-              }
-
-              var contextLabel = 16;
-
-              if ((processingFlags[index] & firstMagnitudeBitMask) !== 0) {
-                processingFlags[index] ^= firstMagnitudeBitMask;
-                var significance = neighborsSignificance[index] & 127;
-                contextLabel = significance === 0 ? 15 : 14;
-              }
-
-              var bit = decoder.readBit(contexts, contextLabel);
-              coefficentsMagnitude[index] = coefficentsMagnitude[index] << 1 | bit;
-              bitsDecoded[index]++;
-              processingFlags[index] |= processedMask;
+        for (let j = 0; j < width; j++) {
+          for (let index = index0 + j; index < indexNext; index += width) {
+            if (!coefficentsMagnitude[index] || (processingFlags[index] & processedMask) !== 0) {
+              continue;
             }
+
+            let contextLabel = 16;
+
+            if ((processingFlags[index] & firstMagnitudeBitMask) !== 0) {
+              processingFlags[index] ^= firstMagnitudeBitMask;
+              const significance = neighborsSignificance[index] & 127;
+              contextLabel = significance === 0 ? 15 : 14;
+            }
+
+            const bit = decoder.readBit(contexts, contextLabel);
+            coefficentsMagnitude[index] = coefficentsMagnitude[index] << 1 | bit;
+            bitsDecoded[index]++;
+            processingFlags[index] |= processedMask;
           }
         }
       }
-    }, {
-      key: "runCleanupPass",
-      value: function runCleanupPass() {
-        var decoder = this.decoder;
-        var width = this.width,
+    }
+
+    runCleanupPass() {
+      const decoder = this.decoder;
+      const width = this.width,
             height = this.height;
-        var neighborsSignificance = this.neighborsSignificance;
-        var coefficentsMagnitude = this.coefficentsMagnitude;
-        var coefficentsSign = this.coefficentsSign;
-        var contexts = this.contexts;
-        var labels = this.contextLabelTable;
-        var bitsDecoded = this.bitsDecoded;
-        var processingFlags = this.processingFlags;
-        var processedMask = 1;
-        var firstMagnitudeBitMask = 2;
-        var oneRowDown = width;
-        var twoRowsDown = width * 2;
-        var threeRowsDown = width * 3;
-        var iNext;
+      const neighborsSignificance = this.neighborsSignificance;
+      const coefficentsMagnitude = this.coefficentsMagnitude;
+      const coefficentsSign = this.coefficentsSign;
+      const contexts = this.contexts;
+      const labels = this.contextLabelTable;
+      const bitsDecoded = this.bitsDecoded;
+      const processingFlags = this.processingFlags;
+      const processedMask = 1;
+      const firstMagnitudeBitMask = 2;
+      const oneRowDown = width;
+      const twoRowsDown = width * 2;
+      const threeRowsDown = width * 3;
+      let iNext;
 
-        for (var i0 = 0; i0 < height; i0 = iNext) {
-          iNext = Math.min(i0 + 4, height);
-          var indexBase = i0 * width;
-          var checkAllEmpty = i0 + 3 < height;
+      for (let i0 = 0; i0 < height; i0 = iNext) {
+        iNext = Math.min(i0 + 4, height);
+        const indexBase = i0 * width;
+        const checkAllEmpty = i0 + 3 < height;
 
-          for (var j = 0; j < width; j++) {
-            var index0 = indexBase + j;
-            var allEmpty = checkAllEmpty && processingFlags[index0] === 0 && processingFlags[index0 + oneRowDown] === 0 && processingFlags[index0 + twoRowsDown] === 0 && processingFlags[index0 + threeRowsDown] === 0 && neighborsSignificance[index0] === 0 && neighborsSignificance[index0 + oneRowDown] === 0 && neighborsSignificance[index0 + twoRowsDown] === 0 && neighborsSignificance[index0 + threeRowsDown] === 0;
-            var i1 = 0,
-                index = index0;
-            var i = i0,
-                sign = void 0;
+        for (let j = 0; j < width; j++) {
+          const index0 = indexBase + j;
+          const allEmpty = checkAllEmpty && processingFlags[index0] === 0 && processingFlags[index0 + oneRowDown] === 0 && processingFlags[index0 + twoRowsDown] === 0 && processingFlags[index0 + threeRowsDown] === 0 && neighborsSignificance[index0] === 0 && neighborsSignificance[index0 + oneRowDown] === 0 && neighborsSignificance[index0 + twoRowsDown] === 0 && neighborsSignificance[index0 + threeRowsDown] === 0;
+          let i1 = 0,
+              index = index0;
+          let i = i0,
+              sign;
 
-            if (allEmpty) {
-              var hasSignificantCoefficent = decoder.readBit(contexts, RUNLENGTH_CONTEXT);
+          if (allEmpty) {
+            const hasSignificantCoefficent = decoder.readBit(contexts, RUNLENGTH_CONTEXT);
 
-              if (!hasSignificantCoefficent) {
-                bitsDecoded[index0]++;
-                bitsDecoded[index0 + oneRowDown]++;
-                bitsDecoded[index0 + twoRowsDown]++;
-                bitsDecoded[index0 + threeRowsDown]++;
-                continue;
-              }
+            if (!hasSignificantCoefficent) {
+              bitsDecoded[index0]++;
+              bitsDecoded[index0 + oneRowDown]++;
+              bitsDecoded[index0 + twoRowsDown]++;
+              bitsDecoded[index0 + threeRowsDown]++;
+              continue;
+            }
 
-              i1 = decoder.readBit(contexts, UNIFORM_CONTEXT) << 1 | decoder.readBit(contexts, UNIFORM_CONTEXT);
+            i1 = decoder.readBit(contexts, UNIFORM_CONTEXT) << 1 | decoder.readBit(contexts, UNIFORM_CONTEXT);
 
-              if (i1 !== 0) {
-                i = i0 + i1;
-                index += i1 * width;
-              }
+            if (i1 !== 0) {
+              i = i0 + i1;
+              index += i1 * width;
+            }
 
+            sign = this.decodeSignBit(i, j, index);
+            coefficentsSign[index] = sign;
+            coefficentsMagnitude[index] = 1;
+            this.setNeighborsSignificance(i, j, index);
+            processingFlags[index] |= firstMagnitudeBitMask;
+            index = index0;
+
+            for (let i2 = i0; i2 <= i; i2++, index += width) {
+              bitsDecoded[index]++;
+            }
+
+            i1++;
+          }
+
+          for (i = i0 + i1; i < iNext; i++, index += width) {
+            if (coefficentsMagnitude[index] || (processingFlags[index] & processedMask) !== 0) {
+              continue;
+            }
+
+            const contextLabel = labels[neighborsSignificance[index]];
+            const decision = decoder.readBit(contexts, contextLabel);
+
+            if (decision === 1) {
               sign = this.decodeSignBit(i, j, index);
               coefficentsSign[index] = sign;
               coefficentsMagnitude[index] = 1;
               this.setNeighborsSignificance(i, j, index);
               processingFlags[index] |= firstMagnitudeBitMask;
-              index = index0;
-
-              for (var i2 = i0; i2 <= i; i2++, index += width) {
-                bitsDecoded[index]++;
-              }
-
-              i1++;
             }
 
-            for (i = i0 + i1; i < iNext; i++, index += width) {
-              if (coefficentsMagnitude[index] || (processingFlags[index] & processedMask) !== 0) {
-                continue;
-              }
-
-              var contextLabel = labels[neighborsSignificance[index]];
-              var decision = decoder.readBit(contexts, contextLabel);
-
-              if (decision === 1) {
-                sign = this.decodeSignBit(i, j, index);
-                coefficentsSign[index] = sign;
-                coefficentsMagnitude[index] = 1;
-                this.setNeighborsSignificance(i, j, index);
-                processingFlags[index] |= firstMagnitudeBitMask;
-              }
-
-              bitsDecoded[index]++;
-            }
+            bitsDecoded[index]++;
           }
         }
       }
-    }, {
-      key: "checkSegmentationSymbol",
-      value: function checkSegmentationSymbol() {
-        var decoder = this.decoder;
-        var contexts = this.contexts;
-        var symbol = decoder.readBit(contexts, UNIFORM_CONTEXT) << 3 | decoder.readBit(contexts, UNIFORM_CONTEXT) << 2 | decoder.readBit(contexts, UNIFORM_CONTEXT) << 1 | decoder.readBit(contexts, UNIFORM_CONTEXT);
+    }
 
-        if (symbol !== 0xa) {
-          throw new JpxError("Invalid segmentation symbol");
-        }
+    checkSegmentationSymbol() {
+      const decoder = this.decoder;
+      const contexts = this.contexts;
+      const symbol = decoder.readBit(contexts, UNIFORM_CONTEXT) << 3 | decoder.readBit(contexts, UNIFORM_CONTEXT) << 2 | decoder.readBit(contexts, UNIFORM_CONTEXT) << 1 | decoder.readBit(contexts, UNIFORM_CONTEXT);
+
+      if (symbol !== 0xa) {
+        throw new JpxError("Invalid segmentation symbol");
       }
-    }]);
+    }
 
-    return BitModel;
-  }();
+  }
 
   return BitModel;
 }();
 
-var Transform = /*#__PURE__*/function () {
-  function Transform() {
-    _classCallCheck(this, Transform);
-
+class Transform {
+  constructor() {
     if (this.constructor === Transform) {
       (0, _util.unreachable)("Cannot initialize Transform.");
     }
   }
 
-  _createClass(Transform, [{
-    key: "calculate",
-    value: function calculate(subbands, u0, v0) {
-      var ll = subbands[0];
+  calculate(subbands, u0, v0) {
+    let ll = subbands[0];
 
-      for (var i = 1, ii = subbands.length; i < ii; i++) {
-        ll = this.iterate(ll, subbands[i], u0, v0);
-      }
+    for (let i = 1, ii = subbands.length; i < ii; i++) {
+      ll = this.iterate(ll, subbands[i], u0, v0);
+    }
 
-      return ll;
-    }
-  }, {
-    key: "extend",
-    value: function extend(buffer, offset, size) {
-      var i1 = offset - 1,
-          j1 = offset + 1;
-      var i2 = offset + size - 2,
-          j2 = offset + size;
-      buffer[i1--] = buffer[j1++];
-      buffer[j2++] = buffer[i2--];
-      buffer[i1--] = buffer[j1++];
-      buffer[j2++] = buffer[i2--];
-      buffer[i1--] = buffer[j1++];
-      buffer[j2++] = buffer[i2--];
-      buffer[i1] = buffer[j1];
-      buffer[j2] = buffer[i2];
-    }
-  }, {
-    key: "filter",
-    value: function filter(x, offset, length) {
-      (0, _util.unreachable)("Abstract method `filter` called");
-    }
-  }, {
-    key: "iterate",
-    value: function iterate(ll, hl_lh_hh, u0, v0) {
-      var llWidth = ll.width,
+    return ll;
+  }
+
+  extend(buffer, offset, size) {
+    let i1 = offset - 1,
+        j1 = offset + 1;
+    let i2 = offset + size - 2,
+        j2 = offset + size;
+    buffer[i1--] = buffer[j1++];
+    buffer[j2++] = buffer[i2--];
+    buffer[i1--] = buffer[j1++];
+    buffer[j2++] = buffer[i2--];
+    buffer[i1--] = buffer[j1++];
+    buffer[j2++] = buffer[i2--];
+    buffer[i1] = buffer[j1];
+    buffer[j2] = buffer[i2];
+  }
+
+  filter(x, offset, length) {
+    (0, _util.unreachable)("Abstract method `filter` called");
+  }
+
+  iterate(ll, hl_lh_hh, u0, v0) {
+    const llWidth = ll.width,
           llHeight = ll.height;
-      var llItems = ll.items;
-      var width = hl_lh_hh.width;
-      var height = hl_lh_hh.height;
-      var items = hl_lh_hh.items;
-      var i, j, k, l, u, v;
+    let llItems = ll.items;
+    const width = hl_lh_hh.width;
+    const height = hl_lh_hh.height;
+    const items = hl_lh_hh.items;
+    let i, j, k, l, u, v;
 
-      for (k = 0, i = 0; i < llHeight; i++) {
-        l = i * 2 * width;
+    for (k = 0, i = 0; i < llHeight; i++) {
+      l = i * 2 * width;
 
-        for (j = 0; j < llWidth; j++, k++, l += 2) {
-          items[l] = llItems[k];
-        }
+      for (j = 0; j < llWidth; j++, k++, l += 2) {
+        items[l] = llItems[k];
       }
+    }
 
-      llItems = ll.items = null;
-      var bufferPadding = 4;
-      var rowBuffer = new Float32Array(width + 2 * bufferPadding);
+    llItems = ll.items = null;
+    const bufferPadding = 4;
+    const rowBuffer = new Float32Array(width + 2 * bufferPadding);
 
-      if (width === 1) {
-        if ((u0 & 1) !== 0) {
-          for (v = 0, k = 0; v < height; v++, k += width) {
-            items[k] *= 0.5;
-          }
-        }
-      } else {
+    if (width === 1) {
+      if ((u0 & 1) !== 0) {
         for (v = 0, k = 0; v < height; v++, k += width) {
-          rowBuffer.set(items.subarray(k, k + width), bufferPadding);
-          this.extend(rowBuffer, bufferPadding, width);
-          this.filter(rowBuffer, bufferPadding, width);
-          items.set(rowBuffer.subarray(bufferPadding, bufferPadding + width), k);
+          items[k] *= 0.5;
         }
       }
-
-      var numBuffers = 16;
-      var colBuffers = [];
-
-      for (i = 0; i < numBuffers; i++) {
-        colBuffers.push(new Float32Array(height + 2 * bufferPadding));
+    } else {
+      for (v = 0, k = 0; v < height; v++, k += width) {
+        rowBuffer.set(items.subarray(k, k + width), bufferPadding);
+        this.extend(rowBuffer, bufferPadding, width);
+        this.filter(rowBuffer, bufferPadding, width);
+        items.set(rowBuffer.subarray(bufferPadding, bufferPadding + width), k);
       }
+    }
 
-      var b,
-          currentBuffer = 0;
-      ll = bufferPadding + height;
+    let numBuffers = 16;
+    const colBuffers = [];
 
-      if (height === 1) {
-        if ((v0 & 1) !== 0) {
-          for (u = 0; u < width; u++) {
-            items[u] *= 0.5;
-          }
-        }
-      } else {
+    for (i = 0; i < numBuffers; i++) {
+      colBuffers.push(new Float32Array(height + 2 * bufferPadding));
+    }
+
+    let b,
+        currentBuffer = 0;
+    ll = bufferPadding + height;
+
+    if (height === 1) {
+      if ((v0 & 1) !== 0) {
         for (u = 0; u < width; u++) {
-          if (currentBuffer === 0) {
-            numBuffers = Math.min(width - u, numBuffers);
+          items[u] *= 0.5;
+        }
+      }
+    } else {
+      for (u = 0; u < width; u++) {
+        if (currentBuffer === 0) {
+          numBuffers = Math.min(width - u, numBuffers);
 
-            for (k = u, l = bufferPadding; l < ll; k += width, l++) {
-              for (b = 0; b < numBuffers; b++) {
-                colBuffers[b][l] = items[k + b];
-              }
+          for (k = u, l = bufferPadding; l < ll; k += width, l++) {
+            for (b = 0; b < numBuffers; b++) {
+              colBuffers[b][l] = items[k + b];
             }
-
-            currentBuffer = numBuffers;
           }
 
-          currentBuffer--;
-          var buffer = colBuffers[currentBuffer];
-          this.extend(buffer, bufferPadding, height);
-          this.filter(buffer, bufferPadding, height);
+          currentBuffer = numBuffers;
+        }
 
-          if (currentBuffer === 0) {
-            k = u - numBuffers + 1;
+        currentBuffer--;
+        const buffer = colBuffers[currentBuffer];
+        this.extend(buffer, bufferPadding, height);
+        this.filter(buffer, bufferPadding, height);
 
-            for (l = bufferPadding; l < ll; k += width, l++) {
-              for (b = 0; b < numBuffers; b++) {
-                items[k + b] = colBuffers[b][l];
-              }
+        if (currentBuffer === 0) {
+          k = u - numBuffers + 1;
+
+          for (l = bufferPadding; l < ll; k += width, l++) {
+            for (b = 0; b < numBuffers; b++) {
+              items[k + b] = colBuffers[b][l];
             }
           }
         }
       }
-
-      return {
-        width: width,
-        height: height,
-        items: items
-      };
     }
-  }]);
 
-  return Transform;
-}();
-
-var IrreversibleTransform = /*#__PURE__*/function (_Transform) {
-  _inherits(IrreversibleTransform, _Transform);
-
-  var _super2 = _createSuper(IrreversibleTransform);
-
-  function IrreversibleTransform() {
-    _classCallCheck(this, IrreversibleTransform);
-
-    return _super2.apply(this, arguments);
+    return {
+      width,
+      height,
+      items
+    };
   }
 
-  _createClass(IrreversibleTransform, [{
-    key: "filter",
-    value: function filter(x, offset, length) {
-      var len = length >> 1;
-      offset |= 0;
-      var j, n, current, next;
-      var alpha = -1.586134342059924;
-      var beta = -0.052980118572961;
-      var gamma = 0.882911075530934;
-      var delta = 0.443506852043971;
-      var K = 1.230174104914001;
-      var K_ = 1 / K;
-      j = offset - 3;
+}
 
-      for (n = len + 4; n--; j += 2) {
-        x[j] *= K_;
-      }
+class IrreversibleTransform extends Transform {
+  filter(x, offset, length) {
+    const len = length >> 1;
+    offset |= 0;
+    let j, n, current, next;
+    const alpha = -1.586134342059924;
+    const beta = -0.052980118572961;
+    const gamma = 0.882911075530934;
+    const delta = 0.443506852043971;
+    const K = 1.230174104914001;
+    const K_ = 1 / K;
+    j = offset - 3;
 
-      j = offset - 2;
-      current = delta * x[j - 1];
+    for (n = len + 4; n--; j += 2) {
+      x[j] *= K_;
+    }
 
-      for (n = len + 3; n--; j += 2) {
-        next = delta * x[j + 1];
+    j = offset - 2;
+    current = delta * x[j - 1];
+
+    for (n = len + 3; n--; j += 2) {
+      next = delta * x[j + 1];
+      x[j] = K * x[j] - current - next;
+
+      if (n--) {
+        j += 2;
+        current = delta * x[j + 1];
         x[j] = K * x[j] - current - next;
-
-        if (n--) {
-          j += 2;
-          current = delta * x[j + 1];
-          x[j] = K * x[j] - current - next;
-        } else {
-          break;
-        }
+      } else {
+        break;
       }
+    }
 
-      j = offset - 1;
-      current = gamma * x[j - 1];
+    j = offset - 1;
+    current = gamma * x[j - 1];
 
-      for (n = len + 2; n--; j += 2) {
-        next = gamma * x[j + 1];
+    for (n = len + 2; n--; j += 2) {
+      next = gamma * x[j + 1];
+      x[j] -= current + next;
+
+      if (n--) {
+        j += 2;
+        current = gamma * x[j + 1];
+        x[j] -= current + next;
+      } else {
+        break;
+      }
+    }
+
+    j = offset;
+    current = beta * x[j - 1];
+
+    for (n = len + 1; n--; j += 2) {
+      next = beta * x[j + 1];
+      x[j] -= current + next;
+
+      if (n--) {
+        j += 2;
+        current = beta * x[j + 1];
+        x[j] -= current + next;
+      } else {
+        break;
+      }
+    }
+
+    if (len !== 0) {
+      j = offset + 1;
+      current = alpha * x[j - 1];
+
+      for (n = len; n--; j += 2) {
+        next = alpha * x[j + 1];
         x[j] -= current + next;
 
         if (n--) {
           j += 2;
-          current = gamma * x[j + 1];
+          current = alpha * x[j + 1];
           x[j] -= current + next;
         } else {
           break;
-        }
-      }
-
-      j = offset;
-      current = beta * x[j - 1];
-
-      for (n = len + 1; n--; j += 2) {
-        next = beta * x[j + 1];
-        x[j] -= current + next;
-
-        if (n--) {
-          j += 2;
-          current = beta * x[j + 1];
-          x[j] -= current + next;
-        } else {
-          break;
-        }
-      }
-
-      if (len !== 0) {
-        j = offset + 1;
-        current = alpha * x[j - 1];
-
-        for (n = len; n--; j += 2) {
-          next = alpha * x[j + 1];
-          x[j] -= current + next;
-
-          if (n--) {
-            j += 2;
-            current = alpha * x[j + 1];
-            x[j] -= current + next;
-          } else {
-            break;
-          }
         }
       }
     }
-  }]);
-
-  return IrreversibleTransform;
-}(Transform);
-
-var ReversibleTransform = /*#__PURE__*/function (_Transform2) {
-  _inherits(ReversibleTransform, _Transform2);
-
-  var _super3 = _createSuper(ReversibleTransform);
-
-  function ReversibleTransform() {
-    _classCallCheck(this, ReversibleTransform);
-
-    return _super3.apply(this, arguments);
   }
 
-  _createClass(ReversibleTransform, [{
-    key: "filter",
-    value: function filter(x, offset, length) {
-      var len = length >> 1;
-      offset |= 0;
-      var j, n;
+}
 
-      for (j = offset, n = len + 1; n--; j += 2) {
-        x[j] -= x[j - 1] + x[j + 1] + 2 >> 2;
-      }
+class ReversibleTransform extends Transform {
+  filter(x, offset, length) {
+    const len = length >> 1;
+    offset |= 0;
+    let j, n;
 
-      for (j = offset + 1, n = len; n--; j += 2) {
-        x[j] += x[j - 1] + x[j + 1] >> 1;
-      }
+    for (j = offset, n = len + 1; n--; j += 2) {
+      x[j] -= x[j - 1] + x[j + 1] + 2 >> 2;
     }
-  }]);
 
-  return ReversibleTransform;
-}(Transform);
+    for (j = offset + 1, n = len; n--; j += 2) {
+      x[j] += x[j - 1] + x[j + 1] >> 1;
+    }
+  }
+
+}
 
 /***/ })
 /******/ 	]);
@@ -11461,31 +10646,31 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 Object.defineProperty(exports, "Jbig2Image", ({
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _jbig.Jbig2Image;
   }
 }));
 Object.defineProperty(exports, "JpegImage", ({
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _jpg.JpegImage;
   }
 }));
 Object.defineProperty(exports, "JpxImage", ({
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _jpx.JpxImage;
   }
 }));
 Object.defineProperty(exports, "getVerbosityLevel", ({
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _util.getVerbosityLevel;
   }
 }));
 Object.defineProperty(exports, "setVerbosityLevel", ({
   enumerable: true,
-  get: function get() {
+  get: function () {
     return _util.setVerbosityLevel;
   }
 }));
@@ -11498,8 +10683,8 @@ var _jpg = __w_pdfjs_require__(92);
 
 var _jpx = __w_pdfjs_require__(93);
 
-var pdfjsVersion = '2.15.349';
-var pdfjsBuild = 'b8aa9c622';
+const pdfjsVersion = '2.16.105';
+const pdfjsBuild = '172ccdbe5';
 })();
 
 /******/ 	return __webpack_exports__;
