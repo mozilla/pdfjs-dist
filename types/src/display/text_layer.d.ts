@@ -39,11 +39,6 @@ export type TextLayerRenderParameters = {
      * text runs occurs.
      */
     timeout?: number | undefined;
-    /**
-     * - Whether to turn on the text
-     * selection enhancement.
-     */
-    enhanceTextSelection?: boolean | undefined;
 };
 /**
  * @param {TextLayerRenderParameters} renderParameters
@@ -51,14 +46,13 @@ export type TextLayerRenderParameters = {
  */
 export function renderTextLayer(renderParameters: TextLayerRenderParameters): TextLayerRenderTask;
 export class TextLayerRenderTask {
-    constructor({ textContent, textContentStream, container, viewport, textDivs, textContentItemsStr, enhanceTextSelection, }: {
+    constructor({ textContent, textContentStream, container, viewport, textDivs, textContentItemsStr, }: {
         textContent: any;
         textContentStream: any;
         container: any;
         viewport: any;
         textDivs: any;
         textContentItemsStr: any;
-        enhanceTextSelection: any;
     });
     _textContent: any;
     _textContentStream: any;
@@ -67,7 +61,6 @@ export class TextLayerRenderTask {
     _viewport: any;
     _textDivs: any;
     _textContentItemsStr: any;
-    _enhanceTextSelection: boolean;
     _fontInspectorEnabled: boolean;
     _reader: any;
     _layoutTextLastFontSize: any;
@@ -101,8 +94,4 @@ export class TextLayerRenderTask {
      * @private
      */
     private _render;
-    /**
-     * @param {boolean} [expandDivs]
-     */
-    expandTextDivs(expandDivs?: boolean | undefined): void;
 }

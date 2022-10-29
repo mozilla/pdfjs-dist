@@ -75,7 +75,7 @@ export namespace LinkTarget {
  * @implements {IPDFLinkService}
  */
 export class PDFLinkService implements IPDFLinkService {
-    static "__#27@#isValidExplicitDestination"(dest: any): boolean;
+    static "__#29@#isValidExplicitDestination"(dest: any): boolean;
     /**
      * @param {PDFLinkServiceOptions} options
      */
@@ -152,6 +152,10 @@ export class PDFLinkService implements IPDFLinkService {
      */
     executeNamedAction(action: string): void;
     /**
+     * @param {Object} action
+     */
+    executeSetOCGState(action: Object): Promise<void>;
+    /**
      * @param {number} pageNum - page number.
      * @param {Object} pageRef - reference to the page.
      */
@@ -227,6 +231,10 @@ export class SimpleLinkService implements IPDFLinkService {
      * @param {string} action
      */
     executeNamedAction(action: string): void;
+    /**
+     * @param {Object} action
+     */
+    executeSetOCGState(action: Object): void;
     /**
      * @param {number} pageNum - page number.
      * @param {Object} pageRef - reference to the page.

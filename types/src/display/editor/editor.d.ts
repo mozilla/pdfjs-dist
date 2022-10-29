@@ -110,6 +110,7 @@ export class AnnotationEditor {
      * @param {number} height
      */
     setDims(width: number, height: number): void;
+    fixDims(): void;
     /**
      * Get the translation used to position this editor when it's created.
      * @returns {Array<number>}

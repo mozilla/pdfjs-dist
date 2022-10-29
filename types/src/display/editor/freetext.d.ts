@@ -37,6 +37,7 @@ export class FreeTextEditor extends AnnotationEditor {
     editorDivKeydown(event: any): void;
     editorDivFocus(event: any): void;
     editorDivBlur(event: any): void;
+    editorDivInput(event: any): void;
     /** @inheritdoc */
     render(): HTMLDivElement | null;
     editorDiv: HTMLDivElement | undefined;

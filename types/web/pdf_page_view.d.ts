@@ -43,9 +43,8 @@ export type PDFPageViewOptions = {
     textLayerFactory?: import("./interfaces").IPDFTextLayerFactory | undefined;
     /**
      * - Controls if the text layer used for
-     * selection and searching is created, and if the improved text selection
-     * behaviour is enabled. The constants from {TextLayerMode} should be used.
-     * The default value is `TextLayerMode.ENABLE`.
+     * selection and searching is created. The constants from {TextLayerMode}
+     * should be used. The default value is `TextLayerMode.ENABLE`.
      */
     textLayerMode?: number | undefined;
     /**

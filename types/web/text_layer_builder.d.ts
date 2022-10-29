@@ -24,11 +24,6 @@ export type TextLayerBuilderOptions = {
      * highlighting text from the find controller.
      */
     highlighter: TextHighlighter;
-    /**
-     * - Option to turn on improved
-     * text selection.
-     */
-    enhanceTextSelection: boolean;
     accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
 };
 /**
@@ -39,8 +34,6 @@ export type TextLayerBuilderOptions = {
  * @property {PageViewport} viewport - The viewport of the text layer.
  * @property {TextHighlighter} highlighter - Optional object that will handle
  *   highlighting text from the find controller.
- * @property {boolean} enhanceTextSelection - Option to turn on improved
- *   text selection.
  * @property {TextAccessibilityManager} [accessibilityManager]
  */
 /**
@@ -49,13 +42,12 @@ export type TextLayerBuilderOptions = {
  * contain text that matches the PDF text they are overlaying.
  */
 export class TextLayerBuilder {
-    constructor({ textLayerDiv, eventBus, pageIndex, viewport, highlighter, enhanceTextSelection, accessibilityManager, }: {
+    constructor({ textLayerDiv, eventBus, pageIndex, viewport, highlighter, accessibilityManager, }: {
         textLayerDiv: any;
         eventBus: any;
         pageIndex: any;
         viewport: any;
         highlighter?: null | undefined;
-        enhanceTextSelection?: boolean | undefined;
         accessibilityManager?: null | undefined;
     });
     textLayerDiv: any;
@@ -69,12 +61,7 @@ export class TextLayerBuilder {
     textDivs: any[];
     textLayerRenderTask: any;
     highlighter: any;
-    enhanceTextSelection: boolean;
     accessibilityManager: any;
-    /**
-     * @private
-     */
-    private _finishRendering;
     /**
      * Renders the text layer.
      *
@@ -88,12 +75,5 @@ export class TextLayerBuilder {
     cancel(): void;
     setTextContentStream(readableStream: any): void;
     setTextContent(textContent: any): void;
-    /**
-     * Improves text selection by adding an additional div where the mouse was
-     * clicked. This reduces flickering of the content if the mouse is slowly
-     * dragged up or down.
-     *
-     * @private
-     */
-    private _bindMouse;
+    #private;
 }

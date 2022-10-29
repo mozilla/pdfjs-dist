@@ -21,7 +21,7 @@
   right: 0;
   bottom: 0;
   overflow: hidden;
-  opacity: 0.2;
+  opacity: 0.25;
   line-height: 1;
   -webkit-text-size-adjust: none;
      -moz-text-size-adjust: none;
@@ -73,11 +73,13 @@
 }
 
 .textLayer ::-moz-selection {
-  background: rgba(0, 0, 255, 1);
+  background: blue;
+  background: AccentColor;
 }
 
 .textLayer ::selection {
-  background: rgba(0, 0, 255, 1);
+  background: blue;
+  background: AccentColor;
 }
 
 /* Avoids https://github.com/mozilla/pdf.js/issues/13840 in Chrome */
@@ -109,9 +111,20 @@
 
 :root {
   --annotation-unfocused-field-background: url("data:image/svg+xml;charset=UTF-8,<svg width='1px' height='1px' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' style='fill:rgba(0, 54, 255, 0.13);'/></svg>");
+  --input-focus-border-color: Highlight;
+  --input-focus-outline: 1px solid Canvas;
+  --input-unfocused-border-color: transparent;
+  --input-disabled-border-color: transparent;
+  --input-hover-border-color: black;
 }
 
 @media (forced-colors: active) {
+  :root {
+    --input-focus-border-color: CanvasText;
+    --input-unfocused-border-color: ActiveText;
+    --input-disabled-border-color: GrayText;
+    --input-hover-border-color: Highlight;
+  }
   .annotationLayer .textWidgetAnnotation input:required,
   .annotationLayer .textWidgetAnnotation textarea:required,
   .annotationLayer .choiceWidgetAnnotation select:required,
@@ -172,7 +185,7 @@
 .annotationLayer .buttonWidgetAnnotation.checkBox input,
 .annotationLayer .buttonWidgetAnnotation.radioButton input {
   background-image: var(--annotation-unfocused-field-background);
-  border: 1px solid transparent;
+  border: 2px solid var(--input-unfocused-border-color);
   box-sizing: border-box;
   font: calc(9px * var(--scale-factor)) sans-serif;
   height: 100%;
@@ -207,7 +220,7 @@
 .annotationLayer .buttonWidgetAnnotation.checkBox input[disabled],
 .annotationLayer .buttonWidgetAnnotation.radioButton input[disabled] {
   background: none;
-  border: 1px solid transparent;
+  border: 2px solid var(--input-disabled-border-color);
   cursor: not-allowed;
 }
 
@@ -216,24 +229,39 @@
 .annotationLayer .choiceWidgetAnnotation select:hover,
 .annotationLayer .buttonWidgetAnnotation.checkBox input:hover,
 .annotationLayer .buttonWidgetAnnotation.radioButton input:hover {
-  border: 1px solid rgba(0, 0, 0, 1);
+  border: 2px solid var(--input-hover-border-color);
+}
+.annotationLayer .textWidgetAnnotation input:hover,
+.annotationLayer .textWidgetAnnotation textarea:hover,
+.annotationLayer .choiceWidgetAnnotation select:hover,
+.annotationLayer .buttonWidgetAnnotation.checkBox input:hover {
+  border-radius: 2px;
 }
 
 .annotationLayer .textWidgetAnnotation input:focus,
 .annotationLayer .textWidgetAnnotation textarea:focus,
 .annotationLayer .choiceWidgetAnnotation select:focus {
   background: none;
-  border: 1px solid transparent;
+  border: 2px solid var(--input-focus-border-color);
+  border-radius: 2px;
+  outline: var(--input-focus-outline);
 }
 
-.annotationLayer .textWidgetAnnotation input :focus,
-.annotationLayer .textWidgetAnnotation textarea :focus,
-.annotationLayer .choiceWidgetAnnotation select :focus,
 .annotationLayer .buttonWidgetAnnotation.checkBox :focus,
 .annotationLayer .buttonWidgetAnnotation.radioButton :focus {
   background-image: none;
   background-color: transparent;
-  outline: auto;
+}
+
+.annotationLayer .buttonWidgetAnnotation.checkBox :focus {
+  border: 2px solid var(--input-focus-border-color);
+  border-radius: 2px;
+  outline: var(--input-focus-outline);
+}
+
+.annotationLayer .buttonWidgetAnnotation.radioButton :focus {
+  border: 2px solid var(--input-focus-border-color);
+  outline: var(--input-focus-outline);
 }
 
 .annotationLayer .buttonWidgetAnnotation.checkBox input:checked:before,
@@ -387,12 +415,20 @@
 
 :root {
   --xfa-unfocused-field-background: url("data:image/svg+xml;charset=UTF-8,<svg width='1px' height='1px' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' style='fill:rgba(0, 54, 255, 0.13);'/></svg>");
+  --xfa-focus-outline: auto;
 }
 
 @media (forced-colors: active) {
+  :root {
+    --xfa-focus-outline: 2px solid CanvasText;
+  }
   .xfaLayer *:required {
     outline: 1.5px solid selectedItem;
   }
+}
+
+.xfaLayer {
+  background-color: transparent;
 }
 
 .xfaLayer .highlight {
@@ -420,14 +456,6 @@
 
 .xfaLayer .highlight.selected {
   background-color: rgba(203, 223, 203, 1);
-}
-
-.xfaLayer ::-moz-selection {
-  background: rgba(0, 0, 255, 1);
-}
-
-.xfaLayer ::selection {
-  background: rgba(0, 0, 255, 1);
 }
 
 .xfaPage {
@@ -572,13 +600,13 @@
 .xfaSelect:focus {
   background-image: none;
   background-color: transparent;
-  outline: auto;
+  outline: var(--xfa-focus-outline);
   outline-offset: -1px;
 }
 
 .xfaCheckbox:focus,
 .xfaRadio:focus {
-  outline: auto;
+  outline: var(--xfa-focus-outline);
 }
 
 .xfaTextfield,
@@ -589,6 +617,12 @@
   border: none;
   resize: none;
   background-image: var(--xfa-unfocused-field-background);
+}
+
+.xfaSelect {
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-inline: 2px;
 }
 
 .xfaTop > .xfaTextfield,
@@ -727,6 +761,7 @@
   --hover-outline: dashed 2px blue;
   --freetext-line-height: 1.35;
   --freetext-padding: 2px;
+  --editorFreeText-editing-cursor: text;
   --editorInk-editing-cursor: pointer;
 }
 
@@ -754,6 +789,16 @@
   left: 0;
   font-size: calc(100px * var(--scale-factor));
   transform-origin: 0 0;
+  cursor: auto;
+  z-index: 20000;
+}
+
+.annotationEditorLayer.freeTextEditing {
+  cursor: var(--editorFreeText-editing-cursor);
+}
+
+.annotationEditorLayer.inkEditing {
+  cursor: var(--editorInk-editing-cursor);
 }
 
 .annotationEditorLayer .selectedEditor {
@@ -772,6 +817,7 @@
   z-index: 1;
   transform-origin: 0 0;
   touch-action: none;
+  cursor: auto;
 }
 
 .annotationEditorLayer .freeTextEditor .internal {
@@ -836,7 +882,7 @@
 
 .annotationEditorLayer .inkEditor.editing {
   resize: none;
-  cursor: var(--editorInk-editing-cursor), pointer;
+  cursor: inherit;
 }
 
 .annotationEditorLayer .inkEditor .inkEditorCanvas {

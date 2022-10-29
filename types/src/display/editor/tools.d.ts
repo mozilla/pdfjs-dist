@@ -17,6 +17,21 @@ export class AnnotationEditorUIManager {
     }): void;
     focusMainContainer(): void;
     /**
+     * Copy callback.
+     * @param {ClipboardEvent} event
+     */
+    copy(event: ClipboardEvent): void;
+    /**
+     * Cut callback.
+     * @param {ClipboardEvent} event
+     */
+    cut(event: ClipboardEvent): void;
+    /**
+     * Paste callback.
+     * @param {ClipboardEvent} event
+     */
+    paste(event: ClipboardEvent): void;
+    /**
      * Keydown callback.
      * @param {KeyboardEvent} event
      */
@@ -133,19 +148,7 @@ export class AnnotationEditorUIManager {
      * Delete the current editor or all.
      */
     delete(): void;
-    /**
-     * Copy the selected editor.
-     */
-    copy(): void;
-    /**
-     * Cut the selected editor.
-     */
-    cut(): void;
-    /**
-     * Paste a previously copied editor.
-     * @returns {undefined}
-     */
-    paste(): undefined;
+    commitOrRemove(): void;
     /**
      * Select all the editors.
      */

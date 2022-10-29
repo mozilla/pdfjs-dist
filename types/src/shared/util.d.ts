@@ -181,7 +181,6 @@ export namespace CMapCompressionType {
     const NONE_2: number;
     export { NONE_2 as NONE };
     export const BINARY: number;
-    export const STREAM: number;
 }
 /**
  * Promise Capability object.
@@ -348,11 +347,8 @@ export namespace OPS {
     const paintFormXObjectEnd: number;
     const beginGroup: number;
     const endGroup: number;
-    const beginAnnotations: number;
-    const endAnnotations: number;
     const beginAnnotation: number;
     const endAnnotation: number;
-    const paintJpegXObject: number;
     const paintImageMaskXObject: number;
     const paintImageMaskXObjectGroup: number;
     const paintImageXObject: number;
@@ -446,13 +442,11 @@ export class UnknownErrorException extends UnknownErrorException_base {
 }
 export function unreachable(msg: any): void;
 export namespace UNSUPPORTED_FEATURES {
-    const unknown: string;
     const forms: string;
     const javaScript: string;
     const signatures: string;
     const smask: string;
     const shadingPattern: string;
-    const font: string;
     const errorTilingPattern: string;
     const errorExtGState: string;
     const errorXObject: string;
@@ -478,7 +472,6 @@ export class Util {
     static applyInverseTransform(p: any, m: any): number[];
     static getAxialAlignedBoundingBox(r: any, m: any): number[];
     static inverseTransform(m: any): number[];
-    static apply3dTransform(m: any, v: any): number[];
     static singularValueDecompose2dScale(m: any): number[];
     static normalizeRect(rect: any): any;
     static intersect(rect1: any, rect2: any): number[] | null;

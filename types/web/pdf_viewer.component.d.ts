@@ -14,7 +14,7 @@ import { PDFHistory } from "./pdf_history.js";
 import { PDFLinkService } from "./pdf_link_service.js";
 import { PDFPageView } from "./pdf_page_view.js";
 import { PDFScriptingManager } from "./pdf_scripting_manager.js";
-import { PDFSinglePageViewer } from "./pdf_viewer.js";
+import { PDFSinglePageViewer } from "./pdf_single_page_viewer.js";
 import { PDFViewer } from "./pdf_viewer.js";
 import { ProgressBar } from "./ui_utils.js";
 import { RenderingStates } from "./ui_utils.js";

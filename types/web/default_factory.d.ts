@@ -125,7 +125,6 @@ export class DefaultTextLayerFactory implements IPDFTextLayerFactory {
      * @property {HTMLDivElement} textLayerDiv
      * @property {number} pageIndex
      * @property {PageViewport} viewport
-     * @property {boolean} [enhanceTextSelection]
      * @property {EventBus} eventBus
      * @property {TextHighlighter} highlighter
      * @property {TextAccessibilityManager} [accessibilityManager]
@@ -134,11 +133,10 @@ export class DefaultTextLayerFactory implements IPDFTextLayerFactory {
      * @param {CreateTextLayerBuilderParameters}
      * @returns {TextLayerBuilder}
      */
-    createTextLayerBuilder({ textLayerDiv, pageIndex, viewport, enhanceTextSelection, eventBus, highlighter, accessibilityManager, }: {
+    createTextLayerBuilder({ textLayerDiv, pageIndex, viewport, eventBus, highlighter, accessibilityManager, }: {
         textLayerDiv: HTMLDivElement;
         pageIndex: number;
         viewport: PageViewport;
-        enhanceTextSelection?: boolean | undefined;
         eventBus: EventBus;
         highlighter: TextHighlighter;
         accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;

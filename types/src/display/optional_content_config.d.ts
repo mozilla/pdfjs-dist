@@ -8,5 +8,6 @@ export class OptionalContentConfig {
     getOrder(): any;
     getGroups(): any;
     getGroup(id: any): any;
+    getHash(): string;
     #private;
 }

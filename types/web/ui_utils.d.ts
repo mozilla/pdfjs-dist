@@ -202,7 +202,7 @@ export namespace PresentationModeState {
     const FULLSCREEN: number;
 }
 export class ProgressBar {
-    constructor(id: any, ...args: any[]);
+    constructor(id: any);
     set percent(arg: number);
     get percent(): number;
     setWidth(viewer: any): void;
@@ -265,7 +265,6 @@ export namespace SpreadMode {
 export namespace TextLayerMode {
     const DISABLE: number;
     const ENABLE: number;
-    const ENABLE_ENHANCE: number;
 }
 export const UNKNOWN_SCALE: 0;
 export const VERTICAL_PADDING: 5;

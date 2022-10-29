@@ -1,5 +1,5 @@
 export class CanvasGraphics {
-    constructor(canvasCtx: any, commonObjs: any, objs: any, canvasFactory: any, imageLayer: any, optionalContentConfig: any, annotationCanvasMap: any, pageColors: any);
+    constructor(canvasCtx: any, commonObjs: any, objs: any, canvasFactory: any, optionalContentConfig: any, annotationCanvasMap: any, pageColors: any);
     ctx: any;
     current: CanvasExtraState;
     stateStack: any[];
@@ -10,7 +10,6 @@ export class CanvasGraphics {
     commonObjs: any;
     objs: any;
     canvasFactory: any;
-    imageLayer: any;
     groupStack: any[];
     processingType3: any;
     baseTransform: any;
