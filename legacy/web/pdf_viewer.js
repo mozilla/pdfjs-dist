@@ -46,7 +46,7 @@ exports.DefaultXfaLayerFactory = exports.DefaultTextLayerFactory = exports.Defau
 var _annotation_editor_layer_builder = __w_pdfjs_require__(2);
 var _annotation_layer_builder = __w_pdfjs_require__(5);
 var _l10n_utils = __w_pdfjs_require__(4);
-var _pdf_link_service = __w_pdfjs_require__(6);
+var _pdf_link_service = __w_pdfjs_require__(7);
 var _struct_tree_layer_builder = __w_pdfjs_require__(8);
 var _text_layer_builder = __w_pdfjs_require__(9);
 var _xfa_layer_builder = __w_pdfjs_require__(10);
@@ -399,6 +399,18 @@ Object.defineProperty(exports, "__esModule", ({
 exports.AnnotationLayerBuilder = void 0;
 var _pdfjsLib = __w_pdfjs_require__(3);
 var _l10n_utils = __w_pdfjs_require__(4);
+var _ui_utils = __w_pdfjs_require__(6);
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+function _classPrivateFieldSet(receiver, privateMap, value) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "set"); _classApplyDescriptorSet(receiver, descriptor, value); return value; }
+function _classApplyDescriptorSet(receiver, descriptor, value) { if (descriptor.set) { descriptor.set.call(receiver, value); } else { if (!descriptor.writable) { throw new TypeError("attempted to set read only private field"); } descriptor.value = value; } }
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+var _onPresentationModeChanged = /*#__PURE__*/new WeakMap();
+var _updatePresentationModeState = /*#__PURE__*/new WeakSet();
 class AnnotationLayerBuilder {
   constructor(_ref) {
     let {
@@ -417,6 +429,11 @@ class AnnotationLayerBuilder {
       annotationCanvasMap = null,
       accessibilityManager = null
     } = _ref;
+    _classPrivateMethodInitSpec(this, _updatePresentationModeState);
+    _classPrivateFieldInitSpec(this, _onPresentationModeChanged, {
+      writable: true,
+      value: null
+    });
     this.pageDiv = pageDiv;
     this.pdfPage = pdfPage;
     this.linkService = linkService;
@@ -433,6 +450,7 @@ class AnnotationLayerBuilder {
     this._accessibilityManager = accessibilityManager;
     this.div = null;
     this._cancelled = false;
+    this._eventBus = linkService.eventBus;
   }
   async render(viewport) {
     let intent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "display";
@@ -470,10 +488,25 @@ class AnnotationLayerBuilder {
       parameters.div = this.div;
       _pdfjsLib.AnnotationLayer.render(parameters);
       this.l10n.translate(this.div);
+      if (this.linkService.isInPresentationMode) {
+        _classPrivateMethodGet(this, _updatePresentationModeState, _updatePresentationModeState2).call(this, _ui_utils.PresentationModeState.FULLSCREEN);
+      }
+      if (!_classPrivateFieldGet(this, _onPresentationModeChanged)) {
+        var _this$_eventBus;
+        _classPrivateFieldSet(this, _onPresentationModeChanged, evt => {
+          _classPrivateMethodGet(this, _updatePresentationModeState, _updatePresentationModeState2).call(this, evt.state);
+        });
+        (_this$_eventBus = this._eventBus) === null || _this$_eventBus === void 0 ? void 0 : _this$_eventBus._on("presentationmodechanged", _classPrivateFieldGet(this, _onPresentationModeChanged));
+      }
     }
   }
   cancel() {
     this._cancelled = true;
+    if (_classPrivateFieldGet(this, _onPresentationModeChanged)) {
+      var _this$_eventBus2;
+      (_this$_eventBus2 = this._eventBus) === null || _this$_eventBus2 === void 0 ? void 0 : _this$_eventBus2._off("presentationmodechanged", _classPrivateFieldGet(this, _onPresentationModeChanged));
+      _classPrivateFieldSet(this, _onPresentationModeChanged, null);
+    }
   }
   hide() {
     if (!this.div) {
@@ -483,487 +516,30 @@ class AnnotationLayerBuilder {
   }
 }
 exports.AnnotationLayerBuilder = AnnotationLayerBuilder;
+function _updatePresentationModeState2(state) {
+  if (!this.div) {
+    return;
+  }
+  let disableFormElements = false;
+  switch (state) {
+    case _ui_utils.PresentationModeState.FULLSCREEN:
+      disableFormElements = true;
+      break;
+    case _ui_utils.PresentationModeState.NORMAL:
+      break;
+    default:
+      return;
+  }
+  for (const section of this.div.childNodes) {
+    if (section.hasAttribute("data-internal-link")) {
+      continue;
+    }
+    section.inert = disableFormElements;
+  }
+}
 
 /***/ }),
 /* 6 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
-
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports.SimpleLinkService = exports.PDFLinkService = exports.LinkTarget = void 0;
-var _ui_utils = __w_pdfjs_require__(7);
-function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
-function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
-function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
-function _classStaticPrivateMethodGet(receiver, classConstructor, method) { _classCheckPrivateStaticAccess(receiver, classConstructor); return method; }
-function _classCheckPrivateStaticAccess(receiver, classConstructor) { if (receiver !== classConstructor) { throw new TypeError("Private static access of wrong provenance"); } }
-function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
-function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
-function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
-const DEFAULT_LINK_REL = "noopener noreferrer nofollow";
-const LinkTarget = {
-  NONE: 0,
-  SELF: 1,
-  BLANK: 2,
-  PARENT: 3,
-  TOP: 4
-};
-exports.LinkTarget = LinkTarget;
-function addLinkAttributes(link) {
-  let {
-    url,
-    target,
-    rel,
-    enabled = true
-  } = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  if (!url || typeof url !== "string") {
-    throw new Error('A valid "url" parameter must provided.');
-  }
-  const urlNullRemoved = (0, _ui_utils.removeNullCharacters)(url);
-  if (enabled) {
-    link.href = link.title = urlNullRemoved;
-  } else {
-    link.href = "";
-    link.title = `Disabled: ${urlNullRemoved}`;
-    link.onclick = () => {
-      return false;
-    };
-  }
-  let targetStr = "";
-  switch (target) {
-    case LinkTarget.NONE:
-      break;
-    case LinkTarget.SELF:
-      targetStr = "_self";
-      break;
-    case LinkTarget.BLANK:
-      targetStr = "_blank";
-      break;
-    case LinkTarget.PARENT:
-      targetStr = "_parent";
-      break;
-    case LinkTarget.TOP:
-      targetStr = "_top";
-      break;
-  }
-  link.target = targetStr;
-  link.rel = typeof rel === "string" ? rel : DEFAULT_LINK_REL;
-}
-var _pagesRefCache = /*#__PURE__*/new WeakMap();
-var _goToDestinationHelper = /*#__PURE__*/new WeakSet();
-class PDFLinkService {
-  constructor() {
-    let {
-      eventBus,
-      externalLinkTarget = null,
-      externalLinkRel = null,
-      ignoreDestinationZoom = false
-    } = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-    _classPrivateMethodInitSpec(this, _goToDestinationHelper);
-    _classPrivateFieldInitSpec(this, _pagesRefCache, {
-      writable: true,
-      value: new Map()
-    });
-    this.eventBus = eventBus;
-    this.externalLinkTarget = externalLinkTarget;
-    this.externalLinkRel = externalLinkRel;
-    this.externalLinkEnabled = true;
-    this._ignoreDestinationZoom = ignoreDestinationZoom;
-    this.baseUrl = null;
-    this.pdfDocument = null;
-    this.pdfViewer = null;
-    this.pdfHistory = null;
-  }
-  setDocument(pdfDocument) {
-    let baseUrl = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-    this.baseUrl = baseUrl;
-    this.pdfDocument = pdfDocument;
-    _classPrivateFieldGet(this, _pagesRefCache).clear();
-  }
-  setViewer(pdfViewer) {
-    this.pdfViewer = pdfViewer;
-  }
-  setHistory(pdfHistory) {
-    this.pdfHistory = pdfHistory;
-  }
-  get pagesCount() {
-    return this.pdfDocument ? this.pdfDocument.numPages : 0;
-  }
-  get page() {
-    return this.pdfViewer.currentPageNumber;
-  }
-  set page(value) {
-    this.pdfViewer.currentPageNumber = value;
-  }
-  get rotation() {
-    return this.pdfViewer.pagesRotation;
-  }
-  set rotation(value) {
-    this.pdfViewer.pagesRotation = value;
-  }
-  async goToDestination(dest) {
-    if (!this.pdfDocument) {
-      return;
-    }
-    let namedDest, explicitDest;
-    if (typeof dest === "string") {
-      namedDest = dest;
-      explicitDest = await this.pdfDocument.getDestination(dest);
-    } else {
-      namedDest = null;
-      explicitDest = await dest;
-    }
-    if (!Array.isArray(explicitDest)) {
-      console.error(`PDFLinkService.goToDestination: "${explicitDest}" is not ` + `a valid destination array, for dest="${dest}".`);
-      return;
-    }
-    _classPrivateMethodGet(this, _goToDestinationHelper, _goToDestinationHelper2).call(this, dest, namedDest, explicitDest);
-  }
-  goToPage(val) {
-    if (!this.pdfDocument) {
-      return;
-    }
-    const pageNumber = typeof val === "string" && this.pdfViewer.pageLabelToPageNumber(val) || val | 0;
-    if (!(Number.isInteger(pageNumber) && pageNumber > 0 && pageNumber <= this.pagesCount)) {
-      console.error(`PDFLinkService.goToPage: "${val}" is not a valid page.`);
-      return;
-    }
-    if (this.pdfHistory) {
-      this.pdfHistory.pushCurrentPosition();
-      this.pdfHistory.pushPage(pageNumber);
-    }
-    this.pdfViewer.scrollPageIntoView({
-      pageNumber
-    });
-  }
-  addLinkAttributes(link, url) {
-    let newWindow = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    addLinkAttributes(link, {
-      url,
-      target: newWindow ? LinkTarget.BLANK : this.externalLinkTarget,
-      rel: this.externalLinkRel,
-      enabled: this.externalLinkEnabled
-    });
-  }
-  getDestinationHash(dest) {
-    if (typeof dest === "string") {
-      if (dest.length > 0) {
-        return this.getAnchorUrl("#" + escape(dest));
-      }
-    } else if (Array.isArray(dest)) {
-      const str = JSON.stringify(dest);
-      if (str.length > 0) {
-        return this.getAnchorUrl("#" + escape(str));
-      }
-    }
-    return this.getAnchorUrl("");
-  }
-  getAnchorUrl(anchor) {
-    return (this.baseUrl || "") + anchor;
-  }
-  setHash(hash) {
-    if (!this.pdfDocument) {
-      return;
-    }
-    let pageNumber, dest;
-    if (hash.includes("=")) {
-      const params = (0, _ui_utils.parseQueryString)(hash);
-      if (params.has("search")) {
-        this.eventBus.dispatch("findfromurlhash", {
-          source: this,
-          query: params.get("search").replace(/"/g, ""),
-          phraseSearch: params.get("phrase") === "true"
-        });
-      }
-      if (params.has("page")) {
-        pageNumber = params.get("page") | 0 || 1;
-      }
-      if (params.has("zoom")) {
-        const zoomArgs = params.get("zoom").split(",");
-        const zoomArg = zoomArgs[0];
-        const zoomArgNumber = parseFloat(zoomArg);
-        if (!zoomArg.includes("Fit")) {
-          dest = [null, {
-            name: "XYZ"
-          }, zoomArgs.length > 1 ? zoomArgs[1] | 0 : null, zoomArgs.length > 2 ? zoomArgs[2] | 0 : null, zoomArgNumber ? zoomArgNumber / 100 : zoomArg];
-        } else {
-          if (zoomArg === "Fit" || zoomArg === "FitB") {
-            dest = [null, {
-              name: zoomArg
-            }];
-          } else if (zoomArg === "FitH" || zoomArg === "FitBH" || zoomArg === "FitV" || zoomArg === "FitBV") {
-            dest = [null, {
-              name: zoomArg
-            }, zoomArgs.length > 1 ? zoomArgs[1] | 0 : null];
-          } else if (zoomArg === "FitR") {
-            if (zoomArgs.length !== 5) {
-              console.error('PDFLinkService.setHash: Not enough parameters for "FitR".');
-            } else {
-              dest = [null, {
-                name: zoomArg
-              }, zoomArgs[1] | 0, zoomArgs[2] | 0, zoomArgs[3] | 0, zoomArgs[4] | 0];
-            }
-          } else {
-            console.error(`PDFLinkService.setHash: "${zoomArg}" is not a valid zoom value.`);
-          }
-        }
-      }
-      if (dest) {
-        this.pdfViewer.scrollPageIntoView({
-          pageNumber: pageNumber || this.page,
-          destArray: dest,
-          allowNegativeOffset: true
-        });
-      } else if (pageNumber) {
-        this.page = pageNumber;
-      }
-      if (params.has("pagemode")) {
-        this.eventBus.dispatch("pagemode", {
-          source: this,
-          mode: params.get("pagemode")
-        });
-      }
-      if (params.has("nameddest")) {
-        this.goToDestination(params.get("nameddest"));
-      }
-    } else {
-      dest = unescape(hash);
-      try {
-        dest = JSON.parse(dest);
-        if (!Array.isArray(dest)) {
-          dest = dest.toString();
-        }
-      } catch (ex) {}
-      if (typeof dest === "string" || _classStaticPrivateMethodGet(PDFLinkService, PDFLinkService, _isValidExplicitDestination).call(PDFLinkService, dest)) {
-        this.goToDestination(dest);
-        return;
-      }
-      console.error(`PDFLinkService.setHash: "${unescape(hash)}" is not a valid destination.`);
-    }
-  }
-  executeNamedAction(action) {
-    var _this$pdfHistory, _this$pdfHistory2;
-    switch (action) {
-      case "GoBack":
-        (_this$pdfHistory = this.pdfHistory) === null || _this$pdfHistory === void 0 ? void 0 : _this$pdfHistory.back();
-        break;
-      case "GoForward":
-        (_this$pdfHistory2 = this.pdfHistory) === null || _this$pdfHistory2 === void 0 ? void 0 : _this$pdfHistory2.forward();
-        break;
-      case "NextPage":
-        this.pdfViewer.nextPage();
-        break;
-      case "PrevPage":
-        this.pdfViewer.previousPage();
-        break;
-      case "LastPage":
-        this.page = this.pagesCount;
-        break;
-      case "FirstPage":
-        this.page = 1;
-        break;
-      default:
-        break;
-    }
-    this.eventBus.dispatch("namedaction", {
-      source: this,
-      action
-    });
-  }
-  async executeSetOCGState(action) {
-    const pdfDocument = this.pdfDocument;
-    const optionalContentConfig = await this.pdfViewer.optionalContentConfigPromise;
-    if (pdfDocument !== this.pdfDocument) {
-      return;
-    }
-    let operator;
-    for (const elem of action.state) {
-      switch (elem) {
-        case "ON":
-        case "OFF":
-        case "Toggle":
-          operator = elem;
-          continue;
-      }
-      switch (operator) {
-        case "ON":
-          optionalContentConfig.setVisibility(elem, true);
-          break;
-        case "OFF":
-          optionalContentConfig.setVisibility(elem, false);
-          break;
-        case "Toggle":
-          const group = optionalContentConfig.getGroup(elem);
-          if (group) {
-            optionalContentConfig.setVisibility(elem, !group.visible);
-          }
-          break;
-      }
-    }
-    this.pdfViewer.optionalContentConfigPromise = Promise.resolve(optionalContentConfig);
-  }
-  cachePageRef(pageNum, pageRef) {
-    if (!pageRef) {
-      return;
-    }
-    const refStr = pageRef.gen === 0 ? `${pageRef.num}R` : `${pageRef.num}R${pageRef.gen}`;
-    _classPrivateFieldGet(this, _pagesRefCache).set(refStr, pageNum);
-  }
-  _cachedPageNumber(pageRef) {
-    if (!pageRef) {
-      return null;
-    }
-    const refStr = pageRef.gen === 0 ? `${pageRef.num}R` : `${pageRef.num}R${pageRef.gen}`;
-    return _classPrivateFieldGet(this, _pagesRefCache).get(refStr) || null;
-  }
-  isPageVisible(pageNumber) {
-    return this.pdfViewer.isPageVisible(pageNumber);
-  }
-  isPageCached(pageNumber) {
-    return this.pdfViewer.isPageCached(pageNumber);
-  }
-}
-exports.PDFLinkService = PDFLinkService;
-function _goToDestinationHelper2(rawDest) {
-  let namedDest = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-  let explicitDest = arguments.length > 2 ? arguments[2] : undefined;
-  const destRef = explicitDest[0];
-  let pageNumber;
-  if (typeof destRef === "object" && destRef !== null) {
-    pageNumber = this._cachedPageNumber(destRef);
-    if (!pageNumber) {
-      this.pdfDocument.getPageIndex(destRef).then(pageIndex => {
-        this.cachePageRef(pageIndex + 1, destRef);
-        _classPrivateMethodGet(this, _goToDestinationHelper, _goToDestinationHelper2).call(this, rawDest, namedDest, explicitDest);
-      }).catch(() => {
-        console.error(`PDFLinkService.#goToDestinationHelper: "${destRef}" is not ` + `a valid page reference, for dest="${rawDest}".`);
-      });
-      return;
-    }
-  } else if (Number.isInteger(destRef)) {
-    pageNumber = destRef + 1;
-  } else {
-    console.error(`PDFLinkService.#goToDestinationHelper: "${destRef}" is not ` + `a valid destination reference, for dest="${rawDest}".`);
-    return;
-  }
-  if (!pageNumber || pageNumber < 1 || pageNumber > this.pagesCount) {
-    console.error(`PDFLinkService.#goToDestinationHelper: "${pageNumber}" is not ` + `a valid page number, for dest="${rawDest}".`);
-    return;
-  }
-  if (this.pdfHistory) {
-    this.pdfHistory.pushCurrentPosition();
-    this.pdfHistory.push({
-      namedDest,
-      explicitDest,
-      pageNumber
-    });
-  }
-  this.pdfViewer.scrollPageIntoView({
-    pageNumber,
-    destArray: explicitDest,
-    ignoreDestinationZoom: this._ignoreDestinationZoom
-  });
-}
-function _isValidExplicitDestination(dest) {
-  if (!Array.isArray(dest)) {
-    return false;
-  }
-  const destLength = dest.length;
-  if (destLength < 2) {
-    return false;
-  }
-  const page = dest[0];
-  if (!(typeof page === "object" && Number.isInteger(page.num) && Number.isInteger(page.gen)) && !(Number.isInteger(page) && page >= 0)) {
-    return false;
-  }
-  const zoom = dest[1];
-  if (!(typeof zoom === "object" && typeof zoom.name === "string")) {
-    return false;
-  }
-  let allowNull = true;
-  switch (zoom.name) {
-    case "XYZ":
-      if (destLength !== 5) {
-        return false;
-      }
-      break;
-    case "Fit":
-    case "FitB":
-      return destLength === 2;
-    case "FitH":
-    case "FitBH":
-    case "FitV":
-    case "FitBV":
-      if (destLength !== 3) {
-        return false;
-      }
-      break;
-    case "FitR":
-      if (destLength !== 6) {
-        return false;
-      }
-      allowNull = false;
-      break;
-    default:
-      return false;
-  }
-  for (let i = 2; i < destLength; i++) {
-    const param = dest[i];
-    if (!(typeof param === "number" || allowNull && param === null)) {
-      return false;
-    }
-  }
-  return true;
-}
-class SimpleLinkService {
-  constructor() {
-    this.externalLinkEnabled = true;
-  }
-  get pagesCount() {
-    return 0;
-  }
-  get page() {
-    return 0;
-  }
-  set page(value) {}
-  get rotation() {
-    return 0;
-  }
-  set rotation(value) {}
-  async goToDestination(dest) {}
-  goToPage(val) {}
-  addLinkAttributes(link, url) {
-    let newWindow = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-    addLinkAttributes(link, {
-      url,
-      enabled: this.externalLinkEnabled
-    });
-  }
-  getDestinationHash(dest) {
-    return "#";
-  }
-  getAnchorUrl(hash) {
-    return "#";
-  }
-  setHash(hash) {}
-  executeNamedAction(action) {}
-  executeSetOCGState(action) {}
-  cachePageRef(pageNum, pageRef) {}
-  isPageVisible(pageNumber) {
-    return true;
-  }
-  isPageCached(pageNumber) {
-    return true;
-  }
-}
-exports.SimpleLinkService = SimpleLinkService;
-
-/***/ }),
-/* 7 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -1495,6 +1071,490 @@ function apiPageModeToSidebarView(mode) {
 }
 
 /***/ }),
+/* 7 */
+/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.SimpleLinkService = exports.PDFLinkService = exports.LinkTarget = void 0;
+var _ui_utils = __w_pdfjs_require__(6);
+function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+function _classStaticPrivateMethodGet(receiver, classConstructor, method) { _classCheckPrivateStaticAccess(receiver, classConstructor); return method; }
+function _classCheckPrivateStaticAccess(receiver, classConstructor) { if (receiver !== classConstructor) { throw new TypeError("Private static access of wrong provenance"); } }
+function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+const DEFAULT_LINK_REL = "noopener noreferrer nofollow";
+const LinkTarget = {
+  NONE: 0,
+  SELF: 1,
+  BLANK: 2,
+  PARENT: 3,
+  TOP: 4
+};
+exports.LinkTarget = LinkTarget;
+function addLinkAttributes(link) {
+  let {
+    url,
+    target,
+    rel,
+    enabled = true
+  } = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  if (!url || typeof url !== "string") {
+    throw new Error('A valid "url" parameter must provided.');
+  }
+  const urlNullRemoved = (0, _ui_utils.removeNullCharacters)(url);
+  if (enabled) {
+    link.href = link.title = urlNullRemoved;
+  } else {
+    link.href = "";
+    link.title = `Disabled: ${urlNullRemoved}`;
+    link.onclick = () => {
+      return false;
+    };
+  }
+  let targetStr = "";
+  switch (target) {
+    case LinkTarget.NONE:
+      break;
+    case LinkTarget.SELF:
+      targetStr = "_self";
+      break;
+    case LinkTarget.BLANK:
+      targetStr = "_blank";
+      break;
+    case LinkTarget.PARENT:
+      targetStr = "_parent";
+      break;
+    case LinkTarget.TOP:
+      targetStr = "_top";
+      break;
+  }
+  link.target = targetStr;
+  link.rel = typeof rel === "string" ? rel : DEFAULT_LINK_REL;
+}
+var _pagesRefCache = /*#__PURE__*/new WeakMap();
+var _goToDestinationHelper = /*#__PURE__*/new WeakSet();
+class PDFLinkService {
+  constructor() {
+    let {
+      eventBus,
+      externalLinkTarget = null,
+      externalLinkRel = null,
+      ignoreDestinationZoom = false
+    } = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    _classPrivateMethodInitSpec(this, _goToDestinationHelper);
+    _classPrivateFieldInitSpec(this, _pagesRefCache, {
+      writable: true,
+      value: new Map()
+    });
+    this.eventBus = eventBus;
+    this.externalLinkTarget = externalLinkTarget;
+    this.externalLinkRel = externalLinkRel;
+    this.externalLinkEnabled = true;
+    this._ignoreDestinationZoom = ignoreDestinationZoom;
+    this.baseUrl = null;
+    this.pdfDocument = null;
+    this.pdfViewer = null;
+    this.pdfHistory = null;
+  }
+  setDocument(pdfDocument) {
+    let baseUrl = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+    this.baseUrl = baseUrl;
+    this.pdfDocument = pdfDocument;
+    _classPrivateFieldGet(this, _pagesRefCache).clear();
+  }
+  setViewer(pdfViewer) {
+    this.pdfViewer = pdfViewer;
+  }
+  setHistory(pdfHistory) {
+    this.pdfHistory = pdfHistory;
+  }
+  get pagesCount() {
+    return this.pdfDocument ? this.pdfDocument.numPages : 0;
+  }
+  get page() {
+    return this.pdfViewer.currentPageNumber;
+  }
+  set page(value) {
+    this.pdfViewer.currentPageNumber = value;
+  }
+  get rotation() {
+    return this.pdfViewer.pagesRotation;
+  }
+  set rotation(value) {
+    this.pdfViewer.pagesRotation = value;
+  }
+  get isInPresentationMode() {
+    return this.pdfViewer.isInPresentationMode;
+  }
+  async goToDestination(dest) {
+    if (!this.pdfDocument) {
+      return;
+    }
+    let namedDest, explicitDest;
+    if (typeof dest === "string") {
+      namedDest = dest;
+      explicitDest = await this.pdfDocument.getDestination(dest);
+    } else {
+      namedDest = null;
+      explicitDest = await dest;
+    }
+    if (!Array.isArray(explicitDest)) {
+      console.error(`PDFLinkService.goToDestination: "${explicitDest}" is not ` + `a valid destination array, for dest="${dest}".`);
+      return;
+    }
+    _classPrivateMethodGet(this, _goToDestinationHelper, _goToDestinationHelper2).call(this, dest, namedDest, explicitDest);
+  }
+  goToPage(val) {
+    if (!this.pdfDocument) {
+      return;
+    }
+    const pageNumber = typeof val === "string" && this.pdfViewer.pageLabelToPageNumber(val) || val | 0;
+    if (!(Number.isInteger(pageNumber) && pageNumber > 0 && pageNumber <= this.pagesCount)) {
+      console.error(`PDFLinkService.goToPage: "${val}" is not a valid page.`);
+      return;
+    }
+    if (this.pdfHistory) {
+      this.pdfHistory.pushCurrentPosition();
+      this.pdfHistory.pushPage(pageNumber);
+    }
+    this.pdfViewer.scrollPageIntoView({
+      pageNumber
+    });
+  }
+  addLinkAttributes(link, url) {
+    let newWindow = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    addLinkAttributes(link, {
+      url,
+      target: newWindow ? LinkTarget.BLANK : this.externalLinkTarget,
+      rel: this.externalLinkRel,
+      enabled: this.externalLinkEnabled
+    });
+  }
+  getDestinationHash(dest) {
+    if (typeof dest === "string") {
+      if (dest.length > 0) {
+        return this.getAnchorUrl("#" + escape(dest));
+      }
+    } else if (Array.isArray(dest)) {
+      const str = JSON.stringify(dest);
+      if (str.length > 0) {
+        return this.getAnchorUrl("#" + escape(str));
+      }
+    }
+    return this.getAnchorUrl("");
+  }
+  getAnchorUrl(anchor) {
+    return (this.baseUrl || "") + anchor;
+  }
+  setHash(hash) {
+    if (!this.pdfDocument) {
+      return;
+    }
+    let pageNumber, dest;
+    if (hash.includes("=")) {
+      const params = (0, _ui_utils.parseQueryString)(hash);
+      if (params.has("search")) {
+        this.eventBus.dispatch("findfromurlhash", {
+          source: this,
+          query: params.get("search").replace(/"/g, ""),
+          phraseSearch: params.get("phrase") === "true"
+        });
+      }
+      if (params.has("page")) {
+        pageNumber = params.get("page") | 0 || 1;
+      }
+      if (params.has("zoom")) {
+        const zoomArgs = params.get("zoom").split(",");
+        const zoomArg = zoomArgs[0];
+        const zoomArgNumber = parseFloat(zoomArg);
+        if (!zoomArg.includes("Fit")) {
+          dest = [null, {
+            name: "XYZ"
+          }, zoomArgs.length > 1 ? zoomArgs[1] | 0 : null, zoomArgs.length > 2 ? zoomArgs[2] | 0 : null, zoomArgNumber ? zoomArgNumber / 100 : zoomArg];
+        } else {
+          if (zoomArg === "Fit" || zoomArg === "FitB") {
+            dest = [null, {
+              name: zoomArg
+            }];
+          } else if (zoomArg === "FitH" || zoomArg === "FitBH" || zoomArg === "FitV" || zoomArg === "FitBV") {
+            dest = [null, {
+              name: zoomArg
+            }, zoomArgs.length > 1 ? zoomArgs[1] | 0 : null];
+          } else if (zoomArg === "FitR") {
+            if (zoomArgs.length !== 5) {
+              console.error('PDFLinkService.setHash: Not enough parameters for "FitR".');
+            } else {
+              dest = [null, {
+                name: zoomArg
+              }, zoomArgs[1] | 0, zoomArgs[2] | 0, zoomArgs[3] | 0, zoomArgs[4] | 0];
+            }
+          } else {
+            console.error(`PDFLinkService.setHash: "${zoomArg}" is not a valid zoom value.`);
+          }
+        }
+      }
+      if (dest) {
+        this.pdfViewer.scrollPageIntoView({
+          pageNumber: pageNumber || this.page,
+          destArray: dest,
+          allowNegativeOffset: true
+        });
+      } else if (pageNumber) {
+        this.page = pageNumber;
+      }
+      if (params.has("pagemode")) {
+        this.eventBus.dispatch("pagemode", {
+          source: this,
+          mode: params.get("pagemode")
+        });
+      }
+      if (params.has("nameddest")) {
+        this.goToDestination(params.get("nameddest"));
+      }
+    } else {
+      dest = unescape(hash);
+      try {
+        dest = JSON.parse(dest);
+        if (!Array.isArray(dest)) {
+          dest = dest.toString();
+        }
+      } catch (ex) {}
+      if (typeof dest === "string" || _classStaticPrivateMethodGet(PDFLinkService, PDFLinkService, _isValidExplicitDestination).call(PDFLinkService, dest)) {
+        this.goToDestination(dest);
+        return;
+      }
+      console.error(`PDFLinkService.setHash: "${unescape(hash)}" is not a valid destination.`);
+    }
+  }
+  executeNamedAction(action) {
+    var _this$pdfHistory, _this$pdfHistory2;
+    switch (action) {
+      case "GoBack":
+        (_this$pdfHistory = this.pdfHistory) === null || _this$pdfHistory === void 0 ? void 0 : _this$pdfHistory.back();
+        break;
+      case "GoForward":
+        (_this$pdfHistory2 = this.pdfHistory) === null || _this$pdfHistory2 === void 0 ? void 0 : _this$pdfHistory2.forward();
+        break;
+      case "NextPage":
+        this.pdfViewer.nextPage();
+        break;
+      case "PrevPage":
+        this.pdfViewer.previousPage();
+        break;
+      case "LastPage":
+        this.page = this.pagesCount;
+        break;
+      case "FirstPage":
+        this.page = 1;
+        break;
+      default:
+        break;
+    }
+    this.eventBus.dispatch("namedaction", {
+      source: this,
+      action
+    });
+  }
+  async executeSetOCGState(action) {
+    const pdfDocument = this.pdfDocument;
+    const optionalContentConfig = await this.pdfViewer.optionalContentConfigPromise;
+    if (pdfDocument !== this.pdfDocument) {
+      return;
+    }
+    let operator;
+    for (const elem of action.state) {
+      switch (elem) {
+        case "ON":
+        case "OFF":
+        case "Toggle":
+          operator = elem;
+          continue;
+      }
+      switch (operator) {
+        case "ON":
+          optionalContentConfig.setVisibility(elem, true);
+          break;
+        case "OFF":
+          optionalContentConfig.setVisibility(elem, false);
+          break;
+        case "Toggle":
+          const group = optionalContentConfig.getGroup(elem);
+          if (group) {
+            optionalContentConfig.setVisibility(elem, !group.visible);
+          }
+          break;
+      }
+    }
+    this.pdfViewer.optionalContentConfigPromise = Promise.resolve(optionalContentConfig);
+  }
+  cachePageRef(pageNum, pageRef) {
+    if (!pageRef) {
+      return;
+    }
+    const refStr = pageRef.gen === 0 ? `${pageRef.num}R` : `${pageRef.num}R${pageRef.gen}`;
+    _classPrivateFieldGet(this, _pagesRefCache).set(refStr, pageNum);
+  }
+  _cachedPageNumber(pageRef) {
+    if (!pageRef) {
+      return null;
+    }
+    const refStr = pageRef.gen === 0 ? `${pageRef.num}R` : `${pageRef.num}R${pageRef.gen}`;
+    return _classPrivateFieldGet(this, _pagesRefCache).get(refStr) || null;
+  }
+  isPageVisible(pageNumber) {
+    return this.pdfViewer.isPageVisible(pageNumber);
+  }
+  isPageCached(pageNumber) {
+    return this.pdfViewer.isPageCached(pageNumber);
+  }
+}
+exports.PDFLinkService = PDFLinkService;
+function _goToDestinationHelper2(rawDest) {
+  let namedDest = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+  let explicitDest = arguments.length > 2 ? arguments[2] : undefined;
+  const destRef = explicitDest[0];
+  let pageNumber;
+  if (typeof destRef === "object" && destRef !== null) {
+    pageNumber = this._cachedPageNumber(destRef);
+    if (!pageNumber) {
+      this.pdfDocument.getPageIndex(destRef).then(pageIndex => {
+        this.cachePageRef(pageIndex + 1, destRef);
+        _classPrivateMethodGet(this, _goToDestinationHelper, _goToDestinationHelper2).call(this, rawDest, namedDest, explicitDest);
+      }).catch(() => {
+        console.error(`PDFLinkService.#goToDestinationHelper: "${destRef}" is not ` + `a valid page reference, for dest="${rawDest}".`);
+      });
+      return;
+    }
+  } else if (Number.isInteger(destRef)) {
+    pageNumber = destRef + 1;
+  } else {
+    console.error(`PDFLinkService.#goToDestinationHelper: "${destRef}" is not ` + `a valid destination reference, for dest="${rawDest}".`);
+    return;
+  }
+  if (!pageNumber || pageNumber < 1 || pageNumber > this.pagesCount) {
+    console.error(`PDFLinkService.#goToDestinationHelper: "${pageNumber}" is not ` + `a valid page number, for dest="${rawDest}".`);
+    return;
+  }
+  if (this.pdfHistory) {
+    this.pdfHistory.pushCurrentPosition();
+    this.pdfHistory.push({
+      namedDest,
+      explicitDest,
+      pageNumber
+    });
+  }
+  this.pdfViewer.scrollPageIntoView({
+    pageNumber,
+    destArray: explicitDest,
+    ignoreDestinationZoom: this._ignoreDestinationZoom
+  });
+}
+function _isValidExplicitDestination(dest) {
+  if (!Array.isArray(dest)) {
+    return false;
+  }
+  const destLength = dest.length;
+  if (destLength < 2) {
+    return false;
+  }
+  const page = dest[0];
+  if (!(typeof page === "object" && Number.isInteger(page.num) && Number.isInteger(page.gen)) && !(Number.isInteger(page) && page >= 0)) {
+    return false;
+  }
+  const zoom = dest[1];
+  if (!(typeof zoom === "object" && typeof zoom.name === "string")) {
+    return false;
+  }
+  let allowNull = true;
+  switch (zoom.name) {
+    case "XYZ":
+      if (destLength !== 5) {
+        return false;
+      }
+      break;
+    case "Fit":
+    case "FitB":
+      return destLength === 2;
+    case "FitH":
+    case "FitBH":
+    case "FitV":
+    case "FitBV":
+      if (destLength !== 3) {
+        return false;
+      }
+      break;
+    case "FitR":
+      if (destLength !== 6) {
+        return false;
+      }
+      allowNull = false;
+      break;
+    default:
+      return false;
+  }
+  for (let i = 2; i < destLength; i++) {
+    const param = dest[i];
+    if (!(typeof param === "number" || allowNull && param === null)) {
+      return false;
+    }
+  }
+  return true;
+}
+class SimpleLinkService {
+  constructor() {
+    this.externalLinkEnabled = true;
+  }
+  get pagesCount() {
+    return 0;
+  }
+  get page() {
+    return 0;
+  }
+  set page(value) {}
+  get rotation() {
+    return 0;
+  }
+  set rotation(value) {}
+  get isInPresentationMode() {
+    return false;
+  }
+  async goToDestination(dest) {}
+  goToPage(val) {}
+  addLinkAttributes(link, url) {
+    let newWindow = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    addLinkAttributes(link, {
+      url,
+      enabled: this.externalLinkEnabled
+    });
+  }
+  getDestinationHash(dest) {
+    return "#";
+  }
+  getAnchorUrl(hash) {
+    return "#";
+  }
+  setHash(hash) {}
+  executeNamedAction(action) {}
+  executeSetOCGState(action) {}
+  cachePageRef(pageNum, pageRef) {}
+  isPageVisible(pageNumber) {
+    return true;
+  }
+  isPageCached(pageNumber) {
+    return true;
+  }
+}
+exports.SimpleLinkService = SimpleLinkService;
+
+/***/ }),
 /* 8 */
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -1823,6 +1883,11 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports.DownloadManager = void 0;
 var _pdfjsLib = __w_pdfjs_require__(3);
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 ;
 function download(blobUrl, filename) {
   const a = document.createElement("a");
@@ -1838,9 +1903,13 @@ function download(blobUrl, filename) {
   a.click();
   a.remove();
 }
+var _openBlobUrls = /*#__PURE__*/new WeakMap();
 class DownloadManager {
   constructor() {
-    this._openBlobUrls = new WeakMap();
+    _classPrivateFieldInitSpec(this, _openBlobUrls, {
+      writable: true,
+      value: new WeakMap()
+    });
   }
   downloadUrl(url, filename) {
     if (!(0, _pdfjsLib.createValidAbsoluteUrl)(url, "http://example.com")) {
@@ -1859,12 +1928,12 @@ class DownloadManager {
     const isPdfData = (0, _pdfjsLib.isPdfFile)(filename);
     const contentType = isPdfData ? "application/pdf" : "";
     if (isPdfData) {
-      let blobUrl = this._openBlobUrls.get(element);
+      let blobUrl = _classPrivateFieldGet(this, _openBlobUrls).get(element);
       if (!blobUrl) {
         blobUrl = URL.createObjectURL(new Blob([data], {
           type: contentType
         }));
-        this._openBlobUrls.set(element, blobUrl);
+        _classPrivateFieldGet(this, _openBlobUrls).set(element, blobUrl);
       }
       let viewerUrl;
       viewerUrl = "?file=" + encodeURIComponent(blobUrl + "#" + filename);
@@ -1874,7 +1943,7 @@ class DownloadManager {
       } catch (ex) {
         console.error(`openOrDownloadData: ${ex}`);
         URL.revokeObjectURL(blobUrl);
-        this._openBlobUrls.delete(element);
+        _classPrivateFieldGet(this, _openBlobUrls).delete(element);
       }
     }
     this.downloadData(data, filename, contentType);
@@ -1898,6 +1967,11 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports.WaitOnType = exports.EventBus = exports.AutomationEventBus = void 0;
 exports.waitOnEventOrTimeout = waitOnEventOrTimeout;
+function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
+function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 const WaitOnType = {
   EVENT: "event",
   TIMEOUT: "timeout"
@@ -1934,9 +2008,13 @@ function waitOnEventOrTimeout(_ref) {
     const timeout = setTimeout(timeoutHandler, delay);
   });
 }
+var _listeners = /*#__PURE__*/new WeakMap();
 class EventBus {
   constructor() {
-    this._listeners = Object.create(null);
+    _classPrivateFieldInitSpec(this, _listeners, {
+      writable: true,
+      value: Object.create(null)
+    });
   }
   on(eventName, listener) {
     let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -1953,7 +2031,7 @@ class EventBus {
     });
   }
   dispatch(eventName, data) {
-    const eventListeners = this._listeners[eventName];
+    const eventListeners = _classPrivateFieldGet(this, _listeners)[eventName];
     if (!eventListeners || eventListeners.length === 0) {
       return;
     }
@@ -1980,9 +2058,9 @@ class EventBus {
     }
   }
   _on(eventName, listener) {
-    var _this$_listeners;
+    var _classPrivateFieldGet2;
     let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    const eventListeners = (_this$_listeners = this._listeners)[eventName] || (_this$_listeners[eventName] = []);
+    const eventListeners = (_classPrivateFieldGet2 = _classPrivateFieldGet(this, _listeners))[eventName] || (_classPrivateFieldGet2[eventName] = []);
     eventListeners.push({
       listener,
       external: (options === null || options === void 0 ? void 0 : options.external) === true,
@@ -1991,7 +2069,7 @@ class EventBus {
   }
   _off(eventName, listener) {
     let options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    const eventListeners = this._listeners[eventName];
+    const eventListeners = _classPrivateFieldGet(this, _listeners)[eventName];
     if (!eventListeners) {
       return;
     }
@@ -2789,7 +2867,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports.PDFFindController = exports.FindState = void 0;
-var _ui_utils = __w_pdfjs_require__(7);
+var _ui_utils = __w_pdfjs_require__(6);
 var _pdfjsLib = __w_pdfjs_require__(3);
 var _pdf_find_utils = __w_pdfjs_require__(16);
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
@@ -2824,7 +2902,7 @@ const CHARACTERS_TO_NORMALIZE = {
   "\u00BE": "3/4"
 };
 const DIACRITICS_EXCEPTION = new Set([0x3099, 0x309a, 0x094d, 0x09cd, 0x0a4d, 0x0acd, 0x0b4d, 0x0bcd, 0x0c4d, 0x0ccd, 0x0d3b, 0x0d3c, 0x0d4d, 0x0dca, 0x0e3a, 0x0eba, 0x0f84, 0x1039, 0x103a, 0x1714, 0x1734, 0x17d2, 0x1a60, 0x1b44, 0x1baa, 0x1bab, 0x1bf2, 0x1bf3, 0x2d7f, 0xa806, 0xa82c, 0xa8c4, 0xa953, 0xa9c0, 0xaaf6, 0xabed, 0x0c56, 0x0f71, 0x0f72, 0x0f7a, 0x0f7b, 0x0f7c, 0x0f7d, 0x0f80, 0x0f74]);
-const DIACRITICS_EXCEPTION_STR = [...DIACRITICS_EXCEPTION.values()].map(x => String.fromCharCode(x)).join("");
+let DIACRITICS_EXCEPTION_STR;
 const DIACRITICS_REG_EXP = /\p{M}+/gu;
 const SPECIAL_CHARS_REG_EXP = /([.*+?^${}()|[\]\\])|(\p{P})|(\s+)|(\p{M})|(\p{L})/gu;
 const NOT_DIACRITIC_FROM_END_REG_EXP = /([^\p{M}])\p{M}*$/u;
@@ -2832,6 +2910,7 @@ const NOT_DIACRITIC_FROM_START_REG_EXP = /^\p{M}*([^\p{M}])/u;
 const SYLLABLES_REG_EXP = /[\uAC00-\uD7AF\uFA6C\uFACF-\uFAD1\uFAD5-\uFAD7]+/g;
 const SYLLABLES_LENGTHS = new Map();
 const FIRST_CHAR_SYLLABLES_REG_EXP = "[\\u1100-\\u1112\\ud7a4-\\ud7af\\ud84a\\ud84c\\ud850\\ud854\\ud857\\ud85f]";
+const NFKC_CHARS_TO_NORMALIZE = new Map();
 let noSyllablesRegExp = null;
 let withSyllablesRegExp = null;
 function normalize(text) {
@@ -2857,7 +2936,8 @@ function normalize(text) {
     normalizationRegex = withSyllablesRegExp;
   } else {
     const replace = Object.keys(CHARACTERS_TO_NORMALIZE).join("");
-    const regexp = `([${replace}])|(\\p{M}+(?:-\\n)?)|(\\S-\\n)|(\\p{Ideographic}\\n)|(\\n)`;
+    const toNormalizeWithNFKC = "\u2460-\u2473" + "\u24b6-\u24ff" + "\u3244-\u32bf" + "\u32d0-\u32fe" + "\uff00-\uffef";
+    const regexp = `([${replace}])|([${toNormalizeWithNFKC}])|(\\p{M}+(?:-\\n)?)|(\\S-\\n)|(\\p{Ideographic}\\n)|(\\n)`;
     if (syllablePositions.length === 0) {
       normalizationRegex = noSyllablesRegExp = new RegExp(regexp + "|(\\u0000)", "gum");
     } else {
@@ -2876,11 +2956,11 @@ function normalize(text) {
   let shiftOrigin = 0;
   let eol = 0;
   let hasDiacritics = false;
-  normalized = normalized.replace(normalizationRegex, (match, p1, p2, p3, p4, p5, p6, i) => {
+  normalized = normalized.replace(normalizationRegex, (match, p1, p2, p3, p4, p5, p6, p7, i) => {
     var _syllablePositions$sy;
     i -= shiftOrigin;
     if (p1) {
-      const replacement = CHARACTERS_TO_NORMALIZE[match];
+      const replacement = CHARACTERS_TO_NORMALIZE[p1];
       const jj = replacement.length;
       for (let j = 1; j < jj; j++) {
         positions.push([i - shift + j, shift - j]);
@@ -2889,9 +2969,22 @@ function normalize(text) {
       return replacement;
     }
     if (p2) {
+      let replacement = NFKC_CHARS_TO_NORMALIZE.get(p2);
+      if (!replacement) {
+        replacement = p2.normalize("NFKC");
+        NFKC_CHARS_TO_NORMALIZE.set(p2, replacement);
+      }
+      const jj = replacement.length;
+      for (let j = 1; j < jj; j++) {
+        positions.push([i - shift + j, shift - j]);
+      }
+      shift -= jj - 1;
+      return replacement;
+    }
+    if (p3) {
       var _rawDiacriticsPositio;
-      const hasTrailingDashEOL = p2.endsWith("\n");
-      const len = hasTrailingDashEOL ? p2.length - 2 : p2.length;
+      const hasTrailingDashEOL = p3.endsWith("\n");
+      const len = hasTrailingDashEOL ? p3.length - 2 : p3.length;
       hasDiacritics = true;
       let jj = len;
       if (i + eol === ((_rawDiacriticsPositio = rawDiacriticsPositions[rawDiacriticsIndex]) === null || _rawDiacriticsPositio === void 0 ? void 0 : _rawDiacriticsPositio[1])) {
@@ -2909,24 +3002,24 @@ function normalize(text) {
         shift += 1;
         shiftOrigin += 1;
         eol += 1;
-        return p2.slice(0, len);
+        return p3.slice(0, len);
       }
-      return p2;
-    }
-    if (p3) {
-      positions.push([i - shift + 1, 1 + shift]);
-      shift += 1;
-      shiftOrigin += 1;
-      eol += 1;
-      return p3.charAt(0);
+      return p3;
     }
     if (p4) {
-      positions.push([i - shift + 1, shift]);
+      positions.push([i - shift + 1, 1 + shift]);
+      shift += 1;
       shiftOrigin += 1;
       eol += 1;
       return p4.charAt(0);
     }
     if (p5) {
+      positions.push([i - shift + 1, shift]);
+      shiftOrigin += 1;
+      eol += 1;
+      return p5.charAt(0);
+    }
+    if (p6) {
       positions.push([i - shift + 1, shift - 1]);
       shift -= 1;
       shiftOrigin += 1;
@@ -2942,7 +3035,7 @@ function normalize(text) {
       shift -= newCharLen;
       shiftOrigin += newCharLen;
     }
-    return p6;
+    return p7;
   });
   positions.push([normalized.length, shift]);
   return [normalized, positions, hasDiacritics];
@@ -3239,6 +3332,7 @@ function _convertToRegExpString2(query, hasDiacritics) {
   }
   if (matchDiacritics) {
     if (hasDiacritics) {
+      DIACRITICS_EXCEPTION_STR || (DIACRITICS_EXCEPTION_STR = String.fromCharCode(...DIACRITICS_EXCEPTION));
       isUnicode = true;
       query = `${query}(?=[${DIACRITICS_EXCEPTION_STR}]|[^\\p{M}]|$)`;
     }
@@ -3594,7 +3688,7 @@ Object.defineProperty(exports, "__esModule", ({
 exports.PDFHistory = void 0;
 exports.isDestArraysEqual = isDestArraysEqual;
 exports.isDestHashesEqual = isDestHashesEqual;
-var _ui_utils = __w_pdfjs_require__(7);
+var _ui_utils = __w_pdfjs_require__(6);
 var _event_utils = __w_pdfjs_require__(12);
 const HASH_CHANGE_TIMEOUT = 1000;
 const POSITION_UPDATED_THRESHOLD = 50;
@@ -4083,7 +4177,7 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports.PDFPageView = void 0;
 var _pdfjsLib = __w_pdfjs_require__(3);
-var _ui_utils = __w_pdfjs_require__(7);
+var _ui_utils = __w_pdfjs_require__(6);
 var _app_options = __w_pdfjs_require__(19);
 var _l10n_utils = __w_pdfjs_require__(4);
 var _text_accessibility = __w_pdfjs_require__(20);
@@ -5156,7 +5250,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports.TextAccessibilityManager = void 0;
-var _ui_utils = __w_pdfjs_require__(7);
+var _ui_utils = __w_pdfjs_require__(6);
 function _classPrivateMethodInitSpec(obj, privateSet) { _checkPrivateRedeclaration(obj, privateSet); privateSet.add(obj); }
 function _classPrivateFieldInitSpec(obj, privateMap, value) { _checkPrivateRedeclaration(obj, privateMap); privateMap.set(obj, value); }
 function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollection.has(obj)) { throw new TypeError("Cannot initialize the same private elements twice on an object"); } }
@@ -5346,7 +5440,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports.PDFScriptingManager = void 0;
-var _ui_utils = __w_pdfjs_require__(7);
+var _ui_utils = __w_pdfjs_require__(6);
 var _pdfjsLib = __w_pdfjs_require__(3);
 class PDFScriptingManager {
   constructor(_ref) {
@@ -5821,7 +5915,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports.PDFSinglePageViewer = void 0;
-var _ui_utils = __w_pdfjs_require__(7);
+var _ui_utils = __w_pdfjs_require__(6);
 var _pdf_viewer = __w_pdfjs_require__(24);
 class PDFSinglePageViewer extends _pdf_viewer.PDFViewer {
   _resetView() {
@@ -5847,13 +5941,13 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports.PagesCountLimit = exports.PDFViewer = exports.PDFPageViewBuffer = void 0;
 var _pdfjsLib = __w_pdfjs_require__(3);
-var _ui_utils = __w_pdfjs_require__(7);
+var _ui_utils = __w_pdfjs_require__(6);
 var _annotation_editor_layer_builder = __w_pdfjs_require__(2);
 var _annotation_layer_builder = __w_pdfjs_require__(5);
 var _l10n_utils = __w_pdfjs_require__(4);
 var _pdf_page_view = __w_pdfjs_require__(18);
 var _pdf_rendering_queue = __w_pdfjs_require__(25);
-var _pdf_link_service = __w_pdfjs_require__(6);
+var _pdf_link_service = __w_pdfjs_require__(7);
 var _struct_tree_layer_builder = __w_pdfjs_require__(8);
 var _text_highlighter = __w_pdfjs_require__(26);
 var _text_layer_builder = __w_pdfjs_require__(9);
@@ -6001,7 +6095,7 @@ class PDFViewer {
       writable: true,
       value: null
     });
-    const viewerVersion = '3.0.279';
+    const viewerVersion = '3.1.81';
     if (_pdfjsLib.version !== viewerVersion) {
       throw new Error(`The API version "${_pdfjsLib.version}" does not match the Viewer version "${viewerVersion}".`);
     }
@@ -7333,8 +7427,10 @@ function _scrollIntoView2(pageView) {
     div,
     id
   } = pageView;
-  if (this._scrollMode === _ui_utils.ScrollMode.PAGE) {
+  if (this._currentPageNumber !== id) {
     this._setCurrentPageNumber(id);
+  }
+  if (this._scrollMode === _ui_utils.ScrollMode.PAGE) {
     _classPrivateMethodGet(this, _ensurePageViewVisible, _ensurePageViewVisible2).call(this);
     this.update();
   }
@@ -7353,6 +7449,9 @@ function _scrollIntoView2(pageView) {
     }
   }
   (0, _ui_utils.scrollIntoView)(div, pageSpot);
+  if (!this._currentScaleValue && this._location) {
+    this._location = null;
+  }
 }
 function _isSameScale2(newScale) {
   return newScale === this._currentScale || Math.abs(newScale - this._currentScale) < 1e-15;
@@ -7422,7 +7521,7 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports.PDFRenderingQueue = void 0;
 var _pdfjsLib = __w_pdfjs_require__(3);
-var _ui_utils = __w_pdfjs_require__(7);
+var _ui_utils = __w_pdfjs_require__(6);
 const CLEANUP_TIMEOUT = 30000;
 class PDFRenderingQueue {
   constructor() {
@@ -7955,8 +8054,8 @@ Object.defineProperty(exports, "parseQueryString", ({
   }
 }));
 var _default_factory = __w_pdfjs_require__(1);
-var _pdf_link_service = __w_pdfjs_require__(6);
-var _ui_utils = __w_pdfjs_require__(7);
+var _pdf_link_service = __w_pdfjs_require__(7);
+var _ui_utils = __w_pdfjs_require__(6);
 var _annotation_layer_builder = __w_pdfjs_require__(5);
 var _download_manager = __w_pdfjs_require__(11);
 var _event_utils = __w_pdfjs_require__(12);
@@ -7971,8 +8070,8 @@ var _pdf_viewer = __w_pdfjs_require__(24);
 var _struct_tree_layer_builder = __w_pdfjs_require__(8);
 var _text_layer_builder = __w_pdfjs_require__(9);
 var _xfa_layer_builder = __w_pdfjs_require__(10);
-const pdfjsVersion = '3.0.279';
-const pdfjsBuild = 'd0823066c';
+const pdfjsVersion = '3.1.81';
+const pdfjsBuild = '0766898d5';
 })();
 
 /******/ 	return __webpack_exports__;

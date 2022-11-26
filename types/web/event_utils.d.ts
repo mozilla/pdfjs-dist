@@ -25,7 +25,6 @@ export class AutomationEventBus extends EventBus {
  * and `off` methods. To raise an event, the `dispatch` method shall be used.
  */
 export class EventBus {
-    _listeners: any;
     /**
      * @param {string} eventName
      * @param {function} listener
@@ -51,6 +50,7 @@ export class EventBus {
      * @ignore
      */
     _off(eventName: any, listener: any, options?: null): void;
+    #private;
 }
 /**
  * @typedef {Object} WaitOnEventOrTimeoutParameters

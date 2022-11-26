@@ -7,30 +7,22 @@ export class AnnotationStorage {
      * @ignore
      */
     static getHash(map: any): string;
-    _storage: Map<any, any>;
-    _modified: boolean;
     onSetModified: any;
     onResetModified: any;
     onAnnotationEditor: any;
     /**
      * Get the value for a given key if it exists, or return the default value.
-     *
-     * @public
-     * @memberof AnnotationStorage
      * @param {string} key
      * @param {Object} defaultValue
      * @returns {Object}
      */
-    public getValue(key: string, defaultValue: Object): Object;
+    getValue(key: string, defaultValue: Object): Object;
     /**
      * Get the value for a given key.
-     *
-     * @public
-     * @memberof AnnotationStorage
      * @param {string} key
      * @returns {Object}
      */
-    public getRawValue(key: string): Object;
+    getRawValue(key: string): Object;
     /**
      * Remove a value from the storage.
      * @param {string} key
@@ -38,13 +30,10 @@ export class AnnotationStorage {
     remove(key: string): void;
     /**
      * Set the value for a given key
-     *
-     * @public
-     * @memberof AnnotationStorage
      * @param {string} key
      * @param {Object} value
      */
-    public setValue(key: string, value: Object): void;
+    setValue(key: string, value: Object): void;
     /**
      * Check if the storage contains the given key.
      * @param {string} key

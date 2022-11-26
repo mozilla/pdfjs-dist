@@ -94,9 +94,10 @@ export function getCurrentTransformInverse(ctx: any): any[];
 /**
  * Gets the filename from a given URL.
  * @param {string} url
+ * @param {boolean} [onlyStripPath]
  * @returns {string}
  */
-export function getFilenameFromUrl(url: string): string;
+export function getFilenameFromUrl(url: string, onlyStripPath?: boolean | undefined): string;
 /**
  * Returns the filename or guessed filename from the url (see issue 3455).
  * @param {string} url - The original PDF location.

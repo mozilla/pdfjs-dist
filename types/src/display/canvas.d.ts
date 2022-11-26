@@ -1,5 +1,8 @@
 export class CanvasGraphics {
-    constructor(canvasCtx: any, commonObjs: any, objs: any, canvasFactory: any, optionalContentConfig: any, annotationCanvasMap: any, pageColors: any);
+    constructor(canvasCtx: any, commonObjs: any, objs: any, canvasFactory: any, { optionalContentConfig, markedContentStack }: {
+        optionalContentConfig: any;
+        markedContentStack?: null | undefined;
+    }, annotationCanvasMap: any, pageColors: any);
     ctx: any;
     current: CanvasExtraState;
     stateStack: any[];
@@ -20,7 +23,7 @@ export class CanvasGraphics {
     tempSMask: any;
     suspendedCtx: any;
     contentVisible: boolean;
-    markedContentStack: any[];
+    markedContentStack: never[];
     optionalContentConfig: any;
     cachedCanvases: CachedCanvases;
     cachedPatterns: Map<any, any>;

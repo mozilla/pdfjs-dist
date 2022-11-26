@@ -71,6 +71,7 @@ export class AnnotationLayerBuilder {
     _accessibilityManager: any;
     div: HTMLDivElement | null;
     _cancelled: boolean;
+    _eventBus: any;
     /**
      * @param {PageViewport} viewport
      * @param {string} intent (default value is 'display')
@@ -80,4 +81,5 @@ export class AnnotationLayerBuilder {
     render(viewport: PageViewport, intent?: string): Promise<void>;
     cancel(): void;
     hide(): void;
+    #private;
 }

@@ -75,7 +75,7 @@ export namespace LinkTarget {
  * @implements {IPDFLinkService}
  */
 export class PDFLinkService implements IPDFLinkService {
-    static "__#29@#isValidExplicitDestination"(dest: any): boolean;
+    static "__#31@#isValidExplicitDestination"(dest: any): boolean;
     /**
      * @param {PDFLinkServiceOptions} options
      */
@@ -112,6 +112,10 @@ export class PDFLinkService implements IPDFLinkService {
      * @type {number}
      */
     get rotation(): number;
+    /**
+     * @type {boolean}
+     */
+    get isInPresentationMode(): boolean;
     /**
      * This method will, when available, also update the browser history.
      *
@@ -199,6 +203,10 @@ export class SimpleLinkService implements IPDFLinkService {
      * @type {number}
      */
     get rotation(): number;
+    /**
+     * @type {boolean}
+     */
+    get isInPresentationMode(): boolean;
     /**
      * @param {string|Array} dest - The named, or explicit, PDF destination.
      */

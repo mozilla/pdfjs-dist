@@ -63,7 +63,7 @@ export type AnnotationLayerParameters = {
  * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap]
  */
 export class AnnotationLayer {
-    static "__#28@#appendElement"(element: any, id: any, div: any, accessibilityManager: any): void;
+    static "__#30@#appendElement"(element: any, id: any, div: any, accessibilityManager: any): void;
     /**
      * Render a new annotation layer with all annotation elements.
      *
@@ -84,7 +84,7 @@ export class AnnotationLayer {
      * @param {HTMLDivElement} div
      * @param {PageViewport} viewport
      */
-    static "__#28@#setDimensions"(div: HTMLDivElement, { width, height, rotation }: PageViewport): void;
-    static "__#28@#setAnnotationCanvasMap"(div: any, annotationCanvasMap: any): void;
+    static "__#30@#setDimensions"(div: HTMLDivElement, { width, height, rotation }: PageViewport): void;
+    static "__#30@#setAnnotationCanvasMap"(div: any, annotationCanvasMap: any): void;
 }
 import { AnnotationStorage } from "./annotation_storage.js";

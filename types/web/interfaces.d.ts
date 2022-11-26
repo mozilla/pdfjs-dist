@@ -192,6 +192,10 @@ export class IPDFLinkService {
      */
     get rotation(): number;
     /**
+     * @type {boolean}
+     */
+    get isInPresentationMode(): boolean;
+    /**
      * @param {boolean} value
      */
     set externalLinkEnabled(arg: boolean);
