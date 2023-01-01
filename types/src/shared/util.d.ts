@@ -219,6 +219,7 @@ export class FeatureTest {
     static get isLittleEndian(): any;
     static get isEvalSupported(): any;
     static get isOffscreenCanvasSupported(): any;
+    static get platform(): any;
 }
 export const FONT_IDENTITY_MATRIX: number[];
 export namespace FontType {

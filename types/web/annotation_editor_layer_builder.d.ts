@@ -1,34 +1,22 @@
 export type PDFPageProxy = import("../src/display/api").PDFPageProxy;
 export type PageViewport = import("../src/display/display_utils").PageViewport;
-export type IPDFLinkService = import("./interfaces").IPDFLinkService;
 export type AnnotationEditorUIManager = import("../src/display/editor/tools.js").AnnotationEditorUIManager;
-export type AnnotationStorage = any;
 export type TextAccessibilityManager = import("./text_accessibility.js").TextAccessibilityManager;
 export type IL10n = import("./interfaces").IL10n;
 export type AnnotationEditorLayerBuilderOptions = {
-    /**
-     * - Editor mode
-     */
-    mode: number;
+    uiManager?: import("../src/display/editor/tools.js").AnnotationEditorUIManager | undefined;
     pageDiv: HTMLDivElement;
     pdfPage: PDFPageProxy;
-    accessibilityManager: TextAccessibilityManager;
-    annotationStorage: any;
-    /**
-     * - Localization service.
-     */
-    l10n: IL10n;
-    uiManager: AnnotationEditorUIManager;
+    l10n?: import("./interfaces").IL10n | undefined;
+    accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
 };
 /**
  * @typedef {Object} AnnotationEditorLayerBuilderOptions
- * @property {number} mode - Editor mode
+ * @property {AnnotationEditorUIManager} [uiManager]
  * @property {HTMLDivElement} pageDiv
  * @property {PDFPageProxy} pdfPage
- * @property {TextAccessibilityManager} accessibilityManager
- * @property {AnnotationStorage} annotationStorage
- * @property {IL10n} l10n - Localization service.
- * @property {AnnotationEditorUIManager} uiManager
+ * @property {IL10n} [l10n]
+ * @property {TextAccessibilityManager} [accessibilityManager]
  */
 export class AnnotationEditorLayerBuilder {
     /**
@@ -37,9 +25,13 @@ export class AnnotationEditorLayerBuilder {
     constructor(options: AnnotationEditorLayerBuilderOptions);
     pageDiv: HTMLDivElement;
     pdfPage: import("../src/display/api").PDFPageProxy;
-    annotationStorage: any;
-    accessibilityManager: import("./text_accessibility.js").TextAccessibilityManager;
-    l10n: import("./interfaces").IL10n;
+    accessibilityManager: import("./text_accessibility.js").TextAccessibilityManager | undefined;
+    l10n: {
+        getLanguage(): Promise<string>;
+        getDirection(): Promise<string>;
+        get(key: any, args?: null, fallback?: any): Promise<any>;
+        translate(element: any): Promise<void>;
+    };
     annotationEditorLayer: any;
     div: HTMLDivElement | null;
     _cancelled: boolean;
@@ -51,6 +43,5 @@ export class AnnotationEditorLayerBuilder {
     cancel(): void;
     hide(): void;
     show(): void;
-    destroy(): void;
     #private;
 }

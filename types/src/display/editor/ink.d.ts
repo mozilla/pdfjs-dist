@@ -17,7 +17,7 @@ export class InkEditor extends AnnotationEditor {
      */
     static "__#2@#buildPath2D"(bezier: Arra<number[]>): Path2D;
     /** @inheritdoc */
-    static deserialize(data: any, parent: any): AnnotationEditor;
+    static deserialize(data: any, parent: any, uiManager: any): AnnotationEditor;
     constructor(params: any);
     color: any;
     thickness: any;
@@ -33,6 +33,7 @@ export class InkEditor extends AnnotationEditor {
     /** @inheritdoc */
     get propertiesToUpdate(): any[][];
     canvas: HTMLCanvasElement | null | undefined;
+    onScaleChanging(): void;
     /**
      * onpointerdown callback for the canvas we're drawing on.
      * @param {PointerEvent} event
@@ -75,7 +76,7 @@ export class InkEditor extends AnnotationEditor {
             points: number[];
         }[];
         pageIndex: number;
-        rect: number[];
+        rect: any[];
         rotation: any;
     } | null;
     #private;

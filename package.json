@@ -1,6 +1,6 @@
 {
   "name": "pdfjs-dist",
-  "version": "3.1.81",
+  "version": "3.2.146",
   "main": "build/pdf.js",
   "types": "types/src/pdf.d.ts",
   "description": "Generic build of Mozilla's PDF.js library.",
@@ -13,7 +13,7 @@
   "bugs": "https://github.com/mozilla/pdf.js/issues",
   "license": "Apache-2.0",
   "optionalDependencies": {
-    "canvas": "^2.10.2"
+    "canvas": "^2.11.0"
   },
   "dependencies": {
     "web-streams-polyfill": "^3.2.1"

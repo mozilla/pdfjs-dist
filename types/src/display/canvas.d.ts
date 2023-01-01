@@ -85,9 +85,9 @@ export class CanvasGraphics {
     transform(a: any, b: any, c: any, d: any, e: any, f: any): void;
     constructPath(ops: any, args: any, minMax: any): void;
     closePath(): void;
-    stroke(consumePath: any): void;
+    stroke(consumePath?: boolean): void;
     closeStroke(): void;
-    fill(consumePath: any): void;
+    fill(consumePath?: boolean): void;
     eoFill(): void;
     fillStroke(): void;
     eoFillStroke(): void;

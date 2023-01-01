@@ -665,6 +665,18 @@ class FeatureTest {
   static get isOffscreenCanvasSupported() {
     return shadow(this, "isOffscreenCanvasSupported", typeof OffscreenCanvas !== "undefined");
   }
+  static get platform() {
+    if (typeof navigator === "undefined") {
+      return shadow(this, "platform", {
+        isWin: false,
+        isMac: false
+      });
+    }
+    return shadow(this, "platform", {
+      isWin: navigator.platform.includes("Win"),
+      isMac: navigator.platform.includes("Mac")
+    });
+  }
 }
 exports.FeatureTest = FeatureTest;
 const hexNumbers = [...Array(256).keys()].map(n => n.toString(16).padStart(2, "0"));
@@ -9105,8 +9117,8 @@ var _util = __w_pdfjs_require__(1);
 var _jbig = __w_pdfjs_require__(88);
 var _jpg = __w_pdfjs_require__(94);
 var _jpx = __w_pdfjs_require__(95);
-const pdfjsVersion = '3.1.81';
-const pdfjsBuild = '0766898d5';
+const pdfjsVersion = '3.2.146';
+const pdfjsBuild = '3fd2a3548';
 })();
 
 /******/ 	return __webpack_exports__;

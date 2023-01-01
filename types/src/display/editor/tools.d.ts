@@ -10,12 +10,29 @@ export type AnnotationEditorLayer = import("./annotation_editor_layer.js").Annot
  */
 export class AnnotationEditorUIManager {
     static _keyboardManager: KeyboardManager;
-    constructor(container: any, eventBus: any);
+    constructor(container: any, eventBus: any, annotationStorage: any);
+    viewParameters: {
+        realScale: number;
+        rotation: number;
+    };
     destroy(): void;
     onPageChanging({ pageNumber }: {
         pageNumber: any;
     }): void;
     focusMainContainer(): void;
+    addShouldRescale(editor: any): void;
+    removeShouldRescale(editor: any): void;
+    onScaleChanging({ scale }: {
+        scale: any;
+    }): void;
+    onRotationChanging({ pagesRotation }: {
+        pagesRotation: any;
+    }): void;
+    /**
+     * Add an editor in the annotation storage.
+     * @param {AnnotationEditor} editor
+     */
+    addToAnnotationStorage(editor: AnnotationEditor): void;
     /**
      * Copy callback.
      * @param {ClipboardEvent} event
@@ -56,6 +73,8 @@ export class AnnotationEditorUIManager {
      * @returns {string}
      */
     getId(): string;
+    get currentLayer(): any;
+    get currentPageIndex(): number;
     /**
      * Add a new layer for a page which will contains the editors.
      * @param {AnnotationEditorLayer} layer
@@ -252,7 +271,6 @@ export class CommandManager {
  * non-mac OSes.
  */
 export class KeyboardManager {
-    static get platform(): any;
     /**
      * Create a new keyboard manager class.
      * @param {Array<Array>} callbacks - an array containing an array of shortcuts

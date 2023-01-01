@@ -20,7 +20,6 @@ export type AnnotationElementParameters = {
     enableScripting?: boolean | undefined;
     hasJSActions?: boolean | undefined;
     fieldObjects?: Object | undefined;
-    mouseState?: Object | undefined;
 };
 export type AnnotationLayerParameters = {
     viewport: PageViewport;
@@ -29,6 +28,7 @@ export type AnnotationLayerParameters = {
     page: PDFPageProxy;
     linkService: IPDFLinkService;
     downloadManager: any;
+    annotationStorage?: AnnotationStorage | undefined;
     /**
      * - Path for image resources, mainly
      * for annotation icons. Include trailing slash.
@@ -44,7 +44,11 @@ export type AnnotationLayerParameters = {
      * The default value is `false`.
      */
     hasJSActions?: boolean | undefined;
+    fieldObjects?: {
+        [x: string]: Object[];
+    } | null | undefined;
     annotationCanvasMap?: Map<string, HTMLCanvasElement> | undefined;
+    accessibilityManager?: any;
 };
 /**
  * @typedef {Object} AnnotationLayerParameters
@@ -54,37 +58,33 @@ export type AnnotationLayerParameters = {
  * @property {PDFPageProxy} page
  * @property {IPDFLinkService} linkService
  * @property {IDownloadManager} downloadManager
+ * @property {AnnotationStorage} [annotationStorage]
  * @property {string} [imageResourcesPath] - Path for image resources, mainly
  *   for annotation icons. Include trailing slash.
  * @property {boolean} renderForms
  * @property {boolean} [enableScripting] - Enable embedded script execution.
  * @property {boolean} [hasJSActions] - Some fields have JS actions.
  *   The default value is `false`.
+ * @property {Object<string, Array<Object>> | null} [fieldObjects]
  * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap]
+ * @property {TextAccessibilityManager} [accessibilityManager]
  */
 export class AnnotationLayer {
-    static "__#30@#appendElement"(element: any, id: any, div: any, accessibilityManager: any): void;
+    static "__#24@#appendElement"(element: any, id: any, div: any, accessibilityManager: any): void;
     /**
      * Render a new annotation layer with all annotation elements.
      *
-     * @public
-     * @param {AnnotationLayerParameters} parameters
+     * @param {AnnotationLayerParameters} params
      * @memberof AnnotationLayer
      */
-    public static render(parameters: AnnotationLayerParameters): void;
+    static render(params: AnnotationLayerParameters): void;
     /**
      * Update the annotation elements on existing annotation layer.
      *
-     * @public
-     * @param {AnnotationLayerParameters} parameters
+     * @param {AnnotationLayerParameters} params
      * @memberof AnnotationLayer
      */
-    public static update(parameters: AnnotationLayerParameters): void;
-    /**
-     * @param {HTMLDivElement} div
-     * @param {PageViewport} viewport
-     */
-    static "__#30@#setDimensions"(div: HTMLDivElement, { width, height, rotation }: PageViewport): void;
-    static "__#30@#setAnnotationCanvasMap"(div: any, annotationCanvasMap: any): void;
+    static update(params: AnnotationLayerParameters): void;
+    static "__#24@#setAnnotationCanvasMap"(div: any, annotationCanvasMap: any): void;
 }
 import { AnnotationStorage } from "./annotation_storage.js";

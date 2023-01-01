@@ -14,7 +14,7 @@ export class TextAccessibilityManager {
      * @param {HTMLElement} e2
      * @returns {number}
      */
-    static "__#24@#compareElementPositions"(e1: HTMLElement, e2: HTMLElement): number;
+    static "__#30@#compareElementPositions"(e1: HTMLElement, e2: HTMLElement): number;
     setTextMapping(textDivs: any): void;
     /**
      * Function called when the text layer has finished rendering.

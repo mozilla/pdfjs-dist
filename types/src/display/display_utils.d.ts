@@ -166,6 +166,11 @@ export class PageViewport {
     width: number;
     height: number;
     /**
+     * The original, un-scaled, viewport dimensions.
+     * @type {Object}
+     */
+    get rawDims(): Object;
+    /**
      * Clones viewport, with optional additional properties.
      * @param {PageViewportCloneParameters} [params]
      * @returns {PageViewport} Cloned viewport.
@@ -228,9 +233,17 @@ export class PixelsPerInch {
 declare const RenderingCancelledException_base: any;
 export class RenderingCancelledException extends RenderingCancelledException_base {
     [x: string]: any;
-    constructor(msg: any, type: any);
+    constructor(msg: any, type: any, extraDelay?: number);
     type: any;
+    extraDelay: number;
 }
+/**
+ * @param {HTMLDivElement} div
+ * @param {PageViewport} viewport
+ * @param {boolean} mustFlip
+ * @param {boolean} mustRotate
+ */
+export function setLayerDimensions(div: HTMLDivElement, viewport: PageViewport, mustFlip?: boolean, mustRotate?: boolean): void;
 export class StatTimer {
     started: any;
     times: any[];

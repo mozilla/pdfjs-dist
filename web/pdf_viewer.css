@@ -27,6 +27,8 @@
      -moz-text-size-adjust: none;
           text-size-adjust: none;
   forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 2;
 }
 
 .textLayer span,
@@ -140,6 +142,7 @@
   left: 0;
   pointer-events: none;
   transform-origin: 0 0;
+  z-index: 3;
 }
 
 .annotationLayer section {
@@ -765,6 +768,11 @@
   --editorInk-editing-cursor: pointer;
 }
 
+@media (-webkit-min-device-pixel-ratio: 1.1), (min-resolution: 1.1dppx) {
+  :root {
+  }
+}
+
 @media (forced-colors: active) {
   :root {
     --focus-outline: solid 3px ButtonText;
@@ -790,7 +798,7 @@
   font-size: calc(100px * var(--scale-factor));
   transform-origin: 0 0;
   cursor: auto;
-  z-index: 20000;
+  z-index: 4;
 }
 
 .annotationEditorLayer.freeTextEditing {
@@ -930,6 +938,9 @@
 
 .pdfViewer .canvasWrapper {
   overflow: hidden;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
 }
 
 .pdfViewer .page {
@@ -1019,6 +1030,11 @@
   display: none;
 }
 
+.pdfViewer .page canvas[zooming] {
+  width: 100%;
+  height: 100%;
+}
+
 .pdfViewer .page .loadingIcon {
   position: absolute;
   display: block;
@@ -1027,6 +1043,7 @@
   right: 0;
   bottom: 0;
   background: url("images/loading-icon.gif") center no-repeat;
+  z-index: 5;
 }
 .pdfViewer .page .loadingIcon.notVisible {
   background: none;

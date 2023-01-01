@@ -725,7 +725,12 @@ export class PDFDocumentLoadingTask {
      * The callback receives an {@link UNSUPPORTED_FEATURES} argument.
      * @type {function}
      */
-    onUnsupportedFeature: Function;
+    set onUnsupportedFeature(arg: Function | null);
+    /**
+     * @type {function | null} The current callback used with unsupported
+     * features.
+     */
+    get onUnsupportedFeature(): Function | null;
     /**
      * Promise for document loading task completion.
      * @type {Promise<PDFDocumentProxy>}
@@ -737,6 +742,7 @@ export class PDFDocumentLoadingTask {
      *   completed.
      */
     destroy(): Promise<void>;
+    #private;
 }
 /**
  * Proxy to a `PDFDocument` in the worker thread.
@@ -1195,7 +1201,6 @@ export class PDFPageProxy {
     cleanupAfterRender: boolean;
     pendingCleanup: boolean;
     _intentStates: Map<any, any>;
-    _annotationPromises: Map<any, any>;
     destroyed: boolean;
     /**
      * @type {number} Page number of the page. First page is 1.
@@ -1235,6 +1240,10 @@ export class PDFPageProxy {
      *   {Object} with JS actions.
      */
     getJSActions(): Promise<Object>;
+    /**
+     * @type {boolean} True if only XFA form.
+     */
+    get isPureXfa(): boolean;
     /**
      * @returns {Promise<Object | null>} A promise that is resolved with
      *   an {Object} with a fake DOM object (a tree structure where elements
@@ -1285,8 +1294,6 @@ export class PDFPageProxy {
      * @private
      */
     private _destroy;
-    _jsActionsPromise: any;
-    _structTreePromise: any;
     /**
      * Cleans up resources allocated by the page.
      *
@@ -1403,8 +1410,10 @@ export class RenderTask {
      * Cancels the rendering task. If the task is currently rendering it will
      * not be cancelled until graphics pauses with a timeout. The promise that
      * this object extends will be rejected when cancelled.
+     *
+     * @param {number} [extraDelay]
      */
-    cancel(): void;
+    cancel(extraDelay?: number | undefined): void;
     /**
      * Whether form fields are rendered separately from the main operatorList.
      * @type {boolean}

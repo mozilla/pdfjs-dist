@@ -5,13 +5,7 @@ export type OptionalContentConfig = import("../src/display/optional_content_conf
 export type EventBus = import("./event_utils").EventBus;
 export type IDownloadManager = import("./interfaces").IDownloadManager;
 export type IL10n = import("./interfaces").IL10n;
-export type IPDFAnnotationLayerFactory = import("./interfaces").IPDFAnnotationLayerFactory;
-export type IPDFAnnotationEditorLayerFactory = import("./interfaces").IPDFAnnotationEditorLayerFactory;
 export type IPDFLinkService = import("./interfaces").IPDFLinkService;
-export type IPDFStructTreeLayerFactory = import("./interfaces").IPDFStructTreeLayerFactory;
-export type IPDFTextLayerFactory = import("./interfaces").IPDFTextLayerFactory;
-export type IPDFXfaLayerFactory = import("./interfaces").IPDFXfaLayerFactory;
-export type TextAccessibilityManager = import("./text_accessibility.js").TextAccessibilityManager;
 export type PDFViewerOptions = {
     /**
      * - The container for the viewer element.
@@ -89,6 +83,11 @@ export type PDFViewerOptions = {
      */
     useOnlyCssZoom?: boolean | undefined;
     /**
+     * - Allows to use an
+     * OffscreenCanvas if needed.
+     */
+    isOffscreenCanvasSupported?: boolean | undefined;
+    /**
      * - The maximum supported canvas size in
      * total pixels, i.e. width * height. Use -1 for no limit. The default value
      * is 4096 * 4096 (16 mega-pixels).
@@ -147,6 +146,8 @@ export namespace PagesCountLimit {
  *   landscape pages upon printing. The default is `false`.
  * @property {boolean} [useOnlyCssZoom] - Enables CSS only zooming. The default
  *   value is `false`.
+ * @property {boolean} [isOffscreenCanvasSupported] - Allows to use an
+ *   OffscreenCanvas if needed.
  * @property {number} [maxCanvasPixels] - The maximum supported canvas size in
  *   total pixels, i.e. width * height. Use -1 for no limit. The default value
  *   is 4096 * 4096 (16 mega-pixels).
@@ -174,14 +175,8 @@ export class PDFPageViewBuffer {
 }
 /**
  * Simple viewer control to display PDF content/pages.
- *
- * @implements {IPDFAnnotationLayerFactory}
- * @implements {IPDFAnnotationEditorLayerFactory}
- * @implements {IPDFStructTreeLayerFactory}
- * @implements {IPDFTextLayerFactory}
- * @implements {IPDFXfaLayerFactory}
  */
-export class PDFViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEditorLayerFactory, IPDFStructTreeLayerFactory, IPDFTextLayerFactory, IPDFXfaLayerFactory {
+export class PDFViewer {
     /**
      * @param {PDFViewerOptions} options
      */
@@ -199,6 +194,7 @@ export class PDFViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdit
     enablePrintAutoRotate: boolean;
     renderer: any;
     useOnlyCssZoom: boolean;
+    isOffscreenCanvasSupported: boolean;
     maxCanvasPixels: number | undefined;
     l10n: import("./interfaces").IL10n;
     pageColors: Object | null;
@@ -309,12 +305,16 @@ export class PDFViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdit
     _previousScrollMode: any;
     _spreadMode: any;
     _scrollUpdate(): void;
-    _setScaleUpdatePages(newScale: any, newValue: any, noScroll?: boolean, preset?: boolean): void;
+    _setScaleUpdatePages(newScale: any, newValue: any, { noScroll, preset, drawingDelay }: {
+        noScroll?: boolean | undefined;
+        preset?: boolean | undefined;
+        drawingDelay?: number | undefined;
+    }): void;
     /**
      * @private
      */
     private get _pageWidthScaleFactor();
-    _setScale(value: any, noScroll?: boolean): void;
+    _setScale(value: any, options: any): void;
     /**
      * @param {string} label - The page label.
      * @returns {number|null} The page number corresponding to the page label,
@@ -381,150 +381,6 @@ export class PDFViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdit
     private _cancelRendering;
     forceRendering(currentlyVisiblePages: any): boolean;
     /**
-     * @typedef {Object} CreateTextLayerBuilderParameters
-     * @property {HTMLDivElement} textLayerDiv
-     * @property {number} pageIndex
-     * @property {PageViewport} viewport
-     * @property {EventBus} eventBus
-     * @property {TextHighlighter} highlighter
-     * @property {TextAccessibilityManager} [accessibilityManager]
-     */
-    /**
-     * @param {CreateTextLayerBuilderParameters}
-     * @returns {TextLayerBuilder}
-     */
-    createTextLayerBuilder({ textLayerDiv, pageIndex, viewport, eventBus, highlighter, accessibilityManager, }: {
-        textLayerDiv: HTMLDivElement;
-        pageIndex: number;
-        viewport: PageViewport;
-        eventBus: EventBus;
-        highlighter: TextHighlighter;
-        accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
-    }): TextLayerBuilder;
-    /**
-     * @typedef {Object} CreateTextHighlighterParameters
-     * @property {number} pageIndex
-     * @property {EventBus} eventBus
-     */
-    /**
-     * @param {CreateTextHighlighterParameters}
-     * @returns {TextHighlighter}
-     */
-    createTextHighlighter({ pageIndex, eventBus }: {
-        pageIndex: number;
-        eventBus: EventBus;
-    }): TextHighlighter;
-    /**
-     * @typedef {Object} CreateAnnotationLayerBuilderParameters
-     * @property {HTMLDivElement} pageDiv
-     * @property {PDFPageProxy} pdfPage
-     * @property {AnnotationStorage} [annotationStorage] - Storage for annotation
-     *   data in forms.
-     * @property {string} [imageResourcesPath] - Path for image resources, mainly
-     *   for annotation icons. Include trailing slash.
-     * @property {boolean} renderForms
-     * @property {IL10n} l10n
-     * @property {boolean} [enableScripting]
-     * @property {Promise<boolean>} [hasJSActionsPromise]
-     * @property {Object} [mouseState]
-     * @property {Promise<Object<string, Array<Object>> | null>}
-     *   [fieldObjectsPromise]
-     * @property {Map<string, HTMLCanvasElement>} [annotationCanvasMap] - Map some
-     *   annotation ids with canvases used to render them.
-     * @property {TextAccessibilityManager} [accessibilityManager]
-     */
-    /**
-     * @param {CreateAnnotationLayerBuilderParameters}
-     * @returns {AnnotationLayerBuilder}
-     */
-    createAnnotationLayerBuilder({ pageDiv, pdfPage, annotationStorage, imageResourcesPath, renderForms, l10n, enableScripting, hasJSActionsPromise, mouseState, fieldObjectsPromise, annotationCanvasMap, accessibilityManager, }: {
-        pageDiv: HTMLDivElement;
-        pdfPage: PDFPageProxy;
-        /**
-         * - Storage for annotation
-         * data in forms.
-         */
-        annotationStorage?: any;
-        /**
-         * - Path for image resources, mainly
-         * for annotation icons. Include trailing slash.
-         */
-        imageResourcesPath?: string | undefined;
-        renderForms: boolean;
-        l10n: IL10n;
-        enableScripting?: boolean | undefined;
-        hasJSActionsPromise?: Promise<boolean> | undefined;
-        mouseState?: Object | undefined;
-        fieldObjectsPromise?: Promise<{
-            [x: string]: Object[];
-        } | null> | undefined;
-        /**
-         * - Map some
-         * annotation ids with canvases used to render them.
-         */
-        annotationCanvasMap?: Map<string, HTMLCanvasElement> | undefined;
-        accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
-    }): AnnotationLayerBuilder;
-    /**
-     * @typedef {Object} CreateAnnotationEditorLayerBuilderParameters
-     * @property {AnnotationEditorUIManager} [uiManager]
-     * @property {HTMLDivElement} pageDiv
-     * @property {PDFPageProxy} pdfPage
-     * @property {IL10n} l10n
-     * @property {AnnotationStorage} [annotationStorage] - Storage for annotation
-     * @property {TextAccessibilityManager} [accessibilityManager]
-     *   data in forms.
-     */
-    /**
-     * @param {CreateAnnotationEditorLayerBuilderParameters}
-     * @returns {AnnotationEditorLayerBuilder}
-     */
-    createAnnotationEditorLayerBuilder({ uiManager, pageDiv, pdfPage, accessibilityManager, l10n, annotationStorage, }: {
-        uiManager?: any;
-        pageDiv: HTMLDivElement;
-        pdfPage: PDFPageProxy;
-        l10n: IL10n;
-        /**
-         * - Storage for annotation
-         */
-        annotationStorage?: any;
-        /**
-         * data in forms.
-         */
-        accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
-    }): AnnotationEditorLayerBuilder;
-    /**
-     * @typedef {Object} CreateXfaLayerBuilderParameters
-     * @property {HTMLDivElement} pageDiv
-     * @property {PDFPageProxy} pdfPage
-     * @property {AnnotationStorage} [annotationStorage] - Storage for annotation
-     *   data in forms.
-     */
-    /**
-     * @param {CreateXfaLayerBuilderParameters}
-     * @returns {XfaLayerBuilder}
-     */
-    createXfaLayerBuilder({ pageDiv, pdfPage, annotationStorage, }: {
-        pageDiv: HTMLDivElement;
-        pdfPage: PDFPageProxy;
-        /**
-         * - Storage for annotation
-         * data in forms.
-         */
-        annotationStorage?: any;
-    }): XfaLayerBuilder;
-    /**
-     * @typedef {Object} CreateStructTreeLayerBuilderParameters
-     * @property {PDFPageProxy} pdfPage
-     */
-    /**
-     * @param {CreateStructTreeLayerBuilderParameters}
-     * @returns {StructTreeLayerBuilder}
-     */
-    createStructTreeLayerBuilder({ pdfPage }: {
-        pdfPage: PDFPageProxy;
-    }): StructTreeLayerBuilder;
-    /**
      * @type {boolean} Whether all pages of the PDF document have identical
      *   widths and heights.
      */
@@ -582,14 +438,16 @@ export class PDFViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdit
     /**
      * Increase the current zoom level one, or more, times.
      * @param {number} [steps] - Defaults to zooming once.
+     * @param {Object|null} [options]
      */
-    increaseScale(steps?: number | undefined): void;
+    increaseScale(steps?: number | undefined, options?: Object | null | undefined): void;
     /**
      * Decrease the current zoom level one, or more, times.
      * @param {number} [steps] - Defaults to zooming once.
+     * @param {Object|null} [options]
      */
-    decreaseScale(steps?: number | undefined): void;
-    updateContainerHeightCss(): void;
+    decreaseScale(steps?: number | undefined, options?: Object | null | undefined): void;
+    get containerTopLeft(): number[];
     /**
      * @param {number} mode - AnnotationEditor mode (None, FreeText, Ink, ...)
      */
@@ -599,13 +457,7 @@ export class PDFViewer implements IPDFAnnotationLayerFactory, IPDFAnnotationEdit
      */
     get annotationEditorMode(): number;
     set annotationEditorParams(arg: any);
-    refresh(): void;
+    refresh(noUpdate?: boolean, updateArgs?: any): void;
     #private;
 }
 import { PDFRenderingQueue } from "./pdf_rendering_queue.js";
-import { TextHighlighter } from "./text_highlighter.js";
-import { TextLayerBuilder } from "./text_layer_builder.js";
-import { AnnotationLayerBuilder } from "./annotation_layer_builder.js";
-import { AnnotationEditorLayerBuilder } from "./annotation_editor_layer_builder.js";
-import { XfaLayerBuilder } from "./xfa_layer_builder.js";
-import { StructTreeLayerBuilder } from "./struct_tree_layer_builder.js";

@@ -42,7 +42,6 @@ export class PDFScriptingManager {
     _closeCapability: any;
     _destroyCapability: any;
     _scripting: any;
-    _mouseState: any;
     _ready: boolean;
     _eventBus: import("./event_utils").EventBus;
     _sandboxBundleSrc: string;
@@ -54,17 +53,12 @@ export class PDFScriptingManager {
     dispatchDidSave(detail: any): Promise<any>;
     dispatchWillPrint(detail: any): Promise<any>;
     dispatchDidPrint(detail: any): Promise<any>;
-    get mouseState(): any;
     get destroyPromise(): any;
     get ready(): boolean;
     /**
      * @private
      */
     private get _internalEvents();
-    /**
-     * @private
-     */
-    private get _domEvents();
     /**
      * @private
      */

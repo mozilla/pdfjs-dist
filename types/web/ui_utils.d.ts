@@ -47,9 +47,6 @@ export type GetVisibleElementsParameters = {
 export const animationStarted: Promise<any>;
 /**
  * Converts API PageLayout values to the format used by `BaseViewer`.
- * NOTE: This is supported to the extent that the viewer implements the
- *       necessary Scroll/Spread modes (since SinglePage, TwoPageLeft,
- *       and TwoPageRight all suggests using non-continuous scrolling).
  * @param {string} mode - The API PageLayout value.
  * @returns {Object}
  */
@@ -202,7 +199,7 @@ export namespace PresentationModeState {
     const FULLSCREEN: number;
 }
 export class ProgressBar {
-    constructor(id: any);
+    constructor(bar: any);
     set percent(arg: number);
     get percent(): number;
     setWidth(viewer: any): void;

@@ -1,5 +1,10 @@
 export type AnnotationEditorLayer = import("./annotation_editor_layer.js").AnnotationEditorLayer;
+export type AnnotationEditorUIManager = import("./tools.js").AnnotationEditorUIManager;
 export type AnnotationEditorParameters = {
+    /**
+     * - the global manager
+     */
+    uiManager: AnnotationEditorUIManager;
     /**
      * - the layer containing this editor
      */
@@ -19,6 +24,7 @@ export type AnnotationEditorParameters = {
 };
 /**
  * @typedef {Object} AnnotationEditorParameters
+ * @property {AnnotationEditorUIManager} uiManager - the global manager
  * @property {AnnotationEditorLayer} parent - the layer containing this editor
  * @property {string} id - editor id
  * @property {number} x - x-coordinate
@@ -37,13 +43,15 @@ export class AnnotationEditor {
      *
      * @param {Object} data
      * @param {AnnotationEditorLayer} parent
+     * @param {AnnotationEditorUIManager} uiManager
      * @returns {AnnotationEditor}
      */
-    static deserialize(data: Object, parent: AnnotationEditorLayer): AnnotationEditor;
+    static deserialize(data: Object, parent: AnnotationEditorLayer, uiManager: AnnotationEditorUIManager): AnnotationEditor;
     /**
      * @param {AnnotationEditorParameters} parameters
      */
     constructor(parameters: AnnotationEditorParameters);
+    _uiManager: null;
     parent: import("./annotation_editor_layer.js").AnnotationEditorLayer;
     id: string;
     width: any;
@@ -51,10 +59,18 @@ export class AnnotationEditor {
     pageIndex: number;
     name: any;
     div: HTMLDivElement | null;
+    rotation: any;
+    pageDimensions: any[];
+    pageTranslation: any[];
     x: number;
     y: number;
-    rotation: any;
     isAttachedToDOM: boolean;
+    /**
+     * Add some commands into the CommandManager (undo/redo stuff).
+     * @param {Object} params
+     */
+    addCommands(params: Object): void;
+    get currentLayer(): any;
     /**
      * This editor will be behind the others.
      */
@@ -63,6 +79,7 @@ export class AnnotationEditor {
      * This editor will be in the foreground.
      */
     setInForeground(): void;
+    setParent(parent: any): void;
     /**
      * onfocus callback.
      */
@@ -77,6 +94,7 @@ export class AnnotationEditor {
      * Commit the data contained in this editor.
      */
     commit(): void;
+    addToAnnotationStorage(): void;
     /**
      * We use drag-and-drop in order to move an editor on a page.
      * @param {DragEvent} event
@@ -104,6 +122,9 @@ export class AnnotationEditor {
      * @param {number} y
      */
     screenToPageTranslation(x: number, y: number): number[];
+    get parentScale(): any;
+    get parentRotation(): any;
+    get parentDimensions(): number[];
     /**
      * Set the dimensions of this editor.
      * @param {number} width
@@ -126,7 +147,7 @@ export class AnnotationEditor {
      * @param {PointerEvent} event
      */
     pointerdown(event: PointerEvent): void;
-    getRect(tx: any, ty: any): number[];
+    getRect(tx: any, ty: any): any[];
     getRectInCurrentCoords(rect: any, pageHeight: any): any[];
     /**
      * Executed once this editor has been rendered.

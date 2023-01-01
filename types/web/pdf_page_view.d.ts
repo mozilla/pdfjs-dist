@@ -2,11 +2,6 @@ export type PageViewport = import("../src/display/display_utils").PageViewport;
 export type OptionalContentConfig = import("../src/display/optional_content_config").OptionalContentConfig;
 export type EventBus = import("./event_utils").EventBus;
 export type IL10n = import("./interfaces").IL10n;
-export type IPDFAnnotationLayerFactory = import("./interfaces").IPDFAnnotationLayerFactory;
-export type IPDFAnnotationEditorLayerFactory = import("./interfaces").IPDFAnnotationEditorLayerFactory;
-export type IPDFStructTreeLayerFactory = import("./interfaces").IPDFStructTreeLayerFactory;
-export type IPDFTextLayerFactory = import("./interfaces").IPDFTextLayerFactory;
-export type IPDFXfaLayerFactory = import("./interfaces").IPDFXfaLayerFactory;
 export type IRenderableView = import("./interfaces").IRenderableView;
 export type PDFRenderingQueue = import("./pdf_rendering_queue").PDFRenderingQueue;
 export type PDFPageViewOptions = {
@@ -40,7 +35,6 @@ export type PDFPageViewOptions = {
      * - The rendering queue object.
      */
     renderingQueue?: import("./pdf_rendering_queue").PDFRenderingQueue | undefined;
-    textLayerFactory?: import("./interfaces").IPDFTextLayerFactory | undefined;
     /**
      * - Controls if the text layer used for
      * selection and searching is created. The constants from {TextLayerMode}
@@ -55,11 +49,6 @@ export type PDFPageViewOptions = {
      * The default value is `AnnotationMode.ENABLE_FORMS`.
      */
     annotationMode?: number | undefined;
-    annotationLayerFactory?: import("./interfaces").IPDFAnnotationLayerFactory | undefined;
-    annotationEditorLayerFactory?: import("./interfaces").IPDFAnnotationEditorLayerFactory | undefined;
-    xfaLayerFactory?: import("./interfaces").IPDFXfaLayerFactory | undefined;
-    structTreeLayerFactory?: import("./interfaces").IPDFStructTreeLayerFactory | undefined;
-    textHighlighterFactory?: Object | undefined;
     /**
      * - Path for image resources, mainly
      * for annotation icons. Include trailing slash.
@@ -70,6 +59,11 @@ export type PDFPageViewOptions = {
      * value is `false`.
      */
     useOnlyCssZoom?: boolean | undefined;
+    /**
+     * - Allows to use an
+     * OffscreenCanvas if needed.
+     */
+    isOffscreenCanvasSupported?: boolean | undefined;
     /**
      * - The maximum supported canvas size in
      * total pixels, i.e. width * height. Use -1 for no limit. The default value
@@ -86,6 +80,11 @@ export type PDFPageViewOptions = {
      * - Localization service.
      */
     l10n?: import("./interfaces").IL10n | undefined;
+    /**
+     * - The function that is used to lookup
+     * the necessary layer-properties.
+     */
+    layerProperties?: Function | undefined;
 };
 /**
  * @implements {IRenderableView}
@@ -108,16 +107,11 @@ export class PDFPageView implements IRenderableView {
     textLayerMode: number;
     imageResourcesPath: string;
     useOnlyCssZoom: boolean;
+    isOffscreenCanvasSupported: boolean;
     maxCanvasPixels: any;
     pageColors: Object | null;
     eventBus: import("./event_utils").EventBus;
     renderingQueue: import("./pdf_rendering_queue").PDFRenderingQueue | undefined;
-    textLayerFactory: import("./interfaces").IPDFTextLayerFactory | undefined;
-    annotationLayerFactory: import("./interfaces").IPDFAnnotationLayerFactory | undefined;
-    annotationEditorLayerFactory: import("./interfaces").IPDFAnnotationEditorLayerFactory | undefined;
-    xfaLayerFactory: import("./interfaces").IPDFXfaLayerFactory | undefined;
-    textHighlighter: any;
-    structTreeLayerFactory: import("./interfaces").IPDFStructTreeLayerFactory | undefined;
     renderer: any;
     l10n: {
         getLanguage(): Promise<string>;
@@ -128,81 +122,71 @@ export class PDFPageView implements IRenderableView {
     paintTask: {
         promise: any;
         onRenderContinue(cont: any): void;
-        cancel(): void;
+        cancel(extraDelay?: number): void;
         readonly separateAnnots: any;
     } | null;
     paintedViewportMap: WeakMap<object, any>;
-    renderingState: number;
     resume: (() => void) | null;
     _renderError: any;
     _isStandalone: boolean | undefined;
     _annotationCanvasMap: any;
-    annotationLayer: any;
-    annotationEditorLayer: any;
-    textLayer: import("./text_layer_builder.js").TextLayerBuilder | null;
+    annotationLayer: AnnotationLayerBuilder | null;
+    annotationEditorLayer: AnnotationEditorLayerBuilder | null;
+    textLayer: TextLayerBuilder | null;
     zoomLayer: ParentNode | null;
-    xfaLayer: any;
+    xfaLayer: XfaLayerBuilder | null;
     structTreeLayer: any;
     div: HTMLDivElement;
+    set renderingState(arg: number);
+    get renderingState(): number;
     setPdfPage(pdfPage: any): void;
     destroy(): void;
-    /**
-     * @private
-     */
-    private _renderAnnotationLayer;
-    /**
-     * @private
-     */
-    private _renderAnnotationEditorLayer;
-    /**
-     * @private
-     */
-    private _renderXfaLayer;
-    _buildXfaTextContentItems(textDivs: any): Promise<void>;
+    get _textHighlighter(): any;
     /**
      * @private
      */
     private _resetZoomLayer;
-    reset({ keepZoomLayer, keepAnnotationLayer, keepAnnotationEditorLayer, keepXfaLayer, }?: {
+    reset({ keepZoomLayer, keepAnnotationLayer, keepAnnotationEditorLayer, keepXfaLayer, keepTextLayer, }?: {
         keepZoomLayer?: boolean | undefined;
         keepAnnotationLayer?: boolean | undefined;
         keepAnnotationEditorLayer?: boolean | undefined;
         keepXfaLayer?: boolean | undefined;
+        keepTextLayer?: boolean | undefined;
     }): void;
     loadingIconDiv: HTMLDivElement | undefined;
-    update({ scale, rotation, optionalContentConfigPromise }: {
+    update({ scale, rotation, optionalContentConfigPromise, drawingDelay, }: {
         scale?: number | undefined;
         rotation?: null | undefined;
         optionalContentConfigPromise?: null | undefined;
+        drawingDelay?: number | undefined;
     }): void;
     /**
      * PLEASE NOTE: Most likely you want to use the `this.reset()` method,
      *              rather than calling this one directly.
      */
-    cancelRendering({ keepAnnotationLayer, keepAnnotationEditorLayer, keepXfaLayer, }?: {
+    cancelRendering({ keepAnnotationLayer, keepAnnotationEditorLayer, keepXfaLayer, keepTextLayer, cancelExtraDelay, }?: {
         keepAnnotationLayer?: boolean | undefined;
         keepAnnotationEditorLayer?: boolean | undefined;
         keepXfaLayer?: boolean | undefined;
+        keepTextLayer?: boolean | undefined;
+        cancelExtraDelay?: number | undefined;
     }): void;
-    _onTextLayerRendered: any;
-    cssTransform({ target, redrawAnnotationLayer, redrawAnnotationEditorLayer, redrawXfaLayer, }: {
+    cssTransform({ target, redrawAnnotationLayer, redrawAnnotationEditorLayer, redrawXfaLayer, redrawTextLayer, hideTextLayer, }: {
         target: any;
         redrawAnnotationLayer?: boolean | undefined;
         redrawAnnotationEditorLayer?: boolean | undefined;
         redrawXfaLayer?: boolean | undefined;
+        redrawTextLayer?: boolean | undefined;
+        hideTextLayer?: boolean | undefined;
     }): void;
     get width(): number;
     get height(): number;
     getPagePoint(x: any, y: any): Object;
-    /**
-     * @ignore
-     */
-    toggleLoadingIconSpinner(viewVisible?: boolean): void;
     draw(): any;
     paintOnCanvas(canvasWrapper: any): {
         promise: any;
         onRenderContinue(cont: any): void;
-        cancel(): void;
+        cancel(extraDelay?: number): void;
         readonly separateAnnots: any;
     };
     canvas: HTMLCanvasElement | undefined;
@@ -225,4 +209,8 @@ export class PDFPageView implements IRenderableView {
     get thumbnailCanvas(): HTMLCanvasElement | null | undefined;
     #private;
 }
+import { AnnotationLayerBuilder } from "./annotation_layer_builder.js";
+import { AnnotationEditorLayerBuilder } from "./annotation_editor_layer_builder.js";
+import { TextLayerBuilder } from "./text_layer_builder.js";
+import { XfaLayerBuilder } from "./xfa_layer_builder.js";
 import { OutputScale } from "./ui_utils.js";

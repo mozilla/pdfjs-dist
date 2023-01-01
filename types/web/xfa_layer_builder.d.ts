@@ -33,7 +33,7 @@ export class XfaLayerBuilder {
      * @param {string} intent (default value is 'display')
      * @returns {Promise<Object | void>} A promise that is resolved when rendering
      *   of the XFA layer is complete. The first rendering will return an object
-     *   with a `textDivs` property that  can be used with the TextHighlighter.
+     *   with a `textDivs` property that can be used with the TextHighlighter.
      */
     render(viewport: PageViewport, intent?: string): Promise<Object | void>;
     cancel(): void;

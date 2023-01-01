@@ -34,7 +34,7 @@ declare class PDFFetchStreamReader implements IPDFStreamReader {
     get isRangeSupported(): boolean;
     get isStreamingSupported(): boolean;
     read(): Promise<{
-        value: undefined;
+        value: Uint8Array | undefined;
         done: true;
     } | {
         value: ArrayBufferLike;
@@ -56,7 +56,7 @@ declare class PDFFetchStreamRangeReader implements IPDFStreamRangeReader {
     onProgress: any;
     get isStreamingSupported(): boolean;
     read(): Promise<{
-        value: undefined;
+        value: Uint8Array | undefined;
         done: true;
     } | {
         value: ArrayBufferLike;

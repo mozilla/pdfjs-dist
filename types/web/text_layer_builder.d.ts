@@ -1,40 +1,27 @@
 export type PageViewport = import("../src/display/display_utils").PageViewport;
-export type EventBus = import("./event_utils").EventBus;
+export type TextContent = import("../src/display/api").TextContent;
 export type TextHighlighter = import("./text_highlighter").TextHighlighter;
 export type TextAccessibilityManager = import("./text_accessibility.js").TextAccessibilityManager;
 export type TextLayerBuilderOptions = {
-    /**
-     * - The text layer container.
-     */
-    textLayerDiv: HTMLDivElement;
-    /**
-     * - The application event bus.
-     */
-    eventBus: EventBus;
-    /**
-     * - The page index.
-     */
-    pageIndex: number;
-    /**
-     * - The viewport of the text layer.
-     */
-    viewport: PageViewport;
     /**
      * - Optional object that will handle
      * highlighting text from the find controller.
      */
     highlighter: TextHighlighter;
     accessibilityManager?: import("./text_accessibility.js").TextAccessibilityManager | undefined;
+    /**
+     * - Allows to use an
+     * OffscreenCanvas if needed.
+     */
+    isOffscreenCanvasSupported?: boolean | undefined;
 };
 /**
  * @typedef {Object} TextLayerBuilderOptions
- * @property {HTMLDivElement} textLayerDiv - The text layer container.
- * @property {EventBus} eventBus - The application event bus.
- * @property {number} pageIndex - The page index.
- * @property {PageViewport} viewport - The viewport of the text layer.
  * @property {TextHighlighter} highlighter - Optional object that will handle
  *   highlighting text from the find controller.
  * @property {TextAccessibilityManager} [accessibilityManager]
+ * @property {boolean} [isOffscreenCanvasSupported] - Allows to use an
+ *   OffscreenCanvas if needed.
  */
 /**
  * The text layer builder provides text selection functionality for the PDF.
@@ -42,38 +29,35 @@ export type TextLayerBuilderOptions = {
  * contain text that matches the PDF text they are overlaying.
  */
 export class TextLayerBuilder {
-    constructor({ textLayerDiv, eventBus, pageIndex, viewport, highlighter, accessibilityManager, }: {
-        textLayerDiv: any;
-        eventBus: any;
-        pageIndex: any;
-        viewport: any;
+    constructor({ highlighter, accessibilityManager, isOffscreenCanvasSupported, }: {
         highlighter?: null | undefined;
         accessibilityManager?: null | undefined;
+        isOffscreenCanvasSupported?: boolean | undefined;
     });
-    textLayerDiv: any;
-    eventBus: any;
-    textContent: any;
     textContentItemsStr: any[];
-    textContentStream: any;
     renderingDone: boolean;
-    pageNumber: any;
-    viewport: any;
     textDivs: any[];
+    textDivProperties: WeakMap<object, any>;
     textLayerRenderTask: any;
     highlighter: any;
     accessibilityManager: any;
+    isOffscreenCanvasSupported: boolean;
+    div: HTMLDivElement;
+    get numTextDivs(): number;
     /**
      * Renders the text layer.
-     *
-     * @param {number} [timeout] - Wait for a specified amount of milliseconds
-     *                             before rendering.
+     * @param {PageViewport} viewport
      */
-    render(timeout?: number | undefined): void;
+    render(viewport: PageViewport): Promise<void>;
+    hide(): void;
+    show(): void;
     /**
      * Cancel rendering of the text layer.
      */
     cancel(): void;
-    setTextContentStream(readableStream: any): void;
-    setTextContent(textContent: any): void;
+    /**
+     * @param {ReadableStream | TextContent} source
+     */
+    setTextContentSource(source: ReadableStream | TextContent): void;
     #private;
 }

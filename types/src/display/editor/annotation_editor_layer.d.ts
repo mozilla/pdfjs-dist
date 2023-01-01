@@ -1,6 +1,6 @@
 export type AnnotationEditor = import("./editor.js").AnnotationEditor;
 export type AnnotationEditorUIManager = import("./tools.js").AnnotationEditorUIManager;
-export type AnnotationStorage = import("../annotation_storage.js").AnnotationStorage;
+export type PageViewport = import("../display_utils.js").PageViewport;
 export type TextAccessibilityManager = any;
 export type IL10n = any;
 export type AnnotationEditorLayerOptions = {
@@ -8,10 +8,12 @@ export type AnnotationEditorLayerOptions = {
     div: HTMLDivElement;
     uiManager: AnnotationEditorUIManager;
     enabled: boolean;
-    annotationStorage: AnnotationStorage;
     accessibilityManager?: any;
     pageIndex: number;
     l10n: any;
+};
+export type RenderEditorLayerOptions = {
+    viewport: PageViewport;
 };
 /**
  * @typedef {Object} AnnotationEditorLayerOptions
@@ -19,10 +21,13 @@ export type AnnotationEditorLayerOptions = {
  * @property {HTMLDivElement} div
  * @property {AnnotationEditorUIManager} uiManager
  * @property {boolean} enabled
- * @property {AnnotationStorage} annotationStorage
  * @property {TextAccessibilityManager} [accessibilityManager]
  * @property {number} pageIndex
  * @property {IL10n} l10n
+ */
+/**
+ * @typedef {Object} RenderEditorLayerOptions
+ * @property {PageViewport} viewport
  */
 /**
  * Manage all the different editors on a page.
@@ -33,7 +38,6 @@ export class AnnotationEditorLayer {
      * @param {AnnotationEditorLayerOptions} options
      */
     constructor(options: AnnotationEditorLayerOptions);
-    annotationStorage: import("../annotation_storage.js").AnnotationStorage;
     pageIndex: number;
     div: HTMLDivElement;
     /**
@@ -86,11 +90,6 @@ export class AnnotationEditorLayer {
      */
     add(editor: AnnotationEditor): void;
     moveEditorInDOM(editor: any): void;
-    /**
-     * Add an editor in the annotation storage.
-     * @param {AnnotationEditor} editor
-     */
-    addToAnnotationStorage(editor: AnnotationEditor): void;
     /**
      * Add or rebuild depending if it has been removed or not.
      * @param {AnnotationEditor} editor
@@ -163,29 +162,19 @@ export class AnnotationEditorLayer {
     destroy(): void;
     /**
      * Render the main editor.
-     * @param {Object} parameters
+     * @param {RenderEditorLayerOptions} parameters
      */
-    render(parameters: Object): void;
-    viewport: any;
+    render({ viewport }: RenderEditorLayerOptions): void;
+    viewport: import("../display_utils.js").PageViewport | undefined;
     /**
      * Update the main editor.
-     * @param {Object} parameters
+     * @param {RenderEditorLayerOptions} parameters
      */
-    update(parameters: Object): void;
-    /**
-     * Get the scale factor from the viewport.
-     * @returns {number}
-     */
-    get scaleFactor(): number;
+    update({ viewport }: RenderEditorLayerOptions): void;
     /**
      * Get page dimensions.
      * @returns {Object} dimensions.
      */
     get pageDimensions(): Object;
-    get viewportBaseDimensions(): any[];
-    /**
-     * Set the dimensions of the main div.
-     */
-    setDimensions(): void;
     #private;
 }

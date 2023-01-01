@@ -14,7 +14,7 @@ export class FreeTextEditor extends AnnotationEditor {
     static updateDefaultParams(type: any, value: any): void;
     static get defaultPropertiesToUpdate(): any[][];
     /** @inheritdoc */
-    static deserialize(data: any, parent: any): AnnotationEditor;
+    static deserialize(data: any, parent: any, uiManager: any): AnnotationEditor;
     constructor(params: any);
     /** @inheritdoc */
     updateParams(type: any, value: any): void;
@@ -50,7 +50,7 @@ export class FreeTextEditor extends AnnotationEditor {
         fontSize: any;
         value: string;
         pageIndex: number;
-        rect: number[];
+        rect: any[];
         rotation: any;
     } | null;
     #private;
