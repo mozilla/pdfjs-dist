@@ -6917,17 +6917,24 @@ class PDFViewer {
     return this.scroll.down;
   }
   forceRendering(currentlyVisiblePages) {
-    const visiblePages = currentlyVisiblePages || this._getVisiblePages();
-    const scrollAhead = this.#getScrollAhead(visiblePages);
-    const preRenderExtra = this._spreadMode !== _ui_utils.SpreadMode.NONE && this._scrollMode !== _ui_utils.ScrollMode.HORIZONTAL;
-    const pageView = this.renderingQueue.getHighestPriority(visiblePages, this._pages, scrollAhead, preRenderExtra);
-    if (pageView) {
-      this.#ensurePdfPageLoaded(pageView).then(() => {
-        this.renderingQueue.renderView(pageView);
-      });
-      return true;
-    }
-    return false;
+	   var top = document.getElementsByClassName("pdfViewer")[0]
+      var topPre = top.getBoundingClientRect().top
+      setTimeout(() => {
+        var topCurrent =top.getBoundingClientRect().top
+        if(topCurrent == topPre){
+	    const visiblePages = currentlyVisiblePages || this._getVisiblePages();
+    	    const scrollAhead = this.#getScrollAhead(visiblePages);
+   	    const preRenderExtra = this._spreadMode !== _ui_utils.SpreadMode.NONE && this._scrollMode !== _ui_utils.ScrollMode.HORIZONTAL;
+   	    const pageView = this.renderingQueue.getHighestPriority(visiblePages, this._pages, scrollAhead, preRenderExtra);
+   		 if (pageView) {
+    		  this.#ensurePdfPageLoaded(pageView).then(() => {
+      		  this.renderingQueue.renderView(pageView);
+    		  });
+    		  return true;
+   		 }
+   		 return false;
+	} },500}
+ 
   }
   get hasEqualPageSizes() {
     const firstPageView = this._pages[0];
