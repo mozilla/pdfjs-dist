@@ -15,4 +15,4 @@ See https://github.com/mozilla/pdf.js for learning and contributing.
 
 ## Releases
 
-As of June 2024, latest releases are pushed directly to **[NPM](https://www.npmjs.com/package/pdfjs-dist)** and may not be visible here.
+As of February 2023, releases are pushed directly to **[NPM](https://www.npmjs.com/package/pdfjs-dist)** and may not be visible here.
