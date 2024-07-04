@@ -13,6 +13,6 @@ and private `class` fields/methods; please see the `legacy/` folder.
 
 See https://github.com/mozilla/pdf.js for learning and contributing.
 
-# Releases
+## Releases
 
 As of June 2024, latest releases are pushed directly to **[NPM](https://www.npmjs.com/package/pdfjs-dist)** and may not be visible here.
