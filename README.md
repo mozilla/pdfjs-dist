@@ -12,3 +12,7 @@ features such as optional chaining, nullish coalescing,
 and private `class` fields/methods; please see the `legacy/` folder.
 
 See https://github.com/mozilla/pdf.js for learning and contributing.
+
+## Releases
+
+As of February 2023, releases are pushed directly to **[NPM](https://www.npmjs.com/package/pdfjs-dist)** and may not be visible here.
